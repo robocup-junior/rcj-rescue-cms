@@ -605,10 +605,12 @@
             "super": "特権管理権限",
             "admin": "管理権限",
             "password": "パスワード",
+            "email": "メールアドレス",
             "authoritySuper": "特別管理権限付与",
             "authorityAdmin": "一般管理権限付与",
             "authorization": "付与",
-            "add": "ユーザーを追加"
+            "add": "ユーザーを追加",
+            "emailNotification": "メール通知"
         },
         "competition": {
             "title": "管理画面トップ",

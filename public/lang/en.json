@@ -607,10 +607,12 @@
             "super": "Super Admin role",
             "admin": "Admin role",
             "password": "Password",
+            "email": "Email",
             "authoritySuper": "Grant Super Admin role",
             "authorityAdmin": "Grant Admin role",
             "authorization": "Grant",
-            "add": "Add User"
+            "add": "Add User",
+            "emailNotification": "Email notification"
         },
         "competition": {
             "title": "Admin console",

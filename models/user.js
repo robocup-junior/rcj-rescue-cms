@@ -75,6 +75,7 @@ module.exports.ROLE = ROLE;
 var userSchema = new Schema({
   username       : {type: String, required: true, unique: true},
   password       : {type: String, required: true, select: false},
+  email          : {type: String, required: false, select: false},
   salt           : {type: String, select: false},
   admin          : {type: Boolean, default: false}, // deprecated
   superDuperAdmin: {type: Boolean, default: false},

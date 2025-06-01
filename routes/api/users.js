@@ -11,11 +11,12 @@ const { ObjectId } = require('mongoose').Types;
 const logger = require('../../config/logger').mainLogger;
 const auth = require('../../helper/authLevels');
 const { ACCESSLEVELS } = require('../../models/user');
-const { rotate } = require('pdfkit');
+const {sendMail} = require('../../helper/mailSender');
 
 adminRouter.get('/', function (req, res) {
   userdb.user
     .find({})
+    .select("_id username email admin superDuperAdmin")
     .lean()
     .exec(function (err, data) {
       if (err) {
@@ -64,6 +65,7 @@ superRouter.post('/', function (req, res) {
     username: user.username,
     password: user.password,
     admin: user.admin,
+    email: user.email,
     superDuperAdmin: user.superDuperAdmin,
     competitions: user.competitions,
   });
@@ -88,6 +90,7 @@ superRouter.post('/', function (req, res) {
             res.status(400).send({
               msg: 'Could not regist user :(',
             });
+            return;
           }
           res.status(200).send({
             msg: 'User has been registerd!',
@@ -100,6 +103,7 @@ superRouter.post('/', function (req, res) {
             res.status(400).send({
               msg: 'Could not regist user :(',
             });
+            return;
           } else {
             res.status(200).send({
               msg: 'User has been registerd!',
@@ -109,6 +113,19 @@ superRouter.post('/', function (req, res) {
       }
     }
   );
+
+  // Send account notification email
+  if (user.emailNotification && user.email) {
+    const variables = {
+      userName: user.username,
+      password: user.password,
+      loginUrl: `${process.env.CMS_PROTOCOL}://${process.env.CMS_HOSTNAME}/login`,
+      contactAddress: process.env.MAIL_REPLY || process.env.MAIL_FROM
+    };
+    const subject = "Welcome to RCJ CMS – Your Account Information";
+    const templateName = "_Welcome to RCJ CMS – Your Account Information";
+    sendMail(subject, templateName, "", variables, user.email);
+  }
 });
 
 adminRouter.put('/:userid/:competitionid/role', function (req, res, next) {

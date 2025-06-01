@@ -25,8 +25,10 @@ block content
             tr
                 th {{"common.name" | translate}}
                 th {{"admin.users.password" | translate}}
+                th {{"admin.users.email" | translate}}
                 th {{"admin.users.authoritySuper" | translate}}
                 th {{"admin.users.authorityAdmin" | translate}}
+                th {{"admin.users.emailNotification" | translate}}
                 th {{"common.operation" | translate}}
         tbody
             tr
@@ -35,11 +37,16 @@ block content
                 td
                     input(ng-model='userPass' style="width:100%;")
                 td
+                    input(ng-model='userEmail' style="width:100%;")
+                td
                     input(type='checkbox' ng-model='userAuthSuper' id="checkSuper")
                     label.checkbox(for="checkSuper") {{"admin.users.authorization" | translate}}
                 td
                     input(type='checkbox' ng-model='userAuthAdmin' id="checkAdmin")
                     label.checkbox(for="checkAdmin") {{"admin.users.authorization" | translate}}
+                td
+                    input(type='checkbox' ng-model='emailNotification' id="checkEmailNotification")
+                    label.checkbox(for="checkEmailNotification") {{"admin.users.emailNotification" | translate}}
                 td
                     button(ng-click='addUser()' style="width:100%;") {{"admin.users.add" | translate}}
       br
@@ -48,12 +55,14 @@ block content
         thead
             tr
               th {{"admin.users.name" | translate}}
+              th {{"admin.users.email" | translate}}
               th {{"admin.users.super" | translate}}
               th {{"admin.users.admin" | translate}}
               th {{"common.operation" | translate}}
         tbody
             tr(ng-repeat='user in users')
               td(ng-bind='user.username')
+              td(ng-bind='user.email')
               td
                 i(class="fa fa-check" aria-hidden="true" style="color:#2ecc71;" ng-if="user.superDuperAdmin")
                 i(class="fa fa-times" aria-hidden="true" style="color:#e74c3c;" ng-if="!user.superDuperAdmin")
@@ -62,4 +71,3 @@ block content
                 i(class="fa fa-times" aria-hidden="true" style="color:#e74c3c;" ng-if="!user.admin")
               td
                 a(href="" ng-click='removeUser(user)') {{"common.delete" | translate}}
-      

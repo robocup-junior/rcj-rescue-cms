@@ -8,8 +8,10 @@ app.controller("AdminUserController", ['$scope', '$http', function ($scope, $htt
         var newUser = {
             username: $scope.userName,
             password: $scope.userPass,
+            email: $scope.userEmail,
             admin: $scope.userAuthAdmin,
             superDuperAdmin: $scope.userAuthSuper,
+            emailNotification: $scope.emailNotification,
             competitions: []
         }
         $http.post("/api/users", newUser).then(function (response) {
@@ -49,5 +51,22 @@ app.controller("AdminUserController", ['$scope', '$http', function ($scope, $htt
         })
         $scope.userAuthAdmin= false
         $scope.userAuthSuper= false
+        $scope.userPass = generatePass();
+    }
+
+    function generatePass() {
+        var letters = 'abcdefghijklmnopqrstuvwxyz';
+        var numbers = '0123456789';
+
+        var string  = letters + letters.toUpperCase() + numbers;
+
+        var len = 10;
+        var password='';
+        
+
+        for (var i = 0; i < len; i++) {
+            password += string.charAt(Math.floor(Math.random() * string.length));
+        }
+        return password;
     }
 }])
