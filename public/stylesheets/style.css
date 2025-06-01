@@ -642,3 +642,89 @@ footer {
 .toggle-button-001 input {
     display: none;
 }
+
+/* === Font sizes === */
+.ql-size-small { font-size: 0.75em; }
+.ql-size-normal { font-size: 1em; }
+.ql-size-large { font-size: 1.5em; }
+.ql-size-huge { font-size: 2.5em; }
+
+/* === Font families === */
+.ql-font-serif { font-family: Georgia, serif; }
+.ql-font-monospace { font-family: 'Courier New', monospace; }
+
+/* === Text styles === */
+.ql-bold { font-weight: bold; }
+.ql-italic { font-style: italic; }
+.ql-underline { text-decoration: underline; }
+.ql-strike { text-decoration: line-through; }
+
+/* === Text alignment === */
+.ql-align-left   { text-align: left; }
+.ql-align-center { text-align: center; }
+.ql-align-right  { text-align: right; }
+.ql-align-justify { text-align: justify; }
+
+/* === Direction (RTL) === */
+.ql-direction-rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* === Blockquote === */
+.ql-blockquote {
+  border-left: 4px solid #ccc;
+  margin: 0.5em 0;
+  padding-left: 1em;
+  color: #666;
+  font-style: italic;
+}
+
+/* === Code block === */
+.ql-code-block {
+  font-family: monospace;
+  background-color: #f3f3f3;
+  padding: 0.75em 1em;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  margin: 0.5em 0;
+}
+
+/* === Lists === */
+.ql-list {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+.ql-list.ql-bullet {
+  list-style-type: disc;
+}
+.ql-list.ql-ordered {
+  list-style-type: decimal;
+}
+
+/* === Indentation for list items (shifts marker + content) === */
+li.ql-indent-1 { margin-left: 3em; }
+li.ql-indent-2 { margin-left: 6em; }
+li.ql-indent-3 { margin-left: 9em; }
+li.ql-indent-4 { margin-left: 12em; }
+li.ql-indent-5 { margin-left: 15em; }
+li.ql-indent-6 { margin-left: 18em; }
+li.ql-indent-7 { margin-left: 21em; }
+li.ql-indent-8 { margin-left: 24em; }
+
+/* === Non-list block indentation (optional) === */
+.ql-indent-1:not(li) { padding-left: 3em; }
+.ql-indent-2:not(li) { padding-left: 6em; }
+.ql-indent-3:not(li) { padding-left: 9em; }
+.ql-indent-4:not(li) { padding-left: 12em; }
+.ql-indent-5:not(li) { padding-left: 15em; }
+.ql-indent-6:not(li) { padding-left: 18em; }
+.ql-indent-7:not(li) { padding-left: 21em; }
+.ql-indent-8:not(li) { padding-left: 24em; }
+
+/* === Video embeds === */
+.ql-video {
+  display: block;
+  max-width: 100%;
+  margin: 1em 0;
+}
