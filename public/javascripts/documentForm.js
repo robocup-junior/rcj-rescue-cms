@@ -15,9 +15,9 @@ function imageUpload(imageDataUrl, type, imageData) {
 
     imageData
     .minify({
-      maxWidth: 20000,
+      maxWidth: 2000,
       maxHeight: 2000,
-      quality: 1,
+      quality: 0.7,
     })
     .then((miniImageData) => {
       const file = miniImageData.toFile()
@@ -33,16 +33,10 @@ function imageUpload(imageDataUrl, type, imageData) {
             contentType: false,
             timeout: 5000
         })
-        .done(async function(data) {
-            let dataUrl = data.url;
-            const index =
-                (quill.getSelection() || {}).index || quill.getLength();
-                quill.insertEmbed(index, 'image', dataUrl, 'user');
-
-            let dimentions = await getImageDimensions(dataUrl)
-            if (dimentions.w > maxWidth) {
-                quill.formatText(index, 1, 'width', `${maxWidth}px`);
-            }  
+        .done(async function(res) {
+            let imageUrl = res.url;
+            const index = (quill.getSelection() || {}).index || quill.getLength();
+            quill.insertEmbed(index, 'image', imageUrl, 'user');
             Swal.close()
         })
         .fail(function() {
