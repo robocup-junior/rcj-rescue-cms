@@ -33,7 +33,7 @@ function imageUpload(imageDataUrl, type, imageData) {
             contentType: false,
             timeout: 5000
         })
-        .done(async function(res) {
+        .done(function(res) {
             let imageUrl = res.url;
             const index = (quill.getSelection() || {}).index || quill.getLength();
             quill.insertEmbed(index, 'image', imageUrl, 'user');
