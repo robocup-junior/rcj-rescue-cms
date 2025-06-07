@@ -488,7 +488,7 @@ app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http'
     }
 
     $scope.contentChanged = function (editor, questionId, maxLength) {
-        $scope.contentLength[questionId] = editor.getLength();
+        $scope.contentLength[questionId] = editor.getLength() - 1;
         if (maxLength) {
             editor.deleteText(maxLength - 1, editor.getLength());
         }
