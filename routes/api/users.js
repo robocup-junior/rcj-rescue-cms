@@ -16,7 +16,7 @@ const {sendMail} = require('../../helper/mailSender');
 adminRouter.get('/', function (req, res) {
   userdb.user
     .find({})
-    .select("_id username email admin superDuperAdmin")
+    .select("_id username email admin superDuperAdmin competitions")
     .lean()
     .exec(function (err, data) {
       if (err) {
