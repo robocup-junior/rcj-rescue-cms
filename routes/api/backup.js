@@ -19,8 +19,9 @@ const base_tmp_path = `${__dirname}/../../tmp/`;
 
 const {backupQueue} = require("../../queue/backupQueue")
 
-adminRouter.get('/:competition', function (req, res) {
+adminRouter.post('/:competition', function (req, res) {
   const competitionId = req.params.competition;
+  const fullBackup = req.body.fullBackup;
 
   if (!auth.authCompetition(req.user, competitionId, ACCESSLEVELS.ADMIN)) {
     return res.status(401).send({
@@ -28,7 +29,7 @@ adminRouter.get('/:competition', function (req, res) {
     });
   }
 
-  backupQueue.add('backup',{competitionId}).then((job) => {
+  backupQueue.add('backup',{competitionId, fullBackup}).then((job) => {
     res.status(200).send({
       msg: 'Backup job has been added to the queue!',
       jobId: job.id
@@ -52,9 +53,10 @@ adminRouter.get('/list/:competitionId', function (req, res, next) {
         for(let f of files){
           let name = path.basename(f);
           let tmp = {
-            "time": Number(path.basename(f, path.extname(f)).replace('_', '')),
+            "time": Number(path.basename(f, path.extname(f)).replace('FULL_', '').replace('AUTO_', '')),
             "name": name,
-            "auto": name.indexOf('_') != -1
+            "auto": name.indexOf('AUTO_') != -1,
+            "full": name.indexOf('FULL_') != -1
           }
           fl.push(tmp);
         }

@@ -21,7 +21,7 @@ const logger = require('../config/logger').mainLogger;
 const glob = require('glob');
 const path = require('path')
 
-const Bversion = "24.0";
+const Bversion = "25.0";
 
 const b_interval = process.env.BACKUP_INTERVAL_HOUR;
 const b_keep = process.env.BACKUP_KEEP_VERSION;
@@ -37,10 +37,11 @@ const backupQueue = new Queue('backup', {
 backupQueue.obliterate({ force: true });
 
 backupQueue.process('backup', function(job, done){
-  const {competitionId, mode} = job.data;
+  const {competitionId, fullBackup, mode} = job.data;
   const folderName = Math.floor( new Date().getTime() / 1000 );
   let prefix = "";
-  if (mode == 'auto') prefix = "_";
+  if (mode == 'auto') prefix += "AUTO_";
+  if (fullBackup) prefix += "FULL_"
   const folderPathTmp = `./backupTmp/${prefix}${folderName}`;
   const dstPath = `./backup/${competitionId}/${prefix}${folderName}.cms`;
   fs.mkdirsSync(folderPathTmp);
@@ -68,30 +69,22 @@ backupQueue.process('backup', function(job, done){
     }
   });
 
-  // Copy Document Folder
-  fs.copy(`./documents/${competitionId}`, `${folderPathTmp}/documents`, (err) => {
-    if(err){
-      done(new Error(err));
-    }else{
-      glob.glob(`${folderPathTmp}/documents/**/trash/*`, function(err, trash){
-        trash.forEach(function(file){
-          fs.unlinkSync(file);
-        });
-        outputCount ++;
-        jobProgress += 50/maxCount;
-        job.progress(Math.floor(jobProgress));
-        if(outputCount == maxCount){
-          makeZip(job, done, dstPath, folderPathTmp);
+  function backupDir(source, dest) {
+    if (fs.existsSync(source)) {
+      // Copy Mail Attachment Folder
+      fs.copy(source, dest, (err) => {
+        if(err){
+          done(new Error(err));
+        }else{
+          outputCount ++;
+          jobProgress += 50/maxCount;
+          job.progress(Math.floor(jobProgress));
+          if(outputCount == maxCount){
+            makeZip(job, done, dstPath, folderPathTmp);
+          }
         }
       });
-    }
-  });
-
-  // Copy Cabinet Folder
-  fs.copy(`./cabinet/${competitionId}`, `${folderPathTmp}/cabinet`, (err) => {
-    if(err){
-      done(new Error(err));
-    }else{
+    } else {
       outputCount ++;
       jobProgress += 50/maxCount;
       job.progress(Math.floor(jobProgress));
@@ -99,43 +92,15 @@ backupQueue.process('backup', function(job, done){
         makeZip(job, done, dstPath, folderPathTmp);
       }
     }
-  });
+  }
 
-  // Copy Suevey Folder
-  fs.copy(`./survey/${competitionId}`, `${folderPathTmp}/survey`, (err) => {
-    if(err){
-      done(new Error(err));
-    }else{
-      outputCount ++;
-      jobProgress += 50/maxCount;
-      job.progress(Math.floor(jobProgress));
-      if(outputCount == maxCount){
-        makeZip(job, done, dstPath, folderPathTmp);
-      }
-    }
-  });
-  
-  if (fs.existsSync(`./mailAttachment/${competitionId}`)) {
-    // Copy Mail Attachment Folder
-    fs.copy(`./mailAttachment/${competitionId}`, `${folderPathTmp}/mailAttachment`, (err) => {
-      if(err){
-        done(new Error(err));
-      }else{
-        outputCount ++;
-        jobProgress += 50/maxCount;
-        job.progress(Math.floor(jobProgress));
-        if(outputCount == maxCount){
-          makeZip(job, done, dstPath, folderPathTmp);
-        }
-      }
-    });
+  if (fullBackup) {
+    backupDir(`./documents/${competitionId}`, `${folderPathTmp}/documents`);
+    backupDir(`./cabinet/${competitionId}`, `${folderPathTmp}/cabinet`);
+    backupDir(`./survey/${competitionId}`, `${folderPathTmp}/survey`);
+    backupDir(`./mailAttachment/${competitionId}`, `${folderPathTmp}/mailAttachment`);
   } else {
-    outputCount ++;
-    jobProgress += 50/maxCount;
-    job.progress(Math.floor(jobProgress));
-    if(outputCount == maxCount){
-      makeZip(job, done, dstPath, folderPathTmp);
-    }
+    outputCount += 4;
   }
 
   //Competition data
@@ -422,99 +387,42 @@ backupQueue.process('restore', function(job, done){
       restore('surveyAnswer', surveyDb.surveyAnswer);
       restore('users', userdb.user);
 
-      // Copy Document Folder
-      fs.copy(`${base_tmp_path}uploads/${folder}/documents`, `${__dirname}/../documents/${competition[0]._id}`, (err) => {
-        chmodr(
-          `${__dirname}/../documents/${competition[0]._id}`,
-          0o777,
-          (err) => {
-            if (err) {
-              done(new Error(err));
-            }else{
-              updated ++;
-              jobProgress += 50/maxCount;
-              job.progress(Math.floor(jobProgress));
-              if(updated == maxCount){
-                job.progress(100);
-                done();
-              }
-            }
-          }
-        );
-      });
-
-      // Copy Cabinet Folder
-      fs.copy(`${base_tmp_path}uploads/${folder}/cabinet`, `${__dirname}/../cabinet/${competition[0]._id}`, (err) => {
-        chmodr(
-          `${__dirname}/../cabinet/${competition[0]._id}`,
-          0o777,
-          (err) => {
-            if (err) {
-              done(new Error(err));
-            }else{
-              updated ++;
-              jobProgress += 50/maxCount;
-              job.progress(Math.floor(jobProgress));
-              if(updated == maxCount){
-                job.progress(100);
-                done();
-              }
-            }
-          }
-        );
-      });
-
-      // Copy Survey Folder
-      fs.copy(`${base_tmp_path}uploads/${folder}/survey`, `${__dirname}/../survey/${competition[0]._id}`, (err) => {
-        chmodr(
-          `${__dirname}/../survey/${competition[0]._id}`,
-          0o777,
-          (err) => {
-            if (err) {
-              done(new Error(err));
-            }else{
-              updated ++;
-              jobProgress += 50/maxCount;
-              job.progress(Math.floor(jobProgress));
-              if(updated == maxCount){
-                job.progress(100);
-                done();
-              }
-            }
-          }
-        );
-      });
-
-      // Copy MailAttachment Folder
-      if (fs.existsSync(`${base_tmp_path}uploads/${folder}/mailAttachment`)) {
-        fs.copy(`${base_tmp_path}uploads/${folder}/mailAttachment`, `${__dirname}/../mailAttachment/${competition[0]._id}`, (err) => {
-          chmodr(
-            `${__dirname}/../mailAttachment/${competition[0]._id}`,
-            0o777,
-            (err) => {
-              if (err) {
-                done(new Error(err));
-              }else{
-                updated ++;
-                jobProgress += 50/maxCount;
-                job.progress(Math.floor(jobProgress));
-                if(updated == maxCount){
-                  job.progress(100);
-                  done();
+      function restoreDir(source, dest) {
+        if (fs.existsSync(source)) {
+          fs.copy(source, dest, (err) => {
+            chmodr(
+              dest,
+              0o777,
+              (err) => {
+                if (err) {
+                  done(new Error(err));
+                }else{
+                  updated ++;
+                  jobProgress += 50/maxCount;
+                  job.progress(Math.floor(jobProgress));
+                  if(updated == maxCount){
+                    job.progress(100);
+                    done();
+                  }
                 }
               }
-            }
-          );
-        });
-      } else {
-        updated ++;
-        jobProgress += 50/maxCount;
-        job.progress(Math.floor(jobProgress));
-        if(updated == maxCount){
-          job.progress(100);
-          done();
+            );
+          });
+        } else {
+          updated ++;
+          jobProgress += 50/maxCount;
+          job.progress(Math.floor(jobProgress));
+          if(updated == maxCount){
+            job.progress(100);
+            done();
+          }
         }
       }
+
+      restoreDir(`${base_tmp_path}uploads/${folder}/documents`, `${__dirname}/../documents/${competition[0]._id}`);
+      restoreDir(`${base_tmp_path}uploads/${folder}/cabinet`, `${__dirname}/../cabinet/${competition[0]._id}`);
+      restoreDir(`${base_tmp_path}uploads/${folder}/survey`, `${__dirname}/../survey/${competition[0]._id}`);
+      restoreDir(`${base_tmp_path}uploads/${folder}/mailAttachment`, `${__dirname}/../mailAttachment/${competition[0]._id}`);
       
       userdb.user.findById(user._id).exec(function (err, dbUser) {
         if (err) {
@@ -576,6 +484,7 @@ if (b_interval && b_interval != 0) {
             for (let d of data) {
               backupQueue.add('backup',{
                 'competitionId': d._id,
+                'fullBackup': false,
                 'mode': 'auto'
               });
             }

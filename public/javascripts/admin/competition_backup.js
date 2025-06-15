@@ -36,12 +36,11 @@ app.controller("AdminBackupController", ['$scope', '$http', '$translate', functi
         let options = {year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric"};
         return(new Intl.DateTimeFormat(navigator.language, options).format(time*1000));
     }
-    
-    $scope.exeBackup = function () {
-        $http.get('/api/backup/'+$scope.competitionId).then(function (response) {
+
+    $scope.exeBackup = function (fullBackup) {
+        $http.post('/api/backup/'+$scope.competitionId, {fullBackup}).then(function (response) {
             updateJobStatus(response.data.jobId);
         }, function (error) {
-            console.log(error)
             Swal.close()
             Swal({
                 type: 'error',

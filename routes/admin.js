@@ -139,7 +139,7 @@ router.get('/:competitionid/backup', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('admin_competition_backup', {
+    res.render('admin/competition_backup', {
       competition_id: id,
       user: req.user,
     });

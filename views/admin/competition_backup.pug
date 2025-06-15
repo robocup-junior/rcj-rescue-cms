@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends ../includes/layout
 
 block vars
   - var ngAppDef = 'AdminBackup'
@@ -7,7 +7,7 @@ block vars
 append scripts
   script.
     var competitionId = "#{competition_id}"
-  script(src='/javascripts/admin_competition_backup.js')
+  script(src='/javascripts/admin/competition_backup.js')
 
 block location
     a.breadcrumb-item(ng-click="go('/home')") Home
@@ -38,9 +38,12 @@ block content
       p {{"admin.backup.notInclude" | translate}}
       br
       .text-center(ng-if="!job.state")
-        button.btn.btn-info.btn-lg(ng-click='exeBackup()' type="button")
+        button.btn.btn-info.btn-lg(ng-click='exeBackup(false)' type="button" style="margin: 0 5px;")
           i.fas.fa-archive &nbsp;
           | {{"admin.backup.exe" | translate}}
+        button.btn.btn-success.btn-lg(ng-click='exeBackup(true)' type="button")
+          i.fas.fa-archive &nbsp;
+          | FULL {{"admin.backup.exe" | translate}}
       .text-center
         h1(ng-if="job.state")
           span.badge(ng-class="statusColour(job.state)")
@@ -70,6 +73,7 @@ block content
             tr(ng-repeat='back in backedup | orderBy: "time"')
               td
                 i.fas.fa-sync(ng-show="back.auto", style="margin-right: 10px;")
+                span.badge.badge-success(ng-show="back.full", style="margin-right: 10px;") FULL
                 a(ng-bind='time(back.time)')
               td
                 button.btn.btn-primary.btn-sm(type='button', ng-click="download(back.name)", style="margin:0 5px;")
