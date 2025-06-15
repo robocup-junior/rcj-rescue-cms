@@ -81,6 +81,7 @@ superRouter.post('/', function (req, res) {
         }
         dbUser.admin = newUser.admin;
         dbUser.superDuperAdmin = newUser.superDuperAdmin;
+        dbUser.email = newUser.email;
 
         // logger.debug(dbUser)
 
