@@ -19,6 +19,33 @@ const base_tmp_path = `${__dirname}/../../tmp/`;
 
 const {backupQueue} = require("../../queue/backupQueue")
 
+adminRouter.post('/restore', function (req, res) {
+  const folder = Math.random().toString(32).substring(2);
+  fs.mkdirsSync(`${base_tmp_path}uploads/`);
+
+  const storage = multer.diskStorage({
+    destination(req, file, callback) {
+      callback(null, `${base_tmp_path}uploads/`);
+    },
+    filename(req, file, callback) {
+      callback(null, `${folder}.zip`);
+    },
+  });
+
+  const upload = multer({
+    storage,
+  }).single('file');
+
+  upload(req, res, function (err) {
+    backupQueue.add('restore',{folder, user: req.user}).then((job) => {
+      res.status(200).send({
+        msg: 'Restore job has been added to the queue!',
+        jobId: job.id
+      });
+    })
+  });
+});
+
 adminRouter.post('/:competition', function (req, res) {
   const competitionId = req.params.competition;
   const fullBackup = req.body.fullBackup;
@@ -137,33 +164,6 @@ adminRouter.delete('/archive/:competitionId/:fileName', function (req, res, next
       msg: 'Auth error'
     });
   }
-});
-
-adminRouter.post('/restore', function (req, res) {
-  const folder = Math.random().toString(32).substring(2);
-  fs.mkdirsSync(`${base_tmp_path}uploads/`);
-
-  const storage = multer.diskStorage({
-    destination(req, file, callback) {
-      callback(null, `${base_tmp_path}uploads/`);
-    },
-    filename(req, file, callback) {
-      callback(null, `${folder}.zip`);
-    },
-  });
-
-  const upload = multer({
-    storage,
-  }).single('file');
-
-  upload(req, res, function (err) {
-    backupQueue.add('restore',{folder, user: req.user}).then((job) => {
-      res.status(200).send({
-        msg: 'Restore job has been added to the queue!',
-        jobId: job.id
-      });
-    })
-  });
 });
 
 adminRouter.get('/job/:jobId', async function (req, res, next) {
