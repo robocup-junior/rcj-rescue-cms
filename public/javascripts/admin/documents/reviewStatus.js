@@ -45,5 +45,21 @@ app.controller('ReviewStatusController', ['$scope', '$uibModal', '$log', '$http'
         }
         return "badge-warning";
     }
+
+    $scope.sendReminder = function () {
+        $http.get(`/api/document/${competitionId}/reviewStatus?sendReminder=true`).then(function (response) {
+            Swal({
+                type: 'success',
+                title: "Remindered!",
+                html: "The reminder email was sent successfully."
+            })
+        }, function (error) {
+            Swal({
+                type: 'error',
+                title: "ERROR",
+                html: error.data.msg
+            })
+        })
+    }
     
 }]);
