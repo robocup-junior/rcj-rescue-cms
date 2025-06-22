@@ -69,7 +69,7 @@
     "grunt-image": "^6.4.0",
     "grunt-json-minification": "^0.2.1",
     "prettier": "2.4.1",
-    "workbox-cli": "6.5.4"
+    "workbox-cli": "7.3.0"
   },
   "author": "",
   "license": "MIT"
