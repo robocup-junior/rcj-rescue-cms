@@ -47,6 +47,10 @@ block content
                         i.fas.fa-exclamation-circle(ng-if="team.answeredQuestionsNum != team.assienedQuestionsNum") &nbsp;
                         | {{team.answeredQuestionsNum}} / {{team.assienedQuestionsNum}}
                   td
+                    p(ng-show="isFormOpen(team.deadline)") The submission form for this team is still open.
+                      br
+                      | Please review it after the following date and time:&nbsp;
+                      strong(ng-bind="deadline(team.deadline)")
                     button.btn.btn-primary(ng-show="team.answeredQuestionsNum != team.assienedQuestionsNum" type='button',ng-click='goReview(team._id)')
                       i.fas.fa-arrow-circle-right &nbsp;
                       | Evaluate

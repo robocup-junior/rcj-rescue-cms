@@ -42,5 +42,15 @@ app.controller('AssignedDocumentsController', ['$scope', '$uibModal', '$log', '$
         }
         return "badge-warning";
     }
-    
+
+    $scope.isFormOpen = function(deadline) {
+        const unixTime = new Date().getTime() / 1000;
+        return deadline > unixTime;
+    }
+
+    $scope.deadline = function(deadline){
+        let d = new Date(deadline * 1000);
+        let options = { weekday: "short", year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric",timeZoneName:"long" };
+        return(new Intl.DateTimeFormat(navigator.language, options).format(d));
+    }
 }]);

@@ -1725,6 +1725,7 @@ privateRouter.get('/map/:fileName',
 );
 
 async function extractReviewAssignInfo(data, teamData, userId) {
+  const competitionLvlDeadline = data.documents.deadline;
   let assignResult = {};
   for (let league of data.documents.leagues) {
     let teamsTmp = {};
@@ -1748,7 +1749,8 @@ async function extractReviewAssignInfo(data, teamData, userId) {
               region: td.country,
               assienedQuestionsNum: totalScaleQuestionNum,
               answeredQuestionsNum: 0,
-              assignedQuestionIds: questionIds
+              assignedQuestionIds: questionIds,
+              deadline: Math.max(competitionLvlDeadline, td.document.deadline)
             }
           } else {
             teamsTmp[td._id].assienedQuestionsNum += totalScaleQuestionNum;
@@ -1770,7 +1772,8 @@ async function extractReviewAssignInfo(data, teamData, userId) {
                   region: td.country,
                   assienedQuestionsNum: totalScaleQuestionNum,
                   answeredQuestionsNum: 0,
-                  assignedQuestionIds: questionIds
+                  assignedQuestionIds: questionIds,
+                  deadline: Math.max(competitionLvlDeadline, td.document.deadline)
                 }
               } else {
                 teamsTmp[td._id].assienedQuestionsNum += totalScaleQuestionNum;
@@ -1789,7 +1792,8 @@ async function extractReviewAssignInfo(data, teamData, userId) {
                   region: td.country,
                   assienedQuestionsNum: totalScaleQuestionNum,
                   answeredQuestionsNum: 0,
-                  assignedQuestionIds: questionIds
+                  assignedQuestionIds: questionIds,
+                  deadline: Math.max(competitionLvlDeadline, td.document.deadline)
                 }
               } else {
                 teamsTmp[td._id].assienedQuestionsNum += totalScaleQuestionNum;
@@ -1837,7 +1841,7 @@ privateRouter.get('/:competitionId/assigned', async function (req, res, next) {
       .find({
         competition: competitionId
       })
-      .select('name teamCode league country')
+      .select('name teamCode league country document.deadline')
       .lean()
       .exec(function (err, teamData) {
         if (err || !teamData) {
