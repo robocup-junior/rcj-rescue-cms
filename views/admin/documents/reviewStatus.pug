@@ -39,7 +39,10 @@ block content
               td(ng-bind='user.userName')
               td(ng-repeat="league in leagues")
                 div(ng-repeat='team in user.assignedTeams[league.id] | orderBy:"[code, name]"')
-                  span.badge(ng-click="goReviewed(team._id)" ng-class="getBadgeColor(team)" style="font-size: 12px;margin: 1px 0 1px 0") {{team.code}} {{team.name}} | 
+                  span.badge(ng-click="goReviewed(team._id)" ng-class="getBadgeColor(team)" style="font-size: 12px;margin: 1px 0 1px 0") {{team.code}} {{team.name}}
+                    br
+                    | {{team.reviewItems.join(" / ")}}
+                    br
                     i.fas.fa-tasks &nbsp;
                     | {{team.answeredQuestionsNum}} / {{team.assienedQuestionsNum}}
               

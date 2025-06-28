@@ -33,6 +33,7 @@ block content
                   th {{"common.teamCode" | translate}}
                   th {{"common.team" | translate}}
                   th {{"common.region" | translate}}
+                  th Review Items
                   th Review Status
                   th {{'common.operation' | translate}}
             tbody
@@ -40,6 +41,9 @@ block content
                   td(ng-bind='team.code')
                   td(ng-bind='team.name')
                   td(ng-bind='team.region')
+                  td
+                    div(ng-repeat="item in team.reviewItems")
+                      span {{item}}
                   td
                     h5
                       span.badge(ng-class="getBadgeColor(team)")

@@ -1734,6 +1734,7 @@ async function extractReviewAssignInfo(data, teamData, userId) {
     let teamDataLeague = teamData.filter((t) => t.league == leagueId);
     if (!review) continue;
     for (let r of review) {
+      const reviewItemTitle = r.i18n[0].title;
       let totalScaleQuestionNum = r.questions.filter((q) => q.type == 'scale' && q.required).length;
       let questionIds = r.questions.filter((q) => q.type == 'scale' && q.required).map((q) => q._id);
       let assignedReviewers = r.assignedReviewers;
@@ -1750,11 +1751,13 @@ async function extractReviewAssignInfo(data, teamData, userId) {
               assienedQuestionsNum: totalScaleQuestionNum,
               answeredQuestionsNum: 0,
               assignedQuestionIds: questionIds,
-              deadline: Math.max(competitionLvlDeadline, td.document.deadline)
+              deadline: Math.max(competitionLvlDeadline, td.document.deadline),
+              reviewItems: [reviewItemTitle]
             }
           } else {
             teamsTmp[td._id].assienedQuestionsNum += totalScaleQuestionNum;
             teamsTmp[td._id].assignedQuestionIds = teamsTmp[td._id].assignedQuestionIds.concat(questionIds);
+            teamsTmp[td._id].reviewItems.push(reviewItemTitle);
           }
         }
       } else {
@@ -1773,11 +1776,13 @@ async function extractReviewAssignInfo(data, teamData, userId) {
                   assienedQuestionsNum: totalScaleQuestionNum,
                   answeredQuestionsNum: 0,
                   assignedQuestionIds: questionIds,
-                  deadline: Math.max(competitionLvlDeadline, td.document.deadline)
+                  deadline: Math.max(competitionLvlDeadline, td.document.deadline),
+                  reviewItems: [reviewItemTitle]
                 }
               } else {
                 teamsTmp[td._id].assienedQuestionsNum += totalScaleQuestionNum;
                 teamsTmp[td._id].assignedQuestionIds = teamsTmp[td._id].assignedQuestionIds.concat(questionIds);
+                teamsTmp[td._id].reviewItems.push(reviewItemTitle);
               }
             }
           } else {
@@ -1793,11 +1798,13 @@ async function extractReviewAssignInfo(data, teamData, userId) {
                   assienedQuestionsNum: totalScaleQuestionNum,
                   answeredQuestionsNum: 0,
                   assignedQuestionIds: questionIds,
-                  deadline: Math.max(competitionLvlDeadline, td.document.deadline)
+                  deadline: Math.max(competitionLvlDeadline, td.document.deadline),
+                  reviewItems: [reviewItemTitle]
                 }
               } else {
                 teamsTmp[td._id].assienedQuestionsNum += totalScaleQuestionNum;
                 teamsTmp[td._id].assignedQuestionIds = teamsTmp[td._id].assignedQuestionIds.concat(questionIds);
+                teamsTmp[td._id].reviewItems.push(reviewItemTitle);
               }
             }
           }
@@ -1920,7 +1927,7 @@ adminRouter.get('/:competitionId/reviewStatus', async function (req, res, next) 
             .find({
               competition: competitionId
             })
-            .select('name teamCode league country')
+            .select('name teamCode league country document.deadline')
             .lean()
             .exec(function (err, teamData) {
               if (err || !teamData) {
@@ -1952,7 +1959,7 @@ adminRouter.get('/:competitionId/reviewStatus', async function (req, res, next) 
                           let pendingList = "";
                           let completedList = "";
                           for (let team of Object.values(assignResult).flat()) {
-                            let txt = `<li>[${team.league}] ${team.code} ${team.name} &nbsp;&nbsp;&nbsp;----- Review Progress: ${team.answeredQuestionsNum}/${team.assienedQuestionsNum}</li>`;
+                            let txt = `<li>[${team.league}] ${team.code} ${team.name} &nbsp;&nbsp;&nbsp;| ${team.reviewItems.join(" / ")} | Review Progress: ${team.answeredQuestionsNum}/${team.assienedQuestionsNum}</li>`;
                             if (team.assienedQuestionsNum != team.answeredQuestionsNum) {
                               pendingList += txt;
                             } else {
