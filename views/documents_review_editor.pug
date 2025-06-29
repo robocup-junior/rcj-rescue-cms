@@ -145,7 +145,7 @@ block content
                                     td(style="min-width: 150px;")
                                         select.custom-select(ng-model='reviewer.reviewerId' ng-options='user._id as user.username for user in users' style='width: 100%;')
                                     td 
-                                        ui-select(multiple='' ng-model='reviewer.teamIds' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;')
+                                        ui-select(multiple='' ng-model='reviewer.teamIds' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;' ng-paste="teamCodePaste($event, reviewer)")
                                             ui-select-match(placeholder='Leave empty to assign for all teams') {{$item.name}}
                                             ui-select-choices(repeat='team._id as team in teams | filter: {name: $select.search}')
                                                 div(ng-bind-html='team.name')

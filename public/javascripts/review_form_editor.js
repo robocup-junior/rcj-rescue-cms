@@ -150,19 +150,14 @@ app.controller('FormEditorController', ['$scope', '$uibModal', '$log', '$http', 
     $http.get(`/api/competitions/${competitionId}/${leagueId}/teams`).then(function (response) {
         $scope.teams = response.data.map((t) => {
             return {
+                code: t.teamCode,
                 name: `${t.teamCode} ${t.name}`,
                 _id: t._id
             }
         })
-
-        console.log($scope.teams)
     })
 
-    
-
-
     $scope.blocks = [];
-
     $scope.addBlock = function (number){
         let i18n = [{
             language: currentLang,
@@ -341,6 +336,14 @@ app.controller('FormEditorController', ['$scope', '$uibModal', '$log', '$http', 
         downloadLink.setAttribute("download", $scope.competition.name + '-' + $scope.league.name + '.json')
         downloadLink.click()
         document.body.removeChild(downloadLink);
+    }
+
+    $scope.teamCodePaste = function(event, target) {
+        event.preventDefault();
+        let pastedData = event.originalEvent.clipboardData.getData('text/plain');
+        pastedData = pastedData.replace(/\s+/g,'');
+        let teamCodes = pastedData.split(",");
+        target.teamIds = [...new Set(target.teamIds.concat(teamCodes.map((code) => $scope.teams.find((t) => t.code == code)._id)))];
     }
 
     // File APIに対応しているか確認
