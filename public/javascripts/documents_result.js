@@ -69,6 +69,22 @@ app.controller('DocumentResultController', ['$scope', '$uibModal', '$log', '$htt
             for (let block of $scope.teams[0].details) {
                 $scope.blockTitle[block.blockId] = getBlockTitle(block.blockId);
             }
+
+            $scope.teams.sort(function(a, b) {
+                if(!a.teamCode && !b.teamCode){
+                    if (a.name > b.name) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                }else{
+                    if (a.teamCode > b.teamCode) {
+                        return 1;
+                    } else {
+                        return -1;
+                    }
+                }
+            });
         })
     })
 

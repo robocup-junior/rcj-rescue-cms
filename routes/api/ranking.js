@@ -736,15 +736,9 @@ async function getDocumentScore(competitionId, leagueId) {
     team.details = [];
     for (let blockId in questions) {
       let blockScore = 0;
-      let warning = false;
       let blockReviewerNum = [];
       let expectedReviewerNum = [];
       for (let questionId of questions[blockId]) {
-        if (comments[questionId] == null) continue;
-        let ratings = comments[questionId].map(str => parseInt(str));
-        let numReviewer = ratings.length;
-        blockReviewerNum.push(numReviewer);
-
         let expectedReviewerCount = 0;
         if (questionReviewerAssignments[questionId].length == 0) {
           expectedReviewerCount += authorizedUsers.length;
@@ -761,6 +755,15 @@ async function getDocumentScore(competitionId, leagueId) {
           }
         }
         expectedReviewerNum.push(expectedReviewerCount);
+
+        if (comments[questionId] == null) {
+          blockReviewerNum.push(0);
+          continue;
+        }
+
+        let ratings = comments[questionId].map(str => parseInt(str));
+        let numReviewer = ratings.length;
+        blockReviewerNum.push(numReviewer);
 
         let score = 0;
         if (numReviewer >= MINIMUM_REVIEWER) {
