@@ -174,7 +174,8 @@ var DefaultUser = new User({
   username       : process.env.dUsername,
   password       :  process.env.dPassword,
   admin          :  process.env.dAdmin,
-  superDuperAdmin:  process.env.dSDAdmin
+  superDuperAdmin:  process.env.dSDAdmin,
+  email: process.env.dEmail
 });
 
 User.findOne({username: DefaultUser.username}, function (err, dbUser) {
@@ -184,6 +185,7 @@ User.findOne({username: DefaultUser.username}, function (err, dbUser) {
     }
     dbUser.admin = DefaultUser.admin
     dbUser.superDuperAdmin = DefaultUser.superDuperAdmin
+    dbUser.email = DefaultUser.email
     
     //logger.debug(dbUser)
     
