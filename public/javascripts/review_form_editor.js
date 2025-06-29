@@ -343,7 +343,12 @@ app.controller('FormEditorController', ['$scope', '$uibModal', '$log', '$http', 
         let pastedData = event.originalEvent.clipboardData.getData('text/plain');
         pastedData = pastedData.replace(/\s+/g,'');
         let teamCodes = pastedData.split(",");
-        target.teamIds = [...new Set(target.teamIds.concat(teamCodes.map((code) => $scope.teams.find((t) => t.code == code)._id)))];
+        const newIds = teamCodes
+            .map((code) => $scope.teams.find((t) => t.code == code))
+            .filter((team) => team)
+            .map((team) => team._id);
+
+        target.teamIds = [...new Set(target.teamIds.concat(newIds))];
     }
 
     // File APIに対応しているか確認
