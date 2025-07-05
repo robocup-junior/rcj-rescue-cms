@@ -331,12 +331,28 @@ app.controller('DocumentReviewController', ['$scope', '$uibModal', '$log', '$htt
         let res = $scope.uploaded.filter(function(value) {
             return new RegExp('^' + name + '\\.*').test(value);
         });
+        res.sort(function(first, second){
+            if ( first.match(/.mp4/)) {
+                return -1;
+            }
+            if ( second.match(/.mp4/)) {
+                return -1;
+            }
+        });
         return res;
     }
 
     $scope.getVideoListReview = function(name, user){
         let res = $scope.uploadedReview.filter(function(value) {
             return new RegExp(user + '/' + '^' + name + '\\.*').test(value);
+        });
+        res.sort(function(first, second){
+            if ( first.match(/.mp4/)) {
+                return -1;
+            }
+            if ( second.match(/.mp4/)) {
+                return -1;
+            }
         });
         return res;
     }
