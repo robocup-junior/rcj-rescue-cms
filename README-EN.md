@@ -71,7 +71,7 @@ The latest version is running. It is built using Docker image and working under 
 
 ## Usage
 ### Using Docker（Recomended）
-Use the  [Official docker image](https://hub.docker.com/repository/docker/ryorobo/rcj-cms) is strongly recommended.  
+Use the  [Official docker image](https://hub.docker.com/r/ryorobo/rcj-cms/tags) is strongly recommended.  
 This docker image supports following archtectures.  
 * linux/amd64
 * linux/arm/v6

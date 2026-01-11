@@ -115,7 +115,7 @@ Please refer to the [English version README](https://github.com/rrrobo/rcj-rescu
 
 ## 使用方法
 ### Dockerを利用（推奨）
-[公式Dockerイメージ](https://hub.docker.com/repository/docker/ryorobo/rcj-cms)を用意しています．本イメージからの利用を推奨します．  
+[公式Dockerイメージ](https://hub.docker.com/r/ryorobo/rcj-cms/tags)を用意しています．本イメージからの利用を推奨します．  
 公式Dockerイメージは次のアーキテクチャに対応します．  
 * linux/amd64
 * linux/arm/v6
