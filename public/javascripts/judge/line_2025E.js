@@ -1,5 +1,5 @@
 /*********************************************************************************/
-// This file is a RoboCup Junior Rescue 2024 rule correspondence version. //
+// This file is a RoboCup Junior Rescue 2025 rule correspondence version. //
 /*********************************************************************************/
 // register the directive with your app module
 

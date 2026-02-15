@@ -1,0 +1,121 @@
+html(ng-app="ddApp")
+  head
+    title Rescue Simulation Sign
+    script.
+      var runId = "#{id}"
+      var timeIncrement = false;
+    include ../includes/common_component
+    script(src="/javascripts/sign/simulation_2026.js")
+    script(src="/javascripts/translate_config.js")
+    script(src='/components/jSignature/libs/jSignature.min.js')
+    link(href="/stylesheets/fredrik.css" rel="stylesheet")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
+
+  body(ng-controller="ddController")
+    nav.navbar(style='background-color: #e67e22; color: #ecf0f1; position: fixed; top: 0; z-index:60 ;  width: 100%')
+      // Navbar content
+      .col-md-6.col-sm4.col-12
+        li.navbar-brand(href='#')
+          i.fas.fa-spinner.fa-spin.fa-fw
+          |  {{team}}
+      .col-md-3.col-sm4.col-7
+        i.fas.fa-calculator.fa-2x(aria-hidden='true') &nbsp;
+        li.navbar-brand(href='#')  {{score}} {{'common.point' | translate}}
+      .col-md-3.col-sm4.col-5
+        i.fas.fa-stopwatch.fa-2x(aria-hidden='true') &nbsp;
+        li.navbar-brand(href='#')  {{minutes*60*1000+seconds*1000 | date:'mm:ss'}}
+    .container-fluid.nav-cont
+      .row
+        .col-md12
+          button.btn.btn-secondary(style='margin:0 10px 10px 0;', type='button', ng-click="go('/simulation/judge/' + runId + '?return=' + getParam('return'))")
+            i.fas.fa-edit(aria-hidden='true')  {{'maze.sign.to_judge' | translate}}
+      .alert.alert-success(style='margin:30 0 0 0;', role='alert')
+        .row
+          .col-md-6
+            .d-none.d-sm-block
+              i.fas.fa-calculator.fa-3x(aria-hidden='true')  : {{score}} {{'common.point' | translate}}
+            .d-sm-none
+              i.fas.fa-calculator.fa-2x(aria-hidden='true')  : {{score}} {{'common.point' | translate}}
+          .col-md-6
+            .d-none.d-sm-block
+              i.fas.fa-stopwatch.fa-3x(aria-hidden='true')
+                | : {{minutes}} {{'common.min' | translate}} {{seconds}} {{'common.sec' | translate}}
+            .d-sm-none
+              i.fas.fa-stopwatch.fa-2x(aria-hidden='true')
+                | : {{minutes}} {{'common.min' | translate}} {{seconds}} {{'common.sec' | translate}}
+      br
+      br
+      .row
+        .col-md-12
+          #sign.card
+            h3.card-header
+              i.fas.fa-comment(aria-hidden='true')
+              | {{'maze.sign.comment' | translate}}
+            .card-body
+              p.card-text.text-info
+                | {{'maze.sign.comment_e' | translate}}
+              .form-group
+                textarea.form-control(ng-model='comment', rows='3')
+            h3.card-header
+              i.fas.fa-pencil-alt(aria-hidden='true')
+              |  {{'maze.sign.sign' | translate}}
+            .card-body
+              strong
+              p.card-text.text-warning(translate='maze.sign.sign_e')
+                strong
+              h2(translate='maze.sign.cap_sign')
+              button.btn.btn-info.btn-lg.btn-block(type='button', style='padding:30 0 30 0', ng-click='toggleSign(0)',ng-show="!enableSign[0]&&!signData[0]")
+                i.fas.fa-signature.fa-2x(aria-hidden='true')  {{'maze.sign.write' | translate}}
+              div(ng-show="enableSign[0]")
+                .row
+                  .col-md-10
+                    #cap_sig.confirmation
+                  .col-md-2
+                    button.btn.btn-success.btn-block(type='button', style='padding:30 0 30 0;width:100%;', ng-click='toggleSign(0)')
+                      i.fas.fa-signature.fa-2x(aria-hidden='true')  {{'maze.sign.comp' | translate}}
+              div(ng-show="!enableSign[0]&&signData[0]")
+                .row
+                  .col-md-10
+                    img(ng-src='{{signData[0]}}', style='max-width: 100%;height: auto;')
+                  .col-md-2
+                    button.btn.btn-warning.btn-block(type='button', style='padding:30 0 30 0;width:100%;', ng-click='clearSign(0)')
+                      i.fas.fa-eraser.fa-2x(aria-hidden='true')  {{'maze.sign.clear' | translate}}
+              hr
+              h2(translate='maze.sign.ref_sign')
+              button.btn.btn-info.btn-lg.btn-block(type='button', style='padding:30 0 30 0', ng-click='toggleSign(1)',ng-show="!enableSign[1]&&!signData[1]")
+                i.fas.fa-signature.fa-2x(aria-hidden='true')  {{'maze.sign.write' | translate}}
+              div(ng-show="enableSign[1]")
+                .row
+                  .col-md-10
+                    #ref_sig.confirmation
+                  .col-md-2
+                    button.btn.btn-success.btn-block(type='button', style='padding:30 0 30 0;width:100%;', ng-click='toggleSign(1)')
+                      i.fas.fa-signature.fa-2x(aria-hidden='true')  {{'maze.sign.comp' | translate}}
+              div(ng-show="!enableSign[1]&&signData[1]")
+                .row
+                  .col-md-10
+                    img(ng-src='{{signData[1]}}', style='max-width: 100%;height: auto;')
+                  .col-md-2
+                    button.btn.btn-warning.btn-block(type='button', style='padding:30 0 30 0;width:100%;', ng-click='clearSign(1)')
+                      i.fas.fa-eraser.fa-2x(aria-hidden='true')  {{'maze.sign.clear' | translate}}
+              hr
+              h2(translate='maze.sign.cref_sign')
+              button.btn.btn-info.btn-lg.btn-block(type='button', style='padding:30 0 30 0', ng-click='toggleSign(2)',ng-show="!enableSign[2]&&!signData[2]")
+                i.fas.fa-signature.fa-2x(aria-hidden='true')  {{'maze.sign.write' | translate}}
+              div(ng-show="enableSign[2]")
+                .row
+                  .col-md-10
+                    #refas_sig.confirmation
+                  .col-md-2
+                    button.btn.btn-success.btn-block(type='button', style='padding:30 0 30 0;width:100%;', ng-click='toggleSign(2)')
+                      i.fas.fa-signature.fa-2x(aria-hidden='true')  {{'maze.sign.comp' | translate}}
+              div(ng-show="!enableSign[2]&&signData[2]")
+                .row
+                  .col-md-10
+                    img(ng-src='{{signData[2]}}', style='max-width: 100%;height: auto;')
+                  .col-md-2
+                    button.btn.btn-warning.btn-block(type='button', style='padding:30 0 30 0;width:100%;', ng-click='clearSign(2)')
+                        i.fas.fa-eraser.fa-2x(aria-hidden='true')  {{'maze.sign.clear' | translate}}
+      .row(style='margin:100 0 100 0;')
+        button.btn.btn-danger.btn-lg.btn-block(type='button', style='padding:30 0 30 0', ng-click='send_sign()')
+          i.fas.fa-paper-plane.fa-2x(aria-hidden='true')  {{'maze.sign.submit' | translate}}

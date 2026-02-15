@@ -1,0 +1,110 @@
+html(ng-app="ddApp")
+  head
+    title Rescue Maze View Iframe
+    script.
+      var runId = "#{id}"
+      var timeIncrement = true;
+    include ../includes/common_component
+    script(src="/javascripts/sign/maze_2026E.js")
+    script.
+      document.cookie = 'sRotate=0';
+      function tile_size() {
+        $(function () {
+            try {
+                var mapTable = $('#mapTable');
+                let bottomBox = $('#bottomBox')
+
+                let areaTopLeftX = document.getElementById("mapTopLeft").getBoundingClientRect().left + window.pageXOffset;
+                let areaTopLeftY = document.getElementById("mapTopLeft").getBoundingClientRect().top + window.pageYOffset;
+
+                let scaleX = (window.innerWidth - areaTopLeftX - 10) / mapTable.width();
+                let scaleY = (window.innerHeight - areaTopLeftY - bottomBox.outerHeight(true) - 10) / mapTable.height();
+                let scale = Math.min(scaleX, scaleY);
+
+                if (scale < 1) {
+                    $('#wrapTile').css('transform-origin', 'top left');
+                } else {
+                    $('#wrapTile').css('transform-origin', 'top center');
+                }
+
+                $('#wrapTile').css('transform', `scale(${scale})`);
+                $('.tilearea').css('height', mapTable.height() * scale + 10);
+            } catch (e) {
+                setTimeout("tile_size()", 500);
+            }
+        });
+      }
+    script(src="/javascripts/translate_config.js")
+    link(href="/stylesheets/fredrik.css" rel="stylesheet")
+
+    link(href="/stylesheets/maze.css" rel="stylesheet")
+
+    meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
+
+  body(ng-controller="ddController")
+    nav.navbar(style='color: #ecf0f1; position: fixed; top: 0; z-index:10 ;  width: 100%', ng-style='{backgroundColor: navColor(status)}')
+      // Navbar content
+      .col-md-6.col-sm4.col-12
+        li.navbar-brand(href='#')
+          i.fas.fa-spinner.fa-spin.fa-fw
+          | &nbsp;{{team}}
+      .col-md-3.col-sm4.col-7
+        i.fas.fa-calculator.fa-2x(aria-hidden='true') &nbsp;
+        li.navbar-brand(href='#')  {{score}} points
+      .col-md-3.col-sm4.col-5
+        i.fas.fa-stopwatch.fa-2x(aria-hidden='true') &nbsp;
+        li.navbar-brand(href='#')  {{minutes*60*1000+seconds*1000 | date:'m:ss'}}
+    .row.nav-cont
+      .col-md-12.tilearea.mx-auto(style="text-align:center;height:80vh;")
+        div(ng-repeat='z in range(height) track by $index', style='display: inline-block;width:100%;')
+          div(style='clear:both;')#mapTopLeft
+          #wrapTile(style='transform-origin: top left;')
+            table.map.mx-auto#mapTable
+              tbody
+                tr(ng-repeat='r in range(2*length + 1)')
+                  td.cell(ng-repeat='c in range(2*width + 1)', ng-class="{'tile': $odd && $parent.$odd, 'wall': cells[c+','+r+','+z].isWall, 'checkpoint': cells[c+','+r+','+z].tile.checkpoint, 'black': cells[c+','+r+','+z].tile.black, 'blue': cells[c+','+r+','+z].tile.blue, 'linear': cells[c+','+r+','+z].tile.reachable && cells[c+','+r+','+z].isLinear, 'floating': cells[c+','+r+','+z].tile.reachable && !cells[c+','+r+','+z].isLinear}", ng-click='cellClick(c, r, z, $odd != $parent.$odd, $odd && $parent.$odd)', ng-style="wallColor(c,r,z)")
+                    .tile-image-container(ng-show="$odd && $parent.$odd")
+                      img.tile-image(ng-src='/images/log.png', ng-show="cells[c+','+r+','+z].tile.speedbump")
+                      img.tile-image(ng-src='/images/start.png', ng-show='startTile.x == c && startTile.y == r && startTile.z == z')
+                      img.tile-image(ng-src='/images/ramp.png', ng-show="cells[c+','+r+','+z].tile.ramp")
+                      img.tile-image(ng-src='/images/steps.png', ng-show="cells[c+','+r+','+z].tile.steps")
+                      img.tile-image(ng-src='/images/h_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'H'")
+                      img.tile-image(ng-src='/images/h_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'H'")
+                      img.tile-image(ng-src='/images/h_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'H'")
+                      img.tile-image(ng-src='/images/h_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'H'")
+                      img.tile-image(ng-src='/images/s_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'S'")
+                      img.tile-image(ng-src='/images/s_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'S'")
+                      img.tile-image(ng-src='/images/s_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'S'")
+                      img.tile-image(ng-src='/images/s_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'S'")
+                      img.tile-image(ng-src='/images/u_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'U'")
+                      img.tile-image(ng-src='/images/u_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'U'")
+                      img.tile-image(ng-src='/images/u_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'U'")
+                      img.tile-image(ng-src='/images/u_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'U'")
+                      p.tile-point(ng-if='tileStatus(c,r,z,$odd && $parent.$odd)', style='color:#000; opacity:1;z-index:50;position: relative;text-align:center;') {{tilePoint(c,r,z,$odd && $parent.$odd)}}
+                      img.tile-image(ng-src='/images/red_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'Red'")
+                      img.tile-image(ng-src='/images/red_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'Red'")
+                      img.tile-image(ng-src='/images/red_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'Red'")
+                      img.tile-image(ng-src='/images/red_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'Red'")
+                      img.tile-image(ng-src='/images/yellow_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'Yellow'")
+                      img.tile-image(ng-src='/images/yellow_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'Yellow'")
+                      img.tile-image(ng-src='/images/yellow_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'Yellow'")
+                      img.tile-image(ng-src='/images/yellow_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'Yellow'")
+                      img.tile-image(ng-src='/images/green_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'Green'")
+                      img.tile-image(ng-src='/images/green_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'Green'")
+                      img.tile-image(ng-src='/images/green_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'Green'")
+                      img.tile-image(ng-src='/images/green_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'Green'")
+                      img.tile-image(ng-src='/images/red_floor.png', ng-show="cells[c+','+r+','+z].tile.victims.floor == 'Red'")
+                      img.tile-image(ng-src='/images/green_floor.png', ng-show="cells[c+','+r+','+z].tile.victims.floor == 'Green'")
+                      i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9;')
+                      i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9;')
+                      i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9;')
+    .alert.alert-info(role='alert')#bottomBox
+      .row
+        .col-4
+          i.fas.fa-step-forward(aria-hidden='true')  : {{LoPs}} times
+        .col-4
+          i.fas Misidentification : {{MisIdent}} times
+        .col-4
+          i.fas.fa-home(aria-hidden='true')
+            | : Exit Bonus:
+            b {{exitBonus}}

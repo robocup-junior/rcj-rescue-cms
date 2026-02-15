@@ -84,7 +84,7 @@ module.exports.initLine = async function (run, rule, scored = false) {
       }
     }
 
-    if (rule == '2024' || rule == '2024E' || rule == '2025E') {
+    if (rule == '2025E' || rule == '2026E') {
       // Consider continued ramp tiles as a ramp
       let rampContinueFlag = false;
       for (let index = run.tiles.length - 1; index >= 0; index--) {

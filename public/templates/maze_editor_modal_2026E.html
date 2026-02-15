@@ -1,0 +1,40 @@
+<div class="modal-header">
+  <h3 class="modal-title">{{"admin.mazeMapEditor.item" | translate}}</h3>
+</div>
+<div class="modal-body">
+  <ul>
+    <li>
+      <input type="checkbox" ng-model="cell.tile.checkpoint" id="isCheckpoint"><label class="checkbox" for="isCheckpoint">{{"admin.mazeMapEditor.cp" | translate}}</label>
+    </li>
+    <li>
+      <input type="checkbox" ng-model="cell.tile.black" id="isBlack" ng-change="blackChanged()"><label class="checkbox" for="isBlack">{{"admin.mazeMapEditor.black" | translate}}</label>
+    </li>
+    <li>
+      <input type="checkbox" ng-model="cell.tile.speedbump" id="hasSpeedbumps"><label class="checkbox" for="hasSpeedbumps">{{"admin.mazeMapEditor.bump" | translate}}</label>
+    </li>
+  </ul>
+
+  <input type="checkbox" ng-model="isStart" ng-disabled="isStart" ng-change="startChanged()" id="isStart"><label class="checkbox" for="isStart">{{"admin.mazeMapEditor.start" | translate}}</label>
+
+  <h5>{{"admin.mazeMapEditor.placement" | translate}}</h5>
+
+  <table>
+    <tr>
+      <th>&nbsp;</th>
+      <th><img src="/images/no_victims.png" alt="None" height="20"></th>
+      <th><img src="/images/Red.png" alt="None" height="20"></th>
+      <th><img src="/images/Green.png" alt="None" height="20"></th>
+    </tr>
+    <tr>
+      <th class="col">{{"admin.mazeMapEditor.floor" | translate}}</th>
+      <td><input type="radio" ng-model="cell.tile.victims.floor" value="None" style="display: block;"></td>
+      <td><input type="radio" ng-model="cell.tile.victims.floor" value="Red" style="display: block;"></td>
+      <td><input type="radio" ng-model="cell.tile.victims.floor" value="Green" style="display: block;"></td>
+    </tr>
+  </table>
+  
+  
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+</div>
