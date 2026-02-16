@@ -2853,7 +2853,7 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
         if ($scope.selectRoom == -1) {
             var modalInstance = $uibModal.open({
                 animation: true,
-                templateUrl: '/templates/sim_editor/sim_editor_modal.2025.html',
+                templateUrl: '/templates/sim_editor/sim_editor_modal.2026.html',
                 controller: 'ModalInstanceCtrl',
                 size: 'lg',
                 scope: $scope,
