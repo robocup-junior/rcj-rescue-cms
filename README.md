@@ -1,7 +1,7 @@
 # RoboCupJunior CMS 2025
 This is a scoring system used in RoboCupJunior's rescue line & maze competition.
 
-For Japan version of this README, see [README-JP.md](./README-JP.md)
+For a japan version of this README, see [README-JP.md](./README-JP.md)
 
 ## Supported rules
 * 2025 rules published by International RoboCupJunior Rescue Technical Committee
