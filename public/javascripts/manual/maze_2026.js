@@ -17,15 +17,15 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
     $scope.victimsList = {
         "H": {
-            "image": "H.png",
+            "image": "phi.png",
             "kit": 2
         },
         "S": {
-            "image": "S.png",
+            "image": "psi.png",
             "kit": 1
         },
         "U": {
-            "image": "U.png",
+            "image": "omega.png",
             "kit": 0
         },
         "Red": {

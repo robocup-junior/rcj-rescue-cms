@@ -350,7 +350,7 @@ function drawRun(doc, config, scoringRun) {
       doc,
       x + 2,
       y + 2,
-      'scoresheet_generation/maze/H.png',
+      'scoresheet_generation/maze/phi.png',
       base_size_y - 5,
       base_size_y - 5,
       'center'
@@ -387,7 +387,7 @@ function drawRun(doc, config, scoringRun) {
       doc,
       x + 2,
       y + 2,
-      'scoresheet_generation/maze/H.png',
+      'scoresheet_generation/maze/phi.png',
       base_size_y - 5,
       base_size_y - 5,
       'center'
@@ -427,7 +427,7 @@ function drawRun(doc, config, scoringRun) {
       doc,
       x + 2,
       y + 2,
-      'scoresheet_generation/maze/S.png',
+      'scoresheet_generation/maze/psi.png',
       base_size_y - 5,
       base_size_y - 5,
       'center'
@@ -464,7 +464,7 @@ function drawRun(doc, config, scoringRun) {
       doc,
       x + 2,
       y + 2,
-      'scoresheet_generation/maze/S.png',
+      'scoresheet_generation/maze/psi.png',
       base_size_y - 5,
       base_size_y - 5,
       'center'
@@ -504,7 +504,7 @@ function drawRun(doc, config, scoringRun) {
       doc,
       x + 2,
       y + 2,
-      'scoresheet_generation/maze/U.png',
+      'scoresheet_generation/maze/omega.png',
       base_size_y - 5,
       base_size_y - 5,
       'center'
@@ -541,7 +541,7 @@ function drawRun(doc, config, scoringRun) {
       doc,
       x + 2,
       y + 2,
-      'scoresheet_generation/maze/U.png',
+      'scoresheet_generation/maze/omega.png',
       base_size_y - 5,
       base_size_y - 5,
       'center'
