@@ -139,14 +139,10 @@ module.exports.calculateMazeScore = function (run) {
       Green: 0,
     };
 
-    if (mapTiles[coord].tile.victims.top != 'None') {
+    if (mapTiles[coord].tile.victims.top !== 'None') {
       if (tile.scoredItems.victims.top) {
         addVictimCount(victims, mapTiles[coord].tile.victims.top);
-        if (
-          mapTiles[coord].tile.victims.top == 'Red' ||
-          mapTiles[coord].tile.victims.top == 'Yellow' ||
-          mapTiles[coord].tile.victims.top == 'Green'
-        )
+        if (isVictimOfTypeLetter(mapTiles[coord].tile.victims.top))
           score += mapTiles[coord].isLinear ? 5 : 15;
         else score += mapTiles[coord].isLinear ? 10 : 30;
 
@@ -156,14 +152,10 @@ module.exports.calculateMazeScore = function (run) {
         );
       }
     }
-    if (mapTiles[coord].tile.victims.right != 'None') {
+    if (mapTiles[coord].tile.victims.right !== 'None') {
       if (tile.scoredItems.victims.right) {
         addVictimCount(victims, mapTiles[coord].tile.victims.right);
-        if (
-          mapTiles[coord].tile.victims.right == 'Red' ||
-          mapTiles[coord].tile.victims.right == 'Yellow' ||
-          mapTiles[coord].tile.victims.right == 'Green'
-        )
+        if (isVictimOfTypeLetter(mapTiles[coord].tile.victims.right))
           score += mapTiles[coord].isLinear ? 5 : 15;
         else score += mapTiles[coord].isLinear ? 10 : 30;
 
@@ -173,14 +165,10 @@ module.exports.calculateMazeScore = function (run) {
         );
       }
     }
-    if (mapTiles[coord].tile.victims.bottom != 'None') {
+    if (mapTiles[coord].tile.victims.bottom !== 'None') {
       if (tile.scoredItems.victims.bottom) {
         addVictimCount(victims, mapTiles[coord].tile.victims.bottom);
-        if (
-          mapTiles[coord].tile.victims.bottom == 'Red' ||
-          mapTiles[coord].tile.victims.bottom == 'Yellow' ||
-          mapTiles[coord].tile.victims.bottom == 'Green'
-        )
+        if (isVictimOfTypeLetter(mapTiles[coord].tile.victims.bottom))
           score += mapTiles[coord].isLinear ? 5 : 15;
         else score += mapTiles[coord].isLinear ? 10 : 30;
 
@@ -190,14 +178,10 @@ module.exports.calculateMazeScore = function (run) {
         );
       }
     }
-    if (mapTiles[coord].tile.victims.left != 'None') {
+    if (mapTiles[coord].tile.victims.left !== 'None') {
       if (tile.scoredItems.victims.left) {
         addVictimCount(victims, mapTiles[coord].tile.victims.left);
-        if (
-          mapTiles[coord].tile.victims.left == 'Red' ||
-          mapTiles[coord].tile.victims.left == 'Yellow' ||
-          mapTiles[coord].tile.victims.left == 'Green'
-        )
+        if (isVictimOfTypeLetter(mapTiles[coord].tile.victims.left))
           score += mapTiles[coord].isLinear ? 5 : 15;
         else score += mapTiles[coord].isLinear ? 10 : 30;
 
@@ -227,6 +211,16 @@ module.exports.calculateMazeScore = function (run) {
     kits: Math.min(rescueKits, 12)
   }
 };
+
+/**
+ * Returns whether the given victimType is a letter victim (in contrast to cognitive victims)
+ * 
+ * @param {string} victimType
+ */
+function isVictimOfTypeLetter(victimType)
+{
+  return ["H", "S", "U"].includes(victimType);
+}
 
 function addVictimCount(obj, type) {
   if (obj[type] == null) obj[type] = 0;
