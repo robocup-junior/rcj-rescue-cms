@@ -122,7 +122,7 @@ html(ng-app="ddApp")
             button.btn.btn-warning(ng-show='!startedTime && time!=0', style='margin:0 10px 10px 0;', type='button', ng-click='timeReset()')
               i.fas.fa-stopwatch(aria-hidden='true')  {{'maze.judge.tim_reset' | translate}}
             .alert.alert-info.blink(role='alert', ng-show='!startedTime && minutes < 8')
-              | {{'maze.judge.pusphi_timer' | translate}}
+              | {{'maze.judge.push_timer' | translate}}
             #card_area.scrool(style='overflow: scroll;')
               .card(ng-show='score == 0 && LoPs == 0 && !diced && (MisIdent == 0 || !MisIdent)')
                 h4.card-header
