@@ -26,8 +26,8 @@ module.exports.calculateLineScore = function (run) {
           case 'checkpoint':
             const tileCount = i - lastCheckPointTile;
             score +=
-              Math.max(tileCount * (5 - 2 * run.LoPs[checkPointCount]), 0) *
-              tile.scoredItems[j].scored;
+                Math.max(tileCount * (5 - 2 * run.LoPs[checkPointCount]), 0) *
+                tile.scoredItems[j].scored;
             lastCheckPointTile = i;
             checkPointCount++;
             break;
@@ -52,7 +52,7 @@ module.exports.calculateLineScore = function (run) {
         }
       }
     }
-    
+
 
     let error = 1;
     if (run.rescueOrder) {
@@ -63,7 +63,7 @@ module.exports.calculateLineScore = function (run) {
         if (victim.victimType == "DEAD" && liveCount != run.map.victims.live) continue;
 
         multiplier *= Math.max(1400-(50*run.LoPs[run.map.EvacuationAreaLoPIndex]),1250);
-        
+
         error *= 1000;
         if (victim.victimType == "LIVE") liveCount ++;
       }
@@ -113,6 +113,9 @@ module.exports.calculateMazeScore = function (run) {
   let victims = {};
   let rescueKits = 0;
 
+  // New: track kits per victim (tile coord + side) so we can do 10 for 1 kit, 30 for 2 kits on SAME victim
+  let kitsByVictim = {};
+
   for (let i = 0; i < run.tiles.length; i++) {
     const tile = run.tiles[i];
     const coord = `${tile.x},${tile.y},${tile.z}`;
@@ -139,37 +142,49 @@ module.exports.calculateMazeScore = function (run) {
       Green: 0,
     };
 
+    // helper: count valid kits for a single victim (ONLY called when victim is scored)
+    function addRescueKitsFor(side, victimType, droppedKits) {
+      const max = maxKits[victimType] ?? 0;
+      const valid = Math.min(droppedKits, max);
+      if (valid <= 0) return;
+
+      const victimKey = `${coord}:${side}`;
+      if (kitsByVictim[victimKey] == null) kitsByVictim[victimKey] = 0;
+      kitsByVictim[victimKey] += valid;
+
+      // total kit count for LoP formula + return value
+      rescueKits += valid;
+    }
+
     if (mapTiles[coord].tile.victims.top != 'None') {
       if (tile.scoredItems.victims.top) {
         addVictimCount(victims, mapTiles[coord].tile.victims.top);
         if (
-          mapTiles[coord].tile.victims.top == 'Red' ||
-          mapTiles[coord].tile.victims.top == 'Yellow' ||
-          mapTiles[coord].tile.victims.top == 'Green'
+            mapTiles[coord].tile.victims.top == 'Red' ||
+            mapTiles[coord].tile.victims.top == 'Yellow' ||
+            mapTiles[coord].tile.victims.top == 'Green'
         )
           score += mapTiles[coord].isLinear ? 5 : 15;
         else score += mapTiles[coord].isLinear ? 10 : 30;
 
-        rescueKits += Math.min(
-          tile.scoredItems.rescueKits.top,
-          maxKits[mapTiles[coord].tile.victims.top]
-        );
+        addRescueKitsFor('top', mapTiles[coord].tile.victims.top, tile.scoredItems.rescueKits.top);
       }
     }
     if (mapTiles[coord].tile.victims.right != 'None') {
       if (tile.scoredItems.victims.right) {
         addVictimCount(victims, mapTiles[coord].tile.victims.right);
         if (
-          mapTiles[coord].tile.victims.right == 'Red' ||
-          mapTiles[coord].tile.victims.right == 'Yellow' ||
-          mapTiles[coord].tile.victims.right == 'Green'
+            mapTiles[coord].tile.victims.right == 'Red' ||
+            mapTiles[coord].tile.victims.right == 'Yellow' ||
+            mapTiles[coord].tile.victims.right == 'Green'
         )
           score += mapTiles[coord].isLinear ? 5 : 15;
         else score += mapTiles[coord].isLinear ? 10 : 30;
 
-        rescueKits += Math.min(
-          tile.scoredItems.rescueKits.right,
-          maxKits[mapTiles[coord].tile.victims.right]
+        addRescueKitsFor(
+            'right',
+            mapTiles[coord].tile.victims.right,
+            tile.scoredItems.rescueKits.right
         );
       }
     }
@@ -177,16 +192,17 @@ module.exports.calculateMazeScore = function (run) {
       if (tile.scoredItems.victims.bottom) {
         addVictimCount(victims, mapTiles[coord].tile.victims.bottom);
         if (
-          mapTiles[coord].tile.victims.bottom == 'Red' ||
-          mapTiles[coord].tile.victims.bottom == 'Yellow' ||
-          mapTiles[coord].tile.victims.bottom == 'Green'
+            mapTiles[coord].tile.victims.bottom == 'Red' ||
+            mapTiles[coord].tile.victims.bottom == 'Yellow' ||
+            mapTiles[coord].tile.victims.bottom == 'Green'
         )
           score += mapTiles[coord].isLinear ? 5 : 15;
         else score += mapTiles[coord].isLinear ? 10 : 30;
 
-        rescueKits += Math.min(
-          tile.scoredItems.rescueKits.bottom,
-          maxKits[mapTiles[coord].tile.victims.bottom]
+        addRescueKitsFor(
+            'bottom',
+            mapTiles[coord].tile.victims.bottom,
+            tile.scoredItems.rescueKits.bottom
         );
       }
     }
@@ -194,24 +210,29 @@ module.exports.calculateMazeScore = function (run) {
       if (tile.scoredItems.victims.left) {
         addVictimCount(victims, mapTiles[coord].tile.victims.left);
         if (
-          mapTiles[coord].tile.victims.left == 'Red' ||
-          mapTiles[coord].tile.victims.left == 'Yellow' ||
-          mapTiles[coord].tile.victims.left == 'Green'
+            mapTiles[coord].tile.victims.left == 'Red' ||
+            mapTiles[coord].tile.victims.left == 'Yellow' ||
+            mapTiles[coord].tile.victims.left == 'Green'
         )
           score += mapTiles[coord].isLinear ? 5 : 15;
         else score += mapTiles[coord].isLinear ? 10 : 30;
 
-        rescueKits += Math.min(
-          tile.scoredItems.rescueKits.left,
-          maxKits[mapTiles[coord].tile.victims.left]
-        );
+        addRescueKitsFor('left', mapTiles[coord].tile.victims.left, tile.scoredItems.rescueKits.left);
       }
     }
   }
 
   let totalVictimCount = sum(Object.values(victims));
 
-  score += Math.min(rescueKits, 12) * 10;
+  // - 1 successful kit to the same victim => 10 points
+  // - 2 successful kits to the same victim => 30 points
+  let kitScore = 0;
+  for (const kits of Object.values(kitsByVictim)) {
+    const k = Math.min(kits, 2);
+    if (k === 1) kitScore += 10;
+    else if (k === 2) kitScore += 30;
+  }
+  score += kitScore;
 
   score += Math.max((totalVictimCount + Math.min(rescueKits, 12) - run.LoPs) * 10, 0);
 
@@ -224,8 +245,8 @@ module.exports.calculateMazeScore = function (run) {
   return {
     score: score,
     victims: convert(victims),
-    kits: Math.min(rescueKits, 12)
-  }
+    kits: Math.min(rescueKits, 12),
+  };
 };
 
 function addVictimCount(obj, type) {
