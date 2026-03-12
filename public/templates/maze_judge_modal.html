@@ -49,8 +49,8 @@
                 <img src="/images/U.png" height=45px ng-if="type=='U'">
                 <img src="/images/S.png" height=45px ng-if="type=='S'">
                 <img src="/images/red.png" height=45px ng-if="type=='Red'">
-                <img src="/images/Yellow.png" height=45px ng-if="type=='Yellow'">
-                <img src="/images/Green.png" height=45px ng-if="type=='Green'">
+                <img src="/images/yellow.png" height=45px ng-if="type=='Yellow'">
+                <img src="/images/green.png" height=45px ng-if="type=='Green'">
                 <i class="fa-2x">{{modalRotate(direction)}}</i>
                 </label>
             </div>
@@ -63,8 +63,8 @@
                             <img src="/images/U.png" height=30px ng-if="type=='U'">
                             <img src="/images/S.png" height=30px ng-if="type=='S'">
                             <img src="/images/red.png" height=30px ng-if="type=='Red'">
-                            <img src="/images/Yellow.png" height=30px ng-if="type=='Yellow'">
-                            <img src="/images/Green.png" height=30px ng-if="type=='Green'">
+                            <img src="/images/yellow.png" height=30px ng-if="type=='Yellow'">
+                            <img src="/images/green.png" height=30px ng-if="type=='Green'">
                             &nbsp;{{modalRotate(direction)}}
                         </span>
                     </div>
@@ -88,7 +88,7 @@
             <div ng-repeat="(direction, type) in cell.tile.victims track by $index" ng-show="type != 'None'" style="margin-left:50px;" >
                 <input type="checkbox" ng-model="tile.scoredItems.victims[direction]" id="{{ 'victim-' + $index }}"  ng-change="applyEntryVictimRestriction(direction)"><label class="checkbox" for="{{ 'victim-' + $index }}" ng-style="{backgroundColor: lightStatus(tile.scoredItems.victims[direction],tile.scoredItems.rescueKits[direction]) ? '#d3f5d3': '#f5d3d4'}">
                 <img src="/images/red.png" height=45px ng-if="type=='Red'">
-                <img src="/images/Green.png" height=45px ng-if="type=='Green'">
+                <img src="/images/green.png" height=45px ng-if="type=='Green'">
                 <i class="fa-2x">{{modalRotate(direction)}}</i>
                 </label>
             </div>
@@ -97,7 +97,7 @@
                 <input type="checkbox" ng-model="tile.scoredItems.rescueKits[direction]" ng-disabled="!tile.scoredItems.victims[direction]" ng-true-value="1" ng-false-value="0" id="{{ 'victimi-' + $index }}">
                 <label class="checkbox" for="{{ 'victimi-' + $index }}" ng-style="{backgroundColor: kitStatus(tile.scoredItems.victims[direction],tile.scoredItems.rescueKits[direction],type) ? '#d3f5d3': '#f5d3d4'}" ng-click="clickSound()">
                 <img src="/images/red.png" height=45px ng-if="type=='Red'">
-                <img src="/images/Green.png" height=45px ng-if="type=='Green'">
+                <img src="/images/green.png" height=45px ng-if="type=='Green'">
                 </label>
             </div>
         <div>
