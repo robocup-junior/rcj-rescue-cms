@@ -29,7 +29,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             "kit": 0
         },
         "Red": {
-            "image": "Red.png",
+            "image": "red.png",
             "kit": 2
         },
         "Yellow": {

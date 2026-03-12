@@ -49,7 +49,7 @@
                     <img src="/images/H.png" height=45px ng-if="type=='H'">
                     <img src="/images/U.png" height=45px ng-if="type=='U'">
                     <img src="/images/S.png" height=45px ng-if="type=='S'">
-                    <img src="/images/Red.png" height=45px ng-if="type=='Red'">
+                    <img src="/images/red.png" height=45px ng-if="type=='Red'">
                     <img src="/images/Yellow.png" height=45px ng-if="type=='Yellow'">
                     <img src="/images/Green.png" height=45px ng-if="type=='Green'">
                     <i class="fa-2x">{{modalRotate(direction)}}</i>
@@ -65,7 +65,7 @@
                             <img src="/images/H.png" height=30px ng-if="type=='H'">
                             <img src="/images/U.png" height=30px ng-if="type=='U'">
                             <img src="/images/S.png" height=30px ng-if="type=='S'">
-                            <img src="/images/Red.png" height=30px ng-if="type=='Red'">
+                            <img src="/images/red.png" height=30px ng-if="type=='Red'">
                             <img src="/images/Yellow.png" height=30px ng-if="type=='Yellow'">
                             <img src="/images/Green.png" height=30px ng-if="type=='Green'">
                             &nbsp;{{modalRotate(direction)}}
@@ -90,7 +90,7 @@
             <i class="far fa-2x fa-lightbulb" aria-hidden="true" style="color:#2980b9;">&nbsp;</i>{{"maze.judge.m_identified" | translate}}
                 <div ng-repeat="(direction, type) in cell.tile.victims track by $index" ng-if="type != 'None'" style="margin-left:50px;" >
                     <input type="checkbox" ng-model="tile.scoredItems.rescueKits[direction]" ng-true-value="1" ng-false-value="0" id="{{ 'victimi-' + $index }}" disabled><label class="checkbox" for="{{ 'victimi-' + $index }}" ng-style="{backgroundColor: kitStatus(tile.scoredItems.victims[direction],tile.scoredItems.rescueKits[direction],type) ? '#d3f5d3': '#f5d3d4'}" ng-click="clickSound()">
-                    <img src="/images/Red.png" height=45px ng-if="type=='Red'">
+                    <img src="/images/red.png" height=45px ng-if="type=='Red'">
                     <img src="/images/Green.png" height=45px ng-if="type=='Green'">
                     </label>
                 </div>

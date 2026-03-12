@@ -5,14 +5,11 @@ app.config(['$translateProvider', function ($translateProvider) {
             suffix: '.json'
         })
 
-        .registerAvailableLanguageKeys(['en', 'ja'], {
-            'en_*': 'en',
-            'ja_*': 'ja',
-            '*': 'en'
-        })
-        .determinePreferredLanguage()
+       .preferredLanguage(((navigator.language || navigator.userLanguage || 'en').split('-')[0] || 'en'))
+
+        .fallbackLanguage('en')
+
         .useSanitizeValueStrategy('escape')
         .useMissingTranslationHandlerLog()
         .useLocalStorage();
-
 }]);

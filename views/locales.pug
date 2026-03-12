@@ -3,6 +3,7 @@ extends includes/layout
 
 block vars
   - var ngAppDef = 'Lang'
+  - var langColors = ['#2980b9', '#e74c3c', '#27ae60', '#8e44ad', '#f39c12', '#16a085', '#2c3e50']
 
 append scripts
   script(src='/javascripts/locales.js')
@@ -10,7 +11,7 @@ append scripts
 block location
   a.breadcrumb-item(ng-click="go('/home')") Home
   span.breadcrumb-item.active Locales
-  
+
 append css
   style(type='text/css').
     .circle {
@@ -35,18 +36,13 @@ block content
       br
       br
       .row
-          .col-md-3(style="text-align: center;" ng-click="changeLanguage('en')")
-            p.circle(style="background-color:#2980b9;") EN
-            h2 English
-          .col-md-3(style="text-align: center; " ng-click="changeLanguage('ja')")
-            p.circle(style="background-color:#e74c3c") JA
-            h2 日本語
-          .col-md-3
-          .col-md-3
-      
-      
-      
-      
+        each lang, i in (langs || [])
+          - var bg = langColors[i % langColors.length]
+          .col-md-3(style="text-align: center;" ng-click=`changeLanguage('${lang.key}')`)
+            p.circle(style=`background-color:${bg};`)= String(lang.key).toUpperCase()
+            h2= lang.name
+        .col-md-3
+        .col-md-3
+
       br
       br
-      
