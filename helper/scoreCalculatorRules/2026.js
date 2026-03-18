@@ -100,6 +100,8 @@ module.exports.calculateLineScore = function (run) {
  * @returns {number}
  */
 module.exports.calculateMazeScore = function (run) {
+  const MAX_RESCUE_KITS = 8;
+
   let score = 0;
 
   const mapTiles = [];
@@ -144,8 +146,10 @@ module.exports.calculateMazeScore = function (run) {
 
     // helper: count valid kits for a single victim (ONLY called when victim is scored)
     function addRescueKitsFor(side, victimType, droppedKits) {
+      if (rescueKits >= MAX_RESCUE_KITS) return;
+
       const max = maxKits[victimType] ?? 0;
-      const valid = Math.min(droppedKits, max);
+      const valid = Math.min(droppedKits, max, MAX_RESCUE_KITS - rescueKits);
       if (valid <= 0) return;
 
       const victimKey = `${coord}:${side}`;
@@ -234,7 +238,7 @@ module.exports.calculateMazeScore = function (run) {
   }
   score += kitScore;
 
-  score += Math.max((totalVictimCount + Math.min(rescueKits, 12) - run.LoPs) * 10, 0);
+  score += Math.max((totalVictimCount + Math.min(rescueKits, MAX_RESCUE_KITS) - run.LoPs) * 10, 0);
 
   if (run.exitBonus) {
     score += totalVictimCount * 10;
@@ -245,7 +249,7 @@ module.exports.calculateMazeScore = function (run) {
   return {
     score: score,
     victims: convert(victims),
-    kits: Math.min(rescueKits, 12),
+    kits: Math.min(rescueKits, MAX_RESCUE_KITS),
   };
 };
 
