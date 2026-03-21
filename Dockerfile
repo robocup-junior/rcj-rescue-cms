@@ -4,11 +4,11 @@ COPY . /opt/rcj-cms/
 WORKDIR /opt/rcj-cms
 
 # install deps + build assets
-RUN npm ci \
- && npm install -g bower \
- && bower install --allow-root \
- && npm run build \
- && mkdir -p logs documents
+RUN npm install -g workbox-cli
+RUN npm install -g bower
+RUN bower install --allow-root
+RUN npm run build
+RUN mkdir -p logs documents
 
 CMD ["npm", "run", "start"]
 EXPOSE 3000
