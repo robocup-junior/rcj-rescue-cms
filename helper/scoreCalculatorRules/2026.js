@@ -131,9 +131,9 @@ module.exports.calculateMazeScore = function (run) {
     }
 
     const maxKits = {
-      H: 2,
-      S: 1,
-      U: 0,
+      PHI: 2,
+      PSI: 1,
+      OMEGA: 0,
       Red: 2,
       Yellow: 1,
       Green: 0,
@@ -219,7 +219,7 @@ module.exports.calculateMazeScore = function (run) {
  */
 function isVictimOfTypeLetter(victimType)
 {
-  return ["H", "S", "U"].includes(victimType);
+  return ["PHI", "PSI", "OMEGA"].includes(victimType);
 }
 
 function addVictimCount(obj, type) {

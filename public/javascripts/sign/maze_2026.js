@@ -5,17 +5,17 @@ var socket;
 let victimConstant = {};
 let victimTypes = [];
 const victimConstantWL = {
-    "H": {
+    "PHI": {
         "maxKitNum": 2,
         "linearPoint": 10,
         "floatingPoint": 30
     },
-    "S": {
+    "PSI": {
         "maxKitNum": 1,
         "linearPoint": 10,
         "floatingPoint": 30
     },
-    "U": {
+    "OMEGA": {
         "maxKitNum": 0,
         "linearPoint": 10,
         "floatingPoint": 30

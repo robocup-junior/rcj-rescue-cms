@@ -335,8 +335,8 @@ function drawRun(doc, config, scoringRun) {
   const base_size_y = 29;
   const text_padding = 7;
 
-  // Draw box for victim "H" (Linear)
-  for (const v of itemList.H.linear) {
+  // Draw box for victim "PHI" (Linear)
+  for (const v of itemList.PHI.linear) {
     pdf.drawImage(
       doc,
       x,
@@ -373,7 +373,7 @@ function drawRun(doc, config, scoringRun) {
   }
 
   // Draw box for victim "H" (Floating)
-  for (const v of itemList.H.floating) {
+  for (const v of itemList.PHI.floating) {
     pdf.drawImage(
       doc,
       x,
@@ -413,7 +413,7 @@ function drawRun(doc, config, scoringRun) {
     y += base_size_y;
   }
   // Draw box for victim "S" (Linear)
-  for (const v of itemList.S.linear) {
+  for (const v of itemList.PSI.linear) {
     pdf.drawImage(
       doc,
       x,
@@ -450,7 +450,7 @@ function drawRun(doc, config, scoringRun) {
   }
 
   // Draw box for victim "S" (Floating)
-  for (const v of itemList.S.floating) {
+  for (const v of itemList.PSI.floating) {
     pdf.drawImage(
       doc,
       x,
@@ -490,7 +490,7 @@ function drawRun(doc, config, scoringRun) {
     y += base_size_y;
   }
   // Draw box for victim "U" (Linear)
-  for (const v of itemList.U.linear) {
+  for (const v of itemList.OMEGA.linear) {
     pdf.drawImage(
       doc,
       x,
@@ -527,7 +527,7 @@ function drawRun(doc, config, scoringRun) {
   }
 
   // Draw box for victim "U" (Floating)
-  for (const v of itemList.U.floating) {
+  for (const v of itemList.OMEGA.floating) {
     pdf.drawImage(
       doc,
       x,

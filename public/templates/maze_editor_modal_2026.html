@@ -28,7 +28,7 @@
       <label>{{"admin.mazeMapEditor.changeF" | translate}}</label><br>
       <ul>
         <li ng-repeat="h in range(height)">
-          <input type="radio" ng-model="cell.tile.changeFloorTo" ng-value="h" ng-change="elevatorChanged(cell.tile.changeFloorTo)" id="{{ 'elevator-' + h }}"><label class="radio" for="{{ 'elevator-' + h }}">{{h}}<span ng-show="h == z"> {{"admin.mazeMapEditor.noEle" | translate}}</span></label>
+          <input type="radio" ng-model="cell.tile.changeFloorTo" ng-value="PHI" ng-change="elevatorChanged(cell.tile.changeFloorTo)" id="{{ 'elevator-' + h }}"><label class="radio" for="{{ 'elevator-' + h }}">{{h}}<span ng-show="h == z"> {{"admin.mazeMapEditor.noEle" | translate}}</span></label>
         </li>
       </ul>
     </li>
@@ -49,30 +49,30 @@
       <tr>
         <th class="col">{{"admin.mazeMapEditor.top" | translate}}</th>
         <td><input type="radio" ng-model="cell.tile.victims.top" value="None" style="display: block;"></td>
-        <td><input type="radio" ng-model="cell.tile.victims.top" value="H" style="display: block;"></td>
-        <td><input type="radio" ng-model="cell.tile.victims.top" value="S" style="display: block;"></td>
-        <td><input type="radio" ng-model="cell.tile.victims.top" value="U" style="display: block;"></td>
+        <td><input type="radio" ng-model="cell.tile.victims.top" value="PHI" style="display: block;"></td>
+        <td><input type="radio" ng-model="cell.tile.victims.top" value="PSI" style="display: block;"></td>
+        <td><input type="radio" ng-model="cell.tile.victims.top" value="OMEGA" style="display: block;"></td>
       </tr>
       <tr>
         <th class="col">{{"admin.mazeMapEditor.bottom" | translate}}</th>
         <td><input type="radio" ng-model="cell.tile.victims.bottom" value="None" style="display: block;"></td>
-        <td><input type="radio" ng-model="cell.tile.victims.bottom" value="H" style="display: block;"></td>
-        <td><input type="radio" ng-model="cell.tile.victims.bottom" value="S" style="display: block;"></td>
-        <td><input type="radio" ng-model="cell.tile.victims.bottom" value="U" style="display: block;"></td>
+        <td><input type="radio" ng-model="cell.tile.victims.bottom" value="PHI" style="display: block;"></td>
+        <td><input type="radio" ng-model="cell.tile.victims.bottom" value="PSI" style="display: block;"></td>
+        <td><input type="radio" ng-model="cell.tile.victims.bottom" value="OMEGA" style="display: block;"></td>
       </tr>
       <tr>
         <th class="col">{{"admin.mazeMapEditor.left" | translate}}</th>
         <td><input type="radio" ng-model="cell.tile.victims.left" value="None" style="display: block;"></td>
-        <td><input type="radio" ng-model="cell.tile.victims.left" value="H" style="display: block;"></td>
-        <td><input type="radio" ng-model="cell.tile.victims.left" value="S" style="display: block;"></td>
-        <td><input type="radio" ng-model="cell.tile.victims.left" value="U" style="display: block;"></td>
+        <td><input type="radio" ng-model="cell.tile.victims.left" value="PHI" style="display: block;"></td>
+        <td><input type="radio" ng-model="cell.tile.victims.left" value="PSI" style="display: block;"></td>
+        <td><input type="radio" ng-model="cell.tile.victims.left" value="OMEGA" style="display: block;"></td>
       </tr>
       <tr>
         <th class="col">{{"admin.mazeMapEditor.right" | translate}}</th>
         <td><input type="radio" ng-model="cell.tile.victims.right" value="None" style="display: block;"></td>
-        <td><input type="radio" ng-model="cell.tile.victims.right" value="H" style="display: block;"></td>
-        <td><input type="radio" ng-model="cell.tile.victims.right" value="S" style="display: block;"></td>
-        <td><input type="radio" ng-model="cell.tile.victims.right" value="U" style="display: block;"></td>
+        <td><input type="radio" ng-model="cell.tile.victims.right" value="PHI" style="display: block;"></td>
+        <td><input type="radio" ng-model="cell.tile.victims.right" value="PSI" style="display: block;"></td>
+        <td><input type="radio" ng-model="cell.tile.victims.right" value="OMEGA" style="display: block;"></td>
       </tr>
     </table>
   </div>
