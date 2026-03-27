@@ -6,6 +6,7 @@ For a japan version of this README, see [README-JP.md](./README-JP.md)
 ## Supported rules
 * 2025 rules published by International RoboCupJunior Rescue Technical Committee
 * 2025 rules published by Japanese Regional Committee for entry leagues
+* 
 ## Demo
 The latest version is running. It is built using Docker image and working under OCI arm instance.
 
@@ -71,11 +72,12 @@ The latest version is running. It is built using Docker image and working under 
 ### 2025 rules
 * RoboCup Junior Japan Open 2025 Nagoya
 * RoboCup 2025 Salvador
+* RoboCup Junior German Open 2026 (German local competition)
 
 ## Usage
-### Using Docker（Recomended）
+### Using Docker（Recommended）
 Use the  [Official docker image](https://hub.docker.com/r/ryorobo/rcj-cms/tags) is strongly recommended.  
-This docker image supports following archtectures.  
+This docker image supports the following architectures.  
 * linux/amd64
 * linux/arm/v6
 * linux/arm/v7
