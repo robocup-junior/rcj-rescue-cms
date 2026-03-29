@@ -105,6 +105,8 @@
 
 ### 2025年ルール対応版
 * RoboCup Junior Japan Open 2025 Nagoya
+* RoboCup 2025 Salvador
+* RoboCup Junior German Open 2026
 
 ## 使用方法
 ### Dockerを利用（推奨）
