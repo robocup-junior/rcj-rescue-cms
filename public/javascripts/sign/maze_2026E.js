@@ -497,7 +497,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.open = function (x, y, z) {
         var modalInstance = $uibModal.open({
             animation: true,
-            templateUrl: '/templates/maze_view_modal.html',
+            templateUrl: '/templates/maze_view_modal_2025.html', // Maze 2026-Entry is reusing the 2025 modal.
             controller: 'ModalInstanceCtrl',
             size: 'lm',
             resolve: {

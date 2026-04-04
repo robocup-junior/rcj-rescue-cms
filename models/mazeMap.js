@@ -9,7 +9,7 @@ const mazeFill = require('../helper/mazeFill')
 
 const logger = require('../config/logger').mainLogger
 
-const VICTIMS = ['H', 'S', 'U', "Red", "Yellow", "Green", "None"];
+const VICTIMS = ['H', 'S', 'U', 'PHI', 'PSI', 'OMEGA', "Red", "Yellow", "Green", "None"];
 
 const MazeRun = require('./mazeRun')
 
