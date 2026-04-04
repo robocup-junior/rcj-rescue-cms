@@ -1,7 +1,7 @@
 {
   "name": "rcj-scoring",
-  "version": "25.2.6",
-  "copyright": "2016-2025 RoboCupJunior Rescue CMS Development SubCommittee",
+  "version": "25.2.7",
+  "copyright": "2016-2026 RoboCupJunior Rescue CMS Development SubCommittee",
   "private": true,
   "scripts": {
     "start": "node server.js",
