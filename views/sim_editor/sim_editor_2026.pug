@@ -11,9 +11,8 @@ append scripts
     var pubService = "#{pubService}"
 
   script(src="/javascripts/lvl-uuid.js")
-  script(src="/javascripts/sim_editor/sim_editor.2026.js")
+  script(src="/javascripts/sim_editor/sim_editor.2024.js")
   script(src="/components/bootstrap-fileinput/js/fileinput.min.js")
-  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js")
   script(src="/components/bootstrap-fileinput/js/locales/ja.js")
   script(src="/components/html2canvas/index.js")
   script(src="/javascripts/opencv.js")
@@ -21,11 +20,6 @@ append scripts
 append css
   link(href="/stylesheets/maze_edit.css" rel="stylesheet")
   link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
-
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/service')") Public services
-    span.breadcrumb-item.active Simulation world editor
 
 block content
     h1 {{"admin.simMapEditor.title" | translate}} 2026
@@ -76,6 +70,7 @@ block content
                         select(ng-model='area4Room', ng-options="room as room.value for room in area4", ng-init="area4Room=area4[0]", ng-change="updateRoom4Pick()", style="margin-right:10px;")
                         button.btn.btn-outline-dark#showRoom4Canvas(type='button', ng-click='openCustomRoom4()', style="margin:5px;display:none;")
                             p Create Custom Room 4
+                    button.btn.btn-secondary(type='button', ng-click='activateExteriorWalls()', style="margin:10px;") {{"admin.simMapEditor.extWalls" | translate}}
 
         .row
             .col-11
@@ -85,6 +80,16 @@ block content
                             td(ng-repeat='c in range(2*width + 1)', ng-class="{'wallspot': $odd != $parent.$odd, 'tile': $odd && $parent.$odd, 'wall': cells[c+','+r+','+z].isWall}", ng-click='cellClick(c, r, z, $odd != $parent.$odd, $odd && $parent.$odd)', ng-style="tileColour(c,r,z)")
                                 .tile-image-container(ng-show="$odd && $parent.$odd")
                                     img.tile-image(ng-src='/images/start.png', ng-show='startTile.x == c && startTile.y == r && startTile.z == z')
+
+                                    span(ng-show="cells[c+','+r+','+z].tile && cogTopLabel(cells[c+','+r+','+z].tile)", ng-bind="cogTopLabel(cells[c+','+r+','+z].tile)", style="position:absolute;top:1px;left:50%;transform:translateX(-50%);font-size:18px;font-weight:900;line-height:1;z-index:2;pointer-events:none;", ng-style="cogLetterStyle(cogTopLabel(cells[c+','+r+','+z].tile))")
+                                    img.tile-image(ng-src='/images/cog_top.png',    ng-show="cells[c+','+r+','+z].tile && cogTopIsFake(cells[c+','+r+','+z].tile)")
+                                    span(ng-show="cells[c+','+r+','+z].tile && cogRightLabel(cells[c+','+r+','+z].tile)", ng-bind="cogRightLabel(cells[c+','+r+','+z].tile)", style="position:absolute;right:1px;top:50%;transform:translateY(-50%);font-size:18px;font-weight:900;line-height:1;z-index:2;pointer-events:none;", ng-style="cogLetterStyle(cogRightLabel(cells[c+','+r+','+z].tile))")
+                                    img.tile-image(ng-src='/images/cog_right.png',  ng-show="cells[c+','+r+','+z].tile && cogRightIsFake(cells[c+','+r+','+z].tile)")
+                                    span(ng-show="cells[c+','+r+','+z].tile && cogBottomLabel(cells[c+','+r+','+z].tile)", ng-bind="cogBottomLabel(cells[c+','+r+','+z].tile)", style="position:absolute;bottom:1px;left:50%;transform:translateX(-50%);font-size:18px;font-weight:900;line-height:1;z-index:2;pointer-events:none;", ng-style="cogLetterStyle(cogBottomLabel(cells[c+','+r+','+z].tile))")
+                                    img.tile-image(ng-src='/images/cog_bottom.png', ng-show="cells[c+','+r+','+z].tile && cogBottomIsFake(cells[c+','+r+','+z].tile)")
+                                    span(ng-show="cells[c+','+r+','+z].tile && cogLeftLabel(cells[c+','+r+','+z].tile)", ng-bind="cogLeftLabel(cells[c+','+r+','+z].tile)", style="position:absolute;left:1px;top:50%;transform:translateY(-50%);font-size:18px;font-weight:900;line-height:1;z-index:2;pointer-events:none;", ng-style="cogLetterStyle(cogLeftLabel(cells[c+','+r+','+z].tile))")
+                                    img.tile-image(ng-src='/images/cog_left.png',   ng-show="cells[c+','+r+','+z].tile && cogLeftIsFake(cells[c+','+r+','+z].tile)")
+
                                     img.tile-image(ng-src='/images/h_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'H' || cells[c+','+r+','+z].tile.halfWallVic[0] == 1 ||  cells[c+','+r+','+z].tile.halfWallVic[4] == 1 || cells[c+','+r+','+z].tile.halfWallVic[1] == 1 || cells[c+','+r+','+z].tile.halfWallVic[7] == 1")
                                     img.tile-image(ng-src='/images/h_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'H' || cells[c+','+r+','+z].tile.halfWallVic[5] == 1 ||  cells[c+','+r+','+z].tile.halfWallVic[13] == 1 || cells[c+','+r+','+z].tile.halfWallVic[6] == 1 || cells[c+','+r+','+z].tile.halfWallVic[12] == 1")
                                     img.tile-image(ng-src='/images/h_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'H' || cells[c+','+r+','+z].tile.halfWallVic[10] == 1 ||  cells[c+','+r+','+z].tile.halfWallVic[14] == 1 || cells[c+','+r+','+z].tile.halfWallVic[9] == 1 || cells[c+','+r+','+z].tile.halfWallVic[15] == 1")
@@ -97,22 +102,24 @@ block content
                                     img.tile-image(ng-src='/images/s_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'S' || cells[c+','+r+','+z].tile.halfWallVic[5] == 3 ||  cells[c+','+r+','+z].tile.halfWallVic[13] == 3 || cells[c+','+r+','+z].tile.halfWallVic[6] == 3 || cells[c+','+r+','+z].tile.halfWallVic[12] == 3")
                                     img.tile-image(ng-src='/images/s_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'S' || cells[c+','+r+','+z].tile.halfWallVic[10] == 3 ||  cells[c+','+r+','+z].tile.halfWallVic[14] == 3 || cells[c+','+r+','+z].tile.halfWallVic[9] == 3 || cells[c+','+r+','+z].tile.halfWallVic[15] == 3")
                                     img.tile-image(ng-src='/images/s_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'S' || cells[c+','+r+','+z].tile.halfWallVic[3] == 3 ||  cells[c+','+r+','+z].tile.halfWallVic[11] == 3 || cells[c+','+r+','+z].tile.halfWallVic[2] == 3 || cells[c+','+r+','+z].tile.halfWallVic[8] == 3")
-                                    img.tile-image(ng-src='/images/f_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'F' || cells[c+','+r+','+z].tile.halfWallVic[0] == 5 ||  cells[c+','+r+','+z].tile.halfWallVic[4] == 5 || cells[c+','+r+','+z].tile.halfWallVic[1] == 5 || cells[c+','+r+','+z].tile.halfWallVic[7] == 5")
-                                    img.tile-image(ng-src='/images/f_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'F' || cells[c+','+r+','+z].tile.halfWallVic[5] == 5 ||  cells[c+','+r+','+z].tile.halfWallVic[13] == 5 || cells[c+','+r+','+z].tile.halfWallVic[6] == 5 || cells[c+','+r+','+z].tile.halfWallVic[12] == 5")
-                                    img.tile-image(ng-src='/images/f_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'F' || cells[c+','+r+','+z].tile.halfWallVic[10] == 5 ||  cells[c+','+r+','+z].tile.halfWallVic[14] == 5 || cells[c+','+r+','+z].tile.halfWallVic[9] == 5 || cells[c+','+r+','+z].tile.halfWallVic[15] == 5")
-                                    img.tile-image(ng-src='/images/f_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'F' || cells[c+','+r+','+z].tile.halfWallVic[3] == 5 ||  cells[c+','+r+','+z].tile.halfWallVic[11] == 5 || cells[c+','+r+','+z].tile.halfWallVic[2] == 5 || cells[c+','+r+','+z].tile.halfWallVic[8] == 5")
-                                    img.tile-image(ng-src='/images/p_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'P' || cells[c+','+r+','+z].tile.halfWallVic[0] == 6 ||  cells[c+','+r+','+z].tile.halfWallVic[4] == 6 || cells[c+','+r+','+z].tile.halfWallVic[1] == 6 || cells[c+','+r+','+z].tile.halfWallVic[7] == 6")
-                                    img.tile-image(ng-src='/images/p_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'P' || cells[c+','+r+','+z].tile.halfWallVic[5] == 6 ||  cells[c+','+r+','+z].tile.halfWallVic[13] == 6 || cells[c+','+r+','+z].tile.halfWallVic[6] == 6 || cells[c+','+r+','+z].tile.halfWallVic[12] == 6")
-                                    img.tile-image(ng-src='/images/p_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'P' || cells[c+','+r+','+z].tile.halfWallVic[10] == 6 ||  cells[c+','+r+','+z].tile.halfWallVic[14] == 6 || cells[c+','+r+','+z].tile.halfWallVic[9] == 6 || cells[c+','+r+','+z].tile.halfWallVic[15] == 6")
-                                    img.tile-image(ng-src='/images/p_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'P' || cells[c+','+r+','+z].tile.halfWallVic[3] == 6 ||  cells[c+','+r+','+z].tile.halfWallVic[11] == 6 || cells[c+','+r+','+z].tile.halfWallVic[2] == 6 || cells[c+','+r+','+z].tile.halfWallVic[8] == 6")
-                                    img.tile-image(ng-src='/images/c_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'C' || cells[c+','+r+','+z].tile.halfWallVic[0] == 7 ||  cells[c+','+r+','+z].tile.halfWallVic[4] == 7 || cells[c+','+r+','+z].tile.halfWallVic[1] == 7 || cells[c+','+r+','+z].tile.halfWallVic[7] == 7")
-                                    img.tile-image(ng-src='/images/c_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'C' || cells[c+','+r+','+z].tile.halfWallVic[5] == 7 ||  cells[c+','+r+','+z].tile.halfWallVic[13] == 7 || cells[c+','+r+','+z].tile.halfWallVic[6] == 7 || cells[c+','+r+','+z].tile.halfWallVic[12] == 7")
-                                    img.tile-image(ng-src='/images/c_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'C' || cells[c+','+r+','+z].tile.halfWallVic[10] == 7 ||  cells[c+','+r+','+z].tile.halfWallVic[14] == 7 || cells[c+','+r+','+z].tile.halfWallVic[9] == 7 || cells[c+','+r+','+z].tile.halfWallVic[15] == 7")
-                                    img.tile-image(ng-src='/images/c_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'C' || cells[c+','+r+','+z].tile.halfWallVic[3] == 7 ||  cells[c+','+r+','+z].tile.halfWallVic[11] == 7 || cells[c+','+r+','+z].tile.halfWallVic[2] == 7 || cells[c+','+r+','+z].tile.halfWallVic[8] == 7")
-                                    img.tile-image(ng-src='/images/o_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'O' || cells[c+','+r+','+z].tile.halfWallVic[0] == 8 ||  cells[c+','+r+','+z].tile.halfWallVic[4] == 8 || cells[c+','+r+','+z].tile.halfWallVic[1] == 8 || cells[c+','+r+','+z].tile.halfWallVic[7] == 8")
-                                    img.tile-image(ng-src='/images/o_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'O' || cells[c+','+r+','+z].tile.halfWallVic[5] == 8 ||  cells[c+','+r+','+z].tile.halfWallVic[13] == 8 || cells[c+','+r+','+z].tile.halfWallVic[6] == 8 || cells[c+','+r+','+z].tile.halfWallVic[12] == 8")
-                                    img.tile-image(ng-src='/images/o_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'O' || cells[c+','+r+','+z].tile.halfWallVic[10] == 8 ||  cells[c+','+r+','+z].tile.halfWallVic[14] == 8 || cells[c+','+r+','+z].tile.halfWallVic[9] == 8 || cells[c+','+r+','+z].tile.halfWallVic[15] == 8")
-                                    img.tile-image(ng-src='/images/o_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'O' || cells[c+','+r+','+z].tile.halfWallVic[3] == 8 ||  cells[c+','+r+','+z].tile.halfWallVic[11] == 8 || cells[c+','+r+','+z].tile.halfWallVic[2] == 8 || cells[c+','+r+','+z].tile.halfWallVic[8] == 8")
+
+                                    // img.tile-image(ng-src='/images/f_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'F' || cells[c+','+r+','+z].tile.halfWallVic[0] == 5 ||  cells[c+','+r+','+z].tile.halfWallVic[4] == 5 || cells[c+','+r+','+z].tile.halfWallVic[1] == 5 || cells[c+','+r+','+z].tile.halfWallVic[7] == 5")
+                                    // img.tile-image(ng-src='/images/f_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'F' || cells[c+','+r+','+z].tile.halfWallVic[5] == 5 ||  cells[c+','+r+','+z].tile.halfWallVic[13] == 5 || cells[c+','+r+','+z].tile.halfWallVic[6] == 5 || cells[c+','+r+','+z].tile.halfWallVic[12] == 5")
+                                    // img.tile-image(ng-src='/images/f_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'F' || cells[c+','+r+','+z].tile.halfWallVic[10] == 5 ||  cells[c+','+r+','+z].tile.halfWallVic[14] == 5 || cells[c+','+r+','+z].tile.halfWallVic[9] == 5 || cells[c+','+r+','+z].tile.halfWallVic[15] == 5")
+                                    // img.tile-image(ng-src='/images/f_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'F' || cells[c+','+r+','+z].tile.halfWallVic[3] == 5 ||  cells[c+','+r+','+z].tile.halfWallVic[11] == 5 || cells[c+','+r+','+z].tile.halfWallVic[2] == 5 || cells[c+','+r+','+z].tile.halfWallVic[8] == 5")
+                                    // img.tile-image(ng-src='/images/p_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'P' || cells[c+','+r+','+z].tile.halfWallVic[0] == 6 ||  cells[c+','+r+','+z].tile.halfWallVic[4] == 6 || cells[c+','+r+','+z].tile.halfWallVic[1] == 6 || cells[c+','+r+','+z].tile.halfWallVic[7] == 6")
+                                    // img.tile-image(ng-src='/images/p_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'P' || cells[c+','+r+','+z].tile.halfWallVic[5] == 6 ||  cells[c+','+r+','+z].tile.halfWallVic[13] == 6 || cells[c+','+r+','+z].tile.halfWallVic[6] == 6 || cells[c+','+r+','+z].tile.halfWallVic[12] == 6")
+                                    // img.tile-image(ng-src='/images/p_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'P' || cells[c+','+r+','+z].tile.halfWallVic[10] == 6 ||  cells[c+','+r+','+z].tile.halfWallVic[14] == 6 || cells[c+','+r+','+z].tile.halfWallVic[9] == 6 || cells[c+','+r+','+z].tile.halfWallVic[15] == 6")
+                                    // img.tile-image(ng-src='/images/p_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'P' || cells[c+','+r+','+z].tile.halfWallVic[3] == 6 ||  cells[c+','+r+','+z].tile.halfWallVic[11] == 6 || cells[c+','+r+','+z].tile.halfWallVic[2] == 6 || cells[c+','+r+','+z].tile.halfWallVic[8] == 6")
+                                    // img.tile-image(ng-src='/images/c_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'C' || cells[c+','+r+','+z].tile.halfWallVic[0] == 7 ||  cells[c+','+r+','+z].tile.halfWallVic[4] == 7 || cells[c+','+r+','+z].tile.halfWallVic[1] == 7 || cells[c+','+r+','+z].tile.halfWallVic[7] == 7")
+                                    // img.tile-image(ng-src='/images/c_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'C' || cells[c+','+r+','+z].tile.halfWallVic[5] == 7 ||  cells[c+','+r+','+z].tile.halfWallVic[13] == 7 || cells[c+','+r+','+z].tile.halfWallVic[6] == 7 || cells[c+','+r+','+z].tile.halfWallVic[12] == 7")
+                                    // img.tile-image(ng-src='/images/c_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'C' || cells[c+','+r+','+z].tile.halfWallVic[10] == 7 ||  cells[c+','+r+','+z].tile.halfWallVic[14] == 7 || cells[c+','+r+','+z].tile.halfWallVic[9] == 7 || cells[c+','+r+','+z].tile.halfWallVic[15] == 7")
+                                    // img.tile-image(ng-src='/images/c_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'C' || cells[c+','+r+','+z].tile.halfWallVic[3] == 7 ||  cells[c+','+r+','+z].tile.halfWallVic[11] == 7 || cells[c+','+r+','+z].tile.halfWallVic[2] == 7 || cells[c+','+r+','+z].tile.halfWallVic[8] == 7")
+                                    // img.tile-image(ng-src='/images/o_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'O' || cells[c+','+r+','+z].tile.halfWallVic[0] == 8 ||  cells[c+','+r+','+z].tile.halfWallVic[4] == 8 || cells[c+','+r+','+z].tile.halfWallVic[1] == 8 || cells[c+','+r+','+z].tile.halfWallVic[7] == 8")
+                                    // img.tile-image(ng-src='/images/o_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'O' || cells[c+','+r+','+z].tile.halfWallVic[5] == 8 ||  cells[c+','+r+','+z].tile.halfWallVic[13] == 8 || cells[c+','+r+','+z].tile.halfWallVic[6] == 8 || cells[c+','+r+','+z].tile.halfWallVic[12] == 8")
+                                    // img.tile-image(ng-src='/images/o_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'O' || cells[c+','+r+','+z].tile.halfWallVic[10] == 8 ||  cells[c+','+r+','+z].tile.halfWallVic[14] == 8 || cells[c+','+r+','+z].tile.halfWallVic[9] == 8 || cells[c+','+r+','+z].tile.halfWallVic[15] == 8")
+                                    // img.tile-image(ng-src='/images/o_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'O' || cells[c+','+r+','+z].tile.halfWallVic[3] == 8 ||  cells[c+','+r+','+z].tile.halfWallVic[11] == 8 || cells[c+','+r+','+z].tile.halfWallVic[2] == 8 || cells[c+','+r+','+z].tile.halfWallVic[8] == 8")
+
                                     img.tile-image(ng-src='/images/obstacleM.png', ng-show="cells[c+','+r+','+z].tile.obstacle")
                                     img.tile-image(ng-src='/images/halfWall_N.png', ng-show="cells[c+','+r+','+z].tile.halfWallIn[0]")
                                     img.tile-image(ng-src='/images/halfWall_E.png', ng-show="cells[c+','+r+','+z].tile.halfWallIn[1]")

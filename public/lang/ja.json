@@ -922,6 +922,9 @@
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
             "placement" : "被災者の配置：",
+            "victimRotation": "被害者の視点：",
+            "victimIsFake": "被害者は偽物です:",
+            "cognitives": "認知",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "exportW": "このマップをErebus用ワールドファイルにエクスポート",
@@ -933,6 +936,7 @@
             "select3": "部屋3のタイルを選ぶ (カーブした壁)",
             "select4": "部屋4のタイルを選ぶ",
             "pick4": "部屋4のタイルの設定",
+            "extWalls": "外壁を作成する",
             "innerTile": "タイルの中の壁",
             "victimRotation": "符号回転",
             "js":{
