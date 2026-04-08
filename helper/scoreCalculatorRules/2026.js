@@ -168,8 +168,8 @@ module.exports.calculateMazeScore = function (run) {
             mapTiles[coord].tile.victims.top == 'Yellow' ||
             mapTiles[coord].tile.victims.top == 'Green'
         )
-          score += mapTiles[coord].isLinear ? 5 : 15;
-        else score += mapTiles[coord].isLinear ? 10 : 30;
+          score += mapTiles[coord].isLinear ? 10 : 30;
+        else score += mapTiles[coord].isLinear ? 5 : 15;
 
         addRescueKitsFor('top', mapTiles[coord].tile.victims.top, tile.scoredItems.rescueKits.top);
       }
@@ -182,13 +182,10 @@ module.exports.calculateMazeScore = function (run) {
             mapTiles[coord].tile.victims.right == 'Yellow' ||
             mapTiles[coord].tile.victims.right == 'Green'
         )
-          score += mapTiles[coord].isLinear ? 5 : 15;
-        else score += mapTiles[coord].isLinear ? 10 : 30;
+          score += mapTiles[coord].isLinear ? 10 : 30;
+        else score += mapTiles[coord].isLinear ? 5 : 15;
 
-        addRescueKitsFor(
-            'right',
-            mapTiles[coord].tile.victims.right,
-            tile.scoredItems.rescueKits.right
+        addRescueKitsFor('right', mapTiles[coord].tile.victims.right, tile.scoredItems.rescueKits.right
         );
       }
     }
@@ -200,13 +197,10 @@ module.exports.calculateMazeScore = function (run) {
             mapTiles[coord].tile.victims.bottom == 'Yellow' ||
             mapTiles[coord].tile.victims.bottom == 'Green'
         )
-          score += mapTiles[coord].isLinear ? 5 : 15;
-        else score += mapTiles[coord].isLinear ? 10 : 30;
+          score += mapTiles[coord].isLinear ? 10 : 30;
+        else score += mapTiles[coord].isLinear ? 5 : 15;
 
-        addRescueKitsFor(
-            'bottom',
-            mapTiles[coord].tile.victims.bottom,
-            tile.scoredItems.rescueKits.bottom
+        addRescueKitsFor('bottom', mapTiles[coord].tile.victims.bottom, tile.scoredItems.rescueKits.bottom
         );
       }
     }
@@ -218,8 +212,8 @@ module.exports.calculateMazeScore = function (run) {
             mapTiles[coord].tile.victims.left == 'Yellow' ||
             mapTiles[coord].tile.victims.left == 'Green'
         )
-          score += mapTiles[coord].isLinear ? 5 : 15;
-        else score += mapTiles[coord].isLinear ? 10 : 30;
+          score += mapTiles[coord].isLinear ? 10 : 30;
+        else score += mapTiles[coord].isLinear ? 5 : 15;
 
         addRescueKitsFor('left', mapTiles[coord].tile.victims.left, tile.scoredItems.rescueKits.left);
       }

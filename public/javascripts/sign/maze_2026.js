@@ -7,33 +7,33 @@ let victimTypes = [];
 const victimConstantWL = {
     "H": {
         "maxKitNum": 2,
-        "linearPoint": 10,
-        "floatingPoint": 30
+        "linearPoint": 5,
+        "floatingPoint": 15
     },
     "S": {
         "maxKitNum": 1,
-        "linearPoint": 10,
-        "floatingPoint": 30
+        "linearPoint": 5,
+        "floatingPoint": 15
     },
     "U": {
         "maxKitNum": 0,
-        "linearPoint": 10,
-        "floatingPoint": 30
+        "linearPoint": 5,
+        "floatingPoint": 15
     },
     "Red": {
         "maxKitNum": 2,
-        "linearPoint": 5,
-        "floatingPoint": 15
+        "linearPoint": 10,
+        "floatingPoint": 30
     },
     "Yellow": {
         "maxKitNum": 1,
-        "linearPoint": 5,
-        "floatingPoint": 15
+        "linearPoint": 10,
+        "floatingPoint": 30
     },
     "Green": {
         "maxKitNum": 0,
-        "linearPoint": 5,
-        "floatingPoint": 15
+        "linearPoint": 10,
+        "floatingPoint": 30
     }
 };
 
