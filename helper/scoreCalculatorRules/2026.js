@@ -136,9 +136,9 @@ module.exports.calculateMazeScore = function (run) {
     }
 
     const maxKits = {
-      H: 2,
-      S: 1,
-      U: 0,
+      PHI: 2,
+      PSI: 1,
+      OMEGA: 0,
       Red: 2,
       Yellow: 1,
       Green: 0,
@@ -161,59 +161,44 @@ module.exports.calculateMazeScore = function (run) {
     }
 
     if (mapTiles[coord].tile.victims.top != 'None') {
+    if (mapTiles[coord].tile.victims.top !== 'None') {
       if (tile.scoredItems.victims.top) {
         addVictimCount(victims, mapTiles[coord].tile.victims.top);
-        if (
-            mapTiles[coord].tile.victims.top == 'Red' ||
-            mapTiles[coord].tile.victims.top == 'Yellow' ||
-            mapTiles[coord].tile.victims.top == 'Green'
-        )
-          score += mapTiles[coord].isLinear ? 10 : 30;
-        else score += mapTiles[coord].isLinear ? 5 : 15;
+        if (isVictimOfTypeLetter(mapTiles[coord].tile.victims.top))
+          score += mapTiles[coord].isLinear ? 5 : 15;
+        else score += mapTiles[coord].isLinear ? 10 : 30;
 
         addRescueKitsFor('top', mapTiles[coord].tile.victims.top, tile.scoredItems.rescueKits.top);
       }
     }
-    if (mapTiles[coord].tile.victims.right != 'None') {
+    if (mapTiles[coord].tile.victims.right !== 'None') {
       if (tile.scoredItems.victims.right) {
         addVictimCount(victims, mapTiles[coord].tile.victims.right);
-        if (
-            mapTiles[coord].tile.victims.right == 'Red' ||
-            mapTiles[coord].tile.victims.right == 'Yellow' ||
-            mapTiles[coord].tile.victims.right == 'Green'
-        )
-          score += mapTiles[coord].isLinear ? 10 : 30;
-        else score += mapTiles[coord].isLinear ? 5 : 15;
+        if (isVictimOfTypeLetter(mapTiles[coord].tile.victims.right))
+          score += mapTiles[coord].isLinear ? 5 : 15;
+        else score += mapTiles[coord].isLinear ? 10 : 30;
 
         addRescueKitsFor('right', mapTiles[coord].tile.victims.right, tile.scoredItems.rescueKits.right
         );
       }
     }
-    if (mapTiles[coord].tile.victims.bottom != 'None') {
+    if (mapTiles[coord].tile.victims.bottom !== 'None') {
       if (tile.scoredItems.victims.bottom) {
         addVictimCount(victims, mapTiles[coord].tile.victims.bottom);
-        if (
-            mapTiles[coord].tile.victims.bottom == 'Red' ||
-            mapTiles[coord].tile.victims.bottom == 'Yellow' ||
-            mapTiles[coord].tile.victims.bottom == 'Green'
-        )
-          score += mapTiles[coord].isLinear ? 10 : 30;
-        else score += mapTiles[coord].isLinear ? 5 : 15;
+        if (isVictimOfTypeLetter(mapTiles[coord].tile.victims.bottom))
+          score += mapTiles[coord].isLinear ? 5 : 15;
+        else score += mapTiles[coord].isLinear ? 10 : 30;
 
         addRescueKitsFor('bottom', mapTiles[coord].tile.victims.bottom, tile.scoredItems.rescueKits.bottom
         );
       }
     }
-    if (mapTiles[coord].tile.victims.left != 'None') {
+    if (mapTiles[coord].tile.victims.left !== 'None') {
       if (tile.scoredItems.victims.left) {
         addVictimCount(victims, mapTiles[coord].tile.victims.left);
-        if (
-            mapTiles[coord].tile.victims.left == 'Red' ||
-            mapTiles[coord].tile.victims.left == 'Yellow' ||
-            mapTiles[coord].tile.victims.left == 'Green'
-        )
-          score += mapTiles[coord].isLinear ? 10 : 30;
-        else score += mapTiles[coord].isLinear ? 5 : 15;
+        if (isVictimOfTypeLetter(mapTiles[coord].tile.victims.left))
+          score += mapTiles[coord].isLinear ? 5 : 15;
+        else score += mapTiles[coord].isLinear ? 10 : 30;
 
         addRescueKitsFor('left', mapTiles[coord].tile.victims.left, tile.scoredItems.rescueKits.left);
       }
@@ -247,6 +232,16 @@ module.exports.calculateMazeScore = function (run) {
   };
 };
 
+/**
+ * Returns whether the given victimType is a letter victim (in contrast to cognitive victims)
+ *
+ * @param {string} victimType
+ */
+function isVictimOfTypeLetter(victimType)
+{
+  return ["PHI", "PSI", "OMEGA"].includes(victimType);
+}
+
 function addVictimCount(obj, type) {
   if (obj[type] == null) obj[type] = 0;
   obj[type] ++;
@@ -266,4 +261,5 @@ function convert(obj) {
       'count': o[1]
     }
   })
+}
 }

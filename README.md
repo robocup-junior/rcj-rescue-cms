@@ -86,9 +86,11 @@ For detail, please check [helper files](https://github.com/robocup-junior/rcj-cm
 #### Using Docker Compose (self-host)
 This repository can also be run using Docker Compose (app + MongoDB + Redis). This is suitable for local testing and self-hosting.
 
-1) Create/update `process.env` (SMTP / mail settings, hostnames, etc.)
+1) Create/update `process.env` (SMTP / mail settings, hostnames, etc.) if needed.
 2) Start the stack:
    `docker compose up -d --build`
+3) Now you can open the app under `localhost:3000`
+4) Everytime you modify something, you'll need to rebuild the docker container as in step #2.
 
 **Note about configuration changes (`process.env`):**  
 When using `env_file:` in `docker-compose.yml`, environment variables are read when the container is created.  
