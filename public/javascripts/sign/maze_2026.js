@@ -7,33 +7,33 @@ let victimTypes = [];
 const victimConstantWL = {
     "PHI": {
         "maxKitNum": 2,
-        "linearPoint": 10,
-        "floatingPoint": 30
+        "linearPoint": 5,
+        "floatingPoint": 15
     },
     "PSI": {
         "maxKitNum": 1,
-        "linearPoint": 10,
-        "floatingPoint": 30
+        "linearPoint": 5,
+        "floatingPoint": 15
     },
     "OMEGA": {
         "maxKitNum": 0,
-        "linearPoint": 10,
-        "floatingPoint": 30
+        "linearPoint": 5,
+        "floatingPoint": 15
     },
     "Red": {
         "maxKitNum": 2,
-        "linearPoint": 5,
-        "floatingPoint": 15
+        "linearPoint": 10,
+        "floatingPoint": 30
     },
     "Yellow": {
         "maxKitNum": 1,
-        "linearPoint": 5,
-        "floatingPoint": 15
+        "linearPoint": 10,
+        "floatingPoint": 30
     },
     "Green": {
         "maxKitNum": 0,
-        "linearPoint": 5,
-        "floatingPoint": 15
+        "linearPoint": 10,
+        "floatingPoint": 30
     }
 };
 
@@ -442,21 +442,48 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
         let wallPointType = cell.isLinear ? 'linearPoint' : 'floatingPoint';
 
+        function kitScoreForVictim(droppedKits, maxKitNum) {
+            const valid = Math.max(0, Math.min(droppedKits || 0, maxKitNum || 0, 2));
+            if (valid === 1) return 10;
+            if (valid === 2) return 30;
+            return 0;
+        }
+
         if (cell.tile.victims.top in victimConstant) {
             current += victimConstant[cell.tile.victims.top][wallPointType] * tile.scoredItems.victims.top;
-            if (tile.scoredItems.victims.top) current += 10 * Math.min(tile.scoredItems.rescueKits.top, victimConstant[cell.tile.victims.top].maxKitNum);
+            if (tile.scoredItems.victims.top) {
+                current += kitScoreForVictim(
+                    tile.scoredItems.rescueKits.top,
+                    victimConstant[cell.tile.victims.top].maxKitNum
+                );
+            }
         }
         if (cell.tile.victims.right in victimConstant) {
             current += victimConstant[cell.tile.victims.right][wallPointType] * tile.scoredItems.victims.right;
-            if (tile.scoredItems.victims.right) current += 10 * Math.min(tile.scoredItems.rescueKits.right, victimConstant[cell.tile.victims.right].maxKitNum);
+            if (tile.scoredItems.victims.right) {
+                current += kitScoreForVictim(
+                    tile.scoredItems.rescueKits.right,
+                    victimConstant[cell.tile.victims.right].maxKitNum
+                );
+            }
         }
         if (cell.tile.victims.left in victimConstant) {
             current += victimConstant[cell.tile.victims.left][wallPointType] * tile.scoredItems.victims.left;
-            if (tile.scoredItems.victims.left)  current += 10 * Math.min(tile.scoredItems.rescueKits.left, victimConstant[cell.tile.victims.left].maxKitNum);
+            if (tile.scoredItems.victims.left) {
+                current += kitScoreForVictim(
+                    tile.scoredItems.rescueKits.left,
+                    victimConstant[cell.tile.victims.left].maxKitNum
+                );
+            }
         }
         if (cell.tile.victims.bottom in victimConstant) {
             current += victimConstant[cell.tile.victims.bottom][wallPointType] * tile.scoredItems.victims.bottom;
-            if (tile.scoredItems.victims.bottom)  current += 10 * Math.min(tile.scoredItems.rescueKits.bottom, victimConstant[cell.tile.victims.bottom].maxKitNum);
+            if (tile.scoredItems.victims.bottom) {
+                current += kitScoreForVictim(
+                    tile.scoredItems.rescueKits.bottom,
+                    victimConstant[cell.tile.victims.bottom].maxKitNum
+                );
+            }
         }
 
         return current;

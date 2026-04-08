@@ -43,15 +43,15 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     };
 
     $scope.itemList = {
-        "H":{
+        "PHI":{
             "linear":[],
             "floating":[]
         },
-        "S":{
+        "PSI":{
             "linear":[],
             "floating":[]
         },
-        "U":{
+        "OMEGA":{
             "linear":[],
             "floating":[]
         },

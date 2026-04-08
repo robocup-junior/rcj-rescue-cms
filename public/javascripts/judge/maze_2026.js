@@ -1,6 +1,46 @@
 // register the directive with your app module
 var app = angular.module('ddApp', ['ngTouch','ngAnimate', 'ui.bootstrap', 'pascalprecht.translate', 'ngCookies']);
-let maxKit={};
+let maxKit={
+    'PHI': 2,
+    'PSI': 1,
+    'OMEGA': 0,
+    'Red': 2,
+    'Yellow': 1,
+    'Green': 0
+};
+
+const victimConstantWL = {
+    "PHI": {
+        "maxKitNum": 2,
+        "linearPoint": 5,
+        "floatingPoint": 15
+    },
+    "PSI": {
+        "maxKitNum": 1,
+        "linearPoint": 5,
+        "floatingPoint": 15
+    },
+    "OMEGA": {
+        "maxKitNum": 0,
+        "linearPoint": 5,
+        "floatingPoint": 15
+    },
+    "Red": {
+        "maxKitNum": 2,
+        "linearPoint": 10,
+        "floatingPoint": 30
+    },
+    "Yellow": {
+        "maxKitNum": 1,
+        "linearPoint": 10,
+        "floatingPoint": 30
+    },
+    "Green": {
+        "maxKitNum": 0,
+        "linearPoint": 10,
+        "floatingPoint": 30
+    }
+};
 
 // function referenced by the drop target
 app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$http','$translate', '$cookies',function ($scope, $uibModal, $log, $timeout, $http, $translate, $cookies) {
@@ -241,14 +281,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             $scope.duration = response.data.duration || 480;
             $scope.leagueType = response.data.leagueType;
             
-            maxKit={
-                'H': 2,
-                'S': 1,
-                'U': 0,
-                'Red': 2,
-                'Yellow': 1,
-                'Green': 0
-            };
+            victimConstant = victimConstantWL;
 
             if(response.data.parent){
                 if(!$scope.dice){
@@ -494,29 +527,30 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 current++;
             }
         }
+
         if(cell.tile.victims.top != "None"){
             possible++;
             current += tile.scoredItems.victims.top;
-            possible += maxKit[cell.tile.victims.top];
-            if (tile.scoredItems.victims.top) current += Math.min(tile.scoredItems.rescueKits.top,maxKit[cell.tile.victims.top]);
+            possible += (maxKit[cell.tile.victims.top] || 0);
+            if (tile.scoredItems.victims.top) current += Math.min(tile.scoredItems.rescueKits.top, (maxKit[cell.tile.victims.top] || 0));
         }
         if(cell.tile.victims.left != "None"){
             possible++;
             current += tile.scoredItems.victims.left;
-            possible += maxKit[cell.tile.victims.left];
-            if (tile.scoredItems.victims.left) current += Math.min(tile.scoredItems.rescueKits.left,maxKit[cell.tile.victims.left]);
+            possible += (maxKit[cell.tile.victims.left] || 0);
+            if (tile.scoredItems.victims.left) current += Math.min(tile.scoredItems.rescueKits.left, (maxKit[cell.tile.victims.left] || 0));
         }
         if(cell.tile.victims.right != "None"){
             possible++;
             current += tile.scoredItems.victims.right;
-            possible += maxKit[cell.tile.victims.right];
-            if (tile.scoredItems.victims.right) current += Math.min(tile.scoredItems.rescueKits.right,maxKit[cell.tile.victims.right]);
+            possible += (maxKit[cell.tile.victims.right] || 0);
+            if (tile.scoredItems.victims.right) current += Math.min(tile.scoredItems.rescueKits.right, (maxKit[cell.tile.victims.right] || 0));
         }
         if(cell.tile.victims.bottom != "None"){
             possible++;
             current += tile.scoredItems.victims.bottom;
-            possible += maxKit[cell.tile.victims.bottom];
-            if (tile.scoredItems.victims.bottom) current += Math.min(tile.scoredItems.rescueKits.bottom,maxKit[cell.tile.victims.bottom]);
+            possible += (maxKit[cell.tile.victims.bottom] || 0);
+            if (tile.scoredItems.victims.bottom) current += Math.min(tile.scoredItems.rescueKits.bottom, (maxKit[cell.tile.victims.bottom] || 0));
         }
 
         if (tile.processing)
@@ -530,6 +564,112 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         else
             return "";
     }
+
+    $scope.tilePoint = function (x, y, z, isTile) {
+        // If this is a non-existent tile
+        var cell = $scope.cells[x + ',' + y + ',' + z];
+
+        if (!cell)
+            return 0;
+        if (!isTile)
+            return 0;
+
+        if (!$scope.tiles[x + ',' + y + ',' + z]) {
+            $scope.tiles[x + ',' + y + ',' + z] = {
+                scoredItems: {
+                    speedbump: false,
+                    checkpoint: false,
+                    ramp: false,
+                    victims: {
+                        top: false,
+                        right: false,
+                        left: false,
+                        bottom: false
+                    },
+                    rescueKits: {
+                        top: 0,
+                        right: 0,
+                        bottom: 0,
+                        left: 0
+                    }
+                }
+            };
+        }
+        var tile = $scope.tiles[x + ',' + y + ',' + z];
+
+        // Current "score" for this tile
+        var current = 0;
+
+
+        if (cell.tile.speedbump) {
+            if (tile.scoredItems.speedbump) {
+                current += 5;
+            }
+        }
+        if (cell.tile.checkpoint) {
+            if (tile.scoredItems.checkpoint) {
+                current += 10;
+            }
+        }
+        if (cell.tile.ramp) {
+            if (tile.scoredItems.ramp) {
+                current += 10;
+            }
+        }
+        if (cell.tile.steps) {
+            if (tile.scoredItems.steps) {
+                current += 10;
+            }
+        }
+
+        let wallPointType = cell.isLinear ? 'linearPoint' : 'floatingPoint';
+
+        function kitScoreForVictim(droppedKits, maxKitNum) {
+            const valid = Math.max(0, Math.min(droppedKits || 0, maxKitNum || 0, 2));
+            if (valid === 1) return 10;
+            if (valid === 2) return 30;
+            return 0;
+        }
+
+        if (cell.tile.victims.top in victimConstantWL) {
+            current += victimConstantWL[cell.tile.victims.top][wallPointType] * tile.scoredItems.victims.top;
+            if (tile.scoredItems.victims.top) {
+                current += kitScoreForVictim(
+                    tile.scoredItems.rescueKits.top,
+                    victimConstantWL[cell.tile.victims.top].maxKitNum
+                );
+            }
+        }
+        if (cell.tile.victims.right in victimConstantWL) {
+            current += victimConstantWL[cell.tile.victims.right][wallPointType] * tile.scoredItems.victims.right;
+            if (tile.scoredItems.victims.right) {
+                current += kitScoreForVictim(
+                    tile.scoredItems.rescueKits.right,
+                    victimConstantWL[cell.tile.victims.right].maxKitNum
+                );
+            }
+        }
+        if (cell.tile.victims.left in victimConstantWL) {
+            current += victimConstantWL[cell.tile.victims.left][wallPointType] * tile.scoredItems.victims.left;
+            if (tile.scoredItems.victims.left) {
+                current += kitScoreForVictim(
+                    tile.scoredItems.rescueKits.left,
+                    victimConstantWL[cell.tile.victims.left].maxKitNum
+                );
+            }
+        }
+        if (cell.tile.victims.bottom in victimConstantWL) {
+            current += victimConstantWL[cell.tile.victims.bottom][wallPointType] * tile.scoredItems.victims.bottom;
+            if (tile.scoredItems.victims.bottom) {
+                current += kitScoreForVictim(
+                    tile.scoredItems.rescueKits.bottom,
+                    victimConstantWL[cell.tile.victims.bottom].maxKitNum
+                );
+            }
+        }
+
+        return current;
+    };
 
 
     $scope.cellClick = function (x, y, z, isWall, isTile) {
