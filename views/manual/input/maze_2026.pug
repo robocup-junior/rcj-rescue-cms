@@ -126,6 +126,15 @@ html(ng-app="ddApp")
                         td
                           button.btn(type='button',ng-click="toggleScored(item)",ng-class="{'btn-success': clearStatus(item),'btn-danger':!clearStatus(item)}",ng-if="!item.afterLoP",style="width:100%;height:100%;")
                             i.far(ng-class="{'fa-check-square': clearStatus(item), 'fa-times-circle': !clearStatus(item)}")
+                  .col-md-2(ng-repeat="item in itemList.blue")
+                    table(style="background-color:#DFF7FD;border:1px solid #444;width:100%;")
+                      tr(style="text-align:center;height:50px;")
+                        td(style="width:43px;")
+                          div(style="width:40px;height:40px;background-color:blue;margin-left:auto;margin-right:auto;border:1px solid #444;")
+                        td(style="width:35px;text-align:center;")
+                          span(style="font-size:30px") {{item.name}}
+                        td
+                          input.form-control(type='number', ng-model="tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue", min='0', style="width:100%;height:100%;font-size:25px;text-align:center;")
 
 
         hr

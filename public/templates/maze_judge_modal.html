@@ -41,6 +41,29 @@
             </div>
         </div>
         <hr ng-if="cell.tile.checkpoint || cell.tile.speedbump || cell.tile.steps || cell.tile.ramp">
+        <div class="row" ng-show="cell.tile.blue" style="margin-bottom: 20px;">
+            <div class="col-12">
+                <strong>{{"maze.judge.m_blue_tile" | translate}}</strong>
+                <br>
+                <p>{{"maze.judge.m_blue_visits" | translate}}</p>
+                <div class="input-group mb-3" style="width:100%;height:40px;">
+                    <div class="input-group-prepend">
+                        <button class="btn btn-danger" type="button" ng-click="decrementBlue()">
+                            <i class="fas fa-minus" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                    <div style="background-color: #F2F2F2; width:calc(100% - 80px); text-align: center;">
+                        <span class="count">{{tile.scoredItems.blue}}</span>
+                    </div>
+                    <div class="input-group-append">
+                        <button class="btn btn-success" type="button" ng-click="incrementBlue()">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr ng-if="cell.tile.blue">
         <div ng-show="hasVictims" ng-if="leagueType=='standard'">
             <i class="far fa-2x fa-lightbulb" aria-hidden="true" style="color:#f8b500;">&nbsp;</i>{{"maze.judge.m_flash" | translate}}
             <div ng-repeat="(direction, type) in cell.tile.victims track by $index" ng-show="type != 'None'" style="margin-left:50px;" >

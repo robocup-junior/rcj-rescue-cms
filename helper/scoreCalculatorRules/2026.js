@@ -100,6 +100,8 @@ module.exports.calculateLineScore = function (run) {
  * @returns {number}
  */
 module.exports.calculateMazeScore = function (run) {
+  const MAX_BLUE_BONUS = 40;
+  const BLUE_VISIT_PENALTY = 10;
   const MAX_RESCUE_KITS = 8;
 
   let score = 0;
@@ -144,6 +146,18 @@ module.exports.calculateMazeScore = function (run) {
       Green: 0,
     };
 
+
+    // Checking blue tiles visits
+    if (mapTiles[coord].tile.blue) {
+      const blueVisits = tile.scoredItems.blue || 0;
+
+      if (blueVisits > 0) {
+        score +=  Math.max(0, MAX_BLUE_BONUS - blueVisits * BLUE_VISIT_PENALTY);
+      }
+    }
+
+
+
     // helper: count valid kits for a single victim (ONLY called when victim is scored)
     function addRescueKitsFor(side, victimType, droppedKits) {
       if (rescueKits >= MAX_RESCUE_KITS) return;
@@ -160,7 +174,7 @@ module.exports.calculateMazeScore = function (run) {
       rescueKits += valid;
     }
 
-    if (mapTiles[coord].tile.victims.top != 'None') {
+
     if (mapTiles[coord].tile.victims.top !== 'None') {
       if (tile.scoredItems.victims.top) {
         addVictimCount(victims, mapTiles[coord].tile.victims.top);
@@ -261,5 +275,4 @@ function convert(obj) {
       'count': o[1]
     }
   })
-}
 }

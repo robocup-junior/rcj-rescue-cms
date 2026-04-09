@@ -71,6 +71,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         "ramp":[],
         "speedbump":[],
         "steps":[],
+        "blue":[],
     };
 
     var db_cells;
@@ -246,6 +247,17 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                             }
                             $scope.itemList.steps.push(tmp);
                         }
+
+                        if(tile.blue){
+                            let tmp = {
+                                x: i,
+                                y: j,
+                                z: k,
+                                name: $scope.itemList.blue.length+1,
+                                type: "blue"
+                            }
+                            $scope.itemList.blue.push(tmp);
+                        }
                     }
                 }
             }
@@ -277,6 +289,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                     checkpoint: false,
                     ramp: false,
                     steps:  false,
+                    blue: 0,
                     victims: {
                         top: false,
                         right: false,
@@ -295,6 +308,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         }
         if(item.direction){//Victims
             return $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.victims[item.direction];
+        }else if(item.type == 'blue'){
+            return true;
         }else{
             return $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems[item.type];
         }
@@ -308,6 +323,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                     checkpoint: false,
                     ramp: false,
                     steps:  false,
+                    blue: 0,
                     victims: {
                         top: false,
                         right: false,
@@ -332,6 +348,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         playSound(sClick);
         if(item.direction) {//Victims
             $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.victims[item.direction] = !$scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.victims[item.direction];
+        }else if(item.type == 'blue'){
+            // No action for blue here, handled by input field directly in pug
         }else{
             $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems[item.type] = !$scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems[item.type];
         }

@@ -273,6 +273,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                     checkpoint: false,
                     ramp: false,
                     steps: false,
+                    blue: 0,
                     victims: {
                         top: false,
                         right: false,
@@ -346,6 +347,13 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             if (tile.scoredItems.victims.bottom) current += Math.min(tile.scoredItems.rescueKits.bottom, victimConstant[cell.tile.victims.bottom].maxKitNum);
         }
 
+        if (cell.tile.blue) {
+            possible++;
+            if (tile.scoredItems.blue > 0) {
+                current++;
+            }
+        }
+
         if (tile.processing)
             return "processing";
         else if (current > 0 && current == possible)
@@ -398,6 +406,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                     speedbump: false,
                     checkpoint: false,
                     ramp: false,
+                    blue: 0,
                     victims: {
                         top: false,
                         right: false,
@@ -485,7 +494,12 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 );
             }
         }
+        const MAX_BLUE_BONUS = 40;
+        const BLUE_VISIT_PENALTY = 10;
 
+        if (cell.tile.blue && tile.scoredItems.blue > 0) {
+            current += Math.max(0, MAX_BLUE_BONUS - tile.scoredItems.blue * BLUE_VISIT_PENALTY);
+        }
         return current;
     };
 

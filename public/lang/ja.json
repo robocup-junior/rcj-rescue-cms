@@ -512,6 +512,8 @@
             "m_bump": "@:maze.view.m_bump",
             "m_ramp": "@:maze.view.m_ramp",
             "m_steps": "@:maze.view.m_steps",
+            "m_blue_tile": "青いタイル",
+            "m_blue_visits": "この青いタイルへの訪問回数：",
             "m_flash": "@:maze.view.m_flash",
             "m_identified": "@:maze.view.m_identified",
             "m_kit": "@:maze.view.m_kit",
