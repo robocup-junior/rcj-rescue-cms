@@ -239,7 +239,16 @@ h2 {{'maze.sign.reliability' | translate}}
         | : {{distKits}}
         br
         br
-        |                     {{distKits * 10}} {{'common.point' | translate}}
+        |                     {{rescueDeploymentPoints()}} {{'common.point' | translate}}
+    .col-md-1
+      h1(style='line-height:140px;text-align:center;') +
+    .col-md-2
+      p(style='text-align:center;height:40px;') {{'maze.sign.blue' | translate}}
+      i.fas.fa-trailer.fa-2x(aria-hidden='true')
+        | : {{blueTilesVisited()}}
+        br
+        br
+        |                     {{blueTilesVisited() * 10}} {{'common.point' | translate}}
     .col-md-1
       h1(style='line-height:140px;text-align:center;') -
     .col-md-2
@@ -251,7 +260,7 @@ h2 {{'maze.sign.reliability' | translate}}
         |                     {{reliabilityLoPs()}} {{'common.point' | translate}}
     .col-md-1
       h1(style='line-height:140px;text-align:center;') =
-    .col-md-3
+    .col-md-2
       h1(style='line-height:140px;text-align:center;') {{reliability()}} {{'common.point' | translate}}
 .alert.alert-info(style='margin-bottom:30px;text-align:center;', role='alert', ng-if="leagueType=='entry'")
   .row
@@ -278,7 +287,7 @@ h2 {{'maze.sign.reliability' | translate}}
 h2 {{'maze.sign.calc' | translate}}
 .alert.alert-warning(style='margin-bottom:80px;text-align:center;', role='alert')
   .row
-    .col-md-2
+    .col-md-3
       p(style='height:30px;') {{'maze.sign.item' | translate}}
       h1
         | {{allItemScore()}} {{'common.point' | translate}}
@@ -297,6 +306,6 @@ h2 {{'maze.sign.calc' | translate}}
     .col-md-1
       p(style='height:30px;')
       h1 -
-    .col-md-3
+    .col-md-2
       p(style='height:30px;') {{'maze.sign.misidentification' | translate}}
       h1 {{MisIdent*5}} {{'common.point' | translate}}

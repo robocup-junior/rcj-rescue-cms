@@ -557,7 +557,8 @@
             "misidentification": "@:maze.view.misidentification",
             "write": "@:line.sign.write",
             "clear": "@:line.sign.clear",
-            "comp": "@:line.sign.comp"
+            "comp": "@:line.sign.comp",
+            "blue": "Successful blue tile visits"
         }
     },
     "admin": {
