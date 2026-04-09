@@ -209,6 +209,31 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         return count;
     }
 
+    $scope.stairsNavigation = function () {
+        let count = 0;
+        for (const key in $scope.tiles) {
+            if ($scope.tiles[key].scoredItems.steps) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    $scope.rampNavigation = function () {
+        let count = 0;
+        for (const key in $scope.tiles) {
+            if ($scope.tiles[key].scoredItems.ramp) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    $scope.exitBonusPoints = function () {
+        if (!$scope.exitBonus) return 0;
+        return $scope.foundVictims * 10 + $scope.blueTilesVisited() * 10 + $scope.stairsNavigation() * 5 + $scope.rampNavigation() * 5;
+    }
+
     $scope.rescueDeploymentPoints = function () {
         return Math.min($scope.distKits, 8) * 10;
     }
