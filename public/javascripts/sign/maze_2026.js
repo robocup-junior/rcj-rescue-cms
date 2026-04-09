@@ -199,19 +199,35 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             });
     }
 
+    $scope.blueTilesVisited = function () {
+        let count = 0;
+        for (const key in $scope.tiles) {
+            if ($scope.tiles[key].scoredItems.blue > 0) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    $scope.rescueDeploymentPoints = function () {
+        return Math.min($scope.distKits, 8) * 10;
+    }
+
     $scope.reliability = function () {
+        const bonus = $scope.foundVictims * 10 + Math.min($scope.distKits, 8) * 10 + $scope.blueTilesVisited() * 10;
         if ($scope.leagueType == "entry") {
-            return Math.max(($scope.foundVictims * 10) - ($scope.LoPs * 5), 0);
+            return Math.max(bonus - ($scope.LoPs * 5), 0);
         } else {
-            return Math.max(($scope.foundVictims + $scope.distKits - $scope.LoPs) * 10, 0);
+            return Math.max(bonus - ($scope.LoPs * 15), 0);
         }
     }
 
     $scope.reliabilityLoPs = function () {
+        const bonus = $scope.foundVictims * 10 + Math.min($scope.distKits, 8) * 10 + $scope.blueTilesVisited() * 10;
         if ($scope.leagueType == "entry") {
-            return Math.min($scope.foundVictims * 10, $scope.LoPs * 5);
+            return Math.min(bonus, $scope.LoPs * 5);
         } else {
-            return Math.min(($scope.foundVictims + $scope.distKits) * 10, $scope.LoPs * 10);
+            return Math.min(bonus, $scope.LoPs * 15);
         }
     }
 
