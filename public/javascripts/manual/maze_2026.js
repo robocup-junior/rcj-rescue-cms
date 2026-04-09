@@ -99,6 +99,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             $scope.tiles[response.data.tiles[i].x + ',' +
                 response.data.tiles[i].y + ',' +
                 response.data.tiles[i].z] = response.data.tiles[i];
+            if (response.data.tiles[i].scoredItems.blue > 0) {
+                $scope.tiles[response.data.tiles[i].x + ',' +
+                response.data.tiles[i].y + ',' +
+                response.data.tiles[i].z].scoredItems.blueActive = true;
+            }
         }
 
         let mapId = response.data.map;
@@ -309,7 +314,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         if(item.direction){//Victims
             return $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.victims[item.direction];
         }else if(item.type == 'blue'){
-            return true;
+            return $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue > 0 || $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blueActive;
         }else{
             return $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems[item.type];
         }
@@ -349,7 +354,14 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         if(item.direction) {//Victims
             $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.victims[item.direction] = !$scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.victims[item.direction];
         }else if(item.type == 'blue'){
-            // No action for blue here, handled by input field directly in pug
+            $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blueActive = !$scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blueActive;
+            if (!$scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blueActive) {
+                $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue = 0;
+            } else {
+                if ($scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue == 0) {
+                    $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue = 1;
+                }
+            }
         }else{
             $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems[item.type] = !$scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems[item.type];
         }

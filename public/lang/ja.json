@@ -556,7 +556,10 @@
             "write": "@:line.sign.write",
             "clear": "@:line.sign.clear",
             "comp": "@:line.sign.comp",
-            "blue": "訪問した青いタイル"
+            "blue": "訪問した青いタイル",
+            "exit": "脱出ボーナス",
+            "stairs": "階段の走破",
+            "ramp": "スロープの走破"
         }
     },
     "admin": {

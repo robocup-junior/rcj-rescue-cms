@@ -223,67 +223,108 @@
 hr
 h2 {{'maze.sign.reliability' | translate}}
 .alert.alert-info(style='margin-bottom:30px;text-align:center;', role='alert', ng-if="leagueType=='standard'")
-  .row
+  .row(style='display: flex; align-items: center;')
     .col-md-2
-      p(style='text-align:center;height:40px;') {{'maze.sign.rescue' | translate}}
+      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.rescue' | translate}}
       i.fas.fa-child.fa-2x(aria-hidden='true')
         | : {{foundVictims}}
-        br
-        br
-        |                     {{foundVictims * 10}} {{'common.point' | translate}}
-    .col-md-1
-      h1(style='line-height:140px;text-align:center;') +
+      br
+      br
+      |                     {{foundVictims * 10}} {{'common.point' | translate}}
+    .col-md-half(style='width: 4%;')
+      h1(style='text-align:center; margin:0;') +
     .col-md-2
-      p(style='text-align:center;height:40px;') {{'maze.sign.kits' | translate}}
+      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.kits' | translate}}
       i.fas.fa-medkit.fa-2x(aria-hidden='true')
         | : {{distKits}}
-        br
-        br
-        |                     {{rescueDeploymentPoints()}} {{'common.point' | translate}}
-    .col-md-1
-      h1(style='line-height:140px;text-align:center;') +
+      br
+      br
+      |                     {{rescueDeploymentPoints()}} {{'common.point' | translate}}
+    .col-md-half(style='width: 4%;')
+      h1(style='text-align:center; margin:0;') +
     .col-md-2
-      p(style='text-align:center;height:40px;') {{'maze.sign.blue' | translate}}
+      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.blue' | translate}}
       i.fas.fa-trailer.fa-2x(aria-hidden='true')
         | : {{blueTilesVisited()}}
-        br
-        br
-        |                     {{blueTilesVisited() * 10}} {{'common.point' | translate}}
-    .col-md-1
-      h1(style='line-height:140px;text-align:center;') -
+      br
+      br
+      |                     {{blueTilesVisited() * 10}} {{'common.point' | translate}}
+    .col-md-half(style='width: 4%;')
+      h1(style='text-align:center; margin:0;') -
     .col-md-2
-      p(style='text-align:center;height:40px;') {{'maze.sign.total_lops' | translate}}
+      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.total_lops' | translate}}
       i.fas.fa-step-forward.fa-2x(aria-hidden='true')
         | : {{LoPs}}
-        br
-        br
-        |                     {{reliabilityLoPs()}} {{'common.point' | translate}}
-    .col-md-1
-      h1(style='line-height:140px;text-align:center;') =
+      br
+      br
+      |                     {{reliabilityLoPs()}} {{'common.point' | translate}}
+    .col-md-half(style='width: 4%;')
+      h1(style='text-align:center; margin:0;') =
     .col-md-2
-      h1(style='line-height:140px;text-align:center;') {{reliability()}} {{'common.point' | translate}}
+      h1(style='text-align:center; margin:0;') {{reliability()}} {{'common.point' | translate}}
 .alert.alert-info(style='margin-bottom:30px;text-align:center;', role='alert', ng-if="leagueType=='entry'")
-  .row
+  .row(style='display: flex; align-items: center;')
     .col-md-3
-      p(style='text-align:center;height:40px;') {{'maze.sign.rescue' | translate}}
+      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.rescue' | translate}}
       i.fas.fa-child.fa-2x(aria-hidden='true')
         | : {{foundVictims}}
-        br
-        br
-        |                     {{foundVictims * 10}} {{'common.point' | translate}}
+      br
+      br
+      |                     {{foundVictims * 10}} {{'common.point' | translate}}
     .col-md-1
-      h1(style='line-height:140px;text-align:center;') -
-    .col-md-3
-      p(style='text-align:center;height:40px;') {{'maze.sign.total_lops' | translate}}
+      h1(style='text-align:center; margin:0;') -
+    .col-md-4
+      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.total_lops' | translate}}
       i.fas.fa-step-forward.fa-2x(aria-hidden='true')
         | : {{LoPs}}
-        br
-        br
-        |                     {{reliabilityLoPs()}} {{'common.point' | translate}}
+      br
+      br
+      |                     {{reliabilityLoPs()}} {{'common.point' | translate}}
     .col-md-1
-      h1(style='line-height:140px;text-align:center;') =
+      h1(style='text-align:center; margin:0;') =
     .col-md-3
-      h1(style='line-height:140px;text-align:center;') {{reliability()}} {{'common.point' | translate}}
+      h1(style='text-align:center; margin:0;') {{reliability()}} {{'common.point' | translate}}
+h2(ng-if="exitBonus") {{'maze.sign.exit' | translate}}
+.alert.alert-success(style='margin-bottom:30px;text-align:center; background-color: #e2d9f3; border-color: #d1c4e9; color: #4527a0;', role='alert', ng-if="exitBonus")
+  .row(style='display: flex; align-items: center;')
+    .col-md-2
+      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.rescue' | translate}}
+      i.fas.fa-child.fa-2x(aria-hidden='true')
+        | : {{foundVictims}}
+      br
+      br
+      |                     {{foundVictims * 10}} {{'common.point' | translate}}
+    .col-md-half(style='width: 4%;')
+      h1(style='text-align:center; margin:0;') +
+    .col-md-2
+      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.blue' | translate}}
+      i.fas.fa-trailer.fa-2x(aria-hidden='true')
+        | : {{blueTilesVisited()}}
+      br
+      br
+      |                     {{blueTilesVisited() * 10}} {{'common.point' | translate}}
+    .col-md-half(style='width: 4%;')
+      h1(style='text-align:center; margin:0;') +
+    .col-md-2
+      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.stairs' | translate}}
+      i.fas.fa-align-left.fa-2x(aria-hidden='true')
+        | : {{stairsNavigation()}}
+      br
+      br
+      |                     {{stairsNavigation() * 5}} {{'common.point' | translate}}
+    .col-md-half(style='width: 4%;')
+      h1(style='text-align:center; margin:0;') +
+    .col-md-2
+      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.ramp' | translate}}
+      i.fas.fa-terminal.fa-2x.fa-rotate-315(aria-hidden='true')
+        | : {{rampNavigation()}}
+      br
+      br
+      |                     {{rampNavigation() * 5}} {{'common.point' | translate}}
+    .col-md-half(style='width: 4%;')
+      h1(style='text-align:center; margin:0;') =
+    .col-md-2
+      h1(style='text-align:center; margin:0;') {{exitBonusPoints()}} {{'common.point' | translate}}
 h2 {{'maze.sign.calc' | translate}}
 .alert.alert-warning(style='margin-bottom:80px;text-align:center;', role='alert')
   .row
@@ -293,19 +334,22 @@ h2 {{'maze.sign.calc' | translate}}
         | {{allItemScore()}} {{'common.point' | translate}}
     .col-md-1
       p(style='height:30px;')
-      h1 +
+      h1
+        | +
     .col-md-2
       p(style='height:30px;') {{'maze.sign.reliability' | translate}}
       h1 {{reliability()}} {{'common.point' | translate}}
     .col-md-1
       p(style='height:30px;')
-      h1 +
+      h1
+        | +
     .col-md-2
-      p(style='text-align:center;height:30px;') {{'maze.sign.return' | translate}}
-      h1 {{foundVictims * 10 * exitBonus}} {{'common.point' | translate}}
+      p(style='height:30px;') {{'maze.sign.exit' | translate}}
+      h1 {{exitBonusPoints()}} {{'common.point' | translate}}
     .col-md-1
       p(style='height:30px;')
-      h1 -
+      h1
+        | -
     .col-md-2
       p(style='height:30px;') {{'maze.sign.misidentification' | translate}}
       h1 {{MisIdent*5}} {{'common.point' | translate}}
