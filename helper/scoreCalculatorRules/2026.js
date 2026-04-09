@@ -116,6 +116,7 @@ module.exports.calculateMazeScore = function (run) {
 
   let victims = {};
   let rescueKits = 0;
+  let blueTilesVisited = 0;
 
   // New: track kits per victim (tile coord + side) so we can do 10 for 1 kit, 30 for 2 kits on SAME victim
   let kitsByVictim = {};
@@ -153,6 +154,7 @@ module.exports.calculateMazeScore = function (run) {
 
       if (blueVisits > 0) {
         score +=  Math.max(0, MAX_BLUE_BONUS - blueVisits * BLUE_VISIT_PENALTY);
+        blueTilesVisited++;
       }
     }
 
@@ -231,7 +233,10 @@ module.exports.calculateMazeScore = function (run) {
   }
   score += kitScore;
 
-  score += Math.max((totalVictimCount + Math.min(rescueKits, MAX_RESCUE_KITS) - run.LoPs) * 10, 0);
+  // Reliability bonus: (SVI) × 10 + (SRD) × 10 + (SBV) × 10 - (LoP) × 15
+  const reliabilityBonus = totalVictimCount * 10 + Math.min(rescueKits, MAX_RESCUE_KITS) * 10 + blueTilesVisited * 10 - run.LoPs * 15;
+  score += Math.max(reliabilityBonus, 0);
+
 
   if (run.exitBonus) {
     score += totalVictimCount * 10;
