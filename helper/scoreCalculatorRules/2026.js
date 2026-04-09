@@ -117,6 +117,8 @@ module.exports.calculateMazeScore = function (run) {
   let victims = {};
   let rescueKits = 0;
   let blueTilesVisited = 0;
+  let stairsNavigation = 0;
+  let rampNavigation = 0;
 
   // New: track kits per victim (tile coord + side) so we can do 10 for 1 kit, 30 for 2 kits on SAME victim
   let kitsByVictim = {};
@@ -132,9 +134,11 @@ module.exports.calculateMazeScore = function (run) {
       score += 10;
     }
     if (tile.scoredItems.ramp && mapTiles[coord].tile.ramp) {
+      rampNavigation++;
       score += 10;
     }
     if (tile.scoredItems.steps && mapTiles[coord].tile.steps) {
+      stairsNavigation++;
       score += 10;
     }
 
@@ -237,9 +241,10 @@ module.exports.calculateMazeScore = function (run) {
   const reliabilityBonus = totalVictimCount * 10 + Math.min(rescueKits, MAX_RESCUE_KITS) * 10 + blueTilesVisited * 10 - run.LoPs * 15;
   score += Math.max(reliabilityBonus, 0);
 
-
+  //Exit bonus: (SVI) × 10 + (SBV) × 10 + (SSN) × 5 + (SRN) × 5
   if (run.exitBonus) {
-    score += totalVictimCount * 10;
+    const exitBonus = totalVictimCount * 10 + blueTilesVisited * 10 + stairsNavigation * 5 + rampNavigation * 5;
+    score += exitBonus;
   }
 
   score -= Math.min(run.misidentification * 5, score);
