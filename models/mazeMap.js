@@ -167,7 +167,7 @@ mazeMapSchema.pre('save', function (next) {
         }
       }
 
-      if (cell.tile.black || cell.tile.checkpoint || cell.tile.steps || cell.tile.speedbump || cell.tile.ramp || cell.tile.blueTile || cell.tile.redTile) {
+      if (cell.tile.black || cell.tile.checkpoint || cell.tile.steps || cell.tile.speedbump || cell.tile.ramp || cell.tile.blue || cell.tile.redTile) {
         if ((cell.tile.victims.top != null &&
              cell.tile.victims.top != "None") ||
         
@@ -188,10 +188,10 @@ mazeMapSchema.pre('save', function (next) {
       }
 
       if (self.leagueType == "entry") { // Validation for Rescue Maze Entry League
-        if (cell.tile.steps || cell.tile.ramp || cell.tile.blueTile) {
+        if (cell.tile.steps || cell.tile.ramp || cell.tile.blue) {
           cell.tile.steps = false;
           cell.tile.ramp = false;
-          cell.tile.blueTile = false;
+          cell.tile.blue = false;
         }
       }
       

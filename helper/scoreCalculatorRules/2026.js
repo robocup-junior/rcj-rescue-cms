@@ -147,6 +147,15 @@ module.exports.calculateMazeScore = function (run) {
     };
 
 
+    // Checking blue tiles visits
+    if (mapTiles[coord].tile.blue) {
+      const blueVisits = tile.scoredItems.blue || 0;
+
+      if (blueVisits > 0) {
+        score +=  Math.max(0, MAX_BLUE_BONUS - blueVisits * BLUE_VISIT_PENALTY);
+      }
+    }
+
 
 
     // helper: count valid kits for a single victim (ONLY called when victim is scored)

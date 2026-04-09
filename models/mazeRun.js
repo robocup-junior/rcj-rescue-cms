@@ -45,6 +45,7 @@ const mazeRunSchema = new Schema({
       checkpoint: {type: Boolean, default: false},
       ramp  : {type: Boolean, default: false},
       steps     : {type: Boolean, default: false},
+      blue      : {type: Number, integer: true, min: 0, default: 0},
       victims   : {
         top   : {type: Boolean, default: false},
         right : {type: Boolean, default: false},

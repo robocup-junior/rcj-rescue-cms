@@ -480,6 +480,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                     checkpoint: false,
                     ramp: false,
                     steps:  false,
+                    blue: 0,
                     victims: {
                         top: false,
                         right: false,
@@ -553,6 +554,13 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             if (tile.scoredItems.victims.bottom) current += Math.min(tile.scoredItems.rescueKits.bottom, (maxKit[cell.tile.victims.bottom] || 0));
         }
 
+        if (cell.tile.blue) {
+            possible++;
+            if (tile.scoredItems.blue > 0) {
+                current++;
+            }
+        }
+
         if (tile.processing)
             return "processing";
         else if (current > 0 && current == possible)
@@ -580,6 +588,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                     speedbump: false,
                     checkpoint: false,
                     ramp: false,
+                    blue: 0,
                     victims: {
                         top: false,
                         right: false,
@@ -668,6 +677,12 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             }
         }
 
+        const MAX_BLUE_BONUS = 40;
+        const BLUE_VISIT_PENALTY = 10;
+        if (cell.tile.blue && tile.scoredItems.blue > 0) {
+            current += Math.max(0, MAX_BLUE_BONUS - tile.scoredItems.blue * BLUE_VISIT_PENALTY);
+        }
+
         return current;
     };
 
@@ -687,6 +702,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                     checkpoint: false,
                     ramp: false,
                     steps: false,
+                    blue: 0,
                     victims: {
                         top: false,
                         right: false,
@@ -710,11 +726,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             (cell.tile.victims.left != "None");
 
         // Total number of scorable things on this tile
-        var total = !!cell.tile.speedbump + !!cell.tile.checkpoint + !!cell.tile.steps + !!cell.tile.ramp + hasVictims;
+        var total = !!cell.tile.speedbump + !!cell.tile.checkpoint + !!cell.tile.steps + !!cell.tile.ramp + !!cell.tile.blue + hasVictims;
         console.log("totalt antal saker", total);
         console.log("Has victims", hasVictims);
 
-        if (total == 1 && !hasVictims) {
+        if (total == 1 && !hasVictims && !cell.tile.blue) {
             if (cell.tile.speedbump) {
                 tile.scoredItems.speedbump = !tile.scoredItems.speedbump;
             }
@@ -733,8 +749,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 }
             };
             upload_run(httpdata);
-        } else if (total > 1 || hasVictims) {
-            // Open modal for multi-select
+        } else if (total > 1 || hasVictims || cell.tile.blue) {
+            // Open modal for multi-select or blue tile
             $scope.open(x, y, z);
         }
 
@@ -962,6 +978,19 @@ app.controller('ModalInstanceCtrl', ['$scope','$uibModalInstance','cell','tile',
     $scope.changeSteps = function(){
         playSound(sClick);
         $scope.tile.scoredItems.steps = !$scope.tile.scoredItems.steps;
+    };
+
+    $scope.incrementBlue = function(){
+        playSound(sClick);
+        $scope.tile.scoredItems.blue++;
+    };
+
+    $scope.decrementBlue = function(){
+        playSound(sClick);
+        $scope.tile.scoredItems.blue--;
+        if ($scope.tile.scoredItems.blue < 0) {
+            $scope.tile.scoredItems.blue = 0;
+        }
     };
 
     $scope.lightStatus = function(light, kit){
