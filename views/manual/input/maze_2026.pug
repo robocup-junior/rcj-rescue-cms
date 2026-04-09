@@ -133,8 +133,11 @@ html(ng-app="ddApp")
                           div(style="width:40px;height:40px;background-color:blue;margin-left:auto;margin-right:auto;border:1px solid #444;")
                         td(style="width:35px;text-align:center;")
                           span(style="font-size:30px") {{item.name}}
+                        td(style="width:40px;")
+                          button.btn(type='button', ng-click="toggleScored(item)", ng-class="{'btn-success': clearStatus(item),'btn-danger':!clearStatus(item)}", style="width:100%;height:100%;")
+                            i.far(ng-class="{'fa-check-square': clearStatus(item), 'fa-times-circle': !clearStatus(item)}")
                         td
-                          input.form-control(type='number', ng-model="tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue", min='0', style="width:100%;height:100%;font-size:25px;text-align:center;")
+                          input.form-control(type='number', ng-model="tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue", min='0', ng-disabled="!clearStatus(item)", style="width:100%;height:100%;font-size:25px;text-align:center;padding:0;")
 
 
         hr
