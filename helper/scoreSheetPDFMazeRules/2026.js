@@ -215,6 +215,7 @@ function drawRun(doc, config, scoringRun) {
     ramp: [],
     speedbump: [],
     steps: [],
+    blue: [],
   };
   for (let j = 1, l = scoringRun.map.length * 2 + 1; j < l; j += 2) {
     for (let i = 1, m = scoringRun.map.width * 2 + 1; i < m; i += 2) {
@@ -323,6 +324,16 @@ function drawRun(doc, config, scoringRun) {
             name: itemList.steps.length + 1,
           };
           itemList.steps.push(tmp);
+        }
+
+        if (tile.blue) {
+          const tmp = {
+            x: i,
+            y: j,
+            z: k,
+            name: itemList.blue.length + 1,
+          };
+          itemList.blue.push(tmp);
         }
       }
     }
@@ -928,6 +939,50 @@ function drawRun(doc, config, scoringRun) {
       x + 2,
       y + 2,
       'scoresheet_generation/maze/steps.png',
+      base_size_y - 5,
+      base_size_y - 5,
+      'center'
+    );
+    pdf.drawTextWithAlign(
+      doc,
+      x + 20,
+      y + text_padding,
+      e.name,
+      20,
+      'black',
+      base_size_y,
+      'center'
+    );
+    x += base_size_x;
+    if (x >= 810) {
+      x = 453;
+      y += base_size_y;
+    }
+  }
+  //
+  // if (x != 453) {
+  //   x = 453;
+  //   y += base_size_y + 5;
+  // } else {
+  //   y += 5;
+  // }
+
+  // Draw box for "blue"
+  for (const e of itemList.blue) {
+    pdf.drawImage(
+      doc,
+      x,
+      y,
+      'scoresheet_generation/maze/element_blue.png',
+      base_size_x,
+      50,
+      'center'
+    );
+    pdf.drawImage(
+      doc,
+      x + 2,
+      y + 2,
+      'scoresheet_generation/maze/blue.png',
       base_size_y - 5,
       base_size_y - 5,
       'center'

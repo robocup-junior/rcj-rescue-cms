@@ -212,6 +212,8 @@ block content
                                     .tile-image-container(ng-show="$odd && $parent.$odd")
                                         div.maru.size_normal.blue1(style="left:1px;top:1px;position: absolute;border-radius:0%;z-index:3;" ng-if="cells[c+','+r+','+z].tile.checkpoint")
                                             div.letter3(ng-bind="itemNumber('checkpoint',c,r,z)")
+                                        div.maru.size_normal.blue1(style="left:1px;top:1px;position: absolute;border-radius:0%;z-index:3;" ng-if="cells[c+','+r+','+z].tile.blue")
+                                            div.letter3(ng-bind="itemNumber('blue',c,r,z)")
                                         img.tile-image(ng-src='/images/log.png', ng-show="cells[c+','+r+','+z].tile.speedbump")
                                         div.maru.size_normal.blue1(style="right:1px;bottom:1px;position: absolute;z-index:3;" ng-if="cells[c+','+r+','+z].tile.speedbump")
                                             div.letter3(ng-bind="itemNumber('speedbump',c,r,z)")
