@@ -968,13 +968,20 @@ function drawRun(doc, config, scoringRun) {
   // }
 
   // Draw box for "blue"
+  if (x != 453) {
+    x = 453;
+    y += base_size_y + 5;
+  } else {
+    y += 5;
+  }
+
   for (const e of itemList.blue) {
     pdf.drawImage(
       doc,
       x,
       y,
       'scoresheet_generation/maze/element_blue.png',
-      base_size_x,
+      base_size_x * 2,
       50,
       'center'
     );
@@ -997,7 +1004,7 @@ function drawRun(doc, config, scoringRun) {
       base_size_y,
       'center'
     );
-    x += base_size_x;
+    x += base_size_x * 2;
     if (x >= 810) {
       x = 453;
       y += base_size_y;
