@@ -187,15 +187,15 @@ function drawRun(doc, config, scoringRun) {
   const big = Range('A', 'Z');
   const small = Range('a', 'z');
   const itemList = {
-    H: {
+    PHI: {
       linear: [],
       floating: [],
     },
-    S: {
+    PSI: {
       linear: [],
       floating: [],
     },
-    U: {
+    OMEGA: {
       linear: [],
       floating: [],
     },

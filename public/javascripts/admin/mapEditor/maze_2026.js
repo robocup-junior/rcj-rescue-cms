@@ -492,6 +492,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     $scope.victimNumber = function(type,x,y,z,place){
         let linear = $scope.cells[x + ',' + y + ',' + z].isLinear;
         let count = 0;
+        let typeUpper = type.toUpperCase();
         for(let i=1,l=$scope.length*2+1;i<l;i+=2){
             for(let j=1,m=$scope.width*2+1;j<m;j+=2){
                 for(let k=0;k<$scope.height;k++) {
@@ -499,27 +500,27 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
                     if($scope.cells[j + ',' + i + ',' + k].isLinear == linear){
                         let victims = $scope.cells[j + ',' + i + ',' + k].tile.victims;
                         if(victims){
-                            if(victims.top == type) count++;
+                            if(victims.top && victims.top.toUpperCase() == typeUpper) count++;
                             if(x == j && y == i && z == k && place == 'top'){
                                 if(linear) return big[count-1];
                                 else return small[count-1];
                             }
-                            if(victims.left == type) count++;
+                            if(victims.left && victims.left.toUpperCase() == typeUpper) count++;
                             if(x == j && y == i && z == k && place == 'left'){
                                 if(linear) return big[count-1];
                                 else return small[count-1];
                             }
-                            if(victims.right == type) count++;
+                            if(victims.right && victims.right.toUpperCase() == typeUpper) count++;
                             if(x == j && y == i && z == k && place == 'right'){
                                 if(linear) return big[count-1];
                                 else return small[count-1];
                             }
-                            if(victims.bottom == type) count++;
+                            if(victims.bottom && victims.bottom.toUpperCase() == typeUpper) count++;
                             if(x == j && y == i && z == k && place == 'bottom'){
                                 if(linear) return big[count-1];
                                 else return small[count-1];
                             }
-                            if(victims.floor == type) count++;
+                            if(victims.floor && victims.floor.toUpperCase() == typeUpper) count++;
                             if(x == j && y == i && z == k && place == 'floor'){
                                 if(linear) return big[count-1];
                                 else return small[count-1];
