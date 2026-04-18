@@ -34,12 +34,6 @@ DPI = 300
 # Ring diameters in cm (from innermost to outermost)
 DIAMETERS_CM = [1, 2, 3, 4, 5]
 
-# Canvas size for offset images (300x300 pixels)
-CANVAS_SIZE = 300
-
-# Target size for offset images (100x100 pixels approximately)
-TARGET_SIZE_OFFSET = 100
-
 
 def cm_to_pixels(cm):
     """Convert centimeters to pixels based on DPI."""
@@ -87,49 +81,6 @@ def create_cognitive_target(color_sequence, size_pixels):
     return img
 
 
-def create_offset_target(color_sequence, position):
-    """
-    Create a cognitive target image with offset positioning on a 300x300 canvas.
-    
-    Args:
-        color_sequence: String of color codes
-        position: One of 'top', 'right', 'bottom', 'left'
-    
-    Returns:
-        PIL Image with transparent background
-    """
-    # Create transparent canvas
-    canvas = Image.new('RGBA', (CANVAS_SIZE, CANVAS_SIZE), (0, 0, 0, 0))
-    
-    # Create the target image (100x100 pixels)
-    target = create_cognitive_target(color_sequence, TARGET_SIZE_OFFSET)
-    
-    # Calculate position
-    target_size = TARGET_SIZE_OFFSET
-    canvas_center = CANVAS_SIZE // 2
-    target_half = target_size // 2
-    
-    if position == 'top':
-        x = canvas_center - target_half
-        y = 0
-    elif position == 'right':
-        x = CANVAS_SIZE - target_size
-        y = canvas_center - target_half
-    elif position == 'bottom':
-        x = canvas_center - target_half
-        y = CANVAS_SIZE - target_size
-    elif position == 'left':
-        x = 0
-        y = canvas_center - target_half
-    else:
-        raise ValueError(f"Invalid position: {position}")
-    
-    # Paste target onto canvas
-    canvas.paste(target, (x, y), target)
-    
-    return canvas
-
-
 def generate_all_combinations():
     """Generate all possible color combinations for cognitive targets with exactly 5 rings."""
     color_codes = ['B', 'R', 'Y', 'G', 'C']
@@ -145,22 +96,13 @@ def generate_all_combinations():
     for combination in product(color_codes, repeat=num_rings):
         color_sequence = ''.join(combination)
         
-        # 1. Generate full-size target (5cm x 5cm)
-        # 5cm at 96 DPI = ~189 pixels
+        # Generate full-size target (5cm x 5cm)
         full_size = cm_to_pixels(5)
         full_target = create_cognitive_target(color_sequence, full_size)
         full_filename = os.path.join(output_dir, f'{color_sequence}.png')
         full_target.save(full_filename)
         print(f'Generated: {full_filename}')
         total_generated += 1
-        
-        # 2-5. Generate offset targets
-        for position in ['top', 'right', 'bottom', 'left']:
-            offset_target = create_offset_target(color_sequence, position)
-            offset_filename = os.path.join(output_dir, f'{color_sequence}_{position}.png')
-            offset_target.save(offset_filename)
-            print(f'Generated: {offset_filename}')
-            total_generated += 1
     
     print(f'\nTotal images generated: {total_generated}')
 
