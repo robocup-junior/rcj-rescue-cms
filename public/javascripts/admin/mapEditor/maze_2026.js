@@ -1037,7 +1037,7 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
             animation: true,
             templateUrl: '/templates/maze_cognitive_target_modal_2026.html',
             controller: 'CognitiveTargetModalCtrl',
-            size: 'md',
+            size: 'lg',
             resolve: {
                 direction: function() {
                     return direction;
