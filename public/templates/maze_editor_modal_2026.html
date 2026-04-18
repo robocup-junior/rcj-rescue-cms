@@ -38,13 +38,14 @@
 
   <h5>{{"admin.mazeMapEditor.placement" | translate}}</h5>
   <div ng-if="leagueType == 'standard'">
-    <table>
+    <table class="table table-bordered">
       <tr>
-        <th width="20%">&nbsp;</th>
-        <th width="12%"><img src="/images/no_victims.png" alt="None" height="20"></th>
-        <th width="12%">Φ</th>
-        <th width="12%">Ψ</th>
-        <th width="12%">Ω</th>
+        <th width="15%">&nbsp;</th>
+        <th width="17%"><img src="/images/no_victims.png" alt="None" height="20"></th>
+        <th width="17%">Φ</th>
+        <th width="17%">Ψ</th>
+        <th width="17%">Ω</th>
+        <th width="17%"><img src="/images/cognitive_targets/YCRBG.png" alt="Cognitive" height="20"></th>
       </tr>
       <tr>
         <th class="col">{{"admin.mazeMapEditor.top" | translate}}</th>
@@ -52,6 +53,15 @@
         <td><input type="radio" ng-model="cell.tile.victims.top" value="PHI" style="display: block;"></td>
         <td><input type="radio" ng-model="cell.tile.victims.top" value="PSI" style="display: block;"></td>
         <td><input type="radio" ng-model="cell.tile.victims.top" value="OMEGA" style="display: block;"></td>
+        <td style="white-space: nowrap;">
+          <input type="radio" ng-model="cell.tile.victims.top" value="Cognitive" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+          <span ng-if="cell.tile.victims.top == 'Cognitive'" style="display: inline-flex; align-items: center; gap: 5px; vertical-align: middle;">
+            <img ng-src="{{getCognitiveTargetImage('top')}}" alt="Cognitive Target" height="30">
+            <button class="btn btn-xs btn-info" ng-click="openCognitiveTargetSettings('top')">
+              <i class="fas fa-cog"></i>
+            </button>
+          </span>
+        </td>
       </tr>
       <tr>
         <th class="col">{{"admin.mazeMapEditor.bottom" | translate}}</th>
@@ -59,6 +69,15 @@
         <td><input type="radio" ng-model="cell.tile.victims.bottom" value="PHI" style="display: block;"></td>
         <td><input type="radio" ng-model="cell.tile.victims.bottom" value="PSI" style="display: block;"></td>
         <td><input type="radio" ng-model="cell.tile.victims.bottom" value="OMEGA" style="display: block;"></td>
+        <td style="white-space: nowrap;">
+          <input type="radio" ng-model="cell.tile.victims.bottom" value="Cognitive" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+          <span ng-if="cell.tile.victims.bottom == 'Cognitive'" style="display: inline-flex; align-items: center; gap: 5px; vertical-align: middle;">
+            <img ng-src="{{getCognitiveTargetImage('bottom')}}" alt="Cognitive Target" height="30">
+            <button class="btn btn-xs btn-info" ng-click="openCognitiveTargetSettings('bottom')">
+              <i class="fas fa-cog"></i>
+            </button>
+          </span>
+        </td>
       </tr>
       <tr>
         <th class="col">{{"admin.mazeMapEditor.left" | translate}}</th>
@@ -66,6 +85,15 @@
         <td><input type="radio" ng-model="cell.tile.victims.left" value="PHI" style="display: block;"></td>
         <td><input type="radio" ng-model="cell.tile.victims.left" value="PSI" style="display: block;"></td>
         <td><input type="radio" ng-model="cell.tile.victims.left" value="OMEGA" style="display: block;"></td>
+        <td style="white-space: nowrap;">
+          <input type="radio" ng-model="cell.tile.victims.left" value="Cognitive" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+          <span ng-if="cell.tile.victims.left == 'Cognitive'" style="display: inline-flex; align-items: center; gap: 5px; vertical-align: middle;">
+            <img ng-src="{{getCognitiveTargetImage('left')}}" alt="Cognitive Target" height="30">
+            <button class="btn btn-xs btn-info" ng-click="openCognitiveTargetSettings('left')">
+              <i class="fas fa-cog"></i>
+            </button>
+          </span>
+        </td>
       </tr>
       <tr>
         <th class="col">{{"admin.mazeMapEditor.right" | translate}}</th>
@@ -73,6 +101,15 @@
         <td><input type="radio" ng-model="cell.tile.victims.right" value="PHI" style="display: block;"></td>
         <td><input type="radio" ng-model="cell.tile.victims.right" value="PSI" style="display: block;"></td>
         <td><input type="radio" ng-model="cell.tile.victims.right" value="OMEGA" style="display: block;"></td>
+        <td style="white-space: nowrap;">
+          <input type="radio" ng-model="cell.tile.victims.right" value="Cognitive" style="display: inline-block; vertical-align: middle; margin-right: 8px;">
+          <span ng-if="cell.tile.victims.right == 'Cognitive'" style="display: inline-flex; align-items: center; gap: 5px; vertical-align: middle;">
+            <img ng-src="{{getCognitiveTargetImage('right')}}" alt="Cognitive Target" height="30">
+            <button class="btn btn-xs btn-info" ng-click="openCognitiveTargetSettings('right')">
+              <i class="fas fa-cog"></i>
+            </button>
+          </span>
+        </td>
       </tr>
     </table>
   </div>

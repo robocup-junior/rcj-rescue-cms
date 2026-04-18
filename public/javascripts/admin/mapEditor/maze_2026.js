@@ -636,7 +636,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-        delete link;
+        link = null;
     }
 
     $scope.wallColor = function(x,y,z){
@@ -917,7 +917,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             animation: true,
             templateUrl: '/templates/maze_editor_modal_2026.html',
             controller: 'ModalInstanceCtrl',
-            size: 'sm',
+            size: 'lg',
             scope: $scope,
             resolve: {
                 x: function () {
@@ -938,7 +938,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
 // Please note that $uibModalInstance represents a modal window (instance) dependency.
 // It is not the same as the $uibModal service used above.
 
-app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'x', 'y', 'z', function ($scope, $uibModalInstance, x, y, z) {
+app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal', 'x', 'y', 'z', function ($scope, $uibModalInstance, $uibModal, x, y, z) {
     $scope.cell = $scope.$parent.cells[x + ',' + y + ',' + z];
     $scope.leagueType = $scope.$parent.leagueType;
     $scope.isStart = $scope.$parent.startTile.x == x &&
@@ -947,6 +947,27 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'x', 'y', 'z
     $scope.height = $scope.$parent.height;
     $scope.z = z;
     $scope.oldFloorDestination = $scope.cell.tile.changeFloorTo;
+
+    // Initialize victims object if not exists
+    if (!$scope.cell.tile.victims) {
+        $scope.cell.tile.victims = {
+            top: 'None',
+            bottom: 'None',
+            left: 'None',
+            right: 'None'
+        };
+    }
+
+    // Initialize cognitiveTargets if not exists
+    if (!$scope.cell.tile.cognitiveTargets) {
+        $scope.cell.tile.cognitiveTargets = {
+            top: { rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' } },
+            bottom: { rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' } },
+            left: { rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' } },
+            right: { rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' } }
+        };
+    }
+
     $scope.elevatorChanged = function (newValue) {
         console.log("old", $scope.oldFloorDestination);
         console.log("new", newValue);
@@ -985,7 +1006,7 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'x', 'y', 'z
             $scope.$parent.startTile.z = z;
         }
     }
-    
+
     $scope.blackChanged = function () {
         $scope.$parent.recalculateLinear();
     }
@@ -997,8 +1018,93 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'x', 'y', 'z
         }
         return arr;
     }
+
+    $scope.getCognitiveTargetImage = function(direction) {
+        if (!$scope.cell.tile.victims || 
+            $scope.cell.tile.victims[direction] !== 'Cognitive' ||
+            !$scope.cell.tile.cognitiveTargets ||
+            !$scope.cell.tile.cognitiveTargets[direction]) {
+            return '';
+        }
+        var rings = $scope.cell.tile.cognitiveTargets[direction].rings;
+        var colorCode = rings.ring1 + rings.ring2 + rings.ring3 + rings.ring4 + rings.ring5;
+        return '/images/cognitive_targets/' + colorCode + '.png';
+    }
+
+    $scope.openCognitiveTargetSettings = function(direction) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: '/templates/maze_cognitive_target_modal.html',
+            controller: 'CognitiveTargetModalCtrl',
+            size: 'md',
+            resolve: {
+                direction: function() {
+                    return direction;
+                },
+                cognitiveData: function() {
+                    return $scope.cell.tile.cognitiveTargets[direction];
+                }
+            }
+        });
+
+        modalInstance.result.then(function(result) {
+            $scope.cell.tile.cognitiveTargets[direction] = result;
+        });
+    }
+
     $scope.ok = function () {
         $scope.$parent.recalculateLinear();
         $uibModalInstance.close();
     };
+}]);
+
+app.controller('CognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'direction', 'cognitiveData', function ($scope, $uibModalInstance, direction, cognitiveData) {
+    $scope.direction = direction;
+    $scope.rings = angular.copy(cognitiveData.rings) || { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' };
+    
+    var colorValues = {
+        'B': -2,
+        'R': -1,
+        'Y': 0,
+        'G': 1,
+        'C': 2
+    };
+
+    $scope.updatePreview = function() {
+        var colorCode = $scope.rings.ring1 + $scope.rings.ring2 + $scope.rings.ring3 + $scope.rings.ring4 + $scope.rings.ring5;
+        $scope.previewImage = '/images/cognitive_targets/' + colorCode + '.png';
+    }
+
+    $scope.calculateTotalValue = function() {
+        var total = 0;
+        for (var i = 1; i <= 5; i++) {
+            total += colorValues[$scope.rings['ring' + i]] || 0;
+        }
+        return total;
+    }
+
+    $scope.getVictimStatus = function() {
+        var total = $scope.calculateTotalValue();
+        if (total === 2) {
+            return 'harmed';
+        } else if (total === 1) {
+            return 'stable';
+        } else if (total === 0) {
+            return 'unharmed';
+        } else {
+            return 'dummy';
+        }
+    }
+
+    $scope.updatePreview();
+
+    $scope.ok = function() {
+        $uibModalInstance.close({
+            rings: $scope.rings
+        });
+    }
+
+    $scope.cancel = function() {
+        $uibModalInstance.dismiss('cancel');
+    }
 }]);

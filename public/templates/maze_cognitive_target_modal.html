@@ -1,0 +1,91 @@
+<div class="modal-header">
+  <h3 class="modal-title">{{"admin.mazeMapEditor.cognitiveTargetSettings" | translate}} - {{direction | translate}}</h3>
+</div>
+<div class="modal-body">
+  <div class="text-center" style="margin-bottom: 20px;">
+    <img ng-src="{{previewImage}}" alt="Cognitive Target Preview" height="100">
+  </div>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>{{"admin.mazeMapEditor.ring" | translate}}</th>
+        <th>{{"admin.mazeMapEditor.color" | translate}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>
+          <select class="form-control" ng-model="rings.ring1" ng-change="updatePreview()">
+            <option value="B">{{"admin.mazeMapEditor.cBlack" | translate}} (-2)</option>
+            <option value="R">{{"admin.mazeMapEditor.cRed" | translate}} (-1)</option>
+            <option value="Y">{{"admin.mazeMapEditor.yellow" | translate}} (0)</option>
+            <option value="G">{{"admin.mazeMapEditor.green" | translate}} (1)</option>
+            <option value="C">{{"admin.mazeMapEditor.cyan" | translate}} (2)</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>
+          <select class="form-control" ng-model="rings.ring2" ng-change="updatePreview()">
+            <option value="B">{{"admin.mazeMapEditor.cBlack" | translate}} (-2)</option>
+            <option value="R">{{"admin.mazeMapEditor.cRed" | translate}} (-1)</option>
+            <option value="Y">{{"admin.mazeMapEditor.yellow" | translate}} (0)</option>
+            <option value="G">{{"admin.mazeMapEditor.green" | translate}} (1)</option>
+            <option value="C">{{"admin.mazeMapEditor.cyan" | translate}} (2)</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>
+          <select class="form-control" ng-model="rings.ring3" ng-change="updatePreview()">
+            <option value="B">{{"admin.mazeMapEditor.cBlack" | translate}} (-2)</option>
+            <option value="R">{{"admin.mazeMapEditor.cRed" | translate}} (-1)</option>
+            <option value="Y">{{"admin.mazeMapEditor.yellow" | translate}} (0)</option>
+            <option value="G">{{"admin.mazeMapEditor.green" | translate}} (1)</option>
+            <option value="C">{{"admin.mazeMapEditor.cyan" | translate}} (2)</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>
+          <select class="form-control" ng-model="rings.ring4" ng-change="updatePreview()">
+            <option value="B">{{"admin.mazeMapEditor.cBlack" | translate}} (-2)</option>
+            <option value="R">{{"admin.mazeMapEditor.cRed" | translate}} (-1)</option>
+            <option value="Y">{{"admin.mazeMapEditor.yellow" | translate}} (0)</option>
+            <option value="G">{{"admin.mazeMapEditor.green" | translate}} (1)</option>
+            <option value="C">{{"admin.mazeMapEditor.cyan" | translate}} (2)</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>
+          <select class="form-control" ng-model="rings.ring5" ng-change="updatePreview()">
+            <option value="B">{{"admin.mazeMapEditor.cBlack" | translate}} (-2)</option>
+            <option value="R">{{"admin.mazeMapEditor.cRed" | translate}} (-1)</option>
+            <option value="Y">{{"admin.mazeMapEditor.yellow" | translate}} (0)</option>
+            <option value="G">{{"admin.mazeMapEditor.green" | translate}} (1)</option>
+            <option value="C">{{"admin.mazeMapEditor.cyan" | translate}} (2)</option>
+          </select>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="alert" ng-class="{'alert-danger': getVictimStatus() === 'harmed', 'alert-warning': getVictimStatus() === 'stable', 'alert-success': getVictimStatus() === 'unharmed', 'alert-dark': getVictimStatus() === 'dummy'}">
+    <strong>{{"admin.mazeMapEditor.victimStatus" | translate}}:</strong>
+    <span ng-if="getVictimStatus() === 'harmed'">{{"admin.mazeMapEditor.harmedVictim" | translate}} (sum = 2)</span>
+    <span ng-if="getVictimStatus() === 'stable'">{{"admin.mazeMapEditor.stableVictim" | translate}} (sum = 1)</span>
+    <span ng-if="getVictimStatus() === 'unharmed'">{{"admin.mazeMapEditor.unharmedVictim" | translate}} (sum = 0)</span>
+    <span ng-if="getVictimStatus() === 'dummy'">{{"admin.mazeMapEditor.dummyVictim" | translate}}</span>
+  </div>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-default" type="button" ng-click="cancel()">{{"common.cancel" | translate}}</button>
+  <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+</div>
