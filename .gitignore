@@ -13,6 +13,7 @@ backup/*
 backupTmp/*
 public/sw.js*
 public/workbox-*
+tools/cognitive_tergets_generator/output/*
 
 .idea/
 
