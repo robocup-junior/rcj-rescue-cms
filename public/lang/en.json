@@ -804,7 +804,12 @@
             "harmedVictim": "Harmed Victim",
             "stableVictim": "Stable Victim",
             "unharmedVictim": "Unharmed Victim",
-            "dummyVictim": "Dummy Victim"
+            "dummyVictim": "Dummy Victim",
+            "autoConfigure": "Auto Configure",
+            "stableAbbr": "S",
+            "harmedAbbr": "H",
+            "unharmedAbbr": "U",
+            "dummyAbbr": "D"
         },
         "mazeRun": {
             "title": "Games",

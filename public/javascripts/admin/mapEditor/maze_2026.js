@@ -1096,6 +1096,51 @@ app.controller('CognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'dire
         }
     }
 
+    $scope.autoSetRings = function(targetStatus) {
+        var targetSum;
+        switch (targetStatus) {
+            case 'harmed':
+                targetSum = 2;
+                break;
+            case 'stable':
+                targetSum = 1;
+                break;
+            case 'unharmed':
+                targetSum = 0;
+                break;
+            case 'dummy':
+                targetSum = null;
+                break;
+            default:
+                targetSum = 0;
+        }
+
+        var colors = ['B', 'R', 'Y', 'G', 'C'];
+        var maxAttempts = 100;
+        var attempts = 0;
+
+        while (attempts < maxAttempts) {
+            for (var i = 1; i <= 5; i++) {
+                $scope.rings['ring' + i] = colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            var currentSum = $scope.calculateTotalValue();
+            var currentStatus = $scope.getVictimStatus();
+
+            if (targetStatus === 'dummy') {
+                if (currentStatus === 'dummy') {
+                    break;
+                }
+            } else if (currentSum === targetSum) {
+                break;
+            }
+
+            attempts++;
+        }
+
+        $scope.updatePreview();
+    }
+
     $scope.updatePreview();
 
     $scope.ok = function() {

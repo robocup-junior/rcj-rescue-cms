@@ -6,6 +6,21 @@
     <img ng-src="{{previewImage}}" alt="Cognitive Target Preview" height="100">
   </div>
 
+  <div class="text-center" style="margin-bottom: 20px;">
+    <div class="dropdown">
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fas fa-magic"></i> {{"admin.mazeMapEditor.autoConfigure" | translate}}
+      </button>
+      <div class="dropdown-menu">
+        <a class="dropdown-item" href="" ng-click="autoSetRings('harmed')"><span class="badge badge-danger" style="margin-right: 8px;">{{"admin.mazeMapEditor.harmedAbbr" | translate}}</span>{{"admin.mazeMapEditor.harmedVictim" | translate}}</a>
+        <a class="dropdown-item" href="" ng-click="autoSetRings('stable')"><span class="badge badge-warning" style="margin-right: 8px;">{{"admin.mazeMapEditor.stableAbbr" | translate}}</span>{{"admin.mazeMapEditor.stableVictim" | translate}}</a>
+        <a class="dropdown-item" href="" ng-click="autoSetRings('unharmed')"><span class="badge badge-success" style="margin-right: 8px;">{{"admin.mazeMapEditor.unharmedAbbr" | translate}}</span>{{"admin.mazeMapEditor.unharmedVictim" | translate}}</a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item" href="" ng-click="autoSetRings('dummy')"><span class="badge badge-secondary" style="margin-right: 8px;">{{"admin.mazeMapEditor.dummyAbbr" | translate}}</span>{{"admin.mazeMapEditor.dummyVictim" | translate}}</a>
+      </div>
+    </div>
+  </div>
+
   <table class="table table-bordered">
     <thead>
       <tr>
@@ -17,61 +32,61 @@
       <tr>
         <td>1</td>
         <td>
-          <select class="form-control" ng-model="rings.ring1" ng-change="updatePreview()">
-            <option value="B">{{"admin.mazeMapEditor.cBlack" | translate}} (-2)</option>
-            <option value="R">{{"admin.mazeMapEditor.cRed" | translate}} (-1)</option>
-            <option value="Y">{{"admin.mazeMapEditor.yellow" | translate}} (0)</option>
-            <option value="G">{{"admin.mazeMapEditor.green" | translate}} (1)</option>
-            <option value="C">{{"admin.mazeMapEditor.cyan" | translate}} (2)</option>
-          </select>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn" ng-class="rings.ring1 === 'B' ? 'btn-dark' : 'btn-outline-secondary'" ng-click="rings.ring1 = 'B'; updatePreview()">{{"admin.mazeMapEditor.cBlack" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring1 === 'R' ? 'btn-danger' : 'btn-outline-danger'" ng-click="rings.ring1 = 'R'; updatePreview()">{{"admin.mazeMapEditor.cRed" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring1 === 'Y' ? 'btn-warning' : 'btn-outline-warning'" ng-click="rings.ring1 = 'Y'; updatePreview()">{{"admin.mazeMapEditor.yellow" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring1 === 'G' ? 'btn-success' : 'btn-outline-success'" ng-click="rings.ring1 = 'G'; updatePreview()">{{"admin.mazeMapEditor.green" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring1 === 'C' ? 'btn-info' : 'btn-outline-info'" ng-click="rings.ring1 = 'C'; updatePreview()">{{"admin.mazeMapEditor.cyan" | translate}}</button>
+          </div>
         </td>
       </tr>
       <tr>
         <td>2</td>
         <td>
-          <select class="form-control" ng-model="rings.ring2" ng-change="updatePreview()">
-            <option value="B">{{"admin.mazeMapEditor.cBlack" | translate}} (-2)</option>
-            <option value="R">{{"admin.mazeMapEditor.cRed" | translate}} (-1)</option>
-            <option value="Y">{{"admin.mazeMapEditor.yellow" | translate}} (0)</option>
-            <option value="G">{{"admin.mazeMapEditor.green" | translate}} (1)</option>
-            <option value="C">{{"admin.mazeMapEditor.cyan" | translate}} (2)</option>
-          </select>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn" ng-class="rings.ring2 === 'B' ? 'btn-dark' : 'btn-outline-secondary'" ng-click="rings.ring2 = 'B'; updatePreview()">{{"admin.mazeMapEditor.cBlack" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring2 === 'R' ? 'btn-danger' : 'btn-outline-danger'" ng-click="rings.ring2 = 'R'; updatePreview()">{{"admin.mazeMapEditor.cRed" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring2 === 'Y' ? 'btn-warning' : 'btn-outline-warning'" ng-click="rings.ring2 = 'Y'; updatePreview()">{{"admin.mazeMapEditor.yellow" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring2 === 'G' ? 'btn-success' : 'btn-outline-success'" ng-click="rings.ring2 = 'G'; updatePreview()">{{"admin.mazeMapEditor.green" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring2 === 'C' ? 'btn-info' : 'btn-outline-info'" ng-click="rings.ring2 = 'C'; updatePreview()">{{"admin.mazeMapEditor.cyan" | translate}}</button>
+          </div>
         </td>
       </tr>
       <tr>
         <td>3</td>
         <td>
-          <select class="form-control" ng-model="rings.ring3" ng-change="updatePreview()">
-            <option value="B">{{"admin.mazeMapEditor.cBlack" | translate}} (-2)</option>
-            <option value="R">{{"admin.mazeMapEditor.cRed" | translate}} (-1)</option>
-            <option value="Y">{{"admin.mazeMapEditor.yellow" | translate}} (0)</option>
-            <option value="G">{{"admin.mazeMapEditor.green" | translate}} (1)</option>
-            <option value="C">{{"admin.mazeMapEditor.cyan" | translate}} (2)</option>
-          </select>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn" ng-class="rings.ring3 === 'B' ? 'btn-dark' : 'btn-outline-secondary'" ng-click="rings.ring3 = 'B'; updatePreview()">{{"admin.mazeMapEditor.cBlack" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring3 === 'R' ? 'btn-danger' : 'btn-outline-danger'" ng-click="rings.ring3 = 'R'; updatePreview()">{{"admin.mazeMapEditor.cRed" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring3 === 'Y' ? 'btn-warning' : 'btn-outline-warning'" ng-click="rings.ring3 = 'Y'; updatePreview()">{{"admin.mazeMapEditor.yellow" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring3 === 'G' ? 'btn-success' : 'btn-outline-success'" ng-click="rings.ring3 = 'G'; updatePreview()">{{"admin.mazeMapEditor.green" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring3 === 'C' ? 'btn-info' : 'btn-outline-info'" ng-click="rings.ring3 = 'C'; updatePreview()">{{"admin.mazeMapEditor.cyan" | translate}}</button>
+          </div>
         </td>
       </tr>
       <tr>
         <td>4</td>
         <td>
-          <select class="form-control" ng-model="rings.ring4" ng-change="updatePreview()">
-            <option value="B">{{"admin.mazeMapEditor.cBlack" | translate}} (-2)</option>
-            <option value="R">{{"admin.mazeMapEditor.cRed" | translate}} (-1)</option>
-            <option value="Y">{{"admin.mazeMapEditor.yellow" | translate}} (0)</option>
-            <option value="G">{{"admin.mazeMapEditor.green" | translate}} (1)</option>
-            <option value="C">{{"admin.mazeMapEditor.cyan" | translate}} (2)</option>
-          </select>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn" ng-class="rings.ring4 === 'B' ? 'btn-dark' : 'btn-outline-secondary'" ng-click="rings.ring4 = 'B'; updatePreview()">{{"admin.mazeMapEditor.cBlack" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring4 === 'R' ? 'btn-danger' : 'btn-outline-danger'" ng-click="rings.ring4 = 'R'; updatePreview()">{{"admin.mazeMapEditor.cRed" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring4 === 'Y' ? 'btn-warning' : 'btn-outline-warning'" ng-click="rings.ring4 = 'Y'; updatePreview()">{{"admin.mazeMapEditor.yellow" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring4 === 'G' ? 'btn-success' : 'btn-outline-success'" ng-click="rings.ring4 = 'G'; updatePreview()">{{"admin.mazeMapEditor.green" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring4 === 'C' ? 'btn-info' : 'btn-outline-info'" ng-click="rings.ring4 = 'C'; updatePreview()">{{"admin.mazeMapEditor.cyan" | translate}}</button>
+          </div>
         </td>
       </tr>
       <tr>
         <td>5</td>
         <td>
-          <select class="form-control" ng-model="rings.ring5" ng-change="updatePreview()">
-            <option value="B">{{"admin.mazeMapEditor.cBlack" | translate}} (-2)</option>
-            <option value="R">{{"admin.mazeMapEditor.cRed" | translate}} (-1)</option>
-            <option value="Y">{{"admin.mazeMapEditor.yellow" | translate}} (0)</option>
-            <option value="G">{{"admin.mazeMapEditor.green" | translate}} (1)</option>
-            <option value="C">{{"admin.mazeMapEditor.cyan" | translate}} (2)</option>
-          </select>
+          <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn" ng-class="rings.ring5 === 'B' ? 'btn-dark' : 'btn-outline-secondary'" ng-click="rings.ring5 = 'B'; updatePreview()">{{"admin.mazeMapEditor.cBlack" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring5 === 'R' ? 'btn-danger' : 'btn-outline-danger'" ng-click="rings.ring5 = 'R'; updatePreview()">{{"admin.mazeMapEditor.cRed" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring5 === 'Y' ? 'btn-warning' : 'btn-outline-warning'" ng-click="rings.ring5 = 'Y'; updatePreview()">{{"admin.mazeMapEditor.yellow" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring5 === 'G' ? 'btn-success' : 'btn-outline-success'" ng-click="rings.ring5 = 'G'; updatePreview()">{{"admin.mazeMapEditor.green" | translate}}</button>
+            <button type="button" class="btn" ng-class="rings.ring5 === 'C' ? 'btn-info' : 'btn-outline-info'" ng-click="rings.ring5 = 'C'; updatePreview()">{{"admin.mazeMapEditor.cyan" | translate}}</button>
+          </div>
         </td>
       </tr>
     </tbody>
