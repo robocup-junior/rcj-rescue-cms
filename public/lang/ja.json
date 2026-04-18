@@ -805,6 +805,7 @@
             "dummyVictim": "ダミーの被災者",
             "tileProperties": "タイル設定",
             "ringConfiguration": "リング設定",
+            "calculation": "計算",
             "autoConfigure": "自動設定",
             "stableAbbr": "安",
             "harmedAbbr": "負",

@@ -2,8 +2,41 @@
   <h3 class="modal-title" style="font-weight: 600; color: #495057;"><i class="fas fa-bullseye" style="margin-right: 8px;"></i>{{"admin.mazeMapEditor.cognitiveTargetSettings" | translate}} - {{direction | translate}}</h3>
 </div>
 <div class="modal-body" style="padding: 20px;">
-  <div class="text-center" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
-    <img ng-src="{{previewImage}}" alt="Cognitive Target Preview" height="120" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+  <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
+    <div style="display: flex; align-items: center; gap: 20px;">
+      <img ng-src="{{previewImage}}" alt="Cognitive Target Preview" height="120" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+      <div style="flex: 1;">
+        <div class="alert" style="margin-bottom: 10px; border-left: 4px solid;" ng-class="{'alert-danger': getVictimStatus() === 'harmed', 'alert-warning': getVictimStatus() === 'stable', 'alert-success': getVictimStatus() === 'unharmed', 'alert-dark': getVictimStatus() === 'dummy', 'border-danger': getVictimStatus() === 'harmed', 'border-warning': getVictimStatus() === 'stable', 'border-success': getVictimStatus() === 'unharmed', 'border-dark': getVictimStatus() === 'dummy'}">
+          <strong><i class="fas fa-info-circle" style="margin-right: 5px;"></i>{{"admin.mazeMapEditor.victimStatus" | translate}}:</strong>
+          <span ng-if="getVictimStatus() === 'harmed'">{{"admin.mazeMapEditor.harmedVictim" | translate}}</span>
+          <span ng-if="getVictimStatus() === 'stable'">{{"admin.mazeMapEditor.stableVictim" | translate}}</span>
+          <span ng-if="getVictimStatus() === 'unharmed'">{{"admin.mazeMapEditor.unharmedVictim" | translate}}</span>
+          <span ng-if="getVictimStatus() === 'dummy'">{{"admin.mazeMapEditor.dummyVictim" | translate}}</span>
+        </div>
+        <table class="table table-sm table-bordered" style="margin-bottom: 0; background-color: white; font-size: 0.85em;">
+          <thead style="background-color: #e9ecef;">
+            <tr>
+              <th style="text-align: center; padding: 4px 8px;">Ring1</th>
+              <th style="text-align: center; padding: 4px 8px;">Ring2</th>
+              <th style="text-align: center; padding: 4px 8px;">Ring3</th>
+              <th style="text-align: center; padding: 4px 8px;">Ring4</th>
+              <th style="text-align: center; padding: 4px 8px;">Ring5</th>
+              <th style="text-align: center; padding: 4px 8px; background-color: #495057; color: white;">Sum</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center; padding: 6px 8px; font-family: monospace; font-weight: 600;">{{getColorValue(rings.ring1)}}</td>
+              <td style="text-align: center; padding: 6px 8px; font-family: monospace; font-weight: 600;">{{getColorValue(rings.ring2)}}</td>
+              <td style="text-align: center; padding: 6px 8px; font-family: monospace; font-weight: 600;">{{getColorValue(rings.ring3)}}</td>
+              <td style="text-align: center; padding: 6px 8px; font-family: monospace; font-weight: 600;">{{getColorValue(rings.ring4)}}</td>
+              <td style="text-align: center; padding: 6px 8px; font-family: monospace; font-weight: 600;">{{getColorValue(rings.ring5)}}</td>
+              <td style="text-align: center; padding: 6px 8px; font-family: monospace; font-weight: bold; font-size: 1.1em; background-color: #f8f9fa;">{{calculateTotalValue()}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <div class="text-center" style="margin-bottom: 20px;">
@@ -93,13 +126,6 @@
     </tbody>
   </table>
 
-  <div class="alert" style="margin-bottom: 0; border-left: 4px solid;" ng-class="{'alert-danger': getVictimStatus() === 'harmed', 'alert-warning': getVictimStatus() === 'stable', 'alert-success': getVictimStatus() === 'unharmed', 'alert-dark': getVictimStatus() === 'dummy', 'border-danger': getVictimStatus() === 'harmed', 'border-warning': getVictimStatus() === 'stable', 'border-success': getVictimStatus() === 'unharmed', 'border-dark': getVictimStatus() === 'dummy'}">
-    <strong><i class="fas fa-info-circle" style="margin-right: 5px;"></i>{{"admin.mazeMapEditor.victimStatus" | translate}}:</strong>
-    <span ng-if="getVictimStatus() === 'harmed'">{{"admin.mazeMapEditor.harmedVictim" | translate}} (sum = 2)</span>
-    <span ng-if="getVictimStatus() === 'stable'">{{"admin.mazeMapEditor.stableVictim" | translate}} (sum = 1)</span>
-    <span ng-if="getVictimStatus() === 'unharmed'">{{"admin.mazeMapEditor.unharmedVictim" | translate}} (sum = 0)</span>
-    <span ng-if="getVictimStatus() === 'dummy'">{{"admin.mazeMapEditor.dummyVictim" | translate}}</span>
-  </div>
 </div>
 <div class="modal-footer" style="background-color: #f8f9fa; border-top: 2px solid #dee2e6;">
   <button class="btn btn-outline-secondary" type="button" ng-click="cancel()">{{"common.cancel" | translate}}</button>

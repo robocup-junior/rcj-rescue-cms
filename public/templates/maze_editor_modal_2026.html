@@ -64,9 +64,9 @@
           <td style="text-align: center; vertical-align: middle; white-space: nowrap;">
             <div style="display: inline-flex; align-items: center; gap: 6px;">
               <input type="radio" ng-model="cell.tile.victims.top" value="Cognitive" style="display: block; transform: scale(1.2);">
-              <span ng-if="cell.tile.victims.top == 'Cognitive'" ng-click="openCognitiveTargetSettings('top')" style="display: inline-flex; align-items: center; cursor: pointer; padding: 4px; border-radius: 6px; border: 2px solid #6c757d; background-color: #f8f9fa; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
+              <span ng-if="cell.tile.victims.top == 'Cognitive'" ng-click="openCognitiveTargetSettings('top')" ng-style="{'border-color': getCognitiveStatusColor('top'), 'display': 'inline-flex', 'align-items': 'center', 'cursor': 'pointer', 'padding': '4px', 'border-radius': '6px', 'border': '2px solid', 'background-color': getCognitiveStatusBgColor('top'), 'transition': 'all 0.2s'}" onmouseover="this.style.backgroundColor=getCognitiveStatusBgColorHover('top')" onmouseout="this.style.backgroundColor=getCognitiveStatusBgColor('top')">
                 <img ng-src="{{getCognitiveTargetImage('top')}}" alt="Cognitive Target" height="28" style="border-radius: 4px;">
-                <i class="fas fa-cog" style="margin-left: 6px; color: #6c757d; font-size: 14px;"></i>
+                <i class="fas fa-cog" ng-style="{'margin-left': '6px', 'color': getCognitiveStatusColor('top'), 'font-size': '14px'}"></i>
               </span>
             </div>
           </td>
@@ -80,9 +80,9 @@
           <td style="text-align: center; vertical-align: middle; white-space: nowrap;">
             <div style="display: inline-flex; align-items: center; gap: 6px;">
               <input type="radio" ng-model="cell.tile.victims.bottom" value="Cognitive" style="display: block; transform: scale(1.2);">
-              <span ng-if="cell.tile.victims.bottom == 'Cognitive'" ng-click="openCognitiveTargetSettings('bottom')" style="display: inline-flex; align-items: center; cursor: pointer; padding: 4px; border-radius: 6px; border: 2px solid #6c757d; background-color: #f8f9fa; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
+              <span ng-if="cell.tile.victims.bottom == 'Cognitive'" ng-click="openCognitiveTargetSettings('bottom')" ng-style="{'border-color': getCognitiveStatusColor('bottom'), 'display': 'inline-flex', 'align-items': 'center', 'cursor': 'pointer', 'padding': '4px', 'border-radius': '6px', 'border': '2px solid', 'background-color': getCognitiveStatusBgColor('bottom'), 'transition': 'all 0.2s'}" onmouseover="this.style.backgroundColor=getCognitiveStatusBgColorHover('bottom')" onmouseout="this.style.backgroundColor=getCognitiveStatusBgColor('bottom')">
                 <img ng-src="{{getCognitiveTargetImage('bottom')}}" alt="Cognitive Target" height="28" style="border-radius: 4px;">
-                <i class="fas fa-cog" style="margin-left: 6px; color: #6c757d; font-size: 14px;"></i>
+                <i class="fas fa-cog" ng-style="{'margin-left': '6px', 'color': getCognitiveStatusColor('bottom'), 'font-size': '14px'}"></i>
               </span>
             </div>
           </td>
@@ -96,9 +96,9 @@
           <td style="text-align: center; vertical-align: middle; white-space: nowrap;">
             <div style="display: inline-flex; align-items: center; gap: 6px;">
               <input type="radio" ng-model="cell.tile.victims.left" value="Cognitive" style="display: block; transform: scale(1.2);">
-              <span ng-if="cell.tile.victims.left == 'Cognitive'" ng-click="openCognitiveTargetSettings('left')" style="display: inline-flex; align-items: center; cursor: pointer; padding: 4px; border-radius: 6px; border: 2px solid #6c757d; background-color: #f8f9fa; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
+              <span ng-if="cell.tile.victims.left == 'Cognitive'" ng-click="openCognitiveTargetSettings('left')" ng-style="{'border-color': getCognitiveStatusColor('left'), 'display': 'inline-flex', 'align-items': 'center', 'cursor': 'pointer', 'padding': '4px', 'border-radius': '6px', 'border': '2px solid', 'background-color': getCognitiveStatusBgColor('left'), 'transition': 'all 0.2s'}" onmouseover="this.style.backgroundColor=getCognitiveStatusBgColorHover('left')" onmouseout="this.style.backgroundColor=getCognitiveStatusBgColor('left')">
                 <img ng-src="{{getCognitiveTargetImage('left')}}" alt="Cognitive Target" height="28" style="border-radius: 4px;">
-                <i class="fas fa-cog" style="margin-left: 6px; color: #6c757d; font-size: 14px;"></i>
+                <i class="fas fa-cog" ng-style="{'margin-left': '6px', 'color': getCognitiveStatusColor('left'), 'font-size': '14px'}"></i>
               </span>
             </div>
           </td>
@@ -112,9 +112,9 @@
           <td style="text-align: center; vertical-align: middle; white-space: nowrap;">
             <div style="display: inline-flex; align-items: center; gap: 6px;">
               <input type="radio" ng-model="cell.tile.victims.right" value="Cognitive" style="display: block; transform: scale(1.2);">
-              <span ng-if="cell.tile.victims.right == 'Cognitive'" ng-click="openCognitiveTargetSettings('right')" style="display: inline-flex; align-items: center; cursor: pointer; padding: 4px; border-radius: 6px; border: 2px solid #6c757d; background-color: #f8f9fa; transition: all 0.2s;" onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'">
+              <span ng-if="cell.tile.victims.right == 'Cognitive'" ng-click="openCognitiveTargetSettings('right')" ng-style="{'border-color': getCognitiveStatusColor('right'), 'display': 'inline-flex', 'align-items': 'center', 'cursor': 'pointer', 'padding': '4px', 'border-radius': '6px', 'border': '2px solid', 'background-color': getCognitiveStatusBgColor('right'), 'transition': 'all 0.2s'}" onmouseover="this.style.backgroundColor=getCognitiveStatusBgColorHover('right')" onmouseout="this.style.backgroundColor=getCognitiveStatusBgColor('right')">
                 <img ng-src="{{getCognitiveTargetImage('right')}}" alt="Cognitive Target" height="28" style="border-radius: 4px;">
-                <i class="fas fa-cog" style="margin-left: 6px; color: #6c757d; font-size: 14px;"></i>
+                <i class="fas fa-cog" ng-style="{'margin-left': '6px', 'color': getCognitiveStatusColor('right'), 'font-size': '14px'}"></i>
               </span>
             </div>
           </td>

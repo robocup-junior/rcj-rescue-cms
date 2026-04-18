@@ -1032,6 +1032,57 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
         return '/images/cognitive_targets/' + colorCode + '.png';
     }
 
+    $scope.getCognitiveStatusColor = function(direction) {
+        if (!$scope.cell.tile.cognitiveTargets || !$scope.cell.tile.cognitiveTargets[direction]) {
+            return '#6c757d';
+        }
+        var rings = $scope.cell.tile.cognitiveTargets[direction].rings;
+        var colorValues = { 'B': -2, 'R': -1, 'Y': 0, 'G': 1, 'C': 2 };
+        var total = 0;
+        for (var i = 1; i <= 5; i++) {
+            total += colorValues[rings['ring' + i]] || 0;
+        }
+        // H (Harmed) -> Red, S (Stable) -> Yellow, U (Unharmed) -> Green, D (Dummy) -> Gray
+        if (total === 2) return '#dc3545'; // Red for Harmed
+        if (total === 1) return '#ffc107'; // Yellow for Stable
+        if (total === 0) return '#28a745'; // Green for Unharmed
+        return '#6c757d'; // Gray for Dummy
+    }
+
+    $scope.getCognitiveStatusBgColor = function(direction) {
+        if (!$scope.cell.tile.cognitiveTargets || !$scope.cell.tile.cognitiveTargets[direction]) {
+            return '#f8f9fa';
+        }
+        var rings = $scope.cell.tile.cognitiveTargets[direction].rings;
+        var colorValues = { 'B': -2, 'R': -1, 'Y': 0, 'G': 1, 'C': 2 };
+        var total = 0;
+        for (var i = 1; i <= 5; i++) {
+            total += colorValues[rings['ring' + i]] || 0;
+        }
+        // Light background colors
+        if (total === 2) return '#f8d7da'; // Light red for Harmed
+        if (total === 1) return '#fff3cd'; // Light yellow for Stable
+        if (total === 0) return '#d4edda'; // Light green for Unharmed
+        return '#f8f9fa'; // Light gray for Dummy
+    }
+
+    $scope.getCognitiveStatusBgColorHover = function(direction) {
+        if (!$scope.cell.tile.cognitiveTargets || !$scope.cell.tile.cognitiveTargets[direction]) {
+            return '#e9ecef';
+        }
+        var rings = $scope.cell.tile.cognitiveTargets[direction].rings;
+        var colorValues = { 'B': -2, 'R': -1, 'Y': 0, 'G': 1, 'C': 2 };
+        var total = 0;
+        for (var i = 1; i <= 5; i++) {
+            total += colorValues[rings['ring' + i]] || 0;
+        }
+        // Slightly darker hover colors
+        if (total === 2) return '#f5c6cb'; // Darker light red for Harmed
+        if (total === 1) return '#ffeeba'; // Darker light yellow for Stable
+        if (total === 0) return '#c3e6cb'; // Darker light green for Unharmed
+        return '#e9ecef'; // Darker light gray for Dummy
+    }
+
     $scope.openCognitiveTargetSettings = function(direction) {
         var modalInstance = $uibModal.open({
             animation: true,
@@ -1082,6 +1133,10 @@ app.controller('CognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'dire
             total += colorValues[$scope.rings['ring' + i]] || 0;
         }
         return total;
+    }
+
+    $scope.getColorValue = function(color) {
+        return colorValues[color] || 0;
     }
 
     $scope.getVictimStatus = function() {

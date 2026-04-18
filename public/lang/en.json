@@ -807,6 +807,7 @@
             "dummyVictim": "Dummy Victim",
             "tileProperties": "Tile Properties",
             "ringConfiguration": "Ring Configuration",
+            "calculation": "Calculation",
             "autoConfigure": "Auto Configure",
             "stableAbbr": "S",
             "harmedAbbr": "H",
