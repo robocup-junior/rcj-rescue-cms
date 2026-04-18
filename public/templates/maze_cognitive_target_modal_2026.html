@@ -3,7 +3,7 @@
 </div>
 <div class="modal-body" style="padding: 20px;">
   <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
-    <div style="display: flex; align-items: center; gap: 20px;">
+    <div style="display: flex; align-items: flex-start; gap: 20px;">
       <img ng-src="{{previewImage}}" alt="Cognitive Target Preview" height="120" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
       <div style="flex: 1;">
         <div class="alert" style="margin-bottom: 10px; border-left: 4px solid;" ng-class="{'alert-danger': getVictimStatus() === 'harmed', 'alert-warning': getVictimStatus() === 'stable', 'alert-success': getVictimStatus() === 'unharmed', 'alert-dark': getVictimStatus() === 'dummy', 'border-danger': getVictimStatus() === 'harmed', 'border-warning': getVictimStatus() === 'stable', 'border-success': getVictimStatus() === 'unharmed', 'border-dark': getVictimStatus() === 'dummy'}">
@@ -13,7 +13,7 @@
           <span ng-if="getVictimStatus() === 'unharmed'">{{"admin.mazeMapEditor.unharmedVictim" | translate}}</span>
           <span ng-if="getVictimStatus() === 'dummy'">{{"admin.mazeMapEditor.dummyVictim" | translate}}</span>
         </div>
-        <table class="table table-sm table-bordered" style="margin-bottom: 0; background-color: white; font-size: 0.85em;">
+        <table class="table table-sm table-bordered" style="margin-bottom: 12px; background-color: white; font-size: 0.85em;">
           <thead style="background-color: #e9ecef;">
             <tr>
               <th style="text-align: center; padding: 4px 8px;">Ring1</th>
@@ -39,22 +39,26 @@
     </div>
   </div>
 
-  <div class="text-center" style="margin-bottom: 20px;">
-    <div class="dropdown">
-      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-weight: 500;">
-        <i class="fas fa-magic" style="margin-right: 5px;"></i>{{"admin.mazeMapEditor.autoConfigure" | translate}}
-      </button>
-      <div class="dropdown-menu">
-        <a class="dropdown-item" href="" ng-click="autoSetRings('harmed')" style="padding: 8px 16px;"><span class="badge badge-danger" style="margin-right: 10px; font-size: 0.9em;">{{"admin.mazeMapEditor.harmedAbbr" | translate}}</span>{{"admin.mazeMapEditor.harmedVictim" | translate}}</a>
-        <a class="dropdown-item" href="" ng-click="autoSetRings('stable')" style="padding: 8px 16px;"><span class="badge badge-warning" style="margin-right: 10px; font-size: 0.9em;">{{"admin.mazeMapEditor.stableAbbr" | translate}}</span>{{"admin.mazeMapEditor.stableVictim" | translate}}</a>
-        <a class="dropdown-item" href="" ng-click="autoSetRings('unharmed')" style="padding: 8px 16px;"><span class="badge badge-success" style="margin-right: 10px; font-size: 0.9em;">{{"admin.mazeMapEditor.unharmedAbbr" | translate}}</span>{{"admin.mazeMapEditor.unharmedVictim" | translate}}</a>
-        <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href="" ng-click="autoSetRings('dummy')" style="padding: 8px 16px;"><span class="badge badge-secondary" style="margin-right: 10px; font-size: 0.9em;">{{"admin.mazeMapEditor.dummyAbbr" | translate}}</span>{{"admin.mazeMapEditor.dummyVictim" | translate}}</a>
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+    <h5 style="font-weight: 600; color: #495057; margin: 0; border-left: 4px solid #17a2b8; padding-left: 10px;">{{"admin.mazeMapEditor.ringConfiguration" | translate}}</h5>
+    <div style="display: flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 5px 10px; border-radius: 20px; border: 1px solid #dee2e6; box-shadow: inset 0 1px 2px rgba(0,0,0,0.08);">
+      <span style="font-size: 0.7em; color: #6c757d; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;"><i class="fas fa-magic" style="margin-right: 3px;"></i>{{"admin.mazeMapEditor.autoConfigure" | translate}}</span>
+      <div style="display: flex; gap: 4px;">
+        <button type="button" class="btn btn-sm" ng-click="autoSetRings('harmed')" style="background: linear-gradient(135deg, #dc3545 0%, #c82333 100%); border: none; color: white; padding: 3px 8px; border-radius: 10px; font-weight: 500; box-shadow: 0 1px 3px rgba(220,53,69,0.3); font-size: 0.7em;">
+          <i class="fas fa-dice" style="margin-right: 2px;"></i>{{"admin.mazeMapEditor.harmedAbbr" | translate}}
+        </button>
+        <button type="button" class="btn btn-sm" ng-click="autoSetRings('stable')" style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); border: none; color: #212529; padding: 3px 8px; border-radius: 10px; font-weight: 500; box-shadow: 0 1px 3px rgba(255,193,7,0.3); font-size: 0.7em;">
+          <i class="fas fa-dice" style="margin-right: 2px;"></i>{{"admin.mazeMapEditor.stableAbbr" | translate}}
+        </button>
+        <button type="button" class="btn btn-sm" ng-click="autoSetRings('unharmed')" style="background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%); border: none; color: white; padding: 3px 8px; border-radius: 10px; font-weight: 500; box-shadow: 0 1px 3px rgba(40,167,69,0.3); font-size: 0.7em;">
+          <i class="fas fa-dice" style="margin-right: 2px;"></i>{{"admin.mazeMapEditor.unharmedAbbr" | translate}}
+        </button>
+        <button type="button" class="btn btn-sm" ng-click="autoSetRings('dummy')" style="background: linear-gradient(135deg, #6c757d 0%, #545b62 100%); border: none; color: white; padding: 3px 8px; border-radius: 10px; font-weight: 500; box-shadow: 0 1px 3px rgba(108,117,125,0.3); font-size: 0.7em;">
+          <i class="fas fa-dice" style="margin-right: 2px;"></i>{{"admin.mazeMapEditor.dummyAbbr" | translate}}
+        </button>
       </div>
     </div>
   </div>
-
-  <h5 style="font-weight: 600; color: #495057; margin-bottom: 12px; border-left: 4px solid #17a2b8; padding-left: 10px;">{{"admin.mazeMapEditor.ringConfiguration" | translate}}</h5>
   <table class="table table-bordered" style="margin-bottom: 15px;">
     <thead style="background-color: #f8f9fa;">
       <tr>

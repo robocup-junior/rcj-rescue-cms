@@ -807,10 +807,10 @@
             "ringConfiguration": "リング設定",
             "calculation": "計算",
             "autoConfigure": "自動設定",
-            "stableAbbr": "安",
-            "harmedAbbr": "負",
-            "unharmedAbbr": "無",
-            "dummyAbbr": "ダ"
+            "stableAbbr": "安定",
+            "harmedAbbr": "負傷",
+            "unharmedAbbr": "無傷",
+            "dummyAbbr": "ダミー"
         },
         "mazeRun": {
             "title": "競技管理",
