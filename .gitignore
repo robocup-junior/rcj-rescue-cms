@@ -65,3 +65,4 @@ public/signage/prohibited.mp4
 mail.env
 tmp/course/
 /mailAttachment
+/tools/cognitive_targets_generator/output
