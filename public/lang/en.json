@@ -805,6 +805,8 @@
             "stableVictim": "Stable Victim",
             "unharmedVictim": "Unharmed Victim",
             "dummyVictim": "Dummy Victim",
+            "tileProperties": "Tile Properties",
+            "ringConfiguration": "Ring Configuration",
             "autoConfigure": "Auto Configure",
             "stableAbbr": "S",
             "harmedAbbr": "H",

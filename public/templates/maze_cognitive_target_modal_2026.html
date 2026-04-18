@@ -1,37 +1,38 @@
-<div class="modal-header">
-  <h3 class="modal-title">{{"admin.mazeMapEditor.cognitiveTargetSettings" | translate}} - {{direction | translate}}</h3>
+<div class="modal-header" style="background-color: #f8f9fa; border-bottom: 2px solid #dee2e6;">
+  <h3 class="modal-title" style="font-weight: 600; color: #495057;"><i class="fas fa-bullseye" style="margin-right: 8px;"></i>{{"admin.mazeMapEditor.cognitiveTargetSettings" | translate}} - {{direction | translate}}</h3>
 </div>
-<div class="modal-body">
-  <div class="text-center" style="margin-bottom: 20px;">
-    <img ng-src="{{previewImage}}" alt="Cognitive Target Preview" height="100">
+<div class="modal-body" style="padding: 20px;">
+  <div class="text-center" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
+    <img ng-src="{{previewImage}}" alt="Cognitive Target Preview" height="120" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
   </div>
 
   <div class="text-center" style="margin-bottom: 20px;">
     <div class="dropdown">
-      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <i class="fas fa-magic"></i> {{"admin.mazeMapEditor.autoConfigure" | translate}}
+      <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-weight: 500;">
+        <i class="fas fa-magic" style="margin-right: 5px;"></i>{{"admin.mazeMapEditor.autoConfigure" | translate}}
       </button>
       <div class="dropdown-menu">
-        <a class="dropdown-item" href="" ng-click="autoSetRings('harmed')"><span class="badge badge-danger" style="margin-right: 8px;">{{"admin.mazeMapEditor.harmedAbbr" | translate}}</span>{{"admin.mazeMapEditor.harmedVictim" | translate}}</a>
-        <a class="dropdown-item" href="" ng-click="autoSetRings('stable')"><span class="badge badge-warning" style="margin-right: 8px;">{{"admin.mazeMapEditor.stableAbbr" | translate}}</span>{{"admin.mazeMapEditor.stableVictim" | translate}}</a>
-        <a class="dropdown-item" href="" ng-click="autoSetRings('unharmed')"><span class="badge badge-success" style="margin-right: 8px;">{{"admin.mazeMapEditor.unharmedAbbr" | translate}}</span>{{"admin.mazeMapEditor.unharmedVictim" | translate}}</a>
+        <a class="dropdown-item" href="" ng-click="autoSetRings('harmed')" style="padding: 8px 16px;"><span class="badge badge-danger" style="margin-right: 10px; font-size: 0.9em;">{{"admin.mazeMapEditor.harmedAbbr" | translate}}</span>{{"admin.mazeMapEditor.harmedVictim" | translate}}</a>
+        <a class="dropdown-item" href="" ng-click="autoSetRings('stable')" style="padding: 8px 16px;"><span class="badge badge-warning" style="margin-right: 10px; font-size: 0.9em;">{{"admin.mazeMapEditor.stableAbbr" | translate}}</span>{{"admin.mazeMapEditor.stableVictim" | translate}}</a>
+        <a class="dropdown-item" href="" ng-click="autoSetRings('unharmed')" style="padding: 8px 16px;"><span class="badge badge-success" style="margin-right: 10px; font-size: 0.9em;">{{"admin.mazeMapEditor.unharmedAbbr" | translate}}</span>{{"admin.mazeMapEditor.unharmedVictim" | translate}}</a>
         <div class="dropdown-divider"></div>
-        <a class="dropdown-item" href="" ng-click="autoSetRings('dummy')"><span class="badge badge-secondary" style="margin-right: 8px;">{{"admin.mazeMapEditor.dummyAbbr" | translate}}</span>{{"admin.mazeMapEditor.dummyVictim" | translate}}</a>
+        <a class="dropdown-item" href="" ng-click="autoSetRings('dummy')" style="padding: 8px 16px;"><span class="badge badge-secondary" style="margin-right: 10px; font-size: 0.9em;">{{"admin.mazeMapEditor.dummyAbbr" | translate}}</span>{{"admin.mazeMapEditor.dummyVictim" | translate}}</a>
       </div>
     </div>
   </div>
 
-  <table class="table table-bordered">
-    <thead>
+  <h5 style="font-weight: 600; color: #495057; margin-bottom: 12px; border-left: 4px solid #17a2b8; padding-left: 10px;">{{"admin.mazeMapEditor.ringConfiguration" | translate}}</h5>
+  <table class="table table-bordered" style="margin-bottom: 15px;">
+    <thead style="background-color: #f8f9fa;">
       <tr>
-        <th>{{"admin.mazeMapEditor.ring" | translate}}</th>
-        <th>{{"admin.mazeMapEditor.color" | translate}}</th>
+        <th style="text-align: center; width: 15%;">{{"admin.mazeMapEditor.ring" | translate}}</th>
+        <th style="text-align: center;">{{"admin.mazeMapEditor.color" | translate}}</th>
       </tr>
     </thead>
     <tbody>
       <tr>
-        <td>1</td>
-        <td>
+        <td style="text-align: center; vertical-align: middle; font-weight: 600;">1</td>
+        <td style="vertical-align: middle;">
           <div class="btn-group btn-group-sm" role="group">
             <button type="button" class="btn" ng-class="rings.ring1 === 'B' ? 'btn-dark' : 'btn-outline-secondary'" ng-click="rings.ring1 = 'B'; updatePreview()">{{"admin.mazeMapEditor.cBlack" | translate}}</button>
             <button type="button" class="btn" ng-class="rings.ring1 === 'R' ? 'btn-danger' : 'btn-outline-danger'" ng-click="rings.ring1 = 'R'; updatePreview()">{{"admin.mazeMapEditor.cRed" | translate}}</button>
@@ -42,8 +43,8 @@
         </td>
       </tr>
       <tr>
-        <td>2</td>
-        <td>
+        <td style="text-align: center; vertical-align: middle; font-weight: 600;">2</td>
+        <td style="vertical-align: middle;">
           <div class="btn-group btn-group-sm" role="group">
             <button type="button" class="btn" ng-class="rings.ring2 === 'B' ? 'btn-dark' : 'btn-outline-secondary'" ng-click="rings.ring2 = 'B'; updatePreview()">{{"admin.mazeMapEditor.cBlack" | translate}}</button>
             <button type="button" class="btn" ng-class="rings.ring2 === 'R' ? 'btn-danger' : 'btn-outline-danger'" ng-click="rings.ring2 = 'R'; updatePreview()">{{"admin.mazeMapEditor.cRed" | translate}}</button>
@@ -54,8 +55,8 @@
         </td>
       </tr>
       <tr>
-        <td>3</td>
-        <td>
+        <td style="text-align: center; vertical-align: middle; font-weight: 600;">3</td>
+        <td style="vertical-align: middle;">
           <div class="btn-group btn-group-sm" role="group">
             <button type="button" class="btn" ng-class="rings.ring3 === 'B' ? 'btn-dark' : 'btn-outline-secondary'" ng-click="rings.ring3 = 'B'; updatePreview()">{{"admin.mazeMapEditor.cBlack" | translate}}</button>
             <button type="button" class="btn" ng-class="rings.ring3 === 'R' ? 'btn-danger' : 'btn-outline-danger'" ng-click="rings.ring3 = 'R'; updatePreview()">{{"admin.mazeMapEditor.cRed" | translate}}</button>
@@ -66,8 +67,8 @@
         </td>
       </tr>
       <tr>
-        <td>4</td>
-        <td>
+        <td style="text-align: center; vertical-align: middle; font-weight: 600;">4</td>
+        <td style="vertical-align: middle;">
           <div class="btn-group btn-group-sm" role="group">
             <button type="button" class="btn" ng-class="rings.ring4 === 'B' ? 'btn-dark' : 'btn-outline-secondary'" ng-click="rings.ring4 = 'B'; updatePreview()">{{"admin.mazeMapEditor.cBlack" | translate}}</button>
             <button type="button" class="btn" ng-class="rings.ring4 === 'R' ? 'btn-danger' : 'btn-outline-danger'" ng-click="rings.ring4 = 'R'; updatePreview()">{{"admin.mazeMapEditor.cRed" | translate}}</button>
@@ -78,8 +79,8 @@
         </td>
       </tr>
       <tr>
-        <td>5</td>
-        <td>
+        <td style="text-align: center; vertical-align: middle; font-weight: 600;">5</td>
+        <td style="vertical-align: middle;">
           <div class="btn-group btn-group-sm" role="group">
             <button type="button" class="btn" ng-class="rings.ring5 === 'B' ? 'btn-dark' : 'btn-outline-secondary'" ng-click="rings.ring5 = 'B'; updatePreview()">{{"admin.mazeMapEditor.cBlack" | translate}}</button>
             <button type="button" class="btn" ng-class="rings.ring5 === 'R' ? 'btn-danger' : 'btn-outline-danger'" ng-click="rings.ring5 = 'R'; updatePreview()">{{"admin.mazeMapEditor.cRed" | translate}}</button>
@@ -92,15 +93,15 @@
     </tbody>
   </table>
 
-  <div class="alert" ng-class="{'alert-danger': getVictimStatus() === 'harmed', 'alert-warning': getVictimStatus() === 'stable', 'alert-success': getVictimStatus() === 'unharmed', 'alert-dark': getVictimStatus() === 'dummy'}">
-    <strong>{{"admin.mazeMapEditor.victimStatus" | translate}}:</strong>
+  <div class="alert" style="margin-bottom: 0; border-left: 4px solid;" ng-class="{'alert-danger': getVictimStatus() === 'harmed', 'alert-warning': getVictimStatus() === 'stable', 'alert-success': getVictimStatus() === 'unharmed', 'alert-dark': getVictimStatus() === 'dummy', 'border-danger': getVictimStatus() === 'harmed', 'border-warning': getVictimStatus() === 'stable', 'border-success': getVictimStatus() === 'unharmed', 'border-dark': getVictimStatus() === 'dummy'}">
+    <strong><i class="fas fa-info-circle" style="margin-right: 5px;"></i>{{"admin.mazeMapEditor.victimStatus" | translate}}:</strong>
     <span ng-if="getVictimStatus() === 'harmed'">{{"admin.mazeMapEditor.harmedVictim" | translate}} (sum = 2)</span>
     <span ng-if="getVictimStatus() === 'stable'">{{"admin.mazeMapEditor.stableVictim" | translate}} (sum = 1)</span>
     <span ng-if="getVictimStatus() === 'unharmed'">{{"admin.mazeMapEditor.unharmedVictim" | translate}} (sum = 0)</span>
     <span ng-if="getVictimStatus() === 'dummy'">{{"admin.mazeMapEditor.dummyVictim" | translate}}</span>
   </div>
 </div>
-<div class="modal-footer">
-  <button class="btn btn-default" type="button" ng-click="cancel()">{{"common.cancel" | translate}}</button>
-  <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+<div class="modal-footer" style="background-color: #f8f9fa; border-top: 2px solid #dee2e6;">
+  <button class="btn btn-outline-secondary" type="button" ng-click="cancel()">{{"common.cancel" | translate}}</button>
+  <button class="btn btn-primary" type="button" ng-click="ok()"><i class="fas fa-check" style="margin-right: 5px;"></i>OK</button>
 </div>

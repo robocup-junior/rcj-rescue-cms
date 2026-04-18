@@ -134,3 +134,17 @@ rzslider.rz-vertical {
 .count {
     font-size: 2em;
 }
+
+/* Center modal vertically and horizontally */
+.modal-centered .modal-dialog {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 1rem);
+    margin: 0 auto;
+}
+
+@media (min-width: 576px) {
+    .modal-centered .modal-dialog {
+        min-height: calc(100% - 3.5rem);
+    }
+}

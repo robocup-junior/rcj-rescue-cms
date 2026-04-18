@@ -918,6 +918,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             templateUrl: '/templates/maze_editor_modal_2026.html',
             controller: 'ModalInstanceCtrl',
             size: 'lg',
+            windowClass: 'modal-centered',
             scope: $scope,
             resolve: {
                 x: function () {
@@ -1034,7 +1035,7 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
     $scope.openCognitiveTargetSettings = function(direction) {
         var modalInstance = $uibModal.open({
             animation: true,
-            templateUrl: '/templates/maze_cognitive_target_modal.html',
+            templateUrl: '/templates/maze_cognitive_target_modal_2026.html',
             controller: 'CognitiveTargetModalCtrl',
             size: 'md',
             resolve: {
