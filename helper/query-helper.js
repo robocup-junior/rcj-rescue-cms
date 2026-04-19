@@ -48,7 +48,6 @@ const async = require('async');
 const mongoose = require('mongoose');
 
 const { ObjectId } = mongoose.Types;
-const validator = require('validator');
 const logger = require('../config/logger').mainLogger;
 
 /** Description of the function
@@ -72,74 +71,21 @@ QueryType.STRING = 'str';
  * @param {checkVariablesOkCb} cb The callback function
  */
 const checkVariablesOk = function (variables, cb) {
-  for (const i in variables) {
-    const variable = variables[i][0];
-    const regex = variables[i][1];
+    for (const i in variables) {
+        const variable = variables[i][0];
+        const regex = variables[i][1];
 
-    if (variable === undefined) {
-      cb(true);
-      return;
-    }
-
-    if (variable.match(regex) != null) {
-      cb(false);
-      return;
-    }
-  }
-  cb(true);
-};
-
-const checkParams = function (req, okParams, cb) {
-  for (var attr in req.query) {
-    // check to see the attribute is included as legal
-    if (okParams[attr] !== undefined) {
-      const isOkParam = okParams[attr][0];
-
-      if (!isOkParam) {
-        return cb(apiMsg.illegalParams + attr);
-      }
-    }
-
-    // if the req.query contains unkowns params
-    else {
-      // return cb("Unkown param:" + attr);
-    }
-  }
-
-  // iterate over params to check if there is a missing required param
-  for (var attr in okParams) {
-    const isRequired = okParams[attr][1];
-    if (isRequired && req.query[attr] === undefined) {
-      return cb(apiMsg.missingParams + attr);
-    }
-  }
-
-  return cb();
-};
-
-const checkForValidInput = function (req, okParams, cb) {
-  for (const attr in req.query) {
-    if (okParams[attr] !== undefined) {
-      const validator = okParams[attr][2];
-      const attrVal = req.query[attr];
-
-      // loop through if attrVal is array
-      if (Array.isArray(attrVal)) {
-        for (i in attrVal) {
-          if (!validator(attrVal[i])) {
-            return cb(`${apiMsg.errorValidate + attr} with value=${attrVal}`);
-          }
+        if (variable === undefined) {
+            cb(true);
+            return;
         }
-      }
 
-      // otherwise check single input
-      else if (!validator(attrVal)) {
-        return cb(`${apiMsg.errorValidate + attr} with value=${attrVal}`);
-      }
+        if (variable.match(regex) != null) {
+            cb(false);
+            return;
+        }
     }
-  }
-
-  return cb();
+    cb(true);
 };
 
 /**
@@ -152,27 +98,27 @@ const checkForValidInput = function (req, okParams, cb) {
  * @param {parseValuesCb} cb The callback function
  */
 const parseValues = function (values, cb) {
-  const returnValues = [];
-  for (let i = 0; i < values.length; i++) {
-    const valPair = values[i];
-    const data = valPair[0];
-    const type = valPair[1];
+    const returnValues = [];
+    for (let i = 0; i < values.length; i++) {
+        const valPair = values[i];
+        const data = valPair[0];
+        const type = valPair[1];
 
-    switch (type) {
-      case QueryType.STRING:
-        returnValues.push(data === undefined ? '' : data);
-        break;
-      case QueryType.JSON:
-        try {
-          const jsonData = data === undefined ? {} : JSON.parse(data);
-          returnValues.push(jsonData);
-        } catch (SyntaxError) {
-          return cb(SyntaxError, null);
+        switch (type) {
+            case QueryType.STRING:
+                returnValues.push(data === undefined ? '' : data);
+                break;
+            case QueryType.JSON:
+                try {
+                    const jsonData = data === undefined ? {} : JSON.parse(data);
+                    returnValues.push(jsonData);
+                } catch (SyntaxError) {
+                    return cb(SyntaxError, null);
+                }
+                break;
         }
-        break;
     }
-  }
-  return cb(null, returnValues);
+    return cb(null, returnValues);
 };
 
 /**
@@ -188,25 +134,25 @@ const parseValues = function (values, cb) {
  * @param {parseValuesCb} cb The callback function
  */
 const restQuery = function (result, find, sort, schema, populate, cb) {
-  let query;
+    let query;
 
-  if (find === undefined) {
-    query = schema.find({});
-  } else {
-    query = schema.find(find);
-  }
-  if (result !== undefined) {
-    query.select(result);
-  }
-  if (sort !== undefined) {
-    query.sort(sort);
-  }
-  if (populate !== undefined && populate) {
-    query.populate(populate);
-  }
-  query.exec(function (err, data) {
-    cb(err, data);
-  });
+    if (find === undefined) {
+        query = schema.find({});
+    } else {
+        query = schema.find(find);
+    }
+    if (result !== undefined) {
+        query.select(result);
+    }
+    if (sort !== undefined) {
+        query.sort(sort);
+    }
+    if (populate !== undefined && populate) {
+        query.populate(populate);
+    }
+    query.exec(function (err, data) {
+        cb(err, data);
+    });
 };
 
 /**
@@ -219,19 +165,19 @@ const restQuery = function (result, find, sort, schema, populate, cb) {
  * @param {parseValuesCb} cb The callback function
  */
 const parseFindResultSort = function (req, cb) {
-  const { find } = req.query;
-  const { result } = req.query;
-  const { sort } = req.query;
-  parseValues(
-    [
-      [find, QueryType.JSON],
-      [result, QueryType.STRING],
-      [sort, QueryType.STRING],
-    ],
-    function (err, values) {
-      return cb(err, values);
-    }
-  );
+    const { find } = req.query;
+    const { result } = req.query;
+    const { sort } = req.query;
+    parseValues(
+        [
+            [find, QueryType.JSON],
+            [result, QueryType.STRING],
+            [sort, QueryType.STRING],
+        ],
+        function (err, values) {
+            return cb(err, values);
+        }
+    );
 };
 
 /** This function is used if you want to add special data to the find parameter.
@@ -264,64 +210,71 @@ const parseFindResultSort = function (req, cb) {
  * @param {FindFunction} [find_function] If you want to add something to the find function
  */
 const doFindResultSortQuery = function (
-  req,
-  res,
-  result_regex,
-  populate,
-  schema,
-  find_function,
-  res_function
+    req,
+    res,
+    result_regex,
+    populate,
+    schema,
+    find_function,
+    res_function
 ) {
-  let parsedValues;
+    let parsedValues;
 
-  function parseValues(cb) {
-    parseFindResultSort(req, function (err, values) {
-      if (err) {
-        logger.error(err);
-        res.status(400).send({ err: `${err}` });
-        cb(err);
-      } else {
-        parsedValues = values;
-        cb(null);
-      }
-    });
-  }
-
-  function execQuery(cb) {
-    const find = parsedValues[0];
-    if (find_function !== undefined) {
-      find_function(find);
-    }
-
-    const result = parsedValues[1];
-    if (res_function !== undefined) {
-      res_function(result);
-    }
-
-    const sort = parsedValues[2];
-    checkVariablesOk(
-      [result_regex == null ? [] : [result, result_regex]],
-      function (alrighty) {
-        // do the rest query
-        if (alrighty) {
-          restQuery(result, find, sort, schema, populate, function (err, data) {
+    function parseValues(cb) {
+        parseFindResultSort(req, function (err, values) {
             if (err) {
-              logger.error(err);
-              res.status(400).send({ err });
+                logger.error(err);
+                res.status(400).send({ err: `${err}` });
+                cb(err);
             } else {
-              res.send(data);
+                parsedValues = values;
+                cb(null);
             }
-            cb(null);
-          });
-        } else {
-          res.status(400).send({ err: apiMsg.api.hacking });
-          cb(apiMsg.api.hacking);
-        }
-      }
-    );
-  }
+        });
+    }
 
-  async.series([parseValues, execQuery]);
+    function execQuery(cb) {
+        const find = parsedValues[0];
+        if (find_function !== undefined) {
+            find_function(find);
+        }
+
+        const result = parsedValues[1];
+        if (res_function !== undefined) {
+            res_function(result);
+        }
+
+        const sort = parsedValues[2];
+        checkVariablesOk(
+            [result_regex == null ? [] : [result, result_regex]],
+            function (alrighty) {
+                // do the rest query
+                if (alrighty) {
+                    restQuery(
+                        result,
+                        find,
+                        sort,
+                        schema,
+                        populate,
+                        function (err, data) {
+                            if (err) {
+                                logger.error(err);
+                                res.status(400).send({ err });
+                            } else {
+                                res.send(data);
+                            }
+                            cb(null);
+                        }
+                    );
+                } else {
+                    res.status(400).send({ err: 'Not all checks passed' });
+                    cb('Not all checks passed');
+                }
+            }
+        );
+    }
+
+    async.series([parseValues, execQuery]);
 };
 
 /**
@@ -339,29 +292,27 @@ const doFindResultSortQuery = function (
  * @param {String/Json} [populate] If you want to populate from other schema (same as join in SQL)
  */
 const doIdQuery = function (req, res, id, select_format, schema, populate) {
-  if (mongoose.Types.ObjectId.isValid(id)) {
-    let query;
-    query = schema.findOne({ _id: new ObjectId(id) });
+    if (mongoose.Types.ObjectId.isValid(id)) {
+        let query;
+        query = schema.findOne({ _id: new ObjectId(id) });
 
-    if (populate !== undefined && populate) {
-      query.populate(populate);
+        if (populate !== undefined && populate) {
+            query.populate(populate);
+        }
+
+        query.exec(function (err, data) {
+            if (err) {
+                logger.error(err);
+                res.status(400).send({ err });
+            } else {
+                res.send(data);
+            }
+        });
+    } else {
+        res.status(400).send({ err: 'ObjectId is invalid' });
     }
-
-    query.exec(function (err, data) {
-      if (err) {
-        logger.error(err);
-        res.status(400).send({ err });
-      } else {
-        res.send(data);
-      }
-    });
-  } else {
-    res.status(400).send({ err: apiMsg.formatFault });
-  }
 };
 
-module.exports.checkForValidInput = checkForValidInput;
-module.exports.checkParams = checkParams;
 module.exports.doIdQuery = doIdQuery;
 module.exports.restQuery = restQuery;
 module.exports.QueryType = QueryType;

@@ -1,7 +1,7 @@
 /**
  * Created by rasmuse on 2015-03-04.
  *
- * Startup for db connection, set start parameters for this class 
+ * Startup for db connection, set start parameters for this class
  *
  */
 var mongoose = require('mongoose');
@@ -10,7 +10,10 @@ var env = require('node-env-file');
 env('process.env');
 
 mongoose.Promise = global.Promise;
-mongoose.connect(process.env.DB_CONNECT_STR, { useNewUrlParser: true, useUnifiedTopology: true});
+mongoose.connect(process.env.DB_CONNECT_STR, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
 var db = mongoose.connection;
 
 db.on('error', function (err) {
