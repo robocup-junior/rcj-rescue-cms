@@ -514,44 +514,25 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     };
 
     $scope.victimNumber = function(type,x,y,z,place){
-        let linear = $scope.cells[x + ',' + y + ',' + z].isLinear;
         let count = 0;
         for(let i=1,l=$scope.length*2+1;i<l;i+=2){
             for(let j=1,m=$scope.width*2+1;j<m;j+=2){
                 for(let k=0;k<$scope.height;k++) {
                     if(!$scope.cells[j + ',' + i + ',' + k]) continue;
-                    if($scope.cells[j + ',' + i + ',' + k].isLinear == linear){
-                        let victims = $scope.cells[j + ',' + i + ',' + k].tile.victims;
-                        if(victims){
-                            if(victims.top == type) count++;
-                            if(x == j && y == i && z == k && place == 'top'){
-                                if(linear) return big[count-1];
-                                else return small[count-1];
-                            }
-                            if(victims.left == type) count++;
-                            if(x == j && y == i && z == k && place == 'left'){
-                                if(linear) return big[count-1];
-                                else return small[count-1];
-                            }
-                            if(victims.right == type) count++;
-                            if(x == j && y == i && z == k && place == 'right'){
-                                if(linear) return big[count-1];
-                                else return small[count-1];
-                            }
-                            if(victims.bottom == type) count++;
-                            if(x == j && y == i && z == k && place == 'bottom'){
-                                if(linear) return big[count-1];
-                                else return small[count-1];
-                            }
-                            if(victims.floor == type) count++;
-                            if(x == j && y == i && z == k && place == 'floor'){
-                                if(linear) return big[count-1];
-                                else return small[count-1];
+                    let victims = $scope.cells[j + ',' + i + ',' + k].tile.victims;
+                    if(victims){
+                        // Count all victim types consecutively
+                        let victimPlaces = ['top', 'left', 'right', 'bottom'];
+                        for(let p = 0; p < victimPlaces.length; p++){
+                            let vp = victimPlaces[p];
+                            if (victims[vp] == 'None') continue;
+                            count++;
+                            if(x == j && y == i && z == k && place == vp){
+                                return big[count-1];
                             }
                         }
                     }
                 }
-                
             }
         }
     };
@@ -566,7 +547,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         return result;
     }
     var big = Range('A', 'Z');
-    var small = Range('α', 'ω');
+    var small = Range('a', 'z');
 
     $scope.isVictim = function(type,x,y,z){
         if($scope.cells[x + ',' + y + ',' + z] && $scope.cells[x + ',' + y + ',' + z].tile){
