@@ -1,3 +1,5 @@
+name: Test Code Quality
+
 on:
   pull_request:
   push:

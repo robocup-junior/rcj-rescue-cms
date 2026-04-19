@@ -1,6 +1,6 @@
 # Ignore everything:
 /*
 
-# Except config for now:
+# Except config and helper (for now):
 !/config
 !/helper
