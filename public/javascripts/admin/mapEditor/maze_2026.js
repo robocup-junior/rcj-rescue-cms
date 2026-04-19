@@ -958,6 +958,44 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         return false;
     }
 
+    // Show cell for output image with specific conditions (per-cell basis):
+    // - Tile cells (odd c, odd r): show if tile exists (isTile)
+    // - Horizontal wall cells (odd c, even r): show if tile above OR below exists
+    // - Vertical wall cells (even c, odd r): show if tile left OR right exists
+    // - Intersection cells (even c, even r): show if any adjacent tile exists
+    $scope.showCellOutput = function (c, r, z) {
+        const isTileCol = c % 2 === 1;
+        const isTileRow = r % 2 === 1;
+        
+        // Tile cell (intersection of tile row and tile column)
+        if (isTileCol && isTileRow) {
+            return checkTileExists(c, r, z);
+        }
+        
+        // Horizontal wall cell (between tile rows)
+        if (isTileCol && !isTileRow) {
+            return checkTileExists(c, r - 1, z) || checkTileExists(c, r + 1, z);
+        }
+        
+        // Vertical wall cell (between tile columns)
+        if (!isTileCol && isTileRow) {
+            return checkTileExists(c - 1, r, z) || checkTileExists(c + 1, r, z);
+        }
+        
+        // Intersection cell (corner) - show if any adjacent tile exists
+        return checkTileExists(c - 1, r - 1, z) || 
+               checkTileExists(c + 1, r - 1, z) ||
+               checkTileExists(c - 1, r + 1, z) || 
+               checkTileExists(c + 1, r + 1, z);
+    }
+    
+    // Check if a tile exists at the given coordinates
+    function checkTileExists(c, r, z) {
+        let cell = $scope.cells[`${c},${r},${z}`];
+        if (!cell) return false;
+        return cell.isTile;
+    }
+
     function checkTileReachable(c, r, z) {
         let cell = $scope.cells[`${c},${r},${z}`];
         if (!cell) return false;

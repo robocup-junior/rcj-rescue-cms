@@ -182,30 +182,48 @@ block content
                     button.btn.btn-info(type='button', ng-click='openMaxScore()')
                         i.fas.fa-calculator
         hr
-        .row
-            .col-6
-                h3 {{"admin.lineMapEditor.generateImage" | translate}}
-            .col-6
-                button.btn.btn-info(type='button', ng-click='makeImageDl()') {{"admin.lineMapEditor.generateImage" | translate}}
+        .row.align-items-center.mb-3
+            .col-md-6
+                h4.mb-0
+                    i.fas.fa-image.mr-2.text-secondary
+                    | {{"admin.lineMapEditor.generateImage" | translate}}
+            .col-md-6.text-md-right.mt-3.mt-md-0
+                button.btn.btn-outline-primary(type='button', ng-click='makeImageDl()')
+                    i.fas.fa-download.mr-2
+                    | {{"admin.lineMapEditor.generateImage" | translate}}
                 if !pubService
-                    button.btn.btn-info(type='button', ng-click='makeImage()',style="margin-left:20px;") {{"admin.lineMapEditor.prepareScoresheets" | translate}}
-        .row(ng-if='hasCognitiveTargets()', style='margin-top: 15px;')
+                    button.btn.btn-outline-secondary.ml-2(type='button', ng-click='makeImage()')
+                        i.fas.fa-file-alt.mr-2
+                        | {{"admin.lineMapEditor.prepareScoresheets" | translate}}
+        
+        .row(ng-if='hasCognitiveTargets()')
             .col-12
-                .card.border-primary
-                    .card-header.bg-primary.text-white
-                        i.fas.fa-bullseye(style='margin-right: 8px;')
-                        | {{"admin.mazeMapEditor.cognitiveTargetsPDF" | translate}}
-                    .card-body
+                .card.shadow-sm.border-0.mt-3
+                    .card-header.bg-gradient-primary.text-white.d-flex.align-items-center.py-3(style='background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);')
+                        i.fas.fa-bullseye.fa-lg.mr-3
+                        .d-flex.flex-column
+                            h5.mb-0.font-weight-bold {{"admin.mazeMapEditor.cognitiveTargetsPDF" | translate}}
+                            small.opacity-75 {{"admin.mazeMapEditor.cognitiveTargetsPDFDesc" | translate}}
+                    .card-body.bg-light.py-4
                         .row.align-items-center
-                            .col-md-4
-                                label.form-label(for='paperSizeSelect') {{"admin.mazeMapEditor.paperSize" | translate}}
-                                select#paperSizeSelect.form-control(ng-model='pdfSettings.paperSize', ng-change='onPaperSizeChange()')
+                            .col-lg-3.col-md-4.mb-3.mb-lg-0
+                                label.form-label.font-weight-bold.text-secondary.mb-2(for='paperSizeSelect')
+                                    i.fas.fa-ruler.mr-2
+                                    | {{"admin.mazeMapEditor.paperSize" | translate}}
+                                select#paperSizeSelect.form-control.form-control-lg.shadow-sm(ng-model='pdfSettings.paperSize', ng-change='onPaperSizeChange()')
                                     option(value='A4') A4 (210 × 297 mm)
                                     option(value='Letter') Letter (8.5 × 11 in)
-                            .col-md-8.text-md-right.mt-3.mt-md-0
-                                button.btn.btn-primary(type='button', ng-click='generateCognitiveTargetsPDF()')
-                                    i.fas.fa-print(style='margin-right: 8px;')
-                                    | {{"admin.mazeMapEditor.printCognitiveTargets" | translate}}
+                            .col-lg-9.col-md-8.text-lg-right
+                                .d-flex.flex-column.flex-sm-row.align-items-center.justify-content-lg-end
+                                    .text-muted.small.mr-sm-3.mb-2.mb-sm-0(ng-if='pdfSettings.paperSize === "A4"')
+                                        i.fas.fa-info-circle.mr-1
+                                        | {{"admin.mazeMapEditor.a4Description" | translate}}
+                                    .text-muted.small.mr-sm-3.mb-2.mb-sm-0(ng-if='pdfSettings.paperSize === "Letter"')
+                                        i.fas.fa-info-circle.mr-1
+                                        | {{"admin.mazeMapEditor.letterDescription" | translate}}
+                                    button.btn.btn-primary.btn-lg.shadow-sm(type='button', ng-click='generateCognitiveTargetsPDF()')
+                                        i.fas.fa-print.mr-2
+                                        | {{"admin.mazeMapEditor.printCognitiveTargets" | translate}}
         .row
             #outputImageArea(style="float:left;padding-top:100px;padding-left:0px;padding-right:0px;padding-bottom:100px;")
                 style.
@@ -237,8 +255,8 @@ block content
                 div(ng-repeat='z in range(height)')
                     table
                         tbody
-                            tr(ng-repeat='r in range(2*length + 1)' ng-show="showRow(r,z)")
-                                td(ng-repeat='c in range(2*width + 1)', ng-class="{'wallspot': $odd != $parent.$odd, 'tile': $odd && $parent.$odd, 'wall': cells[c+','+r+','+z].isWall, 'checkpoint': cells[c+','+r+','+z].tile.checkpoint, 'black': cells[c+','+r+','+z].tile.black, 'blue': cells[c+','+r+','+z].tile.blue, 'red': cells[c+','+r+','+z].tile.red, 'linear': cells[c+','+r+','+z].tile.reachable && cells[c+','+r+','+z].isLinear, 'floating': cells[c+','+r+','+z].tile.reachable && !cells[c+','+r+','+z].isLinear}" , ng-style="wallColor(c,r,z)")
+                            tr(ng-repeat='r in range(2*length + 1)')
+                                td(ng-repeat='c in range(2*width + 1)', ng-show="showCellOutput(c,r,z)", ng-class="{'wallspot': $odd != $parent.$odd, 'tile': $odd && $parent.$odd, 'wall': cells[c+','+r+','+z].isWall, 'checkpoint': cells[c+','+r+','+z].tile.checkpoint, 'black': cells[c+','+r+','+z].tile.black, 'blue': cells[c+','+r+','+z].tile.blue, 'red': cells[c+','+r+','+z].tile.red, 'linear': cells[c+','+r+','+z].tile.reachable && cells[c+','+r+','+z].isLinear, 'floating': cells[c+','+r+','+z].tile.reachable && !cells[c+','+r+','+z].isLinear}" , ng-style="wallColor(c,r,z)")
                                     .tile-image-container(ng-show="$odd && $parent.$odd")
                                         div.maru.size_normal.blue1(style="left:1px;top:1px;position: absolute;border-radius:0%;z-index:3;" ng-if="cells[c+','+r+','+z].tile.checkpoint")
                                             div.letter3(ng-bind="itemNumber('checkpoint',c,r,z)")
