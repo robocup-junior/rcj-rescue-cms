@@ -806,6 +806,7 @@
             "tileProperties": "タイル設定",
             "ringConfiguration": "リング設定",
             "calculation": "計算",
+            "cognitiveTargetsPDF": "Cognitive Target印刷",
             "autoConfigure": "自動設定",
             "stableAbbr": "安定",
             "harmedAbbr": "負傷",

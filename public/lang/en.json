@@ -808,6 +808,7 @@
             "tileProperties": "Tile Properties",
             "ringConfiguration": "Ring Configuration",
             "calculation": "Calculation",
+            "cognitiveTargetsPDF": "Print Cognitive Targets",
             "autoConfigure": "Auto Configure",
             "stableAbbr": "S",
             "harmedAbbr": "H",

@@ -8,6 +8,7 @@ const { ObjectId } = require('mongoose').Types;
 const logger = require('../../config/logger').mainLogger;
 const { mazeMap } = require('../../models/mazeMap');
 const scoreCalculator = require('../../helper/scoreCalculator');
+const cognitiveTargetsPDF = require('../../helper/cognitiveTargetsPDF');
 
 publicRouter.get('/', getMazeMaps);
 
@@ -437,6 +438,31 @@ adminRouter.get('/name/:competitionid/:name', function (req, res, next) {
       }
     )
     .select('_id');
+});
+
+publicRouter.get('/:map/cognitive-targets-pdf', function (req, res, next) {
+  const id = req.params.map;
+
+  if (!ObjectId.isValid(id)) {
+    return next();
+  }
+
+  mazeMap.findById(id).lean().exec(function (err, data) {
+    if (err) {
+      logger.error(err);
+      return res.status(400).send({
+        msg: 'Could not get map',
+        err: err.message,
+      });
+    }
+    if (!data) {
+      return res.status(404).send({
+        msg: 'Map not found',
+      });
+    }
+
+    cognitiveTargetsPDF.generateAndSendPDF(res, data);
+  });
 });
 
 publicRouter.all('*', function (req, res, next) {

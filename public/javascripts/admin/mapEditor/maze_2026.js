@@ -97,6 +97,30 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
 
             }
 
+            // Post-process cells to initialize cognitiveTargets for tiles with Cognitive victims
+            // This handles backward compatibility with saved data that predates cognitiveTargets
+            for (var key in $scope.cells) {
+                var cell = $scope.cells[key];
+                if (cell.isTile && cell.tile && cell.tile.victims) {
+                    var directions = ['top', 'right', 'bottom', 'left'];
+                    for (var j = 0; j < directions.length; j++) {
+                        var dir = directions[j];
+                        if (cell.tile.victims[dir] === 'Cognitive') {
+                            // Initialize cognitiveTargets if not exists
+                            if (!cell.tile.cognitiveTargets) {
+                                cell.tile.cognitiveTargets = {};
+                            }
+                            // Initialize this direction if not exists
+                            if (!cell.tile.cognitiveTargets[dir]) {
+                                cell.tile.cognitiveTargets[dir] = {
+                                    rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' }
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+
         });
     }
     
@@ -625,6 +649,62 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             ctx2 = mem_canvas.getContext("2d");
             ctx2.drawImage(canvas, 0, topY, canvas.width, bottomY-topY, 0, 0, canvas.width, bottomY-topY);
             let imgData = mem_canvas.toDataURL();
+            let link = document.createElement("a");
+            link.href = imgData;
+            link.download = $scope.name + ".png";
+            link.click();
+        });
+    };
+
+    $scope.hasCognitiveTargets = function() {
+        for (const key in $scope.cells) {
+            const cell = $scope.cells[key];
+            if (cell.isTile && cell.tile && cell.tile.victims) {
+                const directions = ['top', 'right', 'bottom', 'left'];
+                for (const dir of directions) {
+                    if (cell.tile.victims[dir] === 'Cognitive') {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    };
+
+    $scope.generateCognitiveTargetsPDF = function() {
+        window.open('/api/maps/maze/' + mapId + '/cognitive-targets-pdf', '_blank');
+    };
+
+    $scope.makeImageDl = function(){
+        window.scrollTo(0,0);
+        html2canvas(document.getElementById("outputImageArea"),{
+            scale: 5
+        }).then(function(canvas) {
+            let ctx = canvas.getContext("2d");
+
+            //Detect image area
+            let topY = 0;
+            for(let y=0;y<canvas.height;y++){
+                let imagedata = ctx.getImageData(canvas.width/2, y, 1, 1);
+                if(imagedata.data[0] != 255){
+                    topY = y;
+                    break;
+                }
+            }
+            let bottomY = 0;
+            for(let y=canvas.height-1;y>=0;y--){
+                let imagedata = ctx.getImageData(canvas.width/2, y, 1, 1);
+                if(imagedata.data[0] != 255){
+                    bottomY = y;
+                    break;
+                }
+            }
+            mem_canvas = document.createElement("canvas");
+            mem_canvas.width = canvas.width;
+            mem_canvas.height = bottomY-topY;
+            ctx2 = mem_canvas.getContext("2d");
+            ctx2.drawImage(canvas, 0, topY, canvas.width, bottomY-topY, 0, 0, canvas.width, bottomY-topY);
+            let imgData = mem_canvas.toDataURL();
             downloadURI(imgData,$scope.name+'.png')
         });
     };
@@ -959,14 +1039,19 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
         };
     }
 
-    // Initialize cognitiveTargets if not exists
+    // Initialize cognitiveTargets container if not exists
     if (!$scope.cell.tile.cognitiveTargets) {
-        $scope.cell.tile.cognitiveTargets = {
-            top: { rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' } },
-            bottom: { rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' } },
-            left: { rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' } },
-            right: { rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' } }
-        };
+        $scope.cell.tile.cognitiveTargets = {};
+    }
+    // Initialize each direction if not exists (preserves existing data)
+    var directions = ['top', 'bottom', 'left', 'right'];
+    for (var i = 0; i < directions.length; i++) {
+        var dir = directions[i];
+        if (!$scope.cell.tile.cognitiveTargets[dir]) {
+            $scope.cell.tile.cognitiveTargets[dir] = {
+                rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' }
+            };
+        }
     }
 
     $scope.elevatorChanged = function (newValue) {
@@ -1084,6 +1169,17 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
     }
 
     $scope.openCognitiveTargetSettings = function(direction) {
+        // Ensure cognitiveTargets exists
+        if (!$scope.cell.tile.cognitiveTargets) {
+            $scope.cell.tile.cognitiveTargets = {};
+        }
+        // Ensure the direction exists with default rings
+        if (!$scope.cell.tile.cognitiveTargets[direction]) {
+            $scope.cell.tile.cognitiveTargets[direction] = {
+                rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' }
+            };
+        }
+
         var modalInstance = $uibModal.open({
             animation: true,
             templateUrl: '/templates/maze_cognitive_target_modal_2026.html',
@@ -1112,7 +1208,7 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
 
 app.controller('CognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'direction', 'cognitiveData', function ($scope, $uibModalInstance, direction, cognitiveData) {
     $scope.direction = direction;
-    $scope.rings = angular.copy(cognitiveData.rings) || { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' };
+    $scope.rings = (cognitiveData && cognitiveData.rings) ? angular.copy(cognitiveData.rings) : { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' };
     
     var colorValues = {
         'B': -2,
