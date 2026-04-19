@@ -671,8 +671,21 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         return false;
     };
 
+    // Initialize paper size selection using object to avoid scope inheritance issues
+    $scope.pdfSettings = {
+        paperSize: 'A4'
+    };
+    
+    $scope.onPaperSizeChange = function() {
+        console.log('Paper size changed to:', $scope.pdfSettings.paperSize);
+    };
+
     $scope.generateCognitiveTargetsPDF = function() {
-        window.open('/api/maps/maze/' + mapId + '/cognitive-targets-pdf', '_blank');
+        var paperSize = $scope.pdfSettings.paperSize;
+        console.log('Generating PDF with paper size:', paperSize);
+        var url = '/api/maps/maze/' + mapId + '/cognitive-targets-pdf?paperSize=' + encodeURIComponent(paperSize);
+        console.log('Opening URL:', url);
+        window.open(url, '_blank');
     };
 
     $scope.makeImageDl = function(){

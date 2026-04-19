@@ -189,9 +189,23 @@ block content
                 button.btn.btn-info(type='button', ng-click='makeImageDl()') {{"admin.lineMapEditor.generateImage" | translate}}
                 if !pubService
                     button.btn.btn-info(type='button', ng-click='makeImage()',style="margin-left:20px;") {{"admin.lineMapEditor.prepareScoresheets" | translate}}
-                button.btn.btn-primary(type='button', ng-click='generateCognitiveTargetsPDF()', style="margin-left:20px;", ng-if='hasCognitiveTargets()')
-                    i.fas.fa-bullseye(style="margin-right:5px;")
-                    | {{"admin.mazeMapEditor.cognitiveTargetsPDF" | translate}}
+        .row(ng-if='hasCognitiveTargets()', style='margin-top: 15px;')
+            .col-12
+                .card.border-primary
+                    .card-header.bg-primary.text-white
+                        i.fas.fa-bullseye(style='margin-right: 8px;')
+                        | {{"admin.mazeMapEditor.cognitiveTargetsPDF" | translate}}
+                    .card-body
+                        .row.align-items-center
+                            .col-md-4
+                                label.form-label(for='paperSizeSelect') {{"admin.mazeMapEditor.paperSize" | translate}}
+                                select#paperSizeSelect.form-control(ng-model='pdfSettings.paperSize', ng-change='onPaperSizeChange()')
+                                    option(value='A4') A4 (210 × 297 mm)
+                                    option(value='Letter') Letter (8.5 × 11 in)
+                            .col-md-8.text-md-right.mt-3.mt-md-0
+                                button.btn.btn-primary(type='button', ng-click='generateCognitiveTargetsPDF()')
+                                    i.fas.fa-print(style='margin-right: 8px;')
+                                    | {{"admin.mazeMapEditor.printCognitiveTargets" | translate}}
         .row
             #outputImageArea(style="float:left;padding-top:100px;padding-left:0px;padding-right:0px;padding-bottom:100px;")
                 style.

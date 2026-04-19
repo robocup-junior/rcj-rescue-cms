@@ -442,6 +442,9 @@ adminRouter.get('/name/:competitionid/:name', function (req, res, next) {
 
 publicRouter.get('/:map/cognitive-targets-pdf', function (req, res, next) {
   const id = req.params.map;
+  const paperSize = req.query.paperSize || 'A4';
+  
+  console.log(`PDF request for map ${id}, paper size: ${paperSize}`);
 
   if (!ObjectId.isValid(id)) {
     return next();
@@ -461,7 +464,7 @@ publicRouter.get('/:map/cognitive-targets-pdf', function (req, res, next) {
       });
     }
 
-    cognitiveTargetsPDF.generateAndSendPDF(res, data);
+    cognitiveTargetsPDF.generateAndSendPDF(res, data, paperSize);
   });
 });
 

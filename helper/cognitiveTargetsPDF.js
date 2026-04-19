@@ -6,8 +6,14 @@ const path = require('path');
  * Generates a PDF with Cognitive Targets for printing
  * Layout: 3 columns x 3 rows = 9 targets per page
  * Each target: 5cm x 5cm (141.73 x 141.73 points)
- * Page: A4 (595.28 x 841.89 points)
+ * Supports A4 and Letter paper sizes
  */
+
+// Paper size dimensions in points
+const PAPER_SIZES = {
+  A4: { width: 595.28, height: 841.89 },
+  Letter: { width: 612, height: 792 }
+};
 
 // Constants for layout
 const TARGET_SIZE = 141.73; // 5cm in points (1cm = 28.346 points)
@@ -208,8 +214,9 @@ function generateCognitiveTargetsPDF(map, outputPath = null) {
  * Generate PDF and pipe to response
  * @param {Object} res - Express response object
  * @param {Object} map - The maze map object
+ * @param {string} paperSize - Paper size ('A4' or 'Letter')
  */
-function generateAndSendPDF(res, map) {
+function generateAndSendPDF(res, map, paperSize = 'A4') {
   const targets = extractCognitiveTargets(map);
   
   if (targets.length === 0) {
@@ -218,9 +225,19 @@ function generateAndSendPDF(res, map) {
     });
   }
   
+  // Validate paper size
+  const validPaperSize = PAPER_SIZES[paperSize] ? paperSize : 'A4';
+  
+  // Get paper dimensions
+  const size = PAPER_SIZES[validPaperSize];
+  const pageWidth = size.width;
+  const pageHeight = size.height;
+  
+  console.log(`Generating PDF with paper size: ${validPaperSize}, dimensions: ${pageWidth}x${pageHeight}`);
+  
   const doc = new PDFDocument({
     autoFirstPage: false,
-    size: 'A4'
+    size: validPaperSize
   });
   
   res.setHeader('Content-Type', 'application/pdf');
@@ -236,13 +253,13 @@ function generateAndSendPDF(res, map) {
     // Add header
     doc.fontSize(16);
     doc.text(`Cognitive Targets - ${map.name}`, 50, 20, {
-      width: 495,
+      width: pageWidth - 100,
       align: 'center'
     });
     
     doc.fontSize(10);
     doc.text(`Page ${Math.floor(targetIndex / (COLS * ROWS)) + 1}`, 50, 40, {
-      width: 495,
+      width: pageWidth - 100,
       align: 'center'
     });
     
@@ -250,9 +267,9 @@ function generateAndSendPDF(res, map) {
     // Total height: 3 targets + 2 gaps between rows + header + margins
     const headerHeight = 35; // Reduced header space
     const bottomMargin = 20; // Reduced bottom margin
-    const availableHeight = 841.89 - MARGIN_Y - headerHeight - bottomMargin;
+    const availableHeight = pageHeight - MARGIN_Y - headerHeight - bottomMargin;
     const cellHeight = availableHeight / ROWS;
-    const availableWidth = 595.28 - (2 * MARGIN_X);
+    const availableWidth = pageWidth - (2 * MARGIN_X);
     const cellWidth = availableWidth / COLS;
     
     // Draw targets in grid

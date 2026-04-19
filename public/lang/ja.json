@@ -807,6 +807,8 @@
             "ringConfiguration": "リング設定",
             "calculation": "計算",
             "cognitiveTargetsPDF": "Cognitive Target印刷",
+            "printCognitiveTargets": "印刷",
+            "paperSize": "用紙サイズ",
             "autoConfigure": "自動設定",
             "stableAbbr": "安定",
             "harmedAbbr": "負傷",
