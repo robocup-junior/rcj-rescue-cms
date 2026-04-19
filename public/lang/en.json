@@ -772,7 +772,7 @@
             "start": "@:admin.lineMapEditor.start",
             "placement" : "Placement of victims:",
             "changeF": "Change floor to",
-            "noEle": "(No elevator)",
+            "noEle": "No elevator",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "parent": "This map is one of parent's dice pattern",

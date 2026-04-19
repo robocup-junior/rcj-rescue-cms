@@ -770,7 +770,7 @@
             "start": "@:admin.lineMapEditor.start",
             "placement" : "被災者の配置:",
             "changeF": "次の階層に移動: ",
-            "noEle": "（エレベーターがありません）",
+            "noEle": "階層変更なし",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "parent": "このマップは，親のサイコロパターンのうちの１つです",
