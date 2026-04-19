@@ -43,15 +43,54 @@ function isExistFile(file) {
 }
 
 /**
- * Extract unique cognitive targets from map cells
+ * Extract unique cognitive targets from map cells with victim numbers
  * @param {Object} map - The maze map object
- * @returns {Array} - Array of unique color codes (e.g., ['YYYYY', 'RRRRR'])
+ * @returns {Array} - Array of objects with colorCode and victimLetter
  */
 function extractCognitiveTargets(map) {
-  const targets = new Set();
+  const targetsMap = new Map(); // colorCode -> {colorCode, victimLetter}
   
   if (!map.cells) return [];
   
+  // Calculate victim numbers using the same logic as maze_2026.js
+  // Order: y (length) -> x (width) -> z (height) -> direction (top, left, right, bottom)
+  const victimNumberMap = new Map(); // position+direction -> letter
+  let victimCount = 0;
+  
+  // Get map dimensions
+  let maxX = 0, maxY = 0, maxZ = 0;
+  for (const cell of map.cells) {
+    if (cell.isTile) {
+      if (cell.x > maxX) maxX = cell.x;
+      if (cell.y > maxY) maxY = cell.y;
+      if (cell.z > maxZ) maxZ = cell.z;
+    }
+  }
+  
+  // Count victims in the same order as frontend
+  for (let i = 1; i <= maxY; i += 2) { // y (length)
+    for (let j = 1; j <= maxX; j += 2) { // x (width)
+      for (let k = 0; k <= maxZ; k++) { // z (height)
+        const cell = map.cells.find(c => c.x === j && c.y === i && c.z === k);
+        if (!cell || !cell.isTile || !cell.tile || !cell.tile.victims) continue;
+        
+        const victims = cell.tile.victims;
+        const victimPlaces = ['top', 'left', 'right', 'bottom'];
+        
+        for (const dir of victimPlaces) {
+          const victimType = victims[dir];
+          if (victimType && victimType !== 'None') {
+            victimCount++;
+            const key = `${j},${i},${k},${dir}`;
+            const letter = String.fromCharCode(64 + victimCount); // 1=A, 2=B, etc.
+            victimNumberMap.set(key, letter);
+          }
+        }
+      }
+    }
+  }
+  
+  // Now extract cognitive targets and get their victim numbers
   for (const cell of map.cells) {
     if (!cell.isTile || !cell.tile || !cell.tile.victims) continue;
     
@@ -63,12 +102,32 @@ function extractCognitiveTargets(map) {
           cell.tile.cognitiveTargets[dir].rings) {
         const rings = cell.tile.cognitiveTargets[dir].rings;
         const colorCode = rings.ring1 + rings.ring2 + rings.ring3 + rings.ring4 + rings.ring5;
-        targets.add(colorCode);
+        
+        // Get victim letter for this position
+        const key = `${cell.x},${cell.y},${cell.z},${dir}`;
+        const victimLetter = victimNumberMap.get(key) || null;
+        
+        if (!targetsMap.has(colorCode)) {
+          targetsMap.set(colorCode, {
+            colorCode: colorCode,
+            victimLetter: victimLetter
+          });
+        }
       }
     }
   }
   
-  return Array.from(targets).sort();
+  return Array.from(targetsMap.values()).sort((a, b) => {
+    // Sort by victim letter (A, B, C...)
+    if (a.victimLetter && b.victimLetter) {
+      return a.victimLetter.localeCompare(b.victimLetter);
+    }
+    // If one has a letter and the other doesn't, prioritize the one with letter
+    if (a.victimLetter) return -1;
+    if (b.victimLetter) return 1;
+    // Fall back to colorCode sorting
+    return a.colorCode.localeCompare(b.colorCode);
+  });
 }
 
 /**
@@ -108,9 +167,11 @@ function getStatusName(status) {
  * @param {PDFDocument} doc - The PDF document
  * @param {number} x - X position
  * @param {number} y - Y position
- * @param {string} colorCode - The color code (e.g., 'YYYYY')
+ * @param {Object} target - The target object with colorCode and victimLetter
  */
-function drawCognitiveTarget(doc, x, y, colorCode) {
+function drawCognitiveTarget(doc, x, y, target) {
+  const colorCode = target.colorCode;
+  const victimLetter = target.victimLetter;
   const imagePath = path.join(__dirname, '../public/images/cognitive_targets', `${colorCode}.png`);
   const status = getVictimStatus(colorCode);
   const statusName = getStatusName(status);
@@ -130,13 +191,44 @@ function drawCognitiveTarget(doc, x, y, colorCode) {
     });
   }
   
-  // Draw color code and status label below the target (1cm = 28.35 points for cutting)
-  doc.fontSize(8);
-  const labelText = `${colorCode} (${status}: ${statusName})`;
-  doc.text(labelText, x, y + TARGET_SIZE + 28.35, {
-    width: TARGET_SIZE,
-    align: 'center'
-  });
+  // Draw victim number in pink circle (left side of label)
+  if (victimLetter) {
+    const labelY = y + TARGET_SIZE + 28.35;
+    const circleX = x + 5;
+    const circleY = labelY + 4;
+    const circleRadius = 7.5;
+    
+    // Draw pink circle
+    doc.circle(circleX, circleY, circleRadius)
+       .fill('#e84393');
+    
+    // Draw letter in white (centered in circle)
+    doc.fontSize(9)
+       .fillColor('#ffffff')
+       .text(victimLetter, circleX - 4, circleY - 3.5, {
+         width: 8,
+         align: 'center'
+       });
+    
+    // Reset fill color
+    doc.fillColor('#000000');
+    
+    // Draw color code and status label to the right of the circle
+    doc.fontSize(8);
+    const labelText = `${colorCode} (${status}: ${statusName})`;
+    doc.text(labelText, x + 18, labelY, {
+      width: TARGET_SIZE - 18,
+      align: 'center'
+    });
+  } else {
+    // Draw color code and status label below the target (1cm = 28.35 points for cutting)
+    doc.fontSize(8);
+    const labelText = `${colorCode} (${status}: ${statusName})`;
+    doc.text(labelText, x, y + TARGET_SIZE + 28.35, {
+      width: TARGET_SIZE,
+      align: 'center'
+    });
+  }
 }
 
 /**
