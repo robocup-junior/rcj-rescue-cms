@@ -681,11 +681,13 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     };
 
     $scope.generateCognitiveTargetsPDF = function() {
-        var paperSize = $scope.pdfSettings.paperSize;
-        console.log('Generating PDF with paper size:', paperSize);
-        var url = '/api/maps/maze/' + mapId + '/cognitive-targets-pdf?paperSize=' + encodeURIComponent(paperSize);
-        console.log('Opening URL:', url);
-        window.open(url, '_blank');
+        $scope.saveMap(null, function () {
+            var paperSize = $scope.pdfSettings.paperSize;
+            console.log('Generating PDF with paper size:', paperSize);
+            var url = '/api/maps/maze/' + mapId + '/cognitive-targets-pdf?paperSize=' + encodeURIComponent(paperSize);
+            console.log('Opening URL:', url);
+            window.open(url, '_blank');
+        });
     };
 
     $scope.makeImageDl = function(){
