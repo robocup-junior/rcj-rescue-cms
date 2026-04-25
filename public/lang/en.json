@@ -569,6 +569,7 @@
         },
         "home": {
             "competitions": "Competitions",
+            "description": "Manage your competitions and system settings from this central dashboard.",
             "c_item": "Tool / Settings",
             "line_tSet": "Line tilesets",
             "add_c": "Add competition",

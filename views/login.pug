@@ -14,34 +14,38 @@ block content
   .row
     .col-md-3.col-sm-2
     .col-md-6.col-sm-8
-      .alert.alert-secondary(role='alert' ng-if="return") {{'login.return' | translate}}
-      .card(style='width: 100%; margin-bottom:50px;')
-          .card-body
-            .text-center
-                h1.card-title 
-                    i.fas.fa-unlock-alt(aria-hidden='true') {{'login.title' | translate}}
-                img(src='/images/logo.png', alt='...' style="width:100px;")
-                
-            br
-            h6.card-subtitle.mb-2.text-muted {{'login.description' | translate}}
-            hr
-            .alert.alert-danger(role='alert' ng-if="isFailed") {{'login.failed' | translate}}
-            form(class="login-container" ng-submit="login()")
-                .input-group.input-group-lg.mb-3
-                    .input-group-prepend
-                        span.input-group-text
-                            i.fas.fa-user.fa-lg(aria-hidden='true')
-                    input.form-control(type='text' autocorrect="off" autocapitalize="off" placeholder='Username' aria-label='Username' ng-model="username" ng-class="isFailed?'is-invalid':''")
-                br
-                .input-group.input-group-lg.mb-3
-                    .input-group-prepend
-                        span.input-group-text
-                            i.fas.fa-key.fa-lg(aria-hidden='true')
-                    input.form-control(type='password', placeholder='Password', aria-label='Password', aria-describedby='sizing-addon1' ng-model="password" ng-class="isFailed?'is-invalid':''")
-                br
-                .text-center
-                    button.btn.btn-success.btn-lg(type='submit')
-                        i.fas.fa-sign-in-alt(aria-hidden='true') {{'login.login' | translate}}
+      .alert.alert-secondary(role='alert' ng-if="return" style="border-radius: 12px; border: none; background: #f1f5f9; color: #475569; font-weight: 600;") 
+        i.fas.fa-info-circle.mr-2
+        | {{'login.return' | translate}}
+      
+      .premium-card
+        .text-center.mb-5
+          img.mb-3(src='/images/logo.png', alt='Logo' style="width: 100px;")
+          h1.font-weight-bold {{'login.title' | translate}}
+          p.text-muted {{'login.description' | translate}}
+        .alert.alert-danger(role='alert' ng-if="isFailed" style="border-radius: 12px; animation: shake 0.5s;") 
+          i.fas.fa-exclamation-circle.mr-2
+          | {{'login.failed' | translate}}
+        
+        form(ng-submit="login()")
+          .form-group.mb-4
+            .input-group.premium-input-group
+              .input-group-prepend
+                span.input-group-text
+                  i.fas.fa-user
+              input.form-control(type='text' autocorrect="off" autocapitalize="off" placeholder='Username' ng-model="username" ng-class="isFailed?'is-invalid':''" required)
+          
+          .form-group.mb-4
+            .input-group.premium-input-group
+              .input-group-prepend
+                span.input-group-text
+                  i.fas.fa-key
+              input.form-control(type='password', placeholder='Password' ng-model="password" ng-class="isFailed?'is-invalid':''" required)
+          
+          .text-center.mt-5
+            button.btn.btn-premium.btn-block.btn-lg.py-3(type='submit')
+              i.fas.fa-sign-in-alt.mr-2
+              | {{'login.login' | translate}}
 
 
 

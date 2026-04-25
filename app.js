@@ -68,7 +68,6 @@ async function bootstrap(){
     var simulationRoute = require('./routes/simulation')
     var loginRoute = require('./routes/login')
     var adminRoute = require('./routes/admin')
-    var localesRoute = require('./routes/locales')
     var signageRoute = require('./routes/signage')
     var shortRoute = require('./routes/shortURL')
     var serviceRoute = require('./routes/service')
@@ -213,7 +212,6 @@ async function bootstrap(){
         });
     })
     app.use('/home', [homeRoute.public, pass.ensureAuthenticated, homeRoute.private, pass.ensureAdmin, homeRoute.admin])
-    app.use('/locales', localesRoute)
     app.use('/s', shortRoute.public)
     app.use('/service', serviceRoute)
 

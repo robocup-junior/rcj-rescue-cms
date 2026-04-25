@@ -13,9 +13,11 @@ html(style='height:100%; overflow-y:scroll;' ng-app=ngAppDef ng-init=ngInit)
                 .row
                     .col-md-1
                     .col-md-10
-                        nav.breadcrumb
+                        nav.breadcrumb.premium-breadcrumb
                             block location
                 br
             block content
         block footer
             include ./footer
+        include ./login_modal
+        include ./language_modal

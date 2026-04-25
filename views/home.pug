@@ -39,12 +39,7 @@ block content
       br
       br
 
-      if typeof(user) == "undefined"
-        button(ng-click="go('/login')" class='btn btn-warning btn-lg btn-block')
-            i.fas.fa-sign-in-alt(aria-hidden='true' ng-cloak) &nbsp; {{'home.login' | translate}}
-      else
-        button(ng-click="go('/logout')" class='btn btn-outline-danger btn-lg btn-block')
-            i.fas.fa-sign-out-alt(aria-hidden='true' ng-cloak) &nbsp; {{'home.logout' | translate}}
+      //- Redundant buttons removed as they are now in the global navbar
       br
       br
       .row.row-height(style="display: flex;justify-content: space-between;")
@@ -57,15 +52,8 @@ block content
               p(ng-if="competition.description" style="text-align:center" ng-style="{'color': '#' + competition.color}" ng-bind-html="competition.description")
       br
       br
-      br
-      if typeof(user) != "undefined"
-        if user.admin
-            button(ng-click="go('/admin')" class='btn btn-outline-success btn-lg btn-block' ng-cloak)
-              i.fas.fa-cog &nbsp;  {{'home.management' | translate}}
-        else
-            button(class='btn btn-outline-success btn-lg btn-block' disabled ng-cloak)
-              i.fas.fa-cog &nbsp;  {{'home.management' | translate}}
-            p(translate="home.access_level", translate-values='{account: "'+ user.username + '"}')
+      if typeof(user) != "undefined" && !user.admin
+        p(translate="home.access_level", translate-values='{account: "'+ user.username + '"}')
       br
       br
       br

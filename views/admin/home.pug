@@ -13,84 +13,287 @@ block location
     a.breadcrumb-item(ng-click="go('/home')") Home
     span.breadcrumb-item.active Admin
 
+append css
+  style.
+    :root {
+        --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        --secondary-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --border-radius: 16px;
+        --primary-color: #4f46e5;
+    }
+
+    .modern-header {
+        background: var(--primary-gradient);
+        padding: 2.5rem;
+        border-radius: var(--border-radius);
+        color: white !important;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .modern-header h1 {
+        color: white !important;
+        margin: 0;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+    }
+
+    .modern-header::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -10%;
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+    }
+
+    .modern-card {
+        background: white;
+        border-radius: var(--border-radius);
+        border: 1px solid #e2e8f0;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+
+    .modern-card-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        font-weight: 700;
+        color: #1e293b;
+        background: #fafafa;
+    }
+
+    .modern-card-header i {
+        margin-right: 0.75rem;
+        color: var(--primary-color);
+    }
+
+    .tools-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+        padding: 0.5rem;
+    }
+
+    @media (min-width: 576px) and (max-width: 991px) {
+        .tools-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    .action-card {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem 1rem;
+        background: rgba(255, 255, 255, 0.7);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(226, 232, 240, 0.8);
+        border-radius: var(--border-radius);
+        text-align: center;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+        color: #475569;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .action-card:hover {
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 20px 25px -5px rgba(99, 102, 241, 0.15), 0 10px 10px -5px rgba(99, 102, 241, 0.1);
+        border-color: #6366f1;
+        color: #1e293b;
+    }
+
+    .action-card:hover::before {
+        opacity: 1;
+    }
+
+    .action-card i {
+        font-size: 2.2rem;
+        margin-bottom: 0.85rem;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .action-card:hover i {
+        transform: scale(1.2) rotate(5deg);
+    }
+
+    .action-card span {
+        font-weight: 700;
+        font-size: 0.9rem;
+        letter-spacing: 0.01em;
+    }
+
+    .custom-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .custom-table th {
+        background: #f8fafc;
+        padding: 1rem;
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid #e2e8f0;
+    }
+
+    .custom-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        vertical-align: middle;
+    }
+
+    .custom-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .custom-table tr:hover td {
+        background-color: #f1f5f9;
+    }
+
+    .btn-premium {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.2s;
+        box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-premium:hover {
+        box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4);
+        transform: scale(1.02);
+        color: white;
+    }
+
+    .btn-premium:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+    .premium-input {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s;
+        width: 100%;
+    }
+
+    .premium-input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
 
 block content
   .row
-    .col-md-1
-    .col-md-10
-      .row
-        .col-md-6
-          h1
-            i.fas.fa-calendar &nbsp;{{"admin.home.competitions" | translate}}
-          table.custom
-            thead
-                tr
-                  th {{"common.name" | translate}}
-                  th {{"common.operation" | translate}}
-            tbody
-                tr
-                  td
-                    input(ng-model='competitionName' style="width:100%;")
-                  td
-                    button(ng-click='addCompetition()') {{"admin.home.add_c" | translate}}
-          br
-          br
-          table.custom
-            thead
-                tr
-                  th {{"common.name" | translate}}
-                  th {{"common.operation" | translate}}
-            tbody
-                tr(ng-repeat='competition in competitions')
-                  td
-                    a(ng-if='competition.authLevel >= 10' ng-bind='competition.name' ng-href="/admin/{{competition._id}}")
-                    span(ng-if='competition.authLevel < 10' ng-bind='competition.name')
-                  td
-                    a(ng-if='competition.authLevel >= 10' href="" ng-click='removeCompetition(competition)')
-                      i.far.fa-trash-alt &nbsp;{{"common.delete" | translate}}
+    .col-md-11.mx-auto
+      .modern-header
+        .row.align-items-center
+          .col-md-8
+            h1
+              i.fas.fa-shield-alt.mr-3
+              | {{"admin.home.competitions" | translate}}
+            p.mb-0.mt-2.opacity-75 {{"admin.home.description" | translate}}
+          .col-md-4.text-right.d-none.d-md-block
+            i.fas.fa-cogs.fa-4x(style="opacity: 0.2;")
 
-        .col-md-6
-          h1 
-            i.fas.fa-tools &nbsp;{{"admin.home.c_item" | translate}}
-          .row 
-            .col-md-4(style="margin-bottom:30px;")
-              button(ng-click="go('/admin/line/tilesets')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                i.fas.fa-road.fa-2x
-                br
-                span {{"admin.home.line_tSet" | translate}}
-            .col-md-4(style="margin-bottom:30px;")
-              button(ng-click="go('/signage/setting')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                i.fas.fa-tv.fa-2x
-                br
-                span {{"admin.home.signage" | translate}}
-            .col-md-4(style="margin-bottom:30px;")
-              button(ng-click="go('/admin/restore')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                i.fas.fa-trash-restore.fa-2x
-                br
-                span {{"admin.home.restore" | translate}}
-            .col-md-4(style="margin-bottom:30px;")
-              button(ng-click="go('/admin/mailTemplates')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                i.fas.fa-mail-bulk.fa-2x
-                br
-                span {{"admin.mailTemplates.title" | translate}}
-            if user.superDuperAdmin
-              .col-md-4(style="margin-bottom:30px;")
-                button(ng-click="open('/admin/queues')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                  i.fas.fa-bullseye.fa-2x
-                  br
-                  span {{"admin.home.queue" | translate}}
-              .col-md-4(style="margin-bottom:30px;")
-                button(ng-click="open('/admin/mongo')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                  i.fas.fa-database.fa-2x
-                  br
-                  span {{"admin.home.mongo" | translate}}
-              .col-md-4(style="margin-bottom:30px;")
-                button(ng-click="go('/admin/short')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                  i.fas.fa-link.fa-2x
-                  br
-                  span {{"admin.shortURL.title" | translate}}
-              .col-md-4(style="margin-bottom:30px;")
-                button(ng-click="go('/admin/user')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                  i.fas.fa-users.fa-2x
-                  br
-                  span {{"admin.home.user" | translate}}
+      .row
+        .col-lg-7
+          .modern-card
+            .modern-card-header
+              i.fas.fa-trophy
+              | {{"admin.home.competitions" | translate}}
+            .modern-card-body
+              table.custom-table
+                thead
+                  tr
+                    th {{"common.name" | translate}}
+                    th.text-right {{"common.operation" | translate}}
+                tbody
+                  tr
+                    td
+                      input.premium-input(ng-model='competitionName' placeholder='{{"admin.home.add_c" | translate}}')
+                    td.text-right
+                      button.btn-premium(ng-click='addCompetition()' ng-disabled='!competitionName')
+                        i.fas.fa-plus.mr-1
+                        | {{"common.create" | translate}}
+                  tr(ng-repeat='competition in competitions')
+                    td
+                      a.font-weight-bold(ng-if='competition.authLevel >= 10' ng-bind='competition.name' ng-href="/admin/{{competition._id}}" style="font-size: 1.1rem; color: var(--primary-color);")
+                      span(ng-if='competition.authLevel < 10' ng-bind='competition.name')
+                    td.text-right
+                      button.btn.btn-outline-danger.btn-sm(ng-if='competition.authLevel >= 10' ng-click='removeCompetition(competition)')
+                        i.far.fa-trash-alt.mr-1
+                        | {{"common.delete" | translate}}
+
+        .col-lg-5
+          .modern-card
+            .modern-card-header
+              i.fas.fa-tools
+              | {{"admin.home.c_item" | translate}}
+            .modern-card-body
+              .tools-grid
+                div.action-card(ng-click="go('/admin/line/tilesets')")
+                  i.fas.fa-road
+                  span {{"admin.home.line_tSet" | translate}}
+                div.action-card(ng-click="go('/signage/setting')")
+                  i.fas.fa-tv
+                  span {{"admin.home.signage" | translate}}
+                div.action-card(ng-click="go('/admin/restore')")
+                  i.fas.fa-trash-restore
+                  span {{"admin.home.restore" | translate}}
+                div.action-card(ng-click="go('/admin/mailTemplates')")
+                  i.fas.fa-mail-bulk
+                  span {{"admin.mailTemplates.title" | translate}}
+                
+                if user.superDuperAdmin
+                  div.action-card(ng-click="open('/admin/queues')")
+                    i.fas.fa-bullseye
+                    span {{"admin.home.queue" | translate}}
+                  div.action-card(ng-click="open('/admin/mongo')")
+                    i.fas.fa-database
+                    span {{"admin.home.mongo" | translate}}
+                  div.action-card(ng-click="go('/admin/short')")
+                    i.fas.fa-link
+                    span {{"admin.shortURL.title" | translate}}
+                  div.action-card(ng-click="go('/admin/user')")
+                    i.fas.fa-users
+                    span {{"admin.home.user" | translate}}
