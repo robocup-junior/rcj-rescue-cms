@@ -746,7 +746,7 @@
             "dimensions": "DIMENSIONS",
             "time": "TIME",
             "mapName": "Map Name",
-            "advancedTools": "ADVANCED TOOLS & OUTPUT",
+            "advancedTools": "ADVANCED TOOLS AND OUTPUT",
             "generateImageDesc": "Generate a downloadable image of the current map or prepare scoresheets for printing.",
             "downloadImage": "Download Image",
             "prepareSheets": "Prepare Sheets",
