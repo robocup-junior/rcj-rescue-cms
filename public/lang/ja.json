@@ -9,7 +9,7 @@
         "access_level": "ログイン中のアカウント， {{account}} は，「大会管理」にアクセスする権限がありません.",
         "goScanner": "スコアシートのマニュアル入力"
     },
-    "team_home":{
+    "team_home": {
         "title": "チーム一覧",
         "document": "ドキュメント",
         "review": "レビュー実施",
@@ -26,44 +26,44 @@
         "check": "確認 / レビュー"
     },
     "login": {
-        "title" : "Staff Login",
+        "title": "Staff Login",
         "description": "OC/TC から通知された，ユーザー名とパスワードを入力してログインしてください．",
-        "login" : "ログイン",
-        "failed" : "ユーザー名，パスワードが一致しません．もう一度ご確認ください．",
-        "return" : "ログインに成功すると，元のアクセスページに戻ります．"
+        "login": "ログイン",
+        "failed": "ユーザー名，パスワードが一致しません．もう一度ご確認ください．",
+        "return": "ログインに成功すると，元のアクセスページに戻ります．"
     },
     "signage": {
-      "create": "新規作成",
-      "editor": {
-          "title": "サイネージ エディター",
-          "name": "パターン名",
-          "save": "保存",
-          "saveAs": "別名で保存",
-          "content": "表示内容",
-          "duration": "継続時間",
-          "type": "タイプ",
-          "iframe": "WEBコンテンツ",
-          "image": "画像",
-          "movie": "動画",
-          "group": "表示対象グループID",
-          "all": "共通",
-          "use": "使用",
-          "news": "ニュース設定",
-          "enable": "有効",
-          "disable": "無効",
-          "refresh": "稼働中のサイネージを強制更新する",
-          "add_blank": "空の項目を追加",
-          "score": "競技結果（ランキング）",
-          "alert": {
-              "update": "更新",
-              "update_mes": "既存のサイネージパターンを更新しました",
-              "create": "新規作成",
-              "create_mes": "新しいサイネージパターンを作成しました",
-              "sameName": "同じ名前",
-              "sameName_mes": "元の名前と同じです．違う名前にしてください．"
-          },
-          "select": "参照"
-      }
+        "create": "新規作成",
+        "editor": {
+            "title": "サイネージ エディター",
+            "name": "パターン名",
+            "save": "保存",
+            "saveAs": "別名で保存",
+            "content": "表示内容",
+            "duration": "継続時間",
+            "type": "タイプ",
+            "iframe": "WEBコンテンツ",
+            "image": "画像",
+            "movie": "動画",
+            "group": "表示対象グループID",
+            "all": "共通",
+            "use": "使用",
+            "news": "ニュース設定",
+            "enable": "有効",
+            "disable": "無効",
+            "refresh": "稼働中のサイネージを強制更新する",
+            "add_blank": "空の項目を追加",
+            "score": "競技結果（ランキング）",
+            "alert": {
+                "update": "更新",
+                "update_mes": "既存のサイネージパターンを更新しました",
+                "create": "新規作成",
+                "create_mes": "新しいサイネージパターンを作成しました",
+                "sameName": "同じ名前",
+                "sameName_mes": "元の名前と同じです．違う名前にしてください．"
+            },
+            "select": "参照"
+        }
     },
     "common": {
         "back": "戻る",
@@ -143,17 +143,17 @@
     "technicalChallenge": {
         "technicalChallenge": "テクニカルチャレンジ"
     },
-    "accessDenied":{
-        "title" : "アクセス拒絶",
-        "description1" : "このページにアクセスする権限がありません．権限のあるアカウントでログインしてください．",
-        "description2" : "この画面が不具合によって表示されていると疑われる場合は，システム管理者にお問い合わせください．"
+    "accessDenied": {
+        "title": "アクセス拒絶",
+        "description1": "このページにアクセスする権限がありません．権限のあるアカウントでログインしてください．",
+        "description2": "この画面が不具合によって表示されていると疑われる場合は，システム管理者にお問い合わせください．"
     },
-    "shortURL404":{
-        "title" : "指定のページが存在しません",
-        "description1" : "指定の短縮リンクに該当するページが見つかりませんでした．",
-        "description2" : "リンクの有効期間外である可能性があります．"
+    "shortURL404": {
+        "title": "指定のページが存在しません",
+        "description1": "指定の短縮リンクに該当するページが見つかりませんでした．",
+        "description2": "リンクの有効期間外である可能性があります．"
     },
-    "registration":{
+    "registration": {
         "title": "参加登録",
         "description": "このページでは，チーム自身による参加登録の受付可否について設定します．",
         "error": "認証エラー",
@@ -183,7 +183,7 @@
         "authButton": "認証",
         "authSent": "認証メールを送信しました．メール内のリンクから登録作業を続けてください．メールが届かない場合，迷惑メールボックスをご確認ください．それでも見つからない場合は，別のメールアドレスでお試しください．hotmailや一部の機関のメールアドレスには，メールを配信できないことが報告されています．"
     },
-    "reservation":{
+    "reservation": {
         "title": "予約",
         "start": "開始時間",
         "duration": "長さ（分）",
@@ -209,7 +209,7 @@
         "open": "オープン",
         "noResv": "予約なし",
         "noResvDesc": "あなたの予約記録はありません．",
-        "js":{
+        "js": {
             "booked": "予約完了!",
             "bookedMes": "予約に成功しました",
             "cancel": "予約キャンセル?",
@@ -220,7 +220,7 @@
             "cancelKeep": "この予約をそのままにする"
         }
     },
-    "survey":{
+    "survey": {
         "title": "アンケート",
         "new": "アンケート新規作成",
         "editor": "アンケートエディター",
@@ -240,7 +240,7 @@
         "onlyOnce": "このフォームは，この期限までに1回だけ提出可能です．提出後の回答内容の変更はできません．",
         "submit": "提出",
         "readOnly": "提出内容を読み込み専用で表示します．",
-        "js":{
+        "js": {
             "multiple": "回答内容を提出しますか？提出後も期限まで回答内容を修正することができます．",
             "onlyOnce": "このフォームは１度しか提出できません．提出後の内容の修正はできません．提出してよいですか？",
             "submit": "提出",
@@ -249,7 +249,7 @@
             "complete": "提出完了"
         }
     },
-    "cabinet":{
+    "cabinet": {
         "title": "キャビネット",
         "description": "チームに各種資料等を配布することができます．",
         "description2": "このページには，オーガナイザーから配布されたファイルが格納されます．",
@@ -258,7 +258,7 @@
         "empty": "ファイルがまだ何も格納されていないようです...",
         "delete": "削除",
         "upload": "アップロード",
-        "js":{
+        "js": {
             "delAsk": "ファイル削除?",
             "delConfirm": "本当にこのファイルを削除しますか？この操作は取り消せません．",
             "delComplete": "削除完了",
@@ -267,12 +267,12 @@
             "delCancelButton": "残す"
         }
     },
-    "mypage":{
+    "mypage": {
         "message": "メッセージ",
         "document": "ドキュメントや，各種ファイルを提出します．",
         "cabinet": "オーガナイザーから配布されたファイルが格納されます．"
     },
-    "interview":{
+    "interview": {
         "runs": "競技一覧",
         "ad_pic": "追加写真",
         "me_pic": "メンバーの写真",
@@ -304,7 +304,7 @@
                 "filter": "競技絞り込み",
                 "round": "ラウンド",
                 "field": "フィールド",
-                "team" : "チーム名"
+                "team": "チーム名"
             },
             "endedrun": "終了した競技を表示",
             "js": {
@@ -383,7 +383,7 @@
             "networkErrorDescription": "競技データをサーバに保存できませんでした．ネットワーク接続を確認してください．競技記録はこのまま続行できますが，サーバには保存されません．システム管理者を呼んでください！",
             "reSend": "再送信",
             "rescuedVictims": "@:line.view.rescuedVictims",
-            "rescuedVictimsMes" : "救助済みの被災者を削除するには，ダブルクリック（PC）か左にスワイプ（モバイル）します．",
+            "rescuedVictimsMes": "救助済みの被災者を削除するには，ダブルクリック（PC）か左にスワイプ（モバイル）します．",
             "noShow": "チームが来なかった場合に時間計測を開始する",
             "search": "レベル2",
             "noSearch": "レベル1",
@@ -438,7 +438,7 @@
             "calc": "得点計算",
             "item": "項目得点",
             "rescuedVictims": "@:line.view.rescuedVictims",
-            "rescuedVictimsMes" : "@:line.judge.rescuedVictimsMes",
+            "rescuedVictimsMes": "@:line.judge.rescuedVictimsMes",
             "kit": "レスキューキット",
             "write": "署名する",
             "clear": "書き直す",
@@ -529,7 +529,6 @@
                     "title": "@:line.judge.js.timeup.title",
                     "content": "@:line.judge.js.timeup.content"
                 }
-
             }
         },
         "sign": {
@@ -605,7 +604,7 @@
             "import": "タイルセットをファイルからインポート",
             "addAll": "一度に全種類を追加する"
         },
-        "users":{
+        "users": {
             "title": "ユーザー管理",
             "name": "ユーザー名",
             "super": "特権管理権限",
@@ -716,7 +715,7 @@
             "export": "このマップをJsonファイルにエクスポート",
             "import": "マップをJsonファイルからインポート",
             "liveVictim": "生きている被災者の数",
-            "deadVictim" : "死んでいる被災者の数",
+            "deadVictim": "死んでいる被災者の数",
             "rampPoint": "坂得点",
             "setCheckpoint": "このタイルをチェックポイントに指定する",
             "cantset": "このタイルに得点項目は設定できません．",
@@ -766,8 +765,8 @@
             "bump": "スピードバンプ",
             "step": "ステップ",
             "ramp": "坂",
-            "cp" : "チェックポイント",
-            "black" : "黒タイル",
+            "cp": "チェックポイント",
+            "black": "黒タイル",
             "blue": "青タイル",
             "red": "赤タイル",
             "down": "坂の下の水平なタイル",
@@ -779,15 +778,15 @@
             "floor": "床",
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
-            "placement" : "被災者の配置:",
+            "placement": "被災者の配置:",
             "changeF": "次の階層に移動: ",
             "noEle": "階層変更なし",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "parent": "このマップは，親のサイコロパターンのうちの１つです",
             "backToParent": "親の編集に戻る",
-            "pattern" : "マップパターン設定",
-            "patSave" : "パターンを設定するためには，マップを一度，保存してください．",
+            "pattern": "マップパターン設定",
+            "patSave": "パターンを設定するためには，マップを一度，保存してください．",
             "create": "新規作成",
             "edit": "編集",
             "patYet": "サイコロパターン設定が行われていないため，迷路作成を完了できません.",
@@ -931,7 +930,7 @@
             "exe": "バックアップを実行",
             "time": "バックアップ時刻",
             "queue": "バックアップキュー",
-            "js":{
+            "js": {
                 "complete": "バックアップジョブが完了しました．下のリストからダウンロードできます．"
             }
         },
@@ -964,16 +963,16 @@
             "finished": "Finished for using in runs",
             "item": "@:admin.lineMapEditor.item",
             "swamp": "沼地",
-            "cp" : "チェックポイント",
-            "black" : "落とし穴",
-            "curve" : "カーブした壁",
+            "cp": "チェックポイント",
+            "black": "落とし穴",
+            "curve": "カーブした壁",
             "top": "@:admin.lineMapEditor.top",
             "right": "@:admin.lineMapEditor.right",
             "left": "@:admin.lineMapEditor.left",
             "bottom": "@:admin.lineMapEditor.bottom",
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
-            "placement" : "被災者の配置：",
+            "placement": "被災者の配置：",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "exportW": "このマップをErebus用ワールドファイルにエクスポート",
@@ -987,7 +986,7 @@
             "pick4": "部屋4のタイルの設定",
             "innerTile": "タイルの中の壁",
             "victimRotation": "符号回転",
-            "js":{
+            "js": {
                 "startTileError": "スタートタイルを設定してください．"
             }
         },
@@ -1009,7 +1008,7 @@
         "deadline": "提出期限",
         "saved": "正常に保存しました",
         "uploaded": "正常にアップロードに成功しました",
-        "admin":{
+        "admin": {
             "title": "ドキュメント提出",
             "overall": "全般設定",
             "access": "アクセス有効化",
@@ -1018,7 +1017,7 @@
             "review": "レビュー設定",
             "result": "評価結果"
         },
-        "teamAdmin":{
+        "teamAdmin": {
             "title": "チーム個別設定",
             "access": "アクセス可否",
             "log": "ログ",
@@ -1083,7 +1082,7 @@
             "assignedTeams": "割り当てられたチーム",
             "emptyAssignment": "割り当て情報が登録されていないため、次のユーザーが評価可能です："
         },
-        "form":{
+        "form": {
             "languageError": "このフォームは，お使いの言語に対応していませんので，代替言語で表示します．",
             "editDeadline": "このフォームは，上の提出期限まで何度でも編集可能です．",
             "basicInformation": "チーム基本情報",
@@ -1110,7 +1109,7 @@
             "currentLength": "現在の入力済み文字数",
             "lengthLimitExceed": "文字数制限を超過しています。"
         },
-        "review":{
+        "review": {
             "reviewer": "ログインしているレビュアー：",
             "comments": "レビューコメント",
             "user": "レビュアー",
@@ -1123,7 +1122,7 @@
             "deletePartMes": "このレビューを部分削除します．この操作は取り消しできません．",
             "deleteWholeMes": "このレビューを全体削除します．この操作は取り消しできません．"
         },
-        "inspection":{
+        "inspection": {
             "do": "検査実施",
             "cancel": "検査キャンセル"
         }
@@ -1136,7 +1135,7 @@
             "1": "開封済",
             "2": "クリック"
         },
-        "home":{
+        "home": {
             "title": "メール配信",
             "error": "この機能を使用するには，設定ファイルにメールの設定を追加してください．",
             "newMailBulk": "選択した宛先にメールを新規作成",
@@ -1164,7 +1163,7 @@
                 "completeMes": "メールを配信キューに登録しました"
             }
         },
-        "sent":{
+        "sent": {
             "title": "メール配信状況",
             "time": "時刻",
             "subject": "@:mail.home.subject",
