@@ -663,14 +663,44 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     };
 
     $scope.generateCognitiveTargetsPDF = function() {
-        $scope.saveMap(null, function () {
-            var paperSize = $scope.pdfSettings.paperSize;
-            var includeLetterVictims = $scope.pdfSettings.includeLetterVictims;
-            console.log('Generating PDF with paper size:', paperSize, 'includeLetterVictims:', includeLetterVictims);
-            var url = '/api/maps/maze/' + mapId + '/cognitive-targets-pdf?paperSize=' + encodeURIComponent(paperSize) + '&includeLetterVictims=' + includeLetterVictims;
-            console.log('Opening URL:', url);
-            window.open(url, '_blank');
-        });
+        var paperSize = $scope.pdfSettings.paperSize;
+        var includeLetterVictims = $scope.pdfSettings.includeLetterVictims;
+        
+        if (pubService === 'true') {
+            var map = {
+                competition: $scope.competitionId,
+                dice: $scope.dice,
+                name: $scope.name,
+                length: $scope.length,
+                height: $scope.height,
+                duration: $scope.duration,
+                width: $scope.width,
+                leagueType: $scope.leagueType,
+                finished: $scope.finished,
+                startTile: $scope.startTile,
+                cells: $scope.cells,
+                league: leagueId,
+                paperSize: paperSize,
+                includeLetterVictims: includeLetterVictims
+            };
+            
+            $http.post('/api/maps/maze/cognitive-targets-pdf', map, { responseType: 'arraybuffer' })
+                .then(function(response) {
+                    var blob = new Blob([response.data], { type: 'application/pdf' });
+                    var fileURL = URL.createObjectURL(blob);
+                    window.open(fileURL, '_blank');
+                }, function(response) {
+                    console.error("PDF Error", response);
+                    alert("Error generating PDF");
+                });
+        } else {
+            $scope.saveMap(null, function () {
+                console.log('Generating PDF with paper size:', paperSize, 'includeLetterVictims:', includeLetterVictims);
+                var url = '/api/maps/maze/' + mapId + '/cognitive-targets-pdf?paperSize=' + encodeURIComponent(paperSize) + '&includeLetterVictims=' + includeLetterVictims;
+                console.log('Opening URL:', url);
+                window.open(url, '_blank');
+            });
+        }
     };
 
     $scope.makeImageDl = function(){

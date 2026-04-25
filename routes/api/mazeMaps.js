@@ -442,9 +442,9 @@ adminRouter.get('/name/:competitionid/:name', function (req, res, next) {
 
 publicRouter.get('/:map/cognitive-targets-pdf', function (req, res, next) {
   const id = req.params.map;
-    const paperSize = req.query.paperSize || 'A4';
+  const paperSize = req.query.paperSize || 'A4';
   const includeLetterVictims = req.query.includeLetterVictims === 'true';
-  
+
   console.log(`PDF request for map ${id}, paper size: ${paperSize}, includeLetterVictims: ${includeLetterVictims}`);
 
   if (!ObjectId.isValid(id)) {
@@ -467,6 +467,38 @@ publicRouter.get('/:map/cognitive-targets-pdf', function (req, res, next) {
 
     cognitiveTargetsPDF.generateAndSendPDF(res, data, paperSize, includeLetterVictims);
   });
+});
+
+publicRouter.post('/cognitive-targets-pdf', function (req, res, next) {
+  const map = req.body;
+  const paperSize = req.body.paperSize || 'A4';
+  const includeLetterVictims = req.body.includeLetterVictims === true;
+
+  if (!map || !map.cells) {
+    return res.status(400).send({
+      msg: 'Invalid map data',
+    });
+  }
+
+  // Convert cells from object map to array if necessary
+  if (!Array.isArray(map.cells)) {
+    const cells = [];
+    for (const i in map.cells) {
+      if (map.cells.hasOwnProperty(i)) {
+        const cell = map.cells[i];
+        if (isNaN(i)) {
+          const coords = i.split(',');
+          cell.x = parseInt(coords[0]);
+          cell.y = parseInt(coords[1]);
+          cell.z = parseInt(coords[2]);
+        }
+        cells.push(cell);
+      }
+    }
+    map.cells = cells;
+  }
+
+  cognitiveTargetsPDF.generateAndSendPDF(res, map, paperSize, includeLetterVictims);
 });
 
 publicRouter.all('*', function (req, res, next) {
