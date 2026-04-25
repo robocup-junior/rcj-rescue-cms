@@ -744,6 +744,16 @@
             "create": "@:admin.lineMapAdmin.create"
         },
         "mazeMapEditor": {
+            "dimensions": "DIMENSIONS",
+            "time": "TIME",
+            "mapName": "Map Name",
+            "advancedTools": "ADVANCED TOOLS & OUTPUT",
+            "generateImageDesc": "Generate a downloadable image of the current map or prepare scoresheets for printing.",
+            "downloadImage": "Download Image",
+            "prepareSheets": "Prepare Sheets",
+            "printPDF": "Print PDF",
+            "includeLetterVictims": "Include Letter Victims",
+            "back": "Back",
             "map": "Map Editor",
             "title": "Map Editor",
             "desc": "Click on the wall to create a maze. Click on the floor of the maze to set items such as victims, checkpoints, bumps and others.",

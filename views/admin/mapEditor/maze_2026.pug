@@ -43,7 +43,7 @@ block content
                     .input-group-prepend
                         span.input-group-text
                             i.fas.fa-tag
-                    input.form-control(type='text', ng-model='name', placeholder='Map Name')
+                    input.form-control(type='text', ng-model='name', placeholder='{{"admin.mazeMapEditor.mapName" | translate}}')
             
             .btn-group.mr-2
                 button.btn.btn-sm.btn-success.shadow-sm(type='button', ng-click='saveMap()')
@@ -74,7 +74,7 @@ block content
                 if parent
                     button.btn.btn-sm.btn-light.shadow-sm(type='button', ng-click='saveMap(parent)')
                         i.fas.fa-chevron-left.mr-1
-                        | Back
+                        | {{"admin.mazeMapEditor.back" | translate}}
     
     #saveAsCollapse.collapse.mb-2
         .modern-card.bg-light.border-success.mb-0
@@ -94,7 +94,7 @@ block content
                     .col-auto.px-3.border-right
                         span.small.text-muted.font-weight-bold
                             i.fas.fa-ruler-combined.mr-2
-                            | DIMENSIONS
+                            | {{"admin.mazeMapEditor.dimensions" | translate}}
                     .col.px-2
                         .d-flex.justify-content-start.ml-3.gap-4
                             .d-flex.align-items-center.mr-4(title='{{"admin.mazeMapEditor.height" | translate}}')
@@ -113,7 +113,7 @@ block content
                         .d-flex.align-items-center(title='{{"admin.simMapEditor.timelimit" | translate}}')
                             label.small.mb-0.mr-2.text-muted
                                 i.fas.fa-clock.mr-1
-                                | TIME
+                                | {{"admin.mazeMapEditor.time" | translate}}
                             input.form-control.form-control-sm(type='number', ng-model='duration', min='1', style="width: 70px;")
 
             .d-flex.mb-3
@@ -200,7 +200,7 @@ block content
         .modern-card
             .modern-card-header(data-toggle="collapse", data-target="#outputCollapse", style="cursor: pointer;")
                 i.fas.fa-file-export.mr-2
-                | ADVANCED TOOLS & OUTPUT
+                | {{"admin.mazeMapEditor.advancedTools" | translate}}
                 .ml-auto
                     i.fas.fa-chevron-down
             
@@ -213,16 +213,16 @@ block content
                                     i.fas.fa-image.mr-2
                                     | {{"admin.lineMapEditor.generateImage" | translate}}
                                 .modern-card-body.d-flex.flex-column
-                                    p.small.text-muted.mb-3 Generate a downloadable image of the current map or prepare scoresheets for printing.
+                                    p.small.text-muted.mb-3 {{"admin.mazeMapEditor.generateImageDesc" | translate}}
                                     .row.no-gutters.mt-auto
                                         .col-6.pr-1
                                             button.btn.btn-sm.btn-outline-primary.btn-block(type='button', ng-click='makeImageDl()')
                                                 i.fas.fa-download.mr-1
-                                                | Download Image
+                                                | {{"admin.mazeMapEditor.downloadImage" | translate}}
                                         .col-6.pl-1
                                             button.btn.btn-sm.btn-outline-secondary.btn-block(type='button', ng-click='makeImage()')
                                                 i.fas.fa-file-alt.mr-1
-                                                | Prepare Sheets
+                                                | {{"admin.mazeMapEditor.prepareSheets" | translate}}
                         
                         .col-md-6(ng-if='hasCognitiveTargets()')
                             .modern-card.h-100.mb-0
@@ -238,10 +238,10 @@ block content
                                         .col-6.pl-1
                                             button.btn.btn-sm.btn-primary.btn-block(type='button', ng-click='generateCognitiveTargetsPDF()')
                                                 i.fas.fa-print.mr-1
-                                                | Print PDF
+                                                | {{"admin.mazeMapEditor.printPDF" | translate}}
                                     .custom-control.custom-switch.mt-3
                                         input#includeLetterVictimsCheckbox.custom-control-input(type='checkbox', ng-model='pdfSettings.includeLetterVictims')
-                                        label.custom-control-label.small(for='includeLetterVictimsCheckbox') Include Letter Victims
+                                        label.custom-control-label.small(for='includeLetterVictimsCheckbox') {{"admin.mazeMapEditor.includeLetterVictims" | translate}}
 
         .row(style="position: absolute; top: -9999px; left: -9999px; opacity: 0; pointer-events: none;")
             #outputImageArea(style="padding-top:100px;padding-left:0px;padding-right:0px;padding-bottom:100px;")

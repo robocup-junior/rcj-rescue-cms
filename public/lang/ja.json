@@ -742,6 +742,16 @@
             "create": "@:admin.lineMapAdmin.create"
         },
         "mazeMapEditor": {
+            "dimensions": "マップサイズ",
+            "time": "制限時間",
+            "mapName": "マップ名",
+            "advancedTools": "高度なツールと出力",
+            "generateImageDesc": "現在のマップの画像をダウンロードしたり、印刷用のスコアシートを準備します。",
+            "downloadImage": "画像ダウンロード",
+            "prepareSheets": "シート準備",
+            "printPDF": "PDF印刷",
+            "includeLetterVictims": "文字被災者を含める",
+            "back": "戻る",
             "map": "マップエディター",
             "title": "マップエディター",
             "desc": "壁の部分をクリックして，迷路を作成します．迷路の床部分をクリックすると，被災者やチェックポイント，バンプなどの項目が設定できます．",
