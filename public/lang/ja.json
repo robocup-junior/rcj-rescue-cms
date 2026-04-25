@@ -756,7 +756,7 @@
             "time": "制限時間",
             "mapName": "マップ名",
             "advancedTools": "高度なツールと出力",
-            "generateImageDesc": "現在のマップの画像をダウンロードしたり、印刷用のスコアシートを準備します。",
+            "generateImageDesc": "現在のマップの画像をダウンロードします。",
             "downloadImage": "画像ダウンロード",
             "prepareSheets": "シート準備",
             "printPDF": "PDF印刷",

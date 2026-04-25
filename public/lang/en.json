@@ -758,7 +758,7 @@
             "time": "TIME",
             "mapName": "Map Name",
             "advancedTools": "ADVANCED TOOLS AND OUTPUT",
-            "generateImageDesc": "Generate a downloadable image of the current map or prepare scoresheets for printing.",
+            "generateImageDesc": "Generate a downloadable image of the current map.",
             "downloadImage": "Download Image",
             "prepareSheets": "Prepare Sheets",
             "printPDF": "Print PDF",

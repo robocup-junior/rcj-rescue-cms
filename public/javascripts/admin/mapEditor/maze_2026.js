@@ -560,7 +560,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         return false;
     };
 
-    $scope.makeImage = function(){
+    $scope.makeImage = function(silent = false){
         window.scrollTo(0,0);
         html2canvas(document.getElementById("outputImageArea"),{
             scale: 5
@@ -591,11 +591,11 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             ctx2.drawImage(canvas, 0, topY, canvas.width, bottomY-topY, 0, 0, canvas.width, bottomY-topY);
             let imgData = mem_canvas.toDataURL();
             $http.post("/api/maps/line/image/" + mapId, {img: imgData}).then(function (response) {
-                alert("Created image!");
+                if (!silent) alert("Created image!");
             }, function (response) {
                 console.log(response);
                 console.log("Error: " + response.statusText);
-                alert(response.data.msg);
+                if (!silent) alert(response.data.msg);
             });
         });
     };
@@ -788,6 +788,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
                         type: 'success',
                         title: "Updated map"
                     })
+                    $scope.makeImage(true);
                     if (loc) window.location.replace("/admin/" + competitionId + "/" + leagueId + "/mapEditor/" + loc)
                 } else {
                     callback();
