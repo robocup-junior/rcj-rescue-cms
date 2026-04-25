@@ -46,6 +46,11 @@ def cm_to_pixels(cm):
     return int(cm * DPI / 2.54)
 
 
+# Overlap in pixels at large scale to prevent gaps between rings
+# Increased to 5 to ensure coverage even with anti-aliasing
+OVERLAP = 5
+
+
 def create_ring_layer(color_code, ring_index, size_pixels):
     """
     Create a single ring layer image.
@@ -76,7 +81,7 @@ def create_ring_layer(color_code, ring_index, size_pixels):
     
     if ring_index > 0:
         inner_diameter_cm = DIAMETERS_CM[ring_index - 1]
-        inner_radius = int(max_radius * (inner_diameter_cm / 5))
+        inner_radius = int(max_radius * (inner_diameter_cm / 5)) - OVERLAP
     else:
         inner_radius = 0
     

@@ -808,6 +808,7 @@
             "calculation": "計算",
             "cognitiveTargetsPDF": "Cognitive Target印刷",
             "cognitiveTargetsPDFDesc": "競技用ターゲットの印刷",
+            "includeLetterVictims": "Letter Victimを含める",
             "printCognitiveTargets": "印刷",
             "paperSize": "用紙サイズ",
             "a4Description": "国際標準サイズ",

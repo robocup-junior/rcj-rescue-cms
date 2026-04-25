@@ -810,6 +810,7 @@
             "calculation": "Calculation",
             "cognitiveTargetsPDF": "Cognitive Targets PDF",
             "cognitiveTargetsPDFDesc": "Printable targets for competition setup",
+            "includeLetterVictims": "Include Letter Victims",
             "printCognitiveTargets": "Print",
             "paperSize": "Paper Size",
             "a4Description": "Standard international size",

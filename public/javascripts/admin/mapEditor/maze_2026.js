@@ -654,7 +654,8 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
 
     // Initialize paper size selection using object to avoid scope inheritance issues
     $scope.pdfSettings = {
-        paperSize: 'A4'
+        paperSize: 'A4',
+        includeLetterVictims: false
     };
     
     $scope.onPaperSizeChange = function() {
@@ -664,8 +665,9 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     $scope.generateCognitiveTargetsPDF = function() {
         $scope.saveMap(null, function () {
             var paperSize = $scope.pdfSettings.paperSize;
-            console.log('Generating PDF with paper size:', paperSize);
-            var url = '/api/maps/maze/' + mapId + '/cognitive-targets-pdf?paperSize=' + encodeURIComponent(paperSize);
+            var includeLetterVictims = $scope.pdfSettings.includeLetterVictims;
+            console.log('Generating PDF with paper size:', paperSize, 'includeLetterVictims:', includeLetterVictims);
+            var url = '/api/maps/maze/' + mapId + '/cognitive-targets-pdf?paperSize=' + encodeURIComponent(paperSize) + '&includeLetterVictims=' + includeLetterVictims;
             console.log('Opening URL:', url);
             window.open(url, '_blank');
         });

@@ -213,7 +213,14 @@ block content
                                 select#paperSizeSelect.form-control.form-control-lg.shadow-sm(ng-model='pdfSettings.paperSize', ng-change='onPaperSizeChange()')
                                     option(value='A4') A4 (210 × 297 mm)
                                     option(value='Letter') Letter (8.5 × 11 in)
-                            .col-lg-9.col-md-8.text-lg-right
+                            .col-lg-3.col-md-4.mb-3.mb-lg-0
+                                label.form-label.font-weight-bold.text-secondary.mb-2(for='includeLetterVictimsCheckbox')
+                                    i.fas.fa-envelope-open-text.mr-2
+                                    | {{"admin.mazeMapEditor.includeLetterVictims" | translate}}
+                                .custom-control.custom-checkbox.custom-control-lg
+                                    input#includeLetterVictimsCheckbox.custom-control-input(type='checkbox', ng-model='pdfSettings.includeLetterVictims')
+                                    label.custom-control-label(for='includeLetterVictimsCheckbox') {{"common.yes" | translate}}
+                            .col-lg-6.col-md-4.text-lg-right
                                 .d-flex.flex-column.flex-sm-row.align-items-center.justify-content-lg-end
                                     .text-muted.small.mr-sm-3.mb-2.mb-sm-0(ng-if='pdfSettings.paperSize === "A4"')
                                         i.fas.fa-info-circle.mr-1
