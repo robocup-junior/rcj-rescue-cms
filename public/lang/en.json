@@ -744,6 +744,7 @@
             "create": "@:admin.lineMapAdmin.create"
         },
         "mazeMapEditor": {
+            "map": "Map Editor",
             "title": "Map Editor",
             "desc": "Click on the wall to create a maze. Click on the floor of the maze to set items such as victims, checkpoints, bumps and others.",
             "save": "@:admin.lineMapEditor.save",

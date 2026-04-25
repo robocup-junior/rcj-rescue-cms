@@ -742,6 +742,7 @@
             "create": "@:admin.lineMapAdmin.create"
         },
         "mazeMapEditor": {
+            "map": "マップエディター",
             "title": "マップエディター",
             "desc": "壁の部分をクリックして，迷路を作成します．迷路の床部分をクリックすると，被災者やチェックポイント，バンプなどの項目が設定できます．",
             "save": "@:admin.lineMapEditor.save",
