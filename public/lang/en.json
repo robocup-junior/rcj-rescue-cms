@@ -9,7 +9,7 @@
         "access_level": "The you logged in account, {{account}}, does not have permission to access Competition Management.",
         "goScanner": "Manual input of score sheet"
     },
-    "team_home":{
+    "team_home": {
         "title": "Team List",
         "document": "Document",
         "review": "Review",
@@ -26,11 +26,11 @@
         "check": "Check / Review"
     },
     "login": {
-        "title" : "Staff Login",
+        "title": "Staff Login",
         "description": "Please enter the username and password notified by the OC/TC and login.",
-        "login" : "Login",
-        "failed" : "Sorry, your username or password cannot be recognized.",
-        "return" : "When login is successful, it returns to the you tried access page."
+        "login": "Login",
+        "failed": "Sorry, your username or password cannot be recognized.",
+        "return": "When login is successful, it returns to the you tried access page."
     },
     "signage": {
         "create": "Create",
@@ -143,17 +143,17 @@
     "technicalChallenge": {
         "technicalChallenge": "Technical Challenge"
     },
-    "accessDenied":{
-        "title" : "Access denied",
-        "description1" : "You do not have permission to access this page. Please login with authorized account.",
-        "description2" : "If you suspect this screen is displayed due to any problem, please contact system administrator."
+    "accessDenied": {
+        "title": "Access denied",
+        "description1": "You do not have permission to access this page. Please login with authorized account.",
+        "description2": "If you suspect this screen is displayed due to any problem, please contact system administrator."
     },
-    "shortURL404":{
-        "title" : "Page Not Found",
-        "description1" : "The page corresponding to the specified short link was not found.",
-        "description2" : "The link's validity period may have passed."
+    "shortURL404": {
+        "title": "Page Not Found",
+        "description1": "The page corresponding to the specified short link was not found.",
+        "description2": "The link's validity period may have passed."
     },
-    "registration":{
+    "registration": {
         "title": "Registration",
         "description": "This page is used to set whether or not teams can register themselves.",
         "error": "Authentication error",
@@ -183,7 +183,7 @@
         "authButton": "Submit",
         "authSent": "An authentication email has been sent to you. Please follow the link in the email to continue the registration process. If you do not receive the email, please check your spam mail box. If you still can't find it, please try a different email address. Hotmail and some institutional email addresses have been reported to fail to deliver emails."
     },
-    "reservation":{
+    "reservation": {
         "title": "Booking",
         "start": "Start time",
         "duration": "Duration(minutes)",
@@ -209,7 +209,7 @@
         "open": "Open",
         "noResv": "No Record",
         "noResvDesc": "There is no record of your booking.",
-        "js":{
+        "js": {
             "booked": "Booking completed!",
             "bookedMes": "You have successfully booked!",
             "cancel": "Booking cancellation?",
@@ -220,7 +220,7 @@
             "cancelKeep": "Keep this booking"
         }
     },
-    "survey":{
+    "survey": {
         "title": "Questionnaire",
         "new": "Create a new questionnaire",
         "editor": "Questionnaire Editor",
@@ -240,7 +240,7 @@
         "onlyOnce": "This form can be submitted only once before this deadline. No changes can be made to the response after submission.",
         "submit": "Submit",
         "readOnly": "Displays the response in read-only mode.",
-        "js":{
+        "js": {
             "multiple": "Do you want to submit your response? You can revise your response after this submission until the deadline.",
             "onlyOnce": "This form can only be submitted once. It is not possible to modify the response after this submission.",
             "submit": "Submit",
@@ -249,7 +249,7 @@
             "complete": "Submission completed"
         }
     },
-    "cabinet":{
+    "cabinet": {
         "title": "Cabinets",
         "description": "You can distribute various materials to your team.",
         "description2": "This page will contain the files distributed by the organisers.",
@@ -258,7 +258,7 @@
         "empty": "It seems that no files have been stored yet...",
         "delete": "Delete",
         "upload": "Upload",
-        "js":{
+        "js": {
             "delAsk": "Delete?",
             "delConfirm": "Are you sure you want to delete this file? This operation cannot be undone.",
             "delComplete": "Deleted",
@@ -267,12 +267,12 @@
             "delCancelButton": "Keep"
         }
     },
-    "mypage":{
+    "mypage": {
         "message": "Message",
         "document": "Submit your documentation and other files.",
         "cabinet": "Contain the files distributed by the organisers."
     },
-    "interview":{
+    "interview": {
         "runs": "All runs",
         "ad_pic": "Additional pictures",
         "me_pic": "Member's picture",
@@ -304,7 +304,7 @@
                 "filter": "Filter",
                 "round": "Round",
                 "field": "Field",
-                "team" : "Team name"
+                "team": "Team name"
             },
             "endedrun": "Display ended runs",
             "js": {
@@ -385,7 +385,7 @@
             "networkErrorDescription": "Failed to save the scoring-run data on the server. Check the network connection.  The record of scoring run can be continued as it is, but it is not stored in the server.  Please call system manager ASAP!",
             "reSend": "ReSend",
             "rescuedVictims": "@:line.view.rescuedVictims",
-            "rescuedVictimsMes" : "To delete a rescued victim, double click or swipe left (Mobile Device)",
+            "rescuedVictimsMes": "To delete a rescued victim, double click or swipe left (Mobile Device)",
             "noShow": "Start timer when team no show",
             "search": "Level 2",
             "noSearch": "Level 1",
@@ -440,7 +440,7 @@
             "calc": "Score calculation",
             "item": "Item points",
             "rescuedVictims": "@:line.view.rescuedVictims",
-            "rescuedVictimsMes" : "@:line.judge.rescuedVictimsMes",
+            "rescuedVictimsMes": "@:line.judge.rescuedVictimsMes",
             "kit": "Rescue kit",
             "write": "Write signature",
             "clear": "Clear",
@@ -531,7 +531,6 @@
                     "title": "@:line.judge.js.timeup.title",
                     "content": "@:line.judge.js.timeup.content"
                 }
-
             }
         },
         "sign": {
@@ -607,7 +606,7 @@
             "import": "Import from file",
             "addAll": "Add all types at once"
         },
-        "users":{
+        "users": {
             "title": "User management",
             "name": "User name",
             "super": "Super Admin role",
@@ -718,7 +717,7 @@
             "export": "Export this map to Json file",
             "import": "Import map from Json file",
             "liveVictim": "Number of the live victims",
-            "deadVictim" : "Number of the dead victims",
+            "deadVictim": "Number of the dead victims",
             "rampPoint": "Ramp points",
             "setCheckpoint": "Set this tile as a checkpoint",
             "cantset": "You can't set this element in some reasons.",
@@ -768,8 +767,8 @@
             "bump": "Speed bumps",
             "step": "Steps",
             "ramp": "Ramp",
-            "cp" : "Check point",
-            "black" : "Black tile",
+            "cp": "Check point",
+            "black": "Black tile",
             "blue": "Blue tile",
             "red": "Red tile",
             "down": "Bottom horizontal tile at ramp",
@@ -781,7 +780,7 @@
             "floor": "Floor",
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
-            "placement" : "Placement of victims:",
+            "placement": "Placement of victims:",
             "changeF": "Change floor to",
             "noEle": "No elevator",
             "export": "@:admin.lineMapEditor.export",
@@ -791,7 +790,7 @@
             "pattern": "Map pattern setting",
             "patSave": "To set the pattern, save the map before once.",
             "create": "Create New",
-            "edit" : "Edit",
+            "edit": "Edit",
             "patYet": "The map creation can not be completed because the dice pattern setting has not been done.",
             "entryLeague": "Entry(JP)",
             "standardLeague": "Normal",
@@ -933,7 +932,7 @@
             "exe": "Backup!",
             "time": "Backup time",
             "queue": "Backup queue",
-            "js":{
+            "js": {
                 "complete": "Your backup job is now complete. You can download it from the list below."
             }
         },
@@ -966,16 +965,16 @@
             "finished": "Finished for using in runs",
             "item": "@:admin.lineMapEditor.item",
             "swamp": "Swamp",
-            "cp" : "Check point",
-            "black" : "Black hole",
-            "curve" : "Curved Wall",
+            "cp": "Check point",
+            "black": "Black hole",
+            "curve": "Curved Wall",
             "top": "@:admin.lineMapEditor.top",
             "right": "@:admin.lineMapEditor.right",
             "left": "@:admin.lineMapEditor.left",
             "bottom": "@:admin.lineMapEditor.bottom",
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
-            "placement" : "Placement of victims:",
+            "placement": "Placement of victims:",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "exportW": "Export this map as a world file for Erebus",
@@ -988,8 +987,7 @@
             "select4": "Select Room 4 Tiles (Anything)",
             "pick4": "Select Room 4 Configuration",
             "innerTile": "Inner Tile Walls",
-
-            "js":{
+            "js": {
                 "startTileError": "Please set the start tile."
             }
         },
@@ -1011,7 +1009,7 @@
         "deadline": "Submission deadline",
         "saved": "Saved successfully",
         "uploaded": "Successfully uploaded!",
-        "admin":{
+        "admin": {
             "title": "Document Submission",
             "overall": "General settings",
             "access": "Access activation",
@@ -1020,7 +1018,7 @@
             "review": "Review setting",
             "result": "Review results"
         },
-        "teamAdmin":{
+        "teamAdmin": {
             "title": "Individual team settings",
             "access": "Accessible",
             "log": "Log",
@@ -1085,7 +1083,7 @@
             "assignedTeams": "Assigned teams",
             "emptyAssignment": "Since there is no assignment information, following users can evaluate: "
         },
-        "form":{
+        "form": {
             "languageError": "This form is not available in your language, so it will be displayed in an alternative language.",
             "editDeadline": "You can edit this form as many times as you wish until the submission deadline above.",
             "basicInformation": "Basic Team Information",
@@ -1112,7 +1110,7 @@
             "currentLength": "The current number of characters",
             "lengthLimitExceed": "You have exceeded the character limit."
         },
-        "review":{
+        "review": {
             "reviewer": "Logged in reviewer: ",
             "comments": "Review Comments",
             "user": "Reviewer",
@@ -1125,11 +1123,11 @@
             "deletePartMes": "Partial deletion of this review. This operation cannot be undone.",
             "deleteWholeMes": "Whole deletion of this review. This operation cannot be undone."
         },
-        "inspection":{
+        "inspection": {
             "do": "Inspections carried out",
             "cancel": "Inspection cancellation"
         }
-    },  
+    },
     "mail": {
         "status": {
             "-2": "Error",
@@ -1138,7 +1136,7 @@
             "1": "Opend",
             "2": "Clicked"
         },
-        "home":{
+        "home": {
             "title": "Email Delivery",
             "error": "To use this function, please add a mail setting to the configuration file.",
             "newMailBulk": "Create a new email to the selected teams",
@@ -1166,7 +1164,7 @@
                 "completeMes": "Emails have been queued."
             }
         },
-        "sent":{
+        "sent": {
             "title": "Email Delivery Status",
             "time": "Time",
             "subject": "@:mail.home.subject",
