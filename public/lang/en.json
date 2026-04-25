@@ -270,7 +270,17 @@
     "mypage": {
         "message": "Message",
         "document": "Submit your documentation and other files.",
-        "cabinet": "Contain the files distributed by the organisers."
+        "cabinet": "Contain the files distributed by the organisers.",
+        "profile": "Profile",
+        "changePassword": "Change Password",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password",
+        "passwordRule": "Must be at least 8 characters long and include at least two of the following: uppercase letters, lowercase letters, numbers, or symbols.",
+        "passwordChanged": "Successfully changed password.",
+        "passwordError": "Failed to change password. Please check if your current password is correct.",
+        "passwordMismatch": "New passwords do not match.",
+        "passwordInvalid": "Password does not meet the requirements."
     },
     "interview": {
         "runs": "All runs",

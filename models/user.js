@@ -132,20 +132,8 @@ userSchema.pre('save', function (next) {
  * @param {updatePasswordCb} cb - The callback function
  */
 userSchema.methods.updatePassword = function (password, cb) {
-  var user = this;
-  
-  crypto.generateHashWithSalt(password, function (err, hashedString, saltUsed) {
-    console.log(err);
-    if (err) {
-      return cb(err);
-    }
-    
-    user.salt = saltUsed;
-    user.password = hashedString;
-    user.save();
-    
-    return cb(null);
-  })
+  this.password = password;
+  this.save(cb);
 }
 
 /**

@@ -270,7 +270,17 @@
     "mypage": {
         "message": "メッセージ",
         "document": "ドキュメントや，各種ファイルを提出します．",
-        "cabinet": "オーガナイザーから配布されたファイルが格納されます．"
+        "cabinet": "オーガナイザーから配布されたファイルが格納されます．",
+        "profile": "プロフィール",
+        "changePassword": "パスワード変更",
+        "currentPassword": "現在のパスワード",
+        "newPassword": "新しいパスワード",
+        "confirmPassword": "新しいパスワード（確認）",
+        "passwordRule": "8文字以上かつ，英大文字・英小文字・数字・記号のうち2種類以上を使用してください．",
+        "passwordChanged": "パスワードを変更しました．",
+        "passwordError": "パスワードの変更に失敗しました．現在のパスワードが正しいか確認してください．",
+        "passwordMismatch": "新しいパスワードが一致しません．",
+        "passwordInvalid": "パスワードがルールに適合していません．"
     },
     "interview": {
         "runs": "競技一覧",

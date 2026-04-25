@@ -312,5 +312,47 @@ superRouter.put('/:userid', function (req, res, next) {
   });
 });
 
+const privateRouter = express.Router();
+
+privateRouter.post('/me/password', function (req, res) {
+  const { current, new: newPass, confirm } = req.body;
+
+  if (newPass !== confirm) {
+    return res.status(400).send({ msg: 'Passwords do not match' });
+  }
+
+  // Password validation: 8+ chars, 2+ types
+  let types = 0;
+  if (/[a-z]/.test(newPass)) types++;
+  if (/[A-Z]/.test(newPass)) types++;
+  if (/[0-9]/.test(newPass)) types++;
+  if (/[^A-Za-z0-9]/.test(newPass)) types++;
+
+  if (newPass.length < 8 || types < 2) {
+    return res.status(400).send({ msg: 'Password does not meet the requirements' });
+  }
+
+  userdb.user.findById(req.user._id).select('+password +salt').exec(function (err, dbUser) {
+    if (err || !dbUser) {
+      return res.status(500).send({ msg: 'User not found' });
+    }
+
+    dbUser.comparePassword(current, function (isMatch) {
+      if (!isMatch) {
+        return res.status(400).send({ msg: 'Current password is incorrect' });
+      }
+
+      dbUser.updatePassword(newPass, function (err) {
+        if (err) {
+          logger.error(err);
+          return res.status(500).send({ msg: 'Failed to update password' });
+        }
+        return res.status(200).send({ msg: 'Password updated successfully' });
+      });
+    });
+  });
+});
+
 module.exports.admin = adminRouter;
 module.exports.super = superRouter;
+module.exports.private = privateRouter;
