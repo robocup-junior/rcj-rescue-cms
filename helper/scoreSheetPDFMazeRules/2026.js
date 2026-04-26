@@ -180,156 +180,85 @@ function drawRun(doc, config, scoringRun) {
   }
 
   const big = Range('A', 'Z');
-  const small = Range('a', 'z');
   const itemList = {
-    PHI: {
-      linear: [],
-      floating: [],
-    },
-    PSI: {
-      linear: [],
-      floating: [],
-    },
-    OMEGA: {
-      linear: [],
-      floating: [],
-    },
-    H: {
-      linear: [],
-      floating: [],
-    },
-    S: {
-      linear: [],
-      floating: [],
-    },
-    U: {
-      linear: [],
-      floating: [],
-    },
-    Red: {
-      linear: [],
-      floating: [],
-    },
-    Yellow: {
-      linear: [],
-      floating: [],
-    },
-    Green: {
-      linear: [],
-      floating: [],
-    },
+    allVictims: [],
     checkpoint: [],
     ramp: [],
     speedbump: [],
     steps: [],
+    blue: [],
   };
+
+  const maxKits = {
+    PHI: 3,
+    PSI: 2,
+    OMEGA: 1,
+  };
+  const cognitiveColorValues = { B: -2, R: -1, Y: 0, G: 1, C: 2 };
+
+  let victimIndex = 0;
   for (let j = 1, l = scoringRun.map.length * 2 + 1; j < l; j += 2) {
     for (let i = 1, m = scoringRun.map.width * 2 + 1; i < m; i += 2) {
       for (let k = 0; k < scoringRun.map.height; k++) {
-        if (!cells[`${i},${j},${k}`]) continue
-        const victimLF = cells[`${i},${j},${k}`].isLinear ? 'linear' : 'floating';
-        const { victims } = cells[`${i},${j},${k}`].tile;
-        const { tile } = cells[`${i},${j},${k}`];
-        let victimType = 'None';
+        const coord = `${i},${j},${k}`;
+        if (!cells[coord]) continue;
+        const cell = cells[coord];
+        const { tile } = cell;
+        const isLinear = cell.isLinear;
 
-        victimType = victims.top;
-        if (victimType != 'None' && itemList[victimType]) {
-          let name;
-          if (victimLF == 'linear')
-            name = big[itemList[victimType][victimLF].length];
-          else name = small[itemList[victimType][victimLF].length];
-          const tmp = {
-            x: i,
-            y: j,
-            z: k,
-            name,
-          };
-          itemList[victimType][victimLF].push(tmp);
-        }
+        const victimPlaces = ['top', 'left', 'right', 'bottom'];
+        for (const vp of victimPlaces) {
+          const victimType = tile.victims[vp];
+          if (victimType && victimType !== 'None') {
+            victimIndex++;
+            let kits = 0;
+            let imgCode = null;
+            let isDummy = false;
+            if (victimType === 'Cognitive') {
+              if (tile.cognitiveTargets && tile.cognitiveTargets[vp] && tile.cognitiveTargets[vp].rings) {
+                const rings = tile.cognitiveTargets[vp].rings;
+                let total = 0;
+                for (let r = 1; r <= 5; r++) {
+                  total += cognitiveColorValues[rings[`ring${r}`]] || 0;
+                }
+                if (total === 2) kits = 2;
+                else if (total === 1) kits = 1;
+                else if (total === 0) kits = 0;
+                else isDummy = true;
+                imgCode = `${rings.ring1}${rings.ring2}${rings.ring3}${rings.ring4}${rings.ring5}`;
+              } else {
+                isDummy = true;
+              }
+            } else {
+              kits = maxKits[victimType] || 0;
+            }
 
-        victimType = victims.left;
-        if (victimType != 'None' && itemList[victimType]) {
-          let name;
-          if (victimLF == 'linear')
-            name = big[itemList[victimType][victimLF].length];
-          else name = small[itemList[victimType][victimLF].length];
-          const tmp = {
-            x: i,
-            y: j,
-            z: k,
-            name,
-          };
-          itemList[victimType][victimLF].push(tmp);
-        }
-
-        victimType = victims.right;
-        if (victimType != 'None' && itemList[victimType]) {
-          let name;
-          if (victimLF == 'linear')
-            name = big[itemList[victimType][victimLF].length];
-          else name = small[itemList[victimType][victimLF].length];
-          const tmp = {
-            x: i,
-            y: j,
-            z: k,
-            name,
-          };
-          itemList[victimType][victimLF].push(tmp);
-        }
-
-        victimType = victims.bottom;
-        if (victimType != 'None' && itemList[victimType]) {
-          let name;
-          if (victimLF == 'linear')
-            name = big[itemList[victimType][victimLF].length];
-          else name = small[itemList[victimType][victimLF].length];
-          const tmp = {
-            x: i,
-            y: j,
-            z: k,
-            name,
-          };
-          itemList[victimType][victimLF].push(tmp);
+            if (!isDummy) {
+              itemList.allVictims.push({
+                type: victimType,
+                isLinear,
+                kits,
+                imgCode,
+                name: big[(victimIndex - 1) % 26],
+              });
+            }
+          }
         }
 
         if (tile.checkpoint) {
-          const tmp = {
-            x: i,
-            y: j,
-            z: k,
-            name: itemList.checkpoint.length + 1,
-          };
-          itemList.checkpoint.push(tmp);
+          itemList.checkpoint.push({ name: itemList.checkpoint.length + 1 });
         }
-
         if (tile.speedbump) {
-          const tmp = {
-            x: i,
-            y: j,
-            z: k,
-            name: itemList.speedbump.length + 1,
-          };
-          itemList.speedbump.push(tmp);
+          itemList.speedbump.push({ name: itemList.speedbump.length + 1 });
         }
-
         if (tile.ramp) {
-          const tmp = {
-            x: i,
-            y: j,
-            z: k,
-            name: itemList.ramp.length + 1,
-          };
-          itemList.ramp.push(tmp);
+          itemList.ramp.push({ name: itemList.ramp.length + 1 });
         }
-
         if (tile.steps) {
-          const tmp = {
-            x: i,
-            y: j,
-            z: k,
-            name: itemList.steps.length + 1,
-          };
-          itemList.steps.push(tmp);
+          itemList.steps.push({ name: itemList.steps.length + 1 });
+        }
+        if (tile.blue) {
+          itemList.blue.push({ name: itemList.blue.length + 1 });
         }
       }
     }
@@ -342,26 +271,38 @@ function drawRun(doc, config, scoringRun) {
   const base_size_y = 29;
   const text_padding = 7;
 
-  // Draw box for victim "PHI" (Linear)
-  for (const v of itemList.PHI.linear) {
-    pdf.drawImage(
-      doc,
-      x,
-      y,
-      'scoresheet_generation/maze/l2.png',
-      base_size_x,
-      50,
-      'center'
-    );
+  // Draw all victims unified
+  for (const v of itemList.allVictims) {
+    let bg = 'scoresheet_generation/maze/';
+    if (v.isLinear) {
+      if (v.kits === 3) bg += 'l2.png';
+      else if (v.kits === 2) bg += 'l1.png';
+      else bg += 'l0.png';
+    } else {
+      if (v.kits === 3) bg += 'f2.png';
+      else if (v.kits === 2) bg += 'f1.png';
+      else bg += 'f0.png';
+    }
+
+    pdf.drawImage(doc, x, y, bg, base_size_x, 50, 'center');
+
+    let icon = 'scoresheet_generation/maze/';
+    if (v.type === 'Cognitive' && v.imgCode) {
+      icon = `public/images/cognitive_targets/${v.imgCode}.png`;
+    } else {
+      icon += v.type.toLowerCase() + '.png';
+    }
+
     pdf.drawImage(
       doc,
       x + 2,
       y + 2,
-      'scoresheet_generation/maze/phi.png',
+      icon,
       base_size_y - 5,
       base_size_y - 5,
       'center'
     );
+
     pdf.drawTextWithAlign(
       doc,
       x + 20,
@@ -372,427 +313,7 @@ function drawRun(doc, config, scoringRun) {
       base_size_y,
       'center'
     );
-    x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
-  }
 
-  // Draw box for victim "H" (Floating)
-  for (const v of itemList.PHI.floating) {
-    pdf.drawImage(
-      doc,
-      x,
-      y,
-      'scoresheet_generation/maze/f2.png',
-      base_size_x,
-      50,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 2,
-      y + 2,
-      'scoresheet_generation/maze/phi.png',
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 23,
-      y + 2,
-      `scoresheet_generation/maze/${v.name}.png`,
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
-  }
-
-  if (x != 453) {
-    x = 453;
-    y += base_size_y;
-  }
-  // Draw box for victim "S" (Linear)
-  for (const v of itemList.PSI.linear) {
-    pdf.drawImage(
-      doc,
-      x,
-      y,
-      'scoresheet_generation/maze/l1.png',
-      base_size_x,
-      50,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 2,
-      y + 2,
-      'scoresheet_generation/maze/psi.png',
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    pdf.drawTextWithAlign(
-      doc,
-      x + 20,
-      y + text_padding,
-      v.name,
-      20,
-      'black',
-      base_size_y,
-      'center'
-    );
-    x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
-  }
-
-  // Draw box for victim "S" (Floating)
-  for (const v of itemList.PSI.floating) {
-    pdf.drawImage(
-      doc,
-      x,
-      y,
-      'scoresheet_generation/maze/f1.png',
-      base_size_x,
-      50,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 2,
-      y + 2,
-      'scoresheet_generation/maze/psi.png',
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 23,
-      y + 2,
-      `scoresheet_generation/maze/${v.name}.png`,
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
-  }
-
-  if (x != 453) {
-    x = 453;
-    y += base_size_y;
-  }
-  // Draw box for victim "U" (Linear)
-  for (const v of itemList.OMEGA.linear) {
-    pdf.drawImage(
-      doc,
-      x,
-      y,
-      'scoresheet_generation/maze/l0.png',
-      base_size_x,
-      50,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 2,
-      y + 2,
-      'scoresheet_generation/maze/omega.png',
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    pdf.drawTextWithAlign(
-      doc,
-      x + 20,
-      y + text_padding,
-      v.name,
-      20,
-      'black',
-      base_size_y,
-      'center'
-    );
-    x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
-  }
-
-  // Draw box for victim "U" (Floating)
-  for (const v of itemList.OMEGA.floating) {
-    pdf.drawImage(
-      doc,
-      x,
-      y,
-      'scoresheet_generation/maze/f0.png',
-      base_size_x,
-      50,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 2,
-      y + 2,
-      'scoresheet_generation/maze/omega.png',
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 23,
-      y + 2,
-      `scoresheet_generation/maze/${v.name}.png`,
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
-  }
-
-  if (x != 453) {
-    x = 453;
-    y += base_size_y;
-  }
-  // Draw box for victim "Red" (Linear)
-  for (const v of itemList.Red.linear) {
-    pdf.drawImage(
-      doc,
-      x,
-      y,
-      'scoresheet_generation/maze/l2.png',
-      base_size_x,
-      50,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 2,
-      y + 2,
-      'scoresheet_generation/maze/red.png',
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    pdf.drawTextWithAlign(
-      doc,
-      x + 20,
-      y + text_padding,
-      v.name,
-      20,
-      'black',
-      base_size_y,
-      'center'
-    );
-    x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
-  }
-
-  // Draw box for victim "Red" (Floating)
-  for (const v of itemList.Red.floating) {
-    pdf.drawImage(
-      doc,
-      x,
-      y,
-      'scoresheet_generation/maze/f2.png',
-      base_size_x,
-      50,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 2,
-      y + 2,
-      'scoresheet_generation/maze/red.png',
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 23,
-      y + 2,
-      `scoresheet_generation/maze/${v.name}.png`,
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
-  }
-
-  if (x != 453) {
-    x = 453;
-    y += base_size_y;
-  }
-  // Draw box for victim "Yellow" (Linear)
-  for (const v of itemList.Yellow.linear) {
-    pdf.drawImage(
-      doc,
-      x,
-      y,
-      'scoresheet_generation/maze/l1.png',
-      base_size_x,
-      50,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 2,
-      y + 2,
-      'scoresheet_generation/maze/yellow.png',
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    pdf.drawTextWithAlign(
-      doc,
-      x + 20,
-      y + text_padding,
-      v.name,
-      20,
-      'black',
-      base_size_y,
-      'center'
-    );
-    x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
-  }
-
-  // Draw box for victim "Yellow" (Floating)
-  for (const v of itemList.Yellow.floating) {
-    pdf.drawImage(
-      doc,
-      x,
-      y,
-      'scoresheet_generation/maze/f1.png',
-      base_size_x,
-      50,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 2,
-      y + 2,
-      'scoresheet_generation/maze/yellow.png',
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 23,
-      y + 2,
-      `scoresheet_generation/maze/${v.name}.png`,
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
-  }
-
-  if (x != 453) {
-    x = 453;
-    y += base_size_y;
-  }
-  // Draw box for victim "Green" (Linear)
-  for (const v of itemList.Green.linear) {
-    pdf.drawImage(
-      doc,
-      x,
-      y,
-      'scoresheet_generation/maze/l0.png',
-      base_size_x,
-      50,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 2,
-      y + 2,
-      'scoresheet_generation/maze/green.png',
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    pdf.drawTextWithAlign(
-      doc,
-      x + 20,
-      y + text_padding,
-      v.name,
-      20,
-      'black',
-      base_size_y,
-      'center'
-    );
-    x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
-  }
-
-  // Draw box for victim "Green" (Floating)
-  for (const v of itemList.Green.floating) {
-    pdf.drawImage(
-      doc,
-      x,
-      y,
-      'scoresheet_generation/maze/f0.png',
-      base_size_x,
-      50,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 2,
-      y + 2,
-      'scoresheet_generation/maze/green.png',
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
-    pdf.drawImage(
-      doc,
-      x + 23,
-      y + 2,
-      `scoresheet_generation/maze/${v.name}.png`,
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
     x += base_size_x;
     if (x >= 810) {
       x = 453;
@@ -950,6 +471,43 @@ function drawRun(doc, config, scoringRun) {
       'center'
     );
     x += base_size_x;
+    if (x >= 810) {
+      x = 453;
+      y += base_size_y;
+    }
+  }
+
+  // Draw box for "blue"
+  for (const e of itemList.blue) {
+    pdf.drawImage(
+      doc,
+      x,
+      y,
+      'scoresheet_generation/maze/element_blue.png',
+      base_size_x * 2,
+      50,
+      'center'
+    );
+    pdf.drawImage(
+      doc,
+      x + 2,
+      y + 2,
+      'scoresheet_generation/maze/blue.png',
+      base_size_y - 5,
+      base_size_y - 5,
+      'center'
+    );
+    pdf.drawTextWithAlign(
+      doc,
+      x + 20,
+      y + text_padding,
+      e.name,
+      20,
+      'black',
+      base_size_y,
+      'center'
+    );
+    x += base_size_x * 2;
     if (x >= 810) {
       x = 453;
       y += base_size_y;

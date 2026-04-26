@@ -146,9 +146,6 @@ module.exports.calculateMazeScore = function (run) {
       PHI: 2,
       PSI: 1,
       OMEGA: 0,
-      Red: 2,
-      Yellow: 1,
-      Green: 0,
     };
 
     const cognitiveColorValues = {
