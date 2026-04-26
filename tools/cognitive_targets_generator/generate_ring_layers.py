@@ -10,22 +10,24 @@ import os
 from itertools import product
 from PIL import Image, ImageDraw
 
-# Color definitions (RGBA)
+# Color definitions (RGBA) — kept in lock-step with generate_cognitive_targets.py
+# so the editor's ring-layer overlays look identical to the printable targets.
+# RGB values were sampled from the maze rules figure.
 COLORS = {
-    'B': (0, 0, 0, 255),        # Black
-    'R': (255, 0, 0, 255),      # Red
+    'K': (0, 0, 0, 255),        # Black
+    'R': (238, 0, 0, 255),      # Red
     'Y': (255, 255, 0, 255),    # Yellow
-    'G': (0, 128, 0, 255),      # Green
-    'C': (0, 255, 255, 255),    # Cyan
+    'G': (0, 176, 80, 255),     # Green
+    'B': (0, 176, 240, 255),    # Blue
 }
 
 # Color names for reference
 COLOR_NAMES = {
-    'B': 'Black',
+    'K': 'Black',
     'R': 'Red',
     'Y': 'Yellow',
     'G': 'Green',
-    'C': 'Cyan',
+    'B': 'Blue',
 }
 
 # DPI for converting cm to pixels (300 DPI for high-quality print)
@@ -56,7 +58,7 @@ def create_ring_layer(color_code, ring_index, size_pixels):
     Create a single ring layer image.
     
     Args:
-        color_code: Single color code (e.g., 'B', 'R', 'Y', 'G', 'C')
+        color_code: Single color code (e.g., 'K', 'R', 'Y', 'G', 'B')
         ring_index: Ring index (0=innermost 1cm, 4=outermost 5cm)
         size_pixels: Size of the output image in pixels (square)
     
@@ -151,7 +153,7 @@ def create_offset_ring_layer(color_code, ring_index, position):
 
 def generate_all_ring_layers():
     """Generate all ring layer images for all color and position combinations."""
-    color_codes = ['B', 'R', 'Y', 'G', 'C']
+    color_codes = ['K', 'R', 'Y', 'G', 'B']
     positions = ['top', 'right', 'bottom', 'left']
     
     # Generate output directory
