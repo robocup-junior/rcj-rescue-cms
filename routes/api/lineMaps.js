@@ -315,7 +315,16 @@ adminRouter.put('/:map', function (req, res, next) {
   });
 });
 
-adminRouter.post('/image/:map', function (req, res, next) {
+adminRouter.get('/image/:map', function (req, res, next) {
+  const id = req.params.map;
+
+  if (!ObjectId.isValid(id)) {
+    return next();
+  }
+  /* 画像を送る */
+});
+
+publicRouter.post('/image/:map', function (req, res, next) {
   const id = req.params.map;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -327,15 +336,6 @@ adminRouter.post('/image/:map', function (req, res, next) {
   fs.writeFile(path, base64Data, 'base64', function (err) {
     res.send(path);
   });
-});
-
-adminRouter.get('/image/:map', function (req, res, next) {
-  const id = req.params.map;
-
-  if (!ObjectId.isValid(id)) {
-    return next();
-  }
-  /* 画像を送る */
 });
 
 adminRouter.delete('/:map', function (req, res, next) {

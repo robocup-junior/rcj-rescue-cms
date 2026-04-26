@@ -1,21 +1,43 @@
 //- -*- tab-width: 2 -*-
 extends includes/layout
 
+block vars
+  - var ngAppDef = 'ErrorPage'
 
-block location
-  a.breadcrumb-item(ng-click="go('/home')") Home
-  span.breadcrumb-item.active= error.status
+append scripts
+  script.
+    var app = angular.module('ErrorPage', ['ngTouch', 'pascalprecht.translate', 'ngCookies', 'ngSanitize']);
+    app.controller("ErrorPageController", ['$scope', function ($scope) {}]);
+  script(src='/javascripts/translate_config.js')
+
+append css
+  link(href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet")
+  link(rel='stylesheet', href='/stylesheets/error_premium.css')
+
+block bread
+  // Breadcrumbs removed as requested
 
 block content
-  .row
-    .col-md-1
-    .col-md-10
-      i.fa.fa-ban.fa-5x(aria-hidden="true" style="color:#e74c3c;") &nbsp;Error :(
-      br
-      br
-      h1= error.status
-      h2= message
-      br
-      br
-
+  .error-page(ng-cloak)
+    .error-card
+      .robot-container
+        .stone
+        .robot
+          .robot-head
+            .robot-ear.ear-left
+            .robot-ear.ear-right
+            .eye
+            .eye
+          .robot-body
+            .robot-arm.arm-left
+            .robot-arm.arm-right
+            .robot-leg.leg-left
+            .robot-leg.leg-right
       
+      .error-status #{error.status}
+      h1.error-message-title {{"error.title" | translate}}
+      p.error-message-detail #{message || ("error.description" | translate)}
+      
+      a.btn-home(href="/home")
+        i.fas.fa-home
+        | {{"common.backHome" | translate}}

@@ -13,172 +13,625 @@ html(ng-app="ddApp")
     link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css')
     link(href="/stylesheets/fredrik.css" rel="stylesheet")
 
-    link(href="/stylesheets/maze.css" rel="stylesheet")
+    style.
+        :root {
+            --primary: #ec4899;
+            --primary-dark: #db2777;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --background: #fdf2f8;
+            --card-bg: #ffffff;
+            --border: #fbcfe8;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
 
-    meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
+        body {
+            background-color: var(--background);
+            font-family: 'Inter', -apple-system, sans-serif;
+            color: var(--text-main);
+            padding-top: 80px;
+            padding-bottom: 100px;
+        }
 
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.1);
+            height: 60px;
+            min-height: 60px;
+            padding: 0 20px;
+        }
 
+        .navbar-brand {
+            font-weight: 800;
+            color: var(--primary) !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-entry {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .card-entry-header {
+            background: #f1f5f9;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-entry-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .entry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            padding: 20px;
+        }
+
+        .entry-item {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0 12px;
+            display: grid;
+            grid-template-columns: 25px 40px 40px 1fr;
+            column-gap: 12px;
+            align-items: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            height: 84px;
+            overflow: hidden;
+        }
+
+        .entry-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .entry-item.active {
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .entry-item.active .item-id {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-icon {
+            margin-left: auto;
+            font-size: 1.2rem;
+            color: var(--border);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .item-id {
+            width: 30px;
+            height: 40px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .item-img-wrapper {
+            grid-column: 2;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .item-img-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .status-icon {
+            grid-column: 4;
+            justify-self: end;
+            font-size: 2.2rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .status-icon i.fa-check-circle {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .status-area {
+            display: contents; /* Let children participate in parent grid */
+        }
+
+        .kit-selector-wrapper {
+            grid-column: 4;
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .toggle-btn {
+            grid-column: 3;
+            justify-self: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            background: white;
+            color: var(--secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+        }
+
+        .toggle-btn.active {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+        }
+
+        .blue-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff1f2;
+            border-radius: 20px;
+            padding: 2px;
+            border: 1px solid #fbcfe8;
+        }
+
+        .blue-stepper:not(.w-100) {
+            margin-left: auto;
+        }
+
+        .blue-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(236, 72, 153, 0.1);
+            transition: all 0.2s;
+        }
+
+        .blue-btn:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(236, 72, 153, 0.2);
+        }
+
+        .blue-count {
+            width: 44px;
+            text-align: center;
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 1.1rem;
+            border: none;
+            background: transparent;
+            outline: none;
+        }
+
+        .status-area {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            height: 44px;
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+            padding: 4px 16px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.2);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .score-label {
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.9;
+        }
+
+        .score-value {
+            font-size: 1.4rem;
+            font-weight: 900;
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
+        }
+
+        .score-unit {
+            font-size: 0.7rem;
+            font-weight: 600;
+            opacity: 0.8;
+        }
+
+        .penalty-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+        }
+
+        .penalty-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .time-input-container {
+            background: #f1f5f9;
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .time-display-large {
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: inset 0 2px 4px rgba(99, 102, 241, 0.05);
+        }
+
+        .time-digits {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+        }
+
+        .time-numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 220px;
+            margin: 0 auto;
+        }
+
+        .num-btn {
+            aspect-ratio: 1/1;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .num-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #f8faff;
+            transform: scale(1.05);
+        }
+
+        .num-btn.clear-btn:hover {
+            color: #ef4444;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .kit-selector {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 12px;
+            gap: 4px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .kit-selector.met {
+            background: #f0fdf4;
+            border-color: var(--success);
+        }
+
+        .kit-btn {
+            border: none;
+            background: white;
+            color: var(--text-muted);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kit-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(236, 72, 153, 0.3);
+            z-index: 1;
+        }
+
+        .kit-btn.active-scored {
+            background: var(--success);
+            border-color: var(--success);
+            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
+        }
+
+        .footer-action {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-premium {
+            padding: 12px 32px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-pink {
+            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+            color: white;
+        }
+
+        .btn-pink:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.3);
+            filter: brightness(1.1);
+            color: white;
+        }
+
+        .btn-secondary-outline {
+            background: white;
+            border: 2px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-secondary-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #fff1f2;
+        }
   body(ng-controller="ddController")
-    nav.navbar(style='background-color: #e84393; color: #ecf0f1; position: fixed; top: 0; z-index:10 ;  width: 100%')
-      // Navbar content
-      .col-md-6.col-sm4.col-12
-        li.navbar-brand(href='#')
-          i.fas.fa-users
-          |  {{team.name}}
-      .col-md-3.col-sm4.col-12
-        li.navbar-brand(href='#')
-          i.fas.fa-hashtag
-          |  {{round}}
-      .col-md-2.col-sm4.col-12
-        li.navbar-brand(href='#')
-          i.fas.fa-map-marker-alt
-          |  {{field}}
-      .col-md-1.col-sm4.col-12
-        li.navbar-brand(href='#')
-          img(ng-src="{{competition.logo}}" height="30px")
-    .container-fluid.nav-cont
-      div#inputcontent
-        .row
-          .col-12
-            .card
-              h4.card-header(style="background-color:#fd79a8;")
-                i.fas.fa-user-injured(aria-hidden='true' style="color:white;") &nbsp;Victims
-              .card-body
-                .row(ng-repeat="(victimType,vic) in victimsList")
-                    .col-md-3(ng-repeat="victim in itemList[victimType].linear")
-                      table(style="background-color:#fffeec;border:1px solid #444")
-                        tr(style="text-align:center;height:50px;")
-                          td(style="width:43px;")
-                            img(ng-src="/images/{{vic.image}}" height="40px;")
-                          td(style="width:35px;text-align:center;")
-                            span(style="font-size:30px") {{victim.name}}
-                          td
-                            button.btn(type='button',ng-click="toggleScored(victim)",ng-class="{'btn-success': clearStatus(victim),'btn-danger':!clearStatus(victim)}",style="height:100%;width:100%;")
-                              i.far.fa-lightbulb
-                          td
-                            .btn-toolbar(role='toolbar',ng-show="vic.kit")
-                              .btn-group.mr-2(role='group')
-                                button.btn.btn-dark(type='button',ng-click="setKits(victim,0)")
-                                  i.fas.fa-first-aid
-                                button.btn(type='button',ng-click="setKits(victim,k+1)",ng-class="{'btn-success': kitStatus(victim,k+1),'btn-light':!kitStatus(victim,k+1)}",ng-repeat="k in range(vic.kit)") {{k+1}}
-                    .col-md-3(ng-repeat="victim in itemList[victimType].floating")
-                      table(style="background-color:#c2f5d7;border:1px solid #444")
-                        tr(style="text-align:center;height:50px;")
-                          td(style="width:43px;")
-                            img(ng-src="/images/{{vic.image}}" height="40px;")
-                          td(style="width:35px;text-align:center;")
-                            span(style="font-size:30px") {{victim.name}}
-                          td
-                            button.btn(type='button',ng-click="toggleScored(victim)",ng-class="{'btn-success': clearStatus(victim),'btn-danger':!clearStatus(victim)}",style="height:100%;width:100%;")
-                              i.far.fa-lightbulb
-                          td
-                            .btn-toolbar(role='toolbar',ng-show="vic.kit")
-                              .btn-group.mr-2(role='group')
-                                button.btn.btn-dark(type='button',ng-click="setKits(victim,0)")
-                                  i.fas.fa-first-aid
-                                button.btn(type='button',ng-click="setKits(victim,k+1)",ng-class="{'btn-success': kitStatus(victim,k+1),'btn-light':!kitStatus(victim,k+1)}",ng-repeat="k in range(vic.kit)") {{k+1}}
-        hr
-        .row
-          .col-12
-            .card
-              h4.card-header(style="background-color:#0984e3;")
-                i.fas.fa-clipboard(aria-hidden='true' style="color:white;") &nbsp;Score elements
-              .card-body
+    nav.navbar.navbar-expand-lg.navbar-custom.fixed-top
+      .container-fluid
+        a.navbar-brand(href='#')
+          i.fas.fa-edit.me-2
+          | {{team.name}}
+          span.badge.bg-pink-100.text-pink-700.ms-2(style="background: #fdf2f8; color: #db2777; font-size: 0.7rem; padding: 4px 8px;") STEP 1: INPUT
+        .d-flex.gap-5.align-items-center
+          div.d-flex.gap-3
+            span.badge.bg-white.text-dark(style="font-size: 0.9rem; padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border);")
+              i.fas.fa-hashtag.me-1
+              | {{round}}
+            span.badge.bg-white.text-dark(style="font-size: 0.9rem; padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border);margin-left: 10px;")
+              i.fas.fa-map-marker-alt.me-1
+              | {{field}}
+
+    .container-fluid.mt-4
+      // Victims Section
+      .card-entry
+        .card-entry-header
+          h4
+            i.fas.fa-user-injured
+            | Victims
+        .entry-grid
+          div.entry-item(ng-repeat="victim in itemList.allVictims", ng-init="maxKits = getModalMaxKitNum(cells[victim.x+','+victim.y+','+victim.z], victim.direction)", ng-class="{'active': clearStatus(victim) && (maxKits == 0 || tiles[victim.x+','+victim.y+','+victim.z].scoredItems.rescueKits[victim.direction] == maxKits)}")
+            .item-id {{victim.name}}
+            .item-img-wrapper
+              img(ng-src="{{getModalCognitiveImage(cells[victim.x+','+victim.y+','+victim.z], victim.direction)}}", ng-if="victim.type == 'Cognitive'")
+              img(ng-src="/images/phi.png", ng-if="victim.type == 'PHI'")
+              img(ng-src="/images/psi.png", ng-if="victim.type == 'PSI'")
+              img(ng-src="/images/omega.png", ng-if="victim.type == 'OMEGA'")
+            
+            // Status Elements participating in parent grid
+            button.toggle-btn(type='button', ng-click="toggleScored(victim)", ng-class="{'active': clearStatus(victim)}")
+              i.fas.fa-lightbulb
+
+            .kit-selector-wrapper(ng-init="maxKits = getModalMaxKitNum(cells[victim.x+','+victim.y+','+victim.z], victim.direction)")
+              .kit-selector(ng-if="maxKits > 0", ng-class="{'met': tiles[victim.x+','+victim.y+','+victim.z].scoredItems.rescueKits[victim.direction] == maxKits}")
+                i.fas.fa-first-aid.me-2(ng-style="{'color': tiles[victim.x+','+victim.y+','+victim.z].scoredItems.rescueKits[victim.direction] == maxKits ? 'var(--success)' : '#cbd5e1'}")
+                button.kit-btn(type='button', ng-click="setKits(victim, 0)", ng-class="{'active': tiles[victim.x+','+victim.y+','+victim.z].scoredItems.rescueKits[victim.direction] == 0}") 0
+                button.kit-btn(type='button', ng-repeat="k in range(maxKits)", ng-click="setKits(victim, k+1)", ng-class="{'active': tiles[victim.x+','+victim.y+','+victim.z].scoredItems.rescueKits[victim.direction] == k+1, 'active-scored': tiles[victim.x+','+victim.y+','+victim.z].scoredItems.rescueKits[victim.direction] == k+1}") {{k+1}}
+
+      // Score Elements Section
+      .card-entry
+        .card-entry-header
+          h4
+            i.fas.fa-clipboard-list
+            | Score Elements
+        .entry-grid
+          // Checkpoints
+          div.entry-item(ng-repeat="item in itemList.checkpoint", ng-click="toggleScored(item)", ng-class="{'active': clearStatus(item)}")
+            .item-id {{item.name}}
+            .item-img-wrapper: img(src="/images/checkpoint.png")
+            .status-icon: i.fas.fa-check-circle(ng-style="{'color': clearStatus(item) ? 'var(--success)' : '#cbd5e1'}")
+          
+          // Speedbumps
+          div.entry-item(ng-repeat="item in itemList.speedbump", ng-click="toggleScored(item)", ng-class="{'active': clearStatus(item)}")
+            .item-id {{item.name}}
+            .item-img-wrapper: img(src="/images/speedbump.png")
+            .status-icon: i.fas.fa-check-circle(ng-style="{'color': clearStatus(item) ? 'var(--success)' : '#cbd5e1'}")
+
+          // Ramps
+          div.entry-item(ng-repeat="item in itemList.ramp", ng-click="toggleScored(item)", ng-class="{'active': clearStatus(item)}")
+            .item-id {{item.name}}
+            .item-img-wrapper: img(src="/images/ramp.png")
+            .status-icon: i.fas.fa-check-circle(ng-style="{'color': clearStatus(item) ? 'var(--success)' : '#cbd5e1'}")
+
+          // Steps
+          div.entry-item(ng-repeat="item in itemList.steps", ng-click="toggleScored(item)", ng-class="{'active': clearStatus(item)}")
+            .item-id {{item.name}}
+            .item-img-wrapper: img(src="/images/steps.png")
+            .status-icon: i.fas.fa-check-circle(ng-style="{'color': clearStatus(item) ? 'var(--success)' : '#cbd5e1'}")
+
+          // Blue Tiles
+          div.entry-item(ng-repeat="item in itemList.blue", ng-class="{'active': tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue > 0}")
+            .item-id {{item.name}}
+            .item-img-wrapper: div(style="width: 30px; height: 30px; background: #2563eb; border-radius: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);")
+            .blue-stepper
+              button.blue-btn(type='button', ng-click="tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue = (tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue > 0 ? tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue - 1 : 0)")
+                i.fas.fa-minus
+              input.blue-count(type='number', ng-model="tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue", min="0", ng-focus="focused('blue', $event)", ng-blur="blured('blue')")
+              button.blue-btn(type='button', ng-click="tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue = tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue + 1")
+                i.fas.fa-plus
+
+      // Others Section
+      .row.others-container.d-flex
+        .col-lg-6
+          .flex-column-fill
+            // Penalties Card
+            .card-entry
+              .card-entry-header
+                h4: i.fas.fa-exclamation-triangle
+                  | Penalties
+              .p-4
                 .row
-                  //Checkpoint
-                  .col-md-2(ng-repeat="item in itemList.checkpoint")
-                    table(style="background-color:#DFF7FD;border:1px solid #444;width:100%;")
-                      tr(style="text-align:center;height:50px;")
-                        td(style="width:43px;")
-                          img(ng-src="/images/checkpoint.png" height="40px;")
-                        td(style="width:35px;text-align:center;")
-                          span(style="font-size:30px") {{item.name}}
-                        td
-                          button.btn(type='button',ng-click="toggleScored(item)",ng-class="{'btn-success': clearStatus(item),'btn-danger':!clearStatus(item)}",ng-if="!item.afterLoP",style="width:100%;height:100%;")
-                            i.far(ng-class="{'fa-check-square': clearStatus(item), 'fa-times-circle': !clearStatus(item)}")
-                  .col-md-2(ng-repeat="item in itemList.speedbump")
-                    table(style="background-color:#DFF7FD;border:1px solid #444;width:100%;")
-                      tr(style="text-align:center;height:50px;")
-                        td(style="width:43px;")
-                          img(ng-src="/images/speedbump.png" height="40px;")
-                        td(style="width:35px;text-align:center;")
-                          span(style="font-size:30px") {{item.name}}
-                        td
-                          button.btn(type='button',ng-click="toggleScored(item)",ng-class="{'btn-success': clearStatus(item),'btn-danger':!clearStatus(item)}",ng-if="!item.afterLoP",style="width:100%;height:100%;")
-                            i.far(ng-class="{'fa-check-square': clearStatus(item), 'fa-times-circle': !clearStatus(item)}")
-                  .col-md-2(ng-repeat="item in itemList.ramp")
-                    table(style="background-color:#DFF7FD;border:1px solid #444;width:100%;")
-                      tr(style="text-align:center;height:50px;")
-                        td(style="width:43px;")
-                          img(ng-src="/images/ramp.png" height="40px;")
-                        td(style="width:35px;text-align:center;")
-                          span(style="font-size:30px") {{item.name}}
-                        td
-                          button.btn(type='button',ng-click="toggleScored(item)",ng-class="{'btn-success': clearStatus(item),'btn-danger':!clearStatus(item)}",ng-if="!item.afterLoP",style="width:100%;height:100%;")
-                            i.far(ng-class="{'fa-check-square': clearStatus(item), 'fa-times-circle': !clearStatus(item)}")
-                  .col-md-2(ng-repeat="item in itemList.steps")
-                    table(style="background-color:#DFF7FD;border:1px solid #444;width:100%;")
-                      tr(style="text-align:center;height:50px;")
-                        td(style="width:43px;")
-                          img(ng-src="/images/steps.png" height="40px;")
-                        td(style="width:35px;text-align:center;")
-                          span(style="font-size:30px") {{item.name}}
-                        td
-                          button.btn(type='button',ng-click="toggleScored(item)",ng-class="{'btn-success': clearStatus(item),'btn-danger':!clearStatus(item)}",ng-if="!item.afterLoP",style="width:100%;height:100%;")
-                            i.far(ng-class="{'fa-check-square': clearStatus(item), 'fa-times-circle': !clearStatus(item)}")
-                  .col-md-2(ng-repeat="item in itemList.blue")
-                    table(style="background-color:#DFF7FD;border:1px solid #444;width:100%;")
-                      tr(style="text-align:center;height:50px;")
-                        td(style="width:43px;")
-                          div(style="width:40px;height:40px;background-color:blue;margin-left:auto;margin-right:auto;border:1px solid #444;")
-                        td(style="width:35px;text-align:center;")
-                          span(style="font-size:30px") {{item.name}}
-                        td(style="width:40px;")
-                          button.btn(type='button', ng-click="toggleScored(item)", ng-class="{'btn-success': clearStatus(item),'btn-danger':!clearStatus(item)}", style="width:100%;height:100%;")
-                            i.far(ng-class="{'fa-check-square': clearStatus(item), 'fa-times-circle': !clearStatus(item)}")
-                        td
-                          input.form-control(type='number', ng-model="tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue", min='0', ng-disabled="!clearStatus(item)", style="width:100%;height:100%;font-size:25px;text-align:center;padding:0;")
+                  .col-sm-6
+                    .penalty-box
+                      label.penalty-label Misidentifications
+                      .blue-stepper.w-100
+                        button.blue-btn(type='button', ng-click="MisIdent = (MisIdent > 0 ? MisIdent - 1 : 0)")
+                          i.fas.fa-minus
+                        input.blue-count(type='number', ng-model='MisIdent', min='0', ng-focus="focused('MisIdent', $event)", ng-blur="blured('MisIdent')")
+                        button.blue-btn(type='button', ng-click="MisIdent = MisIdent + 1")
+                          i.fas.fa-plus
+                  .col-sm-6
+                    .penalty-box
+                      label.penalty-label LoPs
+                      .blue-stepper.w-100
+                        button.blue-btn(type='button', ng-click="LoPs = (LoPs > 0 ? LoPs - 1 : 0)")
+                          i.fas.fa-minus
+                        input.blue-count(type='number', ng-model='LoPs', min='0', ng-focus="focused('LoPs', $event)", ng-blur="blured('LoPs')")
+                        button.blue-btn(type='button', ng-click="LoPs = LoPs + 1")
+                          i.fas.fa-plus
+            
+            // Final Bonus Card
+            .card-entry
+              .card-entry-header
+                h4: i.fas.fa-award
+                  | Final Bonus
+              .p-3.text-center(ng-click='changeExitBonus()', style="cursor: pointer;")
+                .bonus-visual(ng-style="{'background-color': exitBonus?'#f0fdf4':'#fef2f2', 'border-color': exitBonus?'#10b981':'#ef4444'}" style="border: 2px solid; padding: 12px; border-radius: 12px; transition: all 0.3s; display: flex; align-items: center; gap: 16px; justify-content: center;")
+                  img(src='/images/maze_bonus.png', style="height: 40px; object-fit: contain;")
+                  .fw-bold(ng-style="{'color': exitBonus?'#10b981':'#ef4444'}" style="font-size: 1.1rem;")
+                    span(ng-if="exitBonus")
+                      i.fas.fa-check-circle.me-2
+                      | Exit Bonus Achieved
+                    span(ng-if="!exitBonus")
+                      i.fas.fa-times-circle.me-2
+                      | No Exit Bonus
 
+        .col-lg-6
+          // Time Card
+          .card-entry.h-100
+            .card-entry-header
+              h4: i.fas.fa-clock
+                | Time Recorded
+            .p-4.d-flex.flex-column.justify-content-center(style="height: calc(100% - 60px);")
+              .time-input-container
+                .time-display-large
+                  .time-digits {{getTimeDisplay()}}
+                  .time-label MIN : SEC
+                
+                .time-numpad
+                  button.num-btn(type='button', ng-click="addTimeDigit('1')") 1
+                  button.num-btn(type='button', ng-click="addTimeDigit('2')") 2
+                  button.num-btn(type='button', ng-click="addTimeDigit('3')") 3
+                  button.num-btn(type='button', ng-click="addTimeDigit('4')") 4
+                  button.num-btn(type='button', ng-click="addTimeDigit('5')") 5
+                  button.num-btn(type='button', ng-click="addTimeDigit('6')") 6
+                  button.num-btn(type='button', ng-click="addTimeDigit('7')") 7
+                  button.num-btn(type='button', ng-click="addTimeDigit('8')") 8
+                  button.num-btn(type='button', ng-click="addTimeDigit('9')") 9
+                  button.num-btn.action-btn.clear-btn(type='button', ng-click="clearTime()") AC
+                  button.num-btn(type='button', ng-click="addTimeDigit('0')") 0
+                  button.num-btn.action-btn(type='button', ng-click="backspaceTime()")
+                    i.fas.fa-backspace
 
-        hr
-        .row
-          .col-md-12
-            .card
-              h4.card-header
-                i.fas.fa-ellipsis-h(aria-hidden='true') &nbsp;Others
-              .card-body
-                table(border="3")
-                  tr
-                    td Type
-                    td(style="width:30%;")
-                  tr
-                    td Misidentifications
-                    td
-                      input.form-control(type='number', placeholder='', min='0', ng-model='MisIdent', ng-focus="focused('MisIdent')", ng-blur="blured('MisIdent')")
-                  tr
-                    td LoPs
-                    td
-                      input.form-control(type='number', placeholder='', min='0', ng-model='LoPs', ng-focus="focused('LoPs')", ng-blur="blured('LoPs')")
-                  tr
-                    td Time
-                    td
-                      .input-group.input-group-lg
-                        input.form-control(type='tel', placeholder='', aria-label='min', min='0', max='8', ng-model='minutes',ng-focus="focused('minutes')", ng-blur="blured('minutes')")
-                        .input-group-append
-                          span.input-group-text {{'common.min' | translate}}
-                        input.form-control(type='tel', placeholder='', aria-label='sec', min='0', max='60', ng-model='seconds', ng-focus="focused('seconds')", ng-blur="blured('seconds')")
-                        .input-group-append
-                          span.input-group-text {{'common.sec' | translate}}
-                  tr
-                    td Exit bonus
-                    td
-                      div(style='position: relative;', ng-click='changeExitBonus()')
-                        img.img-thumbnail(src='/images/maze_bonus.png', width='100px', height='100px', ng-style="{'background-color': exitBonus?'#2ecc71':'#D91E18'}")
-                        div(style='position:absolute; top:10px; left:0px;')
-                          i.fas.fa-check.fa-fw.fa-5x(ng-show='exitBonus', style='color:#27ae60; opacity:0.9;')
-                          i.fas.fa-times.fa-fw.fa-5x(ng-show='!exitBonus', style='padding-top:4px; color:#e74c3c; opacity:0.9;')
-      .row
-        .col-md-12(style="text-align:center;")
-          br
-          button.btn.btn-success.btn-lg(type='button', ng-click='send()', ng-disabled='startedTime', ng-hide='networkError', style="margin-bottom:20px;")
-            i.fas.fa-check.fa-2x(aria-hidden='true')  Complete
+    .footer-action(style="justify-content: center;")
+      button.btn-premium.btn-pink(type='button', ng-click='send()', ng-disabled='startedTime')
+        i.fas.fa-cloud-upload-alt.me-2
+        | &nbsp;Complete Data Entry & Submit Score

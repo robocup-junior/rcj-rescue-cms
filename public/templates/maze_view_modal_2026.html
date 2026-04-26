@@ -1,113 +1,475 @@
+<style>
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: white;
+        border-bottom: none;
+        padding: 20px 30px;
+    }
+
+    .modal-title {
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        font-size: 1.5rem;
+    }
+
+    .modal-body {
+        background-color: #f1f5f9;
+        padding: 30px;
+    }
+
+    .section-title {
+        font-size: 0.875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+
+    .feature-card {
+        background: white;
+        border-radius: 16px;
+        padding: 15px;
+        text-align: center;
+        position: relative;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s;
+        border: 2px solid transparent;
+    }
+
+    .feature-card.success {
+        border-color: #10b981;
+        background-color: #f0fdf4;
+    }
+
+    .feature-card.fail {
+        border-color: #f43f5e;
+        background-color: #fff1f2;
+    }
+
+    .feature-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 10px;
+        display: block;
+    }
+
+    .feature-img-container {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    .status-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 3rem;
+        opacity: 0.9;
+    }
+
+    .blue-count {
+        font-size: 3rem;
+        font-weight: 800;
+        color: #1e40af;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .victim-section {
+        background: white;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        margin-bottom: 25px;
+    }
+
+    .victim-row {
+        display: flex;
+        align-items: stretch;
+        padding: 0;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: background-color 0.2s, border-color 0.2s;
+    }
+
+    .victim-row.success {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    .victim-row.warning {
+        background: #fffbeb;
+        border-color: #fef08a;
+    }
+
+    .victim-row.fail {
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
+
+    .direction-accent {
+        width: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f5f9;
+        border-right: 1px solid #e2e8f0;
+        color: #64748b;
+        font-size: 0.85rem;
+    }
+
+    .victim-info {
+        display: flex;
+        align-items: center;
+        padding: 10px 15px;
+        gap: 15px;
+    }
+
+    .victim-image-wrapper {
+        position: relative;
+        padding-top: 10px;
+    }
+
+    .victim-image-container {
+        width: 54px;
+        height: 54px;
+        background: white;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .status-tab {
+        position: absolute;
+        top: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        padding: 3px 10px;
+        border-radius: 100px;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border: 1.5px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .status-tab i {
+        font-size: 0.8rem;
+    }
+
+    .direction-tab,
+    .status-tab {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        font-size: 0.5rem;
+        font-weight: 900;
+        padding: 1px 8px;
+        border-radius: 100px;
+        letter-spacing: 0.05em;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        text-transform: uppercase;
+        border: 1.5px solid white;
+        white-space: nowrap;
+    }
+
+    .direction-tab {
+        background: #1e293b;
+    }
+
+    .discovery-toggle {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 5px;
+    }
+
+    .icon-label {
+        font-size: 1rem;
+        margin-bottom: 4px;
+        color: #94a3b8;
+        transition: color 0.3s;
+    }
+
+    .icon-label.active-bulb {
+        color: #facc15;
+        animation: icon-blink 1.5s infinite ease-in-out;
+    }
+
+    .icon-label.active-kit {
+        color: #ef4444;
+    }
+
+    @keyframes icon-blink {
+
+        0%,
+        100% {
+            opacity: 1;
+            transform: scale(1);
+            filter: drop-shadow(0 0 0px #facc15);
+        }
+
+        50% {
+            opacity: 0.8;
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 5px #facc15);
+        }
+    }
+
+    .discovery-toggle {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        border-radius: 12px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
+    }
+
+    .direction-badge {
+        background: #1e293b;
+        color: white;
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
+
+    .kit-pill {
+        background: #1e293b;
+        color: white;
+        padding: 6px 15px;
+        border-radius: 9999px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        min-width: 70px;
+        text-align: center;
+        margin-left: 10px;
+    }
+
+    .modal-footer {
+        background-color: white;
+        border-top: 1px solid #e2e8f0;
+        padding: 20px 30px;
+    }
+
+    .btn-ok {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        padding: 12px;
+        transition: all 0.2s;
+    }
+
+    .btn-ok:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.4);
+    }
+</style>
+
 <div class="modal-header">
-    <h3 class="modal-title">{{"maze.view.m_score" | translate}}</h3>
+    <h3 class="modal-title">
+        <i class="fas fa-clipboard-check mr-2"></i>
+        {{"maze.view.m_score" | translate}}
+    </h3>
 </div>
+
 <div class="modal-body">
-    <ul style="padding-inline-start: 0px;">
-        <div class="row" ng-show="cell.tile.checkpoint || cell.tile.speedbump || cell.tile.steps || cell.tile.ramp || cell.tile.blue" style="margin-bottom: 20px;">
-            <div class="col-4" style="position: relative;text-align: center;" ng-show="cell.tile.checkpoint">
-                <span>{{"maze.judge.m_reach" | translate}}</span>
-                <img class="img-thumbnail" src="/images/checkpoint.png" width="100%" ng-style="{'background-color': tile.scoredItems.checkpoint?'#2ecc71':'#D91E18'}">
-                <div style="position: absolute; top:20px; left:10px;">
-                    <i class="fas fa-check fa-fw fa-5x" ng-show="tile.scoredItems.checkpoint" style="color:#ffffff; opacity:0.9;"></i>
-                    <i class="fas fa-times fa-fw fa-5x" ng-show="!tile.scoredItems.checkpoint" style="padding-top:4px; color:#ffffff; opacity:0.9;"></i>
-                </div>
-            </div>
+    <!-- Features Grid (Checkpoint, Bump, etc) -->
+    <div class="section-title"
+        ng-show="cell.tile.checkpoint || cell.tile.speedbump || cell.tile.steps || cell.tile.ramp || cell.tile.blue">
+        <i class="fas fa-th"></i> {{"maze.view.m_score" | translate}}
+    </div>
 
-            <div class="col-4" style="position: relative;text-align: center;" ng-show="cell.tile.speedbump">
-                <span>{{"maze.judge.m_bump" | translate}}</span>
-                <img class="img-thumbnail" src="/images/log.png" width="100%" ng-style="{'background-color': tile.scoredItems.speedbump?'#2ecc71':'#D91E18'}">
-                <div style="position: absolute; top:20px; left:10px;">
-                    <i class="fas fa-check fa-fw fa-5x" ng-show="tile.scoredItems.speedbump" style="color:#ffffff; opacity:0.9;"></i>
-                    <i class="fas fa-times fa-fw fa-5x" ng-show="!tile.scoredItems.speedbump" style="padding-top:4px; color:#ffffff; opacity:0.9;"></i>
-                </div>
-            </div>
-
-            <div class="col-4" style="position: relative;text-align: center;" ng-show="cell.tile.steps">
-                <span>{{"maze.judge.m_steps" | translate}}</span>
-                <img class="img-thumbnail" src="/images/steps.png" width="100%" ng-style="{'background-color': tile.scoredItems.steps?'#2ecc71':'#D91E18'}">
-                <div style="position: absolute; top:20px; left:10px;">
-                    <i class="fas fa-check fa-fw fa-5x" ng-show="tile.scoredItems.steps" style="color:#ffffff; opacity:0.9;"></i>
-                    <i class="fas fa-times fa-fw fa-5x" ng-show="!tile.scoredItems.steps" style="padding-top:4px; color:#ffffff; opacity:0.9;"></i>
-                </div>
-            </div>
-
-            <div class="col-4" style="position: relative;text-align: center;" ng-show="cell.tile.ramp">
-                <span>{{"maze.judge.m_ramp" | translate}}</span>
-                <img class="img-thumbnail" src="/images/ramp.png" width="100%" ng-style="{'background-color': tile.scoredItems.ramp?'#2ecc71':'#D91E18'}">
-                <div style="position: absolute; top:20px; left:10px;">
-                    <i class="fas fa-check fa-fw fa-5x" ng-show="tile.scoredItems.ramp" style="color:#ffffff; opacity:0.9;"></i>
-                    <i class="fas fa-times fa-fw fa-5x" ng-show="!tile.scoredItems.ramp" style="padding-top:4px; color:#ffffff; opacity:0.9;"></i>
-                </div>
-            </div>
-
-            <div class="col-4" style="position: relative;text-align: center;" ng-show="cell.tile.blue">
-                <span>{{"maze.judge.blue" | translate}}</span>
-                <img class="img-thumbnail" src="/images/blue_tile.png" width="100%" ng-style="{'background-color': tile.scoredItems.blue>0?'#2ecc71':'#D91E18'}">
-                <div style="position: absolute; top:20px; left:10px;">
-                    <i class="fas fa-check fa-fw fa-5x" ng-show="tile.scoredItems.blue > 0" style="color:#ffffff; opacity:0.9;"></i>
-                    <i class="fas fa-times fa-fw fa-5x" ng-show="tile.scoredItems.blue == 0" style="padding-top:4px; color:#ffffff; opacity:0.9;"></i>
-                </div>
+    <div class="feature-grid"
+        ng-show="cell.tile.checkpoint || cell.tile.speedbump || cell.tile.steps || cell.tile.ramp || cell.tile.blue">
+        <!-- Checkpoint -->
+        <div class="feature-card" ng-show="cell.tile.checkpoint"
+            ng-class="tile.scoredItems.checkpoint ? 'success' : 'fail'">
+            <span class="feature-label">{{"maze.judge.m_reach" | translate}}</span>
+            <div class="feature-img-container">
+                <img src="/images/checkpoint.png" style="height: 60px;">
+                <i class="fas status-icon"
+                    ng-class="tile.scoredItems.checkpoint ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
+                    style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
             </div>
         </div>
-        <hr ng-if="cell.tile.checkpoint || cell.tile.speedbump || cell.tile.steps || cell.tile.ramp || cell.tile.blue">
 
-        <div ng-show="hasVictims">
-            <i class="far fa-2x fa-lightbulb" aria-hidden="true" style="color:#f8b500;">&nbsp;</i>{{"maze.view.m_flash" | translate}}
-                <div ng-repeat="(direction, type) in cell.tile.victims track by $index" ng-show="type != 'None'" style="margin-left:50px;" >
-                    <input type="checkbox" ng-model="tile.scoredItems.victims[direction]" id="{{ 'victim-' + $index }}" disabled><label class="checkbox" for="{{ 'victim-' + $index }}" ng-style="{backgroundColor: lightStatus(tile.scoredItems.victims[direction],tile.scoredItems.rescueKits[direction]) ? '#d3f5d3': '#f5d3d4'}">
-                    <img src="/images/phi.png" height=45px ng-if="type=='PHI'">
-                    <img src="/images/omega.png" height=45px ng-if="type=='OMEGA'">
-                    <img src="/images/psi.png" height=45px ng-if="type=='PSI'">
-                    <img src="/images/Red.png" height=45px ng-if="type=='Red'">
-                    <img src="/images/Yellow.png" height=45px ng-if="type=='Yellow'">
-                    <img src="/images/Green.png" height=45px ng-if="type=='Green'">
-                    <i class="fa-2x">{{modalRotate(direction)}}</i>
-                    </label>
+        <!-- Speedbump -->
+        <div class="feature-card" ng-show="cell.tile.speedbump"
+            ng-class="tile.scoredItems.speedbump ? 'success' : 'fail'">
+            <span class="feature-label">{{"maze.judge.m_bump" | translate}}</span>
+            <div class="feature-img-container">
+                <img src="/images/speedbump.png" style="height: 60px;">
+                <i class="fas status-icon"
+                    ng-class="tile.scoredItems.speedbump ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
+                    style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
+            </div>
+        </div>
+
+        <!-- Steps -->
+        <div class="feature-card" ng-show="cell.tile.steps" ng-class="tile.scoredItems.steps ? 'success' : 'fail'">
+            <span class="feature-label">{{"maze.judge.m_steps" | translate}}</span>
+            <div class="feature-img-container">
+                <img src="/images/steps.png" style="height: 60px;">
+                <i class="fas status-icon"
+                    ng-class="tile.scoredItems.steps ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
+                    style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
+            </div>
+        </div>
+
+        <!-- Ramp -->
+        <div class="feature-card" ng-show="cell.tile.ramp" ng-class="tile.scoredItems.ramp ? 'success' : 'fail'">
+            <span class="feature-label">{{"maze.judge.m_ramp" | translate}}</span>
+            <div class="feature-img-container">
+                <img src="/images/ramp.png" style="height: 60px;">
+                <i class="fas status-icon"
+                    ng-class="tile.scoredItems.ramp ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
+                    style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
+            </div>
+        </div>
+
+        <!-- Blue Tile -->
+        <div class="feature-card" ng-show="cell.tile.blue" ng-class="tile.scoredItems.blue > 0 ? 'success' : 'fail'">
+            <span class="feature-label">{{"maze.judge.blue" | translate}}</span>
+            <div class="feature-img-container" style="background: transparent; overflow: hidden;">
+                <img src="/images/blue_tile.png"
+                    style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                <span class="blue-count status-icon"
+                    style="color: white; text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6); transform: translate(-50%, -50%) scale(1.4); opacity: 1;">
+                    {{tile.scoredItems.blue}}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victims & Targets Section -->
+    <div ng-show="hasVictims">
+        <div class="section-title">
+            <i class="fas fa-user-check" style="color:#f8b500;"></i> {{"maze.view.m_victim" | translate}}
+        </div>
+
+        <div class="victim-section">
+            <div ng-repeat="direction in ['top', 'right', 'bottom', 'left']"
+                ng-init="type = cell.tile.victims[direction]"
+                ng-show="type != 'None' && type != undefined && (!hasRealVictims() || !isModalDummy(cell, direction))"
+                class="victim-row" ng-class="{
+                    'success': tile.scoredItems.victims[direction] && (isModalDummy(cell, direction) || kitStatus(tile.scoredItems.victims[direction], tile.scoredItems.rescueKits[direction], direction)),
+                    'warning': tile.scoredItems.victims[direction] && !isModalDummy(cell, direction) && !kitStatus(tile.scoredItems.victims[direction], tile.scoredItems.rescueKits[direction], direction),
+                    'fail': !tile.scoredItems.victims[direction]
+                 }">
+
+                <!-- Left: Direction Accent -->
+                <div class="direction-accent">
+                    <i class="fas" ng-class="{
+                        'fa-chevron-up': modalRotate(direction).toLowerCase() == 'top',
+                        'fa-chevron-down': modalRotate(direction).toLowerCase() == 'bottom',
+                        'fa-chevron-left': modalRotate(direction).toLowerCase() == 'left',
+                        'fa-chevron-right': modalRotate(direction).toLowerCase() == 'right'
+                    }"></i>
                 </div>
-        <div>
-        <div ng-show="hasVictims"  ng-if="leagueType=='standard'">
-            <i class="fas fa-2x fa-medkit" aria-hidden="true" style="color:#c53d43;">&nbsp;</i>{{"maze.view.m_kit" | translate}}
-            <div ng-repeat="(direction, type) in cell.tile.victims" ng-if="type != 'None'" style="margin-left:50px;">
-                <div class="input-group mb-3" style="width:100%;" >
-                    <div class="input-group-prepend">
-                        <span class="input-group-text" ng-style="{backgroundColor: kitStatus(tile.scoredItems.victims[direction],tile.scoredItems.rescueKits[direction],type) ? '#d3f5d3': '#f5d3d4'}">
-                            <img src="/images/phi.png" height=30px ng-if="type=='PHI'">
-                            <img src="/images/omega.png" height=30px ng-if="type=='OMEGA'">
-                            <img src="/images/psi.png" height=30px ng-if="type=='PSI'">
-                            <img src="/images/Red.png" height=30px ng-if="type=='Red'">
-                            <img src="/images/Yellow.png" height=30px ng-if="type=='Yellow'">
-                            <img src="/images/Green.png" height=30px ng-if="type=='Green'">
-                            &nbsp;{{modalRotate(direction)}}
-                        </span>
+
+                <!-- Middle: Victim Info -->
+                <div class="victim-info">
+                    <div class="victim-image-wrapper">
+                        <div class="status-tab" style="background: {{getModalVictimStatusColor(cell, direction)}};">
+                            <i class="fas" ng-class="{
+                                'fa-heartbeat': getModalVictimStatus(cell, direction) == 'Harmed',
+                                'fa-user-check': getModalVictimStatus(cell, direction) == 'Stable',
+                                'fa-smile': getModalVictimStatus(cell, direction) == 'Unharmed',
+                                'fa-robot': getModalVictimStatus(cell, direction) == 'Dummy'
+                            }"></i>
+                        </div>
+                        <div class="victim-image-container">
+                            <img src="/images/phi.png" height="38" ng-if="type=='PHI'">
+                            <img src="/images/omega.png" height="38" ng-if="type=='OMEGA'">
+                            <img src="/images/psi.png" height="38" ng-if="type=='PSI'">
+                            <img ng-src="{{getModalCognitiveImage(cell, direction)}}" height="38"
+                                ng-if="type=='Cognitive' && cell.tile.cognitiveTargets[direction]">
+                        </div>
                     </div>
-                    <span class="input-group-append">
-                        <button type="button" class="btn btn-danger"  disabled>
-                            <i class="fa fa-2x fa-minus" aria-hidden="true"></i>
-                        </button>
-                    </span>
-                    <input type="text" name="quant[2]" class="form-control input-number" ng-model="tile.scoredItems.rescueKits[direction]" min="1" max="12" readonly="readonly" style="font-size:25px;" ng-style="{backgroundColor: kitStatus(tile.scoredItems.victims[direction],tile.scoredItems.rescueKits[direction],type) ? '#d3f5d3': '#f5d3d4'}">
-                    <span class="input-group-append">
-                        <button type="button" class="btn btn-success" disabled>
-                            <i class="fa fa-2x fa-plus" aria-hidden="true"></i>
-                        </button>
-                    </span>
                 </div>
-                <br>
+
+                <!-- Right: Status -->
+                <div style="display: flex; align-items: center; flex-grow: 1; gap: 15px;">
+                    <!-- Discovery Status -->
+                    <div class="discovery-toggle">
+                        <i class="fas fa-lightbulb icon-label"
+                            ng-class="{'active-bulb': tile.scoredItems.victims[direction]}"></i>
+                        <i class="fas fa-2x"
+                            ng-class="tile.scoredItems.victims[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
+                    </div>
+
+                    <!-- Kits Status (Standard) -->
+                    <div ng-if="leagueType=='standard'" style="flex: 2; padding: 0 10px; text-align: center;">
+                        <i class="fas fa-first-aid icon-label"
+                            ng-class="{'active-kit': tile.scoredItems.rescueKits[direction] > 0}"></i>
+                        <div class="kit-pill"
+                            style="margin: 0 auto; background: {{getModalKitColor(cell, direction)}};">
+                            {{tile.scoredItems.rescueKits[direction]}}</div>
+                        <div
+                            style="font-size: 0.6rem; font-weight: 700; color: #94a3b8; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            {{"maze.judge.m_required" | translate}}: {{getModalMaxKitNum(cell, direction)}}
+                        </div>
+                    </div>
+
+                    <!-- Identification Status (Entry) -->
+                    <div ng-if="leagueType=='entry'" style="flex: 2; padding: 0 10px; text-align: center;">
+                        <i class="fas fa-search icon-label"
+                            ng-class="{'active-bulb': tile.scoredItems.rescueKits[direction]}"></i>
+                        <i class="fas fa-2x"
+                            ng-class="tile.scoredItems.rescueKits[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
+                    </div>
+                </div>
             </div>
         </div>
-        <div ng-show="hasVictims" ng-if="leagueType=='entry'">
-            <i class="far fa-2x fa-lightbulb" aria-hidden="true" style="color:#2980b9;">&nbsp;</i>{{"maze.judge.m_identified" | translate}}
-                <div ng-repeat="(direction, type) in cell.tile.victims track by $index" ng-if="type != 'None'" style="margin-left:50px;" >
-                    <input type="checkbox" ng-model="tile.scoredItems.rescueKits[direction]" ng-true-value="1" ng-false-value="0" id="{{ 'victimi-' + $index }}" disabled><label class="checkbox" for="{{ 'victimi-' + $index }}" ng-style="{backgroundColor: kitStatus(tile.scoredItems.victims[direction],tile.scoredItems.rescueKits[direction],type) ? '#d3f5d3': '#f5d3d4'}" ng-click="clickSound()">
-                    <img src="/images/Red.png" height=45px ng-if="type=='Red'">
-                    <img src="/images/Green.png" height=45px ng-if="type=='Green'">
-                    </label>
-                </div>
-        </div>
-    </ul>
+    </div>
 </div>
-
 
 <div class="modal-footer">
-    <button class="btn btn-primary btn-lg btn-block" type="button" ng-click="ok()">OK</button>
+    <button class="btn btn-primary btn-block btn-ok" type="button" ng-click="ok()">
+        <i class="fas fa-check mr-2"></i> OK
+    </button>
 </div>

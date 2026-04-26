@@ -286,24 +286,28 @@ app.controller('LineEditorController', ['$scope', '$uibModal', '$log', '$http', 
         return false;
     };
 
-    $scope.makeImage = function(){
+    $scope.makeImage = function(silent = false){
       window.scrollTo(0,0);
       html2canvas(document.getElementById("outputImageArea"),{
         scale: 5
       }).then(function(canvas) {
         let imgData = canvas.toDataURL();
         $http.post("/api/maps/line/image/" + mapId, {img: imgData}).then(function (response) {
-          Toast.fire({
-            type: 'success',
-            title: "Created image!"
-          })
+          if (!silent) {
+            Toast.fire({
+              type: 'success',
+              title: "Created image!"
+            })
+          }
         }, function (response) {
           console.log("Error: " + response.statusText);
-          Toast.fire({
-            type: 'error',
-            title: "Error",
-            html: response.data.msg
-        })
+          if (!silent) {
+            Toast.fire({
+              type: 'error',
+              title: "Error",
+              html: response.data.msg
+            })
+          }
         });
       });
     };
@@ -373,6 +377,7 @@ app.controller('LineEditorController', ['$scope', '$uibModal', '$log', '$http', 
                         type: 'success',
                         title: "Updated map"
                     })
+                    $scope.makeImage(true);
                 } else {
                     callback();
                 }

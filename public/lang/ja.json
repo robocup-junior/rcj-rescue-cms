@@ -7,9 +7,21 @@
         "about": "RoboCupJunior Competition Management System は，ロボカップジュニア レスキューライン/メイズ の審判の補助を目的に制作されました．このシステムでは，コースマップの作成からスコアの計算やランク付けまで，ロボカップジュニアの大会におけるレスキュー競技の運営に関連するすべての作業を非常に簡単に実行できます．あなたが，このシステムを採用する大会の審判である場合は，下のボタンからログインしてください．ログインに必要なIDとパスワードは，大会のOC（運営委員）が知っています．あなたが，このシステムを採用する大会に参加した選手であるならば、以下のリストからあなたが参加した大会を選ぶことによって，競技の詳細な結果と順位を確認することができます．",
         "management": "各種設定・大会管理",
         "access_level": "ログイン中のアカウント， {{account}} は，「大会管理」にアクセスする権限がありません.",
-        "goScanner": "スコアシートのマニュアル入力"
+        "goScanner": "スコアシートのマニュアル入力",
+        "staffWorkspace": "スタッフ用ワークスペース",
+        "adminCommand": "管理者用コマンドセンター",
+        "enterLeague": "リーグページへ",
+        "manageTeamsDesc": "チーム・登録情報の管理",
+        "scannerDesc": "QRコードでスコアシートをスキャン",
+        "reviewsDesc": "提出書類の審査・採点",
+        "runsMonitor": "ラン・モニター",
+        "runsMonitorDesc": "競技の進行状況をリアルタイム監視",
+        "signageOnly": "サイネージ専用",
+        "signageDesc": "サイネージ画面のみを表示",
+        "dualView": "サイネージ + モニター",
+        "dualViewDesc": "サイネージと進行状況の同時表示"
     },
-    "team_home":{
+    "team_home": {
         "title": "チーム一覧",
         "document": "ドキュメント",
         "review": "レビュー実施",
@@ -26,44 +38,44 @@
         "check": "確認 / レビュー"
     },
     "login": {
-        "title" : "Staff Login",
+        "title": "Staff Login",
         "description": "OC/TC から通知された，ユーザー名とパスワードを入力してログインしてください．",
-        "login" : "ログイン",
-        "failed" : "ユーザー名，パスワードが一致しません．もう一度ご確認ください．",
-        "return" : "ログインに成功すると，元のアクセスページに戻ります．"
+        "login": "ログイン",
+        "failed": "ユーザー名，パスワードが一致しません．もう一度ご確認ください．",
+        "return": "ログインに成功すると，元のアクセスページに戻ります．"
     },
     "signage": {
-      "create": "新規作成",
-      "editor": {
-          "title": "サイネージ エディター",
-          "name": "パターン名",
-          "save": "保存",
-          "saveAs": "別名で保存",
-          "content": "表示内容",
-          "duration": "継続時間",
-          "type": "タイプ",
-          "iframe": "WEBコンテンツ",
-          "image": "画像",
-          "movie": "動画",
-          "group": "表示対象グループID",
-          "all": "共通",
-          "use": "使用",
-          "news": "ニュース設定",
-          "enable": "有効",
-          "disable": "無効",
-          "refresh": "稼働中のサイネージを強制更新する",
-          "add_blank": "空の項目を追加",
-          "score": "競技結果（ランキング）",
-          "alert": {
-              "update": "更新",
-              "update_mes": "既存のサイネージパターンを更新しました",
-              "create": "新規作成",
-              "create_mes": "新しいサイネージパターンを作成しました",
-              "sameName": "同じ名前",
-              "sameName_mes": "元の名前と同じです．違う名前にしてください．"
-          },
-          "select": "参照"
-      }
+        "create": "新規作成",
+        "editor": {
+            "title": "サイネージ エディター",
+            "name": "パターン名",
+            "save": "保存",
+            "saveAs": "別名で保存",
+            "content": "表示内容",
+            "duration": "継続時間",
+            "type": "タイプ",
+            "iframe": "WEBコンテンツ",
+            "image": "画像",
+            "movie": "動画",
+            "group": "表示対象グループID",
+            "all": "共通",
+            "use": "使用",
+            "news": "ニュース設定",
+            "enable": "有効",
+            "disable": "無効",
+            "refresh": "稼働中のサイネージを強制更新する",
+            "add_blank": "空の項目を追加",
+            "score": "競技結果（ランキング）",
+            "alert": {
+                "update": "更新",
+                "update_mes": "既存のサイネージパターンを更新しました",
+                "create": "新規作成",
+                "create_mes": "新しいサイネージパターンを作成しました",
+                "sameName": "同じ名前",
+                "sameName_mes": "元の名前と同じです．違う名前にしてください．"
+            },
+            "select": "参照"
+        }
     },
     "common": {
         "back": "戻る",
@@ -138,22 +150,27 @@
         "totalScore": "合計得点",
         "sort": "ソート",
         "deleted": "正常に削除しました",
-        "mypage": "マイページ"
+        "mypage": "マイページ",
+        "backHome": "ホームに戻る"
+    },
+    "error": {
+        "title": "エラーが発生しました",
+        "description": "ロボットがバグにつまずいてしまいました..."
     },
     "technicalChallenge": {
         "technicalChallenge": "テクニカルチャレンジ"
     },
-    "accessDenied":{
-        "title" : "アクセス拒絶",
-        "description1" : "このページにアクセスする権限がありません．権限のあるアカウントでログインしてください．",
-        "description2" : "この画面が不具合によって表示されていると疑われる場合は，システム管理者にお問い合わせください．"
+    "accessDenied": {
+        "title": "アクセス拒絶",
+        "description1": "このページにアクセスする権限がありません．権限のあるアカウントでログインしてください．",
+        "description2": "この画面が不具合によって表示されていると疑われる場合は，システム管理者にお問い合わせください．"
     },
-    "shortURL404":{
-        "title" : "指定のページが存在しません",
-        "description1" : "指定の短縮リンクに該当するページが見つかりませんでした．",
-        "description2" : "リンクの有効期間外である可能性があります．"
+    "shortURL404": {
+        "title": "指定のページが存在しません",
+        "description1": "指定の短縮リンクに該当するページが見つかりませんでした．",
+        "description2": "リンクの有効期間外である可能性があります．"
     },
-    "registration":{
+    "registration": {
         "title": "参加登録",
         "description": "このページでは，チーム自身による参加登録の受付可否について設定します．",
         "error": "認証エラー",
@@ -183,7 +200,7 @@
         "authButton": "認証",
         "authSent": "認証メールを送信しました．メール内のリンクから登録作業を続けてください．メールが届かない場合，迷惑メールボックスをご確認ください．それでも見つからない場合は，別のメールアドレスでお試しください．hotmailや一部の機関のメールアドレスには，メールを配信できないことが報告されています．"
     },
-    "reservation":{
+    "reservation": {
         "title": "予約",
         "start": "開始時間",
         "duration": "長さ（分）",
@@ -209,7 +226,7 @@
         "open": "オープン",
         "noResv": "予約なし",
         "noResvDesc": "あなたの予約記録はありません．",
-        "js":{
+        "js": {
             "booked": "予約完了!",
             "bookedMes": "予約に成功しました",
             "cancel": "予約キャンセル?",
@@ -220,7 +237,7 @@
             "cancelKeep": "この予約をそのままにする"
         }
     },
-    "survey":{
+    "survey": {
         "title": "アンケート",
         "new": "アンケート新規作成",
         "editor": "アンケートエディター",
@@ -240,7 +257,7 @@
         "onlyOnce": "このフォームは，この期限までに1回だけ提出可能です．提出後の回答内容の変更はできません．",
         "submit": "提出",
         "readOnly": "提出内容を読み込み専用で表示します．",
-        "js":{
+        "js": {
             "multiple": "回答内容を提出しますか？提出後も期限まで回答内容を修正することができます．",
             "onlyOnce": "このフォームは１度しか提出できません．提出後の内容の修正はできません．提出してよいですか？",
             "submit": "提出",
@@ -249,7 +266,7 @@
             "complete": "提出完了"
         }
     },
-    "cabinet":{
+    "cabinet": {
         "title": "キャビネット",
         "description": "チームに各種資料等を配布することができます．",
         "description2": "このページには，オーガナイザーから配布されたファイルが格納されます．",
@@ -258,7 +275,7 @@
         "empty": "ファイルがまだ何も格納されていないようです...",
         "delete": "削除",
         "upload": "アップロード",
-        "js":{
+        "js": {
             "delAsk": "ファイル削除?",
             "delConfirm": "本当にこのファイルを削除しますか？この操作は取り消せません．",
             "delComplete": "削除完了",
@@ -267,12 +284,23 @@
             "delCancelButton": "残す"
         }
     },
-    "mypage":{
+    "mypage": {
+        "locked": "受付終了",
         "message": "メッセージ",
         "document": "ドキュメントや，各種ファイルを提出します．",
-        "cabinet": "オーガナイザーから配布されたファイルが格納されます．"
+        "cabinet": "オーガナイザーから配布されたファイルが格納されます．",
+        "profile": "プロフィール",
+        "changePassword": "パスワード変更",
+        "currentPassword": "現在のパスワード",
+        "newPassword": "新しいパスワード",
+        "confirmPassword": "新しいパスワード（確認）",
+        "passwordRule": "8文字以上かつ，英大文字・英小文字・数字・記号のうち2種類以上を使用してください．",
+        "passwordChanged": "パスワードを変更しました．",
+        "passwordError": "パスワードの変更に失敗しました．現在のパスワードが正しいか確認してください．",
+        "passwordMismatch": "新しいパスワードが一致しません．",
+        "passwordInvalid": "パスワードがルールに適合していません．"
     },
-    "interview":{
+    "interview": {
         "runs": "競技一覧",
         "ad_pic": "追加写真",
         "me_pic": "メンバーの写真",
@@ -304,7 +332,7 @@
                 "filter": "競技絞り込み",
                 "round": "ラウンド",
                 "field": "フィールド",
-                "team" : "チーム名"
+                "team": "チーム名"
             },
             "endedrun": "終了した競技を表示",
             "js": {
@@ -383,7 +411,7 @@
             "networkErrorDescription": "競技データをサーバに保存できませんでした．ネットワーク接続を確認してください．競技記録はこのまま続行できますが，サーバには保存されません．システム管理者を呼んでください！",
             "reSend": "再送信",
             "rescuedVictims": "@:line.view.rescuedVictims",
-            "rescuedVictimsMes" : "救助済みの被災者を削除するには，ダブルクリック（PC）か左にスワイプ（モバイル）します．",
+            "rescuedVictimsMes": "救助済みの被災者を削除するには，ダブルクリック（PC）か左にスワイプ（モバイル）します．",
             "noShow": "チームが来なかった場合に時間計測を開始する",
             "search": "レベル2",
             "noSearch": "レベル1",
@@ -438,7 +466,7 @@
             "calc": "得点計算",
             "item": "項目得点",
             "rescuedVictims": "@:line.view.rescuedVictims",
-            "rescuedVictimsMes" : "@:line.judge.rescuedVictimsMes",
+            "rescuedVictimsMes": "@:line.judge.rescuedVictimsMes",
             "kit": "レスキューキット",
             "write": "署名する",
             "clear": "書き直す",
@@ -487,6 +515,9 @@
             "m_flash": "被災者から15cm以内でランプを点滅",
             "m_identified": "被災者のタイプの識別に成功",
             "m_kit": "レスキューキットを配布",
+            "m_found": "発見",
+            "m_victim": "被災者・ターゲット",
+            "m_required": "必要数",
             "misidentification": "誤発見"
         },
         "judge": {
@@ -512,11 +543,16 @@
             "m_bump": "@:maze.view.m_bump",
             "m_ramp": "@:maze.view.m_ramp",
             "m_steps": "@:maze.view.m_steps",
+            "blue": "青いタイル",
             "m_blue_tile": "青いタイル",
             "m_blue_visits": "この青いタイルへの訪問回数：",
             "m_flash": "@:maze.view.m_flash",
             "m_identified": "@:maze.view.m_identified",
             "m_kit": "@:maze.view.m_kit",
+            "m_found": "@:maze.view.m_found",
+            "m_victim": "@:maze.view.m_victim",
+            "m_required": "@:maze.view.m_required",
+            "m_identified": "@:maze.view.m_identified",
             "pat": "@:admin.mazeMapEditor.pattern",
             "random": "ランダム抽選（乱数）",
             "networkError": "@:line.judge.networkError",
@@ -529,7 +565,6 @@
                     "title": "@:line.judge.js.timeup.title",
                     "content": "@:line.judge.js.timeup.content"
                 }
-
             }
         },
         "sign": {
@@ -568,6 +603,7 @@
         },
         "home": {
             "competitions": "大会",
+            "description": "競技会の管理やシステム設定をこのダッシュボードから行えます。",
             "c_item": "ツール・設定",
             "line_tSet": "ライン タイルセット",
             "add_c": "大会を追加",
@@ -605,7 +641,7 @@
             "import": "タイルセットをファイルからインポート",
             "addAll": "一度に全種類を追加する"
         },
-        "users":{
+        "users": {
             "title": "ユーザー管理",
             "name": "ユーザー名",
             "super": "特権管理権限",
@@ -716,7 +752,7 @@
             "export": "このマップをJsonファイルにエクスポート",
             "import": "マップをJsonファイルからインポート",
             "liveVictim": "生きている被災者の数",
-            "deadVictim" : "死んでいる被災者の数",
+            "deadVictim": "死んでいる被災者の数",
             "rampPoint": "坂得点",
             "setCheckpoint": "このタイルをチェックポイントに指定する",
             "cantset": "このタイルに得点項目は設定できません．",
@@ -742,6 +778,21 @@
             "create": "@:admin.lineMapAdmin.create"
         },
         "mazeMapEditor": {
+            "dimensions": "マップサイズ",
+            "time": "制限時間",
+            "mapName": "マップ名",
+            "advancedTools": "高度なツールと出力",
+            "scoreSheetPreparation": "スコアシート準備",
+            "scoreSheetPreparationDesc": "スコアシートを生成するための準備（画像の生成など）を行います。",
+            "downloadImage": "画像ダウンロード",
+            "prepareSheets": "スコアシートを生成",
+            "printPDF": "PDF印刷",
+            "includeLetterVictims": "文字被災者を含める",
+            "targetsPDF": "ターゲット印刷",
+            "cognitiveTargets": "認知的ターゲット",
+            "letterVictims": "文字被災者",
+            "back": "戻る",
+            "map": "マップエディター",
             "title": "マップエディター",
             "desc": "壁の部分をクリックして，迷路を作成します．迷路の床部分をクリックすると，被災者やチェックポイント，バンプなどの項目が設定できます．",
             "save": "@:admin.lineMapEditor.save",
@@ -755,8 +806,8 @@
             "bump": "スピードバンプ",
             "step": "ステップ",
             "ramp": "坂",
-            "cp" : "チェックポイント",
-            "black" : "黒タイル",
+            "cp": "チェックポイント",
+            "black": "黒タイル",
             "blue": "青タイル",
             "red": "赤タイル",
             "down": "坂の下の水平なタイル",
@@ -768,21 +819,61 @@
             "floor": "床",
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
-            "placement" : "被災者の配置:",
+            "placement": "被災者の配置:",
+            "victimRestricted": "タイルに要素が設定されている間は被災者を配置できません。",
+            "propertyRestricted": "被災者が配置されている間はタイルの要素を変更できません。",
             "changeF": "次の階層に移動: ",
-            "noEle": "（エレベーターがありません）",
+            "noEle": "階層変更なし",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "parent": "このマップは，親のサイコロパターンのうちの１つです",
             "backToParent": "親の編集に戻る",
-            "pattern" : "マップパターン設定",
-            "patSave" : "パターンを設定するためには，マップを一度，保存してください．",
+            "pattern": "マップパターン設定",
+            "patSave": "パターンを設定するためには，マップを一度，保存してください．",
             "create": "新規作成",
             "edit": "編集",
             "patYet": "サイコロパターン設定が行われていないため，迷路作成を完了できません.",
             "entryLeague": "エントリー",
             "standardLeague": "国際標準",
-            "leagueType": "リーグタイプ"
+            "leagueType": "リーグタイプ",
+            "cognitiveTarget": "認知的ターゲット",
+            "cognitive": "認知的",
+            "cognitiveAbbr": "C",
+            "settings": "設定",
+            "none": "なし",
+            "cognitiveTargetSettings": "認知的ターゲット設定",
+            "ring": "リング",
+            "diameter": "直径",
+            "color": "色",
+            "yellow": "黄色",
+            "green": "緑色",
+            "cyan": "青色",
+            "cBlack": "黒色",
+            "cRed": "赤色",
+            "totalValue": "合計値",
+            "victimStatus": "被災者状態",
+            "harmedVictim": "負傷した被災者",
+            "stableVictim": "安定した被災者",
+            "unharmedVictim": "無傷な被災者",
+            "dummyVictim": "ダミーの被災者",
+            "tileProperties": "タイル設定",
+            "ringConfiguration": "リング設定",
+            "calculation": "計算",
+            "cognitiveTargetsPDF": "Cognitive Target印刷",
+            "cognitiveTargetsPDFDesc": "競技用ターゲットの印刷",
+            "includeLetterVictims": "Letter Victimを含める",
+            "targetsPDF": "ターゲット印刷",
+            "cognitiveTargets": "Cognitive Target",
+            "letterVictims": "文字被災者",
+            "printCognitiveTargets": "印刷",
+            "paperSize": "用紙サイズ",
+            "a4Description": "国際標準サイズ",
+            "letterDescription": "北米標準サイズ",
+            "autoConfigure": "自動設定",
+            "stableAbbr": "安定",
+            "harmedAbbr": "負傷",
+            "unharmedAbbr": "無傷",
+            "dummyAbbr": "ダミー"
         },
         "mazeRun": {
             "title": "競技管理",
@@ -885,7 +976,7 @@
             "exe": "バックアップを実行",
             "time": "バックアップ時刻",
             "queue": "バックアップキュー",
-            "js":{
+            "js": {
                 "complete": "バックアップジョブが完了しました．下のリストからダウンロードできます．"
             }
         },
@@ -918,16 +1009,16 @@
             "finished": "Finished for using in runs",
             "item": "@:admin.lineMapEditor.item",
             "swamp": "沼地",
-            "cp" : "チェックポイント",
-            "black" : "落とし穴",
-            "curve" : "カーブした壁",
+            "cp": "チェックポイント",
+            "black": "落とし穴",
+            "curve": "カーブした壁",
             "top": "@:admin.lineMapEditor.top",
             "right": "@:admin.lineMapEditor.right",
             "left": "@:admin.lineMapEditor.left",
             "bottom": "@:admin.lineMapEditor.bottom",
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
-            "placement" : "被災者の配置：",
+            "placement": "被災者の配置：",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "exportW": "このマップをErebus用ワールドファイルにエクスポート",
@@ -941,7 +1032,7 @@
             "pick4": "部屋4のタイルの設定",
             "innerTile": "タイルの中の壁",
             "victimRotation": "符号回転",
-            "js":{
+            "js": {
                 "startTileError": "スタートタイルを設定してください．"
             }
         },
@@ -963,7 +1054,7 @@
         "deadline": "提出期限",
         "saved": "正常に保存しました",
         "uploaded": "正常にアップロードに成功しました",
-        "admin":{
+        "admin": {
             "title": "ドキュメント提出",
             "overall": "全般設定",
             "access": "アクセス有効化",
@@ -972,7 +1063,7 @@
             "review": "レビュー設定",
             "result": "評価結果"
         },
-        "teamAdmin":{
+        "teamAdmin": {
             "title": "チーム個別設定",
             "access": "アクセス可否",
             "log": "ログ",
@@ -1037,7 +1128,7 @@
             "assignedTeams": "割り当てられたチーム",
             "emptyAssignment": "割り当て情報が登録されていないため、次のユーザーが評価可能です："
         },
-        "form":{
+        "form": {
             "languageError": "このフォームは，お使いの言語に対応していませんので，代替言語で表示します．",
             "editDeadline": "このフォームは，上の提出期限まで何度でも編集可能です．",
             "basicInformation": "チーム基本情報",
@@ -1064,7 +1155,7 @@
             "currentLength": "現在の入力済み文字数",
             "lengthLimitExceed": "文字数制限を超過しています。"
         },
-        "review":{
+        "review": {
             "reviewer": "ログインしているレビュアー：",
             "comments": "レビューコメント",
             "user": "レビュアー",
@@ -1077,7 +1168,7 @@
             "deletePartMes": "このレビューを部分削除します．この操作は取り消しできません．",
             "deleteWholeMes": "このレビューを全体削除します．この操作は取り消しできません．"
         },
-        "inspection":{
+        "inspection": {
             "do": "検査実施",
             "cancel": "検査キャンセル"
         }
@@ -1090,7 +1181,7 @@
             "1": "開封済",
             "2": "クリック"
         },
-        "home":{
+        "home": {
             "title": "メール配信",
             "error": "この機能を使用するには，設定ファイルにメールの設定を追加してください．",
             "newMailBulk": "選択した宛先にメールを新規作成",
@@ -1118,7 +1209,7 @@
                 "completeMes": "メールを配信キューに登録しました"
             }
         },
-        "sent":{
+        "sent": {
             "title": "メール配信状況",
             "time": "時刻",
             "subject": "@:mail.home.subject",

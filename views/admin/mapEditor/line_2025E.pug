@@ -51,10 +51,7 @@ block content
             .col-md-4
                 input#select(type='file', name='select')
             .col-md-4(style="text-align:right;")
-                if pubService
-                    button.btn.btn-info(type='button', ng-click='makeImageDl()') {{"admin.lineMapEditor.generateImage" | translate}}
-                else
-                    button.btn.btn-info(type='button', ng-click='makeImage()') {{"admin.lineMapEditor.prepareScoresheets" | translate}}
+                button.btn.btn-info(type='button', ng-click='makeImageDl()') {{"admin.lineMapEditor.generateImage" | translate}}
         br
         .row
             .col-md-12
@@ -146,8 +143,6 @@ block content
                 h3 {{"admin.lineMapEditor.generateImage" | translate}}
             .col-6
                 button.btn.btn-info(type='button', ng-click='makeImageDl()') {{"admin.lineMapEditor.generateImage" | translate}}
-                if !pubService
-                    button.btn.btn-info(type='button', ng-click='makeImage()',style="margin-left:20px;") {{"admin.lineMapEditor.prepareScoresheets" | translate}}
         #outputImageArea(style="background-color: #ddd;float:left;padding-left:18px;padding-right:15px;padding-bottom:2px;")
             div(ng-repeat='z in range(height)')
                 .row(ng-repeat='r in range(length)')

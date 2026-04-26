@@ -9,7 +9,7 @@ const mazeFill = require('../helper/mazeFill')
 
 const logger = require('../config/logger').mainLogger
 
-const VICTIMS = ['H', 'S', 'U', 'PHI', 'PSI', 'OMEGA', "Red", "Yellow", "Green", "None"];
+const VICTIMS = ['H', 'S', 'U', 'PHI', 'PSI', 'OMEGA', 'Red', 'Yellow', 'Green', 'Cognitive', 'None'];
 
 const MazeRun = require('./mazeRun')
 
@@ -33,6 +33,16 @@ function isEven(n) {
  * @param {String} salt - The salt used, unique for every user
  * @param {Boolean} admin - If the user is admin or not
  */
+
+const cognitiveTargetSchema = new Schema({
+  rings: {
+    ring1: {type: String, enum: ['B', 'R', 'Y', 'G', 'C'], default: 'Y'},
+    ring2: {type: String, enum: ['B', 'R', 'Y', 'G', 'C'], default: 'Y'},
+    ring3: {type: String, enum: ['B', 'R', 'Y', 'G', 'C'], default: 'Y'},
+    ring4: {type: String, enum: ['B', 'R', 'Y', 'G', 'C'], default: 'Y'},
+    ring5: {type: String, enum: ['B', 'R', 'Y', 'G', 'C'], default: 'Y'}
+  }
+}, {_id: false})
 
 const tileSchema = new Schema({
   reachable    : {type: Boolean, default: false},
@@ -69,6 +79,12 @@ const tileSchema = new Schema({
       enum   : VICTIMS,
       default: "None"
     }
+  },
+  cognitiveTargets: {
+    top   : {type: cognitiveTargetSchema, default: null},
+    right : {type: cognitiveTargetSchema, default: null},
+    bottom: {type: cognitiveTargetSchema, default: null},
+    left  : {type: cognitiveTargetSchema, default: null}
   },
   changeFloorTo: {type: Number, integer: true, min: 0}
 })

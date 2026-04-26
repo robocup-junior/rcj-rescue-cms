@@ -68,7 +68,6 @@ async function bootstrap(){
     var simulationRoute = require('./routes/simulation')
     var loginRoute = require('./routes/login')
     var adminRoute = require('./routes/admin')
-    var localesRoute = require('./routes/locales')
     var signageRoute = require('./routes/signage')
     var shortRoute = require('./routes/shortURL')
     var serviceRoute = require('./routes/service')
@@ -186,7 +185,7 @@ async function bootstrap(){
     app.use('/api/runs/maze', [apiMazeRunsRoute.public, pass.ensureLoginApi, apiMazeRunsRoute.private, pass.ensureAdminApi, apiMazeRunsRoute.admin])
     app.use('/api/runs/simulation', [apiSimulationRunsRoute.public, pass.ensureLoginApi, apiSimulationRunsRoute.private, pass.ensureAdminApi, apiSimulationRunsRoute.admin])
     app.use('/api/competitions', [apiCompetitionsRoute.public, pass.ensureLoginApi, apiCompetitionsRoute.private, pass.ensureAdminApi, apiCompetitionsRoute.admin])
-    app.use('/api/users', [pass.ensureLoginApi, apiUserRoute.admin, pass.ensureSuperApi , apiUserRoute.super])
+    app.use('/api/users', [pass.ensureLoginApi, apiUserRoute.private, apiUserRoute.admin, pass.ensureSuperApi , apiUserRoute.super])
     app.use('/api/signage', [pass.ensureLoginApi, apiSignageRoute.private, pass.ensureAdminApi, apiSignageRoute.admin])
     app.use('/api/backup', [pass.ensureAdminApi, apiBackupRoute.admin])
     app.use('/api/short', [pass.ensureSuperApi , apiShortURL.super])
@@ -213,7 +212,6 @@ async function bootstrap(){
         });
     })
     app.use('/home', [homeRoute.public, pass.ensureAuthenticated, homeRoute.private, pass.ensureAdmin, homeRoute.admin])
-    app.use('/locales', localesRoute)
     app.use('/s', shortRoute.public)
     app.use('/service', serviceRoute)
 

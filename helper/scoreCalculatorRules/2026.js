@@ -146,9 +146,30 @@ module.exports.calculateMazeScore = function (run) {
       PHI: 2,
       PSI: 1,
       OMEGA: 0,
-      Red: 2,
-      Yellow: 1,
-      Green: 0,
+    };
+
+    const cognitiveColorValues = {
+      'B': -2,
+      'R': -1,
+      'Y': 0,
+      'G': 1,
+      'C': 2
+    };
+
+    const getVictimMaxKits = (victimType, cell, side) => {
+      if (run.map.leagueType === 'entry') return 1;
+      if (victimType === 'Cognitive') {
+        if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[side] || !cell.tile.cognitiveTargets[side].rings) return 0;
+        const rings = cell.tile.cognitiveTargets[side].rings;
+        let total = 0;
+        for (let i = 1; i <= 5; i++) {
+          total += cognitiveColorValues[rings[`ring${i}`]] || 0;
+        }
+        if (total === 2) return 2; // Harmed
+        if (total === 1) return 1; // Stable
+        return 0; // Unharmed or Dummy
+      }
+      return maxKits[victimType] ?? 0;
     };
 
 
@@ -168,7 +189,7 @@ module.exports.calculateMazeScore = function (run) {
     function addRescueKitsFor(side, victimType, droppedKits) {
       if (rescueKits >= MAX_RESCUE_KITS) return;
 
-      const max = maxKits[victimType] ?? 0;
+      const max = getVictimMaxKits(victimType, mapTiles[coord], side);
       const valid = Math.min(droppedKits, max, MAX_RESCUE_KITS - rescueKits);
       if (valid <= 0) return;
 
