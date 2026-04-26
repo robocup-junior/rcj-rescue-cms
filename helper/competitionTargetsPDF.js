@@ -127,6 +127,7 @@ function extractTargets(map, includeLetterVictims = false, includeCognitiveTarge
         cell.tile.cognitiveTargets[dir] &&
         cell.tile.cognitiveTargets[dir].rings) {
         const rings = cell.tile.cognitiveTargets[dir].rings;
+        if (!rings.ring1 || !rings.ring2 || !rings.ring3 || !rings.ring4 || !rings.ring5) continue;
         const colorCode = rings.ring1 + rings.ring2 + rings.ring3 + rings.ring4 + rings.ring5;
 
         targets.push({
