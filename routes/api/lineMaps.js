@@ -324,10 +324,17 @@ adminRouter.get('/image/:map', function (req, res, next) {
   /* 画像を送る */
 });
 
-adminRouter.post('/image/:map', function (req, res, next) {
+publicRouter.post('/image/:map', function (req, res, next) {
   const id = req.params.map;
   if (!ObjectId.isValid(id)) {
     return next();
+  }
+  // The /service/editor flow renders previews against this dummy id without
+  // touching any saved map; everything else is admin-write to a real map.
+  const isDummyId = id === '000000000000000000000000';
+  const isAdmin = req.user && req.user.admin === true;
+  if (!isDummyId && !isAdmin) {
+    return res.status(403).send({ msg: 'Forbidden' });
   }
   const base64Data = req.body.img.replace(/^data:image\/png;base64,/, '');
   let path = `${__dirname}/../../tmp/course`;

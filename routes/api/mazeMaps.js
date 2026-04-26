@@ -462,7 +462,7 @@ function normalizeMapCells(map, { assignIsTile = false } = {}) {
   map.cells = cells;
 }
 
-adminRouter.get('/:map/competition-targets-pdf', function (req, res, next) {
+publicRouter.get('/:map/competition-targets-pdf', function (req, res, next) {
   const id = req.params.map;
   const paperSize = req.query.paperSize || 'A4';
   const includeLetterVictims = req.query.includeLetterVictims === 'true';
@@ -492,7 +492,7 @@ adminRouter.get('/:map/competition-targets-pdf', function (req, res, next) {
   });
 });
 
-adminRouter.get('/:map/scoresheet', function (req, res, next) {
+publicRouter.get('/:map/scoresheet', function (req, res, next) {
   const id = req.params.map;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -522,7 +522,7 @@ adminRouter.get('/:map/scoresheet', function (req, res, next) {
     });
 });
 
-adminRouter.post('/scoresheet', function (req, res, next) {
+publicRouter.post('/scoresheet', function (req, res, next) {
   const map = req.body;
   if (!map || !map.cells) {
     return res.status(400).send({
@@ -536,7 +536,7 @@ adminRouter.post('/scoresheet', function (req, res, next) {
   scoreSheetPDFMaze2.generateScoreSheetFromMap(res, map, rule);
 });
 
-adminRouter.post('/competition-targets-pdf', function (req, res, next) {
+publicRouter.post('/competition-targets-pdf', function (req, res, next) {
   const map = req.body;
   const paperSize = req.body.paperSize || 'A4';
   const includeLetterVictims = req.body.includeLetterVictims === true;
