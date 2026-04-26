@@ -186,7 +186,7 @@ def generate_all_ring_layers():
     
     print(f'\nTotal images generated: {total_generated}')
     print(f'Images saved to: {output_dir}/')
-    print(f'\nTo create a complete target (e.g., BRYGC), overlay in order:')
+    print(f'\nTo create a complete target (e.g., KRYGB), overlay in order:')
     print('  ring5 (outermost, 5cm) -> ring4 -> ring3 -> ring2 -> ring1 (innermost, 1cm)')
 
 

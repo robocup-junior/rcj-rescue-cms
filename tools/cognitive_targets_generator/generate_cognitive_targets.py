@@ -50,7 +50,7 @@ def create_cognitive_target(color_sequence, size_pixels):
     Create a cognitive target image with 5 concentric rings.
     
     Args:
-        color_sequence: String of 5 color codes (e.g., 'BRYGC')
+        color_sequence: String of 5 color codes (e.g., 'KRYGB')
         size_pixels: Size of the output image in pixels (square)
     
     Returns:
