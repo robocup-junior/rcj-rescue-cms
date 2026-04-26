@@ -8,7 +8,8 @@ const { ObjectId } = require('mongoose').Types;
 const logger = require('../../config/logger').mainLogger;
 const { mazeMap } = require('../../models/mazeMap');
 const scoreCalculator = require('../../helper/scoreCalculator');
-const cognitiveTargetsPDF = require('../../helper/cognitiveTargetsPDF');
+const competitionTargetsPDF = require('../../helper/competitionTargetsPDF');
+const scoreSheetPDFMaze2 = require('../../helper/scoreSheetPDFMaze2');
 
 publicRouter.get('/', getMazeMaps);
 
@@ -440,12 +441,13 @@ adminRouter.get('/name/:competitionid/:name', function (req, res, next) {
     .select('_id');
 });
 
-publicRouter.get('/:map/cognitive-targets-pdf', function (req, res, next) {
+publicRouter.get('/:map/competition-targets-pdf', function (req, res, next) {
   const id = req.params.map;
   const paperSize = req.query.paperSize || 'A4';
   const includeLetterVictims = req.query.includeLetterVictims === 'true';
+  const includeCognitiveTargets = req.query.includeCognitiveTargets !== 'false';
 
-  console.log(`PDF request for map ${id}, paper size: ${paperSize}, includeLetterVictims: ${includeLetterVictims}`);
+  console.log(`PDF request for map ${id}, paper size: ${paperSize}, includeLetterVictims: ${includeLetterVictims}, includeCognitiveTargets: ${includeCognitiveTargets}`);
 
   if (!ObjectId.isValid(id)) {
     return next();
@@ -465,14 +467,76 @@ publicRouter.get('/:map/cognitive-targets-pdf', function (req, res, next) {
       });
     }
 
-    cognitiveTargetsPDF.generateAndSendPDF(res, data, paperSize, includeLetterVictims);
+    competitionTargetsPDF.generateAndSendPDF(res, data, paperSize, includeLetterVictims, includeCognitiveTargets);
   });
 });
 
-publicRouter.post('/cognitive-targets-pdf', function (req, res, next) {
+publicRouter.get('/:map/scoresheet', function (req, res, next) {
+  const id = req.params.map;
+  if (!ObjectId.isValid(id)) {
+    return next();
+  }
+
+  mazeMap
+    .findById(id)
+    .populate('competition')
+    .lean()
+    .exec(function (err, data) {
+      if (err) {
+        logger.error(err);
+        return res.status(400).send({
+          msg: 'Could not get map',
+          err: err.message,
+        });
+      }
+      if (!data) {
+        return res.status(404).send({
+          msg: 'Map not found',
+        });
+      }
+
+      const rule = req.query.rule || '2026';
+      data.noQR = req.query.noQR === 'true';
+      scoreSheetPDFMaze2.generateScoreSheetFromMap(res, data, rule);
+    });
+});
+
+publicRouter.post('/scoresheet', function (req, res, next) {
+  const map = req.body;
+  if (!map || !map.cells) {
+    return res.status(400).send({
+      msg: 'Invalid map data',
+    });
+  }
+
+  // Convert cells from object map to array if necessary
+  if (!Array.isArray(map.cells)) {
+    const cells = [];
+    for (const i in map.cells) {
+      if (map.cells.hasOwnProperty(i)) {
+        const cell = map.cells[i];
+        if (isNaN(i)) {
+          const coords = i.split(',');
+          cell.x = parseInt(coords[0]);
+          cell.y = parseInt(coords[1]);
+          cell.z = parseInt(coords[2]);
+          cell.isTile = cell.x % 2 === 1 && cell.y % 2 === 1;
+        }
+        cells.push(cell);
+      }
+    }
+    map.cells = cells;
+  }
+
+  const rule = req.body.rule || '2026';
+  scoreSheetPDFMaze2.generateScoreSheetFromMap(res, map, rule);
+});
+
+publicRouter.post('/competition-targets-pdf', function (req, res, next) {
   const map = req.body;
   const paperSize = req.body.paperSize || 'A4';
   const includeLetterVictims = req.body.includeLetterVictims === true;
+  const includeCognitiveTargets = req.body.includeCognitiveTargets !== false;
 
   if (!map || !map.cells) {
     return res.status(400).send({
@@ -498,7 +562,7 @@ publicRouter.post('/cognitive-targets-pdf', function (req, res, next) {
     map.cells = cells;
   }
 
-  cognitiveTargetsPDF.generateAndSendPDF(res, map, paperSize, includeLetterVictims);
+  competitionTargetsPDF.generateAndSendPDF(res, map, paperSize, includeLetterVictims, includeCognitiveTargets);
 });
 
 publicRouter.all('*', function (req, res, next) {

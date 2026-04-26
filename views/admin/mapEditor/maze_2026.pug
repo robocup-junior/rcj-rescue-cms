@@ -212,21 +212,25 @@ block content
                     .col-md-6.mb-3.mb-md-0
                         .modern-card.h-100.mb-0
                             .modern-card-header.bg-white
-                                i.fas.fa-image.mr-2
-                                | {{"admin.lineMapEditor.generateImage" | translate}}
+                                i.fas.fa-print.mr-2
+                                | {{"admin.mazeMapEditor.scoreSheetPreparation" | translate}}
                             .modern-card-body.d-flex.flex-column
-                                p.small.text-muted.mb-3 {{"admin.mazeMapEditor.generateImageDesc" | translate}}
+                                p.small.text-muted.mb-3 {{"admin.mazeMapEditor.scoreSheetPreparationDesc" | translate}}
                                 .row.no-gutters.mt-auto
-                                    .col-12
+                                    .col-6.pr-1
                                         button.btn.btn-sm.btn-outline-primary.btn-block(type='button', ng-click='makeImageDl()')
                                             i.fas.fa-download.mr-1
                                             | {{"admin.mazeMapEditor.downloadImage" | translate}}
+                                    .col-6.pl-1
+                                        button.btn.btn-sm.btn-outline-secondary.btn-block(type='button', ng-click='generateScoreSheet()')
+                                            i.fas.fa-file-pdf.mr-1
+                                            | {{"admin.mazeMapEditor.prepareSheets" | translate}}
                     
-                    .col-md-6(ng-if='hasCognitiveTargets()')
+                    .col-md-6(ng-if='hasPrintableTargets()')
                         .modern-card.h-100.mb-0
                             .modern-card-header(style='background: var(--primary-gradient); color: white; border: none;')
-                                i.fas.fa-bullseye.mr-2(style='color: white;')
-                                | {{"admin.mazeMapEditor.cognitiveTargetsPDF" | translate}}
+                                i.fas.fa-print.mr-2(style='color: white;')
+                                | {{"admin.mazeMapEditor.targetsPDF" | translate}}
                             .modern-card-body.d-flex.flex-column
                                 .row.no-gutters.mb-auto
                                     .col-6.pr-1
@@ -234,12 +238,16 @@ block content
                                             option(value='A4') A4
                                             option(value='Letter') Letter
                                     .col-6.pl-1
-                                        button.btn.btn-sm.btn-primary.btn-block(type='button', ng-click='generateCognitiveTargetsPDF()')
+                                        button.btn.btn-sm.btn-primary.btn-block(type='button', ng-click='generateCompetitionTargetsPDF()')
                                             i.fas.fa-print.mr-1
                                             | {{"admin.mazeMapEditor.printPDF" | translate}}
-                                .custom-control.custom-switch.mt-3
-                                    input#includeLetterVictimsCheckbox.custom-control-input(type='checkbox', ng-model='pdfSettings.includeLetterVictims')
-                                    label.custom-control-label.small(for='includeLetterVictimsCheckbox') {{"admin.mazeMapEditor.includeLetterVictims" | translate}}
+                                .mt-3.px-1.d-flex.flex-wrap
+                                    .custom-control.custom-checkbox.mr-3
+                                        input#includeCognitiveTargetsCheckbox.custom-control-input(type='checkbox', ng-model='pdfSettings.includeCognitiveTargets')
+                                        label.custom-control-label.small(for='includeCognitiveTargetsCheckbox') {{"admin.mazeMapEditor.cognitiveTargets" | translate}}
+                                    .custom-control.custom-checkbox
+                                        input#includeLetterVictimsCheckbox.custom-control-input(type='checkbox', ng-model='pdfSettings.includeLetterVictims')
+                                        label.custom-control-label.small(for='includeLetterVictimsCheckbox') {{"admin.mazeMapEditor.letterVictims" | translate}}
 
         .row(style="position: absolute; top: -9999px; left: -9999px; opacity: 0; pointer-events: none;")
             #outputImageArea(style="padding-top:100px;padding-left:0px;padding-right:0px;padding-bottom:100px;")

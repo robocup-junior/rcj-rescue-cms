@@ -560,9 +560,9 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         return false;
     };
 
-    $scope.makeImage = function(silent = false){
+    $scope.makeImage = function(silent = false, customId = null){
         window.scrollTo(0,0);
-        html2canvas(document.getElementById("outputImageArea"),{
+        return html2canvas(document.getElementById("outputImageArea"),{
             scale: 5
         }).then(function(canvas) {
             let ctx = canvas.getContext("2d");
@@ -590,54 +590,40 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             ctx2 = mem_canvas.getContext("2d");
             ctx2.drawImage(canvas, 0, topY, canvas.width, bottomY-topY, 0, 0, canvas.width, bottomY-topY);
             let imgData = mem_canvas.toDataURL();
-            $http.post("/api/maps/line/image/" + mapId, {img: imgData}).then(function (response) {
-                if (!silent) alert("Created image!");
+            let uploadId = customId || mapId;
+            if (pubService === 'true' && !uploadId) {
+                uploadId = '000000000000000000000000';
+            }
+            return $http.post("/api/maps/line/image/" + uploadId, {img: imgData}).then(function (response) {
+                if (!silent) alert("Score sheet image prepared!");
+                return response;
             }, function (response) {
                 console.log(response);
                 console.log("Error: " + response.statusText);
                 if (!silent) alert(response.data.msg);
+                return response;
             });
         });
     };
 
-    $scope.makeImageDl = function(){
-        window.scrollTo(0,0);
-        html2canvas(document.getElementById("outputImageArea"),{
-            scale: 5
-        }).then(function(canvas) {
-            let ctx = canvas.getContext("2d");
 
-            //Detect image area
-            let topY = 0;
-            for(let y=0;y<canvas.height;y++){
-                let imagedata = ctx.getImageData(canvas.width/2, y, 1, 1);
-                if(imagedata.data[0] != 255){
-                    topY = y;
-                    break;
+    $scope.hasPrintableTargets = function() {
+        for (const key in $scope.cells) {
+            const cell = $scope.cells[key];
+            if (cell.isTile && cell.tile && cell.tile.victims) {
+                const directions = ['top', 'right', 'bottom', 'left'];
+                for (const dir of directions) {
+                    const v = cell.tile.victims[dir];
+                    if (v === 'Cognitive' || v === 'PHI' || v === 'PSI' || v === 'OMEGA' || v === 'H' || v === 'S' || v === 'U') {
+                        return true;
+                    }
                 }
             }
-            let bottomY = 0;
-            for(let y=canvas.height-1;y>=0;y--){
-                let imagedata = ctx.getImageData(canvas.width/2, y, 1, 1);
-                if(imagedata.data[0] != 255){
-                    bottomY = y;
-                    break;
-                }
-            }
-            mem_canvas = document.createElement("canvas");
-            mem_canvas.width = canvas.width;
-            mem_canvas.height = bottomY-topY;
-            ctx2 = mem_canvas.getContext("2d");
-            ctx2.drawImage(canvas, 0, topY, canvas.width, bottomY-topY, 0, 0, canvas.width, bottomY-topY);
-            let imgData = mem_canvas.toDataURL();
-            let link = document.createElement("a");
-            link.href = imgData;
-            link.download = $scope.name + ".png";
-            link.click();
-        });
+        }
+        return false;
     };
 
-    $scope.hasCognitiveTargets = function() {
+    $scope.hasCognitiveTargetsOnly = function() {
         for (const key in $scope.cells) {
             const cell = $scope.cells[key];
             if (cell.isTile && cell.tile && cell.tile.victims) {
@@ -655,19 +641,26 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     // Initialize paper size selection using object to avoid scope inheritance issues
     $scope.pdfSettings = {
         paperSize: 'A4',
-        includeLetterVictims: false
+        includeLetterVictims: true,
+        includeCognitiveTargets: true
     };
-    
+
     $scope.onPaperSizeChange = function() {
         console.log('Paper size changed to:', $scope.pdfSettings.paperSize);
     };
 
-    $scope.generateCognitiveTargetsPDF = function() {
-        var paperSize = $scope.pdfSettings.paperSize;
-        var includeLetterVictims = $scope.pdfSettings.includeLetterVictims;
+    $scope.generateCompetitionTargetsPDF = function() {
+        const paperSize = $scope.pdfSettings.paperSize;
+        const includeLetterVictims = $scope.pdfSettings.includeLetterVictims;
+        const includeCognitiveTargets = $scope.pdfSettings.includeCognitiveTargets;
         
+        if (!includeLetterVictims && !includeCognitiveTargets) {
+            alert("Please select at least one target type to print");
+            return;
+        }
+
         if (pubService === 'true') {
-            var map = {
+            const map = {
                 competition: $scope.competitionId,
                 dice: $scope.dice,
                 name: $scope.name,
@@ -681,13 +674,14 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
                 cells: $scope.cells,
                 league: leagueId,
                 paperSize: paperSize,
-                includeLetterVictims: includeLetterVictims
+                includeLetterVictims: includeLetterVictims,
+                includeCognitiveTargets: includeCognitiveTargets
             };
             
-            $http.post('/api/maps/maze/cognitive-targets-pdf', map, { responseType: 'arraybuffer' })
+            $http.post('/api/maps/maze/competition-targets-pdf', map, { responseType: 'arraybuffer' })
                 .then(function(response) {
-                    var blob = new Blob([response.data], { type: 'application/pdf' });
-                    var fileURL = URL.createObjectURL(blob);
+                    const blob = new Blob([response.data], { type: 'application/pdf' });
+                    const fileURL = URL.createObjectURL(blob);
                     window.open(fileURL, '_blank');
                 }, function(response) {
                     console.error("PDF Error", response);
@@ -695,8 +689,8 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
                 });
         } else {
             $scope.saveMap(null, function () {
-                console.log('Generating PDF with paper size:', paperSize, 'includeLetterVictims:', includeLetterVictims);
-                var url = '/api/maps/maze/' + mapId + '/cognitive-targets-pdf?paperSize=' + encodeURIComponent(paperSize) + '&includeLetterVictims=' + includeLetterVictims;
+                console.log('Generating PDF with paper size:', paperSize, 'includeLetterVictims:', includeLetterVictims, 'includeCognitiveTargets:', includeCognitiveTargets);
+                const url = '/api/maps/maze/' + mapId + '/competition-targets-pdf?paperSize=' + encodeURIComponent(paperSize) + '&includeLetterVictims=' + includeLetterVictims + '&includeCognitiveTargets=' + includeCognitiveTargets;
                 console.log('Opening URL:', url);
                 window.open(url, '_blank');
             });
@@ -1079,6 +1073,47 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
                 }
             }
         });
+    };
+    
+    $scope.generateScoreSheet = function() {
+        if (pubService === 'true') {
+            // Generate a random 24-character hex string that is a valid ObjectId
+            const tempId = Array.from({length: 24}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+            
+            $scope.makeImage(true, tempId).then(function() {
+                const map = {
+                    competition: $scope.competitionId,
+                    dice: $scope.dice,
+                    name: $scope.name,
+                    length: $scope.length,
+                    height: $scope.height,
+                    duration: $scope.duration,
+                    width: $scope.width,
+                    leagueType: $scope.leagueType,
+                    finished: $scope.finished,
+                    startTile: $scope.startTile,
+                    cells: $scope.cells,
+                    league: leagueId,
+                    rule: '2026',
+                    _id: tempId
+                };
+                
+                $http.post('/api/maps/maze/scoresheet', map, { responseType: 'arraybuffer' })
+                    .then(function(response) {
+                        const blob = new Blob([response.data], { type: 'application/pdf' });
+                        const fileURL = URL.createObjectURL(blob);
+                        window.open(fileURL, '_blank');
+                    }, function(response) {
+                        console.error("PDF Error", response);
+                        alert("Error generating PDF");
+                    });
+            });
+        } else {
+            $scope.saveMap(null, function () {
+                const url = '/api/maps/maze/' + mapId + '/scoresheet?rule=2026&noQR=true';
+                window.open(url, '_blank');
+            });
+        }
     };
 }]);
 

@@ -113,6 +113,7 @@ block content
                                     td
                                         button.btn.btn-secondary(type='button', ng-click='saveMap(dice[i])') {{"admin.mazeMapEditor.edit" | translate}}
                     br
+                if !pubService
                     div(ng-show='(dice[0]&&dice[1]&&dice[2]&&dice[3]&&dice[4]&&dice[5]) || parent')
                         input#isFinished(type='checkbox', ng-model='finished')
                         label.checkbox(for='isFinished') {{"admin.mazeMapEditor.finished" | translate}}

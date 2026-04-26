@@ -78,12 +78,14 @@ function drawRun(doc, config, scoringRun) {
   else pdf.drawImage(doc, 730, 5, 'public/images/logo.png', 100, 30, 'right');
 
   // Draw run QR code
-  doc.image(
-    qr.imageSync(`M;${scoringRun._id.toString()}`, { margin: 2 }),
-    10,
-    10,
-    { width: 75 }
-  );
+  if (scoringRun._id && scoringRun._id.toString() !== '000000000000000000000000' && !scoringRun.noQR) {
+    doc.image(
+      qr.imageSync(`M;${scoringRun._id.toString()}`, { margin: 2 }),
+      10,
+      10,
+      { width: 75 }
+    );
+  }
 
   let drawTeamName = scoringRun.team.name;
   if (scoringRun.team.teamCode) {
@@ -102,19 +104,23 @@ function drawRun(doc, config, scoringRun) {
   );
 
   // Draw start time
-  const dateTime = new Date(scoringRun.startTime);
-  pdf.drawTextWithAlign(
-    doc,
-    140,
-    65,
-    `${`0${dateTime.getUTCHours()}`.slice(-2)}:${`0${dateTime.getUTCMinutes()}`.slice(
-      -2
-    )}`,
-    15,
-    'black',
-    75,
-    'center'
-  );
+  if (scoringRun.startTime) {
+    const dateTime = new Date(scoringRun.startTime);
+    if (!isNaN(dateTime.getTime())) {
+      pdf.drawTextWithAlign(
+        doc,
+        140,
+        65,
+        `${`0${dateTime.getUTCHours()}`.slice(-2)}:${`0${dateTime.getUTCMinutes()}`.slice(
+          -2
+        )}`,
+        15,
+        'black',
+        75,
+        'center'
+      );
+    }
+  }
 
   // Draw round name
   pdf.drawTextWithAlign(
@@ -154,7 +160,7 @@ function drawRun(doc, config, scoringRun) {
   }
 
   // Draw dice
-  if (scoringRun.diceNumber)
+  if (scoringRun.diceNumber && scoringRun.diceNumber >= 1 && scoringRun.diceNumber <= 6)
     pdf.drawImage(
       doc,
       460,
@@ -163,17 +169,6 @@ function drawRun(doc, config, scoringRun) {
       25,
       25,
       'center'
-    );
-  else
-    pdf.drawTextWithAlign(
-      doc,
-      460,
-      460,
-      'Error: Dice pattern!',
-      15,
-      'red',
-      150,
-      'left'
     );
 
   // System version
@@ -187,6 +182,18 @@ function drawRun(doc, config, scoringRun) {
   const big = Range('A', 'Z');
   const small = Range('a', 'z');
   const itemList = {
+    PHI: {
+      linear: [],
+      floating: [],
+    },
+    PSI: {
+      linear: [],
+      floating: [],
+    },
+    OMEGA: {
+      linear: [],
+      floating: [],
+    },
     H: {
       linear: [],
       floating: [],
@@ -226,7 +233,7 @@ function drawRun(doc, config, scoringRun) {
         let victimType = 'None';
 
         victimType = victims.top;
-        if (victimType != 'None') {
+        if (victimType != 'None' && itemList[victimType]) {
           let name;
           if (victimLF == 'linear')
             name = big[itemList[victimType][victimLF].length];
@@ -241,7 +248,7 @@ function drawRun(doc, config, scoringRun) {
         }
 
         victimType = victims.left;
-        if (victimType != 'None') {
+        if (victimType != 'None' && itemList[victimType]) {
           let name;
           if (victimLF == 'linear')
             name = big[itemList[victimType][victimLF].length];
@@ -256,7 +263,7 @@ function drawRun(doc, config, scoringRun) {
         }
 
         victimType = victims.right;
-        if (victimType != 'None') {
+        if (victimType != 'None' && itemList[victimType]) {
           let name;
           if (victimLF == 'linear')
             name = big[itemList[victimType][victimLF].length];
@@ -271,7 +278,7 @@ function drawRun(doc, config, scoringRun) {
         }
 
         victimType = victims.bottom;
-        if (victimType != 'None') {
+        if (victimType != 'None' && itemList[victimType]) {
           let name;
           if (victimLF == 'linear')
             name = big[itemList[victimType][victimLF].length];

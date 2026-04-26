@@ -66,7 +66,7 @@ function getPDFFont() {
  * @param {boolean} includeLetterVictims - Whether to include letter victims
  * @returns {Array} - Array of objects with target details
  */
-function extractTargets(map, includeLetterVictims = false) {
+function extractTargets(map, includeLetterVictims = false, includeCognitiveTargets = true) {
   const targetsMap = new Map(); // id -> target object
 
   if (!map.cells) return [];
@@ -116,7 +116,7 @@ function extractTargets(map, includeLetterVictims = false) {
     for (const dir of directions) {
       const victimType = cell.tile.victims[dir];
 
-      if (victimType === 'Cognitive' &&
+      if (includeCognitiveTargets && victimType === 'Cognitive' &&
         cell.tile.cognitiveTargets &&
         cell.tile.cognitiveTargets[dir] &&
         cell.tile.cognitiveTargets[dir].rings) {
@@ -294,8 +294,8 @@ function drawTarget(doc, x, y, target) {
  * @param {boolean} includeLetterVictims - Whether to include letter victims
  * @returns {PDFDocument} - The PDF document
  */
-function generateCognitiveTargetsPDF(map, outputPath = null, includeLetterVictims = false) {
-  const targets = extractTargets(map, includeLetterVictims);
+function generateCompetitionTargetsPDF(map, outputPath = null, includeLetterVictims = false, includeCognitiveTargets = true) {
+  const targets = extractTargets(map, includeLetterVictims, includeCognitiveTargets);
 
   if (targets.length === 0) {
     return null;
@@ -367,8 +367,8 @@ function generateCognitiveTargetsPDF(map, outputPath = null, includeLetterVictim
  * @param {string} paperSize - Paper size ('A4' or 'Letter')
  * @param {boolean} includeLetterVictims - Whether to include letter victims
  */
-function generateAndSendPDF(res, map, paperSize = 'A4', includeLetterVictims = false) {
-  const targets = extractTargets(map, includeLetterVictims);
+function generateAndSendPDF(res, map, paperSize = 'A4', includeLetterVictims = false, includeCognitiveTargets = true) {
+  const targets = extractTargets(map, includeLetterVictims, includeCognitiveTargets);
 
   if (targets.length === 0) {
     return res.status(404).send({
@@ -442,7 +442,7 @@ function generateAndSendPDF(res, map, paperSize = 'A4', includeLetterVictims = f
 }
 
 module.exports = {
-  generateCognitiveTargetsPDF,
+  generateCompetitionTargetsPDF,
   generateAndSendPDF,
   extractCognitiveTargets: extractTargets // Keep old name for compatibility if needed
 };

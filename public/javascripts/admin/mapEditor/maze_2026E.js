@@ -586,7 +586,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             ctx2.drawImage(canvas, 0, topY, canvas.width, bottomY-topY, 0, 0, canvas.width, bottomY-topY);
             let imgData = mem_canvas.toDataURL();
             $http.post("/api/maps/line/image/" + mapId, {img: imgData}).then(function (response) {
-                if (!silent) alert("Created image!");
+                if (!silent) alert("Score sheet image prepared!");
             }, function (response) {
                 console.log(response);
                 console.log("Error: " + response.statusText);
