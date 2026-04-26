@@ -16,7 +16,8 @@ append scripts
 
 append css
   link(rel='stylesheet', href='/components/angular-toastr/dist/angular-toastr.css')
-  link(href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet")
+  link(href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet")
+  link(rel='stylesheet', href='/stylesheets/home_premium.css')
   link(rel='stylesheet', href='/stylesheets/my_premium.css')
   style.
     /* Custom icon backgrounds to restore theme colors while staying premium */
@@ -34,70 +35,80 @@ block bread
   // Breadcrumbs removed as requested
 
 block content
-  .mesh-header
-    .premium-container
-      .header-content
-        .comp-logo-wrapper
-          img.comp-logo(ng-src="{{competition.logo}}", alt='')
-        h1.header-title {{competition.name}}
-        p.header-subtitle {{leagueName}}
-        .team-badge
+  .home-hero
+    .hero-content
+      .hero-logo(style="background: white; border-radius: 1.5rem; padding: 0.5rem; display: flex; align-items: center; justify-content: center;")
+        img(ng-src="{{competition.logo}}", alt='', style="max-height: 40px; max-width: 40px; object-fit: contain;")
+      .hero-text-wrapper
+        h1.hero-title {{competition.name}}
+        p.hero-subtitle {{leagueName}}
+        .team-badge(style="margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.1); padding: 0.25rem 1rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600;")
           i.fas.fa-users
           span #{teamCode} #{teamName}
 
-  .premium-container
-    .dashboard-grid
+  .comp-container
+    .comp-grid
+      //- We use comp-card style but adapted for the dashboard items
+      
       // Surveys
-      a.glass-card(ng-repeat="surv in survey", ng-click="goSurv(surv._id)", target="_blank")
-        span.card-status.status-editable(ng-if="surv.editable", title="{{'common.enable' | translate}}")
+      a.comp-card(ng-repeat="surv in survey", ng-click="goSurv(surv._id)")
+        div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; z-index: 10; background: #05c46b;")
+        span.card-status.status-editable(ng-if="surv.editable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #dcfce7; color: #166534; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
           i.fas.fa-pen
-        span.card-status.status-locked(ng-if="!surv.editable", title="{{'mypage.locked' | translate}}")
+        span.card-status.status-locked(ng-if="!surv.editable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
           i.fas.fa-lock
-        .card-icon-bg.bg-survey
-          i.fas.fa-question-circle
-        h3.card-title(ng-bind="surv.name")
-        p.card-desc(ng-bind="surv.myDescription")
+        .comp-logo-area(style="height: 180px;")
+          i.fas.fa-question-circle(style="font-size: 4rem; color: #05c46b; opacity: 0.8;")
+        .comp-body
+          h3.comp-name(style="color: #05c46b;") {{surv.name}}
+          p.comp-desc(ng-bind="surv.myDescription")
 
       // Documents
       if documentEnable
-        a.glass-card(ng-if="competition.documents.enable", href=`/document/${team}/${token}`, target="_blank")
-          span.card-status.status-editable(ng-if="docEditable", title="{{'common.enable' | translate}}")
+        a.comp-card(ng-if="competition.documents.enable", href=`/document/${team}/${token}`, target="_blank")
+          div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; z-index: 10; background: #0abde3;")
+          span.card-status.status-editable(ng-if="docEditable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #dcfce7; color: #166534; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
             i.fas.fa-pen
-          span.card-status.status-locked(ng-if="!docEditable", title="{{'mypage.locked' | translate}}")
+          span.card-status.status-locked(ng-if="!docEditable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
             i.fas.fa-lock
-          .card-icon-bg.bg-document
-            i.fas.fa-book
-          h3.card-title {{"document.admin.title" | translate}}
-          p.card-desc {{"mypage.document" | translate}}
+          .comp-logo-area(style="height: 180px;")
+            i.fas.fa-book(style="font-size: 4rem; color: #0abde3; opacity: 0.8;")
+          .comp-body
+            h3.comp-name(style="color: #0abde3;") {{"document.admin.title" | translate}}
+            p.comp-desc {{"mypage.document" | translate}}
 
       // Reservations
-      a.glass-card(ng-repeat="resv in reservations", ng-click="goResv(resv._id)", target="_blank")
-        span.card-status.status-editable(ng-if="resv.editable", title="{{'common.enable' | translate}}")
+      a.comp-card(ng-repeat="resv in reservations", ng-click="goResv(resv._id)")
+        div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; z-index: 10; background: #ff6b6b;")
+        span.card-status.status-editable(ng-if="resv.editable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #dcfce7; color: #166534; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
           i.fas.fa-pen
-        span.card-status.status-locked(ng-if="!resv.editable", title="{{'mypage.locked' | translate}}")
+        span.card-status.status-locked(ng-if="!resv.editable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
           i.fas.fa-lock
-        .card-icon-bg.bg-reservation
-          i.fas.fa-calendar-day
-        h3.card-title(ng-bind="resv.name")
-        p.card-desc(ng-bind="resv.myDescription")
+        .comp-logo-area(style="height: 180px;")
+          i.fas.fa-calendar-day(style="font-size: 4rem; color: #ff6b6b; opacity: 0.8;")
+        .comp-body
+          h3.comp-name(style="color: #ff6b6b;") {{resv.name}}
+          p.comp-desc(ng-bind="resv.myDescription")
 
       // Cabinet
-      a.glass-card(href=`/mypage/${team}/${token}/cabinet`, target="_blank")
-        .card-icon-bg.bg-cabinet
-          i.fas.fa-archive
-        h3.card-title {{"cabinet.title" | translate}}
-        p.card-desc {{"mypage.cabinet" | translate}}
+      a.comp-card(href=`/mypage/${team}/${token}/cabinet`, target="_blank")
+        div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; z-index: 10; background: #feca57;")
+        .comp-logo-area(style="height: 180px;")
+          i.fas.fa-archive(style="font-size: 4rem; color: #feca57; opacity: 0.8;")
+        .comp-body
+          h3.comp-name(style="color: #feca57;") {{"cabinet.title" | translate}}
+          p.comp-desc {{"mypage.cabinet" | translate}}
 
     // Messages Section
-    .message-section(ng-show="mails.length>0")
-      .message-header
-        i.fas.fa-envelope-open-text
-        h2 {{"mypage.message" | translate}}
+    .message-section(ng-show="mails.length>0", style="margin-top: 4rem;")
+      .message-header(style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;")
+        i.fas.fa-envelope-open-text(style="font-size: 1.75rem; color: #2e86de;")
+        h2(style="font-weight: 800; font-size: 2rem; margin: 0;") {{"mypage.message" | translate}}
       
-      .message-list
-        .message-item(ng-repeat='mail in mails', ng-click="mailView(mail)")
-          .message-info
-            .message-subject(ng-bind="mail.subject")
-            .message-date(ng-bind="time(mail.time)")
-          .message-arrow
+      .message-list(style="background: white; border-radius: 1.5rem; padding: 1rem; border: 1px solid #f1f5f9; box-shadow: 0 1px 3px rgba(0,0,0,0.05);")
+        .message-item(ng-repeat='mail in mails', ng-click="mailView(mail)", style="display: flex; align-items: center; padding: 1.5rem; border-radius: 1rem; transition: background 0.2s ease; cursor: pointer; border-bottom: 1px solid #f1f5f9;")
+          .message-info(style="flex-grow: 1;")
+            .message-subject(style="font-weight: 700; font-size: 1.1rem; color: #0f172a;", ng-bind="mail.subject")
+            .message-date(style="font-size: 0.875rem; color: #94a3b8;", ng-bind="time(mail.time)")
+          .message-arrow(style="color: #cbd5e1;")
             i.fas.fa-chevron-right

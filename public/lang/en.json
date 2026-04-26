@@ -138,7 +138,12 @@
         "totalScore": "Total score",
         "sort": "Sorting",
         "deleted": "Successfully deleted!",
-        "mypage": "Personal page"
+        "mypage": "Personal page",
+        "backHome": "Back to Home"
+    },
+    "error": {
+        "title": "Oops! Something went wrong",
+        "description": "The robot tripped over a logic bug..."
     },
     "technicalChallenge": {
         "technicalChallenge": "Technical Challenge"

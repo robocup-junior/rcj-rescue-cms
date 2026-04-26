@@ -138,7 +138,12 @@
         "totalScore": "合計得点",
         "sort": "ソート",
         "deleted": "正常に削除しました",
-        "mypage": "マイページ"
+        "mypage": "マイページ",
+        "backHome": "ホームに戻る"
+    },
+    "error": {
+        "title": "エラーが発生しました",
+        "description": "ロボットがバグにつまずいてしまいました..."
     },
     "technicalChallenge": {
         "technicalChallenge": "テクニカルチャレンジ"
