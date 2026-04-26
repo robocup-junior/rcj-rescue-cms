@@ -849,7 +849,7 @@
             "color": "Color",
             "yellow": "Yellow",
             "green": "Green",
-            "blue": "Blue",
+            "cBlue": "Blue",
             "cBlack": "Black",
             "cRed": "Red",
             "totalValue": "Total Value",

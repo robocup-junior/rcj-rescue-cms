@@ -847,7 +847,7 @@
             "color": "色",
             "yellow": "黄色",
             "green": "緑色",
-            "blue": "青色",
+            "cBlue": "青色",
             "cBlack": "黒色",
             "cRed": "赤色",
             "totalValue": "合計値",
