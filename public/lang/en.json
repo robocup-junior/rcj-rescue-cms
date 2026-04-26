@@ -268,6 +268,7 @@
         }
     },
     "mypage": {
+        "locked": "Acceptance ended",
         "message": "Message",
         "document": "Submit your documentation and other files.",
         "cabinet": "Contain the files distributed by the organisers.",

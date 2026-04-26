@@ -16,81 +16,285 @@ append scripts
 
 append css
   link(rel='stylesheet', href='/components/angular-toastr/dist/angular-toastr.css')
-  style. 
-    .badge-notify{
-      background:red;
-      position:absolute!important;
-      top: -8px!important;
-      right: 7px;
-      width: 35px;
-      height: 35px;
+  link(href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet")
+  style.
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --glass-bg: rgba(255, 255, 255, 0.9);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+      --card-hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      --accent-color: #764ba2;
     }
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    span.breadcrumb-item.active #{teamName}
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: #f8fafc;
+    }
 
+    .premium-header {
+      background: var(--primary-gradient);
+      padding: 1.5rem 1rem;
+      border-radius: 0 0 2rem 2rem;
+      color: white;
+      text-align: center;
+      margin-bottom: 2rem;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    }
+
+    .competition-logo {
+      max-height: 80px;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
+      margin-bottom: 0.5rem;
+      transition: transform 0.3s ease;
+    }
+
+    .competition-logo:hover {
+      transform: scale(1.05);
+    }
+
+    .premium-header h1 {
+      font-size: 1.75rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .premium-header h4 {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .team-info {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      padding: 0.5rem 1.5rem;
+      border-radius: 1.5rem;
+      display: inline-block;
+      margin-top: 0.25rem;
+      border: 1px solid rgba(255,255,255,0.2);
+      font-size: 0.9rem;
+    }
+
+    .modern-card {
+      background: var(--glass-bg);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(0, 0, 0, 0.05);
+      box-shadow: var(--card-shadow);
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      text-decoration: none !important;
+    }
+
+    .modern-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--card-hover-shadow);
+    }
+
+    .modern-card i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      transition: transform 0.3s ease;
+    }
+
+    /* Theme Colors */
+    .card-survey i { color: #05c46b; }
+    .card-document i { color: #0abde3; }
+    .card-reservation i { color: #ff6b6b; }
+    .card-cabinet i { color: #feca57; }
+
+    .modern-card.survey-theme { border-top: 5px solid #05c46b; }
+    .modern-card.document-theme { border-top: 5px solid #0abde3; }
+    .modern-card.reservation-theme { border-top: 5px solid #ff6b6b; }
+    .modern-card.cabinet-theme { border-top: 5px solid #feca57; }
+
+    .modern-card:hover i {
+      transform: scale(1.1);
+    }
+
+    .modern-card h3 {
+      font-weight: 700;
+      color: #1a202c;
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+
+    .modern-card p {
+      color: #718096;
+      font-size: 0.9rem;
+      margin-bottom: 0;
+    }
+
+    .badge-notify {
+      background: #ff4757;
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      color: white;
+      box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);
+      z-index: 2;
+    }
+
+    .section-title {
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-title i {
+      color: var(--accent-color);
+    }
+
+    .message-table-container {
+      background: white;
+      border-radius: 1.5rem;
+      overflow: hidden;
+      box-shadow: var(--card-shadow);
+      margin-bottom: 3rem;
+    }
+
+    .message-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .message-table th {
+      background: #f7fafc;
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-weight: 600;
+      color: #4a5568;
+      border-bottom: 1px solid #edf2f7;
+    }
+
+    .message-table td {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #edf2f7;
+      color: #2d3748;
+    }
+
+    .message-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .message-table tr {
+      transition: background 0.2s ease;
+    }
+
+    .message-table tr:hover {
+      background: #fcfdfe;
+    }
+
+    .mail-link {
+      color: var(--accent-color);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .mail-link:hover {
+      color: #5a3a8a;
+      text-decoration: underline;
+    }
+
+    .time-stamp {
+      font-size: 0.85rem;
+      color: #a0aec0;
+    }
+
+    /* Hide Login/User menu */
+    .login-btn, .nav-user-link.dropdown-toggle {
+      display: none !important;
+    }
+
+block bread
+  // Breadcrumbs removed as requested
 
 block content
-  .row
-    .col-md-1
-    .col-md-10
-      div(style="text-align:center;")
-        img(ng-src="{{competition.logo}}", alt='' style="max-height:20vh;")
-        h1 {{competition.name}}
-        h5 {{leagueName}}
-        h4 #{teamCode} #{teamName}
-      hr
+  .premium-header
+    .container
+      img.competition-logo(ng-src="{{competition.logo}}", alt='')
+      h1.font-weight-bold {{competition.name}}
+      h4.opacity-75 {{leagueName}}
+      .team-info
+        span.font-weight-bold #{teamCode} #{teamName}
 
-      .row
-        .col-md-4(ng-repeat="surv in survey" style="margin-bottom:30px;")
-          a.btn.btn-default.btn-lg(style="height:200px;width:100%;height:100%;color:#fff;",ng-click="goSurv(surv._id)", target="_blank", ng-style="editableColour('05c46b',surv.editable)")
-            div(style="margin-top:20px;")
-              span.badge.badge-notify.badge-pill.shadow(ng-if="surv.editable")
-                i.fas.fa-edit(style="margin: 5px auto auto 2px;")
-              i.fas.fa-question-circle.fa-5x(aria-hidden='true', style="margin-bottom:10px;")
-              p(ng-bind="surv.name")
-              i.fas.fa-info-circle(style="font-size:12px;") &nbsp;
-              span(style="font-size:12px;" ng-bind="surv.myDescription")
-        if documentEnable
-          .col-md-4(style="margin-bottom:30px;", ng-if="competition.documents.enable")
-            a.btn.btn-default.btn-lg(style="height:200px;width:100%;height:100%;color:#fff;",href=`/document/${team}/${token}`, target="_blank", ng-style="editableColour('0abde3',docEditable)")
-              div(style="margin-top:20px;")
-                span.badge.badge-notify.badge-pill.shadow(ng-if="docEditable")
-                  i.fas.fa-edit(style="margin: 5px auto auto 2px;")
-                i.fas.fa-book.fa-5x(aria-hidden='true', style="margin-bottom:10px;")
-                p {{"document.admin.title" | translate}}
-                i.fas.fa-info-circle(style="font-size:12px;") &nbsp;
-                span(style="font-size:12px;") {{"mypage.document" | translate}}
-                
-        .col-md-4(ng-repeat="resv in reservations" style="margin-bottom:30px;")
-          a.btn.btn-default.btn-lg(style="height:200px;width:100%;height:100%;color:#fff;",ng-click="goResv(resv._id)", target="_blank", ng-style="editableColour('ff6b6b',resv.editable)")
-            div(style="margin-top:20px;")
-              span.badge.badge-notify.badge-pill.shadow(ng-if="resv.editable")
-                i.fas.fa-edit(style="margin: 5px auto auto 2px;")
-              i.fas.fa-calendar-day.fa-5x(aria-hidden='true', style="margin-bottom:10px;")
-              p(ng-bind="resv.name")
-              i.fas.fa-info-circle(style="font-size:12px;") &nbsp;
-              span(style="font-size:12px;" ng-bind="resv.myDescription")
-        .col-md-4(style="margin-bottom:30px;")
-          a.btn.btn-default.btn-lg(style="height:200px;width:100%;height:100%;background-color:#feca57;color:#222;",href=`/mypage/${team}/${token}/cabinet`, target="_blank")
-            div(style="margin-top:20px;")
-              i.fas.fa-archive.fa-5x(aria-hidden='true', style="margin-bottom:10px;")
-              p {{"cabinet.title" | translate}}
-              i.fas.fa-info-circle(style="font-size:12px;") &nbsp;
-              span(style="font-size:12px;") {{"mypage.cabinet" | translate}}
-      hr
-      div(ng-show="mails.length>0")
-        h5
-          i.fas.fa-envelope &nbsp;
-          | {{"mypage.message" | translate}}
-        table.custom(style="margin-bottom:20px;")
+  .container
+    .row
+      // Surveys
+      .col-lg-4.col-md-6.mb-4(ng-repeat="surv in survey")
+        a.modern-card.survey-theme.card-survey(ng-click="goSurv(surv._id)", target="_blank")
+          span.badge-notify(ng-if="surv.editable")
+            i.fas.fa-edit(style="color: white; font-size: 1rem; margin-bottom: 0;")
+          i.fas.fa-question-circle
+          h3(ng-bind="surv.name")
+          p(ng-bind="surv.myDescription")
+          div.mt-2(ng-if="!surv.editable", style="font-size: 0.8rem; color: #a0aec0;")
+            i.fas.fa-lock.mr-1(style="font-size: 0.8rem; margin-bottom: 0;")
+            | {{"mypage.locked" | translate}}
+
+      // Documents
+      if documentEnable
+        .col-lg-4.col-md-6.mb-4(ng-if="competition.documents.enable")
+          a.modern-card.document-theme.card-document(href=`/document/${team}/${token}`, target="_blank")
+            span.badge-notify(ng-if="docEditable")
+              i.fas.fa-edit(style="color: white; font-size: 1rem; margin-bottom: 0;")
+            i.fas.fa-book
+            h3 {{"document.admin.title" | translate}}
+            p {{"mypage.document" | translate}}
+            div.mt-2(ng-if="!docEditable", style="font-size: 0.8rem; color: #a0aec0;")
+              i.fas.fa-lock.mr-1(style="font-size: 0.8rem; margin-bottom: 0;")
+              | {{"mypage.locked" | translate}}
+
+      // Reservations
+      .col-lg-4.col-md-6.mb-4(ng-repeat="resv in reservations")
+        a.modern-card.reservation-theme.card-reservation(ng-click="goResv(resv._id)", target="_blank")
+          span.badge-notify(ng-if="resv.editable")
+            i.fas.fa-edit(style="color: white; font-size: 1rem; margin-bottom: 0;")
+          i.fas.fa-calendar-day
+          h3(ng-bind="resv.name")
+          p(ng-bind="resv.myDescription")
+          div.mt-2(ng-if="!resv.editable", style="font-size: 0.8rem; color: #a0aec0;")
+            i.fas.fa-lock.mr-1(style="font-size: 0.8rem; margin-bottom: 0;")
+            | {{"mypage.locked" | translate}}
+
+      // Cabinet
+      .col-lg-4.col-md-6.mb-4
+        a.modern-card.cabinet-theme.card-cabinet(href=`/mypage/${team}/${token}/cabinet`, target="_blank")
+          i.fas.fa-archive
+          h3 {{"cabinet.title" | translate}}
+          p {{"mypage.cabinet" | translate}}
+
+    // Messages Section
+    div(ng-show="mails.length>0", style="margin-top: 2rem;")
+      h2.section-title
+        i.fas.fa-envelope
+        | {{"mypage.message" | translate}}
+      
+      .message-table-container
+        table.message-table
           thead
-              tr
-                th.fixedhead {{"mail.sent.time" | translate}}
-                th.fixedhead {{"mail.sent.subject" | translate}}
+            tr
+              th {{"mail.sent.time" | translate}}
+              th {{"mail.sent.subject" | translate}}
           tbody
-              tr(ng-repeat='mail in mails')
-                td(ng-bind="time(mail.time)")
-                td
-                  a(ng-click="mailView(mail)", ng-bind="mail.subject", style="text-decoration: underline; color: blue;") 
+            tr(ng-repeat='mail in mails')
+              td.time-stamp(ng-bind="time(mail.time)")
+              td
+                a.mail-link(ng-click="mailView(mail)", ng-bind="mail.subject")
