@@ -27,8 +27,8 @@
         <input type="checkbox" ng-model="cell.tile.steps" ng-change="propertyChanged()" ng-disabled="hasVictims()" style="display: none;"><img src="/images/steps.png" height="24" style="margin-right: 8px; vertical-align: middle;">{{"admin.mazeMapEditor.step" | translate}}
       </label>
       
-      <label class="btn" ng-class="isStart ? 'btn-success' : 'btn-outline-success'" ng-disabled="isStart || hasVictims()" ng-style="(isStart || hasVictims()) ? {'opacity': '0.5', 'cursor': 'not-allowed'} : {'cursor': 'pointer'}" style="margin: 0; padding: 10px 16px; font-size: 1.05em;">
-        <input type="checkbox" ng-model="isStart" ng-disabled="isStart || hasVictims()" ng-change="startChanged()" style="display: none;"><i class="fas fa-play" style="margin-right: 8px; font-size: 20px;"></i>{{"admin.mazeMapEditor.start" | translate}}
+      <label class="btn" ng-class="isStart ? 'btn-success' : 'btn-outline-success'" ng-disabled="isStart" style="cursor: pointer; margin: 0; padding: 10px 16px; font-size: 1.05em;">
+        <input type="checkbox" ng-model="isStart" ng-disabled="isStart" ng-change="startChanged()" style="display: none;"><i class="fas fa-play" style="margin-right: 8px; font-size: 20px;"></i>{{"admin.mazeMapEditor.start" | translate}}
       </label>
       
       <div ng-if="hasVictims()" style="background-color: #fff3cd; color: #856404; padding: 8px 15px; border-radius: 6px; font-size: 0.9em; border: 1px solid #ffeeba; margin-left: 5px; flex-grow: 1;">

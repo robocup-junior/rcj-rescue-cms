@@ -1193,7 +1193,6 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
             $scope.$parent.startTile.x = x;
             $scope.$parent.startTile.y = y;
             $scope.$parent.startTile.z = z;
-            $scope.propertyChanged();
         }
     }
 
@@ -1215,7 +1214,6 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
                $scope.cell.tile.speedbump || 
                $scope.cell.tile.steps || 
                $scope.cell.tile.ramp ||
-               $scope.isStart ||
                ($scope.cell.tile.changeFloorTo !== undefined && $scope.cell.tile.changeFloorTo !== z);
     };
 
