@@ -160,6 +160,19 @@ html(ng-app="ddApp")
             object-fit: contain;
         }
 
+        .status-icon {
+            grid-column: 4;
+            justify-self: end;
+            font-size: 2.2rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .status-icon i.fa-check-circle {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
         .status-area {
             display: contents; /* Let children participate in parent grid */
         }
@@ -618,7 +631,7 @@ html(ng-app="ddApp")
                   button.num-btn.action-btn(type='button', ng-click="backspaceTime()")
                     i.fas.fa-backspace
 
-    .footer-action
-      button.btn-submit(type='button', ng-click='send()', ng-disabled='startedTime')
+    .footer-action(style="justify-content: center;")
+      button.btn-premium.btn-pink(type='button', ng-click='send()', ng-disabled='startedTime')
         i.fas.fa-cloud-upload-alt.me-2
         | &nbsp;Complete Data Entry & Submit Score

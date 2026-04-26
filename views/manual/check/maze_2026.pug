@@ -41,10 +41,11 @@ html(ng-app="ddApp")
         }
 
         .navbar {
-            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%) !important;
+            background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%) !important;
             backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            height: 60px;
         }
 
         .navbar-brand {
@@ -228,48 +229,59 @@ html(ng-app="ddApp")
             left: 0;
             right: 0;
             background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 15px 30px;
+            backdrop-filter: blur(12px);
+            padding: 16px 32px;
             border-top: 1px solid var(--border);
             display: flex;
-            justify-content: flex-end;
-            gap: 15px;
-            z-index: 100;
+            justify-content: center;
+            gap: 20px;
+            z-index: 1000;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
         }
 
-        .btn-check-reject {
-            background: var(--danger);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 700;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
-        }
-
-        .btn-check-approve {
-            background: var(--success);
-            color: white;
-            border: none;
+        .btn-premium {
             padding: 12px 40px;
-            border-radius: 12px;
+            border-radius: 14px;
             font-weight: 800;
             font-size: 1.1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
+            gap: 12px;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-purple {
+            background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%);
+            color: white;
+        }
+
+        .btn-purple:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(217, 70, 239, 0.3);
+            filter: brightness(1.1);
+            color: white;
+        }
+
+        .btn-secondary-outline {
+            background: #fee2e2 !important;
+            border: 2px solid #ef4444 !important;
+            color: #b91c1c !important;
+        }
+
+        .btn-secondary-outline:hover {
+            border-color: #dc2626 !important;
+            color: white !important;
+            background: #dc2626 !important;
+            box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.4);
         }
 
         .score-display {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%);
             padding: 4px 16px;
             border-radius: 12px;
-            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+            box-shadow: 0 4px 12px rgba(217, 70, 239, 0.2);
             color: white;
             display: flex;
             align-items: center;
@@ -425,9 +437,9 @@ html(ng-app="ddApp")
                 .static-value(style="font-size: 2rem; padding: 10px 30px;") {{getTimeDisplay()}}
 
     .footer-action
-      button.btn-check-reject(type='button', ng-click='cancel()')
-        i.fas.fa-times.me-2
-        | Reject (Back to Input)
-      button.btn-check-approve(type='button', ng-click='approval()')
-        i.fas.fa-check-double.me-2
+      button.btn-premium.btn-secondary-outline(type='button', ng-click='cancel()')
+        i.fas.fa-times
+        | Reject
+      button.btn-premium.btn-purple(type='button', ng-click='approval()')
+        i.fas.fa-check-double
         | Approve & Submit Score
