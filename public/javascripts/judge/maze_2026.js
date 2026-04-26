@@ -42,13 +42,14 @@ const victimConstantWL = {
     },
     "Cognitive": {
         "maxKitNum": 0,
-        "linearPoint": 5,
-        "floatingPoint": 15
+        "linearPoint": 10,
+        "floatingPoint": 30
     }
 };
 
 // function referenced by the drop target
 app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$http','$translate', '$cookies',function ($scope, $uibModal, $log, $timeout, $http, $translate, $cookies) {
+    $scope.victimConstantWL = victimConstantWL;
 
     var txt_timeup,txt_timeup_mes;
 
@@ -287,6 +288,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             $scope.leagueType = response.data.leagueType;
             
             victimConstant = victimConstantWL;
+            $scope.victimConstantWL = victimConstantWL;
 
             if(response.data.parent){
                 if(!$scope.dice){
@@ -1026,7 +1028,8 @@ $(window).on('load resize', function () {
 // Please note that $uibModalInstance represents a modal window (instance) dependency.
 // It is not the same as the $uibModal service used above.
 
-app.controller('ModalInstanceCtrl', ['$scope','$uibModalInstance','cell','tile','sRotate','leagueType',function ($scope, $uibModalInstance, cell, tile, sRotate, leagueType) {
+app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'cell', 'tile', 'sRotate', 'leagueType', function ($scope, $uibModalInstance, cell, tile, sRotate, leagueType) {
+    $scope.victimConstantWL = victimConstantWL;
     $scope.cell = cell;
     $scope.tile = tile;
     $scope.leagueType = leagueType;

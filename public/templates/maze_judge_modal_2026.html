@@ -348,6 +348,10 @@
                     <img src="/images/Yellow.png" height="35" ng-if="type=='Yellow'">
                     <img src="/images/Green.png" height="35" ng-if="type=='Green'">
                     <img ng-src="{{getModalCognitiveImage(cell, direction)}}" height="35" ng-if="type=='Cognitive' && cell.tile.cognitiveTargets[direction]">
+                    
+                    <div ng-if="victimConstantWL[type]" style="font-size: 0.65rem; font-weight: 800; color: #1e293b; background: #e2e8f0; padding: 1px 6px; border-radius: 4px; margin-top: 4px; white-space: nowrap;">
+                        {{cell.isLinear ? victimConstantWL[type].linearPoint : victimConstantWL[type].floatingPoint}} pts
+                    </div>
                 </div>
 
                 <!-- Right: Actions -->

@@ -37,8 +37,8 @@ const victimConstantWL = {
     },
     "Cognitive": {
         "maxKitNum": 0,
-        "linearPoint": 5,
-        "floatingPoint": 15
+        "linearPoint": 10,
+        "floatingPoint": 30
     }
 };
 
@@ -182,6 +182,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                         $scope.leagueType = response.data.leagueType;
 
                         victimConstant = victimConstantWL;
+            $scope.victimConstantWL = victimConstantWL;
 
                         for (let i = 0; i < response.data.cells.length; i++) {
                             $scope.cells[response.data.cells[i].x + ',' +
@@ -871,6 +872,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
 
 app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'cell', 'tile', 'sRotate', 'leagueType', function ($scope, $uibModalInstance, cell, tile, sRotate, leagueType) {
+    $scope.victimConstantWL = victimConstantWL;
     $scope.cell = cell;
     $scope.tile = tile;
     $scope.leagueType = leagueType;
