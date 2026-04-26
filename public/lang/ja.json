@@ -497,6 +497,9 @@
             "m_flash": "被災者から15cm以内でランプを点滅",
             "m_identified": "被災者のタイプの識別に成功",
             "m_kit": "レスキューキットを配布",
+            "m_found": "発見",
+            "m_victim": "被災者・ターゲット",
+            "m_required": "必要数",
             "misidentification": "誤発見"
         },
         "judge": {
@@ -528,6 +531,10 @@
             "m_flash": "@:maze.view.m_flash",
             "m_identified": "@:maze.view.m_identified",
             "m_kit": "@:maze.view.m_kit",
+            "m_found": "@:maze.view.m_found",
+            "m_victim": "@:maze.view.m_victim",
+            "m_required": "@:maze.view.m_required",
+            "m_identified": "@:maze.view.m_identified",
             "pat": "@:admin.mazeMapEditor.pattern",
             "random": "ランダム抽選（乱数）",
             "networkError": "@:line.judge.networkError",

@@ -122,16 +122,35 @@
         border-color: #10b981;
     }
 
+    .victim-row.warning {
+        background: #fefce8;
+        border-color: #f59e0b;
+    }
+
     .victim-row.fail {
         background: #fff1f2;
         border-color: #f43f5e;
     }
 
     .victim-info {
-        flex-grow: 1;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 15px;
+        gap: 8px;
+        min-width: 100px;
+        padding-right: 15px;
+    }
+
+    .discovery-toggle {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        border-radius: 12px;
+        background-color: #f8fafc;
+        border: 1px solid #e2e8f0;
     }
 
     .direction-badge {
@@ -151,7 +170,7 @@
         border-radius: 9999px;
         font-weight: 700;
         font-size: 1.1rem;
-        min-width: 60px;
+        min-width: 70px;
         text-align: center;
         margin-left: 10px;
     }
@@ -246,16 +265,23 @@
         </div>
     </div>
 
-    <!-- Victims Detection Section -->
+    <!-- Victims & Targets Section -->
     <div ng-show="hasVictims">
         <div class="section-title">
-            <i class="far fa-lightbulb" style="color:#f8b500;"></i> {{"maze.view.m_flash" | translate}}
+            <i class="fas fa-user-check" style="color:#f8b500;"></i> {{"maze.view.m_victim" | translate}}
         </div>
 
         <div class="victim-section">
-            <div ng-repeat="(direction, type) in cell.tile.victims track by $index" ng-show="type != 'None' && (!hasRealVictims() || !isModalDummy(cell, direction))"
-                class="victim-row"
-                ng-class="lightStatus(tile.scoredItems.victims[direction],tile.scoredItems.rescueKits[direction]) ? 'success' : 'fail'">
+            <div ng-repeat="(direction, type) in cell.tile.victims track by $index" 
+                 ng-show="type != 'None' && (!hasRealVictims() || !isModalDummy(cell, direction))"
+                 class="victim-row"
+                 ng-class="{
+                    'success': tile.scoredItems.victims[direction] && (isModalDummy(cell, direction) || kitStatus(tile.scoredItems.victims[direction], tile.scoredItems.rescueKits[direction], direction)),
+                    'warning': tile.scoredItems.victims[direction] && !isModalDummy(cell, direction) && !kitStatus(tile.scoredItems.victims[direction], tile.scoredItems.rescueKits[direction], direction),
+                    'fail': !tile.scoredItems.victims[direction]
+                 }">
+                
+                <!-- Left: Info (Direction + Type) - VERTICAL -->
                 <div class="victim-info">
                     <span class="direction-badge">{{modalRotate(direction)}}</span>
 
@@ -267,63 +293,30 @@
                     <img src="/images/Green.png" height="35" ng-if="type=='Green'">
                     <img ng-src="{{getModalCognitiveImage(cell, direction)}}" height="35"
                         ng-if="type=='Cognitive' && cell.tile.cognitiveTargets[direction]">
-
                 </div>
 
-                <i class="fas fa-2x"
-                    ng-class="tile.scoredItems.victims[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
-            </div>
-        </div>
-
-        <!-- Rescue Kits Section (Standard League) -->
-        <div ng-if="leagueType=='standard'">
-            <div class="section-title">
-                <i class="fas fa-medkit" style="color:#c53d43;"></i> {{"maze.view.m_kit" | translate}}
-            </div>
-
-            <div class="victim-section">
-                <div ng-repeat="(direction, type) in cell.tile.victims"
-                    ng-if="type != 'None' && !isModalDummy(cell, direction)" class="victim-row"
-                    ng-class="kitStatus(tile.scoredItems.victims[direction],tile.scoredItems.rescueKits[direction],direction) ? 'success' : 'fail'">
-                    <div class="victim-info">
-                        <span class="direction-badge">{{modalRotate(direction)}}</span>
-
-                        <img src="/images/phi.png" height="30" ng-if="type=='PHI'">
-                        <img src="/images/omega.png" height="30" ng-if="type=='OMEGA'">
-                        <img src="/images/psi.png" height="30" ng-if="type=='PSI'">
-                        <img src="/images/Red.png" height="30" ng-if="type=='Red'">
-                        <img src="/images/Yellow.png" height="30" ng-if="type=='Yellow'">
-                        <img src="/images/Green.png" height="30" ng-if="type=='Green'">
-                        <img ng-src="{{getModalCognitiveImage(cell, direction)}}" height="30"
-                            ng-if="type=='Cognitive' && cell.tile.cognitiveTargets[direction]">
+                <!-- Right: Status -->
+                <div style="display: flex; align-items: center; flex-grow: 1; gap: 15px;">
+                    <!-- Discovery Status -->
+                    <div class="discovery-toggle">
+                        <div style="font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 2px;">{{"maze.judge.m_found" | translate}}</div>
+                        <i class="fas fa-2x" ng-class="tile.scoredItems.victims[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
                     </div>
 
-                    <div class="d-flex align-items: center; gap: 10px;">
-                        <span
-                            style="font-size: 0.8rem; font-weight: 700; color: #64748b; align-self: center;">KITS</span>
-                        <div class="kit-pill">{{tile.scoredItems.rescueKits[direction]}}</div>
+                    <!-- Kits Status (Standard) -->
+                    <div ng-if="leagueType=='standard'" style="flex: 2; padding: 0 10px; text-align: center;">
+                        <div style="font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 5px;">{{"maze.view.m_kit" | translate}}</div>
+                        <div class="kit-pill" style="margin: 0 auto;">{{tile.scoredItems.rescueKits[direction]}}</div>
+                        <div style="font-size: 0.6rem; font-weight: 700; color: #94a3b8; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
+                            {{"maze.judge.m_required" | translate}}: {{getModalMaxKitNum(cell, direction)}}
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Identification Section (Entry League) -->
-        <div ng-if="leagueType=='entry'">
-            <div class="section-title">
-                <i class="far fa-lightbulb" style="color:#2980b9;"></i> {{"maze.judge.m_identified" | translate}}
-            </div>
-
-            <div class="victim-section">
-                <div ng-repeat="(direction, type) in cell.tile.victims track by $index" ng-if="type != 'None'"
-                    class="victim-row"
-                    ng-class="kitStatus(tile.scoredItems.victims[direction],tile.scoredItems.rescueKits[direction],direction) ? 'success' : 'fail'">
-                    <div class="victim-info">
-                        <span class="direction-badge">{{modalRotate(direction)}}</span>
-                        <img src="/images/Red.png" height="35" ng-if="type=='Red'">
-                        <img src="/images/Green.png" height="35" ng-if="type=='Green'">
+                    <!-- Identification Status (Entry) -->
+                    <div ng-if="leagueType=='entry'" style="flex: 2; padding: 0 10px; text-align: center;">
+                        <div style="font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 2px;">{{"maze.judge.m_identified" | translate}}</div>
+                        <i class="fas fa-2x" ng-class="tile.scoredItems.rescueKits[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
                     </div>
-                    <i class="fas fa-2x"
-                        ng-class="tile.scoredItems.rescueKits[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
                 </div>
             </div>
         </div>

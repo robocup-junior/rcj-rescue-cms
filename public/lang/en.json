@@ -499,6 +499,9 @@
             "m_flash": "Flash within 15cm from victim:",
             "m_identified": "Successfully identified victim type",
             "m_kit": "Delivered rescue kits:",
+            "m_found": "Discovery",
+            "m_victim": "Victims and Targets",
+            "m_required": "Required",
             "misidentification": "Misidentification"
         },
         "judge": {
@@ -530,6 +533,10 @@
             "m_flash": "@:maze.view.m_flash",
             "m_identified": "@:maze.view.m_identified",
             "m_kit": "@:maze.view.m_kit",
+            "m_found": "@:maze.view.m_found",
+            "m_victim": "@:maze.view.m_victim",
+            "m_required": "@:maze.view.m_required",
+            "m_identified": "@:maze.view.m_identified",
             "pat": "@:admin.mazeMapEditor.pattern",
             "random": "Random drawing",
             "networkError": "@:line.judge.networkError",

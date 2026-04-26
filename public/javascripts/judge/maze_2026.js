@@ -1123,6 +1123,7 @@ app.controller('ModalInstanceCtrl', ['$scope','$uibModalInstance','cell','tile',
 
     $scope.getModalMaxKitNum = function (cell, direction) {
         if (!cell || !cell.tile || !cell.tile.victims) return 0;
+        if ($scope.leagueType === 'entry') return 1;
         let type = cell.tile.victims[direction];
         if (type === 'Cognitive') {
             if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return 0;
