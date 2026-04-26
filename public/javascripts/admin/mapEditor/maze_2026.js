@@ -547,7 +547,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         if (type === 'Cognitive') {
             if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return true;
             let rings = cell.tile.cognitiveTargets[direction].rings;
-            let colorValues = { 'B': -2, 'R': -1, 'Y': 0, 'G': 1, 'C': 2 };
+            let colorValues = { 'K': -2, 'R': -1, 'Y': 0, 'G': 1, 'B': 2 };
             let total = 0;
             for (let i = 1; i <= 5; i++) {
                 total += colorValues[rings['ring' + i]] || 0;
@@ -1281,7 +1281,7 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
             return '#6c757d';
         }
         var rings = $scope.cell.tile.cognitiveTargets[direction].rings;
-        var colorValues = { 'B': -2, 'R': -1, 'Y': 0, 'G': 1, 'C': 2 };
+        var colorValues = { 'K': -2, 'R': -1, 'Y': 0, 'G': 1, 'B': 2 };
         var total = 0;
         for (var i = 1; i <= 5; i++) {
             total += colorValues[rings['ring' + i]] || 0;
@@ -1298,7 +1298,7 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
             return '#f8f9fa';
         }
         var rings = $scope.cell.tile.cognitiveTargets[direction].rings;
-        var colorValues = { 'B': -2, 'R': -1, 'Y': 0, 'G': 1, 'C': 2 };
+        var colorValues = { 'K': -2, 'R': -1, 'Y': 0, 'G': 1, 'B': 2 };
         var total = 0;
         for (var i = 1; i <= 5; i++) {
             total += colorValues[rings['ring' + i]] || 0;
@@ -1315,7 +1315,7 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
             return '#e9ecef';
         }
         var rings = $scope.cell.tile.cognitiveTargets[direction].rings;
-        var colorValues = { 'B': -2, 'R': -1, 'Y': 0, 'G': 1, 'C': 2 };
+        var colorValues = { 'K': -2, 'R': -1, 'Y': 0, 'G': 1, 'B': 2 };
         var total = 0;
         for (var i = 1; i <= 5; i++) {
             total += colorValues[rings['ring' + i]] || 0;
@@ -1370,11 +1370,11 @@ app.controller('CognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'dire
     $scope.rings = (cognitiveData && cognitiveData.rings) ? angular.copy(cognitiveData.rings) : { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' };
     
     var colorValues = {
-        'B': -2,
+        'K': -2,
         'R': -1,
         'Y': 0,
         'G': 1,
-        'C': 2
+        'B': 2
     };
 
     $scope.updatePreview = function() {
@@ -1426,7 +1426,7 @@ app.controller('CognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'dire
                 targetSum = 0;
         }
 
-        var colors = ['B', 'R', 'Y', 'G', 'C'];
+        var colors = ['K', 'R', 'Y', 'G', 'B'];
         var maxAttempts = 100;
         var attempts = 0;
 

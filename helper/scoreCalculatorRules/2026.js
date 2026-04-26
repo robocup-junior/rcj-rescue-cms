@@ -148,12 +148,15 @@ module.exports.calculateMazeScore = function (run) {
       OMEGA: 0,
     };
 
+    // Per maze rules (rules/maze/1_Field.adoc):
+    //   Black=-2, Red=-1, Yellow=0, Green=+1, Blue=+2
+    // Letter codes follow CMYK printers' shorthand (K = blacK, B = Blue).
     const cognitiveColorValues = {
-      'B': -2,
+      'K': -2,
       'R': -1,
       'Y': 0,
       'G': 1,
-      'C': 2
+      'B': 2
     };
 
     const getVictimMaxKits = (victimType, cell, side) => {

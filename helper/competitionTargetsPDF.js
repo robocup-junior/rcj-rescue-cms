@@ -24,13 +24,13 @@ const GAP_Y = 45; // Reduced gap between rows to fit 3x3 on one page
 const COLS = 3;
 const ROWS = 3;
 
-// Color to value mapping
+// Color to value mapping (rules/maze/1_Field.adoc — K=Black, B=Blue, CMYK shorthand)
 const colorValues = {
-  'B': -2,
+  'K': -2,
   'R': -1,
   'Y': 0,
   'G': 1,
-  'C': 2
+  'B': 2
 };
 
 function isExistFile(file) {
