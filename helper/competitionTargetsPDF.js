@@ -68,9 +68,8 @@ function getPDFFont() {
  * @returns {Array} - Array of objects with target details
  */
 function extractTargets(map, includeLetterVictims = false, includeCognitiveTargets = true) {
-  // Each victim placement gets its own entry, keyed implicitly by position.
-  // Two victims that happen to share the same ring pattern still need separate
-  // entries so each gets its own letter circle on the printable sheet.
+  // Two victims with the same ring pattern still need separate entries
+  // so each gets its own letter circle on the printable sheet.
   const targets = [];
 
   if (!map.cells) return targets;

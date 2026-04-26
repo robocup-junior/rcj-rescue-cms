@@ -290,20 +290,7 @@ adminRouter.put('/:map', function (req, res, next) {
       });
     }
 
-    const cells = [];
-    for (const i in map.cells) {
-      if (map.cells.hasOwnProperty(i)) {
-        const cell = map.cells[i];
-        if (isNaN(i)) {
-          const coords = i.split(',');
-          cell.x = coords[0];
-          cell.y = coords[1];
-          cell.z = coords[2];
-        }
-        cells.push(cell);
-      }
-    }
-    map.cells = cells;
+    normalizeMapCells(map);
 
     // logger.debug(map)
     dbMap.cells = [];
@@ -441,9 +428,7 @@ adminRouter.get('/name/:competitionid/:name', function (req, res, next) {
     .select('_id');
 });
 
-// Normalise an editor-supplied map body so its `cells` is always an array of
-// {x,y,z,...} entries (the editor sometimes serialises it as a "x,y,z"-keyed
-// object). When `assignIsTile` is true, also sets the derived `isTile` flag.
+// The editor sometimes serialises map.cells as a "x,y,z"-keyed object.
 function normalizeMapCells(map, { assignIsTile = false } = {}) {
   if (!map || !map.cells || Array.isArray(map.cells)) return;
 
