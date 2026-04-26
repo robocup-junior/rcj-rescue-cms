@@ -290,8 +290,10 @@ body {
   }
 
   .hero-logo {
-    width: 60px;
-    height: 60px;
+    width: auto;
+    height: auto;
+    max-width: 120px;
+    max-height: 80px;
   }
 
   .hero-title { 
