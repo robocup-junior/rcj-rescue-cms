@@ -1,6 +1,7 @@
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+const logger = require('../config/logger').mainLogger;
 
 /**
  * Generates a PDF with Cognitive Targets and optionally Letter Victims for printing
@@ -67,9 +68,12 @@ function getPDFFont() {
  * @returns {Array} - Array of objects with target details
  */
 function extractTargets(map, includeLetterVictims = false, includeCognitiveTargets = true) {
-  const targetsMap = new Map(); // id -> target object
+  // Each victim placement gets its own entry, keyed implicitly by position.
+  // Two victims that happen to share the same ring pattern still need separate
+  // entries so each gets its own letter circle on the printable sheet.
+  const targets = [];
 
-  if (!map.cells) return [];
+  if (!map.cells) return targets;
 
   // Calculate victim numbers using the same logic as maze_2026.js
   const victimNumberMap = new Map(); // position+direction -> letter
@@ -115,6 +119,8 @@ function extractTargets(map, includeLetterVictims = false, includeCognitiveTarge
     const directions = ['top', 'right', 'bottom', 'left'];
     for (const dir of directions) {
       const victimType = cell.tile.victims[dir];
+      const key = `${cell.x},${cell.y},${cell.z},${dir}`;
+      const victimLetter = victimNumberMap.get(key) || null;
 
       if (includeCognitiveTargets && victimType === 'Cognitive' &&
         cell.tile.cognitiveTargets &&
@@ -123,34 +129,22 @@ function extractTargets(map, includeLetterVictims = false, includeCognitiveTarge
         const rings = cell.tile.cognitiveTargets[dir].rings;
         const colorCode = rings.ring1 + rings.ring2 + rings.ring3 + rings.ring4 + rings.ring5;
 
-        const key = `${cell.x},${cell.y},${cell.z},${dir}`;
-        const victimLetter = victimNumberMap.get(key) || null;
-
-        const targetId = `COGNITIVE_${colorCode}`;
-        if (!targetsMap.has(targetId)) {
-          targetsMap.set(targetId, {
-            type: 'Cognitive',
-            colorCode: colorCode,
-            victimLetter: victimLetter
-          });
-        }
+        targets.push({
+          type: 'Cognitive',
+          colorCode: colorCode,
+          victimLetter: victimLetter
+        });
       } else if (includeLetterVictims && ['PHI', 'PSI', 'OMEGA'].includes(victimType)) {
-        const key = `${cell.x},${cell.y},${cell.z},${dir}`;
-        const victimLetter = victimNumberMap.get(key) || null;
-
-        const targetId = `LETTER_${victimType}`;
-        if (!targetsMap.has(targetId)) {
-          targetsMap.set(targetId, {
-            type: 'Letter',
-            victimType: victimType,
-            victimLetter: victimLetter
-          });
-        }
+        targets.push({
+          type: 'Letter',
+          victimType: victimType,
+          victimLetter: victimLetter
+        });
       }
     }
   }
 
-  return Array.from(targetsMap.values()).sort((a, b) => {
+  return targets.sort((a, b) => {
     // Sort by victim letter (A, B, C...)
     if (a.victimLetter && b.victimLetter) {
       return a.victimLetter.localeCompare(b.victimLetter);
@@ -381,7 +375,7 @@ function generateAndSendPDF(res, map, paperSize = 'A4', includeLetterVictims = f
   const pageWidth = size.width;
   const pageHeight = size.height;
 
-  console.log(`Generating PDF: ${validPaperSize}, includeLetterVictims: ${includeLetterVictims}`);
+  logger.info(`Generating PDF (paper=${validPaperSize}, letterVictims=${includeLetterVictims})`);
 
   const doc = new PDFDocument({
     autoFirstPage: false,
