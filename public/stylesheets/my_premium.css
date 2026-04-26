@@ -18,421 +18,515 @@ body {
   padding: 0 1.5rem;
 }
 
-.mesh-header {
-  position: relative;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  padding: 4rem 0 6rem;
-  overflow: hidden;
-  border-bottom-left-radius: 1.5rem;
-  border-bottom-right-radius: 1.5rem;
-  margin-bottom: -4rem;
-}
+/* Relying on home_premium.css for Hero background animation and tokens */
 
-/* K-Modern Mesh Gradient (Taegeuk Colors) */
-.mesh-header::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: 
-    radial-gradient(circle at 30% 30%, rgba(255, 71, 87, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 70% 70%, rgba(46, 134, 222, 0.12) 0%, transparent 40%);
-  animation: rotateMesh 40s linear infinite;
-  z-index: 1;
-}
+.premium-container {
 
-/* Subtle Hanok-inspired Grid Pattern */
-.mesh-header::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 30px 30px;
-  z-index: 1;
-  pointer-events: none;
-}
-
-@keyframes rotateMesh {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.header-content {
-  position: relative;
-  z-index: 1;
-  text-align: center;
-  color: white;
-}
-
-.comp-logo-wrapper {
-  display: inline-block;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border-radius: 2rem;
-  margin-bottom: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.comp-logo {
-  max-height: 100px;
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
-}
-
-.header-title {
-  font-weight: 800;
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
-  letter-spacing: -0.025em;
-  background: linear-gradient(to bottom right, #fff, #94a3b8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.header-subtitle {
-  font-weight: 500;
-  font-size: 1.25rem;
-  color: #94a3b8;
-  margin-bottom: 1.5rem;
-}
-
-.team-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1.5rem;
-  background: rgba(59, 130, 246, 0.2);
-  border-radius: 0.5rem;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  font-weight: 600;
-  color: #60a5fa;
-}
-
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem;
-  padding: 2rem 0;
-  position: relative;
-  z-index: 10;
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-radius: 0.75rem;
-  padding: 2.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: var(--card-shadow);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-decoration: none !important;
-  color: inherit;
-  position: relative;
-  overflow: hidden;
-  animation: fadeIn 0.8s ease-out backwards;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.glass-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--card-hover-shadow);
-  background: rgba(255, 255, 255, 0.95);
-}
-
-.card-icon-bg {
-  width: 80px;
-  height: 80px;
-  border-radius: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 1.5rem;
-  transition: transform 0.4s ease;
-}
-
-.glass-card:hover .card-icon-bg {
-  transform: scale(1.1) rotate(5deg);
-}
-
-.card-icon-bg i {
-  font-size: 2.5rem;
-}
-
-.card-title {
-  font-weight: 700;
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-  color: #0f172a;
-}
-
-.card-desc {
-  font-size: 0.95rem;
-  color: #64748b;
-  text-align: center;
-  line-height: 1.5;
-}
-
-.card-status {
-  position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-  transition: all 0.2s ease;
-}
-
-.glass-card:hover .card-status {
-  transform: scale(1.1);
-}
-
-.status-editable {
-  background: #dcfce7;
-  color: #166534;
-  border: 1px solid #bbf7d0;
-}
-
-.status-locked {
-  background: #f1f5f9;
-  color: #64748b;
-  border: 1px solid #e2e8f0;
-}
-
-.message-section {
-  margin-top: 4rem;
-  padding-bottom: 4rem;
-}
-
-.message-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.message-header h2 {
-  font-weight: 800;
-  font-size: 2rem;
-  margin: 0;
-}
-
-.message-header i {
-  font-size: 1.75rem;
-  color: var(--accent-color);
-}
-
-.message-list {
-  background: white;
-  border-radius: 0.75rem;
-  padding: 1rem;
-  box-shadow: var(--card-shadow);
-}
-
-.message-item {
-  display: flex;
-  align-items: center;
-  padding: 1.5rem;
-  border-radius: 1.5rem;
-  transition: background 0.2s ease;
-  cursor: pointer;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.message-item:last-child {
-  border-bottom: none;
-}
-
-.message-item:hover {
-  background: #f8fafc;
-}
-
-.message-info {
-  flex-grow: 1;
-}
-
-.message-subject {
-  font-weight: 700;
-  font-size: 1.1rem;
-  margin-bottom: 0.25rem;
-  color: #0f172a;
-}
-
-.message-date {
-  font-size: 0.875rem;
-  color: #94a3b8;
-}
-
-.message-arrow {
-  color: #cbd5e1;
-  transition: transform 0.2s ease;
-}
-
-.message-item:hover .message-arrow {
-  transform: translateX(5px);
-  color: var(--accent-color);
-}
-
-/* Animations delays */
-.glass-card:nth-child(1) { animation-delay: 0.1s; }
-.glass-card:nth-child(2) { animation-delay: 0.2s; }
-.glass-card:nth-child(3) { animation-delay: 0.3s; }
-.glass-card:nth-child(4) { animation-delay: 0.4s; }
-.glass-card:nth-child(5) { animation-delay: 0.5s; }
-.glass-card:nth-child(6) { animation-delay: 0.6s; }
-
-/* Premium SweetAlert2 Customization */
-.swal2-popup.premium-swal {
-  border-radius: 2rem;
-  padding: 2rem;
-  font-family: 'Outfit', sans-serif;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.mail-modal-header {
-  text-align: left;
-  margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.mail-modal-subject {
-  font-weight: 800;
-  font-size: 1.75rem;
-  color: #0f172a;
-  margin-bottom: 0.5rem;
-}
-
-.mail-modal-meta {
-  color: #94a3b8;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.premium-tabs {
-  border: none !important;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.premium-tabs .nav-link {
-  border: none !important;
-  border-radius: 1rem !important;
-  padding: 0.75rem 1.5rem !important;
-  font-weight: 700;
-  color: #64748b !important;
-  background: #f1f5f9 !important;
-  transition: all 0.3s ease !important;
-}
-
-.premium-tabs .nav-link.active {
-  background: var(--primary-gradient) !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
-}
-
-.mail-content-area {
-  background: white;
-  border-radius: 1.5rem;
-  padding: 2rem;
-  border: 1px solid #f1f5f9;
-  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
-}
-
-/* Custom Scrollbar */
-.mail-content-area::-webkit-scrollbar {
-  width: 8px;
-}
-
-.mail-content-area::-webkit-scrollbar-track {
-  background: #f8fafc;
-  border-radius: 4px;
-}
-
-.mail-content-area::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.mail-content-area::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
-}
-
-@media (max-width: 768px) {
-  .mesh-header { 
-    padding: 3rem 0 5rem;
-    border-bottom-left-radius: 1rem; 
-    border-bottom-right-radius: 1rem; 
-    margin-bottom: -3rem;
+  .header-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    color: white;
   }
-  
-  .header-title { 
-    font-size: 2rem; 
+
+  .comp-logo-wrapper {
+    display: inline-block;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 2rem;
+    margin-bottom: 2rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .comp-logo {
+    max-height: 100px;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+  }
+
+  .header-title {
+    font-weight: 800;
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
+    background: linear-gradient(to bottom right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .header-subtitle {
-    font-size: 1rem;
+    font-weight: 500;
+    font-size: 1.25rem;
+    color: #94a3b8;
+    margin-bottom: 1.5rem;
   }
 
-  .dashboard-grid { 
-    grid-template-columns: 1fr; 
-    padding: 1.5rem 0;
-    gap: 1.25rem;
+  .team-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.5rem;
+    background: rgba(59, 130, 246, 0.2);
+    border-radius: 0.5rem;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    font-weight: 600;
+    color: #60a5fa;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+    padding: 2rem 0;
+    position: relative;
+    z-index: 10;
   }
 
   .glass-card {
-    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 0.75rem;
+    padding: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    box-shadow: var(--card-shadow);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none !important;
+    color: inherit;
+    position: relative;
+    overflow: hidden;
+    animation: fadeIn 0.8s ease-out backwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .glass-card:hover {
+    transform: translateY(-8px);
+    box-shadow: var(--card-hover-shadow);
+    background: rgba(255, 255, 255, 0.95);
   }
 
   .card-icon-bg {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
+    border-radius: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    transition: transform 0.4s ease;
+  }
+
+  .glass-card:hover .card-icon-bg {
+    transform: scale(1.1) rotate(5deg);
   }
 
   .card-icon-bg i {
-    font-size: 1.75rem;
+    font-size: 2.5rem;
   }
 
   .card-title {
-    font-size: 1.25rem;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #0f172a;
   }
 
-  .swal2-popup.premium-swal { 
-    padding: 1rem; 
-    width: 95% !important; 
-    border-radius: 1.5rem;
+  .card-desc {
+    font-size: 0.95rem;
+    color: #64748b;
+    text-align: center;
+    line-height: 1.5;
   }
 
-  .mail-modal-subject { 
-    font-size: 1.25rem; 
+  .card-status {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    transition: all 0.2s ease;
   }
-  
-  .mail-content-area {
+
+  .glass-card:hover .card-status {
+    transform: scale(1.1);
+  }
+
+  .status-editable {
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+
+  .status-locked {
+    background: #f1f5f9;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+  }
+
+  .message-section {
+    margin-top: 4rem;
+    padding-bottom: 4rem;
+  }
+
+  .message-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .message-header h2 {
+    font-weight: 800;
+    font-size: 2rem;
+    margin: 0;
+  }
+
+  .message-header i {
+    font-size: 1.75rem;
+    color: var(--accent-color);
+  }
+
+  .message-list {
+    background: white;
+    border-radius: 0.75rem;
     padding: 1rem;
-    font-size: 0.9rem;
+    box-shadow: var(--card-shadow);
+    margin-bottom: 2rem;
   }
-}
+
+  .message-item {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    border-radius: 1.5rem;
+    transition: background 0.2s ease;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .message-item:last-child {
+    border-bottom: none;
+  }
+
+  .message-item:hover {
+    background: #f8fafc;
+  }
+
+  .message-info {
+    flex-grow: 1;
+  }
+
+  .message-subject {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+    color: #0f172a;
+  }
+
+  .message-date {
+    font-size: 0.875rem;
+    color: #94a3b8;
+  }
+
+  .message-arrow {
+    color: #cbd5e1;
+    transition: transform 0.2s ease;
+  }
+
+  .message-item:hover .message-arrow {
+    transform: translateX(5px);
+    color: var(--accent-color);
+  }
+
+  /* Animations delays */
+  .glass-card:nth-child(1) {
+    animation-delay: 0.1s;
+  }
+
+  .glass-card:nth-child(2) {
+    animation-delay: 0.2s;
+  }
+
+  .glass-card:nth-child(3) {
+    animation-delay: 0.3s;
+  }
+
+  .glass-card:nth-child(4) {
+    animation-delay: 0.4s;
+  }
+
+  .glass-card:nth-child(5) {
+    animation-delay: 0.5s;
+  }
+
+  .glass-card:nth-child(6) {
+    animation-delay: 0.6s;
+  }
+
+  @import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap");
+
+  /* Modern Premium Modal - Futuristic Redesign */
+  .premium-modal-popup-fix {
+    padding: 0 !important;
+    border-radius: 1.5rem !important;
+    overflow: hidden !important;
+    box-shadow: 0 50px 100px -20px rgba(0, 0, 0, 0.25), 0 30px 60px -30px rgba(0, 0, 0, 0.3) !important;
+    border: none !important;
+  }
+
+  .premium-modal-wrapper {
+    font-family: "Outfit", sans-serif;
+    text-align: left;
+    color: #1e293b;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+    background: #ffffff;
+  }
+
+  .modal-header-section {
+    padding: 3.5rem 3.5rem 2.5rem;
+    background: #0f172a;
+    /* Sleek Dark Header */
+    color: #ffffff;
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Subtle accent pulse in background */
+  .modal-header-section::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+    z-index: 0;
+  }
+
+  .modal-icon-box {
+    width: 72px;
+    height: 72px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #60a5fa;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 1;
+  }
+
+  .modal-title-area {
+    flex-grow: 1;
+    z-index: 1;
+  }
+
+  .modal-subject-text {
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    letter-spacing: -0.05em;
+    color: #ffffff;
+    background: linear-gradient(to bottom right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .modal-meta-line {
+    display: flex;
+    gap: 1.5rem;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+  }
+
+  .modal-meta-tag {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .modal-content-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 4rem 3.5rem;
+    background: #ffffff;
+  }
+
+  .mail-body-text {
+    font-size: 1.25rem;
+    line-height: 2;
+    color: #334155;
+    letter-spacing: 0.01em;
+  }
+
+  /* Scrollbar Styling */
+  .modal-content-wrapper::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .modal-content-wrapper::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .modal-content-wrapper::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+  }
+
+  .modal-content-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+  }
+
+  .premium-modal-popup-fix .swal2-html-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    text-align: left !important;
+    overflow: hidden !important;
+  }
+
+  .swal2-close {
+    color: #64748b !important;
+    margin-top: 1rem;
+    margin-right: 1rem;
+    font-size: 2rem !important;
+  }
+
+  .swal2-close {
+    color: #94a3b8 !important;
+    z-index: 100;
+  }
+
+  /* Add a pseudo-element to make it look more like a message/letter */
+  .mail-content-area::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    border-radius: 1rem 1rem 0 0;
+  }
+
+  .mail-body-text {
+    font-family: 'Noto Sans KR', 'Outfit', sans-serif;
+    letter-spacing: 0.01em;
+    white-space: pre-wrap;
+    /* Preserve line breaks */
+  }
+
+  /* Custom Scrollbar for Modal */
+  .mail-content-area::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .mail-content-area::-webkit-scrollbar-track {
+    background: #f8fafc;
+  }
+
+  .mail-content-area::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+
+  .mail-content-area::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  .swal2-close {
+    color: #94a3b8 !important;
+    top: 1rem !important;
+    right: 1rem !important;
+  }
+
+  .swal2-close:hover {
+    color: #0f172a !important;
+  }
+
+  @media (max-width: 768px) {
+    .mesh-header {
+      padding: 3rem 0 5rem;
+      border-bottom-left-radius: 1rem;
+      border-bottom-right-radius: 1rem;
+      margin-bottom: -3rem;
+    }
+
+    .header-title {
+      font-size: 2rem;
+    }
+
+    .header-subtitle {
+      font-size: 1rem;
+    }
+
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+      padding: 1.5rem 0;
+      gap: 1.25rem;
+    }
+
+    .glass-card {
+      padding: 1.5rem;
+    }
+
+    .card-icon-bg {
+      width: 60px;
+      height: 60px;
+    }
+
+    .card-icon-bg i {
+      font-size: 1.75rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+    }
+
+    .swal2-popup.premium-swal {
+      padding: 1rem;
+      width: 95% !important;
+      border-radius: 1.5rem;
+    }
+
+    .mail-modal-subject {
+      font-size: 1.25rem;
+    }
+
+    .mail-content-area {
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+  }

@@ -79,14 +79,32 @@ body {
   min-height: 100px;
 }
 
+/* Vertical Modifier for My Page and Competition Portal */
+.hero-content.hero-vertical {
+  flex-direction: column;
+  text-align: center;
+  gap: 1.5rem;
+}
+
 .hero-logo {
-  width: 54px;
-  height: 54px;
+  width: auto;
+  max-width: 140px;
+  height: auto;
+  max-height: 140px;
   margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.5));
+  filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.4));
+  background: white;
+  padding: 0.5rem 1rem;
+  border-radius: 1.25rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.hero-vertical .hero-logo {
+  max-width: 320px;
+  max-height: 180px;
 }
 
 .hero-text-wrapper {
@@ -95,12 +113,26 @@ body {
   justify-content: center;
 }
 
+.hero-vertical .hero-text-wrapper {
+  align-items: center;
+  width: 100%;
+}
+
 .hero-title {
   font-size: 2.2rem;
   font-weight: 800;
   letter-spacing: -0.025em;
   margin: 0;
   line-height: 1;
+}
+
+.hero-vertical .hero-title {
+  font-size: clamp(1.2rem, 3.5vw, 2.2rem);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .hero-info-capsule {

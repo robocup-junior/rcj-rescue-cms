@@ -36,13 +36,12 @@ block bread
 
 block content
   .home-hero
-    .hero-content
-      .hero-logo(style="background: white; border-radius: 1.5rem; padding: 0.5rem; display: flex; align-items: center; justify-content: center;")
-        img(ng-src="{{competition.logo}}", alt='', style="max-height: 40px; max-width: 40px; object-fit: contain;")
+    .hero-content.hero-vertical
+      img.hero-logo(ng-if="competition.logo" ng-src="{{competition.logo}}")
       .hero-text-wrapper
         h1.hero-title {{competition.name}}
-        p.hero-subtitle {{leagueName}}
-        .team-badge(style="margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.1); padding: 0.25rem 1rem; border-radius: 999px; font-size: 0.85rem; font-weight: 600;")
+        p.hero-subtitle(style="margin-top: 0.5rem; opacity: 0.8; font-weight: 500;") {{leagueName}}
+        .team-badge(style="margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.1); padding: 0.25rem 1rem; border-radius: 999px; font-size: 1.5rem; font-weight: 600;")
           i.fas.fa-users
           span #{teamCode} #{teamName}
 
@@ -105,7 +104,7 @@ block content
         i.fas.fa-envelope-open-text(style="font-size: 1.75rem; color: #2e86de;")
         h2(style="font-weight: 800; font-size: 2rem; margin: 0;") {{"mypage.message" | translate}}
       
-      .message-list(style="background: white; border-radius: 1.5rem; padding: 1rem; border: 1px solid #f1f5f9; box-shadow: 0 1px 3px rgba(0,0,0,0.05);")
+      .message-list(style="background: white; border-radius: 1.5rem; padding: 1rem; border: 1px solid #f1f5f9; box-shadow: 0 1px 3px rgba(0,0,0,0.05);margin-bottom: 2rem;")
         .message-item(ng-repeat='mail in mails', ng-click="mailView(mail)", style="display: flex; align-items: center; padding: 1.5rem; border-radius: 1rem; transition: background 0.2s ease; cursor: pointer; border-bottom: 1px solid #f1f5f9;")
           .message-info(style="flex-grow: 1;")
             .message-subject(style="font-weight: 700; font-size: 1.1rem; color: #0f172a;", ng-bind="mail.subject")

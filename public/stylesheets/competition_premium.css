@@ -23,21 +23,21 @@
 /* MyPage Style Logo Container */
 .hero-logo-container {
   background: white;
-  border-radius: 1.5rem;
-  padding: 1.5rem 2.5rem; /* Reduced padding */
+  border-radius: 1.25rem; /* Slightly sharper as requested before */
+  padding: 0.5rem 1rem; /* Significantly reduced padding */
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   width: fit-content;
   max-width: 90%;
-  min-height: 100px; /* Reduced min-height */
+  min-height: auto; /* Tightly wraps the logo */
   animation: logoEntrance 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .comp-logo-hero {
   max-width: 100%;
-  max-height: 140px; /* Significantly smaller logo */
+  max-height: 200px; /* Fill more of the container */
   object-fit: contain;
 }
 
