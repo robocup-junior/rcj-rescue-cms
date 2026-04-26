@@ -524,6 +524,7 @@
             "m_bump": "@:maze.view.m_bump",
             "m_ramp": "@:maze.view.m_ramp",
             "m_steps": "@:maze.view.m_steps",
+            "blue": "Blue tile",
             "m_blue_tile": "Blue Tile",
             "m_blue_visits": "Number of visits to this blue tile:",
             "m_flash": "@:maze.view.m_flash",
