@@ -89,21 +89,6 @@ const tileSchema = new Schema({
   changeFloorTo: {type: Number, integer: true, min: 0}
 })
 
-// A 'Cognitive' victim is meaningless without its 5 ring colors. Reject saves
-// where a side declares Cognitive but the matching cognitiveTargets entry is
-// absent — otherwise scoring silently awards 0 kits while still granting SVI.
-tileSchema.pre('validate', function (next) {
-  const sides = ['top', 'right', 'bottom', 'left']
-  for (const side of sides) {
-    const isCognitive = this.victims && this.victims[side] === 'Cognitive'
-    const target = this.cognitiveTargets && this.cognitiveTargets[side]
-    if (isCognitive && (!target || !target.rings)) {
-      return next(new Error(`victim '${side}' is Cognitive but cognitiveTargets.${side} is missing`))
-    }
-  }
-  next()
-})
-
 const mazeMapSchema = new Schema({
   competition: {
     type    : ObjectId,
@@ -201,20 +186,32 @@ mazeMapSchema.pre('save', function (next) {
       if (cell.tile.black || cell.tile.checkpoint || cell.tile.steps || cell.tile.speedbump || cell.tile.ramp || cell.tile.blue || cell.tile.redTile) {
         if ((cell.tile.victims.top != null &&
              cell.tile.victims.top != "None") ||
-        
+
             (cell.tile.victims.right != null &&
              cell.tile.victims.right != "None") ||
-        
+
             (cell.tile.victims.bottom != null &&
              cell.tile.victims.bottom != "None") ||
-        
+
             (cell.tile.victims.left != null &&
              cell.tile.victims.left != "None")) {
-          
+
           const err = new Error("Can't have victims on black/silver/blue tile & with stair, ramp, obstacle at x: " +
                                 cell.x + ", y: " +
                                 cell.y + ", z: " + cell.z + "!")
           return next(err)
+        }
+      }
+
+      if (cell.tile.victims) {
+        for (const side of ['top', 'right', 'bottom', 'left']) {
+          if (cell.tile.victims[side] === 'Cognitive' &&
+              !(cell.tile.cognitiveTargets && cell.tile.cognitiveTargets[side])) {
+            const err = new Error("Cognitive victim on '" + side + "' has no rings at x: " +
+                                  cell.x + ", y: " +
+                                  cell.y + ", z: " + cell.z + "!")
+            return next(err)
+          }
         }
       }
 
