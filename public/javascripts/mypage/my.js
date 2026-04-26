@@ -100,19 +100,30 @@ app.controller("MyPageController", ['$scope', '$http', '$translate', function ($
     }
 
     $scope.mailView = function(mail){
-        let mailUrl = `/api/mail/get/${teamId}/${token}/${mail.mailId}`;
+        var mailUrl = "/api/mail/get/" + teamId + "/" + token + "/" + mail.mailId;
         $http.get(mailUrl).then(function (response) {
-            let html = response.data.html;
-            let plain = response.data.plain.replace(/\r?\n/g, '<br>');
+            var html = response.data.html || "";
+            var subject = mail.subject || "";
+            var time = $scope.time(mail.time);
+
+            var modalHtml = 
+                '<div class="mail-modal-header">' +
+                    '<div class="mail-modal-subject">' + subject + '</div>' +
+                    '<div class="mail-modal-meta">' +
+                        '<i class="far fa-calendar-alt"></i> ' +
+                        '<span>' + time + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="mail-content-area" style="text-align:left; max-height:calc(100vh - 250px); overflow:auto;">' + 
+                    html + 
+                '</div>';
+
             Swal.fire({
-                html:'<ul class="nav nav-tabs" id="mailType" role="tablist"><li class="nav-item"><a class="nav-link active" id="html-tab" data-toggle="tab" href="#html" role="tab" aria-controls="html" aria-selected="true">HTML</a></li><li class="nav-item"><a class="nav-link" id="plain-tab" data-toggle="tab" href="#plain" role="tab" aria-controls="plain" aria-selected="false">Plain Text</a></li></ul>'+
-                '<div class="tab-content" id="mailTypeContent">'+
-                    '<div class="tab-pane fade show active" id="html" role="tabpanel" aria-labelledby="html-tab" style="text-align:left;max-height:calc(100vh - 200px);overflow:auto;">' + html +'</div>'+
-                    '<div class="tab-pane fade" id="plain" role="tabpanel" aria-labelledby="plain-tab" style="text-align:left;max-height:calc(100vh - 200px);overflow:auto;">' + plain + '</div>'+
-                '</div>',
+                html: modalHtml,
                 width: "100%",
                 height: "100%",
-                showCloseButton: true, 
+                showCloseButton: true,
+                showConfirmButton: false
             })
         }, function (response) {
             Toast.fire({
@@ -121,7 +132,6 @@ app.controller("MyPageController", ['$scope', '$http', '$translate', function ($
                 html: response.data.msg
             })
         })
-        
     }
 
     function compositeColor(code, alpha) {
