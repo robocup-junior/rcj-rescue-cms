@@ -324,7 +324,7 @@ adminRouter.get('/image/:map', function (req, res, next) {
   /* 画像を送る */
 });
 
-publicRouter.post('/image/:map', function (req, res, next) {
+adminRouter.post('/image/:map', function (req, res, next) {
   const id = req.params.map;
   if (!ObjectId.isValid(id)) {
     return next();

@@ -441,13 +441,34 @@ adminRouter.get('/name/:competitionid/:name', function (req, res, next) {
     .select('_id');
 });
 
-publicRouter.get('/:map/competition-targets-pdf', function (req, res, next) {
+// Normalise an editor-supplied map body so its `cells` is always an array of
+// {x,y,z,...} entries (the editor sometimes serialises it as a "x,y,z"-keyed
+// object). When `assignIsTile` is true, also sets the derived `isTile` flag.
+function normalizeMapCells(map, { assignIsTile = false } = {}) {
+  if (!map || !map.cells || Array.isArray(map.cells)) return;
+
+  const cells = [];
+  for (const key of Object.keys(map.cells)) {
+    const cell = map.cells[key];
+    if (isNaN(key)) {
+      const [x, y, z] = key.split(',').map((n) => parseInt(n, 10));
+      cell.x = x;
+      cell.y = y;
+      cell.z = z;
+      if (assignIsTile) cell.isTile = x % 2 === 1 && y % 2 === 1;
+    }
+    cells.push(cell);
+  }
+  map.cells = cells;
+}
+
+adminRouter.get('/:map/competition-targets-pdf', function (req, res, next) {
   const id = req.params.map;
   const paperSize = req.query.paperSize || 'A4';
   const includeLetterVictims = req.query.includeLetterVictims === 'true';
   const includeCognitiveTargets = req.query.includeCognitiveTargets !== 'false';
 
-  console.log(`PDF request for map ${id}, paper size: ${paperSize}, includeLetterVictims: ${includeLetterVictims}, includeCognitiveTargets: ${includeCognitiveTargets}`);
+  logger.info(`Competition targets PDF request for map ${id} (paper=${paperSize}, letterVictims=${includeLetterVictims}, cognitiveTargets=${includeCognitiveTargets})`);
 
   if (!ObjectId.isValid(id)) {
     return next();
@@ -471,7 +492,7 @@ publicRouter.get('/:map/competition-targets-pdf', function (req, res, next) {
   });
 });
 
-publicRouter.get('/:map/scoresheet', function (req, res, next) {
+adminRouter.get('/:map/scoresheet', function (req, res, next) {
   const id = req.params.map;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -501,7 +522,7 @@ publicRouter.get('/:map/scoresheet', function (req, res, next) {
     });
 });
 
-publicRouter.post('/scoresheet', function (req, res, next) {
+adminRouter.post('/scoresheet', function (req, res, next) {
   const map = req.body;
   if (!map || !map.cells) {
     return res.status(400).send({
@@ -509,30 +530,13 @@ publicRouter.post('/scoresheet', function (req, res, next) {
     });
   }
 
-  // Convert cells from object map to array if necessary
-  if (!Array.isArray(map.cells)) {
-    const cells = [];
-    for (const i in map.cells) {
-      if (map.cells.hasOwnProperty(i)) {
-        const cell = map.cells[i];
-        if (isNaN(i)) {
-          const coords = i.split(',');
-          cell.x = parseInt(coords[0]);
-          cell.y = parseInt(coords[1]);
-          cell.z = parseInt(coords[2]);
-          cell.isTile = cell.x % 2 === 1 && cell.y % 2 === 1;
-        }
-        cells.push(cell);
-      }
-    }
-    map.cells = cells;
-  }
+  normalizeMapCells(map, { assignIsTile: true });
 
   const rule = req.body.rule || '2026';
   scoreSheetPDFMaze2.generateScoreSheetFromMap(res, map, rule);
 });
 
-publicRouter.post('/competition-targets-pdf', function (req, res, next) {
+adminRouter.post('/competition-targets-pdf', function (req, res, next) {
   const map = req.body;
   const paperSize = req.body.paperSize || 'A4';
   const includeLetterVictims = req.body.includeLetterVictims === true;
@@ -544,23 +548,7 @@ publicRouter.post('/competition-targets-pdf', function (req, res, next) {
     });
   }
 
-  // Convert cells from object map to array if necessary
-  if (!Array.isArray(map.cells)) {
-    const cells = [];
-    for (const i in map.cells) {
-      if (map.cells.hasOwnProperty(i)) {
-        const cell = map.cells[i];
-        if (isNaN(i)) {
-          const coords = i.split(',');
-          cell.x = parseInt(coords[0]);
-          cell.y = parseInt(coords[1]);
-          cell.z = parseInt(coords[2]);
-        }
-        cells.push(cell);
-      }
-    }
-    map.cells = cells;
-  }
+  normalizeMapCells(map);
 
   competitionTargetsPDF.generateAndSendPDF(res, map, paperSize, includeLetterVictims, includeCognitiveTargets);
 });
