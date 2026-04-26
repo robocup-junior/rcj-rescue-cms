@@ -89,6 +89,21 @@ const tileSchema = new Schema({
   changeFloorTo: {type: Number, integer: true, min: 0}
 })
 
+// A 'Cognitive' victim is meaningless without its 5 ring colors. Reject saves
+// where a side declares Cognitive but the matching cognitiveTargets entry is
+// absent — otherwise scoring silently awards 0 kits while still granting SVI.
+tileSchema.pre('validate', function (next) {
+  const sides = ['top', 'right', 'bottom', 'left']
+  for (const side of sides) {
+    const isCognitive = this.victims && this.victims[side] === 'Cognitive'
+    const target = this.cognitiveTargets && this.cognitiveTargets[side]
+    if (isCognitive && (!target || !target.rings)) {
+      return next(new Error(`victim '${side}' is Cognitive but cognitiveTargets.${side} is missing`))
+    }
+  }
+  next()
+})
+
 const mazeMapSchema = new Schema({
   competition: {
     type    : ObjectId,
