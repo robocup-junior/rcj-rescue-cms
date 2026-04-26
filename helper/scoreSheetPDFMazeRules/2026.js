@@ -275,12 +275,12 @@ function drawRun(doc, config, scoringRun) {
   for (const v of itemList.allVictims) {
     let bg = 'scoresheet_generation/maze/';
     if (v.isLinear) {
-      if (v.kits === 3) bg += 'l2.png';
-      else if (v.kits === 2) bg += 'l1.png';
+      if (v.kits === 2) bg += 'l2.png';
+      else if (v.kits === 1) bg += 'l1.png';
       else bg += 'l0.png';
     } else {
-      if (v.kits === 3) bg += 'f2.png';
-      else if (v.kits === 2) bg += 'f1.png';
+      if (v.kits === 2) bg += 'f2.png';
+      else if (v.kits === 1) bg += 'f1.png';
       else bg += 'f0.png';
     }
 
