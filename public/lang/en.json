@@ -7,7 +7,19 @@
         "about": "The RoboCupJunior Competition Management System is designed for help the referees of RoboCupJunior Rescue Line / Maze.  In this system, it is very easy to do everything related to competition management, from course map creation to score calculation and ranking.  If you are a judge of a competition that adopts this system, please login from the button below. The competition OC knows the ID and password.  If you are a player, you can check the detailed results and ranking of the competition by choosing the competition you participated from the list below.",
         "management": "Settings / Competition Management",
         "access_level": "The you logged in account, {{account}}, does not have permission to access Competition Management.",
-        "goScanner": "Manual input of score sheet"
+        "goScanner": "Manual input of score sheet",
+        "staffWorkspace": "Staff Workspace",
+        "adminCommand": "Admin Command Center",
+        "enterLeague": "Enter League",
+        "manageTeamsDesc": "Manage teams and registrations",
+        "scannerDesc": "Scan score sheets via QR",
+        "reviewsDesc": "Grade technical documents",
+        "runsMonitor": "Runs Monitor",
+        "runsMonitorDesc": "Real-time competition status",
+        "signageOnly": "Signage Only",
+        "signageDesc": "Pure signage display",
+        "dualView": "Signage + Monitor",
+        "dualViewDesc": "Signage and runs monitor dual view"
     },
     "team_home": {
         "title": "Team List",

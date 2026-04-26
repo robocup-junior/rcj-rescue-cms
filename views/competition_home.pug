@@ -10,39 +10,89 @@ append scripts
   script(src='/javascripts/competition_home.js')
   script(src='/components/cheet.js/cheet.min.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    span.breadcrumb-item.active {{competition.name}}
+append css
+  link(href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet")
+  link(rel='stylesheet', href='/stylesheets/home_premium.css')
+  link(rel='stylesheet', href='/stylesheets/competition_premium.css')
+
+block bread
+  // Breadcrumbs removed for premium minimal look
 
 block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{competition.name}}
-      .alert.alert-success(role='alert' ng-if="competition.message")
-          h4.alert-heading {{'common.message' | translate}}
+  .home-hero
+    .comp-home-hero-content
+      .hero-logo-container(ng-if="competition.logo")
+        img.comp-logo-hero(ng-src="{{competition.logo}}")
+      .comp-text-hero
+        h1.comp-name-title {{competition.name}}
+        .comp-message-box(ng-if="competition.message")
+          h4 {{'common.message' | translate}}
           p(ng-bind-html="competition.message")
-      .row
-        div(ng-repeat="league in leagues" ng-click = "goLeaguePage(league)" class="col-md-6 col-lg-4")
-          .card(style='width: 100%;margin-bottom:20px;')
-              a
-                img.card-img-top(ng-src="/images/leagues/{{leagueImage(league)}}.png" style="width:100%; height:auto;")
-              .card-body
-                button(class='btn btn-primary btn-lg btn-block') 
-                  i.fas.fa-arrow-right &nbsp;
-                  | {{league.name}}
 
-      if judge
-        button(ng-click="go('/home/' + competition._id + '/teams')" class='btn btn-outline-success btn-lg btn-block' style="margin-top:20px;margin-bottom:20px;") 
-          i.fas.fa-users(aria-hidden='true')  {{'team_home.title' | translate}}
-      
-        button(ng-click="go('/home/scanner/home')" class='btn btn-outline-dark btn-lg btn-block' style="margin-top:20px;margin-bottom:20px;")
-          i.fas.fa-qrcode(aria-hidden='true')  {{'home.goScanner' | translate}}
-      if interview 
-        button(ng-click="go('/document/assigned/' + competition._id )" class='btn btn-outline-success btn-lg btn-block' style="margin-top:20px;margin-bottom:20px;") 
-          i.fas.fa-file-alt(aria-hidden='true')  Assigned Reviews
-      div(ng-if="secretCommand")
-          button(ng-click="go('/signage/games/' + competition._id)" class='btn btn-info btn-lg btn-block' style="margin-top:20px;margin-bottom:20px;") Runs Monitor Only
-          div(ng-repeat="sign in signs" style="margin-top:100px;")
-            button(ng-click="go('/signage/display/' + sign._id + '/0' )" class='btn btn-info btn-lg btn-block' style="margin-top:20px;margin-bottom:20px;") Signage Only ({{sign.name}})
-            button(ng-click="go('/signage/games/' + competition._id + '/' + sign._id + '/0')" class='btn btn-outline-info btn-lg btn-block' style="margin-top:20px;margin-bottom:20px;") Signage ({{sign.name}}) & Runs Monitor
+  .comp-container
+    .league-grid
+      .league-card(ng-repeat="league in leagues" ng-click="goLeaguePage(league)")
+        .card-accent(ng-style="{'backgroundColor': league.type == 'line' ? '#2ecc71' : (league.type == 'maze' ? '#3498db' : '#f1c40f')}")
+        .league-image-area
+          img(ng-src="/images/leagues/{{leagueImage(league)}}.png" alt="{{league.name}}")
+        .league-body
+          h3.league-name(ng-style="{'color': league.type == 'line' ? '#27ae60' : (league.type == 'maze' ? '#2980b9' : '#f39c12')}") {{league.name}}
+          .btn-enter-premium
+            i.fas.fa-arrow-right
+            | {{'home.enterLeague' | translate}}
+
+    // Staff Tools Section
+    if judge || interview
+      .tools-section
+        .tools-header
+          i.fas.fa-tools
+          h2 {{'home.staffWorkspace' | translate}}
+        .tools-grid
+          if judge
+            a.tool-button-premium.staff(ng-click="go('/home/' + competition._id + '/teams')")
+              .tool-icon-circle
+                i.fas.fa-users
+              .tool-text-container
+                span.tool-label {{'team_home.title' | translate}}
+                span.tool-sublabel {{'home.manageTeamsDesc' | translate}}
+            
+            a.tool-button-premium.staff(ng-click="go('/home/scanner/home')")
+              .tool-icon-circle
+                i.fas.fa-qrcode
+              .tool-text-container
+                span.tool-label {{'home.goScanner' | translate}}
+                span.tool-sublabel {{'home.scannerDesc' | translate}}
+          
+          if interview
+            a.tool-button-premium.staff(ng-click="go('/document/assigned/' + competition._id)")
+              .tool-icon-circle
+                i.fas.fa-file-alt
+              .tool-text-container
+                span.tool-label Assigned Reviews
+                span.tool-sublabel {{'home.reviewsDesc' | translate}}
+
+    // Admin Tools Section (Hidden by default)
+    .tools-section.admin-tools-container(ng-if="secretCommand")
+      .tools-header
+        i.fas.fa-user-shield
+        h2 {{'home.adminCommand' | translate}}
+      .tools-grid
+        a.tool-button-premium.admin(ng-click="go('/signage/games/' + competition._id)")
+          .tool-icon-circle
+            i.fas.fa-desktop
+          .tool-text-container
+            span.tool-label {{'home.runsMonitor' | translate}}
+            span.tool-sublabel {{'home.runsMonitorDesc' | translate}}
+        
+        // Grouped Signage Cards
+        .signage-combo-card(ng-repeat="sign in signs")
+          .signage-card-header
+            i.fas.fa-tv
+            span {{sign.name}}
+          .signage-actions
+            button.sign-action-btn(ng-click="go('/signage/display/' + sign._id + '/0')")
+              i.fas.fa-play-circle
+              span {{'home.signageOnly' | translate}}
+            button.sign-action-btn.dual(ng-click="go('/signage/games/' + competition._id + '/' + sign._id + '/0')")
+              i.fas.fa-columns
+              span {{'home.dualView' | translate}}
