@@ -35,6 +35,7 @@ module.exports.generateScoreSheetFromMap = function (res, map, rule) {
     round: { name: '' },
     field: { name: '' },
     map: map,
+    noQR: map.noQR,
     diceNumber: (typeof map.dice === 'number' && map.dice >= 1 && map.dice <= 6 ? map.dice : (Array.isArray(map.dice) && typeof map.dice[0] === 'number' && map.dice[0] >= 1 && map.dice[0] <= 6 ? map.dice[0] : null)),
   };
 

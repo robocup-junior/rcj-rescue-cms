@@ -9,6 +9,9 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         showConfirmButton: false,
         timer: 3000
     });
+    $scope.pdfSettings = {
+        noQR: true
+    };
     $scope.competitionId = competitionId;
     $scope.mapId = mapId;
     $translate('admin.mazeMapEditor.import').then(function (val) {
@@ -537,6 +540,24 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         }
     };
 
+    $scope.isDummy = function (x, y, z, direction) {
+        let cell = $scope.cells[x + ',' + y + ',' + z];
+        if (!cell || !cell.tile || !cell.tile.victims) return false;
+        let type = cell.tile.victims[direction];
+        if (type === 'Cognitive') {
+            if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return true;
+            let rings = cell.tile.cognitiveTargets[direction].rings;
+            let colorValues = { 'B': -2, 'R': -1, 'Y': 0, 'G': 1, 'C': 2 };
+            let total = 0;
+            for (let i = 1; i <= 5; i++) {
+                total += colorValues[rings['ring' + i]] || 0;
+            }
+            if (total >= 0 && total <= 2) return false;
+            return true; // Dummy
+        }
+        return false;
+    };
+
     function Range(first, last) {
         var first = first.charCodeAt(0);
         var last = last.charCodeAt(0);
@@ -642,7 +663,8 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     $scope.pdfSettings = {
         paperSize: 'A4',
         includeLetterVictims: true,
-        includeCognitiveTargets: true
+        includeCognitiveTargets: true,
+        noQR: true
     };
 
     $scope.onPaperSizeChange = function() {
@@ -1095,6 +1117,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
                     cells: $scope.cells,
                     league: leagueId,
                     rule: '2026',
+                    noQR: $scope.pdfSettings.noQR,
                     _id: tempId
                 };
                 
@@ -1110,8 +1133,10 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             });
         } else {
             $scope.saveMap(null, function () {
-                const url = '/api/maps/maze/' + mapId + '/scoresheet?rule=2026&noQR=true';
-                window.open(url, '_blank');
+                $scope.makeImage(true).then(function() {
+                    const url = '/api/maps/maze/' + mapId + '/scoresheet?rule=2026&noQR=' + $scope.pdfSettings.noQR;
+                    window.open(url, '_blank');
+                });
             });
         }
     };
