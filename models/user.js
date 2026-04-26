@@ -132,6 +132,8 @@ userSchema.pre('save', function (next) {
  * @param {updatePasswordCb} cb - The callback function
  */
 userSchema.methods.updatePassword = function (password, cb) {
+  // The pre('save') hook above re-hashes whenever `password` is modified, so
+  // setting it and calling save() is enough — no need to hash here.
   this.password = password;
   this.save(cb);
 }

@@ -315,7 +315,11 @@ superRouter.put('/:userid', function (req, res, next) {
 const privateRouter = express.Router();
 
 privateRouter.post('/me/password', function (req, res) {
-  const { current, new: newPass, confirm } = req.body;
+  const { current, new: newPass, confirm } = req.body || {};
+
+  if (typeof current !== 'string' || typeof newPass !== 'string' || typeof confirm !== 'string') {
+    return res.status(400).send({ msg: 'Missing or invalid password fields' });
+  }
 
   if (newPass !== confirm) {
     return res.status(400).send({ msg: 'Passwords do not match' });
