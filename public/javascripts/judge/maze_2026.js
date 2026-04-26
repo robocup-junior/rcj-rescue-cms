@@ -1084,6 +1084,8 @@ app.controller('ModalInstanceCtrl', ['$scope','$uibModalInstance','cell','tile',
         }
     };
 
+
+
     $scope.lightStatus = function(light, kit){
         if(light) return true;
         return false;
@@ -1148,6 +1150,18 @@ app.controller('ModalInstanceCtrl', ['$scope','$uibModalInstance','cell','tile',
             }
             if (total >= 0 && total <= 2) return false;
             return true; // Dummy
+        }
+        return false;
+    };
+
+    $scope.hasRealVictims = function() {
+        if (!$scope.cell || !$scope.cell.tile || !$scope.cell.tile.victims) return false;
+        let directions = ['top', 'bottom', 'left', 'right'];
+        for (let dir of directions) {
+            let type = $scope.cell.tile.victims[dir];
+            if (type && type !== 'None') {
+                if (!$scope.isModalDummy($scope.cell, dir)) return true;
+            }
         }
         return false;
     };

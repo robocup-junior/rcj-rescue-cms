@@ -947,6 +947,18 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'cell', 'til
         return false;
     };
 
+    $scope.hasRealVictims = function() {
+        if (!$scope.cell || !$scope.cell.tile || !$scope.cell.tile.victims) return false;
+        let directions = ['top', 'bottom', 'left', 'right'];
+        for (let dir of directions) {
+            let type = $scope.cell.tile.victims[dir];
+            if (type && type !== 'None') {
+                if (!$scope.isModalDummy($scope.cell, dir)) return true;
+            }
+        }
+        return false;
+    };
+
     $scope.modalRotateInv = function (dir) {
         var ro;
         switch (dir) {

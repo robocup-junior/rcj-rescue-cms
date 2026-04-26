@@ -253,7 +253,7 @@
         </div>
 
         <div class="victim-section">
-            <div ng-repeat="(direction, type) in cell.tile.victims track by $index" ng-show="type != 'None'"
+            <div ng-repeat="(direction, type) in cell.tile.victims track by $index" ng-show="type != 'None' && (!hasRealVictims() || !isModalDummy(cell, direction))"
                 class="victim-row"
                 ng-class="lightStatus(tile.scoredItems.victims[direction],tile.scoredItems.rescueKits[direction]) ? 'success' : 'fail'">
                 <div class="victim-info">
