@@ -4,46 +4,56 @@
 <div class="modal-body" style="padding: 20px;">
   <div style="margin-bottom: 25px;">
     <h5 style="font-weight: 600; color: #495057; margin-bottom: 15px; border-left: 4px solid #007bff; padding-left: 10px;">{{"admin.mazeMapEditor.tileProperties" | translate}}</h5>
-    <div style="display: flex; flex-wrap: wrap; gap: 12px;">
-      <label class="btn" ng-class="cell.tile.checkpoint ? 'btn-success' : 'btn-outline-secondary'" style="cursor: pointer; margin: 0; padding: 10px 16px; font-size: 1.05em;">
-        <input type="checkbox" ng-model="cell.tile.checkpoint" style="display: none;"><img src="/images/checkpoint.png" height="24" style="margin-right: 8px; vertical-align: middle;">{{"admin.mazeMapEditor.cp" | translate}}
+    <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center;">
+      <label class="btn" ng-class="cell.tile.checkpoint ? 'btn-success' : 'btn-outline-secondary'" ng-style="hasVictims() ? {'opacity': '0.5', 'cursor': 'not-allowed'} : {'cursor': 'pointer'}" style="margin: 0; padding: 10px 16px; font-size: 1.05em;">
+        <input type="checkbox" ng-model="cell.tile.checkpoint" ng-change="propertyChanged()" ng-disabled="hasVictims()" style="display: none;"><img src="/images/checkpoint.png" height="24" style="margin-right: 8px; vertical-align: middle;">{{"admin.mazeMapEditor.cp" | translate}}
       </label>
-      <label class="btn" ng-class="cell.tile.black ? 'btn-dark' : 'btn-outline-secondary'" style="cursor: pointer; margin: 0; padding: 10px 16px; font-size: 1.05em;">
-        <input type="checkbox" ng-model="cell.tile.black" ng-change="blackChanged()" style="display: none;"><i class="fas fa-square" style="margin-right: 8px; font-size: 20px;"></i>{{"admin.mazeMapEditor.black" | translate}}
+      <label class="btn" ng-class="cell.tile.black ? 'btn-dark' : 'btn-outline-secondary'" ng-style="hasVictims() ? {'opacity': '0.5', 'cursor': 'not-allowed'} : {'cursor': 'pointer'}" style="margin: 0; padding: 10px 16px; font-size: 1.05em;">
+        <input type="checkbox" ng-model="cell.tile.black" ng-change="blackChanged()" ng-disabled="hasVictims()" style="display: none;"><i class="fas fa-square" style="margin-right: 8px; font-size: 20px;"></i>{{"admin.mazeMapEditor.black" | translate}}
       </label>
-      <label class="btn" ng-class="cell.tile.blue ? 'btn-primary' : 'btn-outline-secondary'" style="cursor: pointer; margin: 0; padding: 10px 16px; font-size: 1.05em;">
-        <input type="checkbox" ng-model="cell.tile.blue" style="display: none;"><i class="fas fa-square" style="margin-right: 8px; color: #007bff; font-size: 20px;"></i>{{"admin.mazeMapEditor.blue" | translate}}
+      <label class="btn" ng-class="cell.tile.blue ? 'btn-primary' : 'btn-outline-secondary'" ng-style="hasVictims() ? {'opacity': '0.5', 'cursor': 'not-allowed'} : {'cursor': 'pointer'}" style="margin: 0; padding: 10px 16px; font-size: 1.05em;">
+        <input type="checkbox" ng-model="cell.tile.blue" ng-change="propertyChanged()" ng-disabled="hasVictims()" style="display: none;"><i class="fas fa-square" style="margin-right: 8px; color: #007bff; font-size: 20px;"></i>{{"admin.mazeMapEditor.blue" | translate}}
       </label>
-      <label class="btn" ng-class="cell.tile.red ? 'btn-danger' : 'btn-outline-secondary'" style="cursor: pointer; margin: 0; padding: 10px 16px; font-size: 1.05em;">
-        <input type="checkbox" ng-model="cell.tile.red" style="display: none;"><i class="fas fa-square" style="margin-right: 8px; color: #dc3545; font-size: 20px;"></i>{{"admin.mazeMapEditor.red" | translate}}
+      <label class="btn" ng-class="cell.tile.red ? 'btn-danger' : 'btn-outline-secondary'" ng-style="hasVictims() ? {'opacity': '0.5', 'cursor': 'not-allowed'} : {'pointer-events': 'auto'}" style="cursor: pointer; margin: 0; padding: 10px 16px; font-size: 1.05em;">
+        <input type="checkbox" ng-model="cell.tile.red" ng-change="propertyChanged()" ng-disabled="hasVictims()" style="display: none;"><i class="fas fa-square" style="margin-right: 8px; color: #dc3545; font-size: 20px;"></i>{{"admin.mazeMapEditor.red" | translate}}
       </label>
-      <label class="btn" ng-class="cell.tile.speedbump ? 'btn-warning' : 'btn-outline-secondary'" style="cursor: pointer; margin: 0; padding: 10px 16px; font-size: 1.05em;">
-        <input type="checkbox" ng-model="cell.tile.speedbump" style="display: none;"><img src="/images/speedbump.png" height="22" style="margin-right: 8px; vertical-align: middle;">{{"admin.mazeMapEditor.bump" | translate}}
+      <label class="btn" ng-class="cell.tile.speedbump ? 'btn-warning' : 'btn-outline-secondary'" ng-style="hasVictims() ? {'opacity': '0.5', 'cursor': 'not-allowed'} : {'cursor': 'pointer'}" style="margin: 0; padding: 10px 16px; font-size: 1.05em;">
+        <input type="checkbox" ng-model="cell.tile.speedbump" ng-change="propertyChanged()" ng-disabled="hasVictims()" style="display: none;"><img src="/images/speedbump.png" height="22" style="margin-right: 8px; vertical-align: middle;">{{"admin.mazeMapEditor.bump" | translate}}
       </label>
-      <label class="btn" ng-class="cell.tile.ramp ? 'btn-info' : 'btn-outline-secondary'" style="cursor: pointer; margin: 0; padding: 10px 16px; font-size: 1.05em;">
-        <input type="checkbox" ng-model="cell.tile.ramp" style="display: none;"><img src="/images/ramp.png" height="24" style="margin-right: 8px; vertical-align: middle;">{{"admin.mazeMapEditor.ramp" | translate}}
+      <label class="btn" ng-class="cell.tile.ramp ? 'btn-info' : 'btn-outline-secondary'" ng-style="hasVictims() ? {'opacity': '0.5', 'cursor': 'not-allowed'} : {'cursor': 'pointer'}" style="margin: 0; padding: 10px 16px; font-size: 1.05em;">
+        <input type="checkbox" ng-model="cell.tile.ramp" ng-change="propertyChanged()" ng-disabled="hasVictims()" style="display: none;"><img src="/images/ramp.png" height="24" style="margin-right: 8px; vertical-align: middle;">{{"admin.mazeMapEditor.ramp" | translate}}
       </label>
-      <label class="btn" ng-class="cell.tile.steps ? 'btn-secondary' : 'btn-outline-secondary'" style="cursor: pointer; margin: 0; padding: 10px 16px; font-size: 1.05em;">
-        <input type="checkbox" ng-model="cell.tile.steps" style="display: none;"><img src="/images/steps.png" height="24" style="margin-right: 8px; vertical-align: middle;">{{"admin.mazeMapEditor.step" | translate}}
+      <label class="btn" ng-class="cell.tile.steps ? 'btn-secondary' : 'btn-outline-secondary'" ng-style="hasVictims() ? {'opacity': '0.5', 'cursor': 'not-allowed'} : {'cursor': 'pointer'}" style="margin: 0; padding: 10px 16px; font-size: 1.05em;">
+        <input type="checkbox" ng-model="cell.tile.steps" ng-change="propertyChanged()" ng-disabled="hasVictims()" style="display: none;"><img src="/images/steps.png" height="24" style="margin-right: 8px; vertical-align: middle;">{{"admin.mazeMapEditor.step" | translate}}
       </label>
-      <label class="btn" ng-class="isStart ? 'btn-success' : 'btn-outline-success'" ng-disabled="isStart" style="cursor: pointer; margin: 0; padding: 10px 16px; font-size: 1.05em;">
-        <input type="checkbox" ng-model="isStart" ng-disabled="isStart" ng-change="startChanged()" style="display: none;"><i class="fas fa-play" style="margin-right: 8px; font-size: 20px;"></i>{{"admin.mazeMapEditor.start" | translate}}
+      
+      <label class="btn" ng-class="isStart ? 'btn-success' : 'btn-outline-success'" ng-disabled="isStart || hasVictims()" ng-style="(isStart || hasVictims()) ? {'opacity': '0.5', 'cursor': 'not-allowed'} : {'cursor': 'pointer'}" style="margin: 0; padding: 10px 16px; font-size: 1.05em;">
+        <input type="checkbox" ng-model="isStart" ng-disabled="isStart || hasVictims()" ng-change="startChanged()" style="display: none;"><i class="fas fa-play" style="margin-right: 8px; font-size: 20px;"></i>{{"admin.mazeMapEditor.start" | translate}}
       </label>
+      
+      <div ng-if="hasVictims()" style="background-color: #fff3cd; color: #856404; padding: 8px 15px; border-radius: 6px; font-size: 0.9em; border: 1px solid #ffeeba; margin-left: 5px; flex-grow: 1;">
+        <i class="fas fa-info-circle" style="margin-right: 8px;"></i>{{"admin.mazeMapEditor.propertyRestricted" | translate}}
+      </div>
     </div>
   </div>
 
   <div ng-show="height > 1" style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
     <h5 style="font-weight: 600; color: #495057; margin-bottom: 10px;"><i class="fas fa-layer-group" style="margin-right: 8px;"></i>{{"admin.mazeMapEditor.changeF" | translate}}</h5>
     <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-      <label ng-repeat="h in range(height)" class="btn btn-sm" ng-class="cell.tile.changeFloorTo === h ? 'btn-primary' : 'btn-outline-primary'" style="cursor: pointer; margin: 0;">
-        <input type="radio" ng-model="cell.tile.changeFloorTo" ng-value="h" ng-change="elevatorChanged(h)" style="display: none;">{{h}}<span ng-show="h == z" style="font-size: 0.8em; opacity: 0.7;"> ({{"admin.mazeMapEditor.noEle" | translate}})</span>
+      <label ng-repeat="h in range(height)" class="btn btn-sm" ng-class="cell.tile.changeFloorTo === h ? 'btn-primary' : 'btn-outline-primary'" ng-style="(hasVictims() && h != z) ? {'opacity': '0.5', 'cursor': 'not-allowed'} : {'cursor': 'pointer'}" style="margin: 0;">
+        <input type="radio" ng-model="cell.tile.changeFloorTo" ng-value="h" ng-change="elevatorChanged(h)" ng-disabled="hasVictims() && h != z" style="display: none;">{{h}}<span ng-show="h == z" style="font-size: 0.8em; opacity: 0.7;"> ({{"admin.mazeMapEditor.noEle" | translate}})</span>
       </label>
     </div>
   </div>
 
   <div ng-if="leagueType == 'standard'" style="margin-top: 25px;">
-    <h5 style="font-weight: 600; color: #495057; margin-bottom: 15px; border-left: 4px solid #28a745; padding-left: 10px;">{{"admin.mazeMapEditor.placement" | translate}}</h5>
-    <table class="table table-bordered" style="margin-bottom: 0; font-size: 1.1em;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+      <h5 style="font-weight: 600; color: #495057; margin: 0; border-left: 4px solid #28a745; padding-left: 10px;">{{"admin.mazeMapEditor.placement" | translate}}</h5>
+      <div ng-if="isVictimDisabled()" style="background-color: #fff3cd; color: #856404; padding: 8px 15px; border-radius: 6px; font-size: 0.9em; border: 1px solid #ffeeba;">
+        <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>{{"admin.mazeMapEditor.victimRestricted" | translate}}
+      </div>
+    </div>
+    <table class="table table-bordered" style="margin-bottom: 0; font-size: 1.1em;" ng-style="isVictimDisabled() ? {'opacity': '0.6'} : {}">
       <thead style="background-color: #f8f9fa;">
         <tr>
           <th style="width: 15%; text-align: center; vertical-align: middle; padding: 12px;">&nbsp;</th>
@@ -58,12 +68,12 @@
         <tr>
           <th style="text-align: center; vertical-align: middle; background-color: #f8f9fa; padding: 14px;">{{"admin.mazeMapEditor.top" | translate}}</th>
           <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.top" value="None" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
-          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.top" value="PHI" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
-          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.top" value="PSI" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
-          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.top" value="OMEGA" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
+          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.top" value="PHI" ng-disabled="isVictimDisabled()" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
+          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.top" value="PSI" ng-disabled="isVictimDisabled()" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
+          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.top" value="OMEGA" ng-disabled="isVictimDisabled()" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
           <td style="text-align: center; vertical-align: middle; white-space: nowrap; padding: 14px;">
             <div style="display: inline-flex; align-items: center; gap: 8px;">
-              <input type="radio" ng-model="cell.tile.victims.top" value="Cognitive" style="display: block; transform: scale(1.4);">
+              <input type="radio" ng-model="cell.tile.victims.top" value="Cognitive" ng-disabled="isVictimDisabled()" style="display: block; transform: scale(1.4);">
               <span ng-if="cell.tile.victims.top == 'Cognitive'" ng-click="openCognitiveTargetSettings('top')" ng-style="{'border-color': getCognitiveStatusColor('top'), 'display': 'inline-flex', 'align-items': 'center', 'cursor': 'pointer', 'padding': '6px', 'border-radius': '8px', 'border': '2px solid', 'background-color': getCognitiveStatusBgColor('top'), 'transition': 'all 0.2s'}">
                 <img ng-src="{{getCognitiveTargetImage('top')}}" alt="Cognitive Target" height="32" style="border-radius: 4px;">
                 <i class="fas fa-cog" ng-style="{'margin-left': '8px', 'color': getCognitiveStatusColor('top'), 'font-size': '16px'}"></i>
@@ -74,12 +84,12 @@
         <tr>
           <th style="text-align: center; vertical-align: middle; background-color: #f8f9fa; padding: 14px;">{{"admin.mazeMapEditor.bottom" | translate}}</th>
           <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.bottom" value="None" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
-          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.bottom" value="PHI" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
-          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.bottom" value="PSI" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
-          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.bottom" value="OMEGA" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
+          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.bottom" value="PHI" ng-disabled="isVictimDisabled()" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
+          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.bottom" value="PSI" ng-disabled="isVictimDisabled()" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
+          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.bottom" value="OMEGA" ng-disabled="isVictimDisabled()" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
           <td style="text-align: center; vertical-align: middle; white-space: nowrap; padding: 14px;">
             <div style="display: inline-flex; align-items: center; gap: 8px;">
-              <input type="radio" ng-model="cell.tile.victims.bottom" value="Cognitive" style="display: block; transform: scale(1.4);">
+              <input type="radio" ng-model="cell.tile.victims.bottom" value="Cognitive" ng-disabled="isVictimDisabled()" style="display: block; transform: scale(1.4);">
               <span ng-if="cell.tile.victims.bottom == 'Cognitive'" ng-click="openCognitiveTargetSettings('bottom')" ng-style="{'border-color': getCognitiveStatusColor('bottom'), 'display': 'inline-flex', 'align-items': 'center', 'cursor': 'pointer', 'padding': '6px', 'border-radius': '8px', 'border': '2px solid', 'background-color': getCognitiveStatusBgColor('bottom'), 'transition': 'all 0.2s'}">
                 <img ng-src="{{getCognitiveTargetImage('bottom')}}" alt="Cognitive Target" height="32" style="border-radius: 4px;">
                 <i class="fas fa-cog" ng-style="{'margin-left': '8px', 'color': getCognitiveStatusColor('bottom'), 'font-size': '16px'}"></i>
@@ -90,12 +100,12 @@
         <tr>
           <th style="text-align: center; vertical-align: middle; background-color: #f8f9fa; padding: 14px;">{{"admin.mazeMapEditor.left" | translate}}</th>
           <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.left" value="None" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
-          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.left" value="PHI" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
-          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.left" value="PSI" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
-          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.left" value="OMEGA" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
+          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.left" value="PHI" ng-disabled="isVictimDisabled()" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
+          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.left" value="PSI" ng-disabled="isVictimDisabled()" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
+          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.left" value="OMEGA" ng-disabled="isVictimDisabled()" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
           <td style="text-align: center; vertical-align: middle; white-space: nowrap; padding: 14px;">
             <div style="display: inline-flex; align-items: center; gap: 8px;">
-              <input type="radio" ng-model="cell.tile.victims.left" value="Cognitive" style="display: block; transform: scale(1.4);">
+              <input type="radio" ng-model="cell.tile.victims.left" value="Cognitive" ng-disabled="isVictimDisabled()" style="display: block; transform: scale(1.4);">
               <span ng-if="cell.tile.victims.left == 'Cognitive'" ng-click="openCognitiveTargetSettings('left')" ng-style="{'border-color': getCognitiveStatusColor('left'), 'display': 'inline-flex', 'align-items': 'center', 'cursor': 'pointer', 'padding': '6px', 'border-radius': '8px', 'border': '2px solid', 'background-color': getCognitiveStatusBgColor('left'), 'transition': 'all 0.2s'}">
                 <img ng-src="{{getCognitiveTargetImage('left')}}" alt="Cognitive Target" height="32" style="border-radius: 4px;">
                 <i class="fas fa-cog" ng-style="{'margin-left': '8px', 'color': getCognitiveStatusColor('left'), 'font-size': '16px'}"></i>
@@ -106,12 +116,12 @@
         <tr>
           <th style="text-align: center; vertical-align: middle; background-color: #f8f9fa; padding: 14px;">{{"admin.mazeMapEditor.right" | translate}}</th>
           <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.right" value="None" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
-          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.right" value="PHI" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
-          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.right" value="PSI" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
-          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.right" value="OMEGA" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
+          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.right" value="PHI" ng-disabled="isVictimDisabled()" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
+          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.right" value="PSI" ng-disabled="isVictimDisabled()" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
+          <td style="text-align: center; vertical-align: middle; padding: 14px;"><input type="radio" ng-model="cell.tile.victims.right" value="OMEGA" ng-disabled="isVictimDisabled()" style="display: block; margin: 0 auto; transform: scale(1.4);"></td>
           <td style="text-align: center; vertical-align: middle; white-space: nowrap; padding: 14px;">
             <div style="display: inline-flex; align-items: center; gap: 8px;">
-              <input type="radio" ng-model="cell.tile.victims.right" value="Cognitive" style="display: block; transform: scale(1.4);">
+              <input type="radio" ng-model="cell.tile.victims.right" value="Cognitive" ng-disabled="isVictimDisabled()" style="display: block; transform: scale(1.4);">
               <span ng-if="cell.tile.victims.right == 'Cognitive'" ng-click="openCognitiveTargetSettings('right')" ng-style="{'border-color': getCognitiveStatusColor('right'), 'display': 'inline-flex', 'align-items': 'center', 'cursor': 'pointer', 'padding': '6px', 'border-radius': '8px', 'border': '2px solid', 'background-color': getCognitiveStatusBgColor('right'), 'transition': 'all 0.2s'}">
                 <img ng-src="{{getCognitiveTargetImage('right')}}" alt="Cognitive Target" height="32" style="border-radius: 4px;">
                 <i class="fas fa-cog" ng-style="{'margin-left': '8px', 'color': getCognitiveStatusColor('right'), 'font-size': '16px'}"></i>

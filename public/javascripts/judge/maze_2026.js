@@ -850,7 +850,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.open = function (x, y, z) {
         var modalInstance = $uibModal.open({
             animation: true,
-            templateUrl: '/templates/maze_judge_modal.html',
+            templateUrl: '/templates/maze_judge_modal_2026.html',
             controller: 'ModalInstanceCtrl',
             size: 'lm',
             resolve: {

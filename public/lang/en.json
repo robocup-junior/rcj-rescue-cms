@@ -797,6 +797,8 @@
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
             "placement": "Placement of victims:",
+            "victimRestricted": "Victims cannot be placed while elements are set on the tile.",
+            "propertyRestricted": "Tile elements cannot be changed when victims are placed.",
             "changeF": "Change floor to",
             "noEle": "No elevator",
             "export": "@:admin.lineMapEditor.export",

@@ -795,6 +795,8 @@
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
             "placement": "被災者の配置:",
+            "victimRestricted": "タイルに要素が設定されている間は被災者を配置できません。",
+            "propertyRestricted": "被災者が配置されている間はタイルの要素を変更できません。",
             "changeF": "次の階層に移動: ",
             "noEle": "階層変更なし",
             "export": "@:admin.lineMapEditor.export",

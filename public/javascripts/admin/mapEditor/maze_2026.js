@@ -1184,6 +1184,7 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
             };
         }
         $scope.oldFloorDestination = newValue;
+        $scope.propertyChanged();
         $scope.$parent.recalculateLinear();
     }
 
@@ -1192,11 +1193,44 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
             $scope.$parent.startTile.x = x;
             $scope.$parent.startTile.y = y;
             $scope.$parent.startTile.z = z;
+            $scope.propertyChanged();
         }
     }
 
-    $scope.blackChanged = function () {
+    $scope.hasVictims = function() {
+        if (!$scope.cell || !$scope.cell.tile || !$scope.cell.tile.victims) return false;
+        var v = $scope.cell.tile.victims;
+        return (v.top && v.top !== 'None') ||
+               (v.bottom && v.bottom !== 'None') ||
+               (v.left && v.left !== 'None') ||
+               (v.right && v.right !== 'None');
+    };
+
+    $scope.isVictimDisabled = function() {
+        if (!$scope.cell || !$scope.cell.tile) return false;
+        return $scope.cell.tile.black || 
+               $scope.cell.tile.checkpoint || 
+               $scope.cell.tile.blue || 
+               $scope.cell.tile.red || 
+               $scope.cell.tile.speedbump || 
+               $scope.cell.tile.steps || 
+               $scope.cell.tile.ramp ||
+               $scope.isStart ||
+               ($scope.cell.tile.changeFloorTo !== undefined && $scope.cell.tile.changeFloorTo !== z);
+    };
+
+    $scope.propertyChanged = function () {
+        if ($scope.isVictimDisabled()) {
+            $scope.cell.tile.victims.top = 'None';
+            $scope.cell.tile.victims.bottom = 'None';
+            $scope.cell.tile.victims.left = 'None';
+            $scope.cell.tile.victims.right = 'None';
+        }
         $scope.$parent.recalculateLinear();
+    };
+
+    $scope.blackChanged = function () {
+        $scope.propertyChanged();
     }
 
     $scope.range = function (n) {
