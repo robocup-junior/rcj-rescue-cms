@@ -5,7 +5,7 @@ nav.navbar.navbar-expand.premium-navbar
         img.d-inline-block.align-top(src="/images/logo.png" alt="Logo")
         span.brand-text &nbsp;RCJ CMS
         if process.env.ENVIRONMENT != "PROD" && process.env.ENVIRONMENT != null
-            span.env-badge &nbsp; (#{process.env.ENVIRONMENT})
+            span.env-badge (#{process.env.ENVIRONMENT})
     
     .ml-auto.d-flex.align-items-center
         a.nav-user-link.mr-2(href='#' data-toggle='modal' data-target='#languageModal' title="{{'select_lang' | translate}}")

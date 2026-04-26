@@ -1,7 +1,7 @@
 .premium-navbar {
     background: linear-gradient(135deg, #0047a0 0%, #002d66 100%) !important;
     border-bottom: 5px solid #cd2e3a;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     padding: 0.5rem 1.5rem;
     transition: all 0.3s ease;
     position: fixed;
@@ -37,14 +37,15 @@ body {
 
 .env-badge {
     font-size: 0.75rem;
-    background: rgba(255,255,255,0.15);
+    background: rgba(255, 255, 255, 0.15);
     padding: 2px 6px;
     border-radius: 4px;
     vertical-align: middle;
+    margin-left: 10px;
 }
 
 .nav-user-link {
-    color: rgba(255,255,255,0.85) !important;
+    color: rgba(255, 255, 255, 0.85) !important;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
@@ -55,7 +56,7 @@ body {
 
 .nav-user-link:hover {
     color: #fff !important;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .username-text {
@@ -77,7 +78,7 @@ body {
 .login-btn:hover {
     background: rgba(255, 255, 255, 0.25) !important;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .premium-dropdown {
@@ -85,7 +86,7 @@ body {
     backdrop-filter: blur(10px);
     border: none !important;
     border-radius: 12px !important;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
     margin-top: 10px !important;
     padding: 0.5rem !important;
     min-width: 220px !important;
@@ -124,12 +125,20 @@ body {
 }
 
 @keyframes fadeInDown {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* Premium Modal & Card Styles */
-.premium-modal-content, .premium-card {
+.premium-modal-content,
+.premium-card {
     border: none;
     border-radius: 24px;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -139,7 +148,8 @@ body {
 }
 
 .premium-card {
-    background: white; /* Standard card might not need blur if not over complex background */
+    background: white;
+    /* Standard card might not need blur if not over complex background */
     padding: 3rem;
     margin-top: 2rem;
     margin-bottom: 5rem;
@@ -194,14 +204,31 @@ body {
 }
 
 .shake {
-    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+    animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 @keyframes shake {
-    10%, 90% { transform: translate3d(-1px, 0, 0); }
-    20%, 80% { transform: translate3d(2px, 0, 0); }
-    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-    40%, 60% { transform: translate3d(4px, 0, 0); }
+
+    10%,
+    90% {
+        transform: translate3d(-1px, 0, 0);
+    }
+
+    20%,
+    80% {
+        transform: translate3d(2px, 0, 0);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translate3d(-4px, 0, 0);
+    }
+
+    40%,
+    60% {
+        transform: translate3d(4px, 0, 0);
+    }
 }
 
 /* Language Modal Cards */
@@ -252,7 +279,7 @@ body {
     align-items: center;
 }
 
-.premium-breadcrumb .breadcrumb-item + .breadcrumb-item::before {
+.premium-breadcrumb .breadcrumb-item+.breadcrumb-item::before {
     content: '\f054' !important;
     font-family: 'Font Awesome 5 Free' !important;
     font-weight: 900 !important;
