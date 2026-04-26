@@ -110,35 +110,84 @@
     .victim-row {
         display: flex;
         align-items: center;
-        padding: 12px;
+        padding: 12px 15px;
         border-radius: 12px;
         margin-bottom: 10px;
-        background: #f8fafc;
+        background: white;
         border: 1px solid #e2e8f0;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        transition: background-color 0.2s, border-color 0.2s;
     }
 
     .victim-row.success {
-        background: #ecfdf5;
-        border-color: #10b981;
+        background: #f0fdf4;
+        border-color: #bbf7d0;
     }
 
     .victim-row.warning {
-        background: #fefce8;
-        border-color: #f59e0b;
+        background: #fffbeb;
+        border-color: #fef08a;
     }
 
     .victim-row.fail {
-        background: #fff1f2;
-        border-color: #f43f5e;
+        background: #fef2f2;
+        border-color: #fecaca;
     }
 
     .victim-info {
         display: flex;
+        align-items: center;
+        gap: 15px;
+        min-width: 80px;
+    }
+
+    .victim-image-wrapper {
+        position: relative;
+        padding: 10px 0; /* Space for top and bottom tabs */
+    }
+
+    .victim-image-container {
+        width: 60px;
+        height: 60px;
+        background: #f1f5f9;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid white;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .direction-tab, .status-tab {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        font-size: 0.5rem;
+        font-weight: 900;
+        padding: 1px 8px;
+        border-radius: 100px;
+        letter-spacing: 0.05em;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-transform: uppercase;
+        border: 1.5px solid white;
+        white-space: nowrap;
+    }
+
+    .direction-tab {
+        background: #1e293b;
+    }
+
+    .discovery-toggle {
+        flex: 1;
+        display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 8px;
-        min-width: 100px;
-        padding-right: 15px;
+        justify-content: center;
+        padding: 5px;
     }
 
     .discovery-toggle {
@@ -287,25 +336,26 @@
                     'fail': !tile.scoredItems.victims[direction]
                  }">
 
-                <!-- Left: Info (Direction + Type) - VERTICAL -->
+                <!-- Left: Victim Info (Direction + Image + Status Stack) -->
                 <div class="victim-info">
-                    <span class="direction-badge">{{modalRotate(direction)}}</span>
-
-                    <img src="/images/phi.png" height="35" ng-if="type=='PHI'">
-                    <img src="/images/omega.png" height="35" ng-if="type=='OMEGA'">
-                    <img src="/images/psi.png" height="35" ng-if="type=='PSI'">
-                    <img ng-src="{{getModalCognitiveImage(cell, direction)}}" height="35"
-                        ng-if="type=='Cognitive' && cell.tile.cognitiveTargets[direction]">
-
-                    <div
-                        style="font-size: 0.65rem; font-weight: 800; color: white; background: {{getModalVictimStatusColor(cell, direction)}}; padding: 2px 8px; border-radius: 4px; margin-top: 4px; white-space: nowrap; display: flex; align-items: center; gap: 4px;">
-                        <i class="fas" ng-class="{
-                            'fa-heartbeat': getModalVictimStatus(cell, direction) == 'Harmed',
-                            'fa-user-check': getModalVictimStatus(cell, direction) == 'Stable',
-                            'fa-smile': getModalVictimStatus(cell, direction) == 'Unharmed',
-                            'fa-robot': getModalVictimStatus(cell, direction) == 'Dummy'
-                        }"></i>
-                        {{getModalVictimStatus(cell, direction)}}
+                    <div class="victim-image-wrapper">
+                        <div class="status-tab" style="top: -2px; background: {{getModalVictimStatusColor(cell, direction)}};">
+                            <i class="fas" ng-class="{
+                                'fa-heartbeat': getModalVictimStatus(cell, direction) == 'Harmed',
+                                'fa-user-check': getModalVictimStatus(cell, direction) == 'Stable',
+                                'fa-smile': getModalVictimStatus(cell, direction) == 'Unharmed',
+                                'fa-robot': getModalVictimStatus(cell, direction) == 'Dummy'
+                            }"></i>
+                            {{getModalVictimStatus(cell, direction).charAt(0)}}
+                        </div>
+                        <div class="victim-image-container">
+                            <img src="/images/phi.png" height="40" ng-if="type=='PHI'">
+                            <img src="/images/omega.png" height="40" ng-if="type=='OMEGA'">
+                            <img src="/images/psi.png" height="40" ng-if="type=='PSI'">
+                            <img ng-src="{{getModalCognitiveImage(cell, direction)}}" height="40"
+                                ng-if="type=='Cognitive' && cell.tile.cognitiveTargets[direction]">
+                        </div>
+                        <div class="direction-tab" style="bottom: -2px;">{{modalRotate(direction)}}</div>
                     </div>
                 </div>
 
