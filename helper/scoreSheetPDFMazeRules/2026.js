@@ -194,7 +194,7 @@ function drawRun(doc, config, scoringRun) {
     PSI: 1,
     OMEGA: 0,
   };
-  const cognitiveColorValues = { B: -2, R: -1, Y: 0, G: 1, C: 2 };
+  const cognitiveColorValues = { K: -2, R: -1, Y: 0, G: 1, B: 2 };
 
   let victimIndex = 0;
   for (let j = 1, l = scoringRun.map.length * 2 + 1; j < l; j += 2) {
