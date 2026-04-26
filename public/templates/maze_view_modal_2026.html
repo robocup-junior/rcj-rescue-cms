@@ -213,22 +213,26 @@
     <div class="feature-grid"
         ng-show="cell.tile.checkpoint || cell.tile.speedbump || cell.tile.steps || cell.tile.ramp || cell.tile.blue">
         <!-- Checkpoint -->
-        <div class="feature-card" ng-show="cell.tile.checkpoint" ng-class="tile.scoredItems.checkpoint ? 'success' : 'fail'">
+        <div class="feature-card" ng-show="cell.tile.checkpoint"
+            ng-class="tile.scoredItems.checkpoint ? 'success' : 'fail'">
             <span class="feature-label">{{"maze.judge.m_reach" | translate}}</span>
             <div class="feature-img-container">
                 <img src="/images/checkpoint.png" style="height: 60px;">
-                <i class="fas status-icon" ng-class="tile.scoredItems.checkpoint ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
-                   style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
+                <i class="fas status-icon"
+                    ng-class="tile.scoredItems.checkpoint ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
+                    style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
             </div>
         </div>
 
         <!-- Speedbump -->
-        <div class="feature-card" ng-show="cell.tile.speedbump" ng-class="tile.scoredItems.speedbump ? 'success' : 'fail'">
+        <div class="feature-card" ng-show="cell.tile.speedbump"
+            ng-class="tile.scoredItems.speedbump ? 'success' : 'fail'">
             <span class="feature-label">{{"maze.judge.m_bump" | translate}}</span>
             <div class="feature-img-container">
                 <img src="/images/log.png" style="height: 60px;">
-                <i class="fas status-icon" ng-class="tile.scoredItems.speedbump ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
-                   style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
+                <i class="fas status-icon"
+                    ng-class="tile.scoredItems.speedbump ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
+                    style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
             </div>
         </div>
 
@@ -237,8 +241,9 @@
             <span class="feature-label">{{"maze.judge.m_steps" | translate}}</span>
             <div class="feature-img-container">
                 <img src="/images/steps.png" style="height: 60px;">
-                <i class="fas status-icon" ng-class="tile.scoredItems.steps ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
-                   style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
+                <i class="fas status-icon"
+                    ng-class="tile.scoredItems.steps ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
+                    style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
             </div>
         </div>
 
@@ -247,8 +252,9 @@
             <span class="feature-label">{{"maze.judge.m_ramp" | translate}}</span>
             <div class="feature-img-container">
                 <img src="/images/ramp.png" style="height: 60px;">
-                <i class="fas status-icon" ng-class="tile.scoredItems.ramp ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
-                   style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
+                <i class="fas status-icon"
+                    ng-class="tile.scoredItems.ramp ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
+                    style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
             </div>
         </div>
 
@@ -256,7 +262,8 @@
         <div class="feature-card" ng-show="cell.tile.blue" ng-class="tile.scoredItems.blue > 0 ? 'success' : 'fail'">
             <span class="feature-label">{{"maze.judge.blue" | translate}}</span>
             <div class="feature-img-container" style="background: transparent; overflow: hidden;">
-                <img src="/images/blue_tile.png" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+                <img src="/images/blue_tile.png"
+                    style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
                 <span class="blue-count status-icon"
                     style="color: white; text-shadow: 0 4px 8px rgba(0, 0, 0, 0.6); transform: translate(-50%, -50%) scale(1.4); opacity: 1;">
                     {{tile.scoredItems.blue}}
@@ -272,15 +279,14 @@
         </div>
 
         <div class="victim-section">
-            <div ng-repeat="(direction, type) in cell.tile.victims track by $index" 
-                 ng-show="type != 'None' && (!hasRealVictims() || !isModalDummy(cell, direction))"
-                 class="victim-row"
-                 ng-class="{
+            <div ng-repeat="(direction, type) in cell.tile.victims track by $index"
+                ng-show="type != 'None' && (!hasRealVictims() || !isModalDummy(cell, direction))" class="victim-row"
+                ng-class="{
                     'success': tile.scoredItems.victims[direction] && (isModalDummy(cell, direction) || kitStatus(tile.scoredItems.victims[direction], tile.scoredItems.rescueKits[direction], direction)),
                     'warning': tile.scoredItems.victims[direction] && !isModalDummy(cell, direction) && !kitStatus(tile.scoredItems.victims[direction], tile.scoredItems.rescueKits[direction], direction),
                     'fail': !tile.scoredItems.victims[direction]
                  }">
-                
+
                 <!-- Left: Info (Direction + Type) - VERTICAL -->
                 <div class="victim-info">
                     <span class="direction-badge">{{modalRotate(direction)}}</span>
@@ -288,14 +294,18 @@
                     <img src="/images/phi.png" height="35" ng-if="type=='PHI'">
                     <img src="/images/omega.png" height="35" ng-if="type=='OMEGA'">
                     <img src="/images/psi.png" height="35" ng-if="type=='PSI'">
-                    <img src="/images/Red.png" height="35" ng-if="type=='Red'">
-                    <img src="/images/Yellow.png" height="35" ng-if="type=='Yellow'">
-                    <img src="/images/Green.png" height="35" ng-if="type=='Green'">
                     <img ng-src="{{getModalCognitiveImage(cell, direction)}}" height="35"
                         ng-if="type=='Cognitive' && cell.tile.cognitiveTargets[direction]">
 
-                    <div style="font-size: 0.65rem; font-weight: 800; color: #1e293b; background: #e2e8f0; padding: 1px 6px; border-radius: 4px; margin-top: 4px; white-space: nowrap;">
-                        {{cell.isLinear ? victimConstantWL[type].linearPoint : victimConstantWL[type].floatingPoint}} pts
+                    <div
+                        style="font-size: 0.65rem; font-weight: 800; color: white; background: {{getModalVictimStatusColor(cell, direction)}}; padding: 2px 8px; border-radius: 4px; margin-top: 4px; white-space: nowrap; display: flex; align-items: center; gap: 4px;">
+                        <i class="fas" ng-class="{
+                            'fa-heartbeat': getModalVictimStatus(cell, direction) == 'Harmed',
+                            'fa-user-check': getModalVictimStatus(cell, direction) == 'Stable',
+                            'fa-smile': getModalVictimStatus(cell, direction) == 'Unharmed',
+                            'fa-robot': getModalVictimStatus(cell, direction) == 'Dummy'
+                        }"></i>
+                        {{getModalVictimStatus(cell, direction)}}
                     </div>
                 </div>
 
@@ -303,23 +313,29 @@
                 <div style="display: flex; align-items: center; flex-grow: 1; gap: 15px;">
                     <!-- Discovery Status -->
                     <div class="discovery-toggle">
-                        <div style="font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 2px;">{{"maze.judge.m_found" | translate}}</div>
-                        <i class="fas fa-2x" ng-class="tile.scoredItems.victims[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
+                        <div style="font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 2px;">
+                            {{"maze.judge.m_found" | translate}}</div>
+                        <i class="fas fa-2x"
+                            ng-class="tile.scoredItems.victims[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
                     </div>
 
                     <!-- Kits Status (Standard) -->
                     <div ng-if="leagueType=='standard'" style="flex: 2; padding: 0 10px; text-align: center;">
-                        <div style="font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 5px;">{{"maze.view.m_kit" | translate}}</div>
+                        <div style="font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 5px;">
+                            {{"maze.view.m_kit" | translate}}</div>
                         <div class="kit-pill" style="margin: 0 auto;">{{tile.scoredItems.rescueKits[direction]}}</div>
-                        <div style="font-size: 0.6rem; font-weight: 700; color: #94a3b8; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <div
+                            style="font-size: 0.6rem; font-weight: 700; color: #94a3b8; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
                             {{"maze.judge.m_required" | translate}}: {{getModalMaxKitNum(cell, direction)}}
                         </div>
                     </div>
 
                     <!-- Identification Status (Entry) -->
                     <div ng-if="leagueType=='entry'" style="flex: 2; padding: 0 10px; text-align: center;">
-                        <div style="font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 2px;">{{"maze.judge.m_identified" | translate}}</div>
-                        <i class="fas fa-2x" ng-class="tile.scoredItems.rescueKits[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
+                        <div style="font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 2px;">
+                            {{"maze.judge.m_identified" | translate}}</div>
+                        <i class="fas fa-2x"
+                            ng-class="tile.scoredItems.rescueKits[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
                     </div>
                 </div>
             </div>

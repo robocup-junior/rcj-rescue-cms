@@ -20,21 +20,6 @@ const victimConstantWL = {
         "linearPoint": 5,
         "floatingPoint": 15
     },
-    "Red": {
-        "maxKitNum": 2,
-        "linearPoint": 10,
-        "floatingPoint": 30
-    },
-    "Yellow": {
-        "maxKitNum": 1,
-        "linearPoint": 10,
-        "floatingPoint": 30
-    },
-    "Green": {
-        "maxKitNum": 0,
-        "linearPoint": 10,
-        "floatingPoint": 30
-    },
     "Cognitive": {
         "maxKitNum": 0,
         "linearPoint": 10,
@@ -961,6 +946,37 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'cell', 'til
         }
         return false;
     };
+
+    $scope.getModalVictimStatus = function (cell, direction) {
+        if (!cell || !cell.tile || !cell.tile.victims) return '';
+        let type = cell.tile.victims[direction];
+        if (type === 'None') return '';
+        if (type === 'PHI') return 'Harmed';
+        if (type === 'PSI') return 'Stable';
+        if (type === 'OMEGA') return 'Unharmed';
+        
+        if (type === 'Cognitive') {
+            if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return 'Dummy';
+            let rings = cell.tile.cognitiveTargets[direction].rings;
+            let total = 0;
+            for (let i = 1; i <= 5; i++) {
+                total += cognitiveColorValues[rings['ring' + i]] || 0;
+            }
+            if (total === 2) return 'Harmed';
+            if (total === 1) return 'Stable';
+            if (total === 0) return 'Unharmed';
+            return 'Dummy';
+        }
+        return '';
+    };
+
+    $scope.getModalVictimStatusColor = function(cell, direction) {
+        let status = $scope.getModalVictimStatus(cell, direction);
+        if (status === 'Harmed') return '#dc3545';
+        if (status === 'Stable') return '#ffc107';
+        if (status === 'Unharmed') return '#28a745';
+        return '#6c757d';
+    }
 
     $scope.modalRotateInv = function (dir) {
         var ro;

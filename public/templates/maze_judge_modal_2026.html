@@ -344,13 +344,16 @@
                     <img src="/images/phi.png" height="35" ng-if="type=='PHI'">
                     <img src="/images/omega.png" height="35" ng-if="type=='OMEGA'">
                     <img src="/images/psi.png" height="35" ng-if="type=='PSI'">
-                    <img src="/images/Red.png" height="35" ng-if="type=='Red'">
-                    <img src="/images/Yellow.png" height="35" ng-if="type=='Yellow'">
-                    <img src="/images/Green.png" height="35" ng-if="type=='Green'">
                     <img ng-src="{{getModalCognitiveImage(cell, direction)}}" height="35" ng-if="type=='Cognitive' && cell.tile.cognitiveTargets[direction]">
                     
-                    <div ng-if="victimConstantWL[type]" style="font-size: 0.65rem; font-weight: 800; color: #1e293b; background: #e2e8f0; padding: 1px 6px; border-radius: 4px; margin-top: 4px; white-space: nowrap;">
-                        {{cell.isLinear ? victimConstantWL[type].linearPoint : victimConstantWL[type].floatingPoint}} pts
+                    <div style="font-size: 0.65rem; font-weight: 800; color: white; background: {{getModalVictimStatusColor(cell, direction)}}; padding: 2px 8px; border-radius: 4px; margin-top: 4px; white-space: nowrap; display: flex; align-items: center; gap: 4px;">
+                        <i class="fas" ng-class="{
+                            'fa-heartbeat': getModalVictimStatus(cell, direction) == 'Harmed',
+                            'fa-user-check': getModalVictimStatus(cell, direction) == 'Stable',
+                            'fa-smile': getModalVictimStatus(cell, direction) == 'Unharmed',
+                            'fa-robot': getModalVictimStatus(cell, direction) == 'Dummy'
+                        }"></i>
+                        {{getModalVictimStatus(cell, direction)}}
                     </div>
                 </div>
 
