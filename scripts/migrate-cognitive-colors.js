@@ -30,6 +30,11 @@ if (!URI) {
 }
 
 // B (Black) -> K, C (Cyan rendered as Blue per rules figure) -> B (Blue).
+// The output alphabet overlaps with the input alphabet (`B` is in both), so
+// running translateRings twice on the same doc would corrupt rings that are
+// already migrated. Instead we stamp `cognitiveColorScheme` on each scanned
+// doc and skip already-stamped docs at the find layer — re-runs are O(0).
+const SCHEME_VERSION = '2026-k-r-y-g-b'
 const TRANSLATE = { B: 'K', C: 'B' }
 const RING_KEYS = ['ring1', 'ring2', 'ring3', 'ring4', 'ring5']
 const SIDES = ['top', 'right', 'bottom', 'left']
@@ -55,18 +60,28 @@ async function run() {
   const db = mongoose.connection
   const coll = db.collection('mazemaps')
 
-  const cursor = coll.find({}, { projection: { _id: 1, cells: 1 } })
+  const cursor = coll.find(
+    { cognitiveColorScheme: { $ne: SCHEME_VERSION } },
+    { projection: { _id: 1, cells: 1 } }
+  )
   let mapsScanned = 0
   let mapsChanged = 0
+  let mapsSkippedNoCells = 0
   let ringsChanged = 0
 
   while (await cursor.hasNext()) {
     const map = await cursor.next()
     mapsScanned++
+
+    if (!Array.isArray(map.cells)) {
+      mapsSkippedNoCells++
+      if (!DRY_RUN) {
+        await coll.updateOne({ _id: map._id }, { $set: { cognitiveColorScheme: SCHEME_VERSION } })
+      }
+      continue
+    }
+
     let mapChanged = false
-
-    if (!Array.isArray(map.cells)) continue
-
     for (const cell of map.cells) {
       const targets = cell && cell.tile && cell.tile.cognitiveTargets
       if (!targets) continue
@@ -83,15 +98,16 @@ async function run() {
       }
     }
 
-    if (mapChanged) {
-      mapsChanged++
-      if (!DRY_RUN) {
-        await coll.updateOne({ _id: map._id }, { $set: { cells: map.cells } })
-      }
+    if (mapChanged) mapsChanged++
+    if (!DRY_RUN) {
+      const update = mapChanged
+        ? { $set: { cells: map.cells, cognitiveColorScheme: SCHEME_VERSION } }
+        : { $set: { cognitiveColorScheme: SCHEME_VERSION } }
+      await coll.updateOne({ _id: map._id }, update)
     }
   }
 
-  console.log(`scanned=${mapsScanned} updated=${mapsChanged} ringsTranslated=${ringsChanged}${DRY_RUN ? ' (dry-run)' : ''}`)
+  console.log(`scanned=${mapsScanned} updated=${mapsChanged} ringsTranslated=${ringsChanged} skippedNoCells=${mapsSkippedNoCells}${DRY_RUN ? ' (dry-run)' : ''}`)
   await mongoose.disconnect()
 }
 
