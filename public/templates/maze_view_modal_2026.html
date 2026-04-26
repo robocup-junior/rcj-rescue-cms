@@ -109,8 +109,8 @@
 
     .victim-row {
         display: flex;
-        align-items: center;
-        padding: 12px 15px;
+        align-items: stretch;
+        padding: 0;
         border-radius: 12px;
         margin-bottom: 10px;
         background: white;
@@ -121,43 +121,63 @@
         transition: background-color 0.2s, border-color 0.2s;
     }
 
-    .victim-row.success {
-        background: #f0fdf4;
-        border-color: #bbf7d0;
-    }
+    .victim-row.success { background: #f0fdf4; border-color: #bbf7d0; }
+    .victim-row.warning { background: #fffbeb; border-color: #fef08a; }
+    .victim-row.fail { background: #fef2f2; border-color: #fecaca; }
 
-    .victim-row.warning {
-        background: #fffbeb;
-        border-color: #fef08a;
-    }
-
-    .victim-row.fail {
-        background: #fef2f2;
-        border-color: #fecaca;
+    .direction-accent {
+        width: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f1f5f9;
+        border-right: 1px solid #e2e8f0;
+        color: #64748b;
+        font-size: 0.85rem;
     }
 
     .victim-info {
         display: flex;
         align-items: center;
+        padding: 10px 15px;
         gap: 15px;
-        min-width: 80px;
     }
 
     .victim-image-wrapper {
         position: relative;
-        padding: 10px 0; /* Space for top and bottom tabs */
+        padding-top: 10px;
     }
 
     .victim-image-container {
-        width: 60px;
-        height: 60px;
-        background: #f1f5f9;
-        border-radius: 12px;
+        width: 54px;
+        height: 54px;
+        background: white;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
         border: 2px solid white;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .status-tab {
+        position: absolute;
+        top: -2px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        padding: 3px 10px;
+        border-radius: 100px;
+        z-index: 10;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        border: 1.5px solid white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .status-tab i {
+        font-size: 0.8rem;
     }
 
     .direction-tab, .status-tab {
@@ -188,6 +208,27 @@
         align-items: center;
         justify-content: center;
         padding: 5px;
+    }
+
+    .icon-label {
+        font-size: 1rem;
+        margin-bottom: 4px;
+        color: #94a3b8;
+        transition: color 0.3s;
+    }
+
+    .icon-label.active-bulb {
+        color: #facc15;
+        animation: icon-blink 1.5s infinite ease-in-out;
+    }
+
+    .icon-label.active-kit {
+        color: #ef4444;
+    }
+
+    @keyframes icon-blink {
+        0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 0px #facc15); }
+        50% { opacity: 0.8; transform: scale(1.1); filter: drop-shadow(0 0 5px #facc15); }
     }
 
     .discovery-toggle {
@@ -328,34 +369,43 @@
         </div>
 
         <div class="victim-section">
-            <div ng-repeat="(direction, type) in cell.tile.victims track by $index"
-                ng-show="type != 'None' && (!hasRealVictims() || !isModalDummy(cell, direction))" class="victim-row"
+            <div ng-repeat="direction in ['top', 'right', 'bottom', 'left']"
+                ng-init="type = cell.tile.victims[direction]"
+                ng-show="type != 'None' && type != undefined && (!hasRealVictims() || !isModalDummy(cell, direction))" class="victim-row"
                 ng-class="{
                     'success': tile.scoredItems.victims[direction] && (isModalDummy(cell, direction) || kitStatus(tile.scoredItems.victims[direction], tile.scoredItems.rescueKits[direction], direction)),
                     'warning': tile.scoredItems.victims[direction] && !isModalDummy(cell, direction) && !kitStatus(tile.scoredItems.victims[direction], tile.scoredItems.rescueKits[direction], direction),
                     'fail': !tile.scoredItems.victims[direction]
                  }">
 
-                <!-- Left: Victim Info (Direction + Image + Status Stack) -->
+                <!-- Left: Direction Accent -->
+                <div class="direction-accent">
+                    <i class="fas" ng-class="{
+                        'fa-chevron-up': modalRotate(direction).toLowerCase() == 'top',
+                        'fa-chevron-down': modalRotate(direction).toLowerCase() == 'bottom',
+                        'fa-chevron-left': modalRotate(direction).toLowerCase() == 'left',
+                        'fa-chevron-right': modalRotate(direction).toLowerCase() == 'right'
+                    }"></i>
+                </div>
+
+                <!-- Middle: Victim Info -->
                 <div class="victim-info">
                     <div class="victim-image-wrapper">
-                        <div class="status-tab" style="top: -2px; background: {{getModalVictimStatusColor(cell, direction)}};">
+                        <div class="status-tab" style="background: {{getModalVictimStatusColor(cell, direction)}};">
                             <i class="fas" ng-class="{
                                 'fa-heartbeat': getModalVictimStatus(cell, direction) == 'Harmed',
                                 'fa-user-check': getModalVictimStatus(cell, direction) == 'Stable',
                                 'fa-smile': getModalVictimStatus(cell, direction) == 'Unharmed',
                                 'fa-robot': getModalVictimStatus(cell, direction) == 'Dummy'
                             }"></i>
-                            {{getModalVictimStatus(cell, direction).charAt(0)}}
                         </div>
                         <div class="victim-image-container">
-                            <img src="/images/phi.png" height="40" ng-if="type=='PHI'">
-                            <img src="/images/omega.png" height="40" ng-if="type=='OMEGA'">
-                            <img src="/images/psi.png" height="40" ng-if="type=='PSI'">
-                            <img ng-src="{{getModalCognitiveImage(cell, direction)}}" height="40"
+                            <img src="/images/phi.png" height="38" ng-if="type=='PHI'">
+                            <img src="/images/omega.png" height="38" ng-if="type=='OMEGA'">
+                            <img src="/images/psi.png" height="38" ng-if="type=='PSI'">
+                            <img ng-src="{{getModalCognitiveImage(cell, direction)}}" height="38"
                                 ng-if="type=='Cognitive' && cell.tile.cognitiveTargets[direction]">
                         </div>
-                        <div class="direction-tab" style="bottom: -2px;">{{modalRotate(direction)}}</div>
                     </div>
                 </div>
 
@@ -363,17 +413,15 @@
                 <div style="display: flex; align-items: center; flex-grow: 1; gap: 15px;">
                     <!-- Discovery Status -->
                     <div class="discovery-toggle">
-                        <div style="font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 2px;">
-                            {{"maze.judge.m_found" | translate}}</div>
+                        <i class="fas fa-lightbulb icon-label" ng-class="{'active-bulb': tile.scoredItems.victims[direction]}"></i>
                         <i class="fas fa-2x"
                             ng-class="tile.scoredItems.victims[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
                     </div>
 
                     <!-- Kits Status (Standard) -->
                     <div ng-if="leagueType=='standard'" style="flex: 2; padding: 0 10px; text-align: center;">
-                        <div style="font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 5px;">
-                            {{"maze.view.m_kit" | translate}}</div>
-                        <div class="kit-pill" style="margin: 0 auto;">{{tile.scoredItems.rescueKits[direction]}}</div>
+                        <i class="fas fa-first-aid icon-label" ng-class="{'active-kit': tile.scoredItems.rescueKits[direction] > 0}"></i>
+                        <div class="kit-pill" style="margin: 0 auto; background: {{getModalKitColor(cell, direction)}};">{{tile.scoredItems.rescueKits[direction]}}</div>
                         <div
                             style="font-size: 0.6rem; font-weight: 700; color: #94a3b8; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
                             {{"maze.judge.m_required" | translate}}: {{getModalMaxKitNum(cell, direction)}}
@@ -382,8 +430,7 @@
 
                     <!-- Identification Status (Entry) -->
                     <div ng-if="leagueType=='entry'" style="flex: 2; padding: 0 10px; text-align: center;">
-                        <div style="font-size: 0.65rem; font-weight: 700; color: #64748b; margin-bottom: 2px;">
-                            {{"maze.judge.m_identified" | translate}}</div>
+                        <i class="fas fa-search icon-label" ng-class="{'active-bulb': tile.scoredItems.rescueKits[direction]}"></i>
                         <i class="fas fa-2x"
                             ng-class="tile.scoredItems.rescueKits[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
                     </div>

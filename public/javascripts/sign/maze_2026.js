@@ -978,6 +978,14 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'cell', 'til
         return '#6c757d';
     }
 
+    $scope.getModalKitColor = function(cell, direction) {
+        if (!cell || !cell.tile) return '#1e293b';
+        let required = $scope.getModalMaxKitNum(cell, direction);
+        let placed = $scope.tile.scoredItems.rescueKits[direction];
+        if (placed >= required) return '#10b981'; // Green
+        return '#ef4444'; // Red
+    };
+
     $scope.modalRotateInv = function (dir) {
         var ro;
         switch (dir) {
