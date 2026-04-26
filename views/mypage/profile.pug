@@ -6,23 +6,17 @@ block vars
 
 append css
   link(rel='stylesheet', href='/stylesheets/mypage_premium.css')
+  link(href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet")
 
 append scripts
   script(src='/javascripts/mypage.js')
 
 block bread
-    .row
-        .col-md-1
-        .col-md-10
-            nav.breadcrumb.premium-breadcrumb
-                a.breadcrumb-item(href='/home') Home
-                span.breadcrumb-item.active {{"common.mypage" | translate}}
+  // Breadcrumbs removed as requested
 
 block content
-  .row
-    .col-md-1
-    .col-md-10
-      .premium-card
+  .premium-container
+    .premium-card
         .profile-header-banner
         .profile-avatar-container
           .profile-avatar-inner

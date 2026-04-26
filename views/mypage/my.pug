@@ -17,206 +17,13 @@ append scripts
 append css
   link(rel='stylesheet', href='/components/angular-toastr/dist/angular-toastr.css')
   link(href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet")
+  link(rel='stylesheet', href='/stylesheets/my_premium.css')
   style.
-    :root {
-      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --glass-bg: rgba(255, 255, 255, 0.9);
-      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-      --card-hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
-      --accent-color: #764ba2;
-    }
-
-    body {
-      font-family: 'Outfit', sans-serif;
-      background-color: #f8fafc;
-    }
-
-    .premium-header {
-      background: var(--primary-gradient);
-      padding: 1.5rem 1rem;
-      border-radius: 0 0 2rem 2rem;
-      color: white;
-      text-align: center;
-      margin-bottom: 2rem;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-    }
-
-    .competition-logo {
-      max-height: 80px;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
-      margin-bottom: 0.5rem;
-      transition: transform 0.3s ease;
-    }
-
-    .competition-logo:hover {
-      transform: scale(1.05);
-    }
-
-    .premium-header h1 {
-      font-size: 1.75rem;
-      margin-bottom: 0.25rem;
-    }
-
-    .premium-header h4 {
-      font-size: 1rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .team-info {
-      background: rgba(255, 255, 255, 0.15);
-      backdrop-filter: blur(10px);
-      padding: 0.5rem 1.5rem;
-      border-radius: 1.5rem;
-      display: inline-block;
-      margin-top: 0.25rem;
-      border: 1px solid rgba(255,255,255,0.2);
-      font-size: 0.9rem;
-    }
-
-    .modern-card {
-      background: var(--glass-bg);
-      border-radius: 1.25rem;
-      padding: 1.5rem;
-      text-align: center;
-      transition: all 0.3s ease;
-      border: 1px solid rgba(0, 0, 0, 0.05);
-      box-shadow: var(--card-shadow);
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      position: relative;
-      overflow: hidden;
-      cursor: pointer;
-      text-decoration: none !important;
-    }
-
-    .modern-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--card-hover-shadow);
-    }
-
-    .modern-card i {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      transition: transform 0.3s ease;
-    }
-
-    /* Theme Colors */
-    .card-survey i { color: #05c46b; }
-    .card-document i { color: #0abde3; }
-    .card-reservation i { color: #ff6b6b; }
-    .card-cabinet i { color: #feca57; }
-
-    .modern-card.survey-theme { border-top: 5px solid #05c46b; }
-    .modern-card.document-theme { border-top: 5px solid #0abde3; }
-    .modern-card.reservation-theme { border-top: 5px solid #ff6b6b; }
-    .modern-card.cabinet-theme { border-top: 5px solid #feca57; }
-
-    .modern-card:hover i {
-      transform: scale(1.1);
-    }
-
-    .modern-card h3 {
-      font-weight: 700;
-      color: #1a202c;
-      margin-bottom: 0.5rem;
-      font-size: 1.1rem;
-    }
-
-    .modern-card p {
-      color: #718096;
-      font-size: 0.9rem;
-      margin-bottom: 0;
-    }
-
-    .badge-notify {
-      background: #ff4757;
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      color: white;
-      box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3);
-      z-index: 2;
-    }
-
-    .section-title {
-      font-weight: 700;
-      color: #2d3748;
-      margin-bottom: 2rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .section-title i {
-      color: var(--accent-color);
-    }
-
-    .message-table-container {
-      background: white;
-      border-radius: 1.5rem;
-      overflow: hidden;
-      box-shadow: var(--card-shadow);
-      margin-bottom: 3rem;
-    }
-
-    .message-table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-    }
-
-    .message-table th {
-      background: #f7fafc;
-      padding: 1rem 1.5rem;
-      text-align: left;
-      font-weight: 600;
-      color: #4a5568;
-      border-bottom: 1px solid #edf2f7;
-    }
-
-    .message-table td {
-      padding: 1.25rem 1.5rem;
-      border-bottom: 1px solid #edf2f7;
-      color: #2d3748;
-    }
-
-    .message-table tr:last-child td {
-      border-bottom: none;
-    }
-
-    .message-table tr {
-      transition: background 0.2s ease;
-    }
-
-    .message-table tr:hover {
-      background: #fcfdfe;
-    }
-
-    .mail-link {
-      color: var(--accent-color);
-      font-weight: 600;
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    .mail-link:hover {
-      color: #5a3a8a;
-      text-decoration: underline;
-    }
-
-    .time-stamp {
-      font-size: 0.85rem;
-      color: #a0aec0;
-    }
+    /* Custom icon backgrounds to restore theme colors while staying premium */
+    .bg-survey { background: rgba(5, 196, 107, 0.1); color: #05c46b; }
+    .bg-document { background: rgba(10, 189, 227, 0.1); color: #0abde3; }
+    .bg-reservation { background: rgba(255, 107, 107, 0.1); color: #ff6b6b; }
+    .bg-cabinet { background: rgba(254, 202, 87, 0.1); color: #feca57; }
 
     /* Hide Login/User menu */
     .login-btn, .nav-user-link.dropdown-toggle {
@@ -227,74 +34,70 @@ block bread
   // Breadcrumbs removed as requested
 
 block content
-  .premium-header
-    .container
-      img.competition-logo(ng-src="{{competition.logo}}", alt='')
-      h1.font-weight-bold {{competition.name}}
-      h4.opacity-75 {{leagueName}}
-      .team-info
-        span.font-weight-bold #{teamCode} #{teamName}
+  .mesh-header
+    .premium-container
+      .header-content
+        .comp-logo-wrapper
+          img.comp-logo(ng-src="{{competition.logo}}", alt='')
+        h1.header-title {{competition.name}}
+        p.header-subtitle {{leagueName}}
+        .team-badge
+          i.fas.fa-users
+          span #{teamCode} #{teamName}
 
-  .container
-    .row
+  .premium-container
+    .dashboard-grid
       // Surveys
-      .col-lg-4.col-md-6.mb-4(ng-repeat="surv in survey")
-        a.modern-card.survey-theme.card-survey(ng-click="goSurv(surv._id)", target="_blank")
-          span.badge-notify(ng-if="surv.editable")
-            i.fas.fa-edit(style="color: white; font-size: 1rem; margin-bottom: 0;")
+      a.glass-card(ng-repeat="surv in survey", ng-click="goSurv(surv._id)", target="_blank")
+        span.card-status.status-editable(ng-if="surv.editable", title="{{'common.enable' | translate}}")
+          i.fas.fa-pen
+        span.card-status.status-locked(ng-if="!surv.editable", title="{{'mypage.locked' | translate}}")
+          i.fas.fa-lock
+        .card-icon-bg.bg-survey
           i.fas.fa-question-circle
-          h3(ng-bind="surv.name")
-          p(ng-bind="surv.myDescription")
-          div.mt-2(ng-if="!surv.editable", style="font-size: 0.8rem; color: #a0aec0;")
-            i.fas.fa-lock.mr-1(style="font-size: 0.8rem; margin-bottom: 0;")
-            | {{"mypage.locked" | translate}}
+        h3.card-title(ng-bind="surv.name")
+        p.card-desc(ng-bind="surv.myDescription")
 
       // Documents
       if documentEnable
-        .col-lg-4.col-md-6.mb-4(ng-if="competition.documents.enable")
-          a.modern-card.document-theme.card-document(href=`/document/${team}/${token}`, target="_blank")
-            span.badge-notify(ng-if="docEditable")
-              i.fas.fa-edit(style="color: white; font-size: 1rem; margin-bottom: 0;")
+        a.glass-card(ng-if="competition.documents.enable", href=`/document/${team}/${token}`, target="_blank")
+          span.card-status.status-editable(ng-if="docEditable", title="{{'common.enable' | translate}}")
+            i.fas.fa-pen
+          span.card-status.status-locked(ng-if="!docEditable", title="{{'mypage.locked' | translate}}")
+            i.fas.fa-lock
+          .card-icon-bg.bg-document
             i.fas.fa-book
-            h3 {{"document.admin.title" | translate}}
-            p {{"mypage.document" | translate}}
-            div.mt-2(ng-if="!docEditable", style="font-size: 0.8rem; color: #a0aec0;")
-              i.fas.fa-lock.mr-1(style="font-size: 0.8rem; margin-bottom: 0;")
-              | {{"mypage.locked" | translate}}
+          h3.card-title {{"document.admin.title" | translate}}
+          p.card-desc {{"mypage.document" | translate}}
 
       // Reservations
-      .col-lg-4.col-md-6.mb-4(ng-repeat="resv in reservations")
-        a.modern-card.reservation-theme.card-reservation(ng-click="goResv(resv._id)", target="_blank")
-          span.badge-notify(ng-if="resv.editable")
-            i.fas.fa-edit(style="color: white; font-size: 1rem; margin-bottom: 0;")
+      a.glass-card(ng-repeat="resv in reservations", ng-click="goResv(resv._id)", target="_blank")
+        span.card-status.status-editable(ng-if="resv.editable", title="{{'common.enable' | translate}}")
+          i.fas.fa-pen
+        span.card-status.status-locked(ng-if="!resv.editable", title="{{'mypage.locked' | translate}}")
+          i.fas.fa-lock
+        .card-icon-bg.bg-reservation
           i.fas.fa-calendar-day
-          h3(ng-bind="resv.name")
-          p(ng-bind="resv.myDescription")
-          div.mt-2(ng-if="!resv.editable", style="font-size: 0.8rem; color: #a0aec0;")
-            i.fas.fa-lock.mr-1(style="font-size: 0.8rem; margin-bottom: 0;")
-            | {{"mypage.locked" | translate}}
+        h3.card-title(ng-bind="resv.name")
+        p.card-desc(ng-bind="resv.myDescription")
 
       // Cabinet
-      .col-lg-4.col-md-6.mb-4
-        a.modern-card.cabinet-theme.card-cabinet(href=`/mypage/${team}/${token}/cabinet`, target="_blank")
+      a.glass-card(href=`/mypage/${team}/${token}/cabinet`, target="_blank")
+        .card-icon-bg.bg-cabinet
           i.fas.fa-archive
-          h3 {{"cabinet.title" | translate}}
-          p {{"mypage.cabinet" | translate}}
+        h3.card-title {{"cabinet.title" | translate}}
+        p.card-desc {{"mypage.cabinet" | translate}}
 
     // Messages Section
-    div(ng-show="mails.length>0", style="margin-top: 2rem;")
-      h2.section-title
-        i.fas.fa-envelope
-        | {{"mypage.message" | translate}}
+    .message-section(ng-show="mails.length>0")
+      .message-header
+        i.fas.fa-envelope-open-text
+        h2 {{"mypage.message" | translate}}
       
-      .message-table-container
-        table.message-table
-          thead
-            tr
-              th {{"mail.sent.time" | translate}}
-              th {{"mail.sent.subject" | translate}}
-          tbody
-            tr(ng-repeat='mail in mails')
-              td.time-stamp(ng-bind="time(mail.time)")
-              td
-                a.mail-link(ng-click="mailView(mail)", ng-bind="mail.subject")
+      .message-list
+        .message-item(ng-repeat='mail in mails', ng-click="mailView(mail)")
+          .message-info
+            .message-subject(ng-bind="mail.subject")
+            .message-date(ng-bind="time(mail.time)")
+          .message-arrow
+            i.fas.fa-chevron-right
