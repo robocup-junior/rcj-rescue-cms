@@ -117,13 +117,24 @@
         border: 1px solid #e2e8f0;
         position: relative;
         overflow: hidden;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         transition: background-color 0.2s, border-color 0.2s;
     }
 
-    .victim-row.success { background: #f0fdf4; border-color: #bbf7d0; }
-    .victim-row.warning { background: #fffbeb; border-color: #fef08a; }
-    .victim-row.fail { background: #fef2f2; border-color: #fecaca; }
+    .victim-row.success {
+        background: #f0fdf4;
+        border-color: #bbf7d0;
+    }
+
+    .victim-row.warning {
+        background: #fffbeb;
+        border-color: #fef08a;
+    }
+
+    .victim-row.fail {
+        background: #fef2f2;
+        border-color: #fecaca;
+    }
 
     .direction-accent {
         width: 30px;
@@ -157,7 +168,7 @@
         align-items: center;
         justify-content: center;
         border: 2px solid white;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     .status-tab {
@@ -169,7 +180,7 @@
         padding: 3px 10px;
         border-radius: 100px;
         z-index: 10;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         border: 1.5px solid white;
         display: flex;
         align-items: center;
@@ -180,7 +191,8 @@
         font-size: 0.8rem;
     }
 
-    .direction-tab, .status-tab {
+    .direction-tab,
+    .status-tab {
         position: absolute;
         left: 50%;
         transform: translateX(-50%);
@@ -191,7 +203,7 @@
         border-radius: 100px;
         letter-spacing: 0.05em;
         z-index: 10;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         text-transform: uppercase;
         border: 1.5px solid white;
         white-space: nowrap;
@@ -227,8 +239,19 @@
     }
 
     @keyframes icon-blink {
-        0%, 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 0px #facc15); }
-        50% { opacity: 0.8; transform: scale(1.1); filter: drop-shadow(0 0 5px #facc15); }
+
+        0%,
+        100% {
+            opacity: 1;
+            transform: scale(1);
+            filter: drop-shadow(0 0 0px #facc15);
+        }
+
+        50% {
+            opacity: 0.8;
+            transform: scale(1.1);
+            filter: drop-shadow(0 0 5px #facc15);
+        }
     }
 
     .discovery-toggle {
@@ -319,7 +342,7 @@
             ng-class="tile.scoredItems.speedbump ? 'success' : 'fail'">
             <span class="feature-label">{{"maze.judge.m_bump" | translate}}</span>
             <div class="feature-img-container">
-                <img src="/images/log.png" style="height: 60px;">
+                <img src="/images/speedbump.png" style="height: 60px;">
                 <i class="fas status-icon"
                     ng-class="tile.scoredItems.speedbump ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"
                     style="font-size: 1.8rem; position: absolute; bottom: 5px; right: 5px; transform: none; top: auto; left: auto;"></i>
@@ -371,8 +394,8 @@
         <div class="victim-section">
             <div ng-repeat="direction in ['top', 'right', 'bottom', 'left']"
                 ng-init="type = cell.tile.victims[direction]"
-                ng-show="type != 'None' && type != undefined && (!hasRealVictims() || !isModalDummy(cell, direction))" class="victim-row"
-                ng-class="{
+                ng-show="type != 'None' && type != undefined && (!hasRealVictims() || !isModalDummy(cell, direction))"
+                class="victim-row" ng-class="{
                     'success': tile.scoredItems.victims[direction] && (isModalDummy(cell, direction) || kitStatus(tile.scoredItems.victims[direction], tile.scoredItems.rescueKits[direction], direction)),
                     'warning': tile.scoredItems.victims[direction] && !isModalDummy(cell, direction) && !kitStatus(tile.scoredItems.victims[direction], tile.scoredItems.rescueKits[direction], direction),
                     'fail': !tile.scoredItems.victims[direction]
@@ -413,15 +436,19 @@
                 <div style="display: flex; align-items: center; flex-grow: 1; gap: 15px;">
                     <!-- Discovery Status -->
                     <div class="discovery-toggle">
-                        <i class="fas fa-lightbulb icon-label" ng-class="{'active-bulb': tile.scoredItems.victims[direction]}"></i>
+                        <i class="fas fa-lightbulb icon-label"
+                            ng-class="{'active-bulb': tile.scoredItems.victims[direction]}"></i>
                         <i class="fas fa-2x"
                             ng-class="tile.scoredItems.victims[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
                     </div>
 
                     <!-- Kits Status (Standard) -->
                     <div ng-if="leagueType=='standard'" style="flex: 2; padding: 0 10px; text-align: center;">
-                        <i class="fas fa-first-aid icon-label" ng-class="{'active-kit': tile.scoredItems.rescueKits[direction] > 0}"></i>
-                        <div class="kit-pill" style="margin: 0 auto; background: {{getModalKitColor(cell, direction)}};">{{tile.scoredItems.rescueKits[direction]}}</div>
+                        <i class="fas fa-first-aid icon-label"
+                            ng-class="{'active-kit': tile.scoredItems.rescueKits[direction] > 0}"></i>
+                        <div class="kit-pill"
+                            style="margin: 0 auto; background: {{getModalKitColor(cell, direction)}};">
+                            {{tile.scoredItems.rescueKits[direction]}}</div>
                         <div
                             style="font-size: 0.6rem; font-weight: 700; color: #94a3b8; margin-top: 5px; text-transform: uppercase; letter-spacing: 0.5px;">
                             {{"maze.judge.m_required" | translate}}: {{getModalMaxKitNum(cell, direction)}}
@@ -430,7 +457,8 @@
 
                     <!-- Identification Status (Entry) -->
                     <div ng-if="leagueType=='entry'" style="flex: 2; padding: 0 10px; text-align: center;">
-                        <i class="fas fa-search icon-label" ng-class="{'active-bulb': tile.scoredItems.rescueKits[direction]}"></i>
+                        <i class="fas fa-search icon-label"
+                            ng-class="{'active-bulb': tile.scoredItems.rescueKits[direction]}"></i>
                         <i class="fas fa-2x"
                             ng-class="tile.scoredItems.rescueKits[direction] ? 'fa-check-circle text-success' : 'fa-times-circle text-danger'"></i>
                     </div>

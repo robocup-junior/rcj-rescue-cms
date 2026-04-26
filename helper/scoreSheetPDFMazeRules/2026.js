@@ -190,9 +190,9 @@ function drawRun(doc, config, scoringRun) {
   };
 
   const maxKits = {
-    PHI: 3,
-    PSI: 2,
-    OMEGA: 1,
+    PHI: 2,
+    PSI: 1,
+    OMEGA: 0,
   };
   const cognitiveColorValues = { B: -2, R: -1, Y: 0, G: 1, C: 2 };
 
