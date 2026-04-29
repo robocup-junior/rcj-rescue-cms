@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'MapAdmin'
@@ -9,74 +9,69 @@ append scripts
     var competitionId = "#{id}"
     var leagueId = "#{leagueId}"
   script(src='/javascripts/admin/maps.js')
-append css
-  link(href='/stylesheets/maps_premium.css', rel='stylesheet')
 
-block bread
-  //- Empty - moved inside content hero
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+  span.breadcrumb-item.active #{leagueId} Maps
 
-block content
-  .maps-hero
-    .maps-container
-      nav.breadcrumb.premium-breadcrumb.hero-breadcrumb
-        a.breadcrumb-item(ng-click="go('/home')")
-          i.fas.fa-home.mr-1
-          | Home
-        a.breadcrumb-item(ng-click="go('/admin')") Admin
-        a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-        span.breadcrumb-item.active #{leagueId} Maps
-      .hero-content-wrapper
-        .hero-text
-          h1.hero-title {{competition.name}}
-          p.hero-subtitle {{league.name}} {{"admin.lineMapAdmin.title" | translate}}
-        .hero-actions
-          button.btn-select-all(ng-click="selectAll()" ng-if="league.type == 'maze'" title="{{allSelected ? ('admin.mazeMapAdmin.unselectAll' | translate) : ('admin.mazeMapAdmin.selectAll' | translate)}}")
-            i.fas.fa-check-double
-          button.btn-print-targets(ng-click="openPrintModal()" ng-if="league.type == 'maze'" ng-disabled="getSelectedCount() == 0" title="{{ 'admin.mazeMapAdmin.printSelected' | translate }}")
-            i.fas.fa-print
-            span.badge-count(ng-if="getSelectedCount() > 0") {{getSelectedCount()}}
-          a.btn-create-map(ng-href="/admin/{{competitionId}}/{{league.league}}/mapEditor")
-            i.fas.fa-plus-circle
-            span {{"admin.lineMapAdmin.create" | translate}}
-  
-  .maps-container
-    .maps-list(ng-if="groupedMaps.length > 0")
-      .maps-list-header.d-none.d-md-flex
-        .header-select
-          i.fas.fa-check-square
-        .header-name {{"admin.mazeMapEditor.mapName" | translate}}
-        .header-actions {{"common.delete" | translate}}
-      
-      .parent-group(ng-repeat='parentMap in groupedMaps')
-        .map-card(ng-click="go('/admin/'+competitionId+'/'+league.league+'/mapEditor/'+parentMap._id)" ng-class="{'selected': selectedMaps[parentMap._id]}")
-          .map-selection(ng-click="toggleSelect(parentMap, $event)" title="Select for bulk print")
-            .custom-checkbox(ng-class="{'checked': selectedMaps[parentMap._id]}")
-              i.fas.fa-check(ng-if="selectedMaps[parentMap._id]")
-          .map-info
-            .map-icon
-              i.fas.fa-map-marked-alt
-            .map-details
-              span.map-name(ng-bind='parentMap.name' title='{{parentMap.name}}')
-          .map-actions
-            .btn-delete-map(ng-click='removeMap(parentMap, $event)' title='{{"common.delete" | translate}}')
-              i.fas.fa-trash-alt
-        
-        .map-card.is-child(ng-repeat='childMap in parentMap.children' ng-click="go('/admin/'+competitionId+'/'+league.league+'/mapEditor/'+childMap._id)" ng-class="{'selected': selectedMaps[childMap._id]}")
-          .map-selection(ng-click="toggleSelect(childMap, $event)" title="Select for bulk print")
-            .custom-checkbox(ng-class="{'checked': selectedMaps[childMap._id]}")
-              i.fas.fa-check(ng-if="selectedMaps[childMap._id]")
-          .map-info
-            .map-icon
-              i.fas.fa-dice-d6
-            .map-details
-              span.map-name(ng-bind='childMap.name' title='{{childMap.name}}')
-          .map-actions
-            .btn-delete-map(ng-click='removeMap(childMap, $event)' title='{{"common.delete" | translate}}')
-              i.fas.fa-trash-alt
+block hero_title
+  | {{competition.name}}
+
+block hero_subtitle
+  | {{league.name}} {{"admin.lineMapAdmin.title" | translate}}
+
+block hero_actions
+  button.btn-select-all(ng-click="selectAll()" ng-if="league.type == 'maze'" title="{{allSelected ? ('admin.mazeMapAdmin.unselectAll' | translate) : ('admin.mazeMapAdmin.selectAll' | translate)}}")
+    i.fas.fa-check-double
+  button.btn-print-targets(ng-click="openPrintModal()" ng-if="league.type == 'maze'" ng-disabled="getSelectedCount() == 0" title="{{ 'admin.mazeMapAdmin.printSelected' | translate }}")
+    i.fas.fa-print
+    span.badge-count(ng-if="getSelectedCount() > 0") {{getSelectedCount()}}
+  a.btn-create-map(ng-href="/admin/{{competitionId}}/{{league.league}}/mapEditor")
+    i.fas.fa-plus-circle
+    span {{"admin.lineMapAdmin.create" | translate}}
+
+block main_content
+  .maps-list(ng-if="groupedMaps.length > 0")
+    .maps-list-header.d-none.d-md-flex
+      .header-select
+        i.fas.fa-check-square
+      .header-name {{"admin.mazeMapEditor.mapName" | translate}}
+      .header-actions {{"common.delete" | translate}}
     
-    .empty-state(ng-if="maps.length == 0")
-      i.fas.fa-folder-open
-      p No maps found for this league.
+    .parent-group(ng-repeat='parentMap in groupedMaps')
+      .map-card(ng-click="go('/admin/'+competitionId+'/'+league.league+'/mapEditor/'+parentMap._id)" ng-class="{'selected': selectedMaps[parentMap._id]}")
+        .map-selection(ng-click="toggleSelect(parentMap, $event)" title="Select for bulk print")
+          .custom-checkbox(ng-class="{'checked': selectedMaps[parentMap._id]}")
+            i.fas.fa-check(ng-if="selectedMaps[parentMap._id]")
+        .map-info
+          .map-icon
+            i.fas.fa-map-marked-alt
+          .map-details
+            span.map-name(ng-bind='parentMap.name' title='{{parentMap.name}}')
+        .map-actions
+          .btn-delete-map(ng-click='removeMap(parentMap, $event)' title='{{"common.delete" | translate}}')
+            i.fas.fa-trash-alt
+      
+      .map-card.is-child(ng-repeat='childMap in parentMap.children' ng-click="go('/admin/'+competitionId+'/'+league.league+'/mapEditor/'+childMap._id)" ng-class="{'selected': selectedMaps[childMap._id]}")
+        .map-selection(ng-click="toggleSelect(childMap, $event)" title="Select for bulk print")
+          .custom-checkbox(ng-class="{'checked': selectedMaps[childMap._id]}")
+            i.fas.fa-check(ng-if="selectedMaps[childMap._id]")
+        .map-info
+          .map-icon
+            i.fas.fa-dice-d6
+          .map-details
+            span.map-name(ng-bind='childMap.name' title='{{childMap.name}}')
+        .map-actions
+          .btn-delete-map(ng-click='removeMap(childMap, $event)' title='{{"common.delete" | translate}}')
+            i.fas.fa-trash-alt
+  
+  .empty-state(ng-if="maps.length == 0")
+    i.fas.fa-folder-open
+    p No maps found for this league.
 
   script(type="text/ng-template" id="printSettingsModal.html")
     .modal-header.premium-modal-header
