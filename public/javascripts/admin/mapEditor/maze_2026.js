@@ -675,7 +675,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
 
     $scope.printMapImage = function() {
         const paperSize = $scope.pdfSettings.paperSize || 'A4';
-        const url = `/api/maps/maze/bulk-maps-pdf?competition=${$scope.competitionId}&league=${leagueId}&ids=${mapId}&paperSize=${paperSize}`;
+        const url = `/api/maps/maze/export?ids=${mapId}&type=maps&format=pdf&paperSize=${paperSize}`;
         window.open(url, '_blank');
     };
 
@@ -733,9 +733,17 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
                 });
         } else {
             $scope.saveMap(null, function () {
-                console.log('Generating PDF with paper size:', paperSize, 'includeLetterVictims:', includeLetterVictims, 'includeCognitiveTargets:', includeCognitiveTargets);
-                const url = '/api/maps/maze/' + mapId + '/competition-targets-pdf?paperSize=' + encodeURIComponent(paperSize) + '&includeLetterVictims=' + includeLetterVictims + '&includeCognitiveTargets=' + includeCognitiveTargets;
-                console.log('Opening URL:', url);
+                let url = `/api/maps/maze/export?ids=${mapId}`;
+                
+                if ($scope.pdfSettings.exportType === 'Targets') {
+                    url += `&type=targets&paperSize=${$scope.pdfSettings.paperSize}&includeLetterVictims=${$scope.pdfSettings.includeLetterVictims}&includeCognitiveTargets=${$scope.pdfSettings.includeCognitiveTargets}`;
+                } else if ($scope.pdfSettings.exportType === 'Scoresheets') {
+                    url += `&type=scoresheets&rule=2026`;
+                } else if ($scope.pdfSettings.exportType === 'Maps') {
+                    url += `&type=maps&format=pdf&paperSize=${$scope.pdfSettings.paperSize}`;
+                }
+                
+                console.log('Opening unified export URL:', url);
                 window.open(url, '_blank');
             });
         }
@@ -1155,10 +1163,8 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             });
         } else {
             $scope.saveMap(null, function () {
-                $scope.makeImage(true).then(function() {
-                    const url = '/api/maps/maze/' + mapId + '/scoresheet?rule=2026&noQR=' + $scope.pdfSettings.noQR;
-                    window.open(url, '_blank');
-                });
+                const url = `/api/maps/maze/export?ids=${mapId}&type=scoresheets&rule=2026`;
+                window.open(url, '_blank');
             });
         }
     };

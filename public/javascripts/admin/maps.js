@@ -116,15 +116,16 @@ app.controller("MapAdminController", ['$scope', '$http', '$uibModal', function (
             }
             const ids = selectedIds.join(',');
             
-            let url = '';
+            let url = `/api/maps/maze/export?competition=${competitionId}&league=${leagueId}&ids=${ids}`;
+            
             if (settings.exportType === 'Targets') {
-                url = `/api/maps/maze/bulk-targets-pdf?competition=${competitionId}&league=${leagueId}&ids=${ids}&paperSize=${settings.paperSize}&includeLetterVictims=${settings.includeLetterVictims}&includeCognitiveTargets=${settings.includeCognitiveTargets}`;
+                url += `&type=targets&paperSize=${settings.paperSize}&includeLetterVictims=${settings.includeLetterVictims}&includeCognitiveTargets=${settings.includeCognitiveTargets}`;
             } else if (settings.exportType === 'Scoresheets') {
-                url = `/api/maps/maze/bulk-scoresheets-pdf?competition=${competitionId}&ids=${ids}&rule=2026`;
+                url += `&type=scoresheets&rule=2026`;
             } else if (settings.exportType === 'Maps') {
-                if (settings.exportFormat === 'PDF') {
-                    url = `/api/maps/maze/bulk-maps-pdf?competition=${competitionId}&league=${leagueId}&ids=${ids}&paperSize=${settings.paperSize}`;
-                } else {
+                url += `&type=maps&format=${settings.exportFormat.toLowerCase()}&paperSize=${settings.paperSize}`;
+                
+                if (settings.exportFormat === 'PNG') {
                     // Trigger individual downloads for PNG
                     selectedIds.forEach(id => {
                         const link = document.createElement('a');
