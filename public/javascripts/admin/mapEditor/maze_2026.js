@@ -1096,6 +1096,102 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
                 alert("Error generating PDF");
             });
     };
+
+    function shiftCells(axis, startGridIndex, amount) {
+        let newCells = {};
+        for (let key in $scope.cells) {
+            let parts = key.split(',');
+            let x = parseInt(parts[0]);
+            let y = parseInt(parts[1]);
+            let z = parseInt(parts[2]);
+            
+            if (axis === 'y' && y >= startGridIndex) {
+                newCells[x + ',' + (y + amount) + ',' + z] = $scope.cells[key];
+                newCells[x + ',' + (y + amount) + ',' + z].y += amount;
+            } else if (axis === 'x' && x >= startGridIndex) {
+                newCells[(x + amount) + ',' + y + ',' + z] = $scope.cells[key];
+                newCells[(x + amount) + ',' + y + ',' + z].x += amount;
+            } else {
+                newCells[key] = $scope.cells[key];
+            }
+        }
+        $scope.cells = newCells;
+
+        // Update startTile
+        if (axis === 'y' && $scope.startTile.y >= startGridIndex) {
+            $scope.startTile.y += amount;
+        } else if (axis === 'x' && $scope.startTile.x >= startGridIndex) {
+            $scope.startTile.x += amount;
+        }
+    }
+
+    $scope.addColumn = function (gridX) {
+        shiftCells('x', gridX + 1, 2);
+        $scope.width++;
+        $scope.recalculateLinear();
+    };
+
+    $scope.removeColumn = function (gridX) {
+        if ($scope.width <= 1) return;
+        
+        let newCells = {};
+        for (let key in $scope.cells) {
+            let parts = key.split(',');
+            let x = parseInt(parts[0]);
+            let y = parseInt(parts[1]);
+            let z = parseInt(parts[2]);
+            
+            if (x < gridX) {
+                newCells[key] = $scope.cells[key];
+            } else if (x > gridX + 1) {
+                newCells[(x - 2) + ',' + y + ',' + z] = $scope.cells[key];
+                if (newCells[(x - 2) + ',' + y + ',' + z].x !== undefined)
+                    newCells[(x - 2) + ',' + y + ',' + z].x -= 2;
+            }
+        }
+        $scope.cells = newCells;
+        
+        if ($scope.startTile.x >= gridX) {
+            $scope.startTile.x = Math.max(1, $scope.startTile.x - 2);
+        }
+        
+        $scope.width--;
+        $scope.recalculateLinear();
+    };
+
+    $scope.addRow = function (gridY) {
+        shiftCells('y', gridY + 1, 2);
+        $scope.length++;
+        $scope.recalculateLinear();
+    };
+
+    $scope.removeRow = function (gridY) {
+        if ($scope.length <= 1) return;
+        
+        let newCells = {};
+        for (let key in $scope.cells) {
+            let parts = key.split(',');
+            let x = parseInt(parts[0]);
+            let y = parseInt(parts[1]);
+            let z = parseInt(parts[2]);
+            
+            if (y < gridY) {
+                newCells[key] = $scope.cells[key];
+            } else if (y > gridY + 1) {
+                newCells[x + ',' + (y - 2) + ',' + z] = $scope.cells[key];
+                if (newCells[x + ',' + (y - 2) + ',' + z].y !== undefined)
+                    newCells[x + ',' + (y - 2) + ',' + z].y -= 2;
+            }
+        }
+        $scope.cells = newCells;
+
+        if ($scope.startTile.y >= gridY) {
+            $scope.startTile.y = Math.max(1, $scope.startTile.y - 2);
+        }
+
+        $scope.length--;
+        $scope.recalculateLinear();
+    };
 }]);
 
 

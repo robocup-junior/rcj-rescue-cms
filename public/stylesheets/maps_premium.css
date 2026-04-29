@@ -956,3 +956,115 @@ hr {
   -webkit-appearance: none;
   margin: 0;
 }
+
+.grid-manage-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.grid-manage-col {
+  padding-bottom: 4px !important;
+  text-align: center;
+  vertical-align: bottom;
+}
+
+.grid-manage-row {
+  padding-right: 4px !important;
+  text-align: right;
+  vertical-align: middle;
+}
+
+.btn-grid-manage-group {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 0;
+}
+
+.grid-manage-col .btn-grid-manage-group {
+  flex-direction: row;
+  justify-content: center;
+}
+
+.btn-grid-manage {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: transform 0.2s, color 0.2s, opacity 0.2s;
+  line-height: 1;
+  opacity: 0;
+}
+
+.grid-manage-col:hover .btn-grid-manage,
+.grid-manage-row:hover .btn-grid-manage,
+tr:hover .grid-manage-row .btn-grid-manage {
+  opacity: 0.6;
+}
+
+.btn-grid-manage:hover {
+  opacity: 1 !important;
+  transform: scale(1.2);
+}
+
+.btn-grid-manage.btn-add {
+  color: #10b981;
+}
+
+.btn-grid-manage.btn-remove {
+  color: #ef4444;
+}
+
+.btn-grid-manage:active {
+  transform: scale(0.9);
+}
+
+.grid-manage-corner {
+  width: 24px;
+  height: 24px;
+}
+
+/* Fix grid offsets after adding management columns/rows */
+.grid-manage-table tbody tr:nth-child(odd) {
+  height: 10px !important;
+}
+
+.grid-manage-table tbody tr:nth-child(even) {
+  height: 40px !important;
+}
+
+.grid-manage-table td:nth-child(even) {
+  width: 10px !important;
+  min-width: 10px !important;
+}
+
+.grid-manage-table td:nth-child(odd):not(.grid-manage-row) {
+  width: 40px !important;
+  min-width: 40px !important;
+}
+
+.grid-manage-row {
+  width: 16px !important;
+  min-width: 16px !important;
+  padding-right: 2px !important;
+  text-align: right;
+  vertical-align: middle !important;
+  border: none !important;
+}
+
+.grid-manage-col {
+  height: 16px !important;
+  padding-bottom: 2px !important;
+  text-align: center;
+  vertical-align: bottom;
+  border: none !important;
+}
+
+.grid-manage-corner {
+  width: 16px;
+  height: 16px;
+  border: none !important;
+}

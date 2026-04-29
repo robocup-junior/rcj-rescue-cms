@@ -136,10 +136,10 @@ block content
                   i.fas.fa-clock.mr-1
                   | {{"admin.mazeMapEditor.time" | translate}}
                 .dimension-spinner
-                  button.btn-spin(type='button', ng-click="duration = duration > 1 ? duration - 1 : 1")
+                  button.btn-spin(type='button', ng-click="duration = duration > 30 ? duration - 30 : 0")
                     i.fas.fa-minus
-                  input.spinner-input(type='number', ng-model='duration', min='1')
-                  button.btn-spin(type='button', ng-click="duration = duration + 1")
+                  input.spinner-input(type='number', ng-model='duration', min='0', step='30')
+                  button.btn-spin(type='button', ng-click="duration = (duration || 0) + 30")
                     i.fas.fa-plus
 
         .d-flex.mb-3
@@ -150,9 +150,24 @@ block content
           .modern-card.flex-grow-1.mb-0.overflow-hidden(style="border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none;")
             .modern-card-body.p-0
               .map-container(style="overflow-x: auto; border-top-left-radius: 0; border-bottom-left-radius: 0;")
-                table
+                table.grid-manage-table
+                  thead
+                    tr
+                      th.grid-manage-corner
+                      th.grid-manage-col(ng-repeat='c in range(2*width + 1)')
+                        .btn-grid-manage-group
+                          button.btn-grid-manage.btn-add(ng-if='$even' type='button', ng-click='addColumn(c)', title='Insert Column Here')
+                            i.fas.fa-plus-circle
+                          button.btn-grid-manage.btn-remove(ng-if='$odd' type='button', ng-click='removeColumn(c)', title='Remove Column')
+                            i.fas.fa-times-circle
                   tbody
                     tr(ng-repeat='r in range(2*length + 1)')
+                      td.grid-manage-row
+                        .btn-grid-manage-group
+                          button.btn-grid-manage.btn-add(ng-if='$even' type='button', ng-click='addRow(r)', title='Insert Row Here')
+                            i.fas.fa-plus-circle
+                          button.btn-grid-manage.btn-remove(ng-if='$odd' type='button', ng-click='removeRow(r)', title='Remove Row')
+                            i.fas.fa-times-circle
                       td(ng-repeat='c in range(2*width + 1)', ng-class="{'wallspot': $odd != $parent.$odd, 'tile': $odd && $parent.$odd, 'wall': cells[c+','+r+','+z].isWall, 'checkpoint': cells[c+','+r+','+z].tile.checkpoint, 'black': cells[c+','+r+','+z].tile.black, 'blue': cells[c+','+r+','+z].tile.blue, 'red': cells[c+','+r+','+z].tile.red, 'linear': cells[c+','+r+','+z].tile.reachable && cells[c+','+r+','+z].isLinear, 'floating': cells[c+','+r+','+z].tile.reachable && !cells[c+','+r+','+z].isLinear}", ng-click='cellClick(c, r, z, $odd != $parent.$odd, $odd && $parent.$odd)', ng-style="wallColor(c,r,z)")
                         .tile-image-container(ng-show="$odd && $parent.$odd")
                           img.tile-image(ng-src='/images/log.png', ng-show="cells[c+','+r+','+z].tile.speedbump")
