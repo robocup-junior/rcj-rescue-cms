@@ -13,10 +13,15 @@ const { mazeMap } = require('../../models/mazeMap');
 const scoreCalculator = require('../../helper/scoreCalculator');
 const competitionTargetsPDF = require('../../helper/competitionTargetsPDF');
 const scoreSheetPDFMaze2 = require('../../helper/scoreSheetPDFMaze2');
+const mazeSSR = require('../../helper/mazeSSR');
 
 publicRouter.get('/', getMazeMaps);
-publicRouter.get('/export', handleExport);
-publicRouter.get('/:mapid/image', getMapImage);
+publicRouter.get('/image/:mapid', getMapImage);
+publicRouter.post('/scoresheet', handlePublicScoreSheet);
+publicRouter.post('/competition-targets-pdf', handlePublicCompetitionTargets);
+publicRouter.post('/map-image-pdf', handlePublicMapImagePDF);
+
+adminRouter.get('/export', handleExport);
 
 function getMazeMaps(req, res) {
   const competition = req.query.competition || req.params.competition;
@@ -463,7 +468,7 @@ adminRouter.get('/name/:competitionid/:name', function (req, res, next) {
 
 
 
-publicRouter.post('/scoresheet', function (req, res, next) {
+async function handlePublicScoreSheet(req, res, next) {
   const map = req.body;
   if (!map || !map.cells) {
     return res.status(400).send({
@@ -482,7 +487,6 @@ publicRouter.post('/scoresheet', function (req, res, next) {
           cell.x = parseInt(coords[0]);
           cell.y = parseInt(coords[1]);
           cell.z = parseInt(coords[2]);
-          cell.isTile = cell.x % 2 === 1 && cell.y % 2 === 1;
         }
         cells.push(cell);
       }
@@ -491,10 +495,10 @@ publicRouter.post('/scoresheet', function (req, res, next) {
   }
 
   const rule = req.body.rule || '2026';
-  scoreSheetPDFMaze2.generateScoreSheetFromMap(res, map, rule);
-});
+  await scoreSheetPDFMaze2.generateScoreSheetFromMap(res, map, rule);
+}
 
-publicRouter.post('/competition-targets-pdf', function (req, res, next) {
+function handlePublicCompetitionTargets(req, res, next) {
   const map = req.body;
   const paperSize = req.body.paperSize || 'A4';
   const includeLetterVictims = req.body.includeLetterVictims === true;
@@ -525,7 +529,44 @@ publicRouter.post('/competition-targets-pdf', function (req, res, next) {
   }
 
   competitionTargetsPDF.generateAndSendPDF(res, map, paperSize, includeLetterVictims, includeCognitiveTargets);
-});
+}
+
+async function handlePublicMapImagePDF(req, res, next) {
+  const map = req.body;
+  const paperSize = req.body.paperSize || 'A4';
+
+  if (!map || !map.cells) {
+    return res.status(400).send({
+      msg: 'Invalid map data',
+    });
+  }
+
+  // Convert cells from object map to array if necessary
+  if (!Array.isArray(map.cells)) {
+    const cells = [];
+    for (const i in map.cells) {
+      if (map.cells.hasOwnProperty(i)) {
+        const cell = map.cells[i];
+        if (isNaN(i)) {
+          const coords = i.split(',');
+          cell.x = parseInt(coords[0]);
+          cell.y = parseInt(coords[1]);
+          cell.z = parseInt(coords[2]);
+        }
+        cells.push(cell);
+      }
+    }
+    map.cells = cells;
+  }
+
+  await competitionTargetsPDF.generateAndSendBulkMapImagesPDF(
+    res,
+    [map],
+    map.competitionName || 'Competition',
+    map.leagueName || 'League',
+    paperSize
+  );
+}
 
 function getMapsFromRequest(req, callback) {
   const competitionId = req.query.competition;
@@ -547,7 +588,7 @@ function getMapsFromRequest(req, callback) {
 function handleExport(req, res) {
   const { type, format } = req.query;
 
-  getMapsFromRequest(req, (err, maps) => {
+  getMapsFromRequest(req, async (err, maps) => {
     if (err) {
       return res.status(400).send({ msg: err.message });
     }
@@ -575,7 +616,7 @@ function handleExport(req, res) {
 
     if (type === 'scoresheets') {
       const rule = req.query.rule || '2026';
-      return scoreSheetPDFMaze2.generateScoreSheetsFromMaps(res, maps, rule);
+      return await scoreSheetPDFMaze2.generateScoreSheetsFromMaps(res, maps, rule, true);
     }
 
     if (type === 'maps') {
@@ -583,12 +624,10 @@ function handleExport(req, res) {
         const archive = archiver('zip', { zlib: { level: 9 } });
         res.attachment('maps.zip');
         archive.pipe(res);
-        maps.forEach((map) => {
-          const filePath = path.join(__dirname, '../../tmp/course', `${map._id}.png`);
-          if (fs.existsSync(filePath)) {
-            archive.file(filePath, { name: `${map.name || map._id}.png` });
-          }
-        });
+        for (const map of maps) {
+          const buffer = await mazeSSR.generatePNG(map);
+          archive.append(buffer, { name: `${map.name || map._id}.png` });
+        }
         return archive.finalize();
       }
       const paperSize = req.query.paperSize || 'A4';
@@ -606,14 +645,22 @@ function handleExport(req, res) {
 }
 
 function getMapImage(req, res) {
-  const { mapid } = req.params;
-  const filePath = path.join(__dirname, '../../tmp/course', `${mapid}.png`);
-  if (fs.existsSync(filePath)) {
-    res.download(filePath, `${mapid}.png`);
-  } else {
-    res.status(404).send('Image not found. Please prepare score sheets first.');
+  const mapid = req.params.mapid;
+  if (!ObjectId.isValid(mapid)) {
+    return res.status(400).send('Invalid map ID');
   }
+
+  mazeMap.findById(mapid).lean().exec(async (err, map) => {
+    if (err || !map) {
+      return res.status(404).send('Map not found');
+    }
+    const buffer = await mazeSSR.generatePNG(map);
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(map.name || mapid)}.png"`);
+    res.send(buffer);
+  });
 }
+
 
 publicRouter.all('*', function (req, res, next) {
   next();

@@ -1,6 +1,7 @@
 const PDFDocument = require('pdfkit');
 const fs = require('fs');
 const path = require('path');
+const mazeSSR = require('./mazeSSR');
 
 /**
  * Generates a PDF with Cognitive Targets and optionally Letter Victims for printing
@@ -539,7 +540,7 @@ function generateAndSendBulkPDF(res, maps, competitionName, leagueName, paperSiz
  * @param {string} leagueName - Name of the league
  * @param {string} paperSize - Paper size ('A4' or 'Letter')
  */
-function generateAndSendBulkMapImagesPDF(res, maps, competitionName, leagueName, paperSize = 'A4') {
+async function generateAndSendBulkMapImagesPDF(res, maps, competitionName, leagueName, paperSize = 'A4') {
   const validPaperSize = PAPER_SIZES[paperSize] ? paperSize : 'A4';
   const size = PAPER_SIZES[validPaperSize];
   const pageWidth = size.width;
@@ -562,21 +563,8 @@ function generateAndSendBulkMapImagesPDF(res, maps, competitionName, leagueName,
   doc.pipe(res);
 
   for (const map of maps) {
-    const imagePath = path.join(__dirname, '../tmp/course', `${map._id}.png`);
-    let orientation = 'portrait';
-    let img = null;
+    let orientation = map.width > map.length ? 'landscape' : 'portrait';
 
-    if (isExistFile(imagePath)) {
-      try {
-        img = doc.openImage(imagePath);
-        if (img && img.width > img.height) {
-          orientation = 'landscape';
-        }
-      } catch (e) {
-        console.error(`Error opening image for map ${map._id}:`, e);
-      }
-    }
-    
     doc.addPage({
       size: validPaperSize,
       layout: orientation,
@@ -591,21 +579,10 @@ function generateAndSendBulkMapImagesPDF(res, maps, competitionName, leagueName,
     doc.fontSize(11).text(`${leagueName} - ${map.name}`, { align: 'center' });
     doc.moveDown(1);
 
-    if (img) {
-      // Calculate available space (page size - margins - header area)
-      const availableWidth = currentPageWidth - 60;
-      const availableHeight = currentPageHeight - 100;
+    const availableWidth = currentPageWidth - 60;
+    const availableHeight = currentPageHeight - 120;
 
-      doc.image(img, {
-        fit: [availableWidth, availableHeight],
-        align: 'center',
-        valign: 'center'
-      });
-    } else {
-      doc.moveDown(10);
-      doc.fontSize(14).fillColor('#ef4444').text('Map image not found!', { align: 'center' });
-      doc.fontSize(10).fillColor('#64748b').text('Please open this map in the editor and save it to generate the image.', { align: 'center' });
-    }
+    await mazeSSR.drawMazePDF(doc, map, 30, 80, availableWidth, availableHeight);
   }
 
   doc.end();

@@ -129,7 +129,7 @@ app.controller("MapAdminController", ['$scope', '$http', '$uibModal', function (
                     // Trigger individual downloads for PNG
                     selectedIds.forEach(id => {
                         const link = document.createElement('a');
-                        link.href = `/api/maps/maze/${id}/image`;
+                        link.href = `/api/maps/maze/image/${id}`;
                         link.download = `${id}.png`;
                         link.style.display = 'none';
                         document.body.appendChild(link);

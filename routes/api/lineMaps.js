@@ -324,19 +324,6 @@ adminRouter.get('/image/:map', function (req, res, next) {
   /* 画像を送る */
 });
 
-publicRouter.post('/image/:map', function (req, res, next) {
-  const id = req.params.map;
-  if (!ObjectId.isValid(id)) {
-    return next();
-  }
-  const base64Data = req.body.img.replace(/^data:image\/png;base64,/, '');
-  let path = `${__dirname}/../../tmp/course`;
-  mkdirp.sync(path);
-  path += `/${id}.png`;
-  fs.writeFile(path, base64Data, 'base64', function (err) {
-    res.send(path);
-  });
-});
 
 adminRouter.delete('/:map', function (req, res, next) {
   const id = req.params.map;

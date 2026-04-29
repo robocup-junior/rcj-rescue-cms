@@ -10,6 +10,10 @@ require('fs')
     supportedRules.push(name);
   });
 
+const mazeSSR = require('./mazeSSR');
+const fs = require('fs');
+const path = require('path');
+
 module.exports.generateScoreSheet = function (res, runs) {
   if (runs.length > 0) {
     let run = runs[0];
@@ -19,7 +23,19 @@ module.exports.generateScoreSheet = function (res, runs) {
   return rules[supportedRules[0]].generateScoreSheet(res, runs)
 };
 
-module.exports.generateScoreSheetsFromMaps = function (res, maps, rule) {
+module.exports.generateScoreSheetsFromMaps = async function (res, maps, rule, noQR = false) {
+  // Ensure tmp/course directory exists
+  const tmpDir = path.join(__dirname, '../tmp/course');
+  if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir, { recursive: true });
+  }
+
+  // Pre-generate map images for the score sheets
+  for (const map of maps) {
+    const buffer = await mazeSSR.generatePNG(map);
+    fs.writeFileSync(path.join(tmpDir, `${map._id}.png`), buffer);
+  }
+
   const dummyRuns = maps.map(map => {
     return {
       _id: map._id || '000000000000000000000000',
@@ -36,7 +52,7 @@ module.exports.generateScoreSheetsFromMaps = function (res, maps, rule) {
       round: { name: '' },
       field: { name: '' },
       map: map,
-      noQR: map.noQR,
+      noQR: noQR || map.noQR,
       diceNumber: (typeof map.dice === 'number' && map.dice >= 1 && map.dice <= 6 ? map.dice : (Array.isArray(map.dice) && typeof map.dice[0] === 'number' && map.dice[0] >= 1 && map.dice[0] <= 6 ? map.dice[0] : null)),
     };
   });
@@ -47,6 +63,6 @@ module.exports.generateScoreSheetsFromMaps = function (res, maps, rule) {
   return rules[supportedRules[0]].generateScoreSheet(res, dummyRuns);
 };
 
-module.exports.generateScoreSheetFromMap = function (res, map, rule) {
-  return module.exports.generateScoreSheetsFromMaps(res, [map], rule);
+module.exports.generateScoreSheetFromMap = async function (res, map, rule) {
+  return await module.exports.generateScoreSheetsFromMaps(res, [map], rule, map.noQR);
 };
