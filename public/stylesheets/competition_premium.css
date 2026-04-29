@@ -339,8 +339,109 @@
 }
 
 @media (max-width: 768px) {
-  .comp-name-title { white-space: normal; font-size: 1.8rem; }
-  .league-grid { grid-template-columns: 1fr; }
-  .tools-section { padding: 2rem 1.5rem; }
-  .signage-actions { flex-direction: column; }
+  .comp-home-hero {
+    padding: 2rem 1rem 2.5rem;
+    border-radius: 0 0 1rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .comp-home-hero-content {
+    gap: 1.25rem;
+  }
+
+  .comp-logo-hero {
+    max-height: 120px;
+  }
+
+  .comp-name-title { 
+    white-space: normal; 
+    font-size: 1.5rem; 
+    padding: 0 0.5rem;
+  }
+
+  .comp-message-box {
+    padding: 1rem 1.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .comp-message-box p {
+    font-size: 0.95rem;
+  }
+
+  .comp-container {
+    padding: 0 0.75rem;
+  }
+
+  .league-grid { 
+    grid-template-columns: 1fr; 
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .league-image-area {
+    height: 160px;
+    padding: 1rem;
+  }
+
+  .league-body {
+    padding: 1.25rem;
+  }
+
+  .league-name {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .btn-enter-premium {
+    padding: 1rem;
+  }
+
+  .tools-section { 
+    padding: 1.5rem 1rem; 
+    margin-bottom: 2rem;
+    border-radius: 1rem;
+  }
+
+  .tools-header {
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+  }
+
+  .tools-header h2 {
+    font-size: 1.35rem;
+  }
+
+  .tools-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .tool-button-premium {
+    padding: 1.25rem;
+    min-height: auto;
+    gap: 1rem;
+    border-radius: 1rem;
+  }
+
+  .tool-icon-circle {
+    width: 48px;
+    height: 48px;
+    font-size: 1.25rem;
+  }
+
+  .tool-label {
+    font-size: 1.1rem;
+  }
+
+  .signage-actions { 
+    flex-direction: column; 
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  .sign-action-btn {
+    flex-direction: row;
+    padding: 0.6rem 1rem;
+    justify-content: flex-start;
+  }
 }

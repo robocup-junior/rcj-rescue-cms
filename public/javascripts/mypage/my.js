@@ -107,24 +107,6 @@ app.controller("MyPageController", ['$scope', '$http', '$translate', function ($
             var time = $scope.time(mail.time);
 
             var modalHtml = 
-                '<style>' +
-                    '@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap");' +
-                    '.premium-modal-wrapper { font-family: "Outfit", sans-serif; text-align: left; color: #1e293b; display: flex; flex-direction: column; height: 90vh; background: #ffffff; width: 100%; border-radius: 1.5rem; overflow: hidden; position: relative; }' +
-                    '.modal-header-section { padding: 1.25rem 2.5rem; background: #0f172a; color: #ffffff; display: flex; align-items: center; gap: 1.25rem; flex-shrink: 0; position: relative; overflow: hidden; }' +
-                    '.modal-header-section::before { content: ""; position: absolute; top: -50%; right: -20%; width: 200px; height: 200px; background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%); z-index: 0; }' +
-                    '.modal-icon-box { width: 42px; height: 42px; background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: #60a5fa; flex-shrink: 0; border: 1px solid rgba(255, 255, 255, 0.2); z-index: 1; }' +
-                    '.modal-title-area { flex-grow: 1; z-index: 1; padding-right: 4rem; }' +
-                    '.modal-subject-text { font-size: 1.55rem; font-weight: 800; line-height: 1.2; margin-bottom: 0.15rem; letter-spacing: -0.02em; color: #ffffff; word-break: break-all; }' +
-                    '.modal-meta-line { display: flex; gap: 1rem; color: #64748b; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.15em; }' +
-                    '.modal-content-wrapper { flex-grow: 1; overflow-y: auto; padding: 3.5rem 4rem; background: #ffffff; }' +
-                    '.mail-body-text { font-size: 1.25rem; line-height: 2; color: #334155; }' +
-                    '.btn-header-close { position: absolute; top: 1.25rem; right: 2rem; background: rgba(255, 255, 255, 0.05); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.1); width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; z-index: 1000; font-size: 1.1rem; }' +
-                    '.btn-header-close i { pointer-events: none; }' +
-                    '.btn-header-close:hover { background: rgba(255, 255, 255, 0.15); color: #ffffff; transform: rotate(90deg); }' +
-                    '.swal2-popup.premium-modal-popup-fix { padding: 0 !important; border-radius: 1.5rem !important; overflow: hidden !important; border: none !important; }' +
-                    '.premium-modal-popup-fix .swal2-html-container { padding: 0 !important; margin: 0 !important; text-align: left !important; overflow: hidden !important; }' +
-                    '.premium-modal-popup-fix .swal2-header, .premium-modal-popup-fix .swal2-title, .premium-modal-popup-fix .swal2-actions, .premium-modal-popup-fix .swal2-close { display: none !important; }' +
-                '</style>' +
                 '<div class="premium-modal-wrapper">' +
                     '<button id="premium-close-btn" class="btn-header-close"><i class="fas fa-times"></i></button>' +
                     '<div class="modal-header-section">' +
@@ -132,7 +114,7 @@ app.controller("MyPageController", ['$scope', '$http', '$translate', function ($
                         '<div class="modal-title-area">' +
                             '<div class="modal-subject-text">' + subject + '</div>' +
                             '<div class="modal-meta-line">' +
-                                '<span><i class="far fa-calendar-alt"></i> ' + time + '</span>' +
+                                '<span>' + time + '</span>' +
                             '</div>' +
                         '</div>' +
                     '</div>' +

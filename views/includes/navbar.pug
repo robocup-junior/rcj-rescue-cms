@@ -13,7 +13,7 @@ nav.navbar.navbar-expand.premium-navbar
         if typeof(user) == "undefined"
             a.nav-user-link.login-btn(href='#' data-toggle='modal' data-target='#loginModal')
                 i.fas.fa-sign-in-alt
-                span.username-text &nbsp; {{"home.login" | translate}}
+                span.username-text.d-none.d-sm-inline-block &nbsp; {{"home.login" | translate}}
         else
             .dropdown
                 a.nav-user-link.dropdown-toggle(href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')

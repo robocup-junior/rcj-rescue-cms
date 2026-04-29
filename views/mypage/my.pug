@@ -40,8 +40,8 @@ block content
       img.hero-logo(ng-if="competition.logo" ng-src="{{competition.logo}}")
       .hero-text-wrapper
         h1.hero-title {{competition.name}}
-        p.hero-subtitle(style="margin-top: 0.5rem; opacity: 0.8; font-weight: 500;") {{leagueName}}
-        .team-badge(style="margin-top: 0.5rem; display: inline-flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.1); padding: 0.25rem 1rem; border-radius: 999px; font-size: 1.5rem; font-weight: 600;")
+        p.hero-subtitle {{leagueName}}
+        .team-badge
           i.fas.fa-users
           span #{teamCode} #{teamName}
 
@@ -56,7 +56,7 @@ block content
           i.fas.fa-pen
         span.card-status.status-locked(ng-if="!surv.editable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
           i.fas.fa-lock
-        .comp-logo-area(style="height: 180px;")
+        .comp-logo-area
           i.fas.fa-question-circle(style="font-size: 4rem; color: #05c46b; opacity: 0.8;")
         .comp-body
           h3.comp-name(style="color: #05c46b;") {{surv.name}}
@@ -70,7 +70,7 @@ block content
             i.fas.fa-pen
           span.card-status.status-locked(ng-if="!docEditable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
             i.fas.fa-lock
-          .comp-logo-area(style="height: 180px;")
+          .comp-logo-area
             i.fas.fa-book(style="font-size: 4rem; color: #0abde3; opacity: 0.8;")
           .comp-body
             h3.comp-name(style="color: #0abde3;") {{"document.admin.title" | translate}}
@@ -83,7 +83,7 @@ block content
           i.fas.fa-pen
         span.card-status.status-locked(ng-if="!resv.editable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
           i.fas.fa-lock
-        .comp-logo-area(style="height: 180px;")
+        .comp-logo-area
           i.fas.fa-calendar-day(style="font-size: 4rem; color: #ff6b6b; opacity: 0.8;")
         .comp-body
           h3.comp-name(style="color: #ff6b6b;") {{resv.name}}
@@ -99,15 +99,15 @@ block content
           p.comp-desc {{"mypage.cabinet" | translate}}
 
     // Messages Section
-    .message-section(ng-show="mails.length>0", style="margin-top: 4rem;")
-      .message-header(style="display: flex; align-items: center; gap: 1rem; margin-bottom: 2rem;")
-        i.fas.fa-envelope-open-text(style="font-size: 1.75rem; color: #2e86de;")
-        h2(style="font-weight: 800; font-size: 2rem; margin: 0;") {{"mypage.message" | translate}}
+    .message-section(ng-show="mails.length>0")
+      .message-header
+        i.fas.fa-envelope-open-text
+        h2 {{"mypage.message" | translate}}
       
-      .message-list(style="background: white; border-radius: 1.5rem; padding: 1rem; border: 1px solid #f1f5f9; box-shadow: 0 1px 3px rgba(0,0,0,0.05);margin-bottom: 2rem;")
-        .message-item(ng-repeat='mail in mails', ng-click="mailView(mail)", style="display: flex; align-items: center; padding: 1.5rem; border-radius: 1rem; transition: background 0.2s ease; cursor: pointer; border-bottom: 1px solid #f1f5f9;")
-          .message-info(style="flex-grow: 1;")
-            .message-subject(style="font-weight: 700; font-size: 1.1rem; color: #0f172a;", ng-bind="mail.subject")
-            .message-date(style="font-size: 0.875rem; color: #94a3b8;", ng-bind="time(mail.time)")
-          .message-arrow(style="color: #cbd5e1;")
+      .message-list
+        .message-item(ng-repeat='mail in mails', ng-click="mailView(mail)")
+          .message-info
+            .message-subject(ng-bind="mail.subject")
+            .message-date(ng-bind="time(mail.time)")
+          .message-arrow
             i.fas.fa-chevron-right
