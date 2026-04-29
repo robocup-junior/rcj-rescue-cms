@@ -55,8 +55,8 @@ block hero_actions
         i.fas.fa-exclamation-circle.mr-1
         | {{"admin.mazeMapEditor.noStart" | translate}}
       span.action-label.mb-1 SAVE
-      .d-flex.flex-column.align-items-center
-        button.btn-hero-icon.btn-save.mb-2(type='button', ng-click='saveMap()', title='{{"admin.mazeMapEditor.save" | translate}}')
+      .d-flex
+        button.btn-hero-icon.btn-save.mr-2(type='button', ng-click='saveMap()', title='{{"admin.mazeMapEditor.save" | translate}}')
           i.fas.fa-save
         if !parent
           button.btn-hero-icon(type='button', ng-click="openSaveAsModal()", title='Save As')
@@ -66,8 +66,8 @@ block hero_actions
   
   .action-group.flex-column.align-items-center
     span.action-label.mb-1 JSON
-    .d-flex.flex-column.align-items-center
-      button.btn-hero-icon.mb-2(type='button', ng-click='export()', title='Export JSON')
+    .d-flex
+      button.btn-hero-icon.mr-2(type='button', ng-click='export()', title='Export JSON')
         i.fas.fa-file-export
       button.btn-hero-icon(type='button', onclick="$('#select').click()", title='Import JSON')
         i.fas.fa-file-import
