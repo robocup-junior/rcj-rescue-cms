@@ -1,20 +1,165 @@
-:root {
-    --primary-gradient: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-    --secondary-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --border-radius: 12px;
-    --primary-color: #4f46e5;
-    --bg-light: #f8fafc;
+.dimension-spinner {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-.modern-header {
-    background: var(--primary-gradient);
-    padding: 2rem;
-    border-radius: var(--border-radius);
-    color: white;
-    margin-bottom: 2rem;
-    box-shadow: var(--card-shadow);
+.btn-spin {
+  background: #f8fafc;
+  border: none;
+  width: 28px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.8rem;
+}
+
+.btn-spin:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.btn-spin:active {
+  background: #cbd5e1;
+}
+
+.spinner-input {
+  width: 50px !important;
+  border: none !important;
+  text-align: center;
+  font-weight: 600;
+  color: #1e293b;
+  height: 32px;
+  padding: 0 !important;
+  -moz-appearance: textfield;
+}
+
+.spinner-input::-webkit-outer-spin-button,
+.spinner-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.grid-manage-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.grid-manage-col {
+  padding-bottom: 4px !important;
+  text-align: center;
+  vertical-align: bottom;
+}
+
+.grid-manage-row {
+  padding-right: 4px !important;
+  text-align: right;
+  vertical-align: middle;
+}
+
+.btn-grid-manage-group {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  line-height: 0;
+}
+
+.grid-manage-col .btn-grid-manage-group {
+  flex-direction: row;
+  justify-content: center;
+}
+
+.btn-grid-manage {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.75rem;
+  transition: transform 0.2s, color 0.2s, opacity 0.2s;
+  line-height: 1;
+  opacity: 0;
+}
+
+.grid-manage-col:hover .btn-grid-manage,
+.grid-manage-row:hover .btn-grid-manage,
+tr:hover .grid-manage-row .btn-grid-manage {
+  opacity: 0.6;
+}
+
+.btn-grid-manage:hover {
+  opacity: 1 !important;
+  transform: scale(1.2);
+}
+
+.btn-grid-manage.btn-add {
+  color: #10b981;
+}
+
+.btn-grid-manage.btn-remove {
+  color: #ef4444;
+}
+
+.btn-grid-manage:active {
+  transform: scale(0.9);
+}
+
+.grid-manage-corner {
+  width: 24px;
+  height: 24px;
+}
+
+/* Fix grid offsets after adding management columns/rows */
+.grid-manage-table tbody tr:nth-child(odd) {
+  height: 10px !important;
+}
+
+.grid-manage-table tbody tr:nth-child(even) {
+  height: 40px !important;
+}
+
+.grid-manage-table td:nth-child(even),
+.grid-manage-table th:nth-child(even) {
+  width: 10px !important;
+  min-width: 10px !important;
+}
+
+.grid-manage-table td:nth-child(odd):not(.grid-manage-row):not(.grid-manage-corner),
+.grid-manage-table th:nth-child(odd):not(.grid-manage-row):not(.grid-manage-corner) {
+  width: 40px !important;
+  min-width: 40px !important;
+}
+
+.grid-manage-row {
+  width: 16px !important;
+  min-width: 16px !important;
+  padding-right: 2px !important;
+  text-align: right;
+  vertical-align: middle !important;
+  border: none !important;
+}
+
+.grid-manage-col {
+  height: 16px !important;
+  padding-bottom: 2px !important;
+  text-align: center;
+  vertical-align: bottom;
+  border: none !important;
+}
+
+.grid-manage-corner {
+  width: 16px;
+  height: 16px;
+  border: none !important;
 }
 
 .modern-card {
@@ -113,22 +258,6 @@
     box-sizing: content-box;
 }
 
-/* Re-enforce original sizes from maze_edit.css but with !important to prevent stretching */
-.map-container tr:nth-child(odd) {
-    height: 10px !important;
-}
-
-.map-container tr:nth-child(even) {
-    height: 40px !important;
-}
-
-.map-container td:nth-child(odd) {
-    width: 10px !important;
-}
-
-.map-container td:nth-child(even) {
-    width: 40px !important;
-}
 
 
 .fancy-input-group {

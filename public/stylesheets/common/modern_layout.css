@@ -1,0 +1,243 @@
+/* Maps Admin Premium Styles */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap');
+
+:root {
+  --primary-gradient: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+  --secondary-gradient: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  --accent-color: #3b82f6;
+  --danger-color: #ef4444;
+  --card-bg: #ffffff;
+  --bg-light: #f8fafc;
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --card-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --border-radius: 12px;
+}
+
+body {
+  background-color: var(--bg-light);
+  font-family: 'Outfit', sans-serif;
+}
+
+.maps-hero {
+  background: var(--primary-gradient);
+  padding: 2rem 0 3.5rem;
+  border-radius: 0 0 2rem 2rem;
+  color: white;
+  margin-bottom: 3rem;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+  position: relative;
+}
+
+.hero-breadcrumb {
+  background: transparent !important;
+  border: none !important;
+  padding: 0.5rem 0 !important;
+  margin-bottom: 1.5rem !important;
+}
+
+.hero-breadcrumb .breadcrumb-item, 
+.hero-breadcrumb .breadcrumb-item a {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-size: 0.9rem !important;
+}
+
+.hero-breadcrumb .breadcrumb-item a:hover {
+  color: #ffffff !important;
+}
+
+.hero-breadcrumb .breadcrumb-item.active {
+  color: #ffffff !important;
+}
+
+.hero-breadcrumb .breadcrumb-item+.breadcrumb-item::before {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.hero-content-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 2rem;
+  padding-bottom: 0.5rem;
+}
+
+.hero-text {
+  flex-grow: 1;
+}
+
+.maps-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.hero-inner-container {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 6rem;
+}
+
+.hero-title {
+  font-size: 2.4rem;
+  font-weight: 900;
+  margin-bottom: 0.4rem;
+  letter-spacing: -0.02em;
+}
+
+.hero-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.7;
+  font-weight: 500;
+  margin: 0;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+
+hr {
+  border: 0;
+  border-top: 1px solid #f1f5f9;
+  margin: 1.5rem 0;
+}
+
+@media (max-width: 768px) {
+  .maps-hero {
+    padding: 1.5rem 0 2.5rem;
+  }
+  .hero-content-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  .hero-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .hero-title {
+    font-size: 1.5rem;
+  }
+  .btn-create-map {
+    width: 100%;
+    justify-content: center;
+    order: 2;
+  }
+  .btn-print-targets, .btn-select-all {
+    width: 3.2rem;
+    height: 3.2rem;
+    justify-content: center;
+  }
+  .maps-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.hero-title-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hero-title-input {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 2.2rem;
+  font-weight: 900;
+  padding: 0;
+  width: 100%;
+  max-width: 800px;
+  letter-spacing: -0.02em;
+  transition: all 0.3s ease;
+  resize: none;
+  overflow: hidden;
+  line-height: 1.1;
+  display: block;
+  min-height: 2.42rem;
+  word-wrap: break-word;
+}
+
+.hero-title-input:focus {
+  outline: none;
+  border-bottom-color: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.title-edit-icon {
+  font-size: 1rem;
+  opacity: 0.3;
+}
+
+.btn-hero-action {
+  background: #10b981;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  transition: all 0.2s ease;
+}
+
+.btn-hero-action:hover {
+  background: #059669;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4);
+}
+
+.btn-hero-icon {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+.btn-hero-icon:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.action-group {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.action-divider {
+  width: 1px;
+  height: 2rem;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 0.5rem;
+}
+
+.action-label {
+  font-size: 0.7rem;
+  font-weight: 800;
+  opacity: 0.5;
+  letter-spacing: 0.1em;
+}
+
+.action-label {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+

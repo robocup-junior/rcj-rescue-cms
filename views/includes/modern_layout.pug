@@ -3,7 +3,10 @@ extends layout
 
 append css
   block page_css
-  link(href='/stylesheets/modern_layout.css', rel='stylesheet')
+  link(href='/stylesheets/common/modern_layout.css', rel='stylesheet')
+  link(href='/stylesheets/common/modern_components.css', rel='stylesheet')
+  link(href='/stylesheets/common/modern_table.css', rel='stylesheet')
+  link(href='/stylesheets/common/modern_modal.css', rel='stylesheet')
 
 block bread
   //- Empty - breadcrumbs are moved inside the hero section in the modern layout
