@@ -1,4 +1,4 @@
-.maps-list {
+.modern-list {
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -11,7 +11,7 @@
   border: 1px solid #f1f5f9;
 }
 
-.maps-list-header {
+.modern-list-header {
   display: flex;
   align-items: center;
   padding: 0.75rem 1.25rem;
@@ -28,7 +28,7 @@
 .header-name { flex: 1; padding-left: 1.25rem; }
 .header-actions { width: 60px; text-align: right; }
 
-.map-card {
+.modern-item-card {
   background: white;
   padding: 0.4rem 1.25rem;
   display: flex;
@@ -41,29 +41,29 @@
   border-radius: 0;
 }
 
-.map-card.is-child {
+.modern-item-card.is-child {
   margin-left: 0;
   padding-left: 4.5rem;
   background: #fdfdfd;
 }
 
-.map-card.is-child .map-info {
+.modern-item-card.is-child .modern-item-info {
   border-left: 2px solid #e2e8f0;
   padding-left: 1rem;
 }
 
-.map-card.is-child::before {
+.modern-item-card.is-child::before {
   display: none;
 }
 
-.map-card.is-child .map-icon {
+.modern-item-card.is-child .modern-item-icon {
   width: 36px;
   height: 36px;
   font-size: 1.1rem;
   background: white;
 }
 
-.map-card.is-child .map-name {
+.modern-item-card.is-child .modern-item-name {
   font-size: 1.05rem;
   color: #64748b;
 }
@@ -74,19 +74,19 @@
   border-bottom: 1px solid #f1f5f9;
 }
 
-.map-card:hover {
+.modern-item-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.08);
   border-color: var(--accent-color);
 }
 
-.map-card.selected {
+.modern-item-card.selected {
   background: #f0f9ff;
   border-color: var(--accent-color);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
 }
 
-.map-selection {
+.modern-item-selection {
   padding: 0 0.5rem;
   display: flex;
   align-items: center;
@@ -116,11 +116,11 @@
   font-size: 0.8rem;
 }
 
-.map-card.selected .map-name {
+.modern-item-card.selected .modern-item-name {
   color: #1e40af;
 }
 
-.map-card::before {
+.modern-item-card::before {
   content: "";
   position: absolute;
   top: 0;
@@ -131,7 +131,7 @@
   opacity: 0.3;
 }
 
-.map-info {
+.modern-item-info {
   display: flex;
   align-items: center;
   gap: 1.25rem;
@@ -139,7 +139,7 @@
   min-width: 0;
 }
 
-.map-icon {
+.modern-item-icon {
   width: 36px;
   height: 36px;
   background: #f0f9ff;
@@ -153,19 +153,19 @@
   transition: all 0.2s ease;
 }
 
-.map-card:hover .map-icon {
+.modern-item-card:hover .modern-item-icon {
   background: var(--accent-color);
   color: white;
   transform: scale(1.05) rotate(-5deg);
 }
 
-.map-details {
+.modern-item-details {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
 }
 
-.map-name {
+.modern-item-name {
   font-weight: 700;
   color: #1e293b;
   font-size: 1.2rem;
@@ -174,14 +174,14 @@
   margin: 0;
 }
 
-.map-actions {
+.modern-item-actions {
   display: flex;
   align-items: center;
   gap: 0.25rem;
   flex-shrink: 0;
 }
 
-.btn-delete-map {
+.btn-delete-item {
   color: #94a3b8;
   padding: 0.5rem;
   border-radius: 0.5rem;
@@ -189,8 +189,47 @@
   cursor: pointer;
 }
 
-.btn-delete-map:hover {
+.btn-delete-item:hover {
   color: var(--danger-color);
   background: #fef2f2;
 }
 
+/* Add Button Row Pattern */
+.modern-item-card.is-add-button {
+  background: #f8fafc;
+  border-top: 1px dashed #cbd5e1;
+  justify-content: center;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.modern-item-card.is-add-button:hover {
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-top-style: solid;
+}
+
+.modern-item-card.is-add-button::before {
+  display: none;
+}
+
+.modern-item-card.is-add-button .modern-item-info {
+  flex: none;
+  gap: 0.75rem;
+  color: var(--accent-color);
+}
+
+.modern-item-card.is-add-button .modern-item-icon {
+  background: transparent;
+  width: auto;
+  height: auto;
+  font-size: 1.2rem;
+  color: var(--accent-color);
+}
+
+.modern-item-card.is-add-button .modern-item-name {
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--accent-color);
+}

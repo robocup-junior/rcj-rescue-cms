@@ -33,8 +33,8 @@ block hero_actions
     span {{"admin.lineMapAdmin.create" | translate}}
 
 block main_content
-  .maps-list(ng-if="groupedMaps.length > 0")
-    .maps-list-header.d-none.d-md-flex
+  .modern-list(ng-if="groupedMaps.length > 0")
+    .modern-list-header.d-none.d-md-flex
       .header-select(ng-click="selectAll()" ng-if="league.type == 'maze'" style="cursor: pointer;" title="{{allSelected ? ('admin.mazeMapAdmin.unselectAll' | translate) : ('admin.mazeMapAdmin.selectAll' | translate)}}")
         .custom-checkbox(ng-class="{'checked': allSelected}")
           i.fas.fa-check(ng-if="allSelected")
@@ -42,30 +42,30 @@ block main_content
       .header-actions {{"common.delete" | translate}}
     
     .parent-group(ng-repeat='parentMap in groupedMaps')
-      .map-card(ng-click="go('/admin/'+competitionId+'/'+league.league+'/mapEditor/'+parentMap._id)" ng-class="{'selected': selectedMaps[parentMap._id]}")
-        .map-selection(ng-click="toggleSelect(parentMap, $event)" title="Select for bulk print")
+      .modern-item-card(ng-click="go('/admin/'+competitionId+'/'+league.league+'/mapEditor/'+parentMap._id)" ng-class="{'selected': selectedMaps[parentMap._id]}")
+        .modern-item-selection(ng-click="toggleSelect(parentMap, $event)" title="Select for bulk print")
           .custom-checkbox(ng-class="{'checked': selectedMaps[parentMap._id]}")
             i.fas.fa-check(ng-if="selectedMaps[parentMap._id]")
-        .map-info
-          .map-icon
+        .modern-item-info
+          .modern-item-icon
             i.fas.fa-map-marked-alt
-          .map-details
-            span.map-name(ng-bind='parentMap.name' title='{{parentMap.name}}')
-        .map-actions
-          .btn-delete-map(ng-click='removeMap(parentMap, $event)' title='{{"common.delete" | translate}}')
+          .modern-item-details
+            span.modern-item-name(ng-bind='parentMap.name' title='{{parentMap.name}}')
+        .modern-item-actions
+          .btn-delete-item(ng-click='removeMap(parentMap, $event)' title='{{"common.delete" | translate}}')
             i.fas.fa-trash-alt
       
-      .map-card.is-child(ng-repeat='childMap in parentMap.children' ng-click="go('/admin/'+competitionId+'/'+league.league+'/mapEditor/'+childMap._id)" ng-class="{'selected': selectedMaps[childMap._id]}")
-        .map-selection(ng-click="toggleSelect(childMap, $event)" title="Select for bulk print")
+      .modern-item-card.is-child(ng-repeat='childMap in parentMap.children' ng-click="go('/admin/'+competitionId+'/'+league.league+'/mapEditor/'+childMap._id)" ng-class="{'selected': selectedMaps[childMap._id]}")
+        .modern-item-selection(ng-click="toggleSelect(childMap, $event)" title="Select for bulk print")
           .custom-checkbox(ng-class="{'checked': selectedMaps[childMap._id]}")
             i.fas.fa-check(ng-if="selectedMaps[childMap._id]")
-        .map-info
-          .map-icon
+        .modern-item-info
+          .modern-item-icon
             i.fas.fa-dice-d6
-          .map-details
-            span.map-name(ng-bind='childMap.name' title='{{childMap.name}}')
-        .map-actions
-          .btn-delete-map(ng-click='removeMap(childMap, $event)' title='{{"common.delete" | translate}}')
+          .modern-item-details
+            span.modern-item-name(ng-bind='childMap.name' title='{{childMap.name}}')
+        .modern-item-actions
+          .btn-delete-item(ng-click='removeMap(childMap, $event)' title='{{"common.delete" | translate}}')
             i.fas.fa-trash-alt
   
   .empty-state(ng-if="maps.length == 0")

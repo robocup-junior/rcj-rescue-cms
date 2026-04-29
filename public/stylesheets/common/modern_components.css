@@ -157,3 +157,115 @@
   box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
 }
 
+/* Modern Card Header Premium Style */
+.modern-card {
+  background: white;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+
+.modern-card-header {
+  padding: 1.25rem 1.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  align-items: center;
+  font-weight: 800;
+  color: #1e293b;
+  background: linear-gradient(to right, #f8fafc, #ffffff);
+  position: relative;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.modern-card-header::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 25%;
+  height: 50%;
+  width: 4px;
+  background: var(--accent-color);
+  border-radius: 0 4px 4px 0;
+}
+
+.modern-card-header i {
+  margin-right: 1rem;
+  color: var(--accent-color);
+  font-size: 1.1rem;
+  filter: drop-shadow(0 2px 4px rgba(59, 130, 246, 0.2));
+}
+
+.modern-card-body {
+  padding: 1.5rem 1.75rem;
+}
+
+/* Premium Action Grid and Cards */
+.tools-grid-premium {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+}
+
+.action-card-premium {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  cursor: pointer;
+  color: #475569;
+  height: 100%;
+}
+
+.action-card-premium:hover {
+  transform: translateY(-5px);
+  background: white;
+  border-color: var(--accent-color);
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.1);
+  color: #1e293b;
+}
+
+.icon-wrapper {
+  width: 50px;
+  height: 50px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.action-card-premium:hover .icon-wrapper {
+  background: var(--accent-color);
+  color: white;
+  transform: scale(1.1);
+}
+
+.action-card-premium i {
+  font-size: 1.5rem;
+}
+
+.action-card-premium span {
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 576px) {
+  .tools-grid-premium {
+    grid-template-columns: 1fr;
+  }
+}
+
