@@ -68,8 +68,6 @@ function getPDFFont() {
  * @returns {Array} - Array of objects with target details
  */
 function extractTargets(map, includeLetterVictims = false, includeCognitiveTargets = true) {
-  const targetsMap = new Map(); // id -> target object
-
   if (!map.cells) return [];
 
   // Calculate victim numbers using the same logic as maze_2026.js
@@ -110,6 +108,8 @@ function extractTargets(map, includeLetterVictims = false, includeCognitiveTarge
   }
 
   // Now extract cognitive targets and letter victims
+  const targets = [];
+
   for (const cell of map.cells) {
     if (!cell.isTile || !cell.tile || !cell.tile.victims) continue;
 
@@ -127,31 +127,25 @@ function extractTargets(map, includeLetterVictims = false, includeCognitiveTarge
         const key = `${cell.x},${cell.y},${cell.z},${dir}`;
         const victimLetter = victimNumberMap.get(key) || null;
 
-        const targetId = `COGNITIVE_${colorCode}`;
-        if (!targetsMap.has(targetId)) {
-          targetsMap.set(targetId, {
-            type: 'Cognitive',
-            colorCode: colorCode,
-            victimLetter: victimLetter
-          });
-        }
+        targets.push({
+          type: 'Cognitive',
+          colorCode: colorCode,
+          victimLetter: victimLetter
+        });
       } else if (includeLetterVictims && ['PHI', 'PSI', 'OMEGA'].includes(victimType)) {
         const key = `${cell.x},${cell.y},${cell.z},${dir}`;
         const victimLetter = victimNumberMap.get(key) || null;
 
-        const targetId = `LETTER_${victimType}`;
-        if (!targetsMap.has(targetId)) {
-          targetsMap.set(targetId, {
-            type: 'Letter',
-            victimType: victimType,
-            victimLetter: victimLetter
-          });
-        }
+        targets.push({
+          type: 'Letter',
+          victimType: victimType,
+          victimLetter: victimLetter
+        });
       }
     }
   }
 
-  return Array.from(targetsMap.values()).sort((a, b) => {
+  return targets.sort((a, b) => {
     // Sort by victim letter (A, B, C...)
     if (a.victimLetter && b.victimLetter) {
       return a.victimLetter.localeCompare(b.victimLetter);

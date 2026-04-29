@@ -20,6 +20,7 @@ publicRouter.get('/image/:mapid', getMapImage);
 publicRouter.post('/scoresheet', handlePublicScoreSheet);
 publicRouter.post('/competition-targets-pdf', handlePublicCompetitionTargets);
 publicRouter.post('/map-image-pdf', handlePublicMapImagePDF);
+publicRouter.post('/map-image-png', handlePublicMapImagePNG);
 
 adminRouter.get('/export', handleExport);
 
@@ -568,6 +569,39 @@ async function handlePublicMapImagePDF(req, res, next) {
   );
 }
 
+async function handlePublicMapImagePNG(req, res, next) {
+  const map = req.body;
+
+  if (!map || !map.cells) {
+    return res.status(400).send({
+      msg: 'Invalid map data',
+    });
+  }
+
+  // Convert cells from object map to array if necessary
+  if (!Array.isArray(map.cells)) {
+    const cells = [];
+    for (const i in map.cells) {
+      if (map.cells.hasOwnProperty(i)) {
+        const cell = map.cells[i];
+        if (isNaN(i)) {
+          const coords = i.split(',');
+          cell.x = parseInt(coords[0]);
+          cell.y = parseInt(coords[1]);
+          cell.z = parseInt(coords[2]);
+        }
+        cells.push(cell);
+      }
+    }
+    map.cells = cells;
+  }
+
+  const buffer = await mazeSSR.generatePNG(map, map.rule || '2026');
+  res.setHeader('Content-Type', 'image/png');
+  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(map.name || 'map')}.png"`);
+  res.send(buffer);
+}
+
 function getMapsFromRequest(req, callback) {
   const competitionId = req.query.competition;
   const leagueId = req.query.league;
@@ -587,6 +621,7 @@ function getMapsFromRequest(req, callback) {
 
 function handleExport(req, res) {
   const { type, format } = req.query;
+  const rule = req.query.rule || '2026';
 
   getMapsFromRequest(req, async (err, maps) => {
     if (err) {
@@ -615,7 +650,6 @@ function handleExport(req, res) {
     }
 
     if (type === 'scoresheets') {
-      const rule = req.query.rule || '2026';
       return await scoreSheetPDFMaze2.generateScoreSheetsFromMaps(res, maps, rule, true);
     }
 
@@ -625,7 +659,7 @@ function handleExport(req, res) {
         res.attachment('maps.zip');
         archive.pipe(res);
         for (const map of maps) {
-          const buffer = await mazeSSR.generatePNG(map);
+          const buffer = await mazeSSR.generatePNG(map, rule);
           archive.append(buffer, { name: `${map.name || map._id}.png` });
         }
         return archive.finalize();
@@ -654,7 +688,7 @@ function getMapImage(req, res) {
     if (err || !map) {
       return res.status(404).send('Map not found');
     }
-    const buffer = await mazeSSR.generatePNG(map);
+    const buffer = await mazeSSR.generatePNG(map, req.query.rule || '2026');
     res.setHeader('Content-Type', 'image/png');
     res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(map.name || mapid)}.png"`);
     res.send(buffer);

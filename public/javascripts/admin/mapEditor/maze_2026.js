@@ -577,7 +577,35 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     };
 
     $scope.makeImageDl = function(){
-        window.location.href = "/api/maps/maze/image/" + $scope.mapId;
+        const map = {
+            competition: $scope.competitionId,
+            dice: $scope.dice,
+            name: $scope.name,
+            length: $scope.length,
+            height: $scope.height,
+            duration: $scope.duration,
+            width: $scope.width,
+            leagueType: $scope.leagueType,
+            finished: $scope.finished,
+            startTile: $scope.startTile,
+            cells: $scope.cells,
+            league: leagueId
+        };
+        
+        $http.post('/api/maps/maze/map-image-png', map, { responseType: 'arraybuffer' })
+            .then(function(response) {
+                const blob = new Blob([response.data], { type: 'image/png' });
+                const fileURL = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = fileURL;
+                a.download = ($scope.name || 'map') + '.png';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            }, function(response) {
+                console.error("PNG Error", response);
+                alert("Error generating PNG");
+            });
     };
 
     $scope.hasPrintableTargets = function() {
