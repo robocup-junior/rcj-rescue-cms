@@ -1,7 +1,7 @@
-const logger = require('../config/logger').mainLogger;
+const logger = require('../../config/logger').mainLogger;
 
 const ssrModules = {
-  '2026': require('./mazeSSR_2026')
+  '2026': require('./2026')
 };
 
 function getSSR(rule = '2026') {

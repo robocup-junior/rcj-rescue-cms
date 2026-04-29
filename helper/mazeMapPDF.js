@@ -557,7 +557,9 @@ async function generateAndSendBulkMapImagesPDF(res, maps, competitionName, leagu
   doc.pipe(res);
 
   for (const map of maps) {
-    let orientation = map.width > map.length ? 'landscape' : 'portrait';
+    const buffer = await mazeSSR.generatePNG(map, map.rule || '2026');
+    const img = doc.openImage(buffer);
+    let orientation = img.width > img.height ? 'landscape' : 'portrait';
 
     doc.addPage({
       size: validPaperSize,
@@ -576,7 +578,7 @@ async function generateAndSendBulkMapImagesPDF(res, maps, competitionName, leagu
     const availableWidth = currentPageWidth - 60;
     const availableHeight = currentPageHeight - 120;
 
-    await mazeSSR.drawMazePDF(doc, map, 30, 80, availableWidth, availableHeight);
+    doc.image(img, 30, 80, { fit: [availableWidth, availableHeight], align: 'center', valign: 'center' });
   }
 
   doc.end();

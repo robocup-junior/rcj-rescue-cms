@@ -11,7 +11,7 @@ const { ObjectId } = require('mongoose').Types;
 const logger = require('../../config/logger').mainLogger;
 const { mazeMap } = require('../../models/mazeMap');
 const scoreCalculator = require('../../helper/scoreCalculator');
-const competitionTargetsPDF = require('../../helper/competitionTargetsPDF');
+const mazeMapPDF = require('../../helper/mazeMapPDF');
 const scoreSheetPDFMaze2 = require('../../helper/scoreSheetPDFMaze2');
 const mazeSSR = require('../../helper/mazeSSR');
 
@@ -529,7 +529,7 @@ function handlePublicCompetitionTargets(req, res, next) {
     map.cells = cells;
   }
 
-  competitionTargetsPDF.generateAndSendPDF(res, map, paperSize, includeLetterVictims, includeCognitiveTargets);
+  mazeMapPDF.generateAndSendPDF(res, map, paperSize, includeLetterVictims, includeCognitiveTargets);
 }
 
 async function handlePublicMapImagePDF(req, res, next) {
@@ -560,7 +560,7 @@ async function handlePublicMapImagePDF(req, res, next) {
     map.cells = cells;
   }
 
-  await competitionTargetsPDF.generateAndSendBulkMapImagesPDF(
+  await mazeMapPDF.generateAndSendBulkMapImagesPDF(
     res,
     [map],
     map.competitionName || 'Competition',
@@ -638,7 +638,7 @@ function handleExport(req, res) {
       const paperSize = req.query.paperSize || 'A4';
       const includeLetterVictims = req.query.includeLetterVictims === 'true';
       const includeCognitiveTargets = req.query.includeCognitiveTargets !== 'false';
-      return competitionTargetsPDF.generateAndSendBulkPDF(
+      return mazeMapPDF.generateAndSendBulkPDF(
         res,
         maps,
         competitionName,
@@ -665,7 +665,7 @@ function handleExport(req, res) {
         return archive.finalize();
       }
       const paperSize = req.query.paperSize || 'A4';
-      return competitionTargetsPDF.generateAndSendBulkMapImagesPDF(
+      return mazeMapPDF.generateAndSendBulkMapImagesPDF(
         res,
         maps,
         competitionName,

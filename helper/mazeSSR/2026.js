@@ -25,7 +25,7 @@ const SIZES = {
 const BIG_LETTERS = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
 
 function getImagePath(name) {
-  return path.join(__dirname, '../public/images', name);
+  return path.join(__dirname, '../../public/images', name);
 }
 
 const imageCache = {};
