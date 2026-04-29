@@ -104,21 +104,43 @@ block content
                 .d-flex.align-items-center.mr-4(title='{{"admin.mazeMapEditor.height" | translate}}')
                   label.small.mb-0.mr-2.text-muted
                     i.fas.fa-layer-group.mr-1
-                  input.form-control.form-control-sm(type='number', ng-model='height', ng-change='sliderOptions.ceil = height - 1', min='1', style="width: 70px;")
+                  .dimension-spinner
+                    button.btn-spin(type='button', ng-click="height = height > 1 ? height - 1 : 1; sliderOptions.ceil = height - 1")
+                      i.fas.fa-minus
+                    input.spinner-input(type='number', ng-model='height', ng-change='sliderOptions.ceil = height - 1', min='1')
+                    button.btn-spin(type='button', ng-click="height = height + 1; sliderOptions.ceil = height - 1")
+                      i.fas.fa-plus
+                
                 .d-flex.align-items-center.mr-4(title='{{"admin.mazeMapEditor.width" | translate}}')
                   label.small.mb-0.mr-2.text-muted
                     i.fas.fa-arrows-alt-h.mr-1
-                  input.form-control.form-control-sm(type='number', ng-model='width', min='1', style="width: 70px;")
+                  .dimension-spinner
+                    button.btn-spin(type='button', ng-click="width = width > 1 ? width - 1 : 1")
+                      i.fas.fa-minus
+                    input.spinner-input(type='number', ng-model='width', min='1')
+                    button.btn-spin(type='button', ng-click="width = width + 1")
+                      i.fas.fa-plus
+                
                 .d-flex.align-items-center(title='{{"admin.mazeMapEditor.length" | translate}}')
                   label.small.mb-0.mr-2.text-muted
                     i.fas.fa-arrows-alt-v.mr-1
-                  input.form-control.form-control-sm(type='number', ng-model='length', min='1', style="width: 70px;")
+                  .dimension-spinner
+                    button.btn-spin(type='button', ng-click="length = length > 1 ? length - 1 : 1")
+                      i.fas.fa-minus
+                    input.spinner-input(type='number', ng-model='length', min='1')
+                    button.btn-spin(type='button', ng-click="length = length + 1")
+                      i.fas.fa-plus
             .col-auto.px-3.border-left
               .d-flex.align-items-center(title='{{"admin.simMapEditor.timelimit" | translate}}')
                 label.small.mb-0.mr-2.text-muted
                   i.fas.fa-clock.mr-1
                   | {{"admin.mazeMapEditor.time" | translate}}
-                input.form-control.form-control-sm(type='number', ng-model='duration', min='1', style="width: 70px;")
+                .dimension-spinner
+                  button.btn-spin(type='button', ng-click="duration = duration > 1 ? duration - 1 : 1")
+                    i.fas.fa-minus
+                  input.spinner-input(type='number', ng-model='duration', min='1')
+                  button.btn-spin(type='button', ng-click="duration = duration + 1")
+                    i.fas.fa-plus
 
         .d-flex.mb-3
           .floor-switcher-vertical.d-flex.flex-column-reverse.p-2.bg-dark.border-right(style="min-width: 60px; border-top-left-radius: 8px; border-bottom-left-radius: 8px;")

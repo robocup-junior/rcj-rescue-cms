@@ -906,3 +906,53 @@ hr {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
+
+.dimension-spinner {
+  display: flex;
+  align-items: center;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-spin {
+  background: #f8fafc;
+  border: none;
+  width: 28px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.8rem;
+}
+
+.btn-spin:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.btn-spin:active {
+  background: #cbd5e1;
+}
+
+.spinner-input {
+  width: 50px !important;
+  border: none !important;
+  text-align: center;
+  font-weight: 600;
+  color: #1e293b;
+  height: 32px;
+  padding: 0 !important;
+  -moz-appearance: textfield;
+}
+
+.spinner-input::-webkit-outer-spin-button,
+.spinner-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
