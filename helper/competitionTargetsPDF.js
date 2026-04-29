@@ -303,7 +303,8 @@ function generateCompetitionTargetsPDF(map, outputPath = null, includeLetterVict
 
   const doc = new PDFDocument({
     autoFirstPage: false,
-    size: 'A4'
+    size: 'A4',
+    margin: 0
   });
 
   const jaFont = getPDFFont();
@@ -385,7 +386,8 @@ function generateAndSendPDF(res, map, paperSize = 'A4', includeLetterVictims = f
 
   const doc = new PDFDocument({
     autoFirstPage: false,
-    size: validPaperSize
+    size: validPaperSize,
+    margin: 0
   });
 
   const jaFont = getPDFFont();
@@ -441,8 +443,178 @@ function generateAndSendPDF(res, map, paperSize = 'A4', includeLetterVictims = f
   doc.end();
 }
 
+/**
+ * Generate a bulk PDF for multiple maps and pipe to response
+ * @param {Object} res - Express response object
+ * @param {Array} maps - Array of maze map objects
+ * @param {string} competitionName - Name of the competition
+ * @param {string} leagueName - Name of the league
+ * @param {string} paperSize - Paper size ('A4' or 'Letter')
+ * @param {boolean} includeLetterVictims - Whether to include letter victims
+ * @param {boolean} includeCognitiveTargets - Whether to include cognitive targets
+ */
+function generateAndSendBulkPDF(res, maps, competitionName, leagueName, paperSize = 'A4', includeLetterVictims = false, includeCognitiveTargets = true) {
+  const validPaperSize = PAPER_SIZES[paperSize] ? paperSize : 'A4';
+  const size = PAPER_SIZES[validPaperSize];
+  const pageWidth = size.width;
+  const pageHeight = size.height;
+
+  const doc = new PDFDocument({
+    autoFirstPage: false,
+    size: validPaperSize,
+    margin: 0
+  });
+
+  const jaFont = getPDFFont();
+  if (jaFont) {
+    doc.font(jaFont);
+  }
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename="bulk-targets.pdf"; filename*=UTF-8''${encodeURIComponent(`targets-${competitionName}-${leagueName}.pdf`)}`);
+
+  doc.pipe(res);
+
+  for (const map of maps) {
+    const targets = extractTargets(map, includeLetterVictims, includeCognitiveTargets);
+    if (targets.length === 0) continue;
+
+    let targetIndex = 0;
+    let mapPage = 0;
+
+    while (targetIndex < targets.length) {
+      doc.addPage();
+      mapPage++;
+
+      doc.fontSize(14);
+      const title = `${competitionName} - ${leagueName}`;
+      doc.text(title, 50, 15, {
+        width: pageWidth - 100,
+        align: 'center'
+      });
+
+      doc.fontSize(11);
+      doc.text(map.name, 50, 32, {
+        width: pageWidth - 100,
+        align: 'center'
+      });
+
+      doc.fontSize(9);
+      doc.text(`Page ${mapPage}`, 50, 48, {
+        width: pageWidth - 100,
+        align: 'center'
+      });
+
+      const headerHeight = 45;
+      const bottomMargin = 20;
+      const availableHeight = pageHeight - MARGIN_Y - headerHeight - bottomMargin;
+      const cellHeight = availableHeight / ROWS;
+      const availableWidth = pageWidth - (2 * MARGIN_X);
+      const cellWidth = availableWidth / COLS;
+
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          if (targetIndex >= targets.length) break;
+
+          const cellX = MARGIN_X + col * cellWidth;
+          const cellY = MARGIN_Y + headerHeight + row * cellHeight;
+          const x = cellX + (cellWidth - TARGET_SIZE) / 2;
+          const y = cellY;
+
+          drawTarget(doc, x, y, targets[targetIndex]);
+          targetIndex++;
+        }
+      }
+    }
+  }
+
+  doc.end();
+}
+
+/**
+ * Generate a bulk PDF with map images for multiple maps
+ * @param {Object} res - Express response object
+ * @param {Array} maps - Array of maze map objects
+ * @param {string} competitionName - Name of the competition
+ * @param {string} leagueName - Name of the league
+ * @param {string} paperSize - Paper size ('A4' or 'Letter')
+ */
+function generateAndSendBulkMapImagesPDF(res, maps, competitionName, leagueName, paperSize = 'A4') {
+  const validPaperSize = PAPER_SIZES[paperSize] ? paperSize : 'A4';
+  const size = PAPER_SIZES[validPaperSize];
+  const pageWidth = size.width;
+  const pageHeight = size.height;
+
+  const doc = new PDFDocument({
+    autoFirstPage: false,
+    size: validPaperSize,
+    margin: 0
+  });
+
+  const jaFont = getPDFFont();
+  if (jaFont) {
+    doc.font(jaFont);
+  }
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `inline; filename="bulk-maps.pdf"; filename*=UTF-8''${encodeURIComponent(`maps-${competitionName}-${leagueName}.pdf`)}`);
+
+  doc.pipe(res);
+
+  for (const map of maps) {
+    const imagePath = path.join(__dirname, '../tmp/course', `${map._id}.png`);
+    let orientation = 'portrait';
+    let img = null;
+
+    if (isExistFile(imagePath)) {
+      try {
+        img = doc.openImage(imagePath);
+        if (img && img.width > img.height) {
+          orientation = 'landscape';
+        }
+      } catch (e) {
+        console.error(`Error opening image for map ${map._id}:`, e);
+      }
+    }
+    
+    doc.addPage({
+      size: validPaperSize,
+      layout: orientation,
+      margin: 30
+    });
+
+    const currentPageWidth = orientation === 'landscape' ? pageHeight : pageWidth;
+    const currentPageHeight = orientation === 'landscape' ? pageWidth : pageHeight;
+
+    // Header
+    doc.fontSize(14).text(competitionName, { align: 'center' });
+    doc.fontSize(11).text(`${leagueName} - ${map.name}`, { align: 'center' });
+    doc.moveDown(1);
+
+    if (img) {
+      // Calculate available space (page size - margins - header area)
+      const availableWidth = currentPageWidth - 60;
+      const availableHeight = currentPageHeight - 100;
+
+      doc.image(img, {
+        fit: [availableWidth, availableHeight],
+        align: 'center',
+        valign: 'center'
+      });
+    } else {
+      doc.moveDown(10);
+      doc.fontSize(14).fillColor('#ef4444').text('Map image not found!', { align: 'center' });
+      doc.fontSize(10).fillColor('#64748b').text('Please open this map in the editor and save it to generate the image.', { align: 'center' });
+    }
+  }
+
+  doc.end();
+}
+
 module.exports = {
   generateCompetitionTargetsPDF,
   generateAndSendPDF,
+  generateAndSendBulkPDF,
+  generateAndSendBulkMapImagesPDF,
   extractCognitiveTargets: extractTargets // Keep old name for compatibility if needed
 };

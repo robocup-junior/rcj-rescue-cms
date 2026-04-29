@@ -1,4 +1,7 @@
 const express = require('express');
+const archiver = require('archiver');
+const fs = require('fs');
+const path = require('path');
 
 const publicRouter = express.Router();
 const privateRouter = express.Router();
@@ -12,6 +15,11 @@ const competitionTargetsPDF = require('../../helper/competitionTargetsPDF');
 const scoreSheetPDFMaze2 = require('../../helper/scoreSheetPDFMaze2');
 
 publicRouter.get('/', getMazeMaps);
+publicRouter.get('/bulk-targets-pdf', getBulkTargetsPDF);
+publicRouter.get('/bulk-scoresheets-pdf', getBulkScoreSheetsPDF);
+publicRouter.get('/bulk-maps-pdf', getBulkMapImagesPDF);
+publicRouter.get('/bulk-maps-zip', getBulkMapImagesZip);
+publicRouter.get('/:mapid/image', getMapImage);
 
 function getMazeMaps(req, res) {
   const competition = req.query.competition || req.params.competition;
@@ -578,6 +586,164 @@ publicRouter.post('/competition-targets-pdf', function (req, res, next) {
 
   competitionTargetsPDF.generateAndSendPDF(res, map, paperSize, includeLetterVictims, includeCognitiveTargets);
 });
+
+function getBulkTargetsPDF(req, res) {
+  const competitionId = req.query.competition;
+  const leagueId = req.query.league;
+  const mapIds = req.query.ids ? req.query.ids.split(',') : null;
+  const paperSize = req.query.paperSize || 'A4';
+  const includeLetterVictims = req.query.includeLetterVictims === 'true';
+  const includeCognitiveTargets = req.query.includeCognitiveTargets !== 'false';
+
+  let mapQuery;
+  if (mapIds) {
+    mapQuery = mazeMap.find({ _id: { $in: mapIds.filter(ObjectId.isValid) } });
+  } else if (ObjectId.isValid(competitionId)) {
+    mapQuery = mazeMap.find({ competition: competitionId, league: leagueId });
+  } else {
+    return res.status(400).send({ msg: 'Missing selection' });
+  }
+
+  mapQuery.populate('competition', 'name').lean().exec(function (err, maps) {
+    if (err) {
+      logger.error(err);
+      return res.status(400).send({ msg: 'Could not get maps' });
+    }
+    if (maps.length === 0) {
+      return res.status(404).send({ msg: 'No maps found' });
+    }
+
+    const competitionName = maps[0].competition ? maps[0].competition.name : 'Competition';
+    const leagueName = maps[0].league || 'League';
+
+    competitionTargetsPDF.generateAndSendBulkPDF(
+      res,
+      maps,
+      competitionName,
+      leagueName,
+      paperSize,
+      includeLetterVictims,
+      includeCognitiveTargets
+    );
+  });
+}
+
+function getBulkScoreSheetsPDF(req, res) {
+  const competitionId = req.query.competition;
+  const mapIds = req.query.ids ? req.query.ids.split(',') : null;
+  const rule = req.query.rule || '2026';
+
+  let mapQuery;
+  if (mapIds) {
+    mapQuery = mazeMap.find({ _id: { $in: mapIds.filter(ObjectId.isValid) } });
+  } else if (ObjectId.isValid(competitionId)) {
+    mapQuery = mazeMap.find({ competition: competitionId });
+  } else {
+    return res.status(400).send({ msg: 'Missing selection' });
+  }
+
+  mapQuery.populate('competition', 'name leagues').lean().exec(function (err, maps) {
+    if (err) {
+      logger.error(err);
+      return res.status(400).send({ msg: 'Could not get maps' });
+    }
+    if (maps.length === 0) {
+      return res.status(404).send({ msg: 'No maps found' });
+    }
+
+    scoreSheetPDFMaze2.generateScoreSheetsFromMaps(res, maps, rule);
+  });
+}
+
+function getBulkMapImagesPDF(req, res) {
+  const competitionId = req.query.competition;
+  const leagueId = req.query.league;
+  const mapIds = req.query.ids ? req.query.ids.split(',') : null;
+  const paperSize = req.query.paperSize || 'A4';
+
+  let mapQuery;
+  if (mapIds) {
+    mapQuery = mazeMap.find({ _id: { $in: mapIds.filter(ObjectId.isValid) } });
+  } else if (ObjectId.isValid(competitionId)) {
+    mapQuery = mazeMap.find({ competition: competitionId, league: leagueId });
+  } else {
+    return res.status(400).send({ msg: 'Missing selection' });
+  }
+
+  mapQuery.populate('competition', 'name').lean().exec(function (err, maps) {
+    if (err) {
+      logger.error(err);
+      return res.status(400).send({ msg: 'Could not get maps' });
+    }
+    if (maps.length === 0) {
+      return res.status(404).send({ msg: 'No maps found' });
+    }
+
+    const competitionName = maps[0].competition ? maps[0].competition.name : 'Competition';
+    const leagueName = maps[0].league || 'League';
+
+    competitionTargetsPDF.generateAndSendBulkMapImagesPDF(
+      res,
+      maps,
+      competitionName,
+      leagueName,
+      paperSize
+    );
+  });
+}
+
+function getBulkMapImagesZip(req, res) {
+  const competitionId = req.query.competition;
+  const leagueId = req.query.league;
+  const mapIds = req.query.ids ? req.query.ids.split(',') : null;
+
+  let mapQuery;
+  if (mapIds) {
+    mapQuery = mazeMap.find({ _id: { $in: mapIds.filter(ObjectId.isValid) } });
+  } else if (ObjectId.isValid(competitionId)) {
+    mapQuery = mazeMap.find({ competition: competitionId, league: leagueId });
+  } else {
+    return res.status(400).send({ msg: 'Missing selection' });
+  }
+
+  mapQuery.lean().exec(function (err, maps) {
+    if (err) {
+      logger.error(err);
+      return res.status(400).send({ msg: 'Could not get maps' });
+    }
+    if (maps.length === 0) {
+      return res.status(404).send({ msg: 'No maps found' });
+    }
+
+    const archive = archiver('zip', {
+      zlib: { level: 9 },
+    });
+
+    res.attachment('maps.zip');
+    archive.pipe(res);
+
+    maps.forEach((map) => {
+      const filePath = path.join(__dirname, '../../tmp/course', `${map._id}.png`);
+      if (fs.existsSync(filePath)) {
+        archive.file(filePath, {
+          name: `${map.name || map._id}.png`,
+        });
+      }
+    });
+
+    archive.finalize();
+  });
+}
+
+function getMapImage(req, res) {
+  const { mapid } = req.params;
+  const filePath = path.join(__dirname, '../../tmp/course', `${mapid}.png`);
+  if (fs.existsSync(filePath)) {
+    res.download(filePath, `${mapid}.png`);
+  } else {
+    res.status(404).send('Image not found. Please prepare score sheets first.');
+  }
+}
 
 publicRouter.all('*', function (req, res, next) {
   next();

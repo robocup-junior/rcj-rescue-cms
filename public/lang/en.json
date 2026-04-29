@@ -777,7 +777,25 @@
         },
         "mazeMapAdmin": {
             "title": "Map",
-            "create": "@:admin.lineMapAdmin.create"
+            "create": "@:admin.lineMapAdmin.create",
+            "selectAll": "Select All",
+            "unselectAll": "Unselect All",
+            "printSelected": "Print Selected",
+            "print": {
+                "title": "Print Options",
+                "outputContent": "Output Content",
+                "victimsTargets": "Victims / Targets",
+                "scoreSheets": "Score Sheets",
+                "mapImages": "Map Images",
+                "fileFormat": "File Format",
+                "paperSize": "Paper Size",
+                "targetTypes": "Target Types",
+                "cognitiveTargets": "Cognitive Targets",
+                "letterVictims": "Letter Victims",
+                "scoreSheetInfo": "Each selected map will generate a blank score sheet with competition details.",
+                "generatePDF": "Generate PDF",
+                "generatePNG": "Download PNG"
+            }
         },
         "mazeMapEditor": {
             "dimensions": "DIMENSIONS",

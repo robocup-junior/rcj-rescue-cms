@@ -775,7 +775,25 @@
         },
         "mazeMapAdmin": {
             "title": "マップ管理",
-            "create": "@:admin.lineMapAdmin.create"
+            "create": "@:admin.lineMapAdmin.create",
+            "selectAll": "すべて選択",
+            "unselectAll": "選択解除",
+            "printSelected": "選択したマップを印刷",
+            "print": {
+                "title": "印刷設定",
+                "outputContent": "出力内容",
+                "victimsTargets": "被災者 / ターゲット",
+                "scoreSheets": "スコアシート",
+                "mapImages": "マップ画像",
+                "fileFormat": "ファイル形式",
+                "paperSize": "用紙サイズ",
+                "targetTypes": "ターゲットの種類",
+                "cognitiveTargets": "認知的ターゲット",
+                "letterVictims": "被災者（文字）",
+                "scoreSheetInfo": "選択した各マップに対して、大会情報が記載された白紙のスコアシートを生成します。",
+                "generatePDF": "PDFを生成",
+                "generatePNG": "PNGをダウンロード"
+            }
         },
         "mazeMapEditor": {
             "dimensions": "マップサイズ",

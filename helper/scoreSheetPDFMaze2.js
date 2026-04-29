@@ -19,28 +19,34 @@ module.exports.generateScoreSheet = function (res, runs) {
   return rules[supportedRules[0]].generateScoreSheet(res, runs)
 };
 
-module.exports.generateScoreSheetFromMap = function (res, map, rule) {
-  const dummyRun = {
-    _id: map._id || '000000000000000000000000',
-    competition: {
-      name: (map.competition && map.competition.name) || 'Competition',
-      logo: (map.competition && map.competition.logo) || '',
-    },
-    team: {
-      name: '',
-      teamCode: '',
-      league: 'Maze',
-    },
-    startTime: null,
-    round: { name: '' },
-    field: { name: '' },
-    map: map,
-    noQR: map.noQR,
-    diceNumber: (typeof map.dice === 'number' && map.dice >= 1 && map.dice <= 6 ? map.dice : (Array.isArray(map.dice) && typeof map.dice[0] === 'number' && map.dice[0] >= 1 && map.dice[0] <= 6 ? map.dice[0] : null)),
-  };
+module.exports.generateScoreSheetsFromMaps = function (res, maps, rule) {
+  const dummyRuns = maps.map(map => {
+    return {
+      _id: map._id || '000000000000000000000000',
+      competition: {
+        name: (map.competition && map.competition.name) || 'Competition',
+        logo: (map.competition && map.competition.logo) || '',
+      },
+      team: {
+        name: '',
+        teamCode: '',
+        league: map.league || 'Maze',
+      },
+      startTime: null,
+      round: { name: '' },
+      field: { name: '' },
+      map: map,
+      noQR: map.noQR,
+      diceNumber: (typeof map.dice === 'number' && map.dice >= 1 && map.dice <= 6 ? map.dice : (Array.isArray(map.dice) && typeof map.dice[0] === 'number' && map.dice[0] >= 1 && map.dice[0] <= 6 ? map.dice[0] : null)),
+    };
+  });
 
   if (rules[rule]) {
-    return rules[rule].generateScoreSheet(res, [dummyRun]);
+    return rules[rule].generateScoreSheet(res, dummyRuns);
   }
-  return rules[supportedRules[0]].generateScoreSheet(res, [dummyRun]);
+  return rules[supportedRules[0]].generateScoreSheet(res, dummyRuns);
+};
+
+module.exports.generateScoreSheetFromMap = function (res, map, rule) {
+  return module.exports.generateScoreSheetsFromMaps(res, [map], rule);
 };

@@ -9,30 +9,132 @@ append scripts
     var competitionId = "#{id}"
     var leagueId = "#{leagueId}"
   script(src='/javascripts/admin/maps.js')
+append css
+  link(href='/stylesheets/maps_premium.css', rel='stylesheet')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-    span.breadcrumb-item.active #{leagueId} Maps
+block bread
+  //- Empty - moved inside content hero
 
 block content
-  .row
-    .col-md-2
-    .col-md-8
-      h3 {{competition.name}}
-      h2 {{league.name}} {{"admin.lineMapAdmin.title" | translate}}
-      button(ng-click="go('/admin/'+competitionId+'/'+league.league+'/mapEditor')" class='btn btn-primary') {{"admin.lineMapAdmin.create" | translate}}
-      br
-      br
-      table.custom
-        thead
-            tr
-              th {{"common.name" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
-            tr(ng-repeat='map in maps')
-              td
-                a(ng-bind='map.name' ng-href="/admin/{{competitionId}}/{{league.league}}/mapEditor/{{map._id}}")
-              td
-                a(href="" ng-click='removeMap(map)') {{"common.delete" | translate}}
+  .maps-hero
+    .maps-container
+      nav.breadcrumb.premium-breadcrumb.hero-breadcrumb
+        a.breadcrumb-item(ng-click="go('/home')")
+          i.fas.fa-home.mr-1
+          | Home
+        a.breadcrumb-item(ng-click="go('/admin')") Admin
+        a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+        span.breadcrumb-item.active #{leagueId} Maps
+      .hero-content-wrapper
+        .hero-text
+          h1.hero-title {{competition.name}}
+          p.hero-subtitle {{league.name}} {{"admin.lineMapAdmin.title" | translate}}
+        .hero-actions
+          button.btn-select-all(ng-click="selectAll()" ng-if="league.type == 'maze'")
+            i.fas.fa-check-double
+            span {{allSelected ? ('admin.mazeMapAdmin.unselectAll' | translate) : ('admin.mazeMapAdmin.selectAll' | translate)}}
+          button.btn-print-targets(ng-click="openPrintModal()" ng-if="league.type == 'maze'" ng-disabled="getSelectedCount() == 0")
+            i.fas.fa-print
+            span {{ 'admin.mazeMapAdmin.printSelected' | translate }} ({{getSelectedCount()}})
+          a.btn-create-map(ng-href="/admin/{{competitionId}}/{{league.league}}/mapEditor")
+            i.fas.fa-plus-circle
+            span {{"admin.lineMapAdmin.create" | translate}}
+  
+  .maps-container
+    .maps-grid(ng-if="maps.length > 0")
+      .map-card(ng-repeat='map in maps' ng-click="go('/admin/'+competitionId+'/'+league.league+'/mapEditor/'+map._id)" ng-class="{'selected': selectedMaps[map._id]}")
+        .map-selection(ng-click="toggleSelect(map, $event)" title="Select for bulk print")
+          .custom-checkbox(ng-class="{'checked': selectedMaps[map._id]}")
+            i.fas.fa-check(ng-if="selectedMaps[map._id]")
+        .map-info
+          .map-icon
+            i.fas.fa-map-marked-alt
+          .map-details
+            span.map-name(ng-bind='map.name' title='{{map.name}}')
+        .map-actions
+          .btn-delete-map(ng-click='removeMap(map, $event)' title='{{"common.delete" | translate}}')
+            i.fas.fa-trash-alt
+    
+    .empty-state(ng-if="maps.length == 0")
+      i.fas.fa-folder-open
+      p No maps found for this league.
+
+  script(type="text/ng-template" id="printSettingsModal.html")
+    .modal-header.premium-modal-header
+      h3.modal-title
+        i.fas.fa-print.mr-2
+        | {{ 'admin.mazeMapAdmin.print.title' | translate }}
+    .modal-body.premium-modal-body
+      .print-section
+        label.section-title {{ 'admin.mazeMapAdmin.print.outputContent' | translate }}
+        .option-tiles
+          .option-tile(ng-class="{'active': settings.exportType === 'Maps'}" ng-click="settings.exportType = 'Maps'")
+            .option-visual
+              i.fas.fa-map
+            .option-label {{ 'admin.mazeMapAdmin.print.mapImages' | translate }}
+            .option-check
+              i.fas.fa-check-circle
+          .option-tile(ng-class="{'active': settings.exportType === 'Scoresheets'}" ng-click="settings.exportType = 'Scoresheets'")
+            .option-visual
+              i.fas.fa-file-signature
+            .option-label {{ 'admin.mazeMapAdmin.print.scoreSheets' | translate }}
+            .option-check
+              i.fas.fa-check-circle
+          .option-tile(ng-class="{'active': settings.exportType === 'Targets'}" ng-click="settings.exportType = 'Targets'")
+            .option-visual
+              i.fas.fa-bullseye
+            .option-label {{ 'admin.mazeMapAdmin.print.victimsTargets' | translate }}
+            .option-check
+              i.fas.fa-check-circle
+      
+      hr
+      
+      .row
+        .col-md-6(ng-show="settings.exportType === 'Maps'")
+          label.section-title {{ 'admin.mazeMapAdmin.print.fileFormat' | translate }}
+          .premium-btn-group
+            .btn(ng-class="{'active': settings.exportFormat === 'PDF'}" ng-click="settings.exportFormat = 'PDF'") PDF
+            .btn(ng-class="{'active': settings.exportFormat === 'PNG'}" ng-click="settings.exportFormat = 'PNG'") PNG
+            
+        .col-md-6(ng-show="settings.exportType === 'Targets' || (settings.exportType === 'Maps' && settings.exportFormat === 'PDF')")
+          label.section-title {{ 'admin.mazeMapAdmin.print.paperSize' | translate }}
+          .premium-btn-group
+            .btn(ng-class="{'active': settings.paperSize === 'A4'}" ng-click="settings.paperSize = 'A4'") A4
+            .btn(ng-class="{'active': settings.paperSize === 'Letter'}" ng-click="settings.paperSize = 'Letter'") Letter
+      
+      //- Target Types (only for Targets)
+      div(ng-show="settings.exportType === 'Targets'")
+        hr
+        .print-section
+          label.section-title {{ 'admin.mazeMapAdmin.print.targetTypes' | translate }}
+          .option-tiles
+            .option-tile(ng-class="{'active': settings.includeCognitiveTargets}" ng-click="settings.includeCognitiveTargets = !settings.includeCognitiveTargets")
+              .option-visual
+                .cognitive-preview
+                  .ring.ring-1
+                  .ring.ring-2
+                  .ring.ring-3
+              .option-label {{ 'admin.mazeMapAdmin.print.cognitiveTargets' | translate }}
+              .option-check
+                i.fas.fa-check-circle
+            .option-tile(ng-class="{'active': settings.includeLetterVictims}" ng-click="settings.includeLetterVictims = !settings.includeLetterVictims")
+              .option-visual
+                .letter-preview
+                  span Φ
+                  span Ψ
+                  span Ω
+              .option-label {{ 'admin.mazeMapAdmin.print.letterVictims' | translate }}
+              .option-check
+                i.fas.fa-check-circle
+      
+      div(ng-if="settings.exportType == 'Scoresheets'")
+        hr
+        .print-section
+          p.text-muted.mb-0 {{ 'admin.mazeMapAdmin.print.scoreSheetInfo' | translate }}
+          
+    .modal-footer.premium-modal-footer
+      button.btn.btn-print-action(ng-click="ok()" ng-disabled="settings.exportType == 'Targets' && !settings.includeCognitiveTargets && !settings.includeLetterVictims")
+        i.fas.fa-magic.mr-2
+        span(ng-if="settings.exportType === 'Maps' && settings.exportFormat === 'PNG'") {{ 'admin.mazeMapAdmin.print.generatePNG' | translate }}
+        span(ng-if="settings.exportType !== 'Maps' || settings.exportFormat === 'PDF'") {{ 'admin.mazeMapAdmin.print.generatePDF' | translate }}
+      button.btn.btn-cancel-action(ng-click="cancel()") {{ 'common.cancel' | translate }}

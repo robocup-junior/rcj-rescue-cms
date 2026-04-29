@@ -664,11 +664,33 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         paperSize: 'A4',
         includeLetterVictims: true,
         includeCognitiveTargets: true,
-        noQR: true
+        noQR: true,
+        exportType: 'Maps',
+        exportFormat: 'PDF'
     };
 
     $scope.onPaperSizeChange = function() {
         console.log('Paper size changed to:', $scope.pdfSettings.paperSize);
+    };
+
+    $scope.printMapImage = function() {
+        const paperSize = $scope.pdfSettings.paperSize || 'A4';
+        const url = `/api/maps/maze/bulk-maps-pdf?competition=${$scope.competitionId}&league=${leagueId}&ids=${mapId}&paperSize=${paperSize}`;
+        window.open(url, '_blank');
+    };
+
+    $scope.generateOutput = function() {
+        if ($scope.pdfSettings.exportType === 'Targets') {
+            $scope.generateCompetitionTargetsPDF();
+        } else if ($scope.pdfSettings.exportType === 'Scoresheets') {
+            $scope.generateScoreSheet();
+        } else if ($scope.pdfSettings.exportType === 'Maps') {
+            if ($scope.pdfSettings.exportFormat === 'PDF') {
+                $scope.printMapImage();
+            } else {
+                $scope.makeImageDl();
+            }
+        }
     };
 
     $scope.generateCompetitionTargetsPDF = function() {
