@@ -17,15 +17,15 @@ block bread
 
 block content
   .home-hero
-    .hero-content
-      .hero-logo(style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius: 1.5rem; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white;")
+    .hero-content.hero-vertical
+      .hero-logo-profile
         i.fas.fa-user-astronaut
       .hero-text-wrapper
         h1.hero-title #{user.username}
         p.hero-subtitle {{"common.mypage" | translate}}
 
   .comp-container
-    .premium-card(style="margin-top: -3rem; position: relative; z-index: 10; padding: 3rem; background: white; border-radius: 2rem; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,0,0,0.05);")
+    .premium-card.profile-card
       .card-body
         h2.section-title
           i.fas.fa-id-card

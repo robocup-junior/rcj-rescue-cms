@@ -277,3 +277,111 @@ body {
     box-shadow: none;
 }
 
+.profile-card {
+    margin-top: -3rem;
+    position: relative;
+    z-index: 10;
+    padding: 0;
+    background: white !important;
+    border-radius: 2rem;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.hero-logo-profile {
+    width: 60px;
+    height: 60px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .comp-container, .premium-container {
+        padding: 0 0.75rem;
+    }
+
+    .hero-content {
+        align-items: center;
+    }
+
+    .profile-card {
+        margin-top: -1.5rem;
+        padding: 1.25rem;
+        border-radius: 1.5rem;
+    }
+
+    .premium-card .card-body {
+        padding: 0;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .info-item {
+        padding: 0.75rem 0;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid #f1f5f9;
+        border-radius: 0;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+
+    .info-item:hover {
+        transform: none;
+    }
+
+    .password-section {
+        padding: 0;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+    }
+
+    .rule-card {
+        padding: 0.5rem 0;
+        margin-bottom: 1.5rem;
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        border-radius: 0;
+    }
+
+    .premium-divider {
+        margin: 2rem 0;
+    }
+
+    .hero-logo-profile {
+        width: 50px;
+        height: 50px;
+        font-size: 1.25rem;
+        border-radius: 1rem;
+    }
+
+    .btn-premium {
+        width: 100%;
+        padding: 0.875rem 1.5rem;
+    }
+    
+    .form-actions {
+        margin-top: 2rem !important;
+        text-align: center !important;
+    }
+}
