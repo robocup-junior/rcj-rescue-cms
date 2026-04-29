@@ -851,7 +851,11 @@
             "saveAsModal": {
                 "newName": "新しいマップ名",
                 "targetCompetition": "コピー先の大会",
-                "createCopy": "コピーを作成"
+                "createCopy": "コピーを作成",
+                "successTitle": "マップを作成しました",
+                "successText": "新しいマップが正常に作成されました。新しいマップのエディタに移動しますか？それともこのページに留まりますか？",
+                "goToNew": "新しいマップへ移動",
+                "stayHere": "このまま編集を続ける"
             },
             "create": "新規作成",
             "edit": "編集",

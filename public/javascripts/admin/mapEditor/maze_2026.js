@@ -1,8 +1,8 @@
 // register the directive with your app module
-var app = angular.module('MazeEditor', ['ngTouch','ngAnimate', 'ui.bootstrap', 'pascalprecht.translate', 'ngCookies']);
+var app = angular.module('MazeEditor', ['ngTouch', 'ngAnimate', 'ui.bootstrap', 'pascalprecht.translate', 'ngCookies']);
 
 // function referenced by the drop target
-app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','$translate', function ($scope, $uibModal, $log, $http, $translate) {
+app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http', '$translate', function ($scope, $uibModal, $log, $http, $translate) {
     const Toast = Swal.mixin({
         toast: true,
         position: 'top-end',
@@ -14,7 +14,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     };
     $scope.competitionId = competitionId;
     $scope.mapId = mapId;
-    if(!pubService){
+    if (!pubService) {
         $http.get("/api/competitions/").then(function (response) {
             $scope.competitions = response.data
             $scope.se_competition = competitionId
@@ -42,86 +42,86 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     $scope.name = "Awesome Testbana";
     $scope.cells = {};
     $scope.dice = [];
-    $scope.saveasname ="";
+    $scope.saveasname = "";
     $scope.finished = true;
     $scope.leagueType = "standard";
 
-    if(!pubService){
+    if (!pubService) {
         $http.get("/api/competitions/" +
-          $scope.competitionId).then(function (response) {
-            $scope.competition = response.data;
-            $scope.league = response.data.leagues.find((l) => l.league == leagueId);
-        })
+            $scope.competitionId).then(function (response) {
+                $scope.competition = response.data;
+                $scope.league = response.data.leagues.find((l) => l.league == leagueId);
+            })
     }
 
 
     if (mapId) {
-        
+
         $http.get("/api/maps/maze/" + mapId +
             "?populate=true").then(function (response) {
-            console.log(response.data);
-            $scope.startTile = response.data.startTile;
-            $scope.height = response.data.height;
-            $scope.width = response.data.width;
-            $scope.duration = response.data.duration || 480;
-            $scope.length = response.data.length;
-            $scope.name = response.data.name;
-            $scope.finished = true;
-            $scope.competitionId = response.data.competition;
-            $scope.leagueType = response.data.leagueType;
+                console.log(response.data);
+                $scope.startTile = response.data.startTile;
+                $scope.height = response.data.height;
+                $scope.width = response.data.width;
+                $scope.duration = response.data.duration || 480;
+                $scope.length = response.data.length;
+                $scope.name = response.data.name;
+                $scope.finished = true;
+                $scope.competitionId = response.data.competition;
+                $scope.leagueType = response.data.leagueType;
 
 
-            try {
-                $scope.parent = response.data.parent;
-            } catch (e) {
-                $scope.parent = "";
-            }
-            if (response.data.dice) {
-                $scope.dice = response.data.dice;
-            } else {
-                $scope.dice = [];
-                for (let i = 0; i < 6; i++) {
-                    $scope.dice[i] = mapId
+                try {
+                    $scope.parent = response.data.parent;
+                } catch (e) {
+                    $scope.parent = "";
                 }
-            }
+                if (response.data.dice) {
+                    $scope.dice = response.data.dice;
+                } else {
+                    $scope.dice = [];
+                    for (let i = 0; i < 6; i++) {
+                        $scope.dice[i] = mapId
+                    }
+                }
 
 
 
 
-            for (var i = 0; i < response.data.cells.length; i++) {
-                $scope.cells[response.data.cells[i].x + ',' +
-                    response.data.cells[i].y + ',' +
-                    response.data.cells[i].z] = response.data.cells[i];
+                for (var i = 0; i < response.data.cells.length; i++) {
+                    $scope.cells[response.data.cells[i].x + ',' +
+                        response.data.cells[i].y + ',' +
+                        response.data.cells[i].z] = response.data.cells[i];
 
-            }
+                }
 
-            // Post-process cells to initialize cognitiveTargets for tiles with Cognitive victims
-            // This handles backward compatibility with saved data that predates cognitiveTargets
-            for (var key in $scope.cells) {
-                var cell = $scope.cells[key];
-                if (cell.isTile && cell.tile && cell.tile.victims) {
-                    var directions = ['top', 'right', 'bottom', 'left'];
-                    for (var j = 0; j < directions.length; j++) {
-                        var dir = directions[j];
-                        if (cell.tile.victims[dir] === 'Cognitive') {
-                            // Initialize cognitiveTargets if not exists
-                            if (!cell.tile.cognitiveTargets) {
-                                cell.tile.cognitiveTargets = {};
-                            }
-                            // Initialize this direction if not exists
-                            if (!cell.tile.cognitiveTargets[dir]) {
-                                cell.tile.cognitiveTargets[dir] = {
-                                    rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' }
-                                };
+                // Post-process cells to initialize cognitiveTargets for tiles with Cognitive victims
+                // This handles backward compatibility with saved data that predates cognitiveTargets
+                for (var key in $scope.cells) {
+                    var cell = $scope.cells[key];
+                    if (cell.isTile && cell.tile && cell.tile.victims) {
+                        var directions = ['top', 'right', 'bottom', 'left'];
+                        for (var j = 0; j < directions.length; j++) {
+                            var dir = directions[j];
+                            if (cell.tile.victims[dir] === 'Cognitive') {
+                                // Initialize cognitiveTargets if not exists
+                                if (!cell.tile.cognitiveTargets) {
+                                    cell.tile.cognitiveTargets = {};
+                                }
+                                // Initialize this direction if not exists
+                                if (!cell.tile.cognitiveTargets[dir]) {
+                                    cell.tile.cognitiveTargets[dir] = {
+                                        rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' }
+                                    };
+                                }
                             }
                         }
                     }
                 }
-            }
 
-        });
+            });
     }
-    
+
 
     $scope.range = function (n) {
         arr = [];
@@ -130,11 +130,11 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         }
         return arr;
     }
-    
-    $scope.changeFloor = function (z){
+
+    $scope.changeFloor = function (z) {
         $scope.z = z;
     }
-    
+
     $scope.go = function (path) {
         window.location = path
     }
@@ -142,9 +142,9 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     $scope.$watchCollection('startTile', function (newValue, oldValue) {
         $scope.recalculateLinear();
     });
-    
+
     $scope.$watchCollection('cells', function (newValue, oldValue) {
-        
+
         $scope.recalculateLinear();
     });
 
@@ -165,31 +165,31 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             $scope.cells[index].ignoreWall = false;
             $scope.cells[index].changeFloorWall = undefined;
             if ($scope.cells[index].tile) {
-                $scope.cells[index].tile.reachable= false;
-            }       
+                $scope.cells[index].tile.reachable = false;
+            }
         }
-        
+
         let startTilePosition = $scope.startTile.x + "," + $scope.startTile.y + "," + $scope.startTile.z;
         for (var index in $scope.cells) {
-            if($scope.cells[index].tile){
+            if ($scope.cells[index].tile) {
                 let tile = $scope.cells[index].tile;
                 var x = Number(index.split(',')[0]);
                 var y = Number(index.split(',')[1]);
                 var z = Number(index.split(',')[2]);
                 // Set to virtual wall around the black tile and start tile
-                if(tile.black || index == startTilePosition){
-                    setVirtualWall(x, y-1, z);
-                    setVirtualWall(x+1, y, z);
-                    setVirtualWall(x-1, y, z);
-                    setVirtualWall(x, y+1, z);
+                if (tile.black || index == startTilePosition) {
+                    setVirtualWall(x, y - 1, z);
+                    setVirtualWall(x + 1, y, z);
+                    setVirtualWall(x - 1, y, z);
+                    setVirtualWall(x, y + 1, z);
                 }
 
                 // Remove wall from elevator
                 if (tile.changeFloorTo != undefined && tile.changeFloorTo != z) {
-                    setIgnoreWall(x, y-1, z, tile.changeFloorTo);
-                    setIgnoreWall(x+1, y, z, tile.changeFloorTo);
-                    setIgnoreWall(x-1, y, z, tile.changeFloorTo);
-                    setIgnoreWall(x, y+1, z, tile.changeFloorTo);
+                    setIgnoreWall(x, y - 1, z, tile.changeFloorTo);
+                    setIgnoreWall(x + 1, y, z, tile.changeFloorTo);
+                    setIgnoreWall(x - 1, y, z, tile.changeFloorTo);
+                    setIgnoreWall(x, y + 1, z, tile.changeFloorTo);
                 }
             }
         }
@@ -201,20 +201,20 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         recurs($scope.startTile.x, $scope.startTile.y + 1, $scope.startTile.z);
 
         //Top Left
-        recurs($scope.startTile.x-1, $scope.startTile.y - 2, $scope.startTile.z);
-        recurs($scope.startTile.x-2, $scope.startTile.y - 1, $scope.startTile.z);
+        recurs($scope.startTile.x - 1, $scope.startTile.y - 2, $scope.startTile.z);
+        recurs($scope.startTile.x - 2, $scope.startTile.y - 1, $scope.startTile.z);
 
         //Top Right
-        recurs($scope.startTile.x+1, $scope.startTile.y - 2, $scope.startTile.z);
-        recurs($scope.startTile.x+2, $scope.startTile.y - 1, $scope.startTile.z);
+        recurs($scope.startTile.x + 1, $scope.startTile.y - 2, $scope.startTile.z);
+        recurs($scope.startTile.x + 2, $scope.startTile.y - 1, $scope.startTile.z);
 
         //Bottom Left
-        recurs($scope.startTile.x-1, $scope.startTile.y + 2, $scope.startTile.z);
-        recurs($scope.startTile.x-2, $scope.startTile.y + 1, $scope.startTile.z);
+        recurs($scope.startTile.x - 1, $scope.startTile.y + 2, $scope.startTile.z);
+        recurs($scope.startTile.x - 2, $scope.startTile.y + 1, $scope.startTile.z);
 
         //Bottom Right
-        recurs($scope.startTile.x+1, $scope.startTile.y + 2, $scope.startTile.z);
-        recurs($scope.startTile.x+2, $scope.startTile.y + 1, $scope.startTile.z);
+        recurs($scope.startTile.x + 1, $scope.startTile.y + 2, $scope.startTile.z);
+        recurs($scope.startTile.x + 2, $scope.startTile.y + 1, $scope.startTile.z);
 
         reachable($scope.startTile.x, $scope.startTile.y, $scope.startTile.z);
     }
@@ -228,30 +228,30 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             y > $scope.length * 2 + 1 || y < 0 ||
             z > $scope.height || z < 0)
             return;
-    
-        if ($scope.cells[pos(x,y,z)] != undefined && $scope.cells[pos(x,y,z)].tile && $scope.cells[pos(x,y,z)].tile.reachable) return;
+
+        if ($scope.cells[pos(x, y, z)] != undefined && $scope.cells[pos(x, y, z)].tile && $scope.cells[pos(x, y, z)].tile.reachable) return;
         setReachable(x, y, z);
 
         // Top
-        if (!wallExist(x, y-1, z)) {
-            reachable(x, y-2, z);
+        if (!wallExist(x, y - 1, z)) {
+            reachable(x, y - 2, z);
         }
         // Right
-        if (!wallExist(x+1, y, z)) {
-            reachable(x+2, y, z);
+        if (!wallExist(x + 1, y, z)) {
+            reachable(x + 2, y, z);
         }
         // Left
-        if (!wallExist(x-1, y, z)) {
-            reachable(x-2, y, z);
+        if (!wallExist(x - 1, y, z)) {
+            reachable(x - 2, y, z);
         }
         // Bottom
-        if (!wallExist(x, y+1, z)) {
-            reachable(x, y+2, z);
+        if (!wallExist(x, y + 1, z)) {
+            reachable(x, y + 2, z);
         }
 
         // Elevator
-        if ($scope.cells[pos(x,y,z)].tile.changeFloorTo != undefined && $scope.cells[pos(x,y,z)].tile.changeFloorTo != z) {
-            reachable(x, y, $scope.cells[pos(x,y,z)].tile.changeFloorTo);
+        if ($scope.cells[pos(x, y, z)].tile.changeFloorTo != undefined && $scope.cells[pos(x, y, z)].tile.changeFloorTo != z) {
+            reachable(x, y, $scope.cells[pos(x, y, z)].tile.changeFloorTo);
         }
     }
 
@@ -260,16 +260,16 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     }
 
     function wallExist(x, y, z) {
-        let cell = $scope.cells[pos(x,y,z)];
+        let cell = $scope.cells[pos(x, y, z)];
         if (!cell) return false;
         return cell.isWall == true;
     }
 
     function setReachable(x, y, z) {
-        if ($scope.cells[pos(x,y,z)]) {
-            $scope.cells[pos(x,y,z)].tile.reachable = true;
+        if ($scope.cells[pos(x, y, z)]) {
+            $scope.cells[pos(x, y, z)].tile.reachable = true;
         } else {
-            $scope.cells[pos(x,y,z)] = {
+            $scope.cells[pos(x, y, z)] = {
                 isTile: true,
                 isLinear: false,
                 tile: {
@@ -280,22 +280,22 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     }
 
     function setIgnoreWall(x, y, z, nextLvl) {
-        if ($scope.cells[pos(x,y,z)]) {
-            $scope.cells[pos(x,y,z)].ignoreWall = !(wallExist(x,y,z) && wallExist(x,y,nextLvl));
-            $scope.cells[pos(x,y,z)].changeFloorWall = nextLvl;
+        if ($scope.cells[pos(x, y, z)]) {
+            $scope.cells[pos(x, y, z)].ignoreWall = !(wallExist(x, y, z) && wallExist(x, y, nextLvl));
+            $scope.cells[pos(x, y, z)].changeFloorWall = nextLvl;
         } else {
-            $scope.cells[pos(x,y,z)] = {
-                ignoreWall: !(wallExist(x,y,z) && wallExist(x,y,nextLvl)),
+            $scope.cells[pos(x, y, z)] = {
+                ignoreWall: !(wallExist(x, y, z) && wallExist(x, y, nextLvl)),
                 changeFloorWall: nextLvl
             };
         }
     }
 
     function setVirtualWall(x, y, z) {
-        if ($scope.cells[pos(x,y,z)]) {
-            $scope.cells[pos(x,y,z)].virtualWall = true;
+        if ($scope.cells[pos(x, y, z)]) {
+            $scope.cells[pos(x, y, z)].virtualWall = true;
         } else {
-            $scope.cells[pos(x,y,z)] = {
+            $scope.cells[pos(x, y, z)] = {
                 virtualWall: true
             };
         }
@@ -307,10 +307,10 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         }
 
         var cell = $scope.cells[x + ',' + y + ',' + z];
-        
-        
 
-        
+
+
+
         // If this is a wall that doesn't exists
         if (!cell)
             return;
@@ -486,47 +486,47 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         };
         $http.post("/api/maps/maze", map).then(function (response) {
             console.log(response.data);
-            $scope.dice[num-1] = response.data.id;
-            $scope.saveMap($scope.dice[num-1]);
+            $scope.dice[num - 1] = response.data.id;
+            $scope.saveMap($scope.dice[num - 1]);
         }, function (response) {
             console.log(response);
             console.log("Error: " + response.statusText);
             alert(response.data.msg);
         });
-        
-        
+
+
     }
 
-    $scope.itemNumber = function(type,x,y,z){
+    $scope.itemNumber = function (type, x, y, z) {
         let count = 0;
-        for(let i=1,l=$scope.length*2+1;i<l;i+=2){
-            for(let j=1,m=$scope.width*2+1;j<m;j+=2){
-                for(let k=0;k<$scope.height;k++) {
-                    if(!$scope.cells[j + ',' + i + ',' + k]) continue;
-                    if($scope.cells[j + ',' + i + ',' + k].tile[type]) count++;
-                    if(x == j && y == i && z == k) return count;
+        for (let i = 1, l = $scope.length * 2 + 1; i < l; i += 2) {
+            for (let j = 1, m = $scope.width * 2 + 1; j < m; j += 2) {
+                for (let k = 0; k < $scope.height; k++) {
+                    if (!$scope.cells[j + ',' + i + ',' + k]) continue;
+                    if ($scope.cells[j + ',' + i + ',' + k].tile[type]) count++;
+                    if (x == j && y == i && z == k) return count;
                 }
             }
         }
         return count;
     };
 
-    $scope.victimNumber = function(type,x,y,z,place){
+    $scope.victimNumber = function (type, x, y, z, place) {
         let count = 0;
-        for(let i=1,l=$scope.length*2+1;i<l;i+=2){
-            for(let j=1,m=$scope.width*2+1;j<m;j+=2){
-                for(let k=0;k<$scope.height;k++) {
-                    if(!$scope.cells[j + ',' + i + ',' + k]) continue;
+        for (let i = 1, l = $scope.length * 2 + 1; i < l; i += 2) {
+            for (let j = 1, m = $scope.width * 2 + 1; j < m; j += 2) {
+                for (let k = 0; k < $scope.height; k++) {
+                    if (!$scope.cells[j + ',' + i + ',' + k]) continue;
                     let victims = $scope.cells[j + ',' + i + ',' + k].tile.victims;
-                    if(victims){
+                    if (victims) {
                         // Count all victim types consecutively
                         let victimPlaces = ['top', 'left', 'right', 'bottom'];
-                        for(let p = 0; p < victimPlaces.length; p++){
+                        for (let p = 0; p < victimPlaces.length; p++) {
                             let vp = victimPlaces[p];
                             if (victims[vp] == 'None') continue;
                             count++;
-                            if(x == j && y == i && z == k && place == vp){
-                                return big[count-1];
+                            if (x == j && y == i && z == k && place == vp) {
+                                return big[count - 1];
                             }
                         }
                     }
@@ -557,7 +557,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         var first = first.charCodeAt(0);
         var last = last.charCodeAt(0);
         var result = new Array();
-        for(var i = first; i <= last; i++) {
+        for (var i = first; i <= last; i++) {
             result.push(String.fromCodePoint(i));
         }
         return result;
@@ -565,18 +565,18 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     var big = Range('A', 'Z');
     var small = Range('a', 'z');
 
-    $scope.isVictim = function(type,x,y,z){
-        if($scope.cells[x + ',' + y + ',' + z] && $scope.cells[x + ',' + y + ',' + z].tile){
-            if($scope.cells[x + ',' + y + ',' + z].tile.victims.bottom == type) return true;
-            if($scope.cells[x + ',' + y + ',' + z].tile.victims.top == type) return true;
-            if($scope.cells[x + ',' + y + ',' + z].tile.victims.right == type) return true;
-            if($scope.cells[x + ',' + y + ',' + z].tile.victims.left == type) return true;
-            if($scope.cells[x + ',' + y + ',' + z].tile.victims.floor == type) return true;
+    $scope.isVictim = function (type, x, y, z) {
+        if ($scope.cells[x + ',' + y + ',' + z] && $scope.cells[x + ',' + y + ',' + z].tile) {
+            if ($scope.cells[x + ',' + y + ',' + z].tile.victims.bottom == type) return true;
+            if ($scope.cells[x + ',' + y + ',' + z].tile.victims.top == type) return true;
+            if ($scope.cells[x + ',' + y + ',' + z].tile.victims.right == type) return true;
+            if ($scope.cells[x + ',' + y + ',' + z].tile.victims.left == type) return true;
+            if ($scope.cells[x + ',' + y + ',' + z].tile.victims.floor == type) return true;
         }
         return false;
     };
 
-    $scope.makeImageDl = function(){
+    $scope.makeImageDl = function () {
         const map = {
             competition: $scope.competitionId,
             dice: $scope.dice,
@@ -591,9 +591,9 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             cells: $scope.cells,
             league: leagueId
         };
-        
+
         $http.post('/api/maps/maze/map-image-png', map, { responseType: 'arraybuffer' })
-            .then(function(response) {
+            .then(function (response) {
                 const blob = new Blob([response.data], { type: 'image/png' });
                 const fileURL = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -602,13 +602,13 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
-            }, function(response) {
+            }, function (response) {
                 console.error("PNG Error", response);
                 alert("Error generating PNG");
             });
     };
 
-    $scope.hasPrintableTargets = function() {
+    $scope.hasPrintableTargets = function () {
         for (const key in $scope.cells) {
             const cell = $scope.cells[key];
             if (cell.isTile && cell.tile && cell.tile.victims) {
@@ -624,7 +624,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         return false;
     };
 
-    $scope.hasCognitiveTargetsOnly = function() {
+    $scope.hasCognitiveTargetsOnly = function () {
         for (const key in $scope.cells) {
             const cell = $scope.cells[key];
             if (cell.isTile && cell.tile && cell.tile.victims) {
@@ -649,11 +649,11 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         exportFormat: 'PDF'
     };
 
-    $scope.onPaperSizeChange = function() {
+    $scope.onPaperSizeChange = function () {
         console.log('Paper size changed to:', $scope.pdfSettings.paperSize);
     };
 
-    $scope.printMapImage = function() {
+    $scope.printMapImage = function () {
         const paperSize = $scope.pdfSettings.paperSize || 'A4';
         const map = {
             competition: $scope.competitionId,
@@ -672,17 +672,17 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         };
 
         $http.post('/api/maps/maze/map-image-pdf', map, { responseType: 'arraybuffer' })
-            .then(function(response) {
+            .then(function (response) {
                 const blob = new Blob([response.data], { type: 'application/pdf' });
                 const fileURL = URL.createObjectURL(blob);
                 window.open(fileURL, '_blank');
-            }, function(response) {
+            }, function (response) {
                 console.error("PDF Error", response);
                 alert("Error generating PDF");
             });
     };
 
-    $scope.generateOutput = function() {
+    $scope.generateOutput = function () {
         if ($scope.pdfSettings.exportType === 'Targets') {
             $scope.generateCompetitionTargetsPDF();
         } else if ($scope.pdfSettings.exportType === 'Scoresheets') {
@@ -696,11 +696,11 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         }
     };
 
-    $scope.generateCompetitionTargetsPDF = function() {
+    $scope.generateCompetitionTargetsPDF = function () {
         const paperSize = $scope.pdfSettings.paperSize;
         const includeLetterVictims = $scope.pdfSettings.includeLetterVictims;
         const includeCognitiveTargets = $scope.pdfSettings.includeCognitiveTargets;
-        
+
         if (!includeLetterVictims && !includeCognitiveTargets) {
             alert("Please select at least one target type to print");
             return;
@@ -723,33 +723,33 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             includeLetterVictims: includeLetterVictims,
             includeCognitiveTargets: includeCognitiveTargets
         };
-        
+
         $http.post('/api/maps/maze/competition-targets-pdf', map, { responseType: 'arraybuffer' })
-            .then(function(response) {
+            .then(function (response) {
                 const blob = new Blob([response.data], { type: 'application/pdf' });
                 const fileURL = URL.createObjectURL(blob);
                 window.open(fileURL, '_blank');
-            }, function(response) {
+            }, function (response) {
                 console.error("PDF Error", response);
                 alert("Error generating PDF");
             });
     };
 
 
-    $scope.wallColor = function(x,y,z){
-        let cell = $scope.cells[x+','+y+','+z];
-        if(!cell) return {};
-        if(cell.isWall) {
-            if (cell.isLinear) return {'background-color': 'black'};
-            else if (cell.ignoreWall) return {'background-color': 'green'};
-            else return {'background-color': 'navy'};
+    $scope.wallColor = function (x, y, z) {
+        let cell = $scope.cells[x + ',' + y + ',' + z];
+        if (!cell) return {};
+        if (cell.isWall) {
+            if (cell.isLinear) return { 'background-color': 'black' };
+            else if (cell.ignoreWall) return { 'background-color': 'green' };
+            else return { 'background-color': 'navy' };
         }
     };
 
     $scope.openSaveAsModal = function () {
         var modalInstance = $uibModal.open({
             animation: true,
-            templateUrl: 'saveAsModal.html',
+            templateUrl: 'saveAsModal_2026.html',
             controller: 'SaveAsModalCtrl',
             size: 'md',
             resolve: {
@@ -773,19 +773,19 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     };
 
 
-    $scope.saveMapAs = function (name, competitionId) {
+    $scope.saveMapAs = function (name, targetCompId) {
         if ($scope.startNotSet()) {
             alert("You must define a starting tile by clicking a tile");
             return;
         }
-        if (name == $scope.name && $scope.se_competition == competitionId) {
-            alert("You must have a new name when saving as!");
+        if (name == $scope.name && $scope.competitionId == targetCompId) {
+            alert("You must have a new name or a different competition when saving as!");
             return;
         }
 
 
         var map = {
-            competition: competitionId,
+            competition: targetCompId,
             name: name,
             length: $scope.length,
             height: $scope.height,
@@ -798,13 +798,35 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             league: leagueId
         };
         $http.post("/api/maps/maze", map).then(function (response) {
-            alert("Created map!");
-            console.log(response.data);
-            window.location.replace("/admin/" + $scope.se_competition + "/" + leagueId + "/mapEditor/" + response.data.id)
+            Swal.fire({
+                title: $translate.instant('admin.mazeMapEditor.saveAsModal.successTitle'),
+                text: $translate.instant('admin.mazeMapEditor.saveAsModal.successText'),
+                icon: 'success',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: $translate.instant('admin.mazeMapEditor.saveAsModal.goToNew'),
+                cancelButtonText: $translate.instant('admin.mazeMapEditor.saveAsModal.stayHere')
+            }).then((result) => {
+                if (result.value) {
+                    const newId = response.data.id;
+                    if (newId) {
+                        const newUrl = "/admin/" + targetCompId + "/" + leagueId + "/mapEditor/" + newId;
+                        console.log("Redirecting to: " + newUrl);
+                        setTimeout(function () {
+                            $scope.go(newUrl);
+                        }, 100);
+                    }
+                }
+            });
         }, function (response) {
             console.log(response);
             console.log("Error: " + response.statusText);
-            alert(response.data.msg);
+            Swal.fire(
+                'Error',
+                response.data.msg || "An error occurred while creating the map.",
+                'error'
+            );
         });
     }
 
@@ -875,7 +897,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         }
     }
 
-    $scope.openMaxScore = function(){
+    $scope.openMaxScore = function () {
         $scope.saveMap(null, function () {
             $http.get(`/api/maps/maze/${mapId}/maxScore`).then(function (response) {
                 let score = response.data.score;
@@ -887,15 +909,15 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
                 `;
                 Swal.fire({
                     html: html,
-                    showCloseButton: true, 
+                    showCloseButton: true,
                 })
             }, function (response) {
                 console.log("Error: " + response.statusText);
             });
         });
     }
-    
-    $scope.export = function(){
+
+    $scope.export = function () {
         var map = {
             name: $scope.name,
             length: $scope.length,
@@ -907,58 +929,58 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             startTile: $scope.startTile,
             cells: $scope.cells
         };
-         var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(map))
-         var downloadLink = document.createElement('a')
-         document.body.appendChild(downloadLink);
-         downloadLink.setAttribute("href",dataStr)
-         downloadLink.setAttribute("download", $scope.name + '.json')
-         downloadLink.click()
-         document.body.removeChild(downloadLink);
+        var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(map))
+        var downloadLink = document.createElement('a')
+        document.body.appendChild(downloadLink);
+        downloadLink.setAttribute("href", dataStr)
+        downloadLink.setAttribute("download", $scope.name + '.json')
+        downloadLink.click()
+        document.body.removeChild(downloadLink);
     }
-    
-     // File APIに対応しているか確認
-        if (window.File) {
-            var select = document.getElementById('select');
 
-            // ファイルが選択されたとき
-            select.addEventListener('change', function (e) {
-                // 選択されたファイルの情報を取得
-                var fileData = e.target.files[0];
+    // File APIに対応しているか確認
+    if (window.File) {
+        var select = document.getElementById('select');
 
-                var reader = new FileReader();
-                // ファイル読み取りに失敗したとき
-                reader.onerror = function () {
-                    alert('ファイル読み取りに失敗しました')
-                }
-                // ファイル読み取りに成功したとき
-                reader.onload = function () {
-                    var data = JSON.parse(reader.result);
-                    $scope.cells = data.cells;
-                    $scope.competitionId = competitionId;
+        // ファイルが選択されたとき
+        select.addEventListener('change', function (e) {
+            // 選択されたファイルの情報を取得
+            var fileData = e.target.files[0];
 
-                    $scope.startTile = data.startTile;
-                    $scope.numberOfDropTiles = data.numberOfDropTiles;
-                    $scope.height = data.height;
-                    $scope.width = data.width;
-                    $scope.length = data.length;
-                    $scope.duration = data.duration || 480;
-                    $scope.name = data.name;
-                    $scope.finished = data.finished;
-                    $scope.leagueType = data.leagueType;
-                    
-                    if(data.startTile) $scope.cells[data.startTile.x + ',' + data.startTile.y + ',' + data.startTile.z].tile.checkpoint = false;
-                    
-                    $scope.$apply();
-                }
+            var reader = new FileReader();
+            // ファイル読み取りに失敗したとき
+            reader.onerror = function () {
+                alert('ファイル読み取りに失敗しました')
+            }
+            // ファイル読み取りに成功したとき
+            reader.onload = function () {
+                var data = JSON.parse(reader.result);
+                $scope.cells = data.cells;
+                $scope.competitionId = competitionId;
 
-                // ファイル読み取りを実行
-                reader.readAsText(fileData);
-            }, false);
-        }
+                $scope.startTile = data.startTile;
+                $scope.numberOfDropTiles = data.numberOfDropTiles;
+                $scope.height = data.height;
+                $scope.width = data.width;
+                $scope.length = data.length;
+                $scope.duration = data.duration || 480;
+                $scope.name = data.name;
+                $scope.finished = data.finished;
+                $scope.leagueType = data.leagueType;
+
+                if (data.startTile) $scope.cells[data.startTile.x + ',' + data.startTile.y + ',' + data.startTile.z].tile.checkpoint = false;
+
+                $scope.$apply();
+            }
+
+            // ファイル読み取りを実行
+            reader.readAsText(fileData);
+        }, false);
+    }
 
 
     $scope.showRow = function (r, z) {
-        for (let c of $scope.range(2*$scope.width + 1)) {
+        for (let c of $scope.range(2 * $scope.width + 1)) {
             let cell = $scope.cells[`${c},${r},${z}`];
             if (!cell) continue;
             if (cell.isTile) {
@@ -970,16 +992,16 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
                 if (r % 2 == 1) {
                     // Check left and right
                     if (
-                        checkTileReachable(c-1, r, z) ||
-                        checkTileReachable(c+1, r, z)
+                        checkTileReachable(c - 1, r, z) ||
+                        checkTileReachable(c + 1, r, z)
                     ) {
                         return true;
                     }
                 } else {
                     // Check up and bottom
                     if (
-                        checkTileReachable(c, r-1, z) ||
-                        checkTileReachable(c, r+1, z)
+                        checkTileReachable(c, r - 1, z) ||
+                        checkTileReachable(c, r + 1, z)
                     ) {
                         return true;
                     }
@@ -997,29 +1019,29 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     $scope.showCellOutput = function (c, r, z) {
         const isTileCol = c % 2 === 1;
         const isTileRow = r % 2 === 1;
-        
+
         // Tile cell (intersection of tile row and tile column)
         if (isTileCol && isTileRow) {
             return checkTileExists(c, r, z);
         }
-        
+
         // Horizontal wall cell (between tile rows)
         if (isTileCol && !isTileRow) {
             return checkTileExists(c, r - 1, z) || checkTileExists(c, r + 1, z);
         }
-        
+
         // Vertical wall cell (between tile columns)
         if (!isTileCol && isTileRow) {
             return checkTileExists(c - 1, r, z) || checkTileExists(c + 1, r, z);
         }
-        
+
         // Intersection cell (corner) - show if any adjacent tile exists
-        return checkTileExists(c - 1, r - 1, z) || 
-               checkTileExists(c + 1, r - 1, z) ||
-               checkTileExists(c - 1, r + 1, z) || 
-               checkTileExists(c + 1, r + 1, z);
+        return checkTileExists(c - 1, r - 1, z) ||
+            checkTileExists(c + 1, r - 1, z) ||
+            checkTileExists(c - 1, r + 1, z) ||
+            checkTileExists(c + 1, r + 1, z);
     }
-    
+
     // Check if a tile exists at the given coordinates
     function checkTileExists(c, r, z) {
         let cell = $scope.cells[`${c},${r},${z}`];
@@ -1049,14 +1071,14 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
                     halfWall: 0
                 };
             } else {
-                if(cell.isWall){
+                if (cell.isWall) {
                     cell.isWall = false;
                     /*cell.halfWall = 1;
                 }else if(cell.halfWall == 1){
                     cell.halfWall = 2;
                 }else if(cell.halfWall == 2){
                     cell.halfWall = 0;*/
-                }else{
+                } else {
                     cell.isWall = true;
                 }
             }
@@ -1095,8 +1117,8 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             }
         });
     };
-    
-    $scope.generateScoreSheet = function() {
+
+    $scope.generateScoreSheet = function () {
         const map = {
             competition: $scope.competitionId,
             dice: $scope.dice,
@@ -1113,13 +1135,13 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             rule: '2026',
             noQR: $scope.pdfSettings.noQR
         };
-        
+
         $http.post('/api/maps/maze/scoresheet', map, { responseType: 'arraybuffer' })
-            .then(function(response) {
+            .then(function (response) {
                 const blob = new Blob([response.data], { type: 'application/pdf' });
                 const fileURL = URL.createObjectURL(blob);
                 window.open(fileURL, '_blank');
-            }, function(response) {
+            }, function (response) {
                 console.error("PDF Error", response);
                 alert("Error generating PDF");
             });
@@ -1132,7 +1154,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             let x = parseInt(parts[0]);
             let y = parseInt(parts[1]);
             let z = parseInt(parts[2]);
-            
+
             if (axis === 'y' && y >= startGridIndex) {
                 newCells[x + ',' + (y + amount) + ',' + z] = $scope.cells[key];
                 newCells[x + ',' + (y + amount) + ',' + z].y += amount;
@@ -1161,14 +1183,14 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
 
     $scope.removeColumn = function (gridX) {
         if ($scope.width <= 1) return;
-        
+
         let newCells = {};
         for (let key in $scope.cells) {
             let parts = key.split(',');
             let x = parseInt(parts[0]);
             let y = parseInt(parts[1]);
             let z = parseInt(parts[2]);
-            
+
             if (x < gridX) {
                 newCells[key] = $scope.cells[key];
             } else if (x > gridX + 1) {
@@ -1178,11 +1200,11 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             }
         }
         $scope.cells = newCells;
-        
+
         if ($scope.startTile.x >= gridX) {
             $scope.startTile.x = Math.max(1, $scope.startTile.x - 2);
         }
-        
+
         $scope.width--;
         $scope.recalculateLinear();
     };
@@ -1195,14 +1217,14 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
 
     $scope.removeRow = function (gridY) {
         if ($scope.length <= 1) return;
-        
+
         let newCells = {};
         for (let key in $scope.cells) {
             let parts = key.split(',');
             let x = parseInt(parts[0]);
             let y = parseInt(parts[1]);
             let z = parseInt(parts[2]);
-            
+
             if (y < gridY) {
                 newCells[key] = $scope.cells[key];
             } else if (y > gridY + 1) {
@@ -1301,25 +1323,25 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
         }
     }
 
-    $scope.hasVictims = function() {
+    $scope.hasVictims = function () {
         if (!$scope.cell || !$scope.cell.tile || !$scope.cell.tile.victims) return false;
         var v = $scope.cell.tile.victims;
         return (v.top && v.top !== 'None') ||
-               (v.bottom && v.bottom !== 'None') ||
-               (v.left && v.left !== 'None') ||
-               (v.right && v.right !== 'None');
+            (v.bottom && v.bottom !== 'None') ||
+            (v.left && v.left !== 'None') ||
+            (v.right && v.right !== 'None');
     };
 
-    $scope.isVictimDisabled = function() {
+    $scope.isVictimDisabled = function () {
         if (!$scope.cell || !$scope.cell.tile) return false;
-        return $scope.cell.tile.black || 
-               $scope.cell.tile.checkpoint || 
-               $scope.cell.tile.blue || 
-               $scope.cell.tile.red || 
-               $scope.cell.tile.speedbump || 
-               $scope.cell.tile.steps || 
-               $scope.cell.tile.ramp ||
-               ($scope.cell.tile.changeFloorTo !== undefined && $scope.cell.tile.changeFloorTo !== z);
+        return $scope.cell.tile.black ||
+            $scope.cell.tile.checkpoint ||
+            $scope.cell.tile.blue ||
+            $scope.cell.tile.red ||
+            $scope.cell.tile.speedbump ||
+            $scope.cell.tile.steps ||
+            $scope.cell.tile.ramp ||
+            ($scope.cell.tile.changeFloorTo !== undefined && $scope.cell.tile.changeFloorTo !== z);
     };
 
     $scope.propertyChanged = function () {
@@ -1344,8 +1366,8 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
         return arr;
     }
 
-    $scope.getCognitiveTargetImage = function(direction) {
-        if (!$scope.cell.tile.victims || 
+    $scope.getCognitiveTargetImage = function (direction) {
+        if (!$scope.cell.tile.victims ||
             $scope.cell.tile.victims[direction] !== 'Cognitive' ||
             !$scope.cell.tile.cognitiveTargets ||
             !$scope.cell.tile.cognitiveTargets[direction]) {
@@ -1356,7 +1378,7 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
         return '/images/cognitive_targets/' + colorCode + '.png';
     }
 
-    $scope.getCognitiveStatusColor = function(direction) {
+    $scope.getCognitiveStatusColor = function (direction) {
         if (!$scope.cell.tile.cognitiveTargets || !$scope.cell.tile.cognitiveTargets[direction]) {
             return '#6c757d';
         }
@@ -1373,7 +1395,7 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
         return '#6c757d'; // Gray for Dummy
     }
 
-    $scope.getCognitiveStatusBgColor = function(direction) {
+    $scope.getCognitiveStatusBgColor = function (direction) {
         if (!$scope.cell.tile.cognitiveTargets || !$scope.cell.tile.cognitiveTargets[direction]) {
             return '#f8f9fa';
         }
@@ -1390,7 +1412,7 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
         return '#f8f9fa'; // Light gray for Dummy
     }
 
-    $scope.getCognitiveStatusBgColorHover = function(direction) {
+    $scope.getCognitiveStatusBgColorHover = function (direction) {
         if (!$scope.cell.tile.cognitiveTargets || !$scope.cell.tile.cognitiveTargets[direction]) {
             return '#e9ecef';
         }
@@ -1407,7 +1429,7 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
         return '#e9ecef'; // Darker light gray for Dummy
     }
 
-    $scope.openCognitiveTargetSettings = function(direction) {
+    $scope.openCognitiveTargetSettings = function (direction) {
         // Ensure cognitiveTargets exists
         if (!$scope.cell.tile.cognitiveTargets) {
             $scope.cell.tile.cognitiveTargets = {};
@@ -1425,34 +1447,38 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
             controller: 'CognitiveTargetModalCtrl',
             size: 'lg',
             resolve: {
-                direction: function() {
+                direction: function () {
                     return direction;
                 },
-                cognitiveData: function() {
+                cognitiveData: function () {
                     return $scope.cell.tile.cognitiveTargets[direction];
                 }
             }
         });
 
-        modalInstance.result.then(function(result) {
+        modalInstance.result.then(function (result) {
             $scope.cell.tile.cognitiveTargets[direction] = result;
         });
     }
+
+    $scope.ok = function () {
+        $uibModalInstance.close();
+    };
 }]);
 
 app.controller('SaveAsModalCtrl', ['$scope', '$uibModalInstance', 'competitions', 'currentCompetitionId', 'currentName', function ($scope, $uibModalInstance, competitions, currentCompetitionId, currentName) {
     $scope.competitions = competitions;
     $scope.se_competition = currentCompetitionId;
     $scope.asname = currentName + "_copy";
-
-    $scope.ok = function () {
+    $scope.saveAsOk = function () {
+        console.log("saveAsOk called");
         $uibModalInstance.close({
             name: $scope.asname,
             competitionId: $scope.se_competition
         });
     };
 
-    $scope.cancel = function () {
+    $scope.saveAsCancel = function () {
         $uibModalInstance.dismiss('cancel');
     };
 }]);
@@ -1460,7 +1486,7 @@ app.controller('SaveAsModalCtrl', ['$scope', '$uibModalInstance', 'competitions'
 app.controller('CognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'direction', 'cognitiveData', function ($scope, $uibModalInstance, direction, cognitiveData) {
     $scope.direction = direction;
     $scope.rings = (cognitiveData && cognitiveData.rings) ? angular.copy(cognitiveData.rings) : { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' };
-    
+
     var colorValues = {
         'B': -2,
         'R': -1,
@@ -1469,12 +1495,12 @@ app.controller('CognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'dire
         'C': 2
     };
 
-    $scope.updatePreview = function() {
+    $scope.updatePreview = function () {
         var colorCode = $scope.rings.ring1 + $scope.rings.ring2 + $scope.rings.ring3 + $scope.rings.ring4 + $scope.rings.ring5;
         $scope.previewImage = '/images/cognitive_targets/' + colorCode + '.png';
     }
 
-    $scope.calculateTotalValue = function() {
+    $scope.calculateTotalValue = function () {
         var total = 0;
         for (var i = 1; i <= 5; i++) {
             total += colorValues[$scope.rings['ring' + i]] || 0;
@@ -1482,11 +1508,11 @@ app.controller('CognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'dire
         return total;
     }
 
-    $scope.getColorValue = function(color) {
+    $scope.getColorValue = function (color) {
         return colorValues[color] || 0;
     }
 
-    $scope.getVictimStatus = function() {
+    $scope.getVictimStatus = function () {
         var total = $scope.calculateTotalValue();
         if (total === 2) {
             return 'harmed';
@@ -1499,7 +1525,7 @@ app.controller('CognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'dire
         }
     }
 
-    $scope.autoSetRings = function(targetStatus) {
+    $scope.autoSetRings = function (targetStatus) {
         var targetSum;
         switch (targetStatus) {
             case 'harmed':
@@ -1546,13 +1572,13 @@ app.controller('CognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'dire
 
     $scope.updatePreview();
 
-    $scope.ok = function() {
+    $scope.cognitiveOk = function () {
         $uibModalInstance.close({
             rings: $scope.rings
         });
     }
 
-    $scope.cancel = function() {
+    $scope.cognitiveCancel = function () {
         $uibModalInstance.dismiss('cancel');
     }
 }]);

@@ -853,7 +853,11 @@
             "saveAsModal": {
                 "newName": "New Name",
                 "targetCompetition": "Target Competition",
-                "createCopy": "Create Copy"
+                "createCopy": "Create Copy",
+                "successTitle": "Map Created!",
+                "successText": "Your new map has been successfully created. Would you like to switch to the new map editor or stay on this page?",
+                "goToNew": "Go to New Map",
+                "stayHere": "Stay Here"
             },
             "create": "Create New",
             "edit": "Edit",
