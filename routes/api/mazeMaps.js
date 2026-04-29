@@ -14,6 +14,8 @@ const scoreCalculator = require('../../helper/scoreCalculator');
 const mazeMapPDF = require('../../helper/mazeMapPDF');
 const scoreSheetPDFMaze2 = require('../../helper/scoreSheetPDFMaze2');
 const mazeSSR = require('../../helper/mazeSSR');
+const auth = require('../../helper/authLevels');
+const { ACCESSLEVELS } = require('../../models/user');
 
 publicRouter.get('/', getMazeMaps);
 publicRouter.get('/image/:mapid', getMapImage);
@@ -61,7 +63,7 @@ module.exports.getMazeMaps = getMazeMaps;
 
 adminRouter.post('/', function (req, res) {
   const map = req.body;
-  if (typeof(map) != "object") {
+  if (typeof (map) != "object") {
     res.status(400).send("Bad request");
     return;
   }
@@ -222,22 +224,22 @@ adminRouter.get('/:map/maxScore', async function (req, res, next) {
           ramp: true,
           steps: true,
           victims: {
-              top: true,
-              right: true,
-              left: true,
-              bottom: true,
-              floor: true
+            top: true,
+            right: true,
+            left: true,
+            bottom: true,
+            floor: true
           },
           rescueKits: {
-              top: 2,
-              right: 2,
-              bottom: 2,
-              left: 2,
-              floor: 2
+            top: 2,
+            right: 2,
+            bottom: 2,
+            left: 2,
+            floor: 2
           }
         }
       }));
-      
+
       res.status(200).send(
         scoreCalculator.calculateScore({
           competition: data.competition,
@@ -629,6 +631,14 @@ function handleExport(req, res) {
     }
     if (!maps || maps.length === 0) {
       return res.status(404).send({ msg: 'No maps found' });
+    }
+
+    const competitionId = maps[0].competition ? maps[0].competition._id : null;
+
+    if (!auth.authCompetition(req.user, competitionId, ACCESSLEVELS.ADMIN)) {
+      return res.status(401).send({
+        msg: 'You have no authority to access this api',
+      });
     }
 
     const competitionName = maps[0].competition ? maps[0].competition.name : 'Competition';
