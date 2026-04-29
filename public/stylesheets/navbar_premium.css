@@ -90,11 +90,13 @@ body {
     padding: 0.5rem 1.25rem;
     border-radius: 12px;
     font-weight: 700;
+    text-decoration: none !important;
 }
 
 .nav-user-link:hover {
     color: #ffffff !important;
     background: rgba(255, 255, 255, 0.1);
+    text-decoration: none !important;
 }
 
 .nav-user-link i {
