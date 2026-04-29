@@ -3,8 +3,10 @@ extends ../../includes/modern_layout
 
 block vars
   - var ngAppDef = 'MazeEditor'
-  - var heroContainerStyle = pubService ? "max-width: 1600px;" : ""
+  - var heroContainerStyle = ""
+  - var contentContainerStyle = pubService ? "max-width: 1600px;" : ""
   - var contentContainerClass = "mt-n4"
+  - var hideLogin = pubService
 
 append scripts
   script.

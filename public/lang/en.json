@@ -28,7 +28,10 @@
         "result": "Review List"
     },
     "service_home": {
-        "about": "The RCJ Scoring System was designed to assist the RoboCup Junior Rescue Line/Maze referees. The system makes it very easy to do everything involved in running a competition, from creating course maps to calculating and ranking scores. From this page, you can create a field map of your line/maze and download it as an image without having to log into the system. You can also generate world files for the Erebus platform(simulation)."
+        "about": "Design field maps, generate images and scoresheets for RoboCupJunior Rescue Line/Maze, or create world files for the Erebus simulation platform.",
+        "line_editor_desc": "Design and simulate challenge-ready Line Rescue maps for the 2025/2026 ruleset.",
+        "maze_editor_desc": "Create intricate Maze Rescue fields with dynamic victim placement and multi-floor support.",
+        "sim_editor_desc": "Build and export high-fidelity worlds for the Erebus simulation platform."
     },
     "scanner": {
         "description": "Please scan the barcode / QR code on the score sheet",

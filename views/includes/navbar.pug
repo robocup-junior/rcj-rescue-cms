@@ -10,11 +10,7 @@ nav.navbar.navbar-expand.premium-navbar
     .ml-auto.d-flex.align-items-center
         a.nav-user-link.mr-2(href='#' data-toggle='modal' data-target='#languageModal' title="{{'select_lang' | translate}}")
             i.fas.fa-globe-americas
-        if typeof(user) == "undefined"
-            a.nav-user-link.login-btn(href='#' data-toggle='modal' data-target='#loginModal')
-                i.fas.fa-sign-in-alt
-                span.username-text.d-none.d-sm-inline-block &nbsp; {{"home.login" | translate}}
-        else
+        if user
             .dropdown
                 a.nav-user-link.dropdown-toggle(href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
                     i.fas.fa-user-circle
@@ -35,3 +31,7 @@ nav.navbar.navbar-expand.premium-navbar
                     a.dropdown-item.text-danger(href='/logout')
                         i.fas.fa-sign-out-alt.mr-2
                         | {{"home.logout" | translate}}
+        else if !hideLogin
+            a.nav-user-link.login-btn(href='#' data-toggle='modal' data-target='#loginModal')
+                i.fas.fa-sign-in-alt
+                span.username-text.d-none.d-sm-inline-block &nbsp; {{"home.login" | translate}}
