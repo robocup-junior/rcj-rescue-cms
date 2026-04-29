@@ -25,8 +25,6 @@ block hero_subtitle
   | {{league.name}} {{"admin.lineMapAdmin.title" | translate}}
 
 block hero_actions
-  button.btn-select-all(ng-click="selectAll()" ng-if="league.type == 'maze'" title="{{allSelected ? ('admin.mazeMapAdmin.unselectAll' | translate) : ('admin.mazeMapAdmin.selectAll' | translate)}}")
-    i.fas.fa-check-double
   button.btn-print-targets(ng-click="openPrintModal()" ng-if="league.type == 'maze'" ng-disabled="getSelectedCount() == 0" title="{{ 'admin.mazeMapAdmin.printSelected' | translate }}")
     i.fas.fa-print
     span.badge-count(ng-if="getSelectedCount() > 0") {{getSelectedCount()}}
@@ -37,8 +35,9 @@ block hero_actions
 block main_content
   .maps-list(ng-if="groupedMaps.length > 0")
     .maps-list-header.d-none.d-md-flex
-      .header-select
-        i.fas.fa-check-square
+      .header-select(ng-click="selectAll()" ng-if="league.type == 'maze'" style="cursor: pointer;" title="{{allSelected ? ('admin.mazeMapAdmin.unselectAll' | translate) : ('admin.mazeMapAdmin.selectAll' | translate)}}")
+        .custom-checkbox(ng-class="{'checked': allSelected}")
+          i.fas.fa-check(ng-if="allSelected")
       .header-name {{"admin.mazeMapEditor.mapName" | translate}}
       .header-actions {{"common.delete" | translate}}
     
