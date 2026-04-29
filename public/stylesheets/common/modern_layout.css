@@ -35,7 +35,7 @@ body {
   margin-bottom: 1.5rem !important;
 }
 
-.hero-breadcrumb .breadcrumb-item, 
+.hero-breadcrumb .breadcrumb-item,
 .hero-breadcrumb .breadcrumb-item a {
   color: rgba(255, 255, 255, 0.6) !important;
   font-size: 0.9rem !important;
@@ -109,33 +109,41 @@ hr {
   .maps-hero {
     padding: 1.5rem 0 2.5rem;
   }
+
   .hero-content-wrapper {
     flex-direction: column;
     align-items: flex-start;
     gap: 1.5rem;
   }
+
   .hero-actions {
     width: 100%;
     flex-wrap: wrap;
     gap: 0.75rem;
   }
+
   .hero-title {
     font-size: 1.5rem;
   }
+
   .btn-create-map {
     width: 100%;
     justify-content: center;
     order: 2;
   }
-  .btn-print-targets, .btn-select-all {
+
+  .btn-print-targets,
+  .btn-select-all {
     width: 3.2rem;
     height: 3.2rem;
     justify-content: center;
   }
+
   .maps-grid {
     grid-template-columns: 1fr;
   }
 }
+
 .hero-title-container {
   display: flex;
   align-items: center;
@@ -221,9 +229,10 @@ hr {
 
 .action-divider {
   width: 1px;
-  height: 2rem;
-  background: rgba(255, 255, 255, 0.1);
-  margin: 0 0.5rem;
+  height: 8.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 0 1rem;
+  align-self: center;
 }
 
 .action-label {
@@ -240,4 +249,3 @@ hr {
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
-

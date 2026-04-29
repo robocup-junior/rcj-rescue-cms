@@ -358,3 +358,109 @@ tr:hover .grid-manage-row .btn-grid-manage {
     transform: scale(1.1) rotate(15deg);
     box-shadow: 0 20px 25px -5px rgba(79, 70, 229, 0.4);
 }
+
+/* Premium Tool Group and Time Capsule */
+.premium-tool-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.calc-btn-premium {
+    width: 42px;
+    height: 42px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white !important;
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.calc-btn-premium:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+}
+
+.calc-btn-premium:active {
+    transform: translateY(0);
+}
+
+.time-capsule {
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 100px;
+    padding: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    min-width: 100px;
+}
+
+.time-capsule:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.time-capsule.expanded {
+    background: white;
+    border-color: var(--primary-color);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+    padding-right: 8px;
+}
+
+.time-capsule-icon {
+    width: 32px;
+    height: 32px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+}
+
+.time-capsule.expanded .time-capsule-icon {
+    background: #4f46e5; /* Distinct indigo background */
+    color: white !important;
+}
+
+/* Ensure btn-save remains green even with btn-hero-icon */
+.btn-hero-icon.btn-save {
+    background: #10b981 !important;
+    color: white !important;
+    border-color: #059669 !important;
+}
+
+.btn-hero-icon.btn-save:hover {
+    background: #059669 !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+}
+
+.time-capsule-label {
+    margin: 0 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #475569;
+    white-space: nowrap;
+}
+
+.time-capsule.expanded .time-capsule-label {
+    color: var(--primary-color);
+    font-size: 0.8rem;
+    margin-right: 8px;
+}
+
+.time-capsule .dimension-spinner {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+}

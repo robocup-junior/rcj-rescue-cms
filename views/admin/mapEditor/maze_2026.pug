@@ -50,31 +50,35 @@ block hero_subtitle
 
 block hero_actions
   if !pubService
-    .action-group(style="position: relative;")
-      .alert.alert-danger.small.py-1.px-2.mb-0(ng-if='startNotSet()', style="position: absolute; top: -38px; left: 0; border-radius: 12px; border: none; background: #fee2e2; color: #b91c1c; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10;")
+    .action-group.flex-column.align-items-center(style="position: relative;")
+      .alert.alert-danger.small.py-1.px-2.mb-0(ng-if='startNotSet()', style="position: absolute; top: -45px; left: 0; border-radius: 12px; border: none; background: #fee2e2; color: #b91c1c; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10;")
         i.fas.fa-exclamation-circle.mr-1
         | {{"admin.mazeMapEditor.noStart" | translate}}
-      button.btn-hero-action.btn-save(type='button', ng-click='saveMap()')
-        i.fas.fa-save
-        span {{"admin.mazeMapEditor.save" | translate}}
-      if !parent
-        button.btn-hero-icon(type='button', ng-click="openSaveAsModal()", title='Save As')
-          i.fas.fa-copy
+      span.action-label.mb-1 SAVE
+      .d-flex.flex-column.align-items-center
+        button.btn-hero-icon.btn-save.mb-2(type='button', ng-click='saveMap()', title='{{"admin.mazeMapEditor.save" | translate}}')
+          i.fas.fa-save
+        if !parent
+          button.btn-hero-icon(type='button', ng-click="openSaveAsModal()", title='Save As')
+            i.fas.fa-copy
   
   .action-divider
   
-  .action-group
-    span.action-label JSON
-    button.btn-hero-icon(type='button', ng-click='export()', title='Export JSON')
-      i.fas.fa-file-export
-    button.btn-hero-icon(type='button', onclick="$('#select').click()", title='Import JSON')
-      i.fas.fa-file-import
-    input#select(type='file', name='select', style="display:none;")
+  .action-group.flex-column.align-items-center
+    span.action-label.mb-1 JSON
+    .d-flex.flex-column.align-items-center
+      button.btn-hero-icon.mb-2(type='button', ng-click='export()', title='Export JSON')
+        i.fas.fa-file-export
+      button.btn-hero-icon(type='button', onclick="$('#select').click()", title='Import JSON')
+        i.fas.fa-file-import
+      input#select(type='file', name='select', style="display:none;")
   
   if parent
     .action-divider
-    button.btn-hero-icon(type='button', ng-click='saveMap(parent)', title='{{"admin.mazeMapEditor.back" | translate}}')
-      i.fas.fa-chevron-left
+    .action-group.flex-column.align-items-center
+      span.action-label.mb-1 BACK
+      button.btn-hero-icon(type='button', ng-click='saveMap(parent)', title='{{"admin.mazeMapEditor.back" | translate}}')
+        i.fas.fa-chevron-left
 
 block main_content
   script(type="text/ng-template" id="saveAsModal_2026.html")
@@ -134,17 +138,24 @@ block main_content
                   input.spinner-input(type='number', ng-model='length', min='1')
                   button.btn-spin(type='button', ng-click="length = length + 1")
                     i.fas.fa-plus
-          .col-auto.px-3.border-left
-            .d-flex.align-items-center(title='{{"admin.simMapEditor.timelimit" | translate}}')
-              label.small.mb-0.mr-2.text-muted
-                i.fas.fa-clock.mr-1
-                | {{"admin.mazeMapEditor.time" | translate}}
-              .dimension-spinner
-                button.btn-spin(type='button', ng-click="duration = duration > 30 ? duration - 30 : 0")
-                  i.fas.fa-minus
-                input.spinner-input(type='number', ng-model='duration', min='0', step='30')
-                button.btn-spin(type='button', ng-click="duration = (duration || 0) + 30")
-                  i.fas.fa-plus
+          .col-auto.px-3.border-left.d-flex.align-items-center
+            .premium-tool-group
+              button.calc-btn-premium(type='button', ng-click='openMaxScore()', title='Calculate Max Score')
+                i.fas.fa-calculator
+              
+              .time-capsule(ng-class="{'expanded': showTimeSetting}", ng-click="showTimeSetting = !showTimeSetting")
+                .time-capsule-icon
+                  i.fas.fa-clock
+                .time-capsule-label
+                  span(ng-if="!showTimeSetting") {{duration}}s
+                  span(ng-if="showTimeSetting") {{"admin.mazeMapEditor.time" | translate}}
+                
+                .dimension-spinner(ng-show="showTimeSetting", ng-click="$event.stopPropagation()")
+                  button.btn-spin(type='button', ng-click="duration = duration > 30 ? duration - 30 : 0")
+                    i.fas.fa-minus
+                  input.spinner-input(type='number', ng-model='duration', min='0', step='30')
+                  button.btn-spin(type='button', ng-click="duration = (duration || 0) + 30")
+                    i.fas.fa-plus
 
       .d-flex.mb-3
         .floor-switcher-vertical.d-flex.flex-column-reverse.p-2.bg-dark.border-right(style="min-width: 60px; border-top-left-radius: 8px; border-bottom-left-radius: 8px;")
