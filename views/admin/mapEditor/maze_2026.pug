@@ -43,7 +43,7 @@ block content
       .hero-content-wrapper
         .hero-text
           .hero-title-container
-            textarea.hero-title-input(ng-model='name', placeholder='{{"admin.mazeMapEditor.mapName" | translate}}', rows="1", oninput='this.style.height = "";this.style.height = this.scrollHeight + "px"')
+            textarea.hero-title-input(ng-model='name', placeholder='{{"admin.mazeMapEditor.mapName" | translate}}', rows="1", auto-resize)
             i.fas.fa-pen.title-edit-icon
           p.hero-subtitle
             if pubService
@@ -53,7 +53,10 @@ block content
         
         .hero-actions
           if !pubService
-            .action-group
+            .action-group(style="position: relative;")
+              .alert.alert-danger.small.py-1.px-2.mb-0(ng-if='startNotSet()', style="position: absolute; top: -38px; left: 0; border-radius: 12px; border: none; background: #fee2e2; color: #b91c1c; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10;")
+                i.fas.fa-exclamation-circle.mr-1
+                | {{"admin.mazeMapEditor.noStart" | translate}}
               button.btn-hero-action.btn-save(type='button', ng-click='saveMap()')
                 i.fas.fa-save
                 span {{"admin.mazeMapEditor.save" | translate}}
@@ -230,16 +233,23 @@ block content
                 .dice-slot.p-2.mb-1(ng-repeat='i in range(6)')
                   i.fas.fa-2x.text-secondary(ng-class="['fa-dice-one', 'fa-dice-two', 'fa-dice-three', 'fa-dice-four', 'fa-dice-five', 'fa-dice-six'][i]", style="width: 32px; text-align: center;")
                   .dice-select.flex-grow-1
-                    select.form-control.form-control-sm(ng-model='dice[i]', ng-options='b_maps._id as b_maps.name for b_maps in maps')
+                    select.form-control.form-control-sm(ng-model='dice[i]', ng-options='b_maps._id as (b_maps._id == mapId ? "(Self)" : (b_maps.name.split(" - ").length > 1 ? b_maps.name.split(" - ")[b_maps.name.split(" - ").length - 1] : b_maps.name)) for b_maps in maps')
                   .btn-group
                     button.btn.btn-xs.btn-outline-primary.px-2(type='button', ng-click='childNew(i+1)')
                       i.fas.fa-plus
-                    button.btn.btn-xs.btn-outline-secondary.px-2(type='button', ng-click='saveMap(dice[i])')
+                    button.btn.btn-xs.btn-outline-secondary.px-2(type='button', ng-click='saveMap(dice[i])', ng-disabled='dice[i] == mapId')
                       i.fas.fa-edit
           
-          .alert.alert-danger.small.py-2(ng-if='startNotSet()')
-            i.fas.fa-exclamation-circle.mr-1
-            | {{"admin.mazeMapEditor.noStart" | translate}}
+          .modern-card(ng-if='parent')
+            .modern-card-header
+              i.fas.fa-level-up-alt.mr-2
+              | {{"admin.mazeMapEditor.backToParent" | translate}}
+            .modern-card-body.p-3
+              p.text-muted.small.mb-3 {{"admin.mazeMapEditor.parent" | translate}}
+              button.btn.btn-outline-primary.btn-block.rounded-pill(type='button', ng-click='saveMap(parent)')
+                i.fas.fa-chevron-left.mr-2
+                | {{"admin.mazeMapEditor.back" | translate}}
+          
 
     .row.mt-4
       .col-12

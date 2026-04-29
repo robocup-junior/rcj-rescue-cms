@@ -1,5 +1,21 @@
-// register the directive with your app module
 var app = angular.module('MazeEditor', ['ngTouch', 'ngAnimate', 'ui.bootstrap', 'pascalprecht.translate', 'ngCookies']);
+
+app.directive('autoResize', ['$timeout', function($timeout) {
+    return {
+        restrict: 'A',
+        link: function(scope, element, attrs) {
+            function resize() {
+                element[0].style.height = 'auto';
+                element[0].style.height = element[0].scrollHeight + 'px';
+            }
+            element.on('input', resize);
+            scope.$watch(attrs.ngModel, function() {
+                $timeout(resize, 0);
+            });
+            $timeout(resize, 100);
+        }
+    };
+}]);
 
 // function referenced by the drop target
 app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http', '$translate', function ($scope, $uibModal, $log, $http, $translate) {

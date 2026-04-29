@@ -64,7 +64,7 @@ app.controller("MapAdminController", ['$scope', '$http', '$uibModal', function (
             confirmButtonText: 'Yes, delete it!',
             borderRadius: '1.25rem'
         }).then((result) => {
-            if (result.isConfirmed) {
+            if (result.value) {
                 $http.delete("/api/maps/" + $scope.league.type + "/" + map._id).then(function (response) {
                     Swal.fire({
                         title: 'Deleted!',
@@ -87,7 +87,21 @@ app.controller("MapAdminController", ['$scope', '$http', '$uibModal', function (
     function updateMapList() {
         $http.get("/api/competitions/" + competitionId +
             "/" + $scope.league.league + "/maps").then(function (response) {
-            $scope.maps = response.data
+            $scope.maps = response.data;
+            
+            const allMaps = angular.copy(response.data);
+            const parents = allMaps.filter(m => !m.parent);
+            const children = allMaps.filter(m => m.parent);
+            
+            parents.forEach(p => {
+                p.children = children.filter(c => c.parent === p._id);
+            });
+            
+            // Also include orphaned children just in case
+            const orphanedChildren = children.filter(c => !parents.some(p => p._id === c.parent));
+            
+            $scope.groupedMaps = parents.concat(orphanedChildren);
+            updateAllSelectedState();
         })
     }
     
