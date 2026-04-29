@@ -30,12 +30,11 @@ block content
           h1.hero-title {{competition.name}}
           p.hero-subtitle {{league.name}} {{"admin.lineMapAdmin.title" | translate}}
         .hero-actions
-          button.btn-select-all(ng-click="selectAll()" ng-if="league.type == 'maze'")
+          button.btn-select-all(ng-click="selectAll()" ng-if="league.type == 'maze'" title="{{allSelected ? ('admin.mazeMapAdmin.unselectAll' | translate) : ('admin.mazeMapAdmin.selectAll' | translate)}}")
             i.fas.fa-check-double
-            span {{allSelected ? ('admin.mazeMapAdmin.unselectAll' | translate) : ('admin.mazeMapAdmin.selectAll' | translate)}}
-          button.btn-print-targets(ng-click="openPrintModal()" ng-if="league.type == 'maze'" ng-disabled="getSelectedCount() == 0")
+          button.btn-print-targets(ng-click="openPrintModal()" ng-if="league.type == 'maze'" ng-disabled="getSelectedCount() == 0" title="{{ 'admin.mazeMapAdmin.printSelected' | translate }}")
             i.fas.fa-print
-            span {{ 'admin.mazeMapAdmin.printSelected' | translate }} ({{getSelectedCount()}})
+            span.badge-count(ng-if="getSelectedCount() > 0") {{getSelectedCount()}}
           a.btn-create-map(ng-href="/admin/{{competitionId}}/{{league.league}}/mapEditor")
             i.fas.fa-plus-circle
             span {{"admin.lineMapAdmin.create" | translate}}

@@ -729,7 +729,7 @@
         "lineMapEditor": {
             "title": "Map Editor",
             "desc": "Drag and drop tiles from the tile set area on the left onto the map area on the right. Right-click on a tile in the map area to set score item such as gaps and obstacles and ramps etc...",
-            "save": "Save map",
+            "save": "Save",
             "saveAs": "Save map as",
             "name": "Name of design: ",
             "height": "Max height: ",
@@ -850,6 +850,11 @@
             "backToParent": "Back to parent editing",
             "pattern": "Map pattern setting",
             "patSave": "To set the pattern, save the map before once.",
+            "saveAsModal": {
+                "newName": "New Name",
+                "targetCompetition": "Target Competition",
+                "createCopy": "Create Copy"
+            },
             "create": "Create New",
             "edit": "Edit",
             "patYet": "The map creation can not be completed because the dice pattern setting has not been done.",

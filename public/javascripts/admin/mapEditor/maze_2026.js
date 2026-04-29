@@ -14,11 +14,6 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
     };
     $scope.competitionId = competitionId;
     $scope.mapId = mapId;
-    $translate('admin.mazeMapEditor.import').then(function (val) {
-        $("#select").fileinput({'showUpload':false, 'showPreview':false, 'showRemove':false, 'showCancel':false  ,'msgPlaceholder': val,allowedFileExtensions: ['json'] , msgValidationError: "ERROR"});
-    }, function (translationId) {
-        // = translationId;
-    });
     if(!pubService){
         $http.get("/api/competitions/").then(function (response) {
             $scope.competitions = response.data
@@ -71,7 +66,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
             $scope.duration = response.data.duration || 480;
             $scope.length = response.data.length;
             $scope.name = response.data.name;
-            $scope.finished = response.data.finished;
+            $scope.finished = true;
             $scope.competitionId = response.data.competition;
             $scope.leagueType = response.data.leagueType;
 
@@ -723,7 +718,34 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
         }
     };
 
-    $scope.saveMapAs = function (name) {
+    $scope.openSaveAsModal = function () {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            templateUrl: 'saveAsModal.html',
+            controller: 'SaveAsModalCtrl',
+            size: 'md',
+            resolve: {
+                competitions: function () {
+                    return $scope.competitions;
+                },
+                currentCompetitionId: function () {
+                    return $scope.competitionId;
+                },
+                currentName: function () {
+                    return $scope.name;
+                }
+            }
+        });
+
+        modalInstance.result.then(function (result) {
+            $scope.saveMapAs(result.name, result.competitionId);
+        }, function () {
+            $log.info('Modal dismissed at: ' + new Date());
+        });
+    };
+
+
+    $scope.saveMapAs = function (name, competitionId) {
         if ($scope.startNotSet()) {
             alert("You must define a starting tile by clicking a tile");
             return;
@@ -735,7 +757,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http','
 
 
         var map = {
-            competition: $scope.se_competition,
+            competition: competitionId,
             name: name,
             length: $scope.length,
             height: $scope.height,
@@ -1292,10 +1314,22 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
             $scope.cell.tile.cognitiveTargets[direction] = result;
         });
     }
+}]);
+
+app.controller('SaveAsModalCtrl', ['$scope', '$uibModalInstance', 'competitions', 'currentCompetitionId', 'currentName', function ($scope, $uibModalInstance, competitions, currentCompetitionId, currentName) {
+    $scope.competitions = competitions;
+    $scope.se_competition = currentCompetitionId;
+    $scope.asname = currentName + "_copy";
 
     $scope.ok = function () {
-        $scope.$parent.recalculateLinear();
-        $uibModalInstance.close();
+        $uibModalInstance.close({
+            name: $scope.asname,
+            competitionId: $scope.se_competition
+        });
+    };
+
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
     };
 }]);
 
