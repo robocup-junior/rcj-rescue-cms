@@ -25,18 +25,31 @@ append css
   link(href="/stylesheets/maps_premium.css" rel="stylesheet")
   link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    if !pubService
-        a.breadcrumb-item(ng-click="go('/admin')") Admin
-        a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-        a.breadcrumb-item(ng-click="go('/admin/'+competitionId + '/' + league.league + '/maps')") #{leagueId} maps
-        span.breadcrumb-item.active Editor
-    else
-        a.breadcrumb-item(ng-click="go('/service')") Public services
-        span.breadcrumb-item.active #{leagueId} editor
+block bread
+  //- Empty - moved inside content hero
 
 block content
+  .maps-hero
+    .maps-container
+      nav.breadcrumb.premium-breadcrumb.hero-breadcrumb
+        a.breadcrumb-item(ng-click="go('/home')")
+          i.fas.fa-home.mr-1
+          | Home
+        if !pubService
+          a.breadcrumb-item(ng-click="go('/admin')") Admin
+          a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+          a.breadcrumb-item(ng-click="go('/admin/'+competitionId + '/' + league.league + '/maps')") #{leagueId} Maps
+          span.breadcrumb-item.active Editor
+        else
+          a.breadcrumb-item(ng-click="go('/service')") Public services
+          span.breadcrumb-item.active #{leagueId} Editor
+      
+      .hero-content-wrapper
+        .hero-text
+          h1.hero-title {{name || 'New Map'}}
+          p.hero-subtitle {{competition.name}} - {{league.name}} Editor
+  
+  .maps-container.mt-4
     .modern-toolbar.mb-2
         .d-flex.align-items-center.w-100
             .fancy-input-group.mb-0.mr-2(style="flex-grow: 1; max-width: 300px;")
@@ -273,6 +286,3 @@ block content
                     i.fas.fa-magic.mr-2
                     span(ng-if="pdfSettings.exportType === 'Maps' && pdfSettings.exportFormat === 'PNG'") {{ 'admin.mazeMapAdmin.print.generatePNG' | translate }}
                     span(ng-if="pdfSettings.exportType !== 'Maps' || pdfSettings.exportFormat === 'PDF'") {{ 'admin.mazeMapAdmin.print.generatePDF' | translate }}
-
-
-
