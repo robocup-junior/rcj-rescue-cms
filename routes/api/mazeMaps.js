@@ -77,6 +77,7 @@ adminRouter.post('/', function (req, res) {
           red: cell.tile.red,
           ramp: cell.tile.ramp,
           steps: cell.tile.steps,
+          reachable: cell.tile.reachable,
           changeFloorTo: cell.tile.changeFloorTo,
         };
 
@@ -89,6 +90,15 @@ adminRouter.post('/', function (req, res) {
             floor: cell.tile.victims.floor
           };
         }
+
+        if (cell.tile.cognitiveTargets != null) {
+          tile.cognitiveTargets = {
+            top: cell.tile.cognitiveTargets.top,
+            right: cell.tile.cognitiveTargets.right,
+            bottom: cell.tile.cognitiveTargets.bottom,
+            left: cell.tile.cognitiveTargets.left
+          };
+        }
       }
 
       cells.push({
@@ -99,6 +109,8 @@ adminRouter.post('/', function (req, res) {
         isWall: cell.isWall,
         isLinear: cell.isLinear,
         halfWall: cell.halfWall,
+        ignoreWall: cell.ignoreWall,
+        virtualWall: cell.virtualWall,
         tile,
       });
     }
@@ -109,10 +121,12 @@ adminRouter.post('/', function (req, res) {
   const newMap = new mazeMap({
     competition: map.competition,
     parent: map.parent,
+    dice: map.dice,
     name: map.name,
     height: map.height,
     width: map.width,
     length: map.length,
+    duration: map.duration,
     leagueType: map.leagueType,
     cells,
     startTile: {
