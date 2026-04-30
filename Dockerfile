@@ -7,7 +7,7 @@ WORKDIR /opt/rcj-cms
 RUN apk add --no-cache python3 \
  && npm install -g workbox-cli bower \
  && bower install --allow-root \
- && npm ci --omit=optional --ignore-scripts \
+ && npm ci \
  && npm run build \
  && mkdir -p logs documents
 
