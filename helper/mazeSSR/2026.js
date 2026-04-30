@@ -317,15 +317,28 @@ async function drawMazeCanvas(map) {
         const tw = getSize(c);
         const th = getSize(r);
 
-        // Check adjacent walls for coloring
+        // Check adjacent walls for coloring and drawing condition
+        const isWallDrawable = (w) => {
+          if (!w || !w.isWall) return false;
+          let t1, t2;
+          if (w.x % 2 === 0) { // vertical wall
+            t1 = map.cells.find(c => c.x === w.x - 1 && c.y === w.y && c.z === z);
+            t2 = map.cells.find(c => c.x === w.x + 1 && c.y === w.y && c.z === z);
+          } else { // horizontal wall
+            t1 = map.cells.find(c => c.x === w.x && c.y === w.y - 1 && c.z === z);
+            t2 = map.cells.find(c => c.x === w.x && c.y === w.y + 1 && c.z === z);
+          }
+          return (t1 && t1.tile && t1.tile.reachable) || (t2 && t2.tile && t2.tile.reachable);
+        };
+
         const neighbors = [
           map.cells.find(cell => cell.x === c - 1 && cell.y === r && cell.z === z),
           map.cells.find(cell => cell.x === c + 1 && cell.y === r && cell.z === z),
           map.cells.find(cell => cell.x === c && cell.y === r - 1 && cell.z === z),
           map.cells.find(cell => cell.x === c && cell.y === r + 1 && cell.z === z)
-        ].filter(n => n && n.isWall);
+        ].filter(n => isWallDrawable(n));
 
-        if (neighbors.length > 0) {
+        if (neighbors.length >= 2) {
           let pillarColor = COLORS.wall;
           if (neighbors.some(n => n.isLinear)) pillarColor = COLORS.black;
           else if (neighbors.some(n => n.ignoreWall)) pillarColor = 'green';
