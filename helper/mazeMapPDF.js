@@ -204,10 +204,11 @@ function drawTarget(doc, x, y, target) {
   let imagePath = '';
   let labelText = '';
 
+  let status = '';
   if (target.type === 'Cognitive') {
     const colorCode = target.colorCode;
     imagePath = path.join(__dirname, '../public/images/cognitive_targets', `${colorCode}.png`);
-    const status = getVictimStatus(colorCode);
+    status = getVictimStatus(colorCode);
     const statusName = getStatusName(status);
     labelText = `${colorCode} (${status}: ${statusName})`;
   } else {
@@ -222,7 +223,7 @@ function drawTarget(doc, x, y, target) {
       'PSI': 'S',
       'OMEGA': 'U'
     };
-    const status = statusMap[victimType];
+    status = statusMap[victimType];
     imagePath = path.join(__dirname, '../public/images/letter_victims', `${fileMap[victimType]}.png`);
     labelText = `${victimType} (${status}: ${getStatusName(status)})`;
   }
@@ -252,9 +253,10 @@ function drawTarget(doc, x, y, target) {
     const circleY = labelY + 4;
     const circleRadius = 7.5;
 
-    // Draw pink circle
+    // Draw circle (Gray for Dummy, Pink for others)
+    const circleColor = status === 'D' ? '#95a5a6' : '#e84393';
     doc.circle(circleX, circleY, circleRadius)
-      .fill('#e84393');
+      .fill(circleColor);
 
     // Draw letter in white
     doc.fontSize(9)
