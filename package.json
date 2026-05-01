@@ -1,11 +1,10 @@
 {
   "name": "rcj-scoring",
-  "version": "26.0.0-alpha.8",
+  "version": "26.0.0-alpha.9",
   "copyright": "2016-2026 RoboCupJunior Rescue CMS Development SubCommittee",
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "build": "workbox generateSW workbox-config.js",
     "minify": "grunt"
   },
   "dependencies": {
@@ -70,8 +69,7 @@
     "grunt-contrib-uglify": "5.0.1",
     "grunt-image": "^6.4.0",
     "grunt-json-minification": "^0.2.1",
-    "prettier": "2.4.1",
-    "workbox-cli": "6.5.4"
+    "prettier": "2.4.1"
   },
   "author": "",
   "license": "MIT"

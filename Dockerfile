@@ -4,11 +4,9 @@ COPY . /opt/rcj-cms/
 WORKDIR /opt/rcj-cms
 
 # install deps + build assets
-RUN apk add --no-cache python3 \
- && npm install -g workbox-cli bower \
+RUN npm install -g bower \
  && bower install --allow-root \
- && npm ci \
- && npm run build \
+ && npm ci --omit=dev \
  && mkdir -p logs documents
 
 CMD ["npm", "run", "start"]

@@ -1,8 +1,6 @@
 services:
   app:
-    command: >
-      sh -c "if [ ! -f public/sw.js ]; then npm run build; fi && 
-             npx nodemon server.js --ignore node_modules --ignore public/components"
+    command: npx nodemon server.js --ignore node_modules --ignore public/components
     volumes:
       - .:/opt/rcj-cms
       - app_node_modules:/opt/rcj-cms/node_modules
