@@ -331,6 +331,10 @@ function drawRun(doc, config, scoringRun) {
   base_size_x = 60;
   // Draw box for "checkpoint"
   for (const e of itemList.checkpoint) {
+    if (x + base_size_x > 810) {
+      x = 453;
+      y += base_size_y;
+    }
     pdf.drawImage(
       doc,
       x,
@@ -368,6 +372,10 @@ function drawRun(doc, config, scoringRun) {
 
   // Draw box for "speedbump"
   for (const e of itemList.speedbump) {
+    if (x + base_size_x > 810) {
+      x = 453;
+      y += base_size_y;
+    }
     pdf.drawImage(
       doc,
       x,
@@ -405,6 +413,10 @@ function drawRun(doc, config, scoringRun) {
 
   // Draw box for "ramp"
   for (const e of itemList.ramp) {
+    if (x + base_size_x > 810) {
+      x = 453;
+      y += base_size_y;
+    }
     pdf.drawImage(
       doc,
       x,
@@ -442,6 +454,10 @@ function drawRun(doc, config, scoringRun) {
 
   // Draw box for "steps"
   for (const e of itemList.steps) {
+    if (x + base_size_x > 810) {
+      x = 453;
+      y += base_size_y;
+    }
     pdf.drawImage(
       doc,
       x,
@@ -479,6 +495,10 @@ function drawRun(doc, config, scoringRun) {
 
   // Draw box for "blue"
   for (const e of itemList.blue) {
+    if (x + base_size_x * 2 > 810) {
+      x = 453;
+      y += base_size_y;
+    }
     pdf.drawImage(
       doc,
       x,
