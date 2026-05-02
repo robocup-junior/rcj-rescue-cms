@@ -155,9 +155,10 @@ html(ng-app="RunAdmin")
               td(ng-bind='run.LoPs' ng-if="showLoPs")
               td(ng-bind='run.misidentification' ng-if="showMisidentification")
               td(ng-if="showVictim")
-                .img-thumbnail(style="padding:0;display: inline-block;margin-right:5px;" ng-repeat="victim in run.foundVictims")
-                  img(ng-src="/images/{{victim.type}}.png", style="height:20px;")
-                  span(style="font-size:15px;") ×{{victim.count}}
+                .img-thumbnail(style="padding:0;display: inline-block;margin-right:5px;" ng-repeat="victim in run.foundVictims | orderBy:victimOrder" ng-style="{'background-color': (victim.type.endsWith(':H') || victim.type=='PHI' || victim.type=='H')?'#f8d7da':((victim.type.endsWith(':S') || victim.type=='PSI' || victim.type=='S')?'#fff3cd':((victim.type.endsWith(':U') || victim.type=='OMEGA' || victim.type=='U')?'#d4edda':'transparent'))}")
+                  img(ng-src="/images/{{victim.type.toLowerCase()}}.png", style="height:20px;", ng-if="!victim.type.startsWith('Cognitive')")
+                  i.fas.fa-bullseye(style="font-size:18px;vertical-align:middle;margin-left:2px;margin-right:2px;", ng-if="victim.type.startsWith('Cognitive')")
+                  span(style="font-size:15px; color:black;") ×{{victim.count}}
               td.text-center(ng-if="showExit")
                 i(class="fas fa-check" aria-hidden="true" style="color:#2ecc71;" ng-if="run.exitBonus")
                 i(class="fas fa-times" aria-hidden="true" style="color:#e74c3c;" ng-if="!run.exitBonus")

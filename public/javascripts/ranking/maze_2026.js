@@ -134,6 +134,22 @@ app.controller("MazeScoreController", ['$scope', '$http', '$sce', '$translate', 
               })
         }
     }
+
+    $scope.victimOrder = function (victim) {
+        const order = {
+            'PHI': 1,
+            'PSI': 2,
+            'OMEGA': 3,
+            'H': 1,
+            'S': 2,
+            'U': 3,
+            'Cognitive:H': 4,
+            'Cognitive:S': 5,
+            'Cognitive:U': 6,
+            'Cognitive': 7
+        };
+        return order[victim.type] || 99;
+    };
 }])
 
 $(window).on('beforeunload', function () {

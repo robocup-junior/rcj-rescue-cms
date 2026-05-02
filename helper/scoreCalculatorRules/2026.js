@@ -187,11 +187,11 @@ module.exports.calculateMazeScore = function (run) {
 
     // helper: count valid kits for a single victim (ONLY called when victim is scored)
     function addRescueKitsFor(side, victimType, droppedKits) {
-      if (rescueKits >= MAX_RESCUE_KITS) return;
+      if (rescueKits >= MAX_RESCUE_KITS) return 0;
 
       const max = getVictimMaxKits(victimType, mapTiles[coord], side);
       const valid = Math.min(droppedKits, max, MAX_RESCUE_KITS - rescueKits);
-      if (valid <= 0) return;
+      if (valid <= 0) return 0;
 
       const victimKey = `${coord}:${side}`;
       if (kitsByVictim[victimKey] == null) kitsByVictim[victimKey] = 0;
@@ -199,54 +199,68 @@ module.exports.calculateMazeScore = function (run) {
 
       // total kit count for LoP formula + return value
       rescueKits += valid;
+      return valid;
     }
 
+    const getCognitiveStatus = (cell, side) => {
+      if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[side] || !cell.tile.cognitiveTargets[side].rings) return 'U';
+      const rings = cell.tile.cognitiveTargets[side].rings;
+      let total = 0;
+      for (let i = 1; i <= 5; i++) {
+        total += cognitiveColorValues[rings[`ring${i}`]] || 0;
+      }
+      if (total === 2) return 'H';
+      if (total === 1) return 'S';
+      return 'U';
+    };
 
     if (mapTiles[coord].tile.victims.top !== 'None') {
       if (tile.scoredItems.victims.top) {
-        addVictimCount(victims, mapTiles[coord].tile.victims.top);
+        const kitsAdded = addRescueKitsFor('top', mapTiles[coord].tile.victims.top, tile.scoredItems.rescueKits.top);
+        let type = mapTiles[coord].tile.victims.top;
+        if (type === 'Cognitive') type += `:${getCognitiveStatus(mapTiles[coord], 'top')}`;
+        addVictimCount(victims, type, kitsAdded);
         if (isVictimOfTypeLetter(mapTiles[coord].tile.victims.top))
           score += mapTiles[coord].isLinear ? 5 : 15;
         else score += mapTiles[coord].isLinear ? 10 : 30;
-
-        addRescueKitsFor('top', mapTiles[coord].tile.victims.top, tile.scoredItems.rescueKits.top);
       }
     }
     if (mapTiles[coord].tile.victims.right !== 'None') {
       if (tile.scoredItems.victims.right) {
-        addVictimCount(victims, mapTiles[coord].tile.victims.right);
+        const kitsAdded = addRescueKitsFor('right', mapTiles[coord].tile.victims.right, tile.scoredItems.rescueKits.right);
+        let type = mapTiles[coord].tile.victims.right;
+        if (type === 'Cognitive') type += `:${getCognitiveStatus(mapTiles[coord], 'right')}`;
+        addVictimCount(victims, type, kitsAdded);
         if (isVictimOfTypeLetter(mapTiles[coord].tile.victims.right))
           score += mapTiles[coord].isLinear ? 5 : 15;
         else score += mapTiles[coord].isLinear ? 10 : 30;
-
-        addRescueKitsFor('right', mapTiles[coord].tile.victims.right, tile.scoredItems.rescueKits.right
-        );
       }
     }
     if (mapTiles[coord].tile.victims.bottom !== 'None') {
       if (tile.scoredItems.victims.bottom) {
-        addVictimCount(victims, mapTiles[coord].tile.victims.bottom);
+        const kitsAdded = addRescueKitsFor('bottom', mapTiles[coord].tile.victims.bottom, tile.scoredItems.rescueKits.bottom);
+        let type = mapTiles[coord].tile.victims.bottom;
+        if (type === 'Cognitive') type += `:${getCognitiveStatus(mapTiles[coord], 'bottom')}`;
+        addVictimCount(victims, type, kitsAdded);
         if (isVictimOfTypeLetter(mapTiles[coord].tile.victims.bottom))
           score += mapTiles[coord].isLinear ? 5 : 15;
         else score += mapTiles[coord].isLinear ? 10 : 30;
-
-        addRescueKitsFor('bottom', mapTiles[coord].tile.victims.bottom, tile.scoredItems.rescueKits.bottom
-        );
       }
     }
     if (mapTiles[coord].tile.victims.left !== 'None') {
       if (tile.scoredItems.victims.left) {
-        addVictimCount(victims, mapTiles[coord].tile.victims.left);
+        const kitsAdded = addRescueKitsFor('left', mapTiles[coord].tile.victims.left, tile.scoredItems.rescueKits.left);
+        let type = mapTiles[coord].tile.victims.left;
+        if (type === 'Cognitive') type += `:${getCognitiveStatus(mapTiles[coord], 'left')}`;
+        addVictimCount(victims, type, kitsAdded);
         if (isVictimOfTypeLetter(mapTiles[coord].tile.victims.left))
           score += mapTiles[coord].isLinear ? 5 : 15;
         else score += mapTiles[coord].isLinear ? 10 : 30;
-
-        addRescueKitsFor('left', mapTiles[coord].tile.victims.left, tile.scoredItems.rescueKits.left);
       }
     }
   }
 
-  let totalVictimCount = sum(Object.values(victims));
+  let totalVictimCount = sum(Object.values(victims).map(v => v.count));
 
   // - 1 successful kit to the same victim => 10 points
   // - 2 successful kits to the same victim => 30 points
@@ -287,9 +301,10 @@ function isVictimOfTypeLetter(victimType)
   return ["PHI", "PSI", "OMEGA"].includes(victimType);
 }
 
-function addVictimCount(obj, type) {
-  if (obj[type] == null) obj[type] = 0;
-  obj[type] ++;
+function addVictimCount(obj, type, kits = 0) {
+  if (obj[type] == null) obj[type] = {count: 0, kits: 0};
+  obj[type].count ++;
+  obj[type].kits += kits;
 }
 
 function sum(array) {
@@ -303,7 +318,8 @@ function convert(obj) {
   return Object.entries(obj).map(o => {
     return {
       'type': o[0],
-      'count': o[1]
+      'count': o[1].count,
+      'kits': o[1].kits
     }
   })
 }
