@@ -20,10 +20,10 @@ body {
 
 .maps-hero {
   background: var(--primary-gradient);
-  padding: 0.5rem 0 0.75rem;
+  padding: 1rem 0 1.25rem;
   border-radius: 0 0 1rem 1rem;
   color: white;
-  margin-bottom: 1.25rem;
+  margin-bottom: 2rem;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
   position: relative;
 }
@@ -68,7 +68,7 @@ body {
 .maps-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 1rem 1.5rem 0;
 }
 
 .hero-inner-container {
