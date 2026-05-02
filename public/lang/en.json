@@ -677,7 +677,21 @@
             "maps": "Maps",
             "runs": "Runs",
             "backup": "Backup",
-            "tools": "Tools"
+            "tools": "Tools",
+            "leagues": "Leagues",
+            "teams_desc": "Register, edit, and manage participating teams and member info.",
+            "rounds_desc": "Create competition rounds, set up groups, and manage schedules.",
+            "fields_desc": "Set up competition fields (arenas) and their specific names.",
+            "settings_desc": "Configure core settings: name, logo, rules, and ranking logic.",
+            "backup_desc": "Create backups and restore competition data for safety.",
+            "maps_short": "Maps",
+            "runs_short": "Runs",
+            "tools_doc_desc": "Review and score submitted technical documents.",
+            "tools_mail_desc": "Email communication and bulk messaging to all teams.",
+            "tools_reg_desc": "Manage self-registration and info correction by teams.",
+            "tools_res_desc": "Manage time-slot bookings for interviews and practice.",
+            "tools_cab_desc": "Distribute files and bulk-upload materials to teams.",
+            "tools_sur_desc": "Create participant surveys and review response results."
         },
         "teams": {
             "title": "Teams",

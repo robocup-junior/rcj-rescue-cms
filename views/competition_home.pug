@@ -12,6 +12,7 @@ append scripts
 
 append css
   link(href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet")
+  link(rel='stylesheet', href='/stylesheets/common/modern_layout.css')
   link(rel='stylesheet', href='/stylesheets/home_premium.css')
   link(rel='stylesheet', href='/stylesheets/competition_premium.css')
 
@@ -30,69 +31,87 @@ block content
           p(ng-bind-html="competition.message")
 
   .comp-container
-    .league-grid
-      .league-card(ng-repeat="league in leagues" ng-click="goLeaguePage(league)")
-        .card-accent(ng-style="{'backgroundColor': league.type == 'line' ? '#2ecc71' : (league.type == 'maze' ? '#3498db' : '#f1c40f')}")
-        .league-image-area
-          img(ng-src="/images/leagues/{{leagueImage(league)}}.png" alt="{{league.name}}")
-        .league-body
-          h3.league-name(ng-style="{'color': league.type == 'line' ? '#27ae60' : (league.type == 'maze' ? '#2980b9' : '#f39c12')}") {{league.name}}
-          .btn-enter-premium
-            i.fas.fa-arrow-right
-            | {{'home.enterLeague' | translate}}
-
-    // Staff Tools Section
-    if judge || interview
-      .tools-section
-        .tools-header
-          i.fas.fa-tools
-          h2 {{'home.staffWorkspace' | translate}}
-        .tools-grid
-          if judge
-            a.tool-button-premium.staff(ng-click="go('/home/' + competition._id + '/teams')")
-              .tool-icon-circle
-                i.fas.fa-users
-              .tool-text-container
-                span.tool-label {{'team_home.title' | translate}}
-                span.tool-sublabel {{'home.manageTeamsDesc' | translate}}
+    //- SECTION 1: LEAGUES (Unified Premium Style)
+    .mb-5
+      h3.text-heading-premium.mb-4(style="font-size: 1.5rem; display: flex; align-items: center;")
+        i.fas.fa-trophy.mr-3(style="color: #f59e0b; font-size: 1.1rem;")
+        | {{'admin.competition.leagues' | translate}}
+      
+      .row.league-grid-premium
+        div(ng-repeat="league in leagues" class="col-md-6 col-lg-4 mb-4")
+          .league-card-premium(ng-click="goLeaguePage(league)" ng-style="{'--league-color': league.color || (league.type == 'line' ? '#10b981' : (league.type == 'maze' ? '#3b82f6' : '#f59e0b'))}")
+            img(ng-src="/images/leagues/{{leagueImage(league)}}.png")
+            .card-overlay
+            .league-accent
+            i.fas.bg-icon(ng-class="{'fa-route': league.type=='line', 'fa-border-all': league.type=='maze', 'fa-desktop': league.type=='simulation'}")
             
-            a.tool-button-premium.staff(ng-click="go('/home/scanner/home')")
-              .tool-icon-circle
-                i.fas.fa-qrcode
-              .tool-text-container
-                span.tool-label {{'home.goScanner' | translate}}
-                span.tool-sublabel {{'home.scannerDesc' | translate}}
+            .card-content
+              h4.league-name
+                i.fas(ng-class="{'fa-route': league.type=='line', 'fa-border-all': league.type=='maze', 'fa-desktop': league.type=='simulation'}")
+                | {{league.name}}
+              .enter-label
+                span {{'home.enterLeague' | translate}}
+                i.fas.fa-chevron-right.ml-2
+
+    //- SECTION 2: STAFF WORKSPACE
+    if judge || interview
+      .section-gap
+        h3.text-heading-premium.mb-4(style="font-size: 1.5rem;")
+          i.fas.fa-briefcase.mr-3(style="color: #6366f1;")
+          | {{'home.staffWorkspace' | translate}}
+        
+        .row
+          if judge
+            .col-md-6.col-lg-4.mb-4
+              a.tool-btn-home(ng-click="go('/home/' + competition._id + '/teams')")
+                .tool-icon-home
+                  i.fas.fa-users
+                div
+                  h6.tool-label.mb-1 {{'team_home.title' | translate}}
+                  p.tool-sublabel.mb-0 {{'home.manageTeamsDesc' | translate}}
+            
+            .col-md-6.col-lg-4.mb-4
+              a.tool-btn-home(ng-click="go('/home/scanner/home')")
+                .tool-icon-home
+                  i.fas.fa-qrcode
+                div
+                  h6.tool-label.mb-1 {{'home.goScanner' | translate}}
+                  p.tool-sublabel.mb-0 {{'home.scannerDesc' | translate}}
           
           if interview
-            a.tool-button-premium.staff(ng-click="go('/document/assigned/' + competition._id)")
-              .tool-icon-circle
-                i.fas.fa-file-alt
-              .tool-text-container
-                span.tool-label Assigned Reviews
-                span.tool-sublabel {{'home.reviewsDesc' | translate}}
+            .col-md-6.col-lg-4.mb-4
+              a.tool-btn-home(ng-click="go('/document/assigned/' + competition._id)")
+                .tool-icon-home
+                  i.fas.fa-file-signature
+                div
+                  h6.tool-label.mb-1 {{'team_home.review' | translate}}
+                  p.tool-sublabel.mb-0 {{'home.reviewsDesc' | translate}}
 
-    // Admin Tools Section (Hidden by default)
-    .tools-section.admin-tools-container(ng-if="secretCommand")
-      .tools-header
-        i.fas.fa-user-shield
-        h2 {{'home.adminCommand' | translate}}
-      .tools-grid
-        a.tool-button-premium.admin(ng-click="go('/signage/games/' + competition._id)")
-          .tool-icon-circle
-            i.fas.fa-desktop
-          .tool-text-container
-            span.tool-label {{'home.runsMonitor' | translate}}
-            span.tool-sublabel {{'home.runsMonitorDesc' | translate}}
+    //- SECTION 3: ADMIN COMMANDS
+    .admin-tools-container.section-gap(ng-if="secretCommand" style="padding-bottom: 8rem;")
+      h4.text-heading-premium.mb-4(style="display: flex; align-items: center;")
+        i.fas.fa-user-shield.mr-3(style="color: #ef4444; font-size: 1.1rem;")
+        | {{'home.adminCommand' | translate}}
+      
+      .row
+        .col-md-6.col-lg-4.mb-4
+          a.tool-btn-home(ng-click="go('/signage/games/' + competition._id)")
+            .tool-icon-home(style="background: #f8fafc; color: #1e293b;")
+              i.fas.fa-desktop
+            div
+              h6.tool-label.mb-1 {{'home.runsMonitor' | translate}}
+              p.tool-sublabel.mb-0 {{'home.runsMonitorDesc' | translate}}
         
-        // Grouped Signage Cards
-        .signage-combo-card(ng-repeat="sign in signs")
-          .signage-card-header
-            i.fas.fa-tv
-            span {{sign.name}}
-          .signage-actions
-            button.sign-action-btn(ng-click="go('/signage/display/' + sign._id + '/0')")
-              i.fas.fa-play-circle
-              span {{'home.signageOnly' | translate}}
-            button.sign-action-btn.dual(ng-click="go('/signage/games/' + competition._id + '/' + sign._id + '/0')")
-              i.fas.fa-columns
-              span {{'home.dualView' | translate}}
+        .col-md-6.col-lg-4.mb-4(ng-repeat="sign in signs")
+          .tool-btn-home(style="flex-direction: column; align-items: stretch; cursor: default;")
+            .d-flex.align-items-center.mb-4
+              .tool-icon-home
+                i.fas.fa-tv(style="color: #6366f1;")
+              span.text-heading-premium(style="font-size: 1.1rem;") {{sign.name}}
+            .d-flex.gap-3
+              button.btn-premium.btn-premium-dark.flex-grow-1(ng-click="go('/signage/display/' + sign._id + '/0')")
+                i.fas.fa-play
+                | {{'home.signageOnly' | translate}}
+              button.btn-premium.btn-premium-primary.flex-grow-1(ng-click="go('/signage/games/' + competition._id + '/' + sign._id + '/0')")
+                i.fas.fa-columns
+                | {{'home.dualView' | translate}}

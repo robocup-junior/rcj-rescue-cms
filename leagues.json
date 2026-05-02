@@ -1,7 +1,47 @@
 [
-  {"type": "line", "id": "Line", "name": "Rescue Line", "rules": ["2025", "2026"]},
-  {"type": "line", "id": "LineNL", "name": "Rescue Line Entry", "rules": ["2025E", "2026E"]},
-  {"type": "maze", "id": "Maze",   "name": "Rescue Maze", "rules": ["2025", "2026"]},
-  {"type": "maze", "id": "MazeNL",   "name": "Rescue Maze Entry", "rules": ["2025E", "2026E"]},
-  {"type": "simulation", "id": "Erebus",   "name": "Rescue Simulation (Erebus)", "rules": ["2025", "2026"]}
+  {
+    "type": "line",
+    "id": "Line",
+    "name": "Rescue Line",
+    "rules": [
+      "2025",
+      "2026"
+    ]
+  },
+  {
+    "type": "line",
+    "id": "LineNL",
+    "name": "Rescue Line Entry",
+    "rules": [
+      "2025E",
+      "2026E"
+    ]
+  },
+  {
+    "type": "maze",
+    "id": "Maze",
+    "name": "Rescue Maze",
+    "rules": [
+      "2025",
+      "2026"
+    ]
+  },
+  {
+    "type": "maze",
+    "id": "MazeNL",
+    "name": "Rescue Maze Entry",
+    "rules": [
+      "2025E",
+      "2026E"
+    ]
+  },
+  {
+    "type": "simulation",
+    "id": "Erebus",
+    "name": "Rescue Simulation",
+    "rules": [
+      "2025",
+      "2026"
+    ]
+  }
 ]
