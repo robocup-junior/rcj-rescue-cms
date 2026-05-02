@@ -780,7 +780,15 @@
             "setCheckpoint": "Set this tile as a checkpoint",
             "cantset": "You can't set this element in some reasons.",
             "generateImage": "Generate map image",
-            "prepareScoresheets": "Prepare for generate score sheets"
+            "prepareScoresheets": "Prepare for generate score sheets",
+            "properties": "Tile Properties",
+            "checkpoint": "Checkpoint",
+            "courseStart": "Start",
+            "evacRestart": "Restart",
+            "simulator3d": "Floor Transitions",
+            "clickToCycle": "Cycle on click",
+            "ascend": "Ascend",
+            "descend": "Descend"
         },
         "teamBulk": {
             "title": "Teams Bulk Registration",

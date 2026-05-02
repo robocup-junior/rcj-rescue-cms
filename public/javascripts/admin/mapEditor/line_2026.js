@@ -1081,7 +1081,6 @@ app.controller('LineEditorController', ['$scope', '$rootScope', '$uibModal', '$l
             animation: true,
             templateUrl: '/templates/line_editor_modal.html?gs',
             controller: 'ModalInstanceCtrl',
-            size: 'sm',
             resolve: {
                 tile: function () {
                     // Clone the tile to prevent direct modification before OK
@@ -1089,6 +1088,12 @@ app.controller('LineEditorController', ['$scope', '$rootScope', '$uibModal', '$l
                     t.start = $scope.startTile.x == x && $scope.startTile.y == y && $scope.startTile.z == $scope.z;
                     t.start2 = $scope.startTile2.x == x && $scope.startTile2.y == y && $scope.startTile2.z == $scope.z;
                     return t;
+                },
+                z: function () {
+                    return $scope.z;
+                },
+                height: function () {
+                    return $scope.height;
                 }
             }
         });
@@ -1131,8 +1136,27 @@ app.controller('LineEditorController', ['$scope', '$rootScope', '$uibModal', '$l
 // Please note that $uibModalInstance represents a modal window (instance) dependency.
 // It is not the same as the $uibModal service used above.
 
-app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'tile', function ($scope, $uibModalInstance, tile) {
+app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'tile', 'z', 'height', function ($scope, $uibModalInstance, tile, z, height) {
     $scope.tile = tile;
+    $scope.z = z;
+    $scope.height = height;
+    $scope.cycleTileLevel = function (dir) {
+        if ($scope.tile.levelUp === dir) {
+            $scope.tile.levelUp = undefined;
+            if ($scope.z > 0) $scope.tile.levelDown = dir;
+        } else if ($scope.tile.levelDown === dir) {
+            $scope.tile.levelDown = undefined;
+        } else {
+            if ($scope.z < $scope.height - 1) {
+                $scope.tile.levelUp = dir;
+                $scope.tile.levelDown = undefined;
+            } else if ($scope.z > 0) {
+                $scope.tile.levelDown = dir;
+                $scope.tile.levelUp = undefined;
+            }
+        }
+    };
+
     $scope.ok = function () {
         $uibModalInstance.close($scope.tile);
     };

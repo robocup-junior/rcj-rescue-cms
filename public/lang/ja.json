@@ -778,7 +778,15 @@
             "setCheckpoint": "このタイルをチェックポイントに指定する",
             "cantset": "このタイルに得点項目は設定できません．",
             "generateImage": "マップの画像を生成する",
-            "prepareScoresheets": "スコアシート生成の準備を実行"
+            "prepareScoresheets": "スコアシート生成の準備を実行",
+            "properties": "設定",
+            "checkpoint": "チェックポイント",
+            "courseStart": "スタート",
+            "evacRestart": "再スタート",
+            "simulator3d": "フロアチェンジ設定",
+            "clickToCycle": "クリックで切替",
+            "ascend": "上昇",
+            "descend": "下降"
         },
         "teamBulk": {
             "title": "チーム一括登録",
