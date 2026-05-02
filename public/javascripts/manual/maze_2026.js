@@ -22,11 +22,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     };
 
     const cognitiveColorValues = {
-        'B': -2,
+        'K': -2,
         'R': -1,
         'Y': 0,
         'G': 1,
-        'C': 2
+        'B': 2
     };
 
     $scope.itemList = {

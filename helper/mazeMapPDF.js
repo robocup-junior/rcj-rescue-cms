@@ -27,11 +27,11 @@ const ROWS = 3;
 
 // Color to value mapping
 const colorValues = {
-  'B': -2,
+  'K': -2,
   'R': -1,
   'Y': 0,
   'G': 1,
-  'C': 2
+  'B': 2
 };
 
 function isExistFile(file) {

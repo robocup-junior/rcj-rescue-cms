@@ -12,20 +12,20 @@ from PIL import Image, ImageDraw
 
 # Color definitions (RGBA)
 COLORS = {
-    'B': (0, 0, 0, 255),        # Black
+    'K': (0, 0, 0, 255),        # Black
     'R': (255, 0, 0, 255),      # Red
     'Y': (255, 255, 0, 255),    # Yellow
     'G': (0, 128, 0, 255),      # Green
-    'C': (0, 255, 255, 255),    # Cyan
+    'B': (0, 255, 255, 255),    # Blue
 }
 
 # Color names for reference
 COLOR_NAMES = {
-    'B': 'Black',
+    'K': 'Black',
     'R': 'Red',
     'Y': 'Yellow',
     'G': 'Green',
-    'C': 'Cyan',
+    'B': 'Blue',
 }
 
 # DPI for converting cm to pixels (300 DPI for high-quality print)
@@ -151,7 +151,7 @@ def create_offset_ring_layer(color_code, ring_index, position):
 
 def generate_all_ring_layers():
     """Generate all ring layer images for all color and position combinations."""
-    color_codes = ['B', 'R', 'Y', 'G', 'C']
+    color_codes = ['K', 'R', 'Y', 'G', 'B']
     positions = ['top', 'right', 'bottom', 'left']
     
     # Generate output directory

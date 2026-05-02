@@ -87,7 +87,7 @@ function isDummy(cell, direction) {
   if (type === 'Cognitive') {
     if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return true;
     const rings = cell.tile.cognitiveTargets[direction].rings;
-    const colorValues = { 'B': -2, 'R': -1, 'Y': 0, 'G': 1, 'C': 2 };
+    const colorValues = { 'K': -2, 'R': -1, 'Y': 0, 'G': 1, 'B': 2 };
     let total = 0;
     for (let i = 1; i <= 5; i++) {
       total += colorValues[rings[`ring${i}`]] || 0;

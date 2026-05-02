@@ -149,11 +149,11 @@ module.exports.calculateMazeScore = function (run) {
     };
 
     const cognitiveColorValues = {
-      'B': -2,
+      'K': -2,
       'R': -1,
       'Y': 0,
       'G': 1,
-      'C': 2
+      'B': 2
     };
 
     const getVictimMaxKits = (victimType, cell, side) => {

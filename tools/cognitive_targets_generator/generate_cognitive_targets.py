@@ -3,7 +3,7 @@
 Generate cognitive target images with concentric rings.
 
 Each target has up to 5 concentric rings with diameters of 1, 2, 3, 4, 5 cm.
-Colors: Black, Red, Yellow, Green, Cyan
+Colors: Black, Red, Yellow, Green, Blue
 """
 
 import os
@@ -12,20 +12,20 @@ from PIL import Image, ImageDraw
 
 # Color definitions (RGBA)
 COLORS = {
-    'B': (0, 0, 0, 255),        # Black
+    'K': (0, 0, 0, 255),        # Black
     'R': (238, 0, 0, 255),      # Red
     'Y': (255, 255, 0, 255),    # Yellow
     'G': (0, 176, 80, 255),      # Green
-    'C': (0, 176, 240, 255),    # Cyan
+    'B': (0, 176, 240, 255),    # Blue
 }
 
 # Color names for reference
 COLOR_NAMES = {
-    'B': 'Black',
+    'K': 'Black',
     'R': 'Red',
     'Y': 'Yellow',
     'G': 'Green',
-    'C': 'Cyan',
+    'B': 'Blue',
 }
 
 # DPI for converting cm to pixels (300 DPI for high-quality print)
@@ -83,7 +83,7 @@ def create_cognitive_target(color_sequence, size_pixels):
 
 def generate_all_combinations():
     """Generate all possible color combinations for cognitive targets with exactly 5 rings."""
-    color_codes = ['B', 'R', 'Y', 'G', 'C']
+    color_codes = ['K', 'R', 'Y', 'G', 'B']
     
     # Generate output directory
     output_dir = 'output'

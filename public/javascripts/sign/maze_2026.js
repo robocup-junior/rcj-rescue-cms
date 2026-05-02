@@ -216,11 +216,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     }
 
     const cognitiveColorValues = {
-        'B': -2,
+        'K': -2,
         'R': -1,
         'Y': 0,
         'G': 1,
-        'C': 2
+        'B': 2
     };
 
     $scope.getMaxKitNum = function (cell, direction) {
@@ -884,21 +884,21 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'cell', 'til
 
     $scope.getColorValue = function (colorCode) {
         switch (colorCode) {
-            case 'B': return 'Black';
+            case 'K': return 'Black';
             case 'R': return 'Red';
             case 'Y': return 'Yellow';
             case 'G': return 'Green';
-            case 'C': return 'Cyan';
+            case 'B': return 'Blue';
             default: return colorCode;
         }
     };
 
     const cognitiveColorValues = {
-        'B': -2,
+        'K': -2,
         'R': -1,
         'Y': 0,
         'G': 1,
-        'C': 2
+        'B': 2
     };
 
     $scope.getModalMaxKitNum = function (cell, direction) {

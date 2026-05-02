@@ -36,11 +36,11 @@ function isEven(n) {
 
 const cognitiveTargetSchema = new Schema({
   rings: {
-    ring1: {type: String, enum: ['B', 'R', 'Y', 'G', 'C'], default: 'Y'},
-    ring2: {type: String, enum: ['B', 'R', 'Y', 'G', 'C'], default: 'Y'},
-    ring3: {type: String, enum: ['B', 'R', 'Y', 'G', 'C'], default: 'Y'},
-    ring4: {type: String, enum: ['B', 'R', 'Y', 'G', 'C'], default: 'Y'},
-    ring5: {type: String, enum: ['B', 'R', 'Y', 'G', 'C'], default: 'Y'}
+    ring1: {type: String, enum: ['K', 'R', 'Y', 'G', 'B'], default: 'Y'},
+    ring2: {type: String, enum: ['K', 'R', 'Y', 'G', 'B'], default: 'Y'},
+    ring3: {type: String, enum: ['K', 'R', 'Y', 'G', 'B'], default: 'Y'},
+    ring4: {type: String, enum: ['K', 'R', 'Y', 'G', 'B'], default: 'Y'},
+    ring5: {type: String, enum: ['K', 'R', 'Y', 'G', 'B'], default: 'Y'}
   }
 }, {_id: false})
 
