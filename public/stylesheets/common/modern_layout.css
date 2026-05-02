@@ -18,6 +18,11 @@ body {
   font-family: 'Outfit', sans-serif;
 }
 
+/* Fix for sticky elements in layout.pug */
+.container-fluid {
+  overflow: visible !important;
+}
+
 .maps-hero {
   background: var(--primary-gradient);
   padding: 1rem 0 1.25rem;

@@ -1,17 +1,18 @@
-//- -*- tab-width: 2 -*-
-extends ../../includes/layout
+extends ../../includes/modern_layout
 
 block vars
   - var ngAppDef = 'LineEditor'
+  - var heroContainerStyle = "max-width: 100%;"
+  - var contentContainerStyle = "max-width: 100%;"
+  - var contentContainerClass = "mt-n4"
+  - var hideLogin = pubService
 
 append scripts
   script.
     var mapId = "#{mapId}"
     var competitionId = "#{competitionId}"
-    var pubService = "#{pubService}"
+    var pubService = !{pubService || false}
     var leagueId = "#{leagueId}"
-
-  script(src="/javascripts/admin/mapEditor/line_2026.js")
 
   script(src="/javascripts/lvl-uuid.js")
   script(src="/javascripts/pathFinder.js")
@@ -22,132 +23,258 @@ append scripts
   script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js")
   script(src="/components/bootstrap-fileinput/js/locales/ja.js")
   script(src="/components/html2canvas/index.js")
+  script(src="/javascripts/admin/mapEditor/line_2026.js")
 
-append css
+block page_css
   link(href="/stylesheets/fredrik.css" rel="stylesheet")
   link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
+  link(href="/stylesheets/admin/mapEditor/maze_modern.css" rel="stylesheet")
+  link(href="/stylesheets/admin/mapEditor/line_modern.css" rel="stylesheet")
+
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  if !pubService
+    a.breadcrumb-item(ng-click="go('/admin')") Admin
+    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+    a.breadcrumb-item(ng-click="go('/admin/'+competitionId + '/' + league.league + '/maps')") #{leagueId} Maps
+    span.breadcrumb-item.active Editor
+  else
+    a.breadcrumb-item(ng-click="go('/service')") Public services
+    span.breadcrumb-item.active #{leagueId} Editor
+
+block hero_title_container
+  .hero-title-container
+    input.hero-title-input(type="text", ng-model="name", placeholder='{{"admin.lineMapEditor.mapName" | translate}}')
+    i.fas.fa-pen.title-edit-icon
+
+block hero_subtitle
+  if pubService
+    | Rescue Line Map Editor 2026
+  else
+    | {{competition.name}} - {{league.name}} Map Editor 2026
+
+block hero_actions
+  if !pubService
+    .action-group.flex-column.align-items-center(style="position: relative;")
+      .alert.alert-danger.small.py-1.px-2.mb-0(ng-if='startNotSet()', style="position: absolute; top: -45px; left: 0; border-radius: 12px; border: none; background: #fee2e2; color: #b91c1c; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10;")
+        i.fas.fa-exclamation-circle.mr-1
+        | {{"admin.lineMapEditor.noStart" | translate}}
+      span.action-label.mb-1 SAVE
+      .d-flex
+        button.btn-hero-icon.btn-save.mr-2(type='button', ng-click='saveMap()', title='{{"admin.lineMapEditor.save" | translate}}')
+          i.fas.fa-save
+        if !parent
+          button.btn-hero-icon(type='button', ng-click="openSaveAsModal()", title='Save As')
+            i.fas.fa-copy
   
+  .action-divider
+  
+  .action-group.flex-column.align-items-center
+    span.action-label.mb-1 JSON
+    .d-flex
+      button.btn-hero-icon.mr-2(type='button', ng-click='export()', uib-tooltip='Export JSON')
+        i.fas.fa-file-export
+      button.btn-hero-icon(type='button', onclick="$('#select').click()", uib-tooltip='Import JSON')
+        i.fas.fa-file-import
+      input#select(type='file', name='select', style="display:none;")
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    if !pubService
-        a.breadcrumb-item(ng-click="go('/admin')") Admin
-        a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-        a.breadcrumb-item(ng-click="go('/admin/'+competitionId + '/' + league.league + '/maps')") #{leagueId} maps
-        span.breadcrumb-item.active Editor
-    else
-        a.breadcrumb-item(ng-click="go('/service')") Public services
-        span.breadcrumb-item.active #{leagueId} editor
+block main_content
+  script(type="text/ng-template" id="saveAsModal_2026.html")
+    .modal-header.premium-modal-header
+      h3.modal-title
+        i.fas.fa-copy.mr-2
+        | {{"admin.lineMapEditor.saveAs" | translate}}
+    .modal-body.premium-modal-body
+      .form-group
+        label.action-label.text-muted.mb-1 {{ 'admin.lineMapEditor.name' | translate }}
+        input.premium-input(type='text', ng-model='asname', placeholder='{{ "admin.lineMapEditor.name" | translate }}')
+      .form-group.mt-4
+        label.action-label.text-muted.mb-1 {{ 'admin.mazeMapEditor.saveAsModal.targetCompetition' | translate }}
+        select.premium-select(ng-model='se_competition', ng-options='b_competitions._id as b_competitions.name for b_competitions in competitions')
+    .modal-footer.premium-modal-footer
+      button.btn.btn-light.rounded-pill.px-4(type='button', ng-click='saveAsCancel()') {{"common.cancel" | translate}}
+      button.btn-hero-action.btn-save(type='button', ng-click='saveAsOk()') 
+        i.fas.fa-save.mr-2
+        | {{ 'admin.lineMapEditor.saveAs' | translate }}
 
-block content
-    if !pubService
-        h3 {{competition.name}}
-    h1 {{league.name}} {{"admin.lineMapEditor.title" | translate}} 2026
-    p {{"admin.lineMapEditor.desc" | translate}}
-    div(style='margin-top:50px;')
-        .row
-            .col-md-4
-                button.btn.btn-dark(type='button', ng-click='export()') {{"admin.lineMapEditor.export" | translate}}
-            .col-md-4
-                input#select(type='file', name='select')
-            .col-md-4(style="text-align:right;")
-                button.btn.btn-info(type='button', ng-click='makeImageDl()') {{"admin.lineMapEditor.generateImage" | translate}}
-        br
-        .row
-            .col-md-12
-                if pubService
-                    .input-group.mb-3
-                        .input-group-prepend
-                            span.input-group-text {{"admin.lineMapEditor.name" | translate}}
-                        input.form-control(type='text', ng-model='name')
-                        .input-group-append
-                            button.btn.btn-secondary(type='button', ng-click='export()') {{"admin.lineMapEditor.export" | translate}}
-                    hr
-                if !pubService
-                    .input-group.mb-3
-                        .input-group-prepend
-                            span.input-group-text {{"admin.lineMapEditor.name" | translate}}
-                        input.form-control(type='text', ng-model='name')
-                        .input-group-append
-                            button.btn.btn-secondary(type='button', ng-click='saveMap()') {{"admin.lineMapEditor.save" | translate}}
-                    hr
-                    .input-group.mb-3
-                        .input-group-prepend
-                            span.input-group-text {{"admin.lineMapEditor.name" | translate}}
-                        input.form-control(type='text', ng-model='saveasname')
-                        .input-group-append
-                            span.input-group-text(for="selectComp") @
-                        select.custom-select#selectComp(ng-model='se_competition', ng-options='b_competitions._id as b_competitions.name for b_competitions in competitions', value='{{competitionId}}')
-                        .input-group-append
-                            button.btn.btn-secondary(type='button', ng-click='saveMapAs()') {{"admin.lineMapEditor.saveAs" | translate}}
+  .row
+    div(class="col-12")
+      .modern-toolbar.py-2.mb-3(style="background: #f8fafc; border-radius: 8px;")
+        .row.no-gutters.w-100.align-items-center
+          .col-auto.px-3.border-right
+            span.small.text-muted.font-weight-bold
+              i.fas.fa-ruler-combined.mr-2
+              | {{"admin.mazeMapEditor.dimensions" | translate}}
+          .col.px-2
+            .d-flex.justify-content-start.ml-3.gap-4
+              .d-flex.align-items-center.mr-4(title='{{"admin.lineMapEditor.height" | translate}}')
+                label.small.mb-0.mr-2.text-muted
+                  i.fas.fa-layer-group.mr-1
+                .dimension-spinner
+                  button.btn-spin(type='button', ng-click="height = height > 1 ? height - 1 : 1; sliderOptions.ceil = height - 1")
+                    i.fas.fa-minus
+                  input.spinner-input(type='number', ng-model='height', ng-change='sliderOptions.ceil = height - 1', min='1')
+                  button.btn-spin(type='button', ng-click="height = height + 1; sliderOptions.ceil = height - 1")
+                    i.fas.fa-plus
+              
+              .d-flex.align-items-center.mr-4(title='{{"admin.lineMapEditor.width" | translate}}')
+                label.small.mb-0.mr-2.text-muted
+                  i.fas.fa-arrows-alt-h.mr-1
+                .dimension-spinner
+                  button.btn-spin(type='button', ng-click="width = width > 1 ? width - 1 : 1")
+                    i.fas.fa-minus
+                  input.spinner-input(type='number', ng-model='width', min='1')
+                  button.btn-spin(type='button', ng-click="width = width + 1")
+                    i.fas.fa-plus
+              
+              .d-flex.align-items-center.mr-4(title='{{"admin.lineMapEditor.length" | translate}}')
+                label.small.mb-0.mr-2.text-muted
+                  i.fas.fa-arrows-alt-v.mr-1
+                .dimension-spinner
+                  button.btn-spin(type='button', ng-click="length = length > 1 ? length - 1 : 1")
+                    i.fas.fa-minus
+                  input.spinner-input(type='number', ng-model='length', min='1')
+                  button.btn-spin(type='button', ng-click="length = length + 1")
+                    i.fas.fa-plus
+          .col.px-3.border-left
+            .d-flex.align-items-center.justify-content-end.gap-4
+              //- Live Victims Capsule
+              .time-capsule(ng-class="{'expanded': showLiveVSetting}", ng-click="showLiveVSetting = !showLiveVSetting")
+                .time-capsule-icon
+                  i.fas.fa-heart.text-danger
+                .time-capsule-label
+                  span(ng-if="!showLiveVSetting") {{liveV}}
+                  span(ng-if="showLiveVSetting") {{"admin.lineMapEditor.liveVictim" | translate}}
+                .dimension-spinner(ng-show="showLiveVSetting", ng-click="$event.stopPropagation()")
+                  button.btn-spin(type='button', ng-click="liveV = liveV > 0 ? liveV - 1 : 0")
+                    i.fas.fa-minus
+                  input.spinner-input(type='number', ng-model='liveV', min='0')
+                  button.btn-spin(type='button', ng-click="liveV = liveV + 1")
+                    i.fas.fa-plus
+              
+              //- Dead Victims Capsule
+              .time-capsule(ng-class="{'expanded': showDeadVSetting}", ng-click="showDeadVSetting = !showDeadVSetting")
+                .time-capsule-icon
+                  i.fas.fa-skull.text-secondary
+                .time-capsule-label
+                  span(ng-if="!showDeadVSetting") {{deadV}}
+                  span(ng-if="showDeadVSetting") {{"admin.lineMapEditor.deadVictim" | translate}}
+                .dimension-spinner(ng-show="showDeadVSetting", ng-click="$event.stopPropagation()")
+                  button.btn-spin(type='button', ng-click="deadV = deadV > 0 ? deadV - 1 : 0")
+                    i.fas.fa-minus
+                  input.spinner-input(type='number', ng-model='deadV', min='0')
+                  button.btn-spin(type='button', ng-click="deadV = deadV + 1")
+                    i.fas.fa-plus
 
-                    hr
-                .input-group.mb-3
-                    .input-group-prepend
-                        span.input-group-text {{"admin.lineMapEditor.height" | translate}}
-                    input.form-control(type='number', ng-model='height', ng-change='sliderOptions.ceil = height - 1', min='1')
-                    .input-group-append
-                        span.input-group-text {{"admin.lineMapEditor.width" | translate}}
-                    input.form-control(type='number', ng-model='width', min='1')
-                    .input-group-append
-                        span.input-group-text {{"admin.lineMapEditor.length" | translate}}
-                    input.form-control(type='number', ng-model='length', min='1')
-                    .input-group-append
-                        span.input-group-text {{"admin.simMapEditor.timelimit" | translate}}:
-                    input.form-control(type='number', ng-model='duration', min = '1')
+              //- Time Capsule
+              .time-capsule(ng-class="{'expanded': showTimeSetting}", ng-click="showTimeSetting = !showTimeSetting")
+                .time-capsule-icon
+                  i.fas.fa-clock
+                .time-capsule-label
+                  span(ng-if="!showTimeSetting") {{duration}}s
+                  span(ng-if="showTimeSetting") {{"admin.lineMapEditor.duration" | translate}}
+                
+                .dimension-spinner(ng-show="showTimeSetting", ng-click="$event.stopPropagation()")
+                  button.btn-spin(type='button', ng-click="duration = duration > 30 ? duration - 30 : 0")
+                    i.fas.fa-minus
+                  input.spinner-input(type='number', ng-model='duration', min='0', step='30')
+                  button.btn-spin(type='button', ng-click="duration = (duration || 0) + 30")
+                    i.fas.fa-plus
 
-                if !pubService
-                    .input-group.mb-3
-                        .input-group-prepend
-                            span.input-group-text {{"admin.lineMapEditor.liveVictim" | translate}}
-                        input.form-control(type='number', ng-model='liveV', min='0')
-                        .input-group-append
-                            span.input-group-text {{"admin.lineMapEditor.deadVictim" | translate}}
-                        input.form-control(type='number', ng-model='deadV', min='0')
-                    hr
+          .col-auto.px-3.border-left.d-flex.align-items-center
+            button.calc-btn-premium(type='button', ng-click='openMaxScore()', uib-tooltip='Calculate Max Score')
+              i.fas.fa-calculator
+      
+      .row.no-gutters.flex-nowrap.align-items-stretch(style="height: calc(100vh - 120px); min-height: 600px; margin-bottom: -20px; width: 100%;")
+        .col.flex-grow-1.mr-3.h-100(style="min-width: 0;")
+          .d-flex(style="background: #e2e8f0; border-radius: 12px; border: 1px solid #cbd5e1; overflow: hidden; height: 100%; width: 100%;")
+            .floor-switcher-vertical.d-flex.flex-column.p-2.bg-dark.border-right(style="min-width: 65px;")
+              button.btn.btn-sm.btn-outline-light.mb-3.w-100(type='button', ng-click='centerMap()', uib-tooltip='Reset View')
+                i.fas.fa-expand-arrows-alt
+              button.btn.btn-sm.btn-outline-light.mb-1.w-100(type='button', ng-click='undo()', uib-tooltip='Undo (Ctrl+Z)', ng-disabled="!canUndo()")
+                i.fas.fa-undo
+              button.btn.btn-sm.btn-outline-light.mb-3.w-100(type='button', ng-click='redo()', uib-tooltip='Redo (Ctrl+Y)', ng-disabled="!canRedo()")
+                i.fas.fa-redo
+              .flex-grow-1
+              .text-center.text-light.pb-2.mb-2.border-bottom.border-secondary(style="opacity: 0.8;")
+                i.fas.fa-layer-group
+              .d-flex.flex-column-reverse
+                button.btn.btn-sm.btn-outline-light.mb-2.w-100(type='button', ng-click='changeFloor(zz)', ng-repeat='zz in range(height)', ng-class='{active: zz == z}', style="font-weight: bold; font-size: 0.75rem;") F{{zz}}
+            
+            .map-container.flex-grow-1#map-container(style="overflow: auto; background: #e2e8f0; height: 100%; width: 100%; position: relative; cursor: crosshair;", ng-mousedown="handleMapMouseDown($event)", ng-mousemove="handleMapMouseMove($event)", ng-mouseup="handleMapMouseUp($event)", ng-click="confirmPaste()")
+              .map-scroll-aligner(style="padding: 100vh 100vw; position: relative; display: inline-block; text-align: left; min-width: 100%;")
+                #selection-marquee.selection-marquee(ng-show="isMarqueeActive", ng-style="marqueeStyle")
+                table.map-table-editor(style="border-collapse: collapse; width: auto; max-width: none !important; table-layout: auto; background: white; box-shadow: 0 20px 50px rgba(0,0,0,0.1);")
+                  tr(ng-repeat='r in range(length)', style="white-space: nowrap;")
+                    td.slot(ng-repeat='c in range(width)', ng-class="{'tile-selected': isSelected(c, r, z), 'tile-cut': isCutSource(c, r, z), 'tile-ghost-target': isInGhostRange(c, r)}", ng-mouseenter="updateMousePos(c, r)", style="padding: 0; border: none; width: 60px; height: 60px; min-width: 60px; min-height: 60px; position: relative;")
+                      tile(tile="tiles[c+','+r+','+z]", x='{{c}}', y='{{r}}', z='{{z}}', x-lvl-draggable='true', x-lvl-drop-target='true', ng-right-click='open(c,r)', ng-click='handleTileClick(c, r, $event)')
+                      
+                      //- Ghost Preview Layer
+                      .ghost-preview-container(ng-if="isInGhostRange(c, r)")
+                        img(ng-src="/images/tiles/{{getGhostTile(c, r).tileType.image}}", style="width: 100%; height: 100%;", ng-class="'rot' + getGhostTile(c, r).rot")
+        
+        //- Tile Palette Section
+        .col-auto.h-100(style="width: 360px;")
+          .modern-card(style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;")
+            .modern-card-header.py-2.px-3
+              .d-flex.justify-content-between.align-items-center.w-100
+                span.small.font-weight-bold.text-uppercase.letter-spacing-1
+                  i.fas.fa-palette.mr-2
+                  | Palette
+                span.badge.badge-pill.badge-primary {{ tileSet.tiles.length }}
+            
+            .p-2.border-bottom.bg-light
+              select.premium-select-small(ng-model='tileSet', ng-options='set as set.name for set in tileSets', style="font-size: 0.75rem; height: 28px;")
+            
+            //- Selection Tools Section
+            .p-2.bg-white.border-bottom(ng-show="hasSelection()")
+              .d-flex.align-items-center.justify-content-between.mb-2
+                span.small.font-weight-bold.text-primary
+                  i.fas.fa-mouse-pointer.mr-1
+                  | {{ selectedCount() }} Selected
+                button.btn.btn-sm.btn-link.text-muted.p-0(ng-click="clearSelection()", style="font-size: 0.7rem;") Clear
+              .d-flex.flex-wrap.gap-1
+                button.btn.btn-sm.btn-outline-primary.flex-grow-1(ng-click="bulkRotate()", title="Rotate Group")
+                  i.fas.fa-sync-alt
+                button.btn.btn-sm.btn-outline-info.flex-grow-1(ng-click="copySelection()", title="Copy Group")
+                  i.fas.fa-copy
+                button.btn.btn-sm.btn-outline-danger.flex-grow-1(ng-click="bulkDelete()", title="Delete Group")
+                  i.fas.fa-trash-alt
+            
+            .p-2.bg-white.border-bottom(ng-show="!hasSelection()")
+              button.btn.btn-sm.btn-block.btn-outline-secondary(ng-click="togglePasteMode()", ng-disabled="!clipboard", ng-class="{'active btn-info text-white': isPasting}", style="font-size: 0.75rem;")
+                i.fas.fa-paste.mr-1
+                | {{ isPasting ? 'Click to Place Tiles' : 'Stamp from Clipboard' }}
+            
+            .tileset-scroll.palette-grid(style="flex: 1; overflow-y: auto; padding: 0.25rem; background: #fdfdfd;")
+              .row.no-gutters
+                .col-2.p-1(ng-repeat='tile in tileSet.tiles track by tile.tileType._id')
+                  .tile-palette-item(title="{{tile.tileType.image}}", style="position: relative; border-radius: 4px; border: 1px solid #f1f5f9; background: white; transition: all 0.2s; cursor: pointer;")
+                    .tile-image-wrapper(style="padding: 2px;")
+                      img.toolbox-tile.rot0(ng-src='/images/tiles/{{tile.tileType.image}}', x-lvl-draggable='true', x-lvl-drop-target='true', x-on-drop='dropped(dragEl, dropEl)', tile-id='{{tile.tileType._id}}', rotate-on-click='', rot='0', style="width: 100%; height: auto; transition: transform 0.2s;")
+                    .tile-count-badge(ng-if="tile.count > 0", style="position: absolute; top: -4px; right: -4px; background: #f1f5f9; color: #64748b; font-size: 0.5rem; padding: 0px 3px; border-radius: 3px; font-weight: bold; border: 1px solid #e2e8f0; z-index: 1;") {{tileRemain(tile)}}
+                    .tile-zoom-preview(style="right: 110%; left: auto; top: 0; transform: translateX(-10px) scale(0.8);")
+                      img(ng-src='/images/tiles/{{tile.tileType.image}}')
+                      .small.mt-2.text-center(style="word-break: break-all;") {{tile.tileType.image}}
+    
 
-                    input#isFinished(type='checkbox', ng-model='finished')
-                    label.checkbox(for='isFinished') {{"admin.lineMapEditor.finished" | translate}}
-                    br
-                    .error(ng-show='startNotSet()') {{"admin.lineMapEditor.noStart" | translate}}
-        .row
-            .col-md-6.tools
-                p
-                    label
-                        | {{"admin.lineMapEditor.tileset" | translate}}
-                        select(ng-model='tileSet', ng-options='set as set.name for set in tileSets')
-                span.toolbox-tile-container(ng-repeat='tile in tileSet.tiles track by tile.tileType._id',ng-view)
-                    div(style="width:70px;")
-                        img.toolbox-tile.rot0(ng-src='/images/tiles/{{tile.tileType.image}}', x-lvl-draggable='true', x-lvl-drop-target='true', x-on-drop='dropped(dragEl, dropEl)', tile-id='{{tile.tileType._id}}', rotate-on-click='', rot='0')
-                        span(ng-bind='tileRemain(tile)',ng-style="{'color': tileRemain(tile)>=0?'#000000':'#ff0000'}")
-                img
-            .col-md-6
-                .row
-                    .col-9
-                        .btn-group(style='margin-bottom:5px;')
-                            .input-group-prepend
-                                span.input-group-text
-                                    i.fas.fa-arrows-alt-v(aria-hidden='true')
-                            button.btn.btn-outline-dark(type='button', ng-click='changeFloor(zz)', ng-repeat='zz in range(height)', ng-class='{active: zz == z}')  {{zz}} 
-                    .col-3(style="text-align:right;")
-                        if !pubService
-                            button.btn.btn-info(type='button', ng-click='openMaxScore()')
-                                i.fas.fa-calculator
-                        
-                .row(ng-repeat='r in range(length)')
-                    .slot(ng-repeat='c in range(width)')
-                        tile(tile="tiles[c+','+r+','+z]", x='{{c}}', y='{{r}}', z='{{z}}', x-lvl-draggable='true', x-lvl-drop-target='true', ng-right-click='open(c,r)', ng-click='$parent.rotateTile(c,r)')
-        hr
-        .row
-            .col-6
-                h3 {{"admin.lineMapEditor.generateImage" | translate}}
-            .col-6
-                button.btn.btn-info(type='button', ng-click='makeImageDl()') {{"admin.lineMapEditor.generateImage" | translate}}
-        #outputImageArea(style="background-color: #ddd;float:left;padding-left:18px;padding-right:15px;padding-bottom:2px;")
-            div(ng-repeat='z in range(height)')
-                .row(ng-repeat='r in range(length)')
-                    div(ng-repeat='c in range(width)')
-                        .slot(style="width:60px;height:60px;border:1px;" ng-if="tileShow4Image(c,r,z)")
-                            tile4image(tile="tiles[c+','+r+','+z]", x='{{c}}', y='{{r}}', z='{{z}}')
-                hr(ng-show="!$last" style="border-top: 1px solid black;margin-top:10px;margin-bottom:10px;")
-        img#result
+  //- Image Generation Preview Area
+  .modern-card.mt-5
+    .modern-card-header
+      i.fas.fa-file-image
+      | {{"admin.lineMapEditor.generateImage" | translate}}
+    .modern-card-body
+      #outputImageArea(style="background-color: #f8fafc; padding: 2rem; border-radius: 8px; border: 1px solid #e2e8f0;")
+        div(ng-repeat='z in range(height)')
+          .row.no-gutters(ng-repeat='r in range(length)')
+            div(ng-repeat='c in range(width)')
+              .slot(style="width:60px;height:60px;border:none;" ng-if="tileShow4Image(c,r,z)")
+                tile4image(tile="tiles[c+','+r+','+z]", x='{{c}}', y='{{r}}', z='{{z}}')
+          hr(ng-show="!$last" style="border-top: 2px dashed #cbd5e1; margin: 2rem 0;")
+      
+      .text-center.mt-4
+        button.btn-hero-action.btn-save(type='button', ng-click='makeImageDl()')
+          i.fas.fa-download.mr-2
+          | Download PNG
