@@ -130,7 +130,7 @@ app.controller("MapAdminController", ['$scope', '$http', '$uibModal', function (
             }
             const ids = selectedIds.join(',');
             
-            let url = `/api/maps/maze/export?competition=${competitionId}&league=${leagueId}&ids=${ids}`;
+            let url = `/api/maps/${$scope.league.type}/export?competition=${competitionId}&league=${leagueId}&ids=${ids}`;
             
             if (settings.exportType === 'Targets') {
                 url += `&type=targets&paperSize=${settings.paperSize}&includeLetterVictims=${settings.includeLetterVictims}&includeCognitiveTargets=${settings.includeCognitiveTargets}`;
@@ -143,7 +143,7 @@ app.controller("MapAdminController", ['$scope', '$http', '$uibModal', function (
                     // Trigger individual downloads for PNG
                     selectedIds.forEach(id => {
                         const link = document.createElement('a');
-                        link.href = `/api/maps/maze/image/${id}`;
+                        link.href = `/api/maps/${$scope.league.type}/image/${id}`;
                         link.download = `${id}.png`;
                         link.style.display = 'none';
                         document.body.appendChild(link);

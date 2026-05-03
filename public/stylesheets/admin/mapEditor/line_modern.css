@@ -874,3 +874,101 @@ tile,
 .settings-group.full-width {
     grid-column: span 2;
 }
+
+.btn-modern-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    cursor: pointer;
+}
+
+.btn-modern-action:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+}
+
+.btn-modern-action i {
+    font-size: 1rem;
+}
+
+.btn-modern-action.primary {
+    color: #3b82f6;
+    border-color: #dbeafe;
+}
+.btn-modern-action.primary:hover {
+    background: #eff6ff;
+    border-color: #3b82f6;
+}
+
+.btn-modern-action.info {
+    color: #0ea5e9;
+    border-color: #e0f2fe;
+}
+.btn-modern-action.info:hover {
+    background: #f0f9ff;
+    border-color: #0ea5e9;
+}
+
+.btn-modern-action.danger {
+    color: #ef4444;
+    border-color: #fee2e2;
+}
+.btn-modern-action.danger:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+}
+
+.btn-modern-group {
+    display: flex;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    background: white;
+}
+
+.btn-modern-group .btn-modern-action {
+    flex: 1;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    border-right: 1px solid #e2e8f0;
+    height: 42px;
+}
+
+.btn-modern-group .btn-modern-action:last-child {
+    border-right: none;
+}
+
+.btn-modern-group .btn-modern-action:hover {
+    transform: none;
+    z-index: 1;
+}
+
+/* Ensure time-capsule icons are perfectly circular */
+.time-capsule-icon {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    border-radius: 50% !important;
+    flex-shrink: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-right: 0 !important;
+}
+
+.time-capsule.expanded .time-capsule-icon {
+    margin-right: 8px !important;
+}

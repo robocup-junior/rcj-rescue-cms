@@ -1,4 +1,6 @@
 const express = require('express');
+const archiver = require('archiver');
+
 
 const publicRouter = express.Router();
 const privateRouter = express.Router();
@@ -755,7 +757,21 @@ function handleExport(req, res) {
     const competitionName = maps[0].competition ? maps[0].competition.name : 'Competition';
     const leagueName = maps[0].league || 'League';
 
+    if (type === 'scoresheets') {
+      return await scoreSheetPDFLine2.generateScoreSheetsFromMaps(res, maps, rule, true);
+    }
+
     if (type === 'maps') {
+      if (format === 'png') {
+        const archive = archiver('zip', { zlib: { level: 9 } });
+        res.attachment('maps.zip');
+        archive.pipe(res);
+        for (const map of maps) {
+          const buffer = await lineSSR.generatePNG(map, rule);
+          archive.append(buffer, { name: `${map.name || map._id}.png` });
+        }
+        return archive.finalize();
+      }
       const paperSize = req.query.paperSize || 'A4';
       return lineMapPDF.generateAndSendBulkMapImagesPDF(
         res,

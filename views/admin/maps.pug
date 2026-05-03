@@ -25,7 +25,7 @@ block hero_subtitle
   | {{league.name}} {{"admin.lineMapAdmin.title" | translate}}
 
 block hero_actions
-  button.btn-print-targets(ng-click="openPrintModal()" ng-if="league.type == 'maze'" ng-disabled="getSelectedCount() == 0" title="{{ 'admin.mazeMapAdmin.printSelected' | translate }}")
+  button.btn-print-targets(ng-click="openPrintModal()" ng-disabled="getSelectedCount() == 0" title="{{ 'admin.mazeMapAdmin.printSelected' | translate }}")
     i.fas.fa-print
     span.badge-count(ng-if="getSelectedCount() > 0") {{getSelectedCount()}}
   a.btn-create-map(ng-href="/admin/{{competitionId}}/{{league.league}}/mapEditor")
@@ -35,7 +35,7 @@ block hero_actions
 block main_content
   .modern-list(ng-if="groupedMaps.length > 0")
     .modern-list-header.d-none.d-md-flex
-      .header-select(ng-click="selectAll()" ng-if="league.type == 'maze'" style="cursor: pointer;" title="{{allSelected ? ('admin.mazeMapAdmin.unselectAll' | translate) : ('admin.mazeMapAdmin.selectAll' | translate)}}")
+      .header-select(ng-click="selectAll()" style="cursor: pointer;" title="{{allSelected ? ('admin.mazeMapAdmin.unselectAll' | translate) : ('admin.mazeMapAdmin.selectAll' | translate)}}")
         .custom-checkbox(ng-class="{'checked': allSelected}")
           i.fas.fa-check(ng-if="allSelected")
       .header-name {{"admin.mazeMapEditor.mapName" | translate}}
@@ -93,14 +93,14 @@ block main_content
             .option-label {{ 'admin.mazeMapAdmin.print.scoreSheets' | translate }}
             .option-check
               i.fas.fa-check-circle
-          .option-tile(ng-class="{'active': settings.exportType === 'Targets'}" ng-click="settings.exportType = 'Targets'")
+          .option-tile(ng-class="{'active': settings.exportType === 'Targets'}" ng-click="settings.exportType = 'Targets'" ng-if="league.type == 'maze'")
             .option-visual
               i.fas.fa-bullseye
             .option-label {{ 'admin.mazeMapAdmin.print.victimsTargets' | translate }}
             .option-check
               i.fas.fa-check-circle
       
-      hr
+      hr(ng-if="settings.exportType != 'Scoresheets'")
       
       .row
         .col-md-6(ng-show="settings.exportType === 'Maps'")

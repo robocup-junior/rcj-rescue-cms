@@ -235,12 +235,12 @@ block main_content
                   i.fas.fa-mouse-pointer.mr-1
                   | {{ selectedCount() }}
                 button.btn.btn-sm.btn-link.text-muted.p-0(ng-click="clearSelection()", style="font-size: 0.7rem;") {{"common.cancel" | translate}}
-              .d-flex.flex-wrap.gap-1
-                button.btn.btn-sm.btn-outline-primary.flex-grow-1(ng-click="bulkRotate()", uib-tooltip='Rotate Group')
+              .btn-modern-group
+                button.btn-modern-action.primary(ng-click="bulkRotate()", uib-tooltip='Rotate Group')
                   i.fas.fa-sync-alt
-                button.btn.btn-sm.btn-outline-info.flex-grow-1(ng-click="copySelection()", uib-tooltip='Copy Group')
+                button.btn-modern-action.info(ng-click="copySelection()", uib-tooltip='Copy Group')
                   i.fas.fa-copy
-                button.btn.btn-sm.btn-outline-danger.flex-grow-1(ng-click="bulkDelete()", uib-tooltip='Delete Group')
+                button.btn-modern-action.danger(ng-click="bulkDelete()", uib-tooltip='Delete Group')
                   i.fas.fa-trash-alt
             
             .p-2.bg-white.border-bottom(ng-show="!hasSelection()")

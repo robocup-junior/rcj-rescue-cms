@@ -272,12 +272,12 @@ async function drawLineCanvas(map) {
         if (indexText) {
           ctx.save();
           ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-          ctx.font = 'bold 8px sans-serif';
+          ctx.font = 'bold 12px sans-serif';
           const textWidth = ctx.measureText(indexText).width;
-          ctx.fillRect(TILE_SIZE / 2 - textWidth - 4, -TILE_SIZE / 2 + 2, textWidth + 2, 10);
+          ctx.fillRect(TILE_SIZE / 2 - textWidth - 4, -TILE_SIZE / 2 + 1, textWidth + 2, 14);
           ctx.fillStyle = (tile.checkPoint || isStartTile) ? 'orange' : '#0abde3';
           ctx.textAlign = 'right';
-          ctx.fillText(indexText, TILE_SIZE / 2 - 3, -TILE_SIZE / 2 + 10);
+          ctx.fillText(indexText, TILE_SIZE / 2 - 3, -TILE_SIZE / 2 + 12);
           ctx.restore();
         }
       }

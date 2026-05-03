@@ -243,7 +243,7 @@ async function drawRun(doc, config, scoringRun) {
     x,
     y + text_padding,
     1,
-    24,
+    20,
     startColor,
     base_size_y,
     'center'
@@ -273,7 +273,7 @@ async function drawRun(doc, config, scoringRun) {
           x,
           y + text_padding,
           tile.nowIndex + 1,
-          24,
+          20,
           '#ee5253',
           base_size_y,
           'center'
@@ -293,7 +293,7 @@ async function drawRun(doc, config, scoringRun) {
           x,
           y + text_padding,
           tile.nowIndex + 1,
-          24,
+          20,
           '#ff9f43',
           base_size_y,
           'center'
@@ -329,7 +329,7 @@ async function drawRun(doc, config, scoringRun) {
           x,
           y + text_padding,
           tile.nowIndex + 1,
-          24,
+          20,
           '#0abde3',
           base_size_y,
           'center'
@@ -404,16 +404,6 @@ async function drawRun(doc, config, scoringRun) {
       50,
       'center'
     );
-    pdf.drawTextWithAlign(
-      doc,
-      x,
-      y + text_padding,
-      lastTile ? lastTile.nowIndex + 2 : '',
-      24,
-      '#ee5253',
-      base_size_y,
-      'center'
-    );
   } else {
     pdf.drawImage(
       doc,
@@ -422,16 +412,6 @@ async function drawRun(doc, config, scoringRun) {
       'scoresheet_generation/line/after_final.png',
       base_size_x,
       50,
-      'center'
-    );
-    pdf.drawTextWithAlign(
-      doc,
-      x,
-      y + text_padding,
-      lastTile ? lastTile.nowIndex + 2 : '',
-      24,
-      '#ff9f43',
-      base_size_y,
       'center'
     );
   }
