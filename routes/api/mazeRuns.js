@@ -699,7 +699,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
     },
   ]);
 
-  query.lean().exec(function (err, dbRuns) {
+  query.lean().exec(async function (err, dbRuns) {
     if (err) {
       logger.error(err);
       res.status(400).send({
@@ -718,7 +718,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
           dbRuns[i].diceNumber = randomMapIndex + 1;
         }
       }
-      scoreSheetPDF2.generateScoreSheet(res, dbRuns);
+      await scoreSheetPDF2.generateScoreSheet(res, dbRuns);
       for (let i = 0; i < dbRuns.length; i++) {
         mazeRun.findById(dbRuns[i]._id, (err, run) => {
           if (err) {

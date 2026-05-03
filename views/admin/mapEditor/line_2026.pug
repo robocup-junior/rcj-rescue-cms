@@ -260,21 +260,52 @@ block main_content
                       .small.mt-2.text-center(style="word-break: break-all;") {{tile.tileType.image}}
     
 
-  //- Image Generation Preview Area
-  .modern-card.mt-5
-    .modern-card-header
-      i.fas.fa-file-image
-      | {{"admin.lineMapEditor.generateImage" | translate}}
-    .modern-card-body
-      #outputImageArea(style="background-color: #f8fafc; padding: 2rem; border-radius: 8px; border: 1px solid #e2e8f0;")
-        div(ng-repeat='z in range(height)')
-          .row.no-gutters(ng-repeat='r in range(length)')
-            div(ng-repeat='c in range(width)')
-              .slot(style="width:60px;height:60px;border:none;" ng-if="tileShow4Image(c,r,z)")
-                tile4image(tile="tiles[c+','+r+','+z]", x='{{c}}', y='{{r}}', z='{{z}}')
-          hr(ng-show="!$last" style="border-top: 2px dashed #cbd5e1; margin: 2rem 0;")
-      
-      .text-center.mt-4
-        button.btn-hero-action.btn-save(type='button', ng-click='makeImageDl()')
-          i.fas.fa-download.mr-2
-          | Download PNG
+  .row.mt-5
+    .col-12
+      .modern-card
+        .modern-card-header(data-toggle="collapse", data-target="#outputCollapse", style="cursor: pointer;")
+          i.fas.fa-file-export.mr-2
+          | {{"admin.mazeMapEditor.advancedTools" | translate}}
+          .ml-auto
+            i.fas.fa-chevron-down
+        
+        #outputCollapse.collapse.show
+          .modern-card-body.bg-light
+            .print-section
+              label.section-title {{ 'admin.mazeMapAdmin.print.outputContent' | translate }}
+              .option-tiles
+                .option-tile(ng-class="{'active': pdfSettings.exportType === 'Maps'}" ng-click="pdfSettings.exportType = 'Maps'")
+                  .option-visual
+                    i.fas.fa-map
+                  .option-label {{ 'admin.mazeMapAdmin.print.mapImages' | translate }}
+                  .option-check
+                    i.fas.fa-check-circle
+                .option-tile(ng-class="{'active': pdfSettings.exportType === 'Scoresheets'}", ng-click="pdfSettings.exportType = 'Scoresheets'")
+                  .option-visual
+                    i.fas.fa-file-signature
+                  .option-label {{ 'admin.mazeMapAdmin.print.scoreSheets' | translate }}
+                  .option-check
+                    i.fas.fa-check-circle
+            
+            hr
+            
+            .row
+              .col-md-6(ng-show="pdfSettings.exportType === 'Maps'")
+                label.section-title {{ 'admin.mazeMapAdmin.print.fileFormat' | translate }}
+                .premium-btn-group
+                  .btn(ng-class="{'active': pdfSettings.exportFormat === 'PDF'}" ng-click="pdfSettings.exportFormat = 'PDF'") PDF
+                  .btn(ng-class="{'active': pdfSettings.exportFormat === 'PNG'}" ng-click="pdfSettings.exportFormat = 'PNG'") PNG
+                  
+              .col-md-6(ng-show="pdfSettings.exportType === 'Maps' && pdfSettings.exportFormat === 'PDF'")
+                label.section-title {{ 'admin.mazeMapAdmin.print.paperSize' | translate }}
+                .premium-btn-group
+                  .btn(ng-class="{'active': pdfSettings.paperSize === 'A4'}" ng-click="pdfSettings.paperSize = 'A4'") A4
+                  .btn(ng-class="{'active': pdfSettings.paperSize === 'Letter'}" ng-click="pdfSettings.paperSize = 'Letter'") Letter
+            
+
+            
+            .mt-4
+              button.btn.btn-print-action.w-100(ng-click="generateOutput()")
+                i.fas.fa-magic.mr-2
+                span(ng-if="pdfSettings.exportType === 'Maps' && pdfSettings.exportFormat === 'PNG'") {{ 'admin.mazeMapAdmin.print.generatePNG' | translate }}
+                span(ng-if="pdfSettings.exportType !== 'Maps' || pdfSettings.exportFormat === 'PDF'") {{ 'admin.mazeMapAdmin.print.generatePDF' | translate }}

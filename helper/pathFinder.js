@@ -44,7 +44,7 @@ function evacTile(tile) {
  */
 function traverse(curTile, entryDir, tiles, map, index, chpCount, restartFlag) {
   if (curTile.checkPoint) chpCount++;
-  const next_Coord = nextCoord(curTile, entryDir);
+  let next_Coord = nextCoord(curTile, entryDir);
   curTile.index.push(index);
   map.indexCount = index + 1;
   const nextTile = tiles[next_Coord];

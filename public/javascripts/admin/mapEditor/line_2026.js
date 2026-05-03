@@ -63,6 +63,12 @@ app.controller('LineEditorController', ['$scope', '$rootScope', '$uibModal', '$l
         if (!$scope.$$phase) $scope.$apply();
     };
 
+    $scope.pdfSettings = {
+        paperSize: 'A4',
+        exportType: 'Maps',
+        exportFormat: 'PDF'
+    };
+
     $scope.canUndo = function() {
         return undoStack.length > 0;
     };
@@ -813,51 +819,86 @@ app.controller('LineEditorController', ['$scope', '$rootScope', '$uibModal', '$l
         });
     }
 
-    $scope.tileShow4Image = function(x,y,z){
-        if($scope.tiles[x + ',' + y + ',' + z]) return true;
-        for(let i=0,l=$scope.width;i<l;i++){
-            if($scope.tiles[i + ',' + y + ',' + z]) return true;
+
+
+
+
+
+    $scope.generateOutput = function () {
+        if ($scope.pdfSettings.exportType === 'Scoresheets') {
+            $scope.updateTileIndex();
+            const map = {
+                name: $scope.name,
+                height: $scope.height,
+                width: $scope.width,
+                length: $scope.length,
+                tiles: $scope.tiles,
+                startTile: $scope.startTile,
+                startTile2: $scope.startTile2,
+                competitionName: $scope.competition.name,
+                leagueName: leagueId,
+                paperSize: $scope.pdfSettings.paperSize,
+                rule: '2026',
+                EvacuationAreaLoPIndex: $scope.EvacuationAreaLoPIndex,
+                noQR: $scope.pdfSettings.noQR
+            };
+
+            $http.post('/api/maps/line/scoresheet', map, { responseType: 'arraybuffer' }).then(function (response) {
+                const blob = new Blob([response.data], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);
+                window.open(url, '_blank');
+            }, function (response) {
+                console.error(response);
+                Toast.fire({
+                    type: 'error',
+                    title: "Error generating scoresheet",
+                    text: response.data ? response.data.msg : "Unknown error"
+                });
+            });
+        } else if ($scope.pdfSettings.exportType === 'Maps') {
+            $scope.updateTileIndex();
+            const map = {
+                name: $scope.name,
+                height: $scope.height,
+                width: $scope.width,
+                length: $scope.length,
+                tiles: $scope.tiles,
+                startTile: $scope.startTile,
+                startTile2: $scope.startTile2,
+                competitionName: $scope.competition.name,
+                leagueName: leagueId,
+                paperSize: $scope.pdfSettings.paperSize,
+                EvacuationAreaLoPIndex: $scope.EvacuationAreaLoPIndex
+            };
+
+            const endpoint = $scope.pdfSettings.exportFormat === 'PDF' ? 'map-image-pdf' : 'map-image-png';
+            
+            $http.post(`/api/maps/line/${endpoint}`, map, { responseType: 'arraybuffer' }).then(function (response) {
+                const blob = new Blob([response.data], { type: $scope.pdfSettings.exportFormat === 'PDF' ? 'application/pdf' : 'image/png' });
+                const url = window.URL.createObjectURL(blob);
+                if ($scope.pdfSettings.exportFormat === 'PDF') {
+                    window.open(url, '_blank');
+                } else {
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `${$scope.name}.${$scope.pdfSettings.exportFormat.toLowerCase()}`;
+                    link.click();
+                }
+            }, function (response) {
+                console.error(response);
+                Toast.fire({
+                    type: 'error',
+                    title: "Error generating output",
+                    text: response.data ? response.data.msg : "Unknown error"
+                });
+            });
         }
-
-        return false;
-    };
-
-    $scope.makeImage = function(silent = false){
-      window.scrollTo(0,0);
-      html2canvas(document.getElementById("outputImageArea"),{
-        scale: 5
-      }).then(function(canvas) {
-        let imgData = canvas.toDataURL();
-        $http.post("/api/maps/line/image/" + mapId, {img: imgData}).then(function (response) {
-          if (!silent) {
-            Toast.fire({
-              type: 'success',
-              title: "Created image!"
-            })
-          }
-        }, function (response) {
-          console.log("Error: " + response.statusText);
-          if (!silent) {
-            Toast.fire({
-              type: 'error',
-              title: "Error",
-              html: response.data.msg
-            })
-          }
-        });
-      });
     };
 
     $scope.makeImageDl = function(){
-        $scope.updateTileIndex();
-        window.scrollTo(0,0);
-        html2canvas(document.getElementById("outputImageArea"),{
-            scale: 5
-        }).then(function(canvas) {
-            let imgData = canvas.toDataURL();
-            console.log(imgData);
-            downloadURI(imgData,$scope.name + '.png')
-        });
+        $scope.pdfSettings.exportType = 'Maps';
+        $scope.pdfSettings.exportFormat = 'PDF';
+        $scope.generateOutput();
     };
 
     function downloadURI(uri, name) {
@@ -902,7 +943,6 @@ app.controller('LineEditorController', ['$scope', '$rootScope', '$uibModal', '$l
             startTile2: $scope.startTile2,
             tiles: $scope.tiles,
             victims: victims,
-            image: $scope.imgData,
             league: leagueId
         };
 
@@ -913,7 +953,6 @@ app.controller('LineEditorController', ['$scope', '$rootScope', '$uibModal', '$l
                         type: 'success',
                         title: "Updated map"
                     })
-                    $scope.makeImage(true);
                 } else {
                     callback();
                 }
@@ -1355,185 +1394,7 @@ app.directive('tile', function () {
     };
 });
 
-app.directive('tile4image', function () {
-    return {
-        scope: {
-            tile: '='
-        },
-        restrict: 'E',
-        templateUrl: '/templates/tile4Image.html',
-        link: function (scope, element, attrs) {
-            scope.tilerotate = function (tilerot) {
-                return tilerot;
-            }
-            scope.rotateRamp = function (direction) {
-                switch (direction) {
-                    case "bottom":
-                        return "rot0";
-                    case "top":
-                        return "rot180";
-                    case "left":
-                        return "rot90";
-                    case "right":
-                        return "rot270";
-                }
-            }
-            scope.isStart = function (tile) {
-                return attrs.x == scope.$parent.startTile.x &&
-                  attrs.y == scope.$parent.startTile.y &&
-                  attrs.z == scope.$parent.startTile.z;
-            };
 
-            scope.isCheckPointTile = function(tile){
-                if(tile) return tile.checkPoint;
-                return false;
-            };
-
-            scope.scoringItems = function (tile){
-                if(tile) return tile.items.obstacles || tile.items.rampPoints || tile.items.speedbumps || tile.tileType.gaps || tile.tileType.intersections || tile.tileType.seesaw;
-                return false;
-            };
-
-            scope.tileNumber = function (tile) {
-                let txt = "";
-                for(let i=0,l=tile.index.length;i<l;i++){
-                        if(txt != "") txt += " , ";
-                        txt += (tile.index[i]+1);
-                };
-                return txt;
-            };
-
-            scope.entranceOrExit = function (tile) {
-                if(!tile) return false;
-                if(tile.tileType._id != "58cfd6549792e9313b1610e1" && tile.tileType._id != "58cfd6549792e9313b1610e2") return false;
-
-                if(tile.tileType._id == "58cfd6549792e9313b1610e1"){
-                    let t;
-                    //Top
-                    t = scope.$parent.tiles[tile.x+","+(tile.y-1)+","+tile.z];
-                    if(t){
-                        if (!evacTile(t)) {
-                            if(t.x == scope.$parent.startTile2.x && t.y == scope.$parent.startTile2.y && t.z == scope.$parent.startTile2.z) return "Exit";
-                            else return "Entrance";
-                        }
-                    }
-                    //Left
-                    t = scope.$parent.tiles[(tile.x-1)+","+tile.y+","+tile.z];
-                    if(t){
-                        if (!evacTile(t)) {
-                            if(t.x == scope.$parent.startTile2.x && t.y == scope.$parent.startTile2.y && t.z == scope.$parent.startTile2.z) return "Exit";
-                            else return "Entrance";
-                        }
-                    }
-                    //Right
-                    t = scope.$parent.tiles[(tile.x+1)+","+tile.y+","+tile.z];
-                    if(t){
-                        if (!evacTile(t)) {
-                            if(t.x == scope.$parent.startTile2.x && t.y == scope.$parent.startTile2.y && t.z == scope.$parent.startTile2.z) return "Exit";
-                            else return "Entrance";
-                        }
-                    }
-                    //Bottom
-                    t = scope.$parent.tiles[tile.x+","+(tile.y+1)+","+tile.z];
-                    if(t){
-                        if (!evacTile(t)) {
-                            if(t.x == scope.$parent.startTile2.x && t.y == scope.$parent.startTile2.y && t.z == scope.$parent.startTile2.z) return "Exit";
-                            else return "Entrance";
-                        }
-                    }
-                }else{
-                    //2 side
-                    if(tile.rot == 0 || tile.rot == 180){
-                        // left or right
-                        let t;
-                        //Left
-                        t = scope.$parent.tiles[(tile.x-1)+","+tile.y+","+tile.z];
-                        if(t){
-                            if (!evacTile(t)) {
-                                if(t.x == scope.$parent.startTile2.x && t.y == scope.$parent.startTile2.y && t.z == scope.$parent.startTile2.z) return "Exit";
-                                else return "Entrance";
-                            }
-                        }
-                        //Right
-                        t = scope.$parent.tiles[(tile.x+1)+","+tile.y+","+tile.z];
-                        if(t){
-                            if (!evacTile(t)) {
-                                if(t.x == scope.$parent.startTile2.x && t.y == scope.$parent.startTile2.y && t.z == scope.$parent.startTile2.z) return "Exit";
-                                else return "Entrance";
-                            }
-                        }
-                    }else{
-                        // top or bottom
-                        let t;
-                        //Top
-                        t = scope.$parent.tiles[tile.x+","+(tile.y-1)+","+tile.z];
-                        if(t){
-                            if (!evacTile(t)) {
-                                if(t.x == scope.$parent.startTile2.x && t.y == scope.$parent.startTile2.y && t.z == scope.$parent.startTile2.z) return "Exit";
-                                else return "Entrance";
-                            }
-                        }
-                        //Bottom
-                        t = scope.$parent.tiles[tile.x+","+(tile.y+1)+","+tile.z];
-                        if(t){
-                            if (!evacTile(t)) {
-                                if(t.x == scope.$parent.startTile2.x && t.y == scope.$parent.startTile2.y && t.z == scope.$parent.startTile2.z) return "Exit";
-                                else return "Entrance";
-                            }
-                        }
-                    }
-                }
-                return false;
-            }
-
-            scope.evacTapeRot = function (tile) {
-                let rot = 0;
-                if(!tile) return false;
-                if(tile.tileType._id != "58cfd6549792e9313b1610e1" && tile.tileType._id != "58cfd6549792e9313b1610e2") return false;
-
-                let dirEv = [];
-                if(tile.tileType._id == "58cfd6549792e9313b1610e1"){ // ev1.png
-                    dirEv = [0, 90, 180, 270];
-                }else{
-                    let r = tile.rot;
-                    dirEv = [(90+r)%360, (180+r)%360, (270+r)%360];
-                }
-                let t;
-                //Top
-                t = scope.$parent.tiles[tile.x+","+(tile.y-1)+","+tile.z];
-                if(t && dirEv.indexOf(0)>=0){
-                    if (!evacTile(t)) {
-                        rot = 0;
-                    }
-                }
-                //Left
-                t = scope.$parent.tiles[(tile.x-1)+","+tile.y+","+tile.z];
-                if(t && dirEv.indexOf(270)>=0){
-                    if (!evacTile(t)) {
-                        rot = 270;
-                    }
-                }
-                //Right
-                t = scope.$parent.tiles[(tile.x+1)+","+tile.y+","+tile.z];
-                if(t && dirEv.indexOf(90)>=0){
-                    if (!evacTile(t)) {
-                        rot = 90;
-                    }
-                }
-                //Bottom
-                t = scope.$parent.tiles[tile.x+","+(tile.y+1)+","+tile.z];
-                if(t && dirEv.indexOf(180)>=0){
-                    if (!evacTile(t)) {
-                        rot = 180;
-                    }
-                }
-                return rot%360;
-            }
-
-
-        }
-    };
-});
 
 
 app.directive('rotateOnClick', function () {

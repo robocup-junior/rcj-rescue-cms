@@ -273,6 +273,10 @@ function drawRun(doc, config, scoringRun) {
 
   // Draw all victims unified
   for (const v of itemList.allVictims) {
+    if (x + base_size_x > 813.1) {
+      x = 453;
+      y += base_size_y;
+    }
     let bg = 'scoresheet_generation/maze/';
     if (v.isLinear) {
       if (v.kits === 2) bg += 'l2.png';
@@ -315,10 +319,6 @@ function drawRun(doc, config, scoringRun) {
     );
 
     x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
   }
 
   if (x != 453) {
@@ -331,7 +331,7 @@ function drawRun(doc, config, scoringRun) {
   base_size_x = 60;
   // Draw box for "checkpoint"
   for (const e of itemList.checkpoint) {
-    if (x + base_size_x > 810) {
+    if (x + base_size_x > 813.1) {
       x = 453;
       y += base_size_y;
     }
@@ -364,15 +364,11 @@ function drawRun(doc, config, scoringRun) {
       'center'
     );
     x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
   }
 
   // Draw box for "speedbump"
   for (const e of itemList.speedbump) {
-    if (x + base_size_x > 810) {
+    if (x + base_size_x > 813.1) {
       x = 453;
       y += base_size_y;
     }
@@ -405,15 +401,11 @@ function drawRun(doc, config, scoringRun) {
       'center'
     );
     x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
   }
 
   // Draw box for "ramp"
   for (const e of itemList.ramp) {
-    if (x + base_size_x > 810) {
+    if (x + base_size_x > 813.1) {
       x = 453;
       y += base_size_y;
     }
@@ -446,15 +438,11 @@ function drawRun(doc, config, scoringRun) {
       'center'
     );
     x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
   }
 
   // Draw box for "steps"
   for (const e of itemList.steps) {
-    if (x + base_size_x > 810) {
+    if (x + base_size_x > 813.1) {
       x = 453;
       y += base_size_y;
     }
@@ -487,15 +475,11 @@ function drawRun(doc, config, scoringRun) {
       'center'
     );
     x += base_size_x;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
   }
 
   // Draw box for "blue"
   for (const e of itemList.blue) {
-    if (x + base_size_x * 2 > 810) {
+    if (x + base_size_x * 2 > 813.1) {
       x = 453;
       y += base_size_y;
     }
@@ -528,10 +512,6 @@ function drawRun(doc, config, scoringRun) {
       'center'
     );
     x += base_size_x * 2;
-    if (x >= 810) {
-      x = 453;
-      y += base_size_y;
-    }
   }
 }
 

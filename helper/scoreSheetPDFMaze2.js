@@ -14,7 +14,26 @@ const mazeSSR = require('./mazeSSR');
 const fs = require('fs');
 const path = require('path');
 
-module.exports.generateScoreSheet = function (res, runs) {
+async function ensureMapImages(runs) {
+  const tmpDir = path.join(__dirname, '../tmp/course');
+  if (!fs.existsSync(tmpDir)) {
+    fs.mkdirSync(tmpDir, { recursive: true });
+  }
+
+  const mapIds = new Set();
+  for (const run of runs) {
+    if (run.map && run.map._id) {
+      if (!mapIds.has(run.map._id.toString())) {
+        mapIds.add(run.map._id.toString());
+        const buffer = await mazeSSR.generatePNG(run.map);
+        fs.writeFileSync(path.join(tmpDir, `${run.map._id}.png`), buffer);
+      }
+    }
+  }
+}
+
+module.exports.generateScoreSheet = async function (res, runs) {
+  await ensureMapImages(runs);
   if (runs.length > 0) {
     let run = runs[0];
     const league = run.competition.leagues.find((l) => l.league == run.team.league);
@@ -24,24 +43,16 @@ module.exports.generateScoreSheet = function (res, runs) {
 };
 
 module.exports.generateScoreSheetsFromMaps = async function (res, maps, rule, noQR = false) {
-  // Ensure tmp/course directory exists
-  const tmpDir = path.join(__dirname, '../tmp/course');
-  if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir, { recursive: true });
-  }
-
-  // Pre-generate map images for the score sheets
-  for (const map of maps) {
-    const buffer = await mazeSSR.generatePNG(map);
-    fs.writeFileSync(path.join(tmpDir, `${map._id}.png`), buffer);
-  }
-
   const dummyRuns = maps.map(map => {
     return {
       _id: map._id || '000000000000000000000000',
       competition: {
         name: (map.competition && map.competition.name) || 'Competition',
         logo: (map.competition && map.competition.logo) || '',
+        leagues: [{
+          league: map.league || 'Maze',
+          rule: rule
+        }]
       },
       team: {
         name: '',
@@ -57,10 +68,7 @@ module.exports.generateScoreSheetsFromMaps = async function (res, maps, rule, no
     };
   });
 
-  if (rules[rule]) {
-    return rules[rule].generateScoreSheet(res, dummyRuns);
-  }
-  return rules[supportedRules[0]].generateScoreSheet(res, dummyRuns);
+  return await module.exports.generateScoreSheet(res, dummyRuns);
 };
 
 module.exports.generateScoreSheetFromMap = async function (res, map, rule) {

@@ -68,12 +68,14 @@ async function drawRun(doc, config, scoringRun) {
   else pdf.drawImage(doc, 730, 5, 'public/images/logo.png', 100, 30, 'right');
 
   // Draw run QR code
-  doc.image(
-    qr.imageSync(`L;${scoringRun._id.toString()}`, { margin: 2 }),
-    10,
-    10,
-    { width: 70 }
-  );
+  if (scoringRun._id && scoringRun._id.toString() !== '000000000000000000000000' && !scoringRun.noQR) {
+    doc.image(
+      qr.imageSync(`L;${scoringRun._id.toString()}`, { margin: 2 }),
+      10,
+      10,
+      { width: 70 }
+    );
+  }
 
   let drawTeamName = scoringRun.team.name;
   if (scoringRun.team.teamCode) {
@@ -92,19 +94,21 @@ async function drawRun(doc, config, scoringRun) {
   );
 
   // Draw start time
-  const dateTime = new Date(scoringRun.startTime);
-  pdf.drawTextWithAlign(
-    doc,
-    124,
-    60,
-    `${`0${dateTime.getUTCHours()}`.slice(-2)}:${`0${dateTime.getUTCMinutes()}`.slice(
-      -2
-    )}`,
-    15,
-    'black',
-    68,
-    'center'
-  );
+  if (scoringRun.startTime) {
+    const dateTime = new Date(scoringRun.startTime);
+    pdf.drawTextWithAlign(
+      doc,
+      124,
+      60,
+      `${`0${dateTime.getUTCHours()}`.slice(-2)}:${`0${dateTime.getUTCMinutes()}`.slice(
+        -2
+      )}`,
+      15,
+      'black',
+      68,
+      'center'
+    );
+  }
 
   // Draw round name
   pdf.drawTextWithAlign(
@@ -185,6 +189,7 @@ async function drawRun(doc, config, scoringRun) {
     ) {
       const t = structuredClone(tile);
       t.nowIndex = index;
+      t.isElement = true;
       tiles.push(t);
       y += base_size_y;
       if (y > 330 - base_size_y) {
@@ -222,6 +227,8 @@ async function drawRun(doc, config, scoringRun) {
   x = 440;
   y = 35;
 
+  const startColor = '#ff9f43';
+
   pdf.drawImage(
     doc,
     x,
@@ -236,16 +243,17 @@ async function drawRun(doc, config, scoringRun) {
     x,
     y + text_padding,
     1,
-    20,
-    '#ff9f43',
+    24,
+    startColor,
     base_size_y,
     'center'
   );
   y += base_size_y;
+
   let checkPointNum = 0;
   for (const tile of tiles) {
     const item = [];
-    if (tile.checkPoint) {
+    if (tile.checkPoint && !tile.isElement) {
       if (y > 330 - base_size_y * 2) {
         x += base_size_x;
         y = 35;
@@ -265,7 +273,7 @@ async function drawRun(doc, config, scoringRun) {
           x,
           y + text_padding,
           tile.nowIndex + 1,
-          20,
+          24,
           '#ee5253',
           base_size_y,
           'center'
@@ -285,7 +293,7 @@ async function drawRun(doc, config, scoringRun) {
           x,
           y + text_padding,
           tile.nowIndex + 1,
-          20,
+          24,
           '#ff9f43',
           base_size_y,
           'center'
@@ -321,7 +329,7 @@ async function drawRun(doc, config, scoringRun) {
           x,
           y + text_padding,
           tile.nowIndex + 1,
-          20,
+          24,
           '#0abde3',
           base_size_y,
           'center'
@@ -385,7 +393,8 @@ async function drawRun(doc, config, scoringRun) {
     index++;
   }
 
-  if (scoringRun.map.EvacuationAreaLoPIndex == checkPointNum)
+  const lastTile = getTileInfo(scoringRun.map.tiles, scoringRun.map.indexCount - 1);
+  if (scoringRun.map.EvacuationAreaLoPIndex == checkPointNum) {
     pdf.drawImage(
       doc,
       x,
@@ -395,7 +404,17 @@ async function drawRun(doc, config, scoringRun) {
       50,
       'center'
     );
-  else
+    pdf.drawTextWithAlign(
+      doc,
+      x,
+      y + text_padding,
+      lastTile ? lastTile.nowIndex + 2 : '',
+      24,
+      '#ee5253',
+      base_size_y,
+      'center'
+    );
+  } else {
     pdf.drawImage(
       doc,
       x,
@@ -405,6 +424,17 @@ async function drawRun(doc, config, scoringRun) {
       50,
       'center'
     );
+    pdf.drawTextWithAlign(
+      doc,
+      x,
+      y + text_padding,
+      lastTile ? lastTile.nowIndex + 2 : '',
+      24,
+      '#ff9f43',
+      base_size_y,
+      'center'
+    );
+  }
 }
 
 function getTileInfo(tiles, index) {
