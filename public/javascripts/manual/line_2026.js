@@ -7,6 +7,21 @@
 var app = angular.module('ddApp', ['ngTouch', 'ngAnimate', 'ui.bootstrap', 'pascalprecht.translate', 'ngCookies']);
 var marker = {};
 
+app.filter('numberFixedLen', function () {
+    return function (n, len) {
+        var num = parseInt(n, 10);
+        len = parseInt(len, 10);
+        if (isNaN(num) || isNaN(len)) {
+            return n;
+        }
+        num = '' + num;
+        while (num.length < len) {
+            num = '0' + num;
+        }
+        return num;
+    };
+});
+
 
 // function referenced by the drop target
 app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$http', '$translate', '$cookies', function ($scope, $uibModal, $log, $timeout, $http, $translate, $cookies) {
@@ -22,6 +37,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.victim_list = [];
     $scope.victim_tmp = [];
     $scope.LoPs = [];
+    $scope.timeBuffer = "";
+
 
 
     const http_config = {
@@ -62,6 +79,9 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             $scope.minutes = response.data.time.minutes;
             $scope.seconds = response.data.time.seconds;
             $scope.time = ($scope.minutes * 60 + $scope.seconds) * 1000;
+            $scope.timeBuffer = (String($scope.minutes).padStart(2, '0') + String($scope.seconds).padStart(2, '0')).replace(/^0+/, '');
+            if (!$scope.timeBuffer) $scope.timeBuffer = "";
+
             $scope.status = response.data.status;
             if($scope.status > 2) $scope.lastModifiedIndex = 100;
 
@@ -94,6 +114,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 length = response.data.length;
                 $scope.startTile = response.data.startTile;
                 $scope.mtiles = {};
+                $scope.mtilesById = {};
 
                 // Get max victim count
                 $scope.maxLiveVictims = response.data.victims.live;
@@ -102,11 +123,17 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 $scope.mapIndexCount = response.data.indexCount;
                 $scope.EvacuationAreaLoPIndex = response.data.EvacuationAreaLoPIndex;
 
-                db_mtile = response.data.tiles;
+                $scope.mtilesByIndex = {};
                 for (var i = 0; i < response.data.tiles.length; i++) {
-                    $scope.mtiles[response.data.tiles[i].x + ',' +
-                    response.data.tiles[i].y + ',' +
-                    response.data.tiles[i].z] = response.data.tiles[i];
+                    let t = response.data.tiles[i];
+                    let z = (t.z === undefined || t.z === null) ? 0 : t.z;
+                    $scope.mtiles[t.x + ',' + t.y + ',' + z] = t;
+                    if (t._id) $scope.mtilesById[t._id] = t;
+                    if (t.index && t.index.length > 0) {
+                        for (let idx of t.index) {
+                            $scope.mtilesByIndex[idx] = t;
+                        }
+                    }
                 }
 
                 // Calculate score sheets layout [Simuate]
@@ -213,7 +240,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 if(!el2[elow2]) el2[elow2] = [];
                 el2[elow2].push(tmp);
 
-                if(el1.length <= 4) $scope.elementList = el1;
+                if(el1.length <= 6) $scope.elementList = el1;
                 else $scope.elementList = el2;
             }, function (response) {
                 console.log("Error: " + response.statusText);
@@ -243,6 +270,39 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.isCheckPoint = function(tile) {
         if(tile.scoredItems) return findItem("checkpoint", tile.scoredItems) != null;
         return false;
+    }
+
+    $scope.getTileImage = function(tile) {
+        if(!tile) return null;
+        if(tile.start) return "/images/tiles/tile-0.png";
+        
+        // Try to get map tile object first
+        let mtile = null;
+        
+        // 1. Try index-based lookup (most reliable for Line Rescue path)
+        if ($scope.mtilesByIndex && tile.index !== undefined && tile.index !== null) {
+            mtile = $scope.mtilesByIndex[tile.index];
+        }
+        
+        // 2. Try ID match
+        if(!mtile && $scope.mtilesById && tile.tileId) mtile = $scope.mtilesById[tile.tileId];
+        if(!mtile && $scope.mtilesById && typeof tile.tile === "string") mtile = $scope.mtilesById[tile.tile];
+        if(!mtile && $scope.mtilesById && tile.tileType && typeof tile.tileType === "string") mtile = $scope.mtilesById[tile.tileType];
+
+        // 3. Try coordinate match
+        if (!mtile && $scope.mtiles && tile.x !== undefined) {
+            let z = (tile.z === undefined || tile.z === null) ? 0 : tile.z;
+            mtile = $scope.mtiles[tile.x + ',' + tile.y + ',' + z];
+        }
+        
+        // 4. Extract image name
+        let imgName = null;
+        if(mtile && mtile.tileType && mtile.tileType.image) imgName = mtile.tileType.image;
+        else if(tile.tileType && tile.tileType.image) imgName = tile.tileType.image;
+        else if(tile.image) imgName = tile.image;
+
+        if(imgName) return "/images/tiles/" + imgName;
+        return null;
     }
 
     $scope.numberStyle = function(item){
@@ -287,7 +347,10 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
     $scope.itemSuccess = function(item){
         if(item.start) return $scope.showedUp;
-        if(item.scoredItems[0].scored) return true;
+        if(item.afterLoP) return false;
+        if(item.scoredItems && item.scoredItems.length > 0) {
+            return item.scoredItems[0].scored;
+        }
         return false;
     }
 
@@ -351,6 +414,20 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         playSound(sClick);
         $scope.victim_tmp.splice(index, 1);
       };
+
+      $scope.getVictimAt = function (sequenceIndex, zoneType) {
+        if (!$scope.victim_list || sequenceIndex === undefined || $scope.victim_list.length <= sequenceIndex) return null;
+        let victim = $scope.victim_list[sequenceIndex];
+        if (victim && victim.zoneType === zoneType) return victim;
+        return null;
+      };
+
+      $scope.getVictimIndexAt = function (sequenceIndex, zoneType) {
+        if (!$scope.victim_list || sequenceIndex === undefined || $scope.victim_list.length <= sequenceIndex) return -1;
+        let victim = $scope.victim_list[sequenceIndex];
+        if (victim && victim.zoneType === zoneType) return sequenceIndex;
+        return -1;
+      };
     
       $scope.victimRegist = function (zoneType) {
         playSound(sClick);
@@ -378,6 +455,53 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         playSound(sClick);
         $scope.victim_tmp = [];
       };
+
+    $scope.addTimeDigit = function(num) {
+        if ($scope.timeBuffer.length >= 4) return;
+        $scope.timeBuffer += num;
+        $scope.syncTime();
+    };
+
+    $scope.clearTime = function() {
+        $scope.timeBuffer = "";
+        $scope.syncTime();
+    };
+
+    $scope.backspaceTime = function() {
+        $scope.timeBuffer = $scope.timeBuffer.slice(0, -1);
+        $scope.syncTime();
+    };
+
+    $scope.syncTime = function() {
+        let val = parseInt($scope.timeBuffer) || 0;
+        let sec = val % 100;
+        let min = Math.floor(val / 100);
+        
+        if (sec > 59) sec = 59;
+        if (min > 8) min = 8;
+        
+        $scope.minutes = min;
+        $scope.seconds = sec;
+    };
+
+    $scope.getTimeDisplay = function() {
+        let s = $scope.timeBuffer.padStart(4, '0');
+        return s.slice(0, 2) + ":" + s.slice(2);
+    };
+
+    // Keyboard support for time entry
+    document.addEventListener('keydown', function(e) {
+        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+        
+        if (e.key >= '0' && e.key <= '9') {
+            $scope.$apply(() => $scope.addTimeDigit(e.key));
+        } else if (e.key === 'Backspace') {
+            $scope.$apply(() => $scope.backspaceTime());
+        } else if (e.key === 'Escape' || e.key.toLowerCase() === 'c') {
+            $scope.$apply(() => $scope.clearTime());
+        }
+    });
+
 
     $scope.send = function () {
             playSound(sClick);

@@ -5,150 +5,942 @@ html(ng-app="ddApp")
       var runId = "#{id}"
 
     include ../../includes/common_component
-
     script(src="/javascripts/manual/line_2026.js")
+
     script(src="/javascripts/translate_config.js")
     script(src='/components/lightbox2/dist/js/lightbox.min.js')
 
     link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css')
     link(href="/stylesheets/fredrik.css" rel="stylesheet")
-    link(href="/components/css-toggle-switch/dist/toggle-switch.css" rel="stylesheet")
 
-    meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
+    style.
+        :root {
+            --primary: #ec4899;
+            --primary-dark: #db2777;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --background: #fdf2f8;
+            --card-bg: #ffffff;
+            --border: #fbcfe8;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            background-color: var(--background);
+            font-family: 'Inter', -apple-system, sans-serif;
+            color: var(--text-main);
+            padding-top: 80px;
+            padding-bottom: 100px;
+        }
+
+        .navbar-custom {
+            background: rgba(255, 255, 255, 0.9) !important;
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.1);
+            height: 60px;
+            min-height: 60px;
+            padding: 0 20px;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            color: var(--primary) !important;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-entry {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        .card-entry-header {
+            background: #f1f5f9;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-entry-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .entry-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            padding: 20px;
+        }
+
+        .entry-item {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0 12px;
+            display: grid;
+            grid-template-columns: 25px 40px 40px 1fr;
+            column-gap: 12px;
+            align-items: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            height: 84px;
+            overflow: hidden;
+        }
+
+        .entry-item:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .entry-item.active {
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .entry-item.active .item-id {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-icon {
+            margin-left: auto;
+            font-size: 1.2rem;
+            color: var(--border);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .item-id {
+            width: 30px;
+            height: 40px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .item-img-wrapper {
+            grid-column: 2;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #f1f5f9;
+        }
+
+        .item-img-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .status-icon {
+            grid-column: 4;
+            justify-self: end;
+            font-size: 2.2rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .status-icon i.fa-check-circle {
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .premium-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff1f2;
+            border-radius: 20px;
+            padding: 4px;
+            border: 1px solid #fbcfe8;
+            box-shadow: inset 0 2px 4px rgba(236, 72, 153, 0.05);
+        }
+
+        .premium-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 4px rgba(236, 72, 153, 0.1);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .premium-btn:hover {
+            background: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(236, 72, 153, 0.2);
+            color: var(--primary-dark);
+        }
+
+        .premium-btn:active {
+            transform: scale(0.95);
+        }
+
+        .premium-count {
+            width: 40px;
+            text-align: center;
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 1.1rem;
+            border: none;
+            background: transparent;
+            outline: none;
+        }
+
+        .victim-sequence-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 8px 16px;
+            gap: 12px;
+            position: relative;
+            transition: all 0.2s;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .victim-sequence-item:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.1);
+        }
+
+        .sequence-number {
+            width: 24px;
+            height: 24px;
+            background: var(--text-main);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+
+        .sequence-zone {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .sequence-zone.zone-green {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+        }
+
+        .sequence-zone.zone-red {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+        }
+
+        .sequence-zone img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .sequence-victim {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .sequence-victim img {
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .evac-btn-group {
+            display: flex;
+            background: white;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            width: 100%;
+        }
+
+        .evac-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            border-right: 1px solid var(--border);
+            border-radius: 0;
+        }
+
+        .evac-btn:last-child {
+            border-right: none;
+        }
+
+        .evac-btn img {
+            height: 24px;
+        }
+
+        .evac-btn-green {
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .evac-btn-green:hover {
+            background: #dcfce7;
+        }
+
+        .evac-btn-red {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .evac-btn-red:hover {
+            background: #fee2e2;
+        }
+
+        .evac-btn-trash {
+            width: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8fafc;
+            color: var(--secondary);
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .evac-btn-trash:hover {
+            background: #f1f5f9;
+            color: var(--danger);
+        }
+
+        .score-sheet-grid {
+            border: 2px solid #94a3b8;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
+
+        .grid-header-row, .grid-data-row {
+            display: grid;
+            grid-template-columns: 100px repeat(3, 1fr);
+            min-width: 300px;
+        }
+
+        .grid-header-row {
+            background: #f8fafc;
+            border-bottom: 2px solid #94a3b8;
+        }
+
+        .grid-label, .grid-sequence {
+            padding: 8px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 0.75rem;
+            color: #64748b;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .grid-sequence {
+            background: #f1f5f9;
+        }
+
+        .grid-data-row {
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .grid-data-row:last-child {
+            border-bottom: none;
+        }
+
+        .grid-zone-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            gap: 4px;
+            border-right: 2px solid #94a3b8;
+            font-weight: 800;
+            font-size: 0.7rem;
+        }
+
+        .zone-green .grid-zone-label { background: #f0fdf4; color: #166534; }
+        .zone-red .grid-zone-label { background: #fef2f2; color: #991b1b; }
+
+        .grid-zone-label img {
+            height: 24px;
+            object-fit: contain;
+        }
+
+        .grid-cell {
+            border-right: 1px solid #e2e8f0;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .grid-cell:hover {
+            background: #f8fafc;
+        }
+
+        .cell-victim {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .cell-victim img {
+            height: 24px;
+        }
+
+        .victim-type-label {
+            font-size: 0.8rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .penalty-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .time-input-container {
+            background: #f1f5f9;
+            border-radius: 20px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .time-display-large {
+            background: white;
+            border: 2px solid var(--primary);
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: inset 0 2px 4px rgba(99, 102, 241, 0.05);
+        }
+
+        .time-digits {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+            line-height: 1;
+        }
+
+        .time-numpad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 220px;
+            margin: 0 auto;
+        }
+
+        .num-btn {
+            aspect-ratio: 1/1;
+            border: 1px solid var(--border);
+            background: white;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .num-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #f8faff;
+            transform: scale(1.05);
+        }
+
+        .num-btn.clear-btn:hover {
+            color: #ef4444;
+            border-color: #fecaca;
+            background: #fef2f2;
+        }
+
+        .footer-action {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            padding: 16px 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-premium {
+            padding: 12px 32px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-pink {
+            background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+            color: white;
+        }
+
+        .btn-pink:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.3);
+            filter: brightness(1.1);
+            color: white;
+        }
+
+        .btn-secondary-outline {
+            background: white;
+            border: 2px solid var(--border);
+            color: var(--text-muted);
+        }
+
+        .btn-secondary-outline:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #fff1f2;
+        }
+
+        .victim-select-btn {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .victim-select-btn:hover {
+            border-color: var(--primary);
+            background: #fff1f2;
+            transform: translateY(-2px);
+        }
+
+        .victim-select-btn img {
+            height: 60px;
+            object-fit: contain;
+            margin-bottom: 5px;
+        }
+
+        .victim-select-btn.disabled {
+            background: #f1f5f9;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+
+        .victim-badge {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 4px 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .lop-input-wrapper {
+            grid-column: 3 / span 2;
+        }
+
+        .scroll-area {
+            border-bottom: 1px solid var(--border);
+            background: rgba(241, 245, 249, 0.3);
+            padding: 12px;
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+
+        .checkpoint-column-wrap {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            height: 560px;
+            align-content: flex-start;
+            gap: 8px;
+            padding: 2px;
+        }
+
+        .entry-item-compact {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0 8px;
+            display: grid;
+            grid-template-columns: 22px 42px 1fr 32px;
+            column-gap: 8px;
+            align-items: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            height: 48px !important;
+            width: 190px;
+            overflow: hidden;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        .entry-item-compact:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(236, 72, 153, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .entry-item-compact.active {
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .entry-item-compact.is-checkpoint {
+            border-color: #fb923c;
+            background: #fff7ed;
+        }
+
+        .entry-item-compact.is-checkpoint .item-id {
+            background: #ffedd5;
+            color: #ea580c;
+        }
+
+        .entry-item-compact.is-checkpoint.active {
+            border-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .entry-item-compact .item-id {
+            width: 20px;
+            height: 25px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+        }
+
+        .entry-item-compact .item-img-wrapper {
+            width: 40px;
+            height: 40px;
+            grid-column: 2;
+        }
+
+        .entry-item-compact .status-icon {
+            font-size: 1.4rem;
+            color: #cbd5e1;
+        }
+
+        .entry-item-compact .status-icon i.fa-check-circle {
+            color: var(--success);
+        }
+
+        .entry-item-compact.has-lop {
+            height: 104px !important; /* 48*2 + 8(gap) = 104 */
+            grid-template-columns: 22px 42px 1fr 32px;
+            grid-template-rows: 40px 1fr;
+            padding: 6px 8px;
+            align-items: center;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        .entry-item-compact.has-lop .item-id {
+            grid-row: 1;
+            grid-column: 1;
+        }
+
+        .entry-item-compact.has-lop .item-img-wrapper {
+            grid-row: 1;
+            grid-column: 2;
+            justify-self: start;
+        }
+
+        .entry-item-compact.has-lop .status-icon {
+            grid-row: 1;
+            grid-column: 4;
+            justify-self: end;
+        }
+
+        .entry-item-compact.has-lop .lop-input-wrapper {
+            grid-row: 2;
+            grid-column: 1 / span 4;
+            flex-direction: column;
+            gap: 4px;
+            padding-top: 6px;
+            border-top: 1px dashed var(--border);
+            width: 100%;
+        }
+
+        .entry-item-compact.has-lop .premium-stepper {
+            width: 100%;
+            height: 40px;
+        }
+
+        /* Custom scrollbar for better aesthetics */
+        .scroll-area::-webkit-scrollbar {
+            height: 8px;
+        }
+        .scroll-area::-webkit-scrollbar-track {
+            background: var(--background);
+        }
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        .scroll-area::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
 
   body(ng-controller="ddController")
-    nav.navbar(style='background-color: #e84393; color: #ecf0f1; position: fixed; top: 0; z-index:10 ;  width: 100%')
-      // Navbar content
-      .col-md-6.col-sm4.col-12
-              li.navbar-brand(href='#')
-                i.fas.fa-users
-                |  {{team.name}}
-      .col-md-3.col-sm4.col-12
-        li.navbar-brand(href='#')
-          i.fas.fa-hashtag
-          |  {{round}}
-      .col-md-2.col-sm4.col-12
-        li.navbar-brand(href='#')
-          i.fas.fa-map-marker-alt
-          |  {{field}}
-      .col-md-1.col-sm4.col-12
-        li.navbar-brand(href='#')
-          img(ng-src="{{competition.logo}}" height="30px")
+    nav.navbar.navbar-expand-lg.navbar-custom.fixed-top
+      .container-fluid
+        a.navbar-brand(href='#')
+          i.fas.fa-edit.me-2
+          | {{team.name}}
+          span.badge.bg-pink-100.text-pink-700.ms-2(style="background: #fdf2f8; color: #db2777; font-size: 0.7rem; padding: 4px 8px;") STEP 1: INPUT
+        .d-flex.gap-5.align-items-center
+          div.d-flex.gap-3
+            span.badge.bg-white.text-dark(style="font-size: 0.9rem; padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border);")
+              i.fas.fa-hashtag.me-1
+              | {{round}}
+            span.badge.bg-white.text-dark(style="font-size: 0.9rem; padding: 8px 16px; border-radius: 10px; border: 1px solid var(--border);margin-left: 10px;")
+              i.fas.fa-map-marker-alt.me-1
+              | {{field}}
 
-    .container-fluid.nav-cont
-      div#inputcontent
-        .row
-          .col-md-12
-            .card
-              h4.card-header(style="background-color:#0984e3;")
-                i.fas.fa-clipboard(aria-hidden='true' style="color:white;") &nbsp;Checkpoints & Scored Elements
-              .card-body
-                .row
-                  .col-sm-2(ng-repeat="list in elementList")
-                    table(border="3")
-                      tr
-                        td No.
-                        td Success
-                      tr(ng-repeat="item in list" ng-style="numberStyle(item)")
-                        td(style="font-size:30px;text-align:center")
-                          span(ng-hide="item.afterLoP") {{item.index + 1}}
-                        td(style="text-align:center;")
-                          button.btn(type='button',ng-click="itemChange(item)",ng-class="{'btn-success': itemSuccess(item),'btn-danger':!itemSuccess(item)}",ng-if="!item.afterLoP",style="width:100%;")
-                            i.far(ng-class="{'fa-check-square': itemSuccess(item), 'fa-times-circle': !itemSuccess(item)}")
-                          div(ng-if="item.LoP != null")
-                            span(ng-show="item.afterLoP") After final checkpoint
-                            input.form-control(type='number', placeholder='', min='0', ng-model='LoPs[item.LoP]',style="margin-top:3px;margin-bottom:3px;width:100%;",ng-focus="focused('LoPs',item.LoP)", ng-blur="blured('LoPs',item.LoP,false)")
+    .container-fluid.mt-4
+      // Checkpoints Section
+      .card-entry
+        .card-entry-header
+          h4
+            i.fas.fa-clipboard-check
+            | Checkpoints & Scored Elements
+        .scroll-area
+          .checkpoint-column-wrap
+            // Standard Elements from elementList
+            div(ng-repeat="list in elementList", style="display: contents;")
+              div.entry-item-compact(ng-repeat="item in list", ng-class="{'active': itemSuccess(item), 'has-lop': item.LoP != null && !item.afterLoP, 'is-checkpoint': isCheckPoint(item) || item.start}", ng-click="!item.afterLoP ? itemChange(item) : null")
+                .item-id(ng-if="!item.afterLoP") {{item.index + 1}}
+                .item-id(ng-if="item.afterLoP"): i.fas.fa-flag-checkered
+                
+                .item-img-wrapper(ng-if="!item.afterLoP")
+                  img(ng-src="{{getTileImage(item)}}", ng-if="getTileImage(item)", style="width: 100%; height: 100%; object-fit: contain;")
+                
+                // Always show status icon for tiles
+                .status-icon(ng-if="!item.afterLoP")
+                  i.fas.fa-check-circle(ng-if="itemSuccess(item)")
+                  i.far.fa-circle(ng-if="!itemSuccess(item)")
+                
+                .lop-input-wrapper(ng-if="item.LoP != null", ng-click="$event.stopPropagation()", ng-style="!item.afterLoP ? {'grid-row': '2', 'grid-column': '1 / span 4', 'display': 'grid', 'grid-template-columns': '22px 1fr', 'gap': '8px', 'align-items': 'center', 'border-top': '1px dashed var(--border)', 'padding-top': '6px'} : {'grid-column': '2 / span 3', 'display': 'flex', 'align-items': 'center', 'gap': '8px'}")
+                  .lop-icon(style="color: var(--primary); font-size: 0.9rem; justify-self: center;")
+                    i.fas.fa-undo
+                  .premium-stepper(ng-style="{'height': item.afterLoP ? '32px' : '40px', 'width': item.afterLoP ? '110px' : '100%', 'padding': item.afterLoP ? '2px' : '4px'}")
+                    button.premium-btn(type='button', ng-click="LoPs[item.LoP] = (LoPs[item.LoP] > 0 ? LoPs[item.LoP] - 1 : 0)", ng-style="{'width': item.afterLoP ? '26px' : '32px', 'height': item.afterLoP ? '26px' : '32px'}")
+                      i.fas.fa-minus
+                    input.premium-count(type='number', ng-model="LoPs[item.LoP]", min="0", ng-focus="focused('LoPs',item.LoP)", ng-blur="blured('LoPs',item.LoP,false)", ng-style="{'font-size': item.afterLoP ? '0.8rem' : '1.1rem', 'width': item.afterLoP ? '30px' : '40px'}")
+                    button.premium-btn(type='button', ng-click="LoPs[item.LoP] = LoPs[item.LoP] + 1", ng-style="{'width': item.afterLoP ? '26px' : '32px', 'height': item.afterLoP ? '26px' : '32px'}")
+                      i.fas.fa-plus
 
+      // Victims Section
+      .card-entry
+        .card-entry-header
+          h4
+            i.fas.fa-user-injured
+            | Victims
+        .p-4
+            .row.g-3
+                .col-6.col-sm-3
+                    .victim-select-btn(ng-click="addVictimTmp('LIVE')", ng-class="{'disabled': count_victim_list('L') + count_victim_tmp('L') >= maxLiveVictims}")
+                        .penalty-label Max: {{maxLiveVictims}}
+                        img(src='/images/liveVictim.png')
+                        .fw-bold LIVE
+                .col-6.col-sm-3
+                    .victim-select-btn(ng-click="addVictimTmp('DEAD')", ng-class="{'disabled': count_victim_list('D') + count_victim_tmp('D') >= maxDeadVictims}")
+                        .penalty-label Max: {{maxDeadVictims}}
+                        img(src='/images/deadVictim.png')
+                        .fw-bold DEAD
+                
+                // Temp Storage & Registration
+                .col-12.col-sm-6(ng-if="victim_tmp.length > 0")
+                    .penalty-box.h-100.d-flex.flex-column.justify-content-between
+                        div
+                            .penalty-label Selected (Double click to remove)
+                            .d-flex.flex-wrap.gap-2.mb-3
+                                div.victim-badge(ng-repeat='i in range(4)', ng-if="victim_tmp[i]", ng-dblclick='delete_victim_tmp(i)')
+                                    img(src='/images/liveVictim.png', width='20px', ng-if="victim_tmp[i] == 'LIVE'")
+                                    img(src='/images/deadVictim.png', width='20px', ng-if="victim_tmp[i] == 'DEAD'")
+                                    span.small {{victim_tmp[i]}}
+                            
+                        .evac-btn-group
+                            div.evac-btn.evac-btn-green.flex-grow-1(ng-click='victimRegist("GREEN")')
+                                img(src='/images/evacZone/green_lv2_a.png')
+                                .small.fw-bold REGIST GREEN
+                            div.evac-btn.evac-btn-red.flex-grow-1(ng-click='victimRegist("RED")')
+                                img(src='/images/evacZone/red_lv2_a.png')
+                                .small.fw-bold REGIST RED
+                            div.evac-btn-trash(ng-click='victim_tmp_clear()')
+                                i.fas.fa-trash-alt
 
-          .col-md-12(style="margin-top:20px;")
-            .card
-              h4.card-header(style="background-color:#fd79a8;")
-                i.fas.fa-user-injured(aria-hidden='true' style="color:white;") &nbsp;Victims
-              .card-body
-                .row
-                  .col-md-12
-                    .row(style="padding:10px;")
-                      .col-4(ng-click="addVictimTmp('LIVE')")
-                        span Max : {{maxLiveVictims}}
-                        br
-                        .victim_btn(style='width:100%;position: relative;', ng-style="{'background-color': count_victim_list('L') + count_victim_tmp('L') >= maxLiveVictims?'#ccc':'#E1FFFE'}")
-                          img.img-thumbnail(src='/images/liveVictim.png', height='60px', style="max-width:200px;")
+            // Score Sheet Style Rescued Grid
+            div(ng-show="victim_list.length > 0")
+                hr.my-4
+                .d-flex.justify-content-between.align-items-center.mb-3
+                    .penalty-label Rescued Order
+                    .small.text-muted Double click a victim to remove
+                
+                .score-sheet-grid
+                    .grid-header-row
+                        .grid-label Zone
+                        .grid-sequence(ng-repeat="n in range(3)") {{n + 1}}
+                    
+                    // Green Zone Row
+                    .grid-data-row.zone-green
+                        .grid-zone-label
+                            img(src='/images/evacZone/green_lv2.png')
+                            span GREEN
+                        .grid-cell(ng-repeat="n in range(3)", ng-dblclick="getVictimAt(n, 'GREEN') ? delete_victim(getVictimIndexAt(n, 'GREEN')) : null")
+                            .cell-victim(ng-if="getVictimAt(n, 'GREEN')")
+                                img(src='/images/liveVictim.png', ng-if="getVictimAt(n, 'GREEN').victimType == 'LIVE'")
+                                img(src='/images/deadVictim.png', ng-if="getVictimAt(n, 'GREEN').victimType == 'DEAD'")
+                                .victim-type-label {{getVictimAt(n, 'GREEN').victimType == 'LIVE' ? 'L' : 'D'}}
+                    
+                    // Red Zone Row
+                    .grid-data-row.zone-red
+                        .grid-zone-label
+                            img(src='/images/evacZone/red_lv2.png')
+                            span RED
+                        .grid-cell(ng-repeat="n in range(3)", ng-dblclick="getVictimAt(n, 'RED') ? delete_victim(getVictimIndexAt(n, 'RED')) : null")
+                            .cell-victim(ng-if="getVictimAt(n, 'RED')")
+                                img(src='/images/liveVictim.png', ng-if="getVictimAt(n, 'RED').victimType == 'LIVE'")
+                                img(src='/images/deadVictim.png', ng-if="getVictimAt(n, 'RED').victimType == 'DEAD'")
+                                .victim-type-label {{getVictimAt(n, 'RED').victimType == 'LIVE' ? 'L' : 'D'}}
 
-                      .col-4(style='', ng-click="addVictimTmp('DEAD')")
-                        span Max : {{maxDeadVictims}}
-                        br
-                        .victim_btn(style='width:100%;position: relative;', ng-style="{'background-color': count_victim_list('D') + count_victim_tmp('D') >= maxDeadVictims?'#ccc':'#E1FFFE'}")
-                          img.img-thumbnail(src='/images/deadVictim.png', height='60px', style="max-width:200px;")
-                      .col-12(ng-if="victim_tmp.length > 0")
-                        table(border='1', style='width:100%; text-align: center; margin-top: 10px;')
-                          tbody
-                            tr
-                              td(ng-repeat='i in range(4)', ng-dblclick='delete_victim_tmp(i)', ng-swipe-left='delete_victim_tmp(i)')
-                                img(src='/images/liveVictim.png', width='30px', ng-if="victim_tmp[i] == 'LIVE'")
-                                img(src='/images/deadVictim.png', width='30px', ng-if="victim_tmp[i] == 'DEAD'")
-                                span(style='width:30px;', ng-hide='victim_tmp[i]') ---
-                              td(rowspan="6")
-                                button.btn.btn-warning(type='button', ng-click='victim_tmp_clear()')
-                                  i.far.fa-trash-alt(aria-hidden='true')
-                      .col-6(ng-if="victim_tmp.length > 0", style="margin-top:10px;", ng-click='victimRegist("GREEN")')
-                        .evac_zone_btn_green(style='width:100%;position: relative;')
-                          img.img-thumbnail(src='/images/evacZone/green_lv2_a.png', height='60px', style="max-width:200px;")
-                      .col-6(ng-if="victim_tmp.length > 0", style="margin-top:10px;")
-                        .evac_zone_btn_red(style='width:100%;position: relative;', ng-click='victimRegist("RED")')
-                          img.img-thumbnail(src='/images/evacZone/red_lv2_a.png', height='60px', style="max-width:200px;")
-                      .col-12
-                        div(ng-show="victim_list.length > 0")
-                          hr
-                          h6 {{'line.judge.rescuedVictims' | translate}}
-                          span(style='font-size:9px;') {{'line.judge.rescuedVictimsMes' | translate}}
-                          table(border='1', style='width:100%; text-align: center; margin-top: 10px;', ng-if='victim_list.length > 0')
-                            tbody
-                              tr
-                                th Zone
-                                th(style='text-align:center;', ng-repeat='i in range(3)') {{i+1}}
-                              tr
-                                td
-                                  img(src='/images/evacZone/green_lv2.png', height='50px',)
-                                td(ng-repeat='i in range(3)', ng-dblclick='delete_victim(i)', ng-swipe-left='delete_victim(i)')
-                                  div(ng-if="victim_list[i].zoneType == 'GREEN'")
-                                    img(src='/images/liveVictim.png', width='30px', ng-if="victim_list[i].victimType == 'LIVE'")
-                                    img(src='/images/deadVictim.png', width='30px', ng-if="victim_list[i].victimType == 'DEAD'")
-                              tr
-                                td
-                                  img(src='/images/evacZone/red_lv2.png', height='50px')
-                                td(ng-repeat='i in range(3)', ng-dblclick='delete_victim(i)', ng-swipe-left='delete_victim(i)')
-                                  div(ng-if="victim_list[i].zoneType == 'RED'")
-                                    img(src='/images/liveVictim.png', width='30px', ng-if="victim_list[i].victimType == 'LIVE'")
-                                    img(src='/images/deadVictim.png', width='30px', ng-if="victim_list[i].victimType == 'DEAD'")
-          .col-md-12(style="margin-top:20px;")
-            .card
-              h4.card-header
-                i.fas.fa-ellipsis-h(aria-hidden='true') &nbsp;Others
-              .card-body
-                table(border="3")
-                  tr
-                    td Type
-                    td(style="width:50%;")
-                  tr
-                    td Time
-                    td
-                      .input-group.input-group-lg
-                        input.form-control(type='tel', placeholder='', aria-label='min', min='0', max='8', ng-model='minutes',ng-focus="focused('minutes')", ng-blur="blured('minutes')")
-                        .input-group-append
-                          span.input-group-text {{'common.min' | translate}}
-                        input.form-control(type='tel', placeholder='', aria-label='sec', min='0', max='60', ng-model='seconds', ng-focus="focused('seconds')", ng-blur="blured('seconds')")
-                        .input-group-append
-                          span.input-group-text {{'common.sec' | translate}}
-                  tr
-                    td Exit bonus
-                    td
-                      div(style='position: relative;' ng-click='changeExitBonus()')
-                        img.img-thumbnail(src='/images/line_bonus.png', width='186.3px', height='118px', ng-style="{'background-color': exitBonus?'#2ecc71':'#D91E18'}")
-                        div(style='position:absolute; top:15px; left:45px;')
-                          i.fas.fa-check.fa-fw.fa-5x(ng-show='exitBonus', style='color:#27ae60; opacity:0.9;')
-                          i.fas.fa-times.fa-fw.fa-5x(ng-show='!exitBonus ', style='padding-top:4px; color:#e74c3c; opacity:0.9;')
-        .row
-          .col-md-12(style="text-align:center;")
-            br
-            button.btn.btn-success.btn-lg(type='button', ng-click='send()', style="margin-bottom:20px;")
-              i.fas.fa-check.fa-2x(aria-hidden='true')  Complete
+      // Others Section
+      .row.d-flex
+        .col-lg-6
+            // Final Bonus Card
+            .card-entry
+              .card-entry-header
+                h4: i.fas.fa-award
+                  | Final Bonus
+              .p-4.text-center(ng-click='changeExitBonus()', style="cursor: pointer;")
+                .bonus-visual(ng-style="{'background-color': exitBonus?'#f0fdf4':'#fef2f2', 'border-color': exitBonus?'#10b981':'#ef4444'}" style="border: 2px solid; padding: 20px; border-radius: 16px; transition: all 0.3s; display: flex; align-items: center; gap: 24px; justify-content: center;")
+                  img(src='/images/line_bonus.png', style="height: 60px; object-fit: contain;")
+                  .fw-bold(ng-style="{'color': exitBonus?'#10b981':'#ef4444'}" style="font-size: 1.4rem;")
+                    span(ng-if="exitBonus")
+                      i.fas.fa-check-circle.me-2
+                      | Exit Bonus Achieved
+                    span(ng-if="!exitBonus")
+                      i.fas.fa-times-circle.me-2
+                      | No Exit Bonus
+
+        .col-lg-6
+          // Time Card
+          .card-entry.h-100
+            .card-entry-header
+              h4: i.fas.fa-clock
+                | Time Recorded
+            .p-4.d-flex.flex-column.justify-content-center(style="height: calc(100% - 60px);")
+              .time-input-container
+                .time-display-large
+                  .time-digits {{getTimeDisplay()}}
+                  .time-label MIN : SEC
+                
+                .time-numpad
+                  button.num-btn(type='button', ng-click="addTimeDigit('1')") 1
+                  button.num-btn(type='button', ng-click="addTimeDigit('2')") 2
+                  button.num-btn(type='button', ng-click="addTimeDigit('3')") 3
+                  button.num-btn(type='button', ng-click="addTimeDigit('4')") 4
+                  button.num-btn(type='button', ng-click="addTimeDigit('5')") 5
+                  button.num-btn(type='button', ng-click="addTimeDigit('6')") 6
+                  button.num-btn(type='button', ng-click="addTimeDigit('7')") 7
+                  button.num-btn(type='button', ng-click="addTimeDigit('8')") 8
+                  button.num-btn(type='button', ng-click="addTimeDigit('9')") 9
+                  button.num-btn.action-btn.clear-btn(type='button', ng-click="clearTime()") AC
+                  button.num-btn(type='button', ng-click="addTimeDigit('0')") 0
+                  button.num-btn.action-btn(type='button', ng-click="backspaceTime()")
+                    i.fas.fa-backspace
+
+    .footer-action(style="justify-content: center;")
+      button.btn-premium.btn-pink(type='button', ng-click='send()', ng-disabled='startedTime')
+        i.fas.fa-cloud-upload-alt.me-2
+        | &nbsp;Complete Data Entry & Submit Score
