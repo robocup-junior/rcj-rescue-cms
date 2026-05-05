@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'RunAdmin'
@@ -15,194 +15,920 @@ append scripts
 
 append css
   link(rel='stylesheet' href='/components/angular-bootstrap-datetimepicker/src/css/datetimepicker.css')
-
   style(type='text/css').
-    .uib-time input {
-      padding-left: 0;
-      padding-right: 0;
-      width: 2.5em;
-      margin-right: 0;
+    /* Premium DateTime Picker Overhaul */
+    .premium-datetime-group {
+      display: inline-flex;
+      align-items: center;
+      background: #f8fafc;
+      padding: 4px;
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      transition: all 0.2s ease;
+    }
+    
+    .premium-datetime-group:focus-within {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      background: white;
     }
 
-    .uib-timepicker .btn {
-      padding-left: 6px;
-      padding-right: 6px;
+    .date-picker-wrapper {
+      position: relative;
     }
 
-block location
-  a.breadcrumb-item(ng-click="go('/home')") Home
+    .date-picker-wrapper input {
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      font-weight: 700;
+      color: #1e293b;
+      padding-left: 35px !important;
+      width: 160px !important;
+      cursor: pointer;
+    }
+
+    .date-picker-wrapper i.fa-calendar {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #64748b;
+      pointer-events: none;
+    }
+
+    .datetime-separator {
+      width: 1px;
+      height: 24px;
+      background: #e2e8f0;
+      margin: 0 8px;
+    }
+
+    /* Datepicker Popup Styling */
+    .uib-datepicker-popup {
+      border: none !important;
+      border-radius: 1.25rem !important;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+      padding: 1.25rem !important;
+      background: rgba(255, 255, 255, 0.95) !important;
+      backdrop-filter: blur(10px) !important;
+      -webkit-backdrop-filter: blur(10px) !important;
+      z-index: 1100 !important;
+      margin-top: 12px !important;
+      border: 1px solid rgba(255, 255, 255, 0.2) !important;
+      width: 355px !important;
+    }
+    
+    .uib-datepicker-popup table {
+      outline: none !important;
+    }
+
+    .uib-datepicker-popup thead th {
+      color: #94a3b8 !important;
+      font-size: 0.75rem !important;
+      font-weight: 800 !important;
+      text-transform: uppercase;
+      padding: 0.75rem 0 !important;
+      letter-spacing: 0.05em;
+    }
+
+    .uib-datepicker-popup .uib-title {
+      color: #1e293b !important;
+      font-weight: 900 !important;
+      font-size: 1.1rem !important;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+
+    .uib-datepicker-popup .uib-left, 
+    .uib-datepicker-popup .uib-right {
+      background: #f8fafc !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 10px !important;
+      width: 34px !important;
+      height: 34px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      color: #64748b !important;
+      transition: all 0.2s ease !important;
+    }
+
+    .uib-datepicker-popup .uib-left:hover, 
+    .uib-datepicker-popup .uib-right:hover {
+      background: white !important;
+      color: var(--accent-color) !important;
+      border-color: var(--accent-color) !important;
+    }
+    
+    .uib-datepicker-popup button,
+    .uib-datepicker-popup .uib-day button,
+    .uib-datepicker-popup .uib-month button,
+    .uib-datepicker-popup .uib-year button {
+      border: 1px solid #f1f5f9 !important;
+      background: white !important;
+      font-weight: 700 !important;
+      color: #334155 !important;
+      border-radius: 12px !important;
+      padding: 10px !important;
+      transition: all 0.2s ease !important;
+      width: 100%;
+      font-size: 0.95rem !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
+    }
+    
+    .uib-datepicker-popup button:hover,
+    .uib-datepicker-popup .uib-day button:hover {
+      background: #f8fafc !important;
+      color: var(--accent-color) !important;
+      border-color: var(--accent-color) !important;
+      transform: translateY(-1px);
+    }
+
+    .uib-datepicker-popup .uib-day button.active,
+    .uib-datepicker-popup .uib-day button.btn-info,
+    .uib-datepicker-popup .uib-month button.active,
+    .uib-datepicker-popup .uib-year button.active {
+      background: var(--accent-color) !important;
+      color: white !important;
+      border: none !important;
+      border-radius: 12px !important;
+      box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3) !important;
+      font-weight: 800 !important;
+      transform: scale(1.05);
+      z-index: 10;
+    }
+
+    
+    .uib-datepicker-popup .btn-info .text-info {
+      color: white !important;
+    }
+    
+    .uib-datepicker-popup .text-info {
+      color: var(--accent-color) !important;
+      font-weight: 800 !important;
+    }
+
+    .uib-datepicker-popup .uib-button-bar {
+      border-top: 1px solid #f1f5f9 !important;
+      padding: 0 !important;
+      margin: 0.5rem -0.5rem -1rem -0.5rem !important;
+      display: flex !important;
+      gap: 0 !important;
+      overflow: hidden;
+      border-radius: 0 0 0.75rem 0.75rem;
+    }
+
+    .uib-datepicker-popup .uib-button-bar .btn {
+      flex: 1 !important;
+      border-radius: 0 !important;
+      font-weight: 800 !important;
+      font-size: 0.8rem !important;
+      text-transform: uppercase !important;
+      letter-spacing: 0.05em !important;
+      padding: 16px 8px !important;
+      border: none !important;
+      transition: all 0.2s ease !important;
+      margin: 0 !important;
+    }
+    
+    .uib-datepicker-popup .uib-button-bar .btn:hover {
+      filter: brightness(1.1);
+    }
+
+    .uib-datepicker-popup .uib-button-bar .btn-info { background: #3b82f6 !important; }
+    .uib-datepicker-popup .uib-button-bar .btn-danger { background: #ef4444 !important; }
+    .uib-datepicker-popup .uib-button-bar .btn-success { background: #10b981 !important; }
+    
+    .uib-datepicker-popup .uib-datepicker {
+      border: none !important;
+      width: 100% !important;
+      table-layout: fixed !important;
+    }
+
+    .uib-datepicker-popup .uib-day,
+    .uib-datepicker-popup .uib-month,
+    .uib-datepicker-popup .uib-year {
+      padding: 2px !important;
+      width: 14.28% !important;
+    }
+    
+    .uib-datepicker-popup .uib-week {
+      display: none !important;
+    }
+
+    /* Weekend Colors */
+    /* Sunday Header */
+    .uib-datepicker-popup thead tr:nth-child(2) th:nth-child(1) {
+      color: #ef4444 !important;
+    }
+    /* Saturday Header */
+    .uib-datepicker-popup thead tr:nth-child(2) th:nth-child(7) {
+      color: #3b82f6 !important;
+    }
+    
+    /* Sunday Days */
+    .uib-datepicker-popup tbody td:nth-child(1) button:not(.active) span {
+      color: #ef4444 !important;
+    }
+    /* Saturday Days */
+    .uib-datepicker-popup tbody td:nth-child(7) button:not(.active) span {
+      color: #3b82f6 !important;
+    }
+    
+    .uib-datepicker-popup .uib-day button[disabled] {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+
+
+    .uib-timepicker {
+
+
+
+      display: flex !important;
+      align-items: center;
+    }
+    .time-picker-wrapper {
+      display: flex;
+      align-items: center;
+      background: #f1f5f9;
+      padding: 0 12px;
+      border-radius: 10px;
+      margin-left: 4px;
+    }
+
+    .time-picker-wrapper i.fa-clock {
+      color: #94a3b8;
+      margin-right: 2px;
+      font-size: 0.9rem;
+    }
+
+    .uib-timepicker .form-control {
+      border: none !important;
+      background: transparent !important;
+      box-shadow: none !important;
+      text-align: center;
+      padding: 0 !important;
+      width: 32px !important;
+      font-weight: 900;
+      color: #1e293b;
+      height: auto !important;
+      font-size: 1.2rem;
+      transition: all 0.2s ease;
+    }
+
+    .uib-timepicker .btn-link {
+      padding: 0 !important;
+      color: #94a3b8 !important;
+      transition: all 0.2s ease;
+    }
+    
+    .uib-timepicker .btn-link:hover {
+      color: var(--accent-color) !important;
+      transform: scale(1.2);
+    }
+    
+    .uib-timepicker .btn-link i {
+      font-size: 0.7rem;
+    }
+
+    .uib-timepicker table {
+      border: none !important;
+      margin: 0 !important;
+    }
+    
+    .uib-timepicker table td {
+      border: none !important;
+      padding: 0 1px !important;
+    }
+
+    .time-colon {
+      font-weight: 900;
+      color: #94a3b8;
+      padding: 0 2px;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .uib-timepicker .btn-link {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      height: 10px !important;
+      width: 100% !important;
+    }
+    
+    .status-indicator {
+
+
+      width: 8px;
+      height: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+    
+    .table-modern {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 0.5rem;
+    }
+    
+    .table-modern thead th {
+      padding: 1rem 0.75rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      letter-spacing: 0.05em;
+      border: none;
+    }
+    
+    .table-modern tbody tr {
+      background: white;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+    
+    .table-modern tbody tr:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+    }
+    
+    .table-modern tbody td {
+      padding: 1rem 0.75rem;
+      vertical-align: middle;
+      border-top: 1px solid #f1f5f9;
+      border-bottom: 1px solid #f1f5f9;
+      position: relative;
+    }
+    
+    .table-modern tbody td:first-child {
+      border-left: 1px solid #f1f5f9;
+      border-top-left-radius: 0.75rem;
+      border-bottom-left-radius: 0.75rem;
+    }
+    
+    .table-modern tbody td:last-child {
+      border-right: 1px solid #f1f5f9;
+      border-top-right-radius: 0.75rem;
+      border-bottom-right-radius: 0.75rem;
+    }
+    
+    .filter-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 2rem;
+      background: #f1f5f9;
+      font-size: 0.8rem;
+      margin: 0.25rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+    
+    .filter-badge.active {
+      background: var(--accent-color);
+      color: white;
+    }
+    
+    .btn-action-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .btn-action-icon:hover {
+      background: white;
+      color: var(--accent-color);
+      transform: translateY(-2px);
+    }
+
+    .btn-table-group {
+      display: inline-flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .btn-table-action {
+      background: transparent;
+      border: none;
+      border-left: 1px solid #f1f5f9;
+      color: #64748b;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0;
+      width: 64px;
+      height: 42px;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .btn-table-action:first-child {
+      border-left: none;
+    }
+
+    .btn-table-action:hover {
+      background: #f8fafc;
+      color: #334155;
+    }
+
+    .btn-table-action i {
+      font-size: 1rem;
+      opacity: 0.8;
+      margin: 0 !important;
+    }
+
+    .btn-table-action.active-blue {
+      background: rgba(59, 130, 246, 0.08) !important;
+      color: #2563eb !important;
+    }
+    
+    .btn-table-action.active-green {
+      background: rgba(16, 185, 129, 0.08) !important;
+      color: #059669 !important;
+    }
+
+    .btn-table-action.danger {
+      color: #ef4444;
+    }
+
+    .btn-table-action.danger:hover {
+      background: rgba(239, 68, 68, 0.05);
+    }
+    
+    .btn-table-action.primary {
+      color: #3b82f6;
+    }
+    
+    .btn-table-action.primary:hover {
+      background: rgba(59, 130, 246, 0.05);
+    }
+
+    .custom-checkbox {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #e2e8f0;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: white;
+      margin: 0 auto;
+    }
+    
+    .custom-checkbox.checked {
+      background: var(--accent-color);
+      border-color: var(--accent-color);
+    }
+    
+    .custom-checkbox i {
+      color: white !important;
+      font-size: 0.75rem;
+    }
+
+    .print-row {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      justify-content: center;
+    }
+    
+    .section-title {
+      font-weight: 800;
+      color: #64748b;
+      min-width: 50px;
+      margin-bottom: 0 !important;
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* Fix for dropdown clipping */
+    .modern-card, .modern-card-body, .table-responsive {
+      overflow: visible !important;
+    }
+    
+    .table-modern tbody tr {
+      position: relative;
+    }
+    
+    .table-modern tbody tr:hover,
+    .table-modern tbody tr:focus-within {
+      z-index: 10 !important;
+    }
+
+    .dropdown-menu {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+      border: 1px solid #e2e8f0 !important;
+      border-radius: 12px !important;
+      padding: 0.5rem !important;
+      z-index: 1060 !important;
+    }
+    
+    /* Mobile Responsiveness */
+    @media (max-width: 576px) {
+      .premium-datetime-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 8px;
+        padding: 12px;
+      }
+      .date-picker-wrapper input {
+        width: 100% !important;
+      }
+      .datetime-separator {
+        display: none;
+      }
+      .time-picker-wrapper {
+        margin-left: 0;
+        justify-content: center;
+        width: 100%;
+      }
+      .uib-datepicker-popup {
+        width: calc(100vw - 30px) !important;
+        left: 15px !important;
+        padding: 0.75rem !important;
+      }
+      .uib-datepicker-popup .uib-button-bar {
+        margin: 0.5rem -0.75rem -0.75rem -0.75rem !important;
+      }
+      
+      .modern-card-header .d-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 1rem;
+      }
+      
+      .btn-table-group {
+        width: 100%;
+        display: flex;
+      }
+      
+      .btn-table-action {
+        flex: 1;
+        width: auto;
+      }
+
+      .print-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+      
+      .section-title {
+        min-width: unset;
+      }
+    }
+
+    /* Mobile Table Transformation */
+    @media (max-width: 991px) {
+      .table-modern thead {
+        display: none !important;
+      }
+      .table-modern, .table-modern tbody, .table-modern tr, .table-modern td {
+        display: block !important;
+        width: 100% !important;
+      }
+      .table-modern tr {
+        margin-bottom: 1.5rem !important;
+        background: white !important;
+        border-radius: 1.25rem !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
+        padding: 1rem 1rem 1rem 1.5rem !important;
+        border: 1px solid #f1f5f9 !important;
+        position: relative !important;
+        overflow: hidden;
+      }
+      .table-modern td {
+        text-align: right !important;
+        padding: 0.85rem 0 !important;
+        border: none !important;
+        border-bottom: 1px solid #f8fafc !important;
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        min-height: 3rem;
+        position: static !important;
+      }
+      .table-modern td:last-child {
+        border-bottom: none !important;
+      }
+      .table-modern td::before {
+        content: attr(data-label);
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        color: #94a3b8;
+        padding-right: 1rem;
+        text-align: left;
+      }
+      /* Special handling for checkbox and indicator */
+      .table-modern td:first-child {
+        justify-content: flex-start !important;
+        border-bottom: 2px solid #f1f5f9 !important;
+        margin-bottom: 0.5rem;
+      }
+      .table-modern td:first-child::before {
+        display: none;
+      }
+      .status-indicator {
+        position: absolute !important;
+        width: 8px !important;
+        height: 100% !important;
+        left: 0 !important;
+        top: 0 !important;
+        border-radius: 0 !important;
+      }
+    }
+
+    .dropdown-item {
+      border-radius: 8px !important;
+      padding: 0.5rem 1rem !important;
+      font-weight: 600 !important;
+      color: #475569 !important;
+      transition: all 0.2s ease;
+    }
+    
+    .dropdown-item:hover {
+      background: #f1f5f9 !important;
+      color: var(--accent-color) !important;
+    }
+    
+    .dropdown-item i {
+      width: 20px;
+      text-align: center;
+    }
+
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
   a.breadcrumb-item(ng-click="go('/admin')") Admin
   a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
   span.breadcrumb-item.active #{leagueId} Games
 
-block content
+block hero_title
+  | {{competition.name}}
+
+block hero_subtitle
+  | {{league.name}} - {{"admin.lineRun.title" | translate}}
+
+block hero_actions
+  button.btn-action-icon(ng-hide="league.type == 'simulation'" ng-click="go('/signage/games/'+ competitionId + '?league=' + league.type)" uib-tooltip='{{"admin.lineRun.monitor" | translate}}' tooltip-placement="bottom")
+    i.fas.fa-desktop
+  button.btn-action-icon(ng-show="league.league == 'Line' || league.league == 'Maze'" ng-click="openScoreSheetModal()" uib-tooltip='{{"admin.lineRun.scoresheetTitle" | translate}}' tooltip-placement="bottom")
+    i.fas.fa-file-signature
+  button.btn-action-icon(ng-click="go('/admin/' + competitionId +'/' + league.league + '/games/print')" uib-tooltip='{{"admin.lineRun.printRuns" | translate}}' tooltip-placement="bottom")
+    i.fas.fa-print
+  button.btn-action-icon(ng-click="go('/admin/' + competition._id + '/' + league.league + '/games/ranking/')" uib-tooltip='{{"admin.lineRun.printRanking" | translate}}' tooltip-placement="bottom")
+    i.fas.fa-trophy
+
+
+block main_content
   .row
-    .col-md-1
-    .col-md-10
-      h3 {{competition.name}}
-      h2 {{league.name}} - {{"admin.lineRun.title" | translate}}
-      table(class="custom")
-        thead
-          tr
-            th {{"common.round" | translate}}
-            th {{"common.team" | translate}}
-            th(ng-hide="league.type == 'simulation'") {{"common.map" | translate}}
-            th {{"common.field" | translate}}
-            th {{"common.starttime" | translate}}
-            th {{"admin.common.normalization_group_id" | translate}}
-            th {{"common.operation" | translate}}
-        tbody
-          tr
-            td
-              select(ng-model='run.round' ng-options='round as round.name for round in rounds')
-            td
-              select(ng-model='run.team' ng-options='team as team.name for team in teams')
-            td(ng-hide="league.type == 'simulation'")
-              select(ng-model='run.map' ng-options='map as map.name for map in maps')
-            td
-              select(ng-model='run.field' ng-options='field as field.name for field in fields')
-            td
-              p.input-group
-                span.input-group-prepend
-                  button.btn.btn-info(type="button" ng-click="openStartDate()")
-                    i.fa.fa-calendar(aria-hidden='true')
-                input.form-control(type="text" uib-datepicker-popup ng-model="startDate" ng-change="updateStartTime()" is-open="startDatePopup.opened" datepicker-options="startDateOptions" close-text="Close")
-              div(uib-timepicker ng-model="startTime" ng-change="updateStartTime()" hour-step="1" minute-step="5" show-meridian="false" show-spinners='true' style="border-bottom:0px;border-left:0px;")
-            td
-                  input(ng-model='run.normalizationGroup' style="width:100%;")
-            td
-              button(ng-click='addRun()') {{"admin.lineRun.add" | translate}}
-      a(ng-href='/admin/{{competitionId}}/{{league.league}}/games/bulk') {{"admin.lineRun.bulk" | translate}}
+    .col-lg-12
+      .modern-card.mb-4
+        .modern-card-header(ng-click="showAddRun = !showAddRun" style="cursor: pointer;")
+          .d-flex.justify-content-between.align-items-center.w-100
+            div
+              i.fas.fa-plus-circle
+              | {{"admin.lineRun.add" | translate}}
+            i.fas.text-muted(ng-class="showAddRun ? 'fa-chevron-up' : 'fa-chevron-down'")
+        .modern-card-body(ng-show="showAddRun")
+          .row
+            .col-md-3
+              .form-group
+                label {{"common.round" | translate}}
+                select.form-control(ng-model='run.round' ng-options='round as round.name for round in rounds')
+            .col-md-3
+              .form-group
+                label {{"common.team" | translate}}
+                select.form-control(ng-model='run.team' ng-options='team as team.name for team in teams')
+            .col-md-3(ng-hide="league.type == 'simulation'")
+              .form-group
+                label {{"common.map" | translate}}
+                select.form-control(ng-model='run.map' ng-options='map as map.name for map in maps')
+            .col-md-3
+              .form-group
+                label {{"common.field" | translate}}
+                select.form-control(ng-model='run.field' ng-options='field as field.name for field in fields')
+          .row.mt-3
+            .col-md-6
+              .form-group
+                label {{"common.starttime" | translate}}
+                .premium-datetime-group
+                  .date-picker-wrapper
+                    i.fa.fa-calendar
+                    input.form-control(type="text" uib-datepicker-popup ng-model="startDate" ng-change="updateStartTime()" is-open="startDatePopup.opened" datepicker-options="startDateOptions" close-text="Close" ng-click="openStartDate()" datepicker-append-to-body="true")
+                  .datetime-separator
+                  .time-picker-wrapper
+                    i.fas.fa-clock
+                    div(uib-timepicker ng-model="startTime" ng-change="updateStartTime()" hour-step="1" minute-step="5" show-meridian="false" show-spinners='true')
 
-      .refine
-        .card.border-dark.mb-3(style='width:100%;')
-          .card-header.bg-transparent.border-dark.fa-2x
-            i.fas.fa-search(aria-hidden='true') {{'line.competition.refine.filter' | translate}}
-          .card-body.text-dark
-            h6.card-title {{'line.competition.refine.round' | translate}}
-            span(ng-repeat='(key, value) in Rrounds track by key')
-              input(type='checkbox' ng-model='Rrounds[key]' id="checkR_{{key}}")
-              label.checkbox(for="checkR_{{key}}") {{key}}
-            hr
-            h6.card-title {{'line.competition.refine.field' | translate}}
-            span(ng-repeat='(key, value) in Rfields track by key')
-              input(type='checkbox' ng-model='Rfields[key]' id="checkF_{{key}}")
-              label.checkbox(for="checkF_{{key}}") {{key}}
-            hr
-            h6.card-title {{'common.teamCode' | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-users(aria-hidden='true')
-              input.form-control(type='text', placeholder='Team code', aria-label='code', aria-describedby='basic-addon1' ng-model='teamCode')
-            hr
-            h6.card-title {{'line.competition.refine.team' | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-users(aria-hidden='true')
-              input.form-control(type='text', placeholder='Team name', aria-label='Username', aria-describedby='basic-addon1' ng-model='teamName')
-              
-      .row(ng-show="league.league == 'Line' || league.league == 'Maze'")
-        .col-md-10
-          h3 Scoresheets
-      .row(ng-show="league.league == 'Line' || league.league == 'Maze'")
-        .col-md-2
-          div
-            p.input-group
-              span.input-group-prepend
-                button.btn.btn-info(type="button" ng-click="openScoreSheetStartDate()")
-                  i.fa.fa-calendar(aria-hidden='true')
-              input.form-control(type="text" uib-datepicker-popup ng-model="scoreSheetStartDateTime" is-open="scoreSheetStartDatePopup.opened" datepicker-options="startDateOptions" close-text="Close")
-            div(uib-timepicker ng-model="scoreSheetStartDateTime" hour-step="1" minute-step="5" show-meridian="false" show-spinners='true' style="border-bottom:0px;border-left:0px;")
-        .col-md-2
-          div
-            p.input-group
-              span.input-group-prepend
-                button.btn.btn-info(type="button" ng-click="openScoreSheetEndDate()")
-                  i.fa.fa-calendar(aria-hidden='true')
-              input.form-control(type="text" uib-datepicker-popup ng-model="scoreSheetEndDateTime" is-open="scoreSheetEndDatePopup.opened" datepicker-options="startDateOptions" close-text="Close")
-            div(uib-timepicker ng-model="scoreSheetEndDateTime" hour-step="1" minute-step="5" show-meridian="false" show-spinners='true' style="border-bottom:0px;border-left:0px;")
-        .col-md-3
-          button(ng-click="go_scoreSheetInTimeRange2()" class='btn btn-primary' target="_blank" style="margin: 5px 5px 5px 5px;") {{"common.generateSheet" | translate}}
+            .col-md-2
+              .form-group
+                label {{"admin.common.normalization_group_id" | translate}}
+                input.form-control(ng-model='run.normalizationGroup')
+            .col-md-2.d-flex.align-items-end
+              .form-group.w-100
+                a.btn.btn-premium-dark.w-100(ng-href='/admin/{{competitionId}}/{{league.league}}/games/bulk')
+                  i.fas.fa-upload.mr-2
+                  | {{"admin.teams.bulk" | translate}}
+            .col-md-2.d-flex.align-items-end
+              .form-group.w-100
+                button.btn.btn-premium-primary.w-100(ng-click='addRun()')
+                  i.fas.fa-plus.mr-2
+                  | {{"admin.lineRun.add" | translate}}
 
-      div
-        button(ng-click="selectAll()" class='btn btn-primary' style="margin: 5px 5px 5px 5px;") {{"admin.lineRun.selectAll" | translate}}
-        button(ng-click="removeSelectedRun()" class='btn btn-danger' style="margin: 5px 5px 5px 5px;") {{"admin.lineRun.delS" | translate}}
-        button(ng-hide="league.type == 'simulation'" ng-click="go('/signage/games/'+ competitionId + '?league=' + league.type)" class='btn btn-success' style="margin: 5px 5px 5px 5px; text-align:right;") {{"admin.lineRun.monitor" | translate}}
-        button(ng-click="go('/admin/' + competitionId +'/' + league.league + '/games/print')" class='btn btn-info' style="margin: 5px 5px 5px 5px; text-align:right;")
-          i.fas.fa-print &nbsp;{{"admin.lineRun.printRuns" | translate}}
-        button(ng-click="go('/admin/' + competition._id + '/' + league.league + '/games/ranking/')" class='btn btn-info' style="margin: 5px 5px 5px 5px; text-align:right;")
-          i.fas.fa-print(aria-hidden='true') &nbsp;[{{league.name}}]&nbsp;{{'admin.lineRun.printRanking' | translate}}
-        button(ng-click="toggleEdit()" class='btn btn-success' style="margin: 5px 5px 5px 5px;")
-          span(ng-show="editMode")
-            i.fas.fa-save 
-            | &nbsp;{{"common.save" | translate}}
-          span(ng-hide="editMode")
-            i.fas.fa-edit 
-            | &nbsp;{{"common.edit" | translate}}
-      center
-        .loader
-          img(src="/images/loader2.gif")
-          p Now Loading...
-      table(class="custom" style="margin-bottom:100px;")
-        thead
-          tr
-            th
-            th {{"common.starttime" | translate}}
-            th {{"common.round" | translate}}
-            th {{"common.teamCode" | translate}}
-            th {{"common.team" | translate}}
-            th {{"common.field" | translate}}
-            th(ng-hide="league.type == 'simulation'") {{"common.map" | translate}}
-            th {{"admin.common.normalization_group_id" | translate}}
-            th {{"common.score" | translate}}
-            th Adjustment
-            th {{"common.time" | translate}}
-            th {{"admin.lineRun.status" | translate}}
-            th {{"common.comment" | translate}}
-            th {{"common.operation" | translate}}
-        tbody
-          tr(ng-repeat='run in runs | filter:list_filter | orderBy:"[startTime,round.name,field.name,team.name]"' runs-read-finished='')
-            td
-                input(type='checkbox' ng-model='run.checked' style="display:initial;" tabindex="-1")
-            td(ng-bind='run.startTime | date:"dd EEE HH:mm"' ng-style="{'background-color':statusColor(run.status)}" )
-            td(ng-bind='run.round.name' ng-style="{'background-color':statusColor(run.status)}" )
-            td(ng-bind='run.team.teamCode' ng-style="{'background-color':statusColor(run.status)}")
-            td(ng-bind='run.team.name' ng-style="{'background-color':statusColor(run.status)}")
-            td(ng-bind='run.field.name' ng-style="{'background-color':statusColor(run.status)}")
-            td(ng-hide="league.type == 'simulation'" ng-bind='run.map.name' ng-style="{'background-color':statusColor(run.status)}")
-            td(ng-bind='run.normalizationGroup' ng-style="{'background-color':statusColor(run.status)}")
-            td(ng-style="{'background-color':statusColor(run.status)}")
-              span {{run.score}}
-              span(ng-show="run.score != run.originalScore" style="font-size:8px;")
-                br
-                | ({{run.originalScore}})
-            td(ng-style="{'background-color':statusColor(run.status)}")
-              span(ng-hide="editMode") {{run.adjustment}} %
-              input(ng-model='run.adjustment' style="width:100%;" ng-show="editMode")
-            td(ng-bind="run.time.minutes*60*1000+run.time.seconds*1000 | date:'mm:ss'" ng-style="{'background-color':statusColor(run.status)}")
-            td(ng-style="{'background-color':statusColor(run.status)}")
-              span(ng-if="run.status==-1") Not yet set check points
-              span(ng-if="run.status==0") {{"admin.lineRun.st0" | translate}}
-              span(ng-if="run.status==1") {{"admin.lineRun.st1" | translate}}
-              span(ng-if="run.status==2") {{"admin.lineRun.st2" | translate}}
-              span(ng-if="run.status==3") {{"admin.lineRun.st3" | translate}}
-              span(ng-if="run.status==4") {{"admin.lineRun.st4" | translate}}
-              span(ng-if="run.status==5") {{"admin.lineRun.st5" | translate}}
-              span(ng-if="run.status==6") {{"admin.lineRun.st6" | translate}}
-            td(ng-style="{'background-color':statusColor(run.status)}")
-              button.btn.btn-light(uib-popover="{{run.comment}}" popover-trigger="'outsideClick'"  type="button" ng-disabled="run.comment==''") {{"common.comment" | translate}}
-            td(ng-style="{'background-color':statusColor(run.status)}")
-              //a(href="" ng-click='removeRun(run._id)') {{"common.delete" | translate}}
-              .dropdown
-                  button#dropdownMenu.btn.btn-secondary.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false' tabindex="-1") {{"common.action" | translate}}
-                  .dropdown-menu(aria-labelledby='dropdownMenu')
-                    button.dropdown-item(ng-hide="league.type == 'simulation'" type='button' ng-click="go_scoreSheet2(run._id)") {{"common.generateSheet" | translate}}
-                    button.dropdown-item(type='button' ng-click="go('/' + league.type + '/view/' + run._id)") {{"common.view" | translate}}
-                    button.dropdown-item(type='button' ng-click="go_judge(run._id)") {{"common.judge" | translate}}
-                    button.dropdown-item(type='button' ng-click="go_sign(run._id)") {{"common.sign" | translate}}
+
+
+
+
+
+
+  .modern-card
+    .modern-card-header
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-list
+          | {{"admin.lineRun.title" | translate}}
+        .btn-table-group
+          div.btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'line.competition.refine.filter' | translate}}" tooltip-placement="top")
+            i.fas.fa-filter
+          div.btn-table-action.danger(ng-click="removeSelectedRun()" uib-tooltip="{{'admin.lineRun.delS' | translate}}" tooltip-placement="top")
+            i.fas.fa-trash-alt
+          div.btn-table-action(ng-click="toggleEdit()" ng-class="editMode ? 'active-green' : ''" uib-tooltip="{{editMode ? ('common.save' | translate) : ('common.edit' | translate)}}" tooltip-placement="top")
+            i.fas(ng-class="editMode ? 'fa-save' : 'fa-edit'")
+    
+    .filter-collapse(ng-show="showFilter" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 1.5rem;")
+      .row
+        .col-md-4
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{'line.competition.refine.round' | translate}}
+          .filter-container
+            span.filter-badge(ng-repeat='(key, value) in Rrounds track by key' ng-class="{'active': Rrounds[key]}" ng-click="Rrounds[key] = !Rrounds[key]") {{key}}
+        .col-md-4
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{'line.competition.refine.field' | translate}}
+          .filter-container
+            span.filter-badge(ng-repeat='(key, value) in Rfields track by key' ng-class="{'active': Rfields[key]}" ng-click="Rfields[key] = !Rfields[key]") {{key}}
+        .col-md-4
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{'line.competition.refine.team' | translate}}
+          .input-group.mb-2
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-hashtag
+            input.form-control.form-control-sm(type='text', placeholder='Team code' ng-model='teamCode')
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-users
+            input.form-control.form-control-sm(type='text', placeholder='Team name' ng-model='teamName')
+
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        center(ng-show="!runsReadFinished")
+          .loader.my-5
+            img(src="/images/loader2.gif")
+            p.mt-2 Now Loading...
+        
+        table.table-modern(ng-show="runsReadFinished")
+          thead
+            tr
+              th(style="width: 50px;")
+                .custom-checkbox(ng-class="{'checked': allChecked}" ng-click="toggleAll()")
+                  i.fas.fa-check(ng-if="allChecked")
+              th {{"common.starttime" | translate}}
+              th {{"common.round" | translate}}
+              th {{"common.teamCode" | translate}}
+              th {{"common.team" | translate}}
+              th {{"common.field" | translate}}
+              th(ng-hide="league.type == 'simulation'") {{"common.map" | translate}}
+              th {{"admin.common.normalization_group_id" | translate}}
+              th {{"common.score" | translate}}
+              th Adj.
+              th {{"common.time" | translate}}
+              th {{"admin.lineRun.status" | translate}}
+              th {{"common.operation" | translate}}
+          tbody
+            tr(ng-repeat='run in runs | filter:list_filter | orderBy:"[startTime,round.name,field.name,team.name]"' runs-read-finished='')
+              td
+                .custom-checkbox(ng-class="{'checked': run.checked}" ng-click="run.checked = !run.checked")
+                  i.fas.fa-check(ng-if="run.checked")
+              td(data-label='{{"common.starttime" | translate}}')
+                .status-indicator(ng-style="{'background-color':statusColor(run.status)}")
+                | {{run.startTime | date:"dd EEE HH:mm"}}
+              td(data-label='{{"common.round" | translate}}' ng-bind='run.round.name')
+              td(data-label='{{"common.teamCode" | translate}}' ng-bind='run.team.teamCode')
+              td(data-label='{{"common.team" | translate}}' ng-bind='run.team.name')
+              td(data-label='{{"common.field" | translate}}' ng-bind='run.field.name')
+              td(ng-hide="league.type == 'simulation'" data-label='{{"common.map" | translate}}' ng-bind='run.map.name')
+              td(data-label='{{"admin.common.normalization_group_id" | translate}}' ng-bind='run.normalizationGroup')
+              td(data-label='{{"common.score" | translate}}')
+                span.font-weight-bold {{run.score}}
+                span.text-muted.small(ng-show="run.score != run.originalScore")
+                  br
+                  | ({{run.originalScore}})
+              td(data-label='Adj.')
+                span(ng-hide="editMode") {{run.adjustment}} %
+                input.form-control.form-control-sm(ng-model='run.adjustment' style="width:60px;" ng-show="editMode")
+              td(data-label='{{"common.time" | translate}}' ng-bind="run.time.minutes*60*1000+run.time.seconds*1000 | date:'mm:ss'")
+              td(data-label='{{"admin.lineRun.status" | translate}}')
+                span.badge.badge-pill(ng-style="{'background-color':statusColor(run.status), 'color': '#fff'}")
+                  span(ng-if="run.status==-1") No CPs
+                  span(ng-if="run.status==0") {{"admin.lineRun.st0" | translate}}
+                  span(ng-if="run.status==1") {{"admin.lineRun.st1" | translate}}
+                  span(ng-if="run.status==2") {{"admin.lineRun.st2" | translate}}
+                  span(ng-if="run.status==3") {{"admin.lineRun.st3" | translate}}
+                  span(ng-if="run.status==4") {{"admin.lineRun.st4" | translate}}
+                  span(ng-if="run.status==5") {{"admin.lineRun.st5" | translate}}
+                  span(ng-if="run.status==6") {{"admin.lineRun.st6" | translate}}
+                i.fas.fa-comment.ml-2.text-muted(ng-if="run.comment" uib-popover="{{run.comment}}" popover-trigger="'outsideClick'" style="cursor:pointer;")
+              td(data-label='{{"common.operation" | translate}}')
+                .dropdown
+                  button.btn.btn-sm.btn-light.dropdown-toggle(type='button', data-toggle='dropdown') {{"common.action" | translate}}
+                  .dropdown-menu.dropdown-menu-right
+                    button.dropdown-item(ng-hide="league.type == 'simulation'" type='button' ng-click="go_scoreSheet2(run._id)")
+                      i.fas.fa-file-pdf.mr-2
+                      | {{"common.generateSheet" | translate}}
+                    button.dropdown-item(type='button' ng-click="go('/' + league.type + '/view/' + run._id)")
+                      i.fas.fa-eye.mr-2
+                      | {{"common.view" | translate}}
+                    button.dropdown-item(type='button' ng-click="go_judge(run._id)")
+                      i.fas.fa-gavel.mr-2
+                      | {{"common.judge" | translate}}
+                    button.dropdown-item(type='button' ng-click="go_sign(run._id)")
+                      i.fas.fa-signature.mr-2
+                      | {{"common.sign" | translate}}
                     .dropdown-divider
-                    button.dropdown-item(ng-hide="league.type == 'simulation'" type='button' ng-click="go_input(run._id)") Manual input
-                    button.dropdown-item(type='button' ng-click='statusReset(run._id)') {{"admin.lineRun.statusReset" | translate}}
-                    button.dropdown-item(type='button' ng-click='removeRun(run._id)') {{"common.delete" | translate}}
+                    button.dropdown-item(ng-hide="league.type == 'simulation'" type='button' ng-click="go_input(run._id)")
+                      i.fas.fa-keyboard.mr-2
+                      | Manual input
+                    button.dropdown-item(type='button' ng-click='statusReset(run._id)')
+                      i.fas.fa-undo.mr-2
+                      | {{"admin.lineRun.statusReset" | translate}}
+                    button.dropdown-item.text-danger(type='button' ng-click='removeRun(run._id)')
+                      i.fas.fa-trash-alt.mr-2
+                      | {{"common.delete" | translate}}
+  
+  script(type="text/ng-template" id="scoreSheetModal.html")
+    .modal-header.premium-modal-header
+      h3.modal-title
+        i.fas.fa-file-signature.mr-2
+        | {{'admin.lineRun.scoresheetTitle' | translate}}
+    .modal-body.premium-modal-body
+      .print-section
+        .print-row
+          label.section-title {{'common.from' | translate}}
+          .premium-datetime-group
+            .date-picker-wrapper
+              i.fa.fa-calendar
+              input.form-control(type="text" uib-datepicker-popup ng-model="scoreSheetStartDateTime" is-open="scoreSheetStartDatePopup.opened" datepicker-options="startDateOptions" close-text="Close" ng-click="openScoreSheetStartDate()" datepicker-append-to-body="true")
+            .datetime-separator
+            .time-picker-wrapper
+              i.fas.fa-clock
+              div(uib-timepicker ng-model="scoreSheetStartDateTime" hour-step="1" minute-step="5" show-meridian="false" show-spinners='true')
+        
+        .print-row
+          label.section-title {{'common.to' | translate}}
+          .premium-datetime-group
+            .date-picker-wrapper
+              i.fa.fa-calendar
+              input.form-control(type="text" uib-datepicker-popup ng-model="scoreSheetEndDateTime" is-open="scoreSheetEndDatePopup.opened" datepicker-options="startDateOptions" close-text="Close" ng-click="openScoreSheetEndDate()" datepicker-append-to-body="true")
+            .datetime-separator
+            .time-picker-wrapper
+              i.fas.fa-clock
+              div(uib-timepicker ng-model="scoreSheetEndDateTime" hour-step="1" minute-step="5" show-meridian="false" show-spinners='true')
+
+      
+      .alert.alert-info.mt-4.glass-effect
+        i.fas.fa-info-circle.mr-2
+        | Select the time range to generate all scoresheets for the runs scheduled in this period.
+
+    .modal-footer.premium-modal-footer
+      button.btn.btn-print-action(ng-click="ok()")
+        i.fas.fa-magic.mr-2
+        | {{"common.generateSheet" | translate}}
+      button.btn.btn-cancel-action(ng-click="cancel()") {{ 'common.cancel' | translate }}
+

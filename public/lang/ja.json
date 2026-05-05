@@ -154,7 +154,9 @@
         "sort": "ソート",
         "deleted": "正常に削除しました",
         "mypage": "マイページ",
-        "backHome": "ホームに戻る"
+        "backHome": "ホームに戻る",
+        "from": "開始",
+        "to": "終了"
     },
     "error": {
         "title": "エラーが発生しました",
@@ -726,7 +728,8 @@
             "delS": "選択した競技を削除",
             "statusReset": "ステータス リセット",
             "printRuns": "競技結果を印刷",
-            "printRanking": "ランキングを印刷"
+            "printRanking": "ランキングを印刷",
+            "scoresheetTitle": "スコアシート一括出力"
         },
         "lineRunBulk": {
             "title": "競技一括登録",

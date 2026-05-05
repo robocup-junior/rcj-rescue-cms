@@ -154,7 +154,9 @@
         "sort": "Sorting",
         "deleted": "Successfully deleted!",
         "mypage": "Personal page",
-        "backHome": "Back to Home"
+        "backHome": "Back to Home",
+        "from": "From",
+        "to": "To"
     },
     "error": {
         "title": "Oops! Something went wrong",
@@ -728,7 +730,8 @@
             "delS": "Delete selected runs",
             "statusReset": "Reset Status",
             "printRuns": "Print all runs",
-            "printRanking": "Print ranking"
+            "printRanking": "Print ranking",
+            "scoresheetTitle": "Scoresheets Generation"
         },
         "lineRunBulk": {
             "title": "Line Run Bulk Registration",
