@@ -608,7 +608,7 @@ app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http'
     $scope.startTour = function() {
         let steps = [
             {
-                element: document.querySelector('.hero-deadline-pill'),
+                element: document.querySelector('.hero-deadline-info'),
                 intro: $translate.instant('document.form.tour.deadline')
             }
         ];
@@ -641,9 +641,18 @@ app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http'
             overlayOpacity: 0.85,
             showStepNumbers: true,
             dontShowAgain: true,
-            positionRelative: true
+            positionRelative: true,
+            scrollToElement: true,
+            scrollPadding: 150
         }).onstart(function() {
             document.body.classList.add('tour-active');
+        }).onbeforechange(function(targetElement) {
+            // Manual centering for notification
+            if (targetElement && targetElement.classList.contains('alert-premium')) {
+                setTimeout(() => {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 50);
+            }
         }).onexit(function() {
             document.body.classList.remove('tour-active');
         }).oncomplete(function() {

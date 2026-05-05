@@ -202,14 +202,82 @@ append css
       text-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
       margin-left: 0.5rem;
     }
-    .status-badge-premium {
-      padding: 0.3rem 0.8rem;
+    .hero-dashboard {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 1.25rem 1.75rem;
+      width: 100%;
+      margin-top: 1rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .hero-dashboard-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .hero-dashboard-row:not(:last-child) {
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .hero-team-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .hero-team-info i {
+      font-size: 1.25rem;
+      color: #a5b4fc;
+      opacity: 0.8;
+    }
+    .hero-team-info .team-code {
+      font-weight: 800;
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.15);
+      padding: 0.25rem 0.75rem;
       border-radius: 8px;
+      font-size: 0.95rem;
+      letter-spacing: 0.05em;
+    }
+    .hero-team-info .team-name {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: white;
+    }
+    .hero-league-tag {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #e0e7ff;
+      opacity: 0.7;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 0.35rem 1rem;
+      border-radius: 8px;
+    }
+    .hero-deadline-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: white;
+    }
+    .hero-deadline-info i {
+      color: #fca5a5;
+    }
+    .deadline-date {
+      font-weight: 700;
+      color: #fbbf24;
+      font-size: 1.05rem;
+    }
+    .status-badge-premium {
+      padding: 0.35rem 0.9rem;
+      border-radius: 10px;
       font-size: 0.75rem;
       font-weight: 900;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
     .btn-tour-hero {
       background: rgba(255, 255, 255, 0.15);
@@ -336,11 +404,12 @@ append css
     .introjs-showElement.sticky-char-count {
         padding: 5px 10px !important;
     }
-    body.tour-active .sticky-action-bar {
+    body.tour-active .sticky-action-bar,
+    body.tour-active .hero-dashboard {
       z-index: 10000000 !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
-      background: rgba(255, 255, 255, 1) !important;
+      background: rgba(255, 255, 255, 0.1) !important;
     }
     .introjs-fixParent {
       z-index: auto !important;
@@ -578,21 +647,26 @@ block hero_title
   | {{competition.name}}
 
 block hero_subtitle
-  .d-flex.flex-column
-    span.mb-1
-      i.fas.fa-file-alt.mr-2
-      | RCJ Document Submission
-    .hero-deadline-pill(ng-cloak)
-      i.fas.fa-clock.mr-2
-      span {{'document.deadline' | translate}}: 
-      span.deadline-date-highlight {{deadline()}}
-      span.ml-3.status-badge-premium.bg-white.text-primary(ng-if="!isPastDeadline()") OPEN
-      span.ml-3.status-badge-premium.bg-danger.text-white(ng-if="isPastDeadline()") CLOSED
+  .hero-dashboard(ng-cloak)
+    .hero-dashboard-row
+      .hero-team-info
+        i.fas.fa-users
+        span.team-code(ng-bind="team.teamCode" ng-show="team.teamCode")
+        span.team-name(ng-bind="team.name")
+      .hero-league-tag(ng-bind="league.name")
+    
+    .hero-dashboard-row
+      .hero-deadline-info
+        i.fas.fa-clock.mr-2
+        span {{'document.deadline' | translate}}: 
+        span.deadline-date {{deadline()}}
+        span.ml-3.status-badge-premium.bg-white.text-primary(ng-if="!isPastDeadline()") OPEN
+        span.ml-3.status-badge-premium.bg-danger.text-white(ng-if="isPastDeadline()") CLOSED
+      
+      button.btn.btn-tour-hero(type='button', ng-click='startTour()')
+        i.fas.fa-question-circle.mr-2
+        | {{ "document.form.tour.help" | translate }}
 
-block hero_actions
-  button.btn.btn-tour-hero(type='button', ng-click='startTour()')
-    i.fas.fa-question-circle.mr-2
-    | {{ "document.form.tour.help" | translate }}
 
 
 
@@ -625,24 +699,8 @@ block main_content
           h4.alert-heading(ng-bind="langContent(notification.i18n, 'title')")
           span(ng-bind-html="langContent(notification.i18n, 'description')")
 
-  //- Team Info Bar
-  .info-bar
+  //- Team Info Bar (Removed, integrated into Hero)
 
-    .info-item
-      .info-label {{"document.form.teamName" | translate}}
-      .info-value
-        span.text-primary(ng-bind="team.teamCode + ' '" ng-show="team.teamCode")
-        span(ng-bind="team.name")
-    .info-item
-      .info-label {{"common.league" | translate}}
-      .info-value(ng-bind="league.name")
-    .ml-auto.d-flex.align-items-center
-      .status-pill.mr-3(ng-if="isPastDeadline()", style="background: #fef2f2; color: #ef4444; border: 1px solid #fecaca;")
-        i.fas.fa-calendar-times.mr-2
-        | {{"document.form.editDeadline" | translate}}
-      .status-pill(ng-if="!isPastDeadline()", style="background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0;")
-        i.fas.fa-calendar-check.mr-2
-        | {{"document.form.editable" | translate}}
 
   .row
     .col-12
