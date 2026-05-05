@@ -145,7 +145,8 @@ append css
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 20px;
       padding: 1.25rem 1.75rem;
-      width: fit-content;
+      width: 100%;
+      max-width: 800px;
       margin-top: 1rem;
       box-shadow: 0 10px 40px rgba(0,0,0,0.2);
     }
@@ -255,6 +256,15 @@ block hero_subtitle
         span.deadline-date {{deadline(survey.deadline)}}
         span.ml-3.status-badge-premium.bg-white.text-primary(ng-if="!isPastDeadline()") OPEN
         span.ml-3.status-badge-premium.bg-danger.text-white(ng-if="isPastDeadline()") CLOSED
+    
+    .hero-dashboard-row
+      .hero-reedit-info.small
+        span.text-white.opacity-75(ng-if="survey.reEdit")
+          i.fas.fa-info-circle.mr-2
+          | {{"survey.multiple" | translate}}
+        span.text-white.opacity-75(ng-if="!survey.reEdit")
+          i.fas.fa-exclamation-triangle.mr-2
+          | {{"survey.onlyOnce" | translate}}
 
 block main_content
   if editable
@@ -274,76 +284,67 @@ block main_content
         i.fas.fa-info-circle.mr-3.fa-2x
         span {{"survey.readOnly" | translate}}
 
-  .row
-    .col-12
-      .alert.alert-premium.bg-light.border(role='alert' ng-if="survey.reEdit || !survey.reEdit")
-        .d-flex.align-items-center
-          i.fas.fa-info-circle.mr-3(ng-show="survey.reEdit" style="color:#3498db;")
-          i.fas.fa-exclamation-triangle.mr-3(ng-show="!survey.reEdit" style="color:#f39c12;")
-          span(ng-show="survey.reEdit") {{"survey.multiple" | translate}}
-          span(ng-show="!survey.reEdit") {{"survey.onlyOnce" | translate}}
-
-      div(ng-repeat="question in survey.questions track by $index")
-        .card.document-card
-          .document-card-header.d-flex.justify-content-between.align-items-center(ng-if="question.type != 'explanationOnly'")
-            h5.document-card-title(ng-bind="langContent(question.i18n, 'title')")
+  div(ng-repeat="question in survey.questions track by $index")
+    .card.document-card
+      .document-card-header.d-flex.justify-content-between.align-items-center(ng-if="question.type != 'explanationOnly'")
+        h5.document-card-title(ng-bind="langContent(question.i18n, 'title')")
+      
+      .document-card-body
+        div.question-container
+          div(ng-if="question.type == 'explanationOnly'")
+            div(style="margin-bottom:10px;font-size:1.8rem;text-align:center;")
+              strong(ng-bind="langContent(question.i18n, 'title')")
+            div.question-description.text-center
+              p(ng-bind-html="langContent(question.i18n, 'description')")
           
-          .document-card-body
-            div.question-container
-              div(ng-if="question.type == 'explanationOnly'")
-                div(style="margin-bottom:10px;font-size:1.8rem;text-align:center;")
-                  strong(ng-bind="langContent(question.i18n, 'title')")
-                div.question-description.text-center
-                  p(ng-bind-html="langContent(question.i18n, 'description')")
-              
-              div(ng-if="question.type != 'explanationOnly'")
-                .question-description
-                  p(ng-bind-html="langContent(question.i18n, 'description')")
+          div(ng-if="question.type != 'explanationOnly'")
+            .question-description
+              p(ng-bind-html="langContent(question.i18n, 'description')")
 
-              //- Question Types Input
-              div(ng-if="question.type=='input'")
-                if editable
-                  ng-quill-editor(ng-model="answers[question.questionId]")
-                else
-                  .p-3.bg-light.rounded.border(ng-bind-html="answers[question.questionId]")
-              
-              div(ng-if="question.type=='teamVote'")
-                if editable
-                  select.custom-select.premium-select(ng-model='answers[question.questionId]', ng-options="team for team in question.teamVote.teamList")
-                else
-                  select.custom-select(ng-model='answers[question.questionId]', disabled , ng-options="question.teamVote.teamList")
+          //- Question Types Input
+          div(ng-if="question.type=='input'")
+            if editable
+              ng-quill-editor(ng-model="answers[question.questionId]")
+            else
+              .p-3.bg-light.rounded.border(ng-bind-html="answers[question.questionId]")
+          
+          div(ng-if="question.type=='teamVote'")
+            if editable
+              select.custom-select.premium-select(ng-model='answers[question.questionId]', ng-options="team for team in question.teamVote.teamList")
+            else
+              select.custom-select(ng-model='answers[question.questionId]', disabled , ng-options="question.teamVote.teamList")
 
-              div(ng-if="question.type=='select'")
-                if editable
-                  select.custom-select.premium-select(ng-model='answers[question.questionId]', ng-options="option.value as option.text for option in langArray(question.i18n, 'options')")
-                else
-                  select.custom-select(ng-model='answers[question.questionId]', disabled , ng-options="option.value as option.text for option in langArray(question.i18n, 'options')")
+          div(ng-if="question.type=='select'")
+            if editable
+              select.custom-select.premium-select(ng-model='answers[question.questionId]', ng-options="option.value as option.text for option in langArray(question.i18n, 'options')")
+            else
+              select.custom-select(ng-model='answers[question.questionId]', disabled , ng-options="option.value as option.text for option in langArray(question.i18n, 'options')")
 
-              div(ng-if="question.type=='scale'")
-                .btn-group.premium-btn-group
-                  button.btn.btn-outline-primary(type='button', ng-click='editable ? (answers[question.questionId] = ans) : null', ng-repeat='ans in rangeS(question.scale.least, question.scale.most)', ng-class='{active: int(answers[question.questionId]) === ans}', ng-disabled="!editable")  {{ans}}
+          div(ng-if="question.type=='scale'")
+            .btn-group.premium-btn-group
+              button.btn.btn-outline-primary(type='button', ng-click='editable ? (answers[question.questionId] = ans) : null', ng-repeat='ans in rangeS(question.scale.least, question.scale.most)', ng-class='{active: int(answers[question.questionId]) === ans}', ng-disabled="!editable")  {{ans}}
 
-              div(ng-if="question.type=='file'")
-                .uploaded-preview(ng-if="answers[question.questionId]")
-                  .alert.alert-warning.py-2.px-3.mb-3.small
-                    i.fas.fa-exclamation-triangle.mr-2
-                    | {{"document.form.overwrite" | translate}}
-                  .text-center.mb-4
-                    a.btn.btn-primary.btn-premium(ng-href="/api/survey/answer/{{team._id}}/{{token}}/{{survey._id}}/file/{{question.questionId}}")
-                      i.fas.fa-file-archive.mr-2
-                      | {{"document.form.uploaded" | translate}}
+          div(ng-if="question.type=='file'")
+            .uploaded-preview(ng-if="answers[question.questionId]")
+              .alert.alert-warning.py-2.px-3.mb-3.small
+                i.fas.fa-exclamation-triangle.mr-2
+                | {{"document.form.overwrite" | translate}}
+              .text-center.mb-4
+                a.btn.btn-primary.btn-premium(ng-href="/api/survey/answer/{{team._id}}/{{token}}/{{survey._id}}/file/{{question.questionId}}")
+                  i.fas.fa-file-archive.mr-2
+                  | {{"document.form.uploaded" | translate}}
+            
+            if editable
+              .upload-zone
+                .d-flex.align-items-center
+                  button.btn.btn-primary.btn-premium(type='file' ngf-select='uploadFiles(question, $file, $invalidFiles)' ngf-max-size='20MB')
+                    i.far.fa-folder-open.mr-2
+                    | {{"document.form.selectFile" | translate}}
+                  .ml-3.text-muted.small
+                    | {{"document.form.max20" | translate}}
+                  .ml-3.text-danger.small(ng-if="question.errFile.$error")
+                    | ERROR: {{question.errFile.$error}}
                 
-                if editable
-                  .upload-zone
-                    .d-flex.align-items-center
-                      button.btn.btn-primary.btn-premium(type='file' ngf-select='uploadFiles(question, $file, $invalidFiles)' ngf-max-size='20MB')
-                        i.far.fa-folder-open.mr-2
-                        | {{"document.form.selectFile" | translate}}
-                      .ml-3.text-muted.small
-                        | {{"document.form.max20" | translate}}
-                      .ml-3.text-danger.small(ng-if="question.errFile.$error")
-                        | ERROR: {{question.errFile.$error}}
-                    
-                    .progress.mt-3(ng-show="question.f.progress > 0", style="height: 10px; border-radius: 5px;")
-                      .progress-bar.progress-bar-striped.progress-bar-animated(role='progressbar' style='width: {{question.f.progress}}%;' aria-valuenow='{{question.f.progress}}' aria-valuemin='0' aria-valuemax='100')
-                    .text-danger.mt-2.small(ng-if="question.errorMsg") {{question.errorMsg}}
+                .progress.mt-3(ng-show="question.f.progress > 0", style="height: 10px; border-radius: 5px;")
+                  .progress-bar.progress-bar-striped.progress-bar-animated(role='progressbar' style='width: {{question.f.progress}}%;' aria-valuenow='{{question.f.progress}}' aria-valuemin='0' aria-valuemax='100')
+                .text-danger.mt-2.small(ng-if="question.errorMsg") {{question.errorMsg}}
