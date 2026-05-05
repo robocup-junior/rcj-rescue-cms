@@ -4,7 +4,6 @@ let uploading_mes;
 
 function imageUpload(imageDataUrl, type, imageData) {
     let quill = this.quill;
-    let maxWidth = 600;
     Swal.fire({
         title: uploading_mes,
         allowOutsideClick : false,
@@ -36,8 +35,18 @@ function imageUpload(imageDataUrl, type, imageData) {
         .done(function(res) {
             let imageUrl = res.url;
             const index = (quill.getSelection() || {}).index || quill.getLength();
-            quill.insertEmbed(index, 'image', imageUrl, 'user');
-            Swal.close()
+            getImageDimensions(imageUrl).then(dim => {
+                let ops = [];
+                if (index > 0) ops.push({ retain: index });
+                
+                let attrs = {};
+                if (dim.w > 500) attrs.width = '500';
+                
+                ops.push({ insert: { image: imageUrl }, attributes: attrs });
+                
+                quill.updateContents({ ops: ops }, 'user');
+                Swal.close()
+            });
         })
         .fail(function() {
             Swal.fire({
@@ -145,7 +154,7 @@ app.constant('NG_QUILL_CONFIG', {
   ])
 
 // function referenced by the drop target
-app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http', '$translate','$sce', 'Upload', '$timeout' , function ($scope, $uibModal, $log, $http, $translate, $sce, Upload, $timeout) {
+app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http', '$translate','$sce', 'Upload', '$timeout', '$cookies', function ($scope, $uibModal, $log, $http, $translate, $sce, Upload, $timeout, $cookies) {
 
     const Toast = Swal.mixin({
         toast: true,
@@ -223,7 +232,7 @@ app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http'
 
     $scope.videoRefresh = false;
 
-    $scope.contentLength = [];
+    $scope.contentLength = {};
 
     $scope.rangeS =  (start, end) => [...Array((end - start) + 1)].map((_, i) => start + i);
 
@@ -283,7 +292,7 @@ app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http'
 
     $scope.save = function () {
         // Check total length count
-        if ($scope.totalLength() > $scope.maxLength) {
+        if ($scope.maxLength != null && $scope.totalLength() > $scope.maxLength) {
             Swal.fire({
                 type: 'error',
                 title: length_err_title,
@@ -489,8 +498,8 @@ app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http'
 
     $scope.contentChanged = function (editor, questionId, maxLength) {
         $scope.contentLength[questionId] = editor.getLength() - 1;
-        if (maxLength) {
-            editor.deleteText(maxLength - 1, editor.getLength());
+        if (maxLength && editor.getLength() - 1 > maxLength) {
+            editor.deleteText(maxLength, editor.getLength());
         }
     }
     
@@ -595,4 +604,61 @@ app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http'
             }
         }
     }, 1000);
+
+    $scope.startTour = function() {
+        let steps = [
+            {
+                element: document.querySelector('.hero-deadline-pill'),
+                intro: $translate.instant('document.form.tour.deadline')
+            }
+        ];
+
+        if ($scope.notifications && $scope.notifications.length > 0) {
+            steps.push({
+                element: document.querySelector('.notifications-container .alert:first-child'),
+                intro: $translate.instant('document.form.tour.notification')
+            });
+        }
+
+        steps.push({
+            element: document.querySelector('.sticky-action-bar .btn-primary'),
+            intro: $translate.instant('document.form.tour.save')
+        });
+
+        if ($scope.maxLength != null) {
+            steps.push({
+                element: document.querySelector('.sticky-char-count'),
+                intro: $translate.instant('document.form.tour.charLimit')
+            });
+        }
+
+        introJs().setOptions({
+            steps: steps,
+            nextLabel: $translate.instant('document.form.tour.next') + ' &rarr;',
+            prevLabel: '&larr; ' + $translate.instant('document.form.tour.prev'),
+            skipLabel: '×',
+            doneLabel: $translate.instant('document.form.tour.done'),
+            overlayOpacity: 0.85,
+            showStepNumbers: true,
+            dontShowAgain: true,
+            positionRelative: true
+        }).onstart(function() {
+            document.body.classList.add('tour-active');
+        }).onexit(function() {
+            document.body.classList.remove('tour-active');
+        }).oncomplete(function() {
+            document.body.classList.remove('tour-active');
+        }).start();
+    };
+
+    // Check if first access
+    if (!$cookies.get('document_tour_finished')) {
+        setTimeout(function() {
+            $scope.startTour();
+            $cookies.put('document_tour_finished', 'true', {
+                expires: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
+                path: '/'
+            });
+        }, 1500);
+    }
 }]);
