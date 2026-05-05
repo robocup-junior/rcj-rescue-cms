@@ -1,8 +1,9 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'SurveyForm'
+  - var hideLogin = true
 
 append scripts
   script.
@@ -11,122 +12,338 @@ append scripts
     var token = "#{token}"
     var leagueId = "#{league}"
     var survId = "#{survId}"
+    var editable = #{editable}
   script(src="/javascripts/survey/form.js")
   script(src='/components/quill/index.js')
   script(src='/components/ngQuill/src/ng-quill.js')
   script(src="/components/ng-file-upload/ng-file-upload.min.js")
 
 append css
-    style.
-        p{
-            margin-bottom: 0;
-        }
-        img {
-            max-width: 100%;
-        }
-    link(rel='stylesheet', href='/components/quill.snow/index.css')
+  style.
+    p {
+      margin-bottom: 0;
+    }
+    img {
+      max-width: 100%;
+    }
+    .document-card {
+      margin-bottom: 2rem;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+    .document-card-header {
+      padding: 1.25rem 1.5rem;
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .document-card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1e293b;
+      margin: 0;
+      display: flex;
+      align-items: center;
+    }
+    .document-card-body {
+      padding: 1.5rem;
+    }
+    .question-container {
+      margin-bottom: 2.5rem;
+    }
+    .question-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #334155;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .question-description {
+      color: #64748b;
+      font-size: 0.95rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.6;
+    }
+    .badge-premium {
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-weight: 500;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+    .alert-premium {
+      border-radius: 12px;
+      border: none;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+    .premium-btn-group {
+      flex-wrap: wrap !important;
+      padding: 0.5rem !important;
+      background: #f1f5f9 !important;
+      border-radius: 14px !important;
+    }
+    .premium-btn-group .btn {
+      border: none !important;
+      background: transparent !important;
+      color: #64748b !important;
+      font-weight: 700 !important;
+      padding: 0.8rem 1.25rem !important;
+      border-radius: 10px !important;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      position: relative;
+    }
+    .premium-btn-group .btn:hover:not(:disabled):not(.active) {
+      background: rgba(59, 130, 246, 0.05) !important;
+      color: #3b82f6 !important;
+      transform: translateY(-1px);
+    }
+    .premium-btn-group .btn.active {
+      background: #ffffff !important;
+      color: #3b82f6 !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+      transform: scale(1.02);
+    }
+    .premium-select.custom-select {
+      appearance: none !important;
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 1.25rem center !important;
+      background-size: 1.2rem !important;
+      padding-right: 3.5rem !important;
+      height: 4.2rem !important;
+      min-height: 4.2rem !important;
+      font-size: 1.1rem !important;
+      font-weight: 600 !important;
+      color: #1e293b !important;
+      border: 2px solid #e2e8f0 !important;
+      border-radius: 1.25rem !important;
+      background-color: #f8fafc !important;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      cursor: pointer !important;
+    }
+    .premium-select.custom-select:hover:not(:disabled) {
+      border-color: #3b82f6 !important;
+      background-color: #ffffff !important;
+      box-shadow: 0 10px 20px rgba(59, 130, 246, 0.1) !important;
+      transform: translateY(-2px);
+    }
+    .hero-breadcrumb {
+      display: none !important;
+    }
+    .hero-dashboard {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 1.25rem 1.75rem;
+      width: fit-content;
+      margin-top: 1rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .hero-dashboard-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+    .hero-dashboard-row:not(:last-child) {
+      margin-bottom: 1.25rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .hero-team-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .hero-team-info i {
+      font-size: 1.25rem;
+      color: #a5b4fc;
+      opacity: 0.8;
+    }
+    .hero-team-info .team-name {
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: white;
+    }
+    .hero-deadline-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: white;
+    }
+    .hero-deadline-info i {
+      color: #fca5a5;
+    }
+    .deadline-date {
+      font-weight: 700;
+      color: #fbbf24;
+      font-size: 1.05rem;
+    }
+    .status-badge-premium {
+      padding: 0.35rem 0.9rem;
+      border-radius: 10px;
+      font-size: 0.75rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .sticky-action-bar {
+      position: fixed;
+      top: 85px;
+      right: 2rem;
+      z-index: 1020;
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      padding: 0.5rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      border-radius: 99px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+      width: fit-content;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0.8;
+    }
+    .sticky-action-bar:hover {
+      background: #ffffff;
+      opacity: 1;
+      transform: scale(1.05) translateY(-2px);
+      box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.15);
+    }
+    @media (max-width: 768px) {
+      .sticky-action-bar {
+        top: auto;
+        bottom: 2rem;
+        right: 1.5rem;
+        left: 1.5rem;
+        width: auto;
+        padding: 0.75rem 1.5rem;
+        justify-content: center;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        opacity: 1;
+        background: rgba(255, 255, 255, 0.95);
+      }
+    }
+  link(rel='stylesheet', href='/components/quill.snow/index.css')
 
+block hero_breadcrumb
 
-block navbar
-    nav.navbar(style='background-color: #283655; color: #fff; position: fixed; top: 0; z-index:10 ;  width: 100%')
-        .col-sm-11
-            span(style="font-size:20px;")
-                i.fas.fa-question-circle &nbsp;
-                | {{competition.name}} - Survey
-        .col-sm-1(style="text-align:right;")
-            button.btn.btn-primary(type='button', ng-click="changeLocale()", style="padding:2px 5px 0px 3px;margin-right:10px;")
-                i.fas.fa-language(style="font-size:30px;")
+block hero_title
+  span(ng-bind-html="langContent(survey.i18n, 'name')")
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/mypage/'+ teamId + '/' + token)") {{team.name}}
-    span.breadcrumb-item.active {{langContent(survey.i18n, 'name')}}
+block hero_subtitle
+  p.mb-4.opacity-75(ng-bind-html="langContent(survey.i18n, 'topDescription')" style="font-size: 1.1rem; line-height: 1.6; max-width: 800px;")
+  .hero-dashboard(ng-cloak)
+    .hero-dashboard-row
+      .hero-deadline-info
+        i.fas.fa-clock.mr-2
+        span {{'document.deadline' | translate}}: 
+        span.deadline-date {{deadline(survey.deadline)}}
+        span.ml-3.status-badge-premium.bg-white.text-primary(ng-if="!isPastDeadline()") OPEN
+        span.ml-3.status-badge-premium.bg-danger.text-white(ng-if="isPastDeadline()") CLOSED
 
-block content
-    .row 
-        .col-md-1 
-        .col-md-10
-            .alert.alert-danger(role='alert',style="margin-bottom: 20px;", ng-if="currentLang != displayLang")
-                i.fas.fa-info-circle &nbsp;
-                span {{"document.form.languageError" | translate}}
+block main_content
+  if editable
+    .sticky-action-bar
+      button.btn.btn-primary.btn-premium.btn-sm.rounded-pill.px-4(type='button', ng-click='submit()')
+        i.fas.fa-paper-plane.mr-2
+        | {{"survey.submit" | translate}}
 
-            h2(ng-bind-html="langContent(survey.i18n, 'name')")
-            p(ng-bind-html="langContent(survey.i18n, 'topDescription')", style="margin:20px;")
-            .alert.alert-secondary(role='alert')
-                h4.alert-heading {{"document.deadline" | translate}}: 
-                    strong(ng-bind="deadline(survey.deadline)")
-                i.fas.fa-info-circle(ng-show="survey.reEdit" style="color:#3498db;") &nbsp;
-                    | {{"survey.multiple" | translate}}
-                i.fas.fa-exclamation-triangle(ng-show="!survey.reEdit" style="color:#f39c12;") &nbsp;
-                    | {{"survey.onlyOnce" | translate}}
-            hr
-            if !editable
-                .alert.alert-warning(role='alert',style="margin-bottom: 20px;")
-                    i.fas.fa-info-circle &nbsp;
-                    span {{"survey.readOnly" | translate}}
-            
-            div(ng-repeat="question in survey.questions track by $index")
-                div(ng-if="question.type != 'explanationOnly'")
-                    div(style="margin-bottom:10px;font-size:20px;")
-                        strong(ng-bind="langContent(question.i18n, 'title')")
-                    div(style="font-size:15px;margin-bottom:10px;")
-                        p(ng-bind-html="langContent(question.i18n, 'description')")
-                div(ng-if="question.type == 'explanationOnly'")
-                    div(style="margin-bottom:10px;font-size:30px;text-align:center;")
-                        strong(ng-bind="langContent(question.i18n, 'title')")
-                    div(style="font-size:15px;margin-bottom:10px;text-align:center;")
-                        p(ng-bind-html="langContent(question.i18n, 'description')")
-                
-                div(ng-if="question.type=='input'")
-                    if editable
-                        ng-quill-editor(ng-model="answers[question.questionId]")
-                    else
-                        div(style="margin-top:10px;padding:10px;border: 1px solid #555", ng-bind-html="answers[question.questionId]")
-                div(ng-if="question.type=='teamVote'")
-                    if editable
-                        select.custom-select(ng-model='answers[question.questionId]', ng-options="team for team in question.teamVote.teamList")
-                    else
-                        select.custom-select(ng-model='answers[question.questionId]', disabled , ng-options="question.teamVote.teamList")
-                div(ng-if="question.type=='select'")
-                    if editable
-                        select.custom-select(ng-model='answers[question.questionId]', ng-options="option.value as option.text for option in langArray(question.i18n, 'options')")
-                    else
-                        select.custom-select(ng-model='answers[question.questionId]', disabled , ng-options="option.value as option.text for option in langArray(question.i18n, 'options')")
-                div(ng-if="question.type=='scale'")
-                    if editable
-                        .btn-group
-                            button.btn.btn-outline-primary(type='button', ng-click='answers[question.questionId] = ans;', ng-repeat='ans in rangeS(question.scale.least, question.scale.most)', ng-class='{active: answers[question.questionId] == ans}')  {{ans}}
-                    else
-                        .btn-group
-                            button.btn.btn-outline-primary(type='button', ng-repeat='ans in rangeS(question.scale.least, question.scale.most)', ng-class='{active: answers[question.questionId] == ans}')  {{ans}}
-                div(ng-if="question.type=='file'")
-                    strong {{"document.form.max20" | translate}}
-                    .row(ng-if="answers[question.questionId]", style="width:100%;")
-                        .col-12
-                            strong(style="color:#e74c3c;") {{"document.form.overwrite" | translate}}
-                            br
-                            div(style="text-align:center;margin:10px 0px;")
-                                a.btn.btn-primary(type='file' ng-href="/api/survey/answer/{{team._id}}/{{token}}/{{survey._id}}/file/{{question.questionId}}")
-                                    i.fas.fa-file-archive &nbsp;
-                                    | {{"document.form.uploaded" | translate}}
-                    if editable
-                        .d-sm-flex.flex-row
-                            div
-                                button.btn.btn-warning(type='file' ngf-select='uploadFiles(question, $file, $invalidFiles)' ngf-max-size='20MB')
-                                    i.far.fa-folder-open
-                                    | {{"document.form.selectFile" | translate}}
-                            div(style="color:#e74c3c;margin-left:10px;", ng-if="question.errFile.$error")
-                                span ERROR: {{question.errFile.$error}}
-                            .flex-fill(style="margin:10px 0px 0px 10px;", ng-show="question.f.progress > 0")
-                                .progress
-                                    .progress-bar(role='progressbar' style='width: {{question.f.progress}}%;' aria-valuenow='{{question.f.progress}}' aria-valuemin='0' aria-valuemax='100') {{question.f.progress}}%
-                            div(style="color:#e74c3c;margin-top:10px;", ng-if="question.errorMsg")
-                                span {{question.errorMsg}}
+  .alert.alert-danger.alert-premium(role='alert', ng-if="currentLang != displayLang")
+    .d-flex.align-items-center
+      i.fas.fa-exclamation-triangle.mr-3.fa-2x
+      span {{"document.form.languageError" | translate}}
 
-                hr(ng-if="!$last")
+  if !editable
+    .alert.alert-warning.alert-premium(role='alert')
+      .d-flex.align-items-center
+        i.fas.fa-info-circle.mr-3.fa-2x
+        span {{"survey.readOnly" | translate}}
 
-            div(style="text-align:center;margin:20px 0;" )   
+  .row
+    .col-12
+      .alert.alert-premium.bg-light.border(role='alert' ng-if="survey.reEdit || !survey.reEdit")
+        .d-flex.align-items-center
+          i.fas.fa-info-circle.mr-3(ng-show="survey.reEdit" style="color:#3498db;")
+          i.fas.fa-exclamation-triangle.mr-3(ng-show="!survey.reEdit" style="color:#f39c12;")
+          span(ng-show="survey.reEdit") {{"survey.multiple" | translate}}
+          span(ng-show="!survey.reEdit") {{"survey.onlyOnce" | translate}}
+
+      div(ng-repeat="question in survey.questions track by $index")
+        .card.document-card
+          .document-card-header.d-flex.justify-content-between.align-items-center(ng-if="question.type != 'explanationOnly'")
+            h5.document-card-title(ng-bind="langContent(question.i18n, 'title')")
+          
+          .document-card-body
+            div.question-container
+              div(ng-if="question.type == 'explanationOnly'")
+                div(style="margin-bottom:10px;font-size:1.8rem;text-align:center;")
+                  strong(ng-bind="langContent(question.i18n, 'title')")
+                div.question-description.text-center
+                  p(ng-bind-html="langContent(question.i18n, 'description')")
+              
+              div(ng-if="question.type != 'explanationOnly'")
+                .question-description
+                  p(ng-bind-html="langContent(question.i18n, 'description')")
+
+              //- Question Types Input
+              div(ng-if="question.type=='input'")
                 if editable
-                    button.btn.btn-lg.btn-primary(type='button', ng-click='submit()')
-                        i.fas.fa-paper-plane &nbsp;
-                        | {{"survey.submit" | translate}}
+                  ng-quill-editor(ng-model="answers[question.questionId]")
+                else
+                  .p-3.bg-light.rounded.border(ng-bind-html="answers[question.questionId]")
+              
+              div(ng-if="question.type=='teamVote'")
+                if editable
+                  select.custom-select.premium-select(ng-model='answers[question.questionId]', ng-options="team for team in question.teamVote.teamList")
+                else
+                  select.custom-select(ng-model='answers[question.questionId]', disabled , ng-options="question.teamVote.teamList")
+
+              div(ng-if="question.type=='select'")
+                if editable
+                  select.custom-select.premium-select(ng-model='answers[question.questionId]', ng-options="option.value as option.text for option in langArray(question.i18n, 'options')")
+                else
+                  select.custom-select(ng-model='answers[question.questionId]', disabled , ng-options="option.value as option.text for option in langArray(question.i18n, 'options')")
+
+              div(ng-if="question.type=='scale'")
+                .btn-group.premium-btn-group
+                  button.btn.btn-outline-primary(type='button', ng-click='editable ? (answers[question.questionId] = ans) : null', ng-repeat='ans in rangeS(question.scale.least, question.scale.most)', ng-class='{active: int(answers[question.questionId]) === ans}', ng-disabled="!editable")  {{ans}}
+
+              div(ng-if="question.type=='file'")
+                .uploaded-preview(ng-if="answers[question.questionId]")
+                  .alert.alert-warning.py-2.px-3.mb-3.small
+                    i.fas.fa-exclamation-triangle.mr-2
+                    | {{"document.form.overwrite" | translate}}
+                  .text-center.mb-4
+                    a.btn.btn-primary.btn-premium(ng-href="/api/survey/answer/{{team._id}}/{{token}}/{{survey._id}}/file/{{question.questionId}}")
+                      i.fas.fa-file-archive.mr-2
+                      | {{"document.form.uploaded" | translate}}
+                
+                if editable
+                  .upload-zone
+                    .d-flex.align-items-center
+                      button.btn.btn-primary.btn-premium(type='file' ngf-select='uploadFiles(question, $file, $invalidFiles)' ngf-max-size='20MB')
+                        i.far.fa-folder-open.mr-2
+                        | {{"document.form.selectFile" | translate}}
+                      .ml-3.text-muted.small
+                        | {{"document.form.max20" | translate}}
+                      .ml-3.text-danger.small(ng-if="question.errFile.$error")
+                        | ERROR: {{question.errFile.$error}}
+                    
+                    .progress.mt-3(ng-show="question.f.progress > 0", style="height: 10px; border-radius: 5px;")
+                      .progress-bar.progress-bar-striped.progress-bar-animated(role='progressbar' style='width: {{question.f.progress}}%;' aria-valuenow='{{question.f.progress}}' aria-valuemin='0' aria-valuemax='100')
+                    .text-danger.mt-2.small(ng-if="question.errorMsg") {{question.errorMsg}}

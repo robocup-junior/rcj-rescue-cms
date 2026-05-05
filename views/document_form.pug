@@ -396,17 +396,28 @@ append css
       z-index: 99999999 !important;
     }
     .introjs-showElement.sticky-char-count, 
-    .introjs-showElement.sticky-action-bar {
+    .introjs-showElement.sticky-action-bar,
+    .introjs-showElement.hero-deadline-info {
       background: #fff !important;
       border-radius: 12px !important;
       box-shadow: 0 0 30px rgba(59, 130, 246, 0.4) !important;
+      color: #1e293b !important;
+      z-index: 99999999 !important;
+      position: relative !important;
     }
-    .introjs-showElement.sticky-char-count {
-        padding: 5px 10px !important;
+    .introjs-showElement.hero-deadline-info * {
+      color: #1e293b !important;
+    }
+    .introjs-showElement.sticky-char-count,
+    .introjs-showElement.hero-deadline-info {
+        padding: 5px 15px !important;
+    }
+    body.tour-active .maps-hero {
+      z-index: 10000000 !important;
     }
     body.tour-active .sticky-action-bar,
     body.tour-active .hero-dashboard {
-      z-index: 10000000 !important;
+      z-index: 10000001 !important;
       backdrop-filter: none !important;
       -webkit-backdrop-filter: none !important;
       background: rgba(255, 255, 255, 0.1) !important;
