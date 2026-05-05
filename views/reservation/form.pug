@@ -1,8 +1,9 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'ResvForm'
+  - var hideLogin = true
 
 append scripts
   script.
@@ -13,76 +14,202 @@ append scripts
     var resvId = "#{resvId}"
   script(src='/javascripts/reservation/form.js')
 
-block navbar
-    nav.navbar(style='background-color: #283655; color: #fff; position: fixed; top: 0; z-index:10 ;  width: 100%')
-        .col-sm-11
-            span(style="font-size:20px;")
-                i.fas.fa-calendar-day &nbsp;
-                | {{competition.name}} - {{langContent(resv.i18n, 'name')}}
-        .col-sm-1(style="text-align:right;")
-            button.btn.btn-primary(type='button', onclick="location.href='/locales'", ng-cloak, style="padding:2px 5px 0px 3px;margin-right:10px;")
-                i.fas.fa-language(style="font-size:30px;")
+append css
+  style.
+    .hero-dashboard {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 1.25rem 1.75rem;
+      width: 100%;
+      max-width: 800px;
+      margin-top: 1rem;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+    .hero-dashboard-row {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+    .hero-deadline-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: white;
+    }
+    .deadline-date {
+      font-weight: 700;
+      color: #fbbf24;
+      font-size: 1.05rem;
+    }
+    .status-badge-premium {
+      padding: 0.4rem 1rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .reservation-card {
+      background: white;
+      border: none;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    .reservation-card-header {
+      padding: 1.5rem 2rem;
+      background: #f8fafc;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .reservation-card-title {
+      font-weight: 800;
+      color: #1e293b;
+      margin: 0;
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .reservation-card-body {
+      padding: 2rem;
+    }
+    .slot-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0 0.75rem;
+    }
+    .slot-table th {
+      padding: 1rem;
+      color: #64748b;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      border: none;
+    }
+    .slot-row {
+      transition: all 0.2s ease;
+    }
+    .slot-row td {
+      padding: 1.25rem 1rem;
+      background: #f8fafc;
+      border: none;
+    }
+    .slot-row td:first-child {
+      border-radius: 12px 0 0 12px;
+    }
+    .slot-row td:last-child {
+      border-radius: 0 12px 12px 0;
+    }
+    .slot-row:hover td {
+      background: #f1f5f9;
+    }
+    .status-indicator {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    .my-booking-active {
+      background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+      border: 1px solid #bfdbfe;
+    }
+    .hero-breadcrumb {
+      display: none !important;
+    }
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/mypage/'+ teamId + '/' + token)") #{teamName}
-    span.breadcrumb-item.active {{langContent(resv.i18n, 'name')}}
+block hero_breadcrumb
 
+block hero_title
+  span {{langContent(resv.i18n, 'name')}}
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      div(style="text-align:center;")
-        h1 {{langContent(resv.i18n, 'name')}}
-        h5 {{competition.name}} - {{leagueName}}
-        h4 #{teamCode} #{teamName}
-      
-      .alert.alert-primary.text-center(role='alert')
-        h4.alert-heading {{"reservation.deadline" | translate}}: 
-          strong(ng-bind="deadline()")
+block hero_subtitle
+  .hero-dashboard(ng-cloak)
+    .hero-dashboard-row
+      .hero-deadline-info
+        i.fas.fa-clock.mr-2
+        span {{'reservation.deadline' | translate}}: 
+        span.deadline-date {{deadline()}}
+        span.ml-3.status-badge-premium.bg-white.text-primary(ng-if="inDeadline()") OPEN
+        span.ml-3.status-badge-premium.bg-danger.text-white(ng-if="!inDeadline()") CLOSED
+    
+    .hero-dashboard-row.mt-2
+      .text-white.opacity-75.small
+        i.fas.fa-globe.mr-2
         span {{"reservation.timeZone" | translate}}
-      hr
-      .alert.alert-danger(role='alert',style="margin-bottom: 20px;", ng-if="currentLang != displayLang")
-        i.fas.fa-info-circle &nbsp;
-        span {{"document.form.languageError" | translate}}
-      p(ng-bind-html="langContent(resv.i18n, 'description')")
 
-      .alert.alert-success.text-center(role='alert', ng-if="myBook")
-        h4.alert-heading 
-          i.fas.fa-calendar-check &nbsp;
-          | {{"reservation.myResv" | translate}}
-        h5 {{"reservation.start" | translate}}:&nbsp;
-          strong(ng-bind="time(myBook.start)")
-        div(ng-if="inDeadline()")
-          p {{"reservation.change" | translate}}
-          button.btn.btn-danger.btn-sm(type='button', ng-click='cancel(myBook)', style="margin:0 5px;")
-            i.fas.fa-times &nbsp;
+block main_content
+  .alert.alert-danger.alert-premium(role='alert', ng-if="currentLang != displayLang")
+    .d-flex.align-items-center
+      i.fas.fa-info-circle.mr-3.fa-2x
+      span {{"document.form.languageError" | translate}}
+
+  .reservation-card(ng-if="langContent(resv.i18n, 'description')")
+    .reservation-card-body
+      p.mb-0(ng-bind-html="langContent(resv.i18n, 'description')")
+
+  //- My Booking Section
+  .reservation-card.my-booking-active(ng-if="myBook")
+    .reservation-card-header
+      h3.reservation-card-title
+        i.fas.fa-calendar-check.text-primary
+        | {{"reservation.myResv" | translate}}
+    .reservation-card-body
+      .row.align-items-center
+        .col-md-8
+          h4.mb-2 {{"reservation.start" | translate}}
+          p.h3.font-weight-bold.text-primary.mb-0(ng-bind="time(myBook.start)")
+        .col-md-4.text-md-right.mt-3.mt-md-0(ng-if="inDeadline()")
+          p.small.text-muted.mb-3 {{"reservation.change" | translate}}
+          button.btn.btn-danger.btn-premium.rounded-pill.px-4(type='button', ng-click='cancel(myBook)')
+            i.fas.fa-times.mr-2
             | {{"reservation.cancel" | translate}}
-      
-      .alert.alert-danger.text-center(role='alert', ng-if="!myBook && !inDeadline()")
-        h4.alert-heading 
-          i.fas.fa-calendar-times &nbsp;
-          | {{"reservation.noResv" | translate}}
-        p {{"reservation.noResvDesc" | translate}}
 
-      table.custom(ng-if="inDeadline()")
-        thead
+  //- No Booking Alert
+  .alert.alert-warning.alert-premium(role='alert', ng-if="!myBook && !inDeadline()")
+    .d-flex.align-items-center
+      i.fas.fa-calendar-times.mr-3.fa-2x
+      div
+        h4.alert-heading.mb-1 {{"reservation.noResv" | translate}}
+        p.mb-0 {{"reservation.noResvDesc" | translate}}
+
+  //- Available Slots Section
+  .reservation-card(ng-if="inDeadline()")
+    .reservation-card-header.d-flex.justify-content-between.align-items-center
+      h3.reservation-card-title
+        i.fas.fa-list-ul.text-primary
+        | {{"reservation.status" | translate}}
+    .reservation-card-body
+      .table-responsive
+        table.slot-table
+          thead
             tr
               th {{"reservation.start" | translate}}
-              th {{"reservation.duration" | translate}}
-              th {{"reservation.status" | translate}}
-              th(ng-if="!myBook") {{"reservation.makeResv" | translate}}
-        tbody
-            tr(ng-repeat="r in resv.slot | orderBy: 'start'")
-              td(ng-bind="time(r.start)")
-              td(ng-bind="r.duration")
-              td 
-                i.fas.fa-calendar-check(style="color:#3498db;", ng-if="r.myBooked")
-                i.fas.fa-times-circle(style="color:#e74c3c;", ng-if="!r.myBooked && r.available == 0")
-                i.fas.fa-circle(style="color:#2ecc71;", ng-if="!r.myBooked && r.available > 0")
-              td(ng-if="!myBook")
-                button.btn.btn-success.btn-sm(type='button', ng-click='book(r.slotId)', style="margin:0 5px;", ng-if="r.available > 0 && !myBook")
-                  i.fas.fa-check &nbsp;
+              th.text-center {{"reservation.duration" | translate}}
+              th.text-center {{"reservation.status" | translate}}
+              th.text-right(ng-if="!myBook") {{"reservation.makeResv" | translate}}
+          tbody
+            tr.slot-row(ng-repeat="r in resv.slot | orderBy: 'start'")
+              td
+                span.font-weight-bold(ng-bind="time(r.start)")
+              td.text-center
+                span.badge.badge-light.px-3.py-2 {{r.duration}} min
+              td.text-center
+                .status-indicator(ng-if="r.myBooked")
+                  i.fas.fa-calendar-check.text-primary
+                  span.text-primary {{"reservation.myResv" | translate}}
+                .status-indicator(ng-if="!r.myBooked && r.available == 0")
+                  i.fas.fa-times-circle.text-danger
+                  span.text-danger FULL
+                .status-indicator(ng-if="!r.myBooked && r.available > 0")
+                  i.fas.fa-circle.text-success
+                  span.text-success {{r.available}} Left
+              td.text-right(ng-if="!myBook")
+                button.btn.btn-success.btn-premium.btn-sm.rounded-pill.px-4(type='button', ng-click='book(r.slotId)', ng-if="r.available > 0 && !myBook")
+                  i.fas.fa-check.mr-2
                   | {{"reservation.makeResv" | translate}}
-      br

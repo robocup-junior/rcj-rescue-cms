@@ -36,6 +36,8 @@ app.controller("CabinetFileController", ['$scope', '$http', '$translate', 'Uploa
     $scope.competitionId = competitionId;
     $scope.teamId = teamId;
     $scope.token = token;
+    $scope.files = [];
+    $scope.loading = true;
 
     $scope.go = function (path) {
         window.location = path
@@ -75,7 +77,12 @@ app.controller("CabinetFileController", ['$scope', '$http', '$translate', 'Uploa
                         f.folder = $scope.team._id;
                     }
                     $scope.files = $scope.files.concat(files);
+                    $scope.loading = false;
+                }, function(){
+                    $scope.loading = false;
                 })
+            }, function(){
+                $scope.loading = false;
             })
         }else{
             $http.get(`/api/cabinet/${competitionId}/files/${teamId}/${token}/${leagueTeam}`).then(function (response) {
@@ -83,6 +90,9 @@ app.controller("CabinetFileController", ['$scope', '$http', '$translate', 'Uploa
                 for(let f of $scope.files){
                     f.folder = leagueTeam;
                 }
+                $scope.loading = false;
+            }, function(){
+                $scope.loading = false;
             })
         }
     }
