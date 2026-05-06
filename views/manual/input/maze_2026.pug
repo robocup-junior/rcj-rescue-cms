@@ -89,6 +89,35 @@ html(ng-app="ddApp")
             padding: 20px;
         }
 
+        .score-elements-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .score-elements-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .score-elements-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        .blue-tile-item {
+            grid-column: span 1;
+        }
+
+        @media (min-width: 768px) {
+            .blue-tile-item {
+                grid-column: span 2;
+            }
+        }
+
         .entry-item {
             background: #ffffff;
             border: 1px solid var(--border);
@@ -110,6 +139,25 @@ html(ng-app="ddApp")
             border-color: var(--primary);
             box-shadow: 0 4px 12px rgba(236, 72, 153, 0.1);
             transform: translateY(-2px);
+        }
+
+        .blue-tile-item .blue-stepper {
+            grid-column: 3 / 5;
+            width: 100%;
+            max-width: 190px;
+            height: 46px;
+            margin-left: auto;
+            margin-right: 8px;
+        }
+
+        .blue-tile-item .blue-count {
+            width: 60px;
+            font-size: 1.3rem;
+        }
+
+        .blue-tile-item .blue-btn {
+            width: 42px;
+            height: 42px;
         }
 
         .entry-item.active {
@@ -522,7 +570,7 @@ html(ng-app="ddApp")
           h4
             i.fas.fa-clipboard-list
             | Score Elements
-        .entry-grid
+        .score-elements-grid
           // Checkpoints
           div.entry-item(ng-repeat="item in itemList.checkpoint", ng-click="toggleScored(item)", ng-class="{'active': clearStatus(item)}")
             .item-id {{item.name}}
@@ -548,7 +596,7 @@ html(ng-app="ddApp")
             .status-icon: i.fas.fa-check-circle(ng-style="{'color': clearStatus(item) ? 'var(--success)' : '#cbd5e1'}")
 
           // Blue Tiles
-          div.entry-item(ng-repeat="item in itemList.blue", ng-class="{'active': tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue > 0}")
+          div.entry-item.blue-tile-item(ng-repeat="item in itemList.blue", ng-class="{'active': tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue > 0}")
             .item-id {{item.name}}
             .item-img-wrapper: div(style="width: 30px; height: 30px; background: #2563eb; border-radius: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);")
             .blue-stepper

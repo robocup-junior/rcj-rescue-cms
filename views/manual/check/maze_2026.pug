@@ -114,6 +114,48 @@ html(ng-app="ddApp")
             padding: 20px;
         }
 
+        .score-elements-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .score-elements-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .score-elements-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+        }
+
+        .blue-tile-item {
+            grid-column: span 1;
+        }
+
+        @media (min-width: 768px) {
+            .blue-tile-item {
+                grid-column: span 2;
+            }
+        }
+
+        .blue-tile-item .status-row {
+            width: auto;
+            min-width: 100px;
+            margin-left: auto;
+            margin-right: 8px;
+        }
+
+        .blue-tile-item .kit-status-badge {
+            width: 100% !important;
+            height: 54px !important;
+            min-width: 100px;
+        }
+
         .entry-item {
             background: #ffffff;
             border: 1px solid var(--border);
@@ -368,7 +410,7 @@ html(ng-app="ddApp")
         .card-entry-header
           h4: i.fas.fa-clipboard-list.me-2
             | Score Elements
-        .entry-grid
+        .score-elements-grid
           // Checkpoints
           div.entry-item(ng-repeat="item in itemList.checkpoint", ng-class="{'cleared-element': clearStatus(item)}")
             .item-id {{item.name}}
@@ -394,7 +436,7 @@ html(ng-app="ddApp")
             .status-icon: i.fas.fa-check-circle(ng-style="{'color': clearStatus(item) ? 'var(--success)' : '#cbd5e1'}")
 
           // Blue Tiles
-          div.entry-item(ng-repeat="item in itemList.blue", ng-class="{'cleared-element': tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue > 0}")
+          div.entry-item.blue-tile-item(ng-repeat="item in itemList.blue", ng-class="{'cleared-element': tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue > 0}")
             .item-id {{item.name}}
             .item-img-wrapper: div(style="width: 30px; height: 30px; background: #2563eb; border-radius: 8px;")
             .status-row
