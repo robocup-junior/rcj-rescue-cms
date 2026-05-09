@@ -301,135 +301,79 @@ append css
       box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
       border-color: rgba(255, 255, 255, 0.5);
     }
-    /* Intro.js Premium Customization */
-    .introjs-tooltip {
-      border-radius: 24px !important;
-      padding: 1.75rem !important;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
-      border: 1px solid rgba(255, 255, 255, 0.8) !important;
-      background: rgba(255, 255, 255, 0.95) !important;
-      backdrop-filter: blur(10px) !important;
-      -webkit-backdrop-filter: blur(10px) !important;
-      max-width: 420px !important;
+    /* Driver.js Premium Theme */
+    .driver-popover.driver-premium-theme {
+      background-color: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border-radius: 24px;
+      padding: 1.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      max-width: 420px;
     }
-    .introjs-tooltiptext {
+    .driver-popover.driver-premium-theme .driver-popover-title {
+      font-family: 'Outfit', sans-serif !important;
+      font-size: 1.3rem !important;
+      font-weight: 800 !important;
+      color: #1e293b !important;
+      margin-bottom: 0.75rem;
+    }
+    .driver-popover.driver-premium-theme .driver-popover-description {
+      font-family: 'Outfit', sans-serif !important;
       font-size: 1.05rem !important;
       line-height: 1.7 !important;
-      color: #1e293b !important;
+      color: #475569 !important;
       font-weight: 500 !important;
-      font-family: 'Outfit', sans-serif !important;
     }
-    .introjs-helperLayer {
-      background: rgba(59, 130, 246, 0.08) !important;
-      border: 2px solid #3b82f6 !important;
-      box-shadow: 0 0 25px rgba(59, 130, 246, 0.3) !important;
-      border-radius: 16px !important;
+    .driver-popover.driver-premium-theme .driver-popover-footer {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
     }
-    .introjs-arrow {
-      border-width: 10px !important;
-    }
-    .introjs-arrow.left { border-right-color: rgba(255, 255, 255, 0.95) !important; }
-    .introjs-arrow.right { border-left-color: rgba(255, 255, 255, 0.95) !important; }
-    .introjs-arrow.top { border-bottom-color: rgba(255, 255, 255, 0.95) !important; }
-    .introjs-arrow.bottom { border-top-color: rgba(255, 255, 255, 0.95) !important; }
-    
-    .introjs-tooltipbuttons {
-      border-top: 1px solid #f1f5f9 !important;
-      padding-top: 1.25rem !important;
-      margin-top: 1.25rem !important;
-      display: flex !important;
-      justify-content: flex-end !important;
-      gap: 0.75rem !important;
-    }
-    .introjs-button {
-      text-shadow: none !important;
-      background: #f1f5f9 !important;
-      border: none !important;
+    .driver-popover.driver-premium-theme .driver-popover-btn {
       border-radius: 12px !important;
       padding: 0.7rem 1.4rem !important;
       font-weight: 800 !important;
       font-size: 0.9rem !important;
-      color: #64748b !important;
+      text-shadow: none !important;
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-      box-shadow: none !important;
+      border: none !important;
     }
-    .introjs-button:hover {
-      background: #e2e8f0 !important;
-      color: #1e293b !important;
-      transform: translateY(-1px) !important;
-    }
-    .introjs-nextbutton, .introjs-donebutton {
+    .driver-popover.driver-premium-theme .driver-popover-next-btn {
       background: #3b82f6 !important;
       color: white !important;
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25) !important;
     }
-    .introjs-nextbutton:hover, .introjs-donebutton:hover {
+    .driver-popover.driver-premium-theme .driver-popover-next-btn:hover {
       background: #2563eb !important;
-      color: white !important;
       box-shadow: 0 6px 15px rgba(59, 130, 246, 0.35) !important;
     }
-    .introjs-skipbutton {
+    .driver-popover.driver-premium-theme .driver-popover-prev-btn {
+      background: #f1f5f9 !important;
+      color: #64748b !important;
+    }
+    .driver-popover.driver-premium-theme .driver-popover-prev-btn:hover {
+      background: #e2e8f0 !important;
+      color: #1e293b !important;
+    }
+    .driver-popover.driver-premium-theme .driver-popover-close-btn {
+      color: #94a3b8 !important;
+    }
+    .driver-popover.driver-premium-theme .driver-popover-progress-text {
       color: #94a3b8 !important;
       font-weight: 700 !important;
-      padding: 0.5rem !important;
+      font-size: 0.85rem !important;
     }
-    .introjs-bullets ul li a {
-      background: #e2e8f0 !important;
-      width: 8px !important;
-      height: 8px !important;
-      transition: all 0.3s ease !important;
+    .driver-popover.driver-premium-theme .driver-popover-arrow {
+      border-width: 10px !important;
     }
-    .introjs-bullets ul li a.active {
-      background: #3b82f6 !important;
-      width: 24px !important;
-      border-radius: 4px !important;
-    }
-    .introjs-overlay {
-      background: #0f172a !important;
-      opacity: 0.85 !important;
-      backdrop-filter: blur(4px) !important;
-    }
-    .introjs-showElement {
-      z-index: 99999999 !important;
-    }
-    .introjs-helperLayer, .introjs-tooltipReferenceLayer {
-      z-index: 99999999 !important;
-    }
-    .introjs-showElement.sticky-char-count, 
-    .introjs-showElement.sticky-action-bar,
-    .introjs-showElement.hero-deadline-info {
-      background: #fff !important;
-      border-radius: 12px !important;
-      box-shadow: 0 0 30px rgba(59, 130, 246, 0.4) !important;
-      color: #1e293b !important;
-      z-index: 99999999 !important;
-      position: relative !important;
-    }
-    .introjs-showElement.hero-deadline-info * {
-      color: #1e293b !important;
-    }
-    .introjs-showElement.sticky-char-count,
-    .introjs-showElement.hero-deadline-info {
-        padding: 5px 15px !important;
-    }
-    body.tour-active .maps-hero {
-      z-index: 10000000 !important;
-    }
-    body.tour-active .sticky-action-bar,
-    body.tour-active .hero-dashboard {
-      z-index: 10000001 !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      background: rgba(255, 255, 255, 0.1) !important;
-    }
-    .introjs-fixParent {
-      z-index: auto !important;
-      opacity: 1 !important;
-      transform: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      perspective: none !important;
-    }
+    .driver-popover.driver-premium-theme .driver-popover-arrow-side-top { border-top-color: rgba(255, 255, 255, 0.95) !important; }
+    .driver-popover.driver-premium-theme .driver-popover-arrow-side-bottom { border-bottom-color: rgba(255, 255, 255, 0.95) !important; }
+    .driver-popover.driver-premium-theme .driver-popover-arrow-side-left { border-left-color: rgba(255, 255, 255, 0.95) !important; }
+    .driver-popover.driver-premium-theme .driver-popover-arrow-side-right { border-right-color: rgba(255, 255, 255, 0.95) !important; }
+
     .premium-btn-group {
       flex-wrap: wrap !important;
       padding: 0.5rem !important;
@@ -651,8 +595,8 @@ append css
   link(rel='stylesheet', href='/components/quill.snow/index.css')
   link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
   link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css')
-  link(rel='stylesheet', href='/components/intro.css/index.css')
-  script(src='/components/intro.js/index.js')
+  link(rel="stylesheet", href="/components/driver.css/index.css")
+  script(src="/components/driver.js/index.js")
 
 block hero_title
   | {{competition.name}}

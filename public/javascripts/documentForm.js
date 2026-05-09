@@ -606,58 +606,67 @@ app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http'
     }, 1000);
 
     $scope.startTour = function() {
+        const driver = window.driver.js.driver;
+        
         let steps = [
             {
-                element: document.querySelector('.hero-deadline-info'),
-                intro: $translate.instant('document.form.tour.deadline')
+                element: '.hero-deadline-info',
+                popover: {
+                    title: $translate.instant('document.deadline'),
+                    description: $translate.instant('document.form.tour.deadline'),
+                    side: "bottom",
+                    align: 'start',
+                    popoverClass: 'driver-premium-theme'
+                }
             }
         ];
 
         if ($scope.notifications && $scope.notifications.length > 0) {
             steps.push({
-                element: document.querySelector('.notifications-container .alert:first-child'),
-                intro: $translate.instant('document.form.tour.notification')
+                element: '.notifications-container .alert:first-child',
+                popover: {
+                    title: $translate.instant('document.editor.notification'),
+                    description: $translate.instant('document.form.tour.notification'),
+                    side: "bottom",
+                    align: 'start',
+                    popoverClass: 'driver-premium-theme'
+                }
             });
         }
 
         steps.push({
-            element: document.querySelector('.sticky-action-bar .btn-primary'),
-            intro: $translate.instant('document.form.tour.save')
+            element: '.sticky-action-bar',
+            popover: {
+                title: $translate.instant('common.save'),
+                description: $translate.instant('document.form.tour.save'),
+                side: "left",
+                align: 'center',
+                popoverClass: 'driver-premium-theme'
+            }
         });
 
         if ($scope.maxLength != null) {
             steps.push({
-                element: document.querySelector('.sticky-char-count'),
-                intro: $translate.instant('document.form.tour.charLimit')
+                element: '.sticky-char-count',
+                popover: {
+                    title: $translate.instant('document.editor.maxLength'),
+                    description: $translate.instant('document.form.tour.charLimit'),
+                    side: "left",
+                    align: 'center',
+                    popoverClass: 'driver-premium-theme'
+                }
             });
         }
 
-        introJs().setOptions({
+        const driverObj = driver({
+            showProgress: true,
             steps: steps,
-            nextLabel: $translate.instant('document.form.tour.next') + ' &rarr;',
-            prevLabel: '&larr; ' + $translate.instant('document.form.tour.prev'),
-            skipLabel: '×',
+            nextLabel: $translate.instant('document.form.tour.next') + ' →',
+            prevLabel: '← ' + $translate.instant('document.form.tour.prev'),
             doneLabel: $translate.instant('document.form.tour.done'),
-            overlayOpacity: 0.85,
-            showStepNumbers: true,
-            dontShowAgain: true,
-            positionRelative: true,
-            scrollToElement: true,
-            scrollPadding: 150
-        }).onstart(function() {
-            document.body.classList.add('tour-active');
-        }).onbeforechange(function(targetElement) {
-            // Manual centering for notification
-            if (targetElement && targetElement.classList.contains('alert-premium')) {
-                setTimeout(() => {
-                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 50);
-            }
-        }).onexit(function() {
-            document.body.classList.remove('tour-active');
-        }).oncomplete(function() {
-            document.body.classList.remove('tour-active');
-        }).start();
+        });
+
+        driverObj.drive();
     };
 
     // Check if first access
