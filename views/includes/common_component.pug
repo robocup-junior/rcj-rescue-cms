@@ -21,7 +21,8 @@ block scripts
 block css
     link(rel='stylesheet',href='/components/bootstrap/dist/css/bootstrap.min.css')
     link(rel='stylesheet',href='/stylesheets/style.css')
-    link(rel='stylesheet',href='/stylesheets/navbar_premium.css')
+    if !noNavbar
+        link(rel='stylesheet',href='/stylesheets/navbar_premium.css')
     link(href="/components/font-awesome-5/css/all.min.css" rel="stylesheet")
     link(rel='stylesheet' href='/components/angular-bootstrap/dist/ui-bootstrap-csp.css')
     link(rel='stylesheet' href='/components/angular-ui-select/dist/select.min.css')
