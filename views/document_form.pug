@@ -369,10 +369,26 @@ append css
     .driver-popover.driver-premium-theme .driver-popover-arrow {
       border-width: 10px !important;
     }
-    .driver-popover.driver-premium-theme .driver-popover-arrow-side-top { border-top-color: rgba(255, 255, 255, 0.95) !important; }
-    .driver-popover.driver-premium-theme .driver-popover-arrow-side-bottom { border-bottom-color: rgba(255, 255, 255, 0.95) !important; }
-    .driver-popover.driver-premium-theme .driver-popover-arrow-side-left { border-left-color: rgba(255, 255, 255, 0.95) !important; }
-    .driver-popover.driver-premium-theme .driver-popover-arrow-side-right { border-right-color: rgba(255, 255, 255, 0.95) !important; }
+    .driver-popover.driver-premium-theme .driver-popover-arrow-side-top { 
+      /* Arrow at BOTTOM of popover, pointing DOWN towards element */
+      border-width: 10px 10px 0 10px !important;
+      border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent !important;
+    }
+    .driver-popover.driver-premium-theme .driver-popover-arrow-side-bottom { 
+      /* Arrow at TOP of popover, pointing UP towards element */
+      border-width: 0 10px 10px 10px !important;
+      border-color: transparent transparent rgba(255, 255, 255, 0.95) transparent !important;
+    }
+    .driver-popover.driver-premium-theme .driver-popover-arrow-side-left { 
+      /* Arrow at RIGHT of popover, pointing RIGHT towards element */
+      border-width: 10px 0 10px 10px !important;
+      border-color: transparent transparent transparent rgba(255, 255, 255, 0.95) !important;
+    }
+    .driver-popover.driver-premium-theme .driver-popover-arrow-side-right { 
+      /* Arrow at LEFT of popover, pointing LEFT towards element */
+      border-width: 10px 10px 10px 0 !important;
+      border-color: transparent rgba(255, 255, 255, 0.95) transparent transparent !important;
+    }
 
     .premium-btn-group {
       flex-wrap: wrap !important;

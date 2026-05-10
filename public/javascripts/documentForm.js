@@ -634,25 +634,27 @@ app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http'
             });
         }
 
-        steps.push({
-            element: '.sticky-action-bar',
-            popover: {
-                title: $translate.instant('common.save'),
-                description: $translate.instant('document.form.tour.save'),
-                side: "left",
-                align: 'center',
-                popoverClass: 'driver-premium-theme'
-            }
-        });
+        if (document.querySelector('.sticky-action-bar')) {
+            steps.push({
+                element: '.sticky-action-bar',
+                popover: {
+                    title: $translate.instant('common.save'),
+                    description: $translate.instant('document.form.tour.save'),
+                    side: "bottom",
+                    align: 'end',
+                    popoverClass: 'driver-premium-theme'
+                }
+            });
+        }
 
-        if ($scope.maxLength != null) {
+        if ($scope.maxLength != null && document.querySelector('.sticky-char-count')) {
             steps.push({
                 element: '.sticky-char-count',
                 popover: {
                     title: $translate.instant('document.editor.maxLength'),
                     description: $translate.instant('document.form.tour.charLimit'),
-                    side: "left",
-                    align: 'center',
+                    side: "bottom",
+                    align: 'end',
                     popoverClass: 'driver-premium-theme'
                 }
             });
