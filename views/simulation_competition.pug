@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'SimulationCompetition'
@@ -11,64 +11,125 @@ append scripts
     var league = "#{league}"
   script(src='/javascripts/simulation_competition.js')
 
+block page_css
+  style.
+    .run-table-modern { width:100%; border-collapse:separate; border-spacing:0 0.5rem; }
+    .run-table-modern thead th { padding:0.75rem 1rem; font-weight:800; text-transform:uppercase; font-size:0.72rem; color:#94a3b8; letter-spacing:0.06em; border:none; background:transparent; }
+    .run-table-modern tbody tr { background:white; transition:all 0.2s ease; box-shadow:0 2px 6px rgba(0,0,0,0.03); }
+    .run-table-modern tbody tr:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,0.07); }
+    .run-table-modern tbody td { padding:1rem; vertical-align:middle; border-top:1px solid #f1f5f9; border-bottom:1px solid #f1f5f9; }
+    .run-table-modern tbody td:first-child { border-left:1px solid #f1f5f9; border-top-left-radius:0.75rem; border-bottom-left-radius:0.75rem; }
+    .run-table-modern tbody td:last-child { border-right:1px solid #f1f5f9; border-top-right-radius:0.75rem; border-bottom-right-radius:0.75rem; }
+    .run-table-modern tbody td.end { color:#94a3b8; }
+    .run-table-modern tbody td.delay { color:#ef4444; font-weight:700; }
+    .filter-badge { display:inline-block; padding:0.25rem 0.85rem; border-radius:2rem; background:#f1f5f9; font-size:0.8rem; margin:0.25rem; cursor:pointer; transition:all 0.2s ease; border:1px solid transparent; }
+    .filter-badge.active { background:var(--accent-color); color:white; }
+    .btn-table-group { display:inline-flex; align-items:center; background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; box-shadow:0 1px 2px rgba(0,0,0,0.05); }
+    .btn-table-action { background:transparent; border:none; border-left:1px solid #f1f5f9; color:#64748b; font-weight:700; font-size:0.85rem; padding:0; width:52px; height:42px; transition:all 0.2s ease; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; position:relative; }
+    .btn-table-action:first-child { border-left:none; }
+    .btn-table-action:hover { background:#f8fafc; color:#334155; }
+    .btn-table-action i { font-size:1rem; opacity:0.8; margin:0 !important; }
+    .btn-table-action.active-blue { background:rgba(59,130,246,0.08) !important; color:#2563eb !important; }
+    .btn-table-action.active-green { background:rgba(16,185,129,0.08) !important; color:#059669 !important; }
+    .btn-run-action { display:inline-flex; align-items:center; gap:0.4rem; padding:0.4rem 0.8rem; border-radius:10px; font-size:0.82rem; font-weight:700; border:none; cursor:pointer; transition:all 0.2s ease; }
+    .btn-run-view { background:#eff6ff; color:#3b82f6; }
+    .btn-run-view:hover { background:#dbeafe; }
+    .btn-run-judge { background:#fef2f2; color:#ef4444; }
+    .btn-run-judge:hover { background:#fee2e2; }
+    .btn-run-input { background:#fffbeb; color:#d97706; }
+    .btn-run-input:hover { background:#fef3c7; }
+    .action-cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .action-card { background: white; border-radius: 1rem; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem; cursor: pointer; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    .action-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01); border-color: #cbd5e1; }
+    .action-card .icon-wrapper { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; flex-shrink: 0; transition: all 0.2s ease; }
+    .action-card:hover .icon-wrapper { transform: scale(1.05); }
+    .action-card.ranking-card .icon-wrapper { background: #fffbeb; color: #f59e0b; }
+    .action-card.tech-card .icon-wrapper { background: #f0fdf4; color: #10b981; }
+    .action-card .text-wrapper { display: flex; flex-direction: column; }
+    .action-card .text-wrapper h5 { margin: 0 0 0.15rem 0; font-weight: 700; color: #1e293b; font-size: 1rem; }
+    .action-card .text-wrapper p { margin: 0; color: #64748b; font-size: 0.8rem; line-height: 1.4; }
+    .message-box-modern { background:linear-gradient(135deg,#f0fdf4,#dcfce7); border:1px solid #bbf7d0; border-radius:1rem; padding:1.25rem 1.5rem; margin-bottom:1.5rem; }
+    .message-box-modern h4 { font-weight:800; color:#065f46; margin-bottom:0.5rem; }
+    .ended-toggle { display:flex; align-items:center; gap:0.5rem; font-size:0.88rem; color:#64748b; font-weight:600; }
+    .ended-toggle input { cursor:pointer; }
+    .loader-modern { display:flex; flex-direction:column; align-items:center; padding:3rem; color:#94a3b8; }
+    @media (max-width:768px) {
+      .run-table-modern thead { display:none !important; }
+      .run-table-modern,.run-table-modern tbody,.run-table-modern tr,.run-table-modern td { display:block !important; width:100% !important; }
+      .run-table-modern tr { margin-bottom:1rem !important; border-radius:1rem !important; box-shadow:0 4px 12px rgba(0,0,0,0.05) !important; padding:1rem !important; border:1px solid #f1f5f9 !important; }
+      .run-table-modern td { border:none !important; padding:0.5rem 0 !important; border-bottom:1px solid #f8fafc !important; display:flex !important; justify-content:space-between !important; align-items:center !important; }
+      .run-table-modern td::before { content:attr(data-content); font-weight:800; text-transform:uppercase; font-size:0.7rem; color:#94a3b8; }
+    }
 
-block location
-  a.breadcrumb-item(ng-click="go('/home')") Home
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
   a.breadcrumb-item(ng-click="go('/home/'+competitionId)") {{competition.name}}
   span.breadcrumb-item.active {{league.name}}
 
+block hero_title
+  | {{competition.name}}
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{competition.name}}
-      h2 {{league.name}}
-      .alert.alert-success(role='alert' ng-if="competition.message")
-        h4.alert-heading {{'common.message' | translate}}
-        p(ng-bind-html="competition.message")
-      br
-      button(ng-click="go('/simulation/' + competition._id + '/' + league.id + '/ranking')" class='btn btn-outline-danger btn-lg btn-block' style="margin-bottom:20px;" ng-show="rankingOpen[league.id]")
-        i.fas.fa-trophy.fa-3x(aria-hidden='true')
-        p [{{league.name}}]
-        p(style="font-size: 30px; margin:0;") {{'common.rank' | translate}}
+block hero_subtitle
+  | {{league.name}}
 
-      button(ng-click="go('/simulation/' + competition._id + '/' + league.id + '/technicalChallenge')" class='btn btn-outline-success btn-lg btn-block' style="margin-bottom:20px;" ng-if="isJudge == 1 && rankingMode[league.id] =='GAMES_DOCUMENT_CHALLENGE'")
-        i.fas.fa-edit.fa-3x(aria-hidden='true')
-        p(style="font-size: 30px; margin:0;") {{'technicalChallenge.technicalChallenge' | translate}}
+block main_content
+  .message-box-modern(ng-if="competition.message")
+    h4
+      i.fas.fa-bullhorn.mr-2
+      | {{'common.message' | translate}}
+    p(ng-bind-html="competition.message" style="margin:0;")
 
-      br
-      .refine
-        .card.border-dark.mb-3(style='width:100%;')
-          .card-header.bg-transparent.border-dark
-            i.fas.fa-2x.fa-search(aria-hidden='true') {{'maze.competition.refine.filter' | translate}}
-          .card-body.text-dark
-            h6.card-title {{'maze.competition.refine.round' | translate}}
-            span(ng-repeat='(key, value) in rounds track by key')
-              input(type='checkbox' ng-model='rounds[key]' id="checkR_{{key}}")
-              label.checkbox(for="checkR_{{key}}") {{key}}
-            hr
-            h6.card-title {{'maze.competition.refine.field' | translate}}
-            span(ng-repeat='(key, value) in fields track by key')
-              input(type='checkbox' ng-model='fields[key]' id="checkF_{{key}}")
-              label.checkbox(for="checkF_{{key}}") {{key}}
-            hr
-            h6.card-title {{'maze.competition.refine.team' | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-users(aria-hidden='true')
-              input.form-control(type='text', placeholder='Team name', aria-label='Username', ng-model='teamName')
-      hr
-      input#showEnd(type='checkbox' ng-model='show_ended' ng-change='update_list()')
-      label.checkbox(for='showEnd') {{'maze.competition.endedrun' | translate}}
-      br
-      center
-        .loader(ng-show="runs==null")
-          img(src="/images/loader2.gif")
-          p {{'common.loading' | translate}}
-      #compe
-          table(class="custom" style="margin-bottom:50px;")
+  .action-cards-container
+    .action-card.ranking-card(ng-show="rankingOpen[league.id]" ng-click="go('/simulation/' + competition._id + '/' + league.id + '/ranking')")
+      .icon-wrapper
+        i.fas.fa-trophy
+      .text-wrapper
+        h5 [{{league.name}}] {{'common.rank' | translate}}
+
+    .action-card.tech-card(ng-if="isJudge == 1 && rankingMode[league.id] =='GAMES_DOCUMENT_CHALLENGE'" ng-click="go('/simulation/' + competition._id + '/' + league.id + '/technicalChallenge')")
+      .icon-wrapper
+        i.fas.fa-file-signature
+      .text-wrapper
+        h5 {{'technicalChallenge.technicalChallenge' | translate}}
+
+  .modern-card
+    .modern-card-header
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-desktop
+          | {{'interview.runs' | translate}}
+        .btn-table-group
+          div.btn-table-action(ng-click="show_ended = !show_ended; update_list()" ng-class="show_ended ? 'active-green' : ''" uib-tooltip="{{'maze.competition.endedrun' | translate}}" tooltip-placement="top" tooltip-append-to-body="true")
+            i.fas.fa-flag-checkered
+          div.btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'maze.competition.refine.filter' | translate}}" tooltip-placement="top" tooltip-append-to-body="true")
+            i.fas.fa-filter
+
+    .filter-collapse(ng-show="showFilter" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 1.5rem;")
+      .row
+        .col-md-4
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{'maze.competition.refine.round' | translate}}
+          div
+            span.filter-badge(ng-repeat='(key, value) in rounds track by key' ng-class="{'active': rounds[key]}" ng-click="rounds[key] = !rounds[key]") {{key}}
+        .col-md-4
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{'maze.competition.refine.field' | translate}}
+          div
+            span.filter-badge(ng-repeat='(key, value) in fields track by key' ng-class="{'active': fields[key]}" ng-click="fields[key] = !fields[key]") {{key}}
+        .col-md-4
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{'maze.competition.refine.team' | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-users(aria-hidden='true')
+            input.form-control(type='text', placeholder="{{'maze.competition.refine.team' | translate}}", ng-model='teamName')
+    .modern-card-body
+      .loader-modern(ng-show="runs==null")
+        img(src="/images/loader2.gif")
+        p {{'common.loading' | translate}}
+      #compe(ng-show="runs!=null")
+        .table-responsive
+          table.run-table-modern
             thead
               tr
                 th {{'common.team' | translate}}
@@ -77,12 +138,19 @@ block content
                 th {{'common.field' | translate}}
                 th
             tbody
-              tr(ng-repeat='run in runs | filter:list_filter | orderBy:"[startTime,round.name,field.name,team.name]" ')
-                td(ng-bind='run.team.name' ng-class="{'end' : run.status>=3,'delay' : run.startTime<curTime}")
+              tr(ng-repeat='run in runs | filter:list_filter | orderBy:"[startTime,round.name,field.name,team.name]"')
+                td(ng-bind='run.team.name' ng-class="{'end' : run.status>=3,'delay' : run.startTime<curTime}" data-content="{{'common.team' | translate}}")
                 td(ng-bind='run.startTime | date:"dd EEE HH:mm"' data-content="{{'common.starttime' | translate}}")
                 td(ng-bind='run.round.name' data-content="{{'common.round' | translate}}")
                 td(ng-bind='run.field.name' data-content="{{'common.field' | translate}}")
-                td
-                  button(ng-if= "run.field != null" ng-click="go('/simulation/view/' + run._id)" class='btn btn-info' style="width:30%; margin-right:5px;") {{'common.view' | translate}}
-                  button(ng-if= "run.field == null" ng-click="go('/home/access_denied')" class='btn btn-info' style="width:30%; margin-right:5px;") {{'common.view' | translate}}
-                  button(ng-click="go_judge('/simulation/judge/' + run._id , run.team.name)" class='btn btn-danger' ng-if="run.status<2 && isJudge == 1"  style="width:30%;margin-right:5px;") {{'common.judge' | translate}}
+                td(data-content="Actions")
+                  .btn-table-group
+                    button.btn-run-action.btn-run-view(ng-if="run.field != null" ng-click="go('/simulation/view/' + run._id)")
+                      i.fas.fa-eye
+                      | {{'common.view' | translate}}
+                    button.btn-run-action.btn-run-view(ng-if="run.field == null" ng-click="go('/home/access_denied')")
+                      i.fas.fa-eye
+                      | {{'common.view' | translate}}
+                    button.btn-run-action.btn-run-judge(ng-click="go_judge('/simulation/judge/' + run._id , run.team.name)" ng-if="run.status<2 && isJudge == 1")
+                      i.fas.fa-gavel
+                      | {{'common.judge' | translate}}
