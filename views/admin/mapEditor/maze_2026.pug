@@ -158,10 +158,16 @@ block main_content
                     i.fas.fa-plus
 
       .d-flex.mb-3
-        .floor-switcher-vertical.d-flex.flex-column-reverse.p-2.bg-dark.border-right(style="min-width: 60px; border-top-left-radius: 8px; border-bottom-left-radius: 8px;")
-          button.btn.btn-sm.btn-outline-light.mb-2.w-100(type='button', ng-click='changeFloor(zz)', ng-repeat='zz in range(height)', ng-class='{active: zz == z}', style="font-weight: bold;") F{{zz}}
+        .floor-switcher-vertical.d-flex.flex-column.p-2.bg-dark.border-right(style="min-width: 60px; border-top-left-radius: 8px; border-bottom-left-radius: 8px;")
+          button.btn.btn-sm.btn-outline-light.mb-1.w-100(type='button', ng-click='undo()', uib-tooltip='Undo (Ctrl+Z)', ng-disabled="!canUndo()")
+            i.fas.fa-undo
+          button.btn.btn-sm.btn-outline-light.mb-3.w-100(type='button', ng-click='redo()', uib-tooltip='Redo (Ctrl+Y)', ng-disabled="!canRedo()")
+            i.fas.fa-redo
+          .flex-grow-1
           .text-center.text-light.pb-2.mb-2.border-bottom.border-secondary(title='{{"admin.mazeMapEditor.height" | translate}}', style="opacity: 0.8;")
             i.fas.fa-layer-group
+          .d-flex.flex-column-reverse
+            button.btn.btn-sm.btn-outline-light.mb-2.w-100(type='button', ng-click='changeFloor(zz)', ng-repeat='zz in range(height)', ng-class='{active: zz == z}', style="font-weight: bold;") F{{zz}}
         .modern-card.flex-grow-1.mb-0.overflow-hidden(style="border-top-left-radius: 0; border-bottom-left-radius: 0; border-left: none;")
           .modern-card-body.p-0
             .map-container(style="overflow-x: auto; border-top-left-radius: 0; border-bottom-left-radius: 0;")

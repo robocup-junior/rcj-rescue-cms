@@ -25,6 +25,91 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http', 
         showConfirmButton: false,
         timer: 3000
     });
+
+    // History (Undo/Redo) Management
+    let undoStack = [];
+    let redoStack = [];
+
+    $scope.saveHistory = function () {
+        if (undoStack.length > 50) {
+            undoStack.shift();
+        }
+        const state = {
+            cells: $scope.cells,
+            startTile: $scope.startTile,
+            width: $scope.width,
+            length: $scope.length,
+            height: $scope.height
+        };
+        undoStack.push(JSON.stringify(state));
+        redoStack = []; // Clear redo stack on new action
+    };
+
+    $scope.undo = function () {
+        if (undoStack.length === 0) return;
+        const currentState = {
+            cells: $scope.cells,
+            startTile: $scope.startTile,
+            width: $scope.width,
+            length: $scope.length,
+            height: $scope.height
+        };
+        redoStack.push(JSON.stringify(currentState));
+        const previousState = JSON.parse(undoStack.pop());
+        $scope.cells = previousState.cells;
+        $scope.startTile = previousState.startTile;
+        $scope.width = previousState.width;
+        $scope.length = previousState.length;
+        $scope.height = previousState.height;
+        $scope.recalculateLinear();
+        if (!$scope.$$phase) $scope.$apply();
+    };
+
+    $scope.redo = function () {
+        if (redoStack.length === 0) return;
+        const currentState = {
+            cells: $scope.cells,
+            startTile: $scope.startTile,
+            width: $scope.width,
+            length: $scope.length,
+            height: $scope.height
+        };
+        undoStack.push(JSON.stringify(currentState));
+        const nextState = JSON.parse(redoStack.pop());
+        $scope.cells = nextState.cells;
+        $scope.startTile = nextState.startTile;
+        $scope.width = nextState.width;
+        $scope.length = nextState.length;
+        $scope.height = nextState.height;
+        $scope.recalculateLinear();
+        if (!$scope.$$phase) $scope.$apply();
+    };
+
+    $scope.canUndo = function () {
+        return undoStack.length > 0;
+    };
+
+    $scope.canRedo = function () {
+        return redoStack.length > 0;
+    };
+
+    // Keyboard Shortcuts for Undo/Redo
+    window.addEventListener('keydown', function (e) {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+        const isZ = e.key === 'z' || e.key === 'Z';
+        const isY = e.key === 'y' || e.key === 'Y';
+        const isCmdOrCtrl = e.ctrlKey || e.metaKey;
+
+        if (isCmdOrCtrl && isZ && !e.shiftKey) {
+            e.preventDefault();
+            $scope.undo();
+        } else if (isCmdOrCtrl && (isY || (isZ && e.shiftKey))) {
+            e.preventDefault();
+            $scope.redo();
+        }
+    });
+
     $scope.pdfSettings = {
         noQR: true
     };
@@ -1081,6 +1166,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http', 
 
         // If wall 
         if (isWall) {
+            $scope.saveHistory();
             if (!cell) {
                 $scope.cells[x + ',' + y + ',' + z] = {
                     isWall: true,
@@ -1107,6 +1193,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http', 
                     }
                 };
             }
+            $scope.saveHistory();
             $scope.open(x, y, z);
         }
         $scope.recalculateLinear();
@@ -1192,6 +1279,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http', 
     }
 
     $scope.addColumn = function (gridX) {
+        $scope.saveHistory();
         shiftCells('x', gridX + 1, 2);
         $scope.width++;
         $scope.recalculateLinear();
@@ -1199,6 +1287,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http', 
 
     $scope.removeColumn = function (gridX) {
         if ($scope.width <= 1) return;
+        $scope.saveHistory();
 
         let newCells = {};
         for (let key in $scope.cells) {
@@ -1226,6 +1315,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http', 
     };
 
     $scope.addRow = function (gridY) {
+        $scope.saveHistory();
         shiftCells('y', gridY + 1, 2);
         $scope.length++;
         $scope.recalculateLinear();
@@ -1233,6 +1323,7 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http', 
 
     $scope.removeRow = function (gridY) {
         if ($scope.length <= 1) return;
+        $scope.saveHistory();
 
         let newCells = {};
         for (let key in $scope.cells) {
