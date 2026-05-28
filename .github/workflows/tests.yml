@@ -1,0 +1,20 @@
+name: Test Code Quality
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  code-style:
+    name: Check code style
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install dependencies
+        run: npm i
+
+      - name: Run eslint
+        run: npm run eslint
+
+      - name: Run prettier
+        run: npm run prettier

@@ -1,0 +1,6 @@
+# Ignore everything:
+/*
+
+# Except config and helper (for now):
+!/config
+!/helper
