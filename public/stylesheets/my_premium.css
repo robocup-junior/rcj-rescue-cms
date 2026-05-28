@@ -1,0 +1,345 @@
+:root {
+  --primary-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  --accent-color: #3b82f6;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --card-hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+body {
+  background-color: #f1f5f9;
+  font-family: 'Outfit', sans-serif;
+  color: #1e293b;
+}
+
+.premium-container, .comp-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .premium-container, .comp-container {
+    padding: 0 0.75rem;
+  }
+}
+
+.team-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 1rem;
+  background: rgba(255,255,255,0.1);
+  border-radius: 999px;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  color: white;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2.5rem;
+  padding: 2rem 0;
+  position: relative;
+  z-index: 10;
+}
+
+.comp-logo-area {
+    height: 180px;
+}
+
+.message-section {
+  margin-top: 4rem;
+  padding-bottom: 4rem;
+}
+
+.message-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.message-header h2 {
+  font-weight: 800;
+  font-size: 2rem;
+  margin: 0;
+}
+
+.message-header i {
+  font-size: 1.75rem;
+  color: #2e86de;
+}
+
+.message-list {
+  background: white;
+  border-radius: 1.5rem;
+  padding: 1rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  margin-bottom: 2rem;
+  border: 1px solid #f1f5f9;
+}
+
+.message-item {
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  transition: background 0.2s ease;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.message-item:last-child {
+  border-bottom: none;
+}
+
+.message-item:hover {
+  background: #f8fafc;
+}
+
+.message-info {
+  flex-grow: 1;
+}
+
+.message-subject {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+  color: #0f172a;
+}
+
+.message-date {
+  font-size: 0.875rem;
+  color: #94a3b8;
+}
+
+.message-arrow {
+  color: #cbd5e1;
+  transition: transform 0.2s ease;
+}
+
+.message-item:hover .message-arrow {
+  transform: translateX(5px);
+  color: var(--accent-color);
+}
+
+/* Modern Premium Modal - Futuristic Redesign */
+.premium-modal-wrapper {
+  font-family: "Outfit", sans-serif;
+  text-align: left;
+  color: #1e293b;
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+  background: #ffffff;
+  width: 100%;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.modal-header-section {
+  padding: 1rem 2rem;
+  background: #0f172a;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.modal-header-section::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+  z-index: 0;
+}
+
+.modal-icon-box {
+  width: 42px;
+  height: 42px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #60a5fa;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 1;
+}
+
+.modal-title-area {
+  flex-grow: 1;
+  z-index: 1;
+  padding-right: 4rem;
+}
+
+.modal-subject-text {
+  font-size: 1.55rem;
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 0.15rem;
+  letter-spacing: -0.02em;
+  color: #ffffff;
+  word-break: break-all;
+}
+
+.modal-meta-line {
+  display: flex;
+  gap: 1rem;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.modal-content-wrapper {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 2.5rem 3rem;
+  background: #ffffff;
+}
+
+.mail-body-text {
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: #334155;
+  font-family: 'Noto Sans KR', 'Outfit', sans-serif;
+  letter-spacing: 0.01em;
+  white-space: pre-wrap;
+}
+
+.btn-header-close {
+  position: absolute;
+  top: 1.25rem;
+  right: 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 1000;
+  font-size: 1.1rem;
+}
+
+.btn-header-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  transform: rotate(90deg);
+}
+
+.swal2-popup.premium-modal-popup-fix {
+  padding: 0 !important;
+  border-radius: 1.5rem !important;
+  overflow: hidden !important;
+  border: none !important;
+}
+
+.premium-modal-popup-fix .swal2-html-container {
+  padding: 0 !important;
+  margin: 0 !important;
+  text-align: left !important;
+  overflow: hidden !important;
+}
+
+.premium-modal-popup-fix .swal2-header,
+.premium-modal-popup-fix .swal2-title,
+.premium-modal-popup-fix .swal2-actions,
+.premium-modal-popup-fix .swal2-close {
+  display: none !important;
+}
+
+@media (max-width: 768px) {
+  .team-badge {
+    font-size: 1.1rem;
+    padding: 0.25rem 0.75rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+    padding: 1.5rem 0;
+  }
+
+  .comp-logo-area {
+      height: 140px;
+  }
+
+  .message-section {
+    margin-top: 2.5rem;
+  }
+
+  .message-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .message-item {
+    padding: 1rem;
+    border-radius: 0.75rem;
+  }
+
+  .message-subject {
+    font-size: 1rem;
+  }
+
+  /* Modal Mobile Refinement */
+  .premium-modal-wrapper {
+      height: 100vh;
+      border-radius: 0;
+  }
+
+  .modal-header-section {
+      padding: 1.5rem 1.25rem;
+  }
+
+  .modal-title-area {
+      padding-right: 2.5rem;
+  }
+
+  .modal-subject-text {
+      font-size: 1.25rem;
+  }
+
+  .modal-content-wrapper {
+      padding: 1.5rem 1.25rem;
+  }
+
+  .mail-body-text {
+      font-size: 1rem;
+      line-height: 1.6;
+  }
+
+  .btn-header-close {
+      top: 1rem;
+      right: 1rem;
+  }
+
+  .swal2-popup.premium-modal-popup-fix {
+      width: 100% !important;
+      height: 100% !important;
+      border-radius: 0 !important;
+  }
+}

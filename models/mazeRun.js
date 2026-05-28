@@ -67,7 +67,8 @@ const mazeRunSchema = new Schema({
   foundVictims: [
     {
       type: {type: String},
-      count: {type: Number, min: 0, default: 0}
+      count: {type: Number, min: 0, default: 0},
+      kits: {type: Number, min: 0, default: 0}
     }
   ],
   distKits: {type: Number, min:0, default: 0},

@@ -1,0 +1,108 @@
+//- -*- tab-width: 2 -*-
+extends ../includes/layout
+
+block vars
+  - var ngAppDef = 'DocumentResult'
+
+append scripts
+  script.
+    var competitionId = "#{id}"
+    var leagueId = "#{lid}"
+  script(src='/javascripts/document/result.js')
+  script(src='/components/exceljs/index.js')
+
+append css
+    style.
+      .scroll-table table {
+        display: block;
+        overflow-x: scroll;
+        -webkit-overflow-scrolling: touch;
+      }
+
+block location
+    a.breadcrumb-item(ng-click="go('/home')") Home
+    a.breadcrumb-item(ng-click="go('/admin')") Admin
+    a.breadcrumb-item(ng-click="go('/admin/' + competition._id)") {{competition.name}}
+    a.breadcrumb-item(ng-click="go('/admin/' + competition._id + '/documents')") Document settings
+    span.breadcrumb-item.active Results
+
+
+
+block content
+  .row
+    .col-12
+      h1 {{'document.result.title' | translate}} - {{competition.name}}
+      .refine
+        .card.border-dark.mb-3(style='width:100%;')
+          .card-header.bg-transparent.border-dark.fa-2x
+            .row 
+              .col-md-6
+                i.fas.fa-search(aria-hidden='true') &nbsp;
+                | {{'common.refine' | translate}}
+              .col-md-6(style="text-align:right;")
+                button.btn.btn-sm.btn-success(ng-click="downloadExcel()")
+                  i.fas.fa-file-excel &nbsp;
+                  | Export
+
+          .card-body.text-dark
+            h6.card-title {{"common.teamCode" | translate}}
+            .input-group
+              .input-group-prepend
+                span.input-group-text
+                  i.fas.fa-list-ol(aria-hidden='true')
+              input.form-control(type='text', placeholder='{{"common.teamCode" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineCode')
+            hr
+            h6.card-title {{"common.team" | translate}}
+            .input-group
+              .input-group-prepend
+                span.input-group-text
+                  i.fas.fa-users(aria-hidden='true')
+              input.form-control(type='text', placeholder='{{"common.team" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineName')
+            hr
+            h6.card-title {{"common.region" | translate}}
+            .input-group
+              .input-group-prepend
+                span.input-group-text
+                  i.fas.fa-globe-asia(aria-hidden='true')
+              input.form-control(type='text', placeholder='{{"common.region" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineRegion')
+            hr
+            h6.card-title {{"common.sort" | translate}}
+            div(style="margin:10px;")
+              button(ng-click="changeSort(b.blockId)" class='btn btn-sm' ng-class="activeSortKey == b.blockId ? 'btn-warning' : 'btn-outline-dark'" style="margin: 5px;" ng-repeat="b in teams[0].details track by $index" ng-bind="blockTitle[b.blockId]") 
+              button(ng-click="changeSort(-1)" class='btn btn-sm' ng-class="activeSortKey == -1 ? 'btn-warning' : 'btn-outline-dark'" style="margin: 5px;")
+                i.fas.fa-calculator &nbsp;
+                | {{"common.totalScore" | translate}}
+            
+      
+      .scroll-table
+        table.custom(style="margin-bottom:20px;")
+          thead
+              tr
+                th {{"common.teamCode" | translate}}
+                th {{"common.team" | translate}}
+                th {{"common.region" | translate}}
+                th {{"document.teamAdmin.penalty" | translate}}
+                th(ng-repeat="b in teams[0].details track by $index" ng-bind="blockTitle[b.blockId]" ng-style="{backgroundColor: activeSortKey == b.blockId ? '#f1c40f':'#3498db'}")
+                th(ng-style="{backgroundColor: activeSortKey == -1 ? '#f1c40f':'#e74c3c'}")
+                  i.fas.fa-calculator &nbsp;
+                  | {{"common.totalScore" | translate}}
+                
+          tbody
+              tr(ng-repeat-start='team in teams | filter:list_filter')
+                td(rowspan="2" ng-bind='team.teamCode')
+                td(rowspan="2" )
+                  a(ng-click="go('/document/reviewed/' + team._id + '?return=/admin/' + competitionId + '/documents/' + leagueId + '/results')" ng-bind='team.name' style="color: #006699;") 
+                td(rowspan="2" ng-bind='team.country')
+                td(rowspan="2") {{team.document.penalty}}%
+                td(ng-repeat="b in team.details" style="border-bottom: none;padding-bottom: 0;" ng-style="{backgroundColor: activeSortKey == b.blockId ? '#f6e58d':'#dff9fb'}")
+                  span {{b.score}}
+                td(rowspan="2" ng-if="team.details.length>0" ng-style="{backgroundColor: activeSortKey == -1 ? '#f6e58d':'#ff7979'}")
+                  i.fa.fa-chart-bar &nbsp; {{team.score}}
+              tr(ng-repeat-end)
+                td(ng-repeat="b in team.details" style="border-top: none;padding-top: 0;" ng-style="{backgroundColor: activeSortKey == b.blockId ? '#f6e58d':'#dff9fb'}")
+                  i.fa.fa-chart-bar(style="font-size: 10px;") &nbsp;{{b.normalizedScore}}
+                  br
+                  i.fas.fa-exclamation-triangle(style='margin-left:5px; color: #ffaa00;' ng-show="b.warning") &nbsp;
+                  i.fas.fa-user(style="font-size: 10px;") &nbsp;{{b.reviewerNum}}
+                    span(ng-show="b.reviewerNum != b.expectedReviewerNum") /{{b.expectedReviewerNum}}
+

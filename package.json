@@ -1,11 +1,10 @@
 {
   "name": "rcj-scoring",
-  "version": "26.0.0-alpha.0",
-  "copyright": "2016-2025 RoboCupJunior Rescue CMS Development SubCommittee",
+  "version": "26.0.0-alpha.11",
+  "copyright": "2016-2026 RoboCupJunior Rescue CMS Development SubCommittee",
   "private": true,
   "scripts": {
     "start": "node server.js",
-    "build": "workbox generateSW workbox-config.js",
     "minify": "grunt",
     "prettier": "prettier . --check",
     "prettier:fix": "prettier . --write",
@@ -14,6 +13,7 @@
   },
   "dependencies": {
     "@bull-board/express": "5.20.5",
+    "@napi-rs/canvas": "^0.1.100",
     "archiver": "7.0.1",
     "async": "3.2.5",
     "body-parser": "1.20.2",
@@ -73,8 +73,7 @@
     "grunt-contrib-uglify": "5.0.1",
     "grunt-image": "^6.4.0",
     "grunt-json-minification": "^0.2.1",
-    "prettier": "3.8.1",
-    "workbox-cli": "6.5.4"
+    "prettier": "^3.8.1"
   },
   "author": "",
   "license": "MIT"

@@ -1,0 +1,34 @@
+//- -*- tab-width: 2 -*-
+extends layout
+
+append css
+  block page_css
+  link(href='/stylesheets/common/modern_layout.css', rel='stylesheet')
+  link(href='/stylesheets/common/modern_components.css', rel='stylesheet')
+  link(href='/stylesheets/common/modern_list.css', rel='stylesheet')
+  link(href='/stylesheets/common/modern_modal.css', rel='stylesheet')
+
+block bread
+  //- Empty - breadcrumbs are moved inside the hero section in the modern layout
+
+block content
+  .maps-hero
+    .maps-container(class=heroContainerClass || "", style=heroContainerStyle || "")
+      nav.breadcrumb.premium-breadcrumb.hero-breadcrumb
+        block hero_breadcrumb
+      
+      .hero-content-wrapper
+        .hero-text
+          block hero_title_container
+            h1.hero-title
+              block hero_title
+          .hero-subtitle
+            block hero_subtitle
+        
+        .hero-actions
+          block hero_actions
+        
+        block hero_extra
+
+  .maps-container(class=contentContainerClass || "", style=contentContainerStyle || "")
+    block main_content

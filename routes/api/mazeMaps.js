@@ -1,4 +1,7 @@
 const express = require('express');
+const archiver = require('archiver');
+const fs = require('fs');
+const path = require('path');
 
 const publicRouter = express.Router();
 const privateRouter = express.Router();
@@ -8,8 +11,20 @@ const { ObjectId } = require('mongoose').Types;
 const logger = require('../../config/logger').mainLogger;
 const { mazeMap } = require('../../models/mazeMap');
 const scoreCalculator = require('../../helper/scoreCalculator');
+const mazeMapPDF = require('../../helper/mazeMapPDF');
+const scoreSheetPDFMaze2 = require('../../helper/scoreSheetPDFMaze2');
+const mazeSSR = require('../../helper/mazeSSR');
+const auth = require('../../helper/authLevels');
+const { ACCESSLEVELS } = require('../../models/user');
 
 publicRouter.get('/', getMazeMaps);
+publicRouter.get('/image/:mapid', getMapImage);
+publicRouter.post('/scoresheet', handlePublicScoreSheet);
+publicRouter.post('/competition-targets-pdf', handlePublicCompetitionTargets);
+publicRouter.post('/map-image-pdf', handlePublicMapImagePDF);
+publicRouter.post('/map-image-png', handlePublicMapImagePNG);
+
+adminRouter.get('/export', handleExport);
 
 function getMazeMaps(req, res) {
   const competition = req.query.competition || req.params.competition;
@@ -48,7 +63,7 @@ module.exports.getMazeMaps = getMazeMaps;
 
 adminRouter.post('/', function (req, res) {
   const map = req.body;
-  if (typeof(map) != "object") {
+  if (typeof (map) != "object") {
     res.status(400).send("Bad request");
     return;
   }
@@ -75,6 +90,7 @@ adminRouter.post('/', function (req, res) {
           red: cell.tile.red,
           ramp: cell.tile.ramp,
           steps: cell.tile.steps,
+          reachable: cell.tile.reachable,
           changeFloorTo: cell.tile.changeFloorTo,
         };
 
@@ -87,6 +103,15 @@ adminRouter.post('/', function (req, res) {
             floor: cell.tile.victims.floor
           };
         }
+
+        if (cell.tile.cognitiveTargets != null) {
+          tile.cognitiveTargets = {
+            top: cell.tile.cognitiveTargets.top,
+            right: cell.tile.cognitiveTargets.right,
+            bottom: cell.tile.cognitiveTargets.bottom,
+            left: cell.tile.cognitiveTargets.left
+          };
+        }
       }
 
       cells.push({
@@ -97,6 +122,8 @@ adminRouter.post('/', function (req, res) {
         isWall: cell.isWall,
         isLinear: cell.isLinear,
         halfWall: cell.halfWall,
+        ignoreWall: cell.ignoreWall,
+        virtualWall: cell.virtualWall,
         tile,
       });
     }
@@ -107,10 +134,12 @@ adminRouter.post('/', function (req, res) {
   const newMap = new mazeMap({
     competition: map.competition,
     parent: map.parent,
+    dice: map.dice,
     name: map.name,
     height: map.height,
     width: map.width,
     length: map.length,
+    duration: map.duration,
     leagueType: map.leagueType,
     cells,
     startTile: {
@@ -195,22 +224,22 @@ adminRouter.get('/:map/maxScore', async function (req, res, next) {
           ramp: true,
           steps: true,
           victims: {
-              top: true,
-              right: true,
-              left: true,
-              bottom: true,
-              floor: true
+            top: true,
+            right: true,
+            left: true,
+            bottom: true,
+            floor: true
           },
           rescueKits: {
-              top: 2,
-              right: 2,
-              bottom: 2,
-              left: 2,
-              floor: 2
+            top: 2,
+            right: 2,
+            bottom: 2,
+            left: 2,
+            floor: 2
           }
         }
       }));
-      
+
       res.status(200).send(
         scoreCalculator.calculateScore({
           competition: data.competition,
@@ -438,6 +467,244 @@ adminRouter.get('/name/:competitionid/:name', function (req, res, next) {
     )
     .select('_id');
 });
+
+
+
+
+async function handlePublicScoreSheet(req, res, next) {
+  const map = req.body;
+  if (!map || !map.cells) {
+    return res.status(400).send({
+      msg: 'Invalid map data',
+    });
+  }
+
+  // Convert cells from object map to array if necessary
+  if (!Array.isArray(map.cells)) {
+    const cells = [];
+    for (const i in map.cells) {
+      if (map.cells.hasOwnProperty(i)) {
+        const cell = map.cells[i];
+        if (isNaN(i)) {
+          const coords = i.split(',');
+          cell.x = parseInt(coords[0]);
+          cell.y = parseInt(coords[1]);
+          cell.z = parseInt(coords[2]);
+        }
+        cells.push(cell);
+      }
+    }
+    map.cells = cells;
+  }
+
+  const rule = req.body.rule || '2026';
+  await scoreSheetPDFMaze2.generateScoreSheetFromMap(res, map, rule);
+}
+
+function handlePublicCompetitionTargets(req, res, next) {
+  const map = req.body;
+  const paperSize = req.body.paperSize || 'A4';
+  const includeLetterVictims = req.body.includeLetterVictims === true;
+  const includeCognitiveTargets = req.body.includeCognitiveTargets !== false;
+
+  if (!map || !map.cells) {
+    return res.status(400).send({
+      msg: 'Invalid map data',
+    });
+  }
+
+  // Convert cells from object map to array if necessary
+  if (!Array.isArray(map.cells)) {
+    const cells = [];
+    for (const i in map.cells) {
+      if (map.cells.hasOwnProperty(i)) {
+        const cell = map.cells[i];
+        if (isNaN(i)) {
+          const coords = i.split(',');
+          cell.x = parseInt(coords[0]);
+          cell.y = parseInt(coords[1]);
+          cell.z = parseInt(coords[2]);
+        }
+        cells.push(cell);
+      }
+    }
+    map.cells = cells;
+  }
+
+  mazeMapPDF.generateAndSendPDF(res, map, paperSize, includeLetterVictims, includeCognitiveTargets);
+}
+
+async function handlePublicMapImagePDF(req, res, next) {
+  const map = req.body;
+  const paperSize = req.body.paperSize || 'A4';
+
+  if (!map || !map.cells) {
+    return res.status(400).send({
+      msg: 'Invalid map data',
+    });
+  }
+
+  // Convert cells from object map to array if necessary
+  if (!Array.isArray(map.cells)) {
+    const cells = [];
+    for (const i in map.cells) {
+      if (map.cells.hasOwnProperty(i)) {
+        const cell = map.cells[i];
+        if (isNaN(i)) {
+          const coords = i.split(',');
+          cell.x = parseInt(coords[0]);
+          cell.y = parseInt(coords[1]);
+          cell.z = parseInt(coords[2]);
+        }
+        cells.push(cell);
+      }
+    }
+    map.cells = cells;
+  }
+
+  await mazeMapPDF.generateAndSendBulkMapImagesPDF(
+    res,
+    [map],
+    map.competitionName || 'Competition',
+    map.leagueName || 'League',
+    paperSize
+  );
+}
+
+async function handlePublicMapImagePNG(req, res, next) {
+  const map = req.body;
+
+  if (!map || !map.cells) {
+    return res.status(400).send({
+      msg: 'Invalid map data',
+    });
+  }
+
+  // Convert cells from object map to array if necessary
+  if (!Array.isArray(map.cells)) {
+    const cells = [];
+    for (const i in map.cells) {
+      if (map.cells.hasOwnProperty(i)) {
+        const cell = map.cells[i];
+        if (isNaN(i)) {
+          const coords = i.split(',');
+          cell.x = parseInt(coords[0]);
+          cell.y = parseInt(coords[1]);
+          cell.z = parseInt(coords[2]);
+        }
+        cells.push(cell);
+      }
+    }
+    map.cells = cells;
+  }
+
+  const buffer = await mazeSSR.generatePNG(map, map.rule || '2026');
+  res.setHeader('Content-Type', 'image/png');
+  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(map.name || 'map')}.png"`);
+  res.send(buffer);
+}
+
+function getMapsFromRequest(req, callback) {
+  const competitionId = req.query.competition;
+  const leagueId = req.query.league;
+  const mapIds = req.query.ids ? req.query.ids.split(',') : (req.params.map ? [req.params.map] : null);
+
+  let mapQuery;
+  if (mapIds) {
+    mapQuery = mazeMap.find({ _id: { $in: mapIds.filter(ObjectId.isValid) } });
+  } else if (ObjectId.isValid(competitionId)) {
+    mapQuery = mazeMap.find({ competition: competitionId, league: leagueId });
+  } else {
+    return callback(new Error('Missing selection'), null);
+  }
+
+  mapQuery.populate('competition', 'name').lean().exec(callback);
+}
+
+function handleExport(req, res) {
+  const { type, format } = req.query;
+  const rule = req.query.rule || '2026';
+
+  getMapsFromRequest(req, async (err, maps) => {
+    if (err) {
+      return res.status(400).send({ msg: err.message });
+    }
+    if (!maps || maps.length === 0) {
+      return res.status(404).send({ msg: 'No maps found' });
+    }
+
+    const competitionId = maps[0].competition ? maps[0].competition._id : null;
+
+    if (!auth.authCompetition(req.user, competitionId, ACCESSLEVELS.ADMIN)) {
+      return res.status(401).send({
+        msg: 'You have no authority to access this api',
+      });
+    }
+
+    const competitionName = maps[0].competition ? maps[0].competition.name : 'Competition';
+    const leagueName = maps[0].league || 'League';
+
+    if (type === 'targets') {
+      const paperSize = req.query.paperSize || 'A4';
+      const includeLetterVictims = req.query.includeLetterVictims === 'true';
+      const includeCognitiveTargets = req.query.includeCognitiveTargets !== 'false';
+      return mazeMapPDF.generateAndSendBulkPDF(
+        res,
+        maps,
+        competitionName,
+        leagueName,
+        paperSize,
+        includeLetterVictims,
+        includeCognitiveTargets
+      );
+    }
+
+    if (type === 'scoresheets') {
+      return await scoreSheetPDFMaze2.generateScoreSheetsFromMaps(res, maps, rule, true);
+    }
+
+    if (type === 'maps') {
+      if (format === 'png') {
+        const archive = archiver('zip', { zlib: { level: 9 } });
+        res.attachment('maps.zip');
+        archive.pipe(res);
+        for (const map of maps) {
+          const buffer = await mazeSSR.generatePNG(map, rule);
+          archive.append(buffer, { name: `${map.name || map._id}.png` });
+        }
+        return archive.finalize();
+      }
+      const paperSize = req.query.paperSize || 'A4';
+      return mazeMapPDF.generateAndSendBulkMapImagesPDF(
+        res,
+        maps,
+        competitionName,
+        leagueName,
+        paperSize
+      );
+    }
+
+    res.status(400).send('Invalid export type');
+  });
+}
+
+function getMapImage(req, res) {
+  const mapid = req.params.mapid;
+  if (!ObjectId.isValid(mapid)) {
+    return res.status(400).send('Invalid map ID');
+  }
+
+  mazeMap.findById(mapid).lean().exec(async (err, map) => {
+    if (err || !map) {
+      return res.status(404).send('Map not found');
+    }
+    const buffer = await mazeSSR.generatePNG(map, req.query.rule || '2026');
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(map.name || mapid)}.png"`);
+    res.send(buffer);
+  });
+}
+
 
 publicRouter.all('*', function (req, res, next) {
   next();

@@ -729,7 +729,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
     },
   ]);
 
-  query.lean().exec(function (err, dbRuns) {
+  query.lean().exec(async function (err, dbRuns) {
     if (err) {
       logger.error(err);
       res.status(400).send({
@@ -739,7 +739,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
       dbRuns.map(run => {
         run.startTime += parseInt(offset)*60*1000;
       })
-      scoreSheetLinePDF2.generateScoreSheet(res, dbRuns);
+      await scoreSheetLinePDF2.generateScoreSheet(res, dbRuns);
     }
   });
 });

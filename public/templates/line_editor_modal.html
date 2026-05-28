@@ -1,63 +1,169 @@
-<div class="modal-header">
-    <h3 class="modal-title">{{"admin.lineMapEditor.item" | translate}}</h3>
+<div class="modal-header premium-modal-header">
+    <h3 class="modal-title">
+        <i class="fas fa-layer-group"></i>
+        {{"admin.lineMapEditor.properties" | translate}}
+    </h3>
 </div>
-<div class="modal-body">
-    <ul>
-        <li>
-            <label>{{"admin.lineMapEditor.bump" | translate}}</label>
-            <div ng-hide="tile.checkPoint">
-                <a href="#" ng-click="tile.items.speedbumps>0?tile.items.speedbumps=tile.items.speedbumps-1:0">-</a> {{tile.items.speedbumps}}
-                <a href="#" ng-click="tile.items.speedbumps=tile.items.speedbumps+1">+</a>
-            </div>
-            <div ng-show="tile.checkPoint">
-                <span style="color:red">{{"admin.lineMapEditor.cantset" | translate}}</span>
-            </div>
-
-        </li>
-        <li>
-            <label>{{"admin.lineMapEditor.obstacle" | translate}}</label>
-            <div ng-hide="tile.checkPoint">
-                <a href="#" ng-click="tile.items.obstacles>0?tile.items.obstacles=tile.items.obstacles-1:0">-</a> {{tile.items.obstacles}}
-                <a href="#" ng-click="tile.items.obstacles=tile.items.obstacles+1">+</a>
-            </div>
-            <div ng-show="tile.checkPoint">
-                <span style="color:red">{{"admin.lineMapEditor.cantset" | translate}}</span>
-            </div>
-
-        </li>
-    </ul>
-    <div ng-hide="tile.checkPoint">
-        <input type="checkbox" ng-model="tile.items.rampPoints" id="isRampPoints"><label class="checkbox" for="isRampPoints"> {{"admin.lineMapEditor.rampPoint" | translate}}</label>
+<div class="premium-modal-body">
+    <!-- Combined Section: Tile Properties -->
+    <div class="modal-section-title">
+        <i class="fas fa-cog"></i>
+        {{"admin.lineMapEditor.properties" | translate}}
     </div>
-    <div ng-show="tile.checkPoint">
-        <label>{{"admin.lineMapEditor.rampPoint" | translate}}</label>
-        <span style="color:red">{{"admin.lineMapEditor.cantset" | translate}}</span>
+    <div class="settings-card-grid">
+        <!-- Speedbumps -->
+        <div class="settings-group card-mode">
+            <label class="settings-label">
+                <i class="fas fa-braille mr-1"></i>
+                {{"admin.lineMapEditor.bump" | translate}}
+            </label>
+            <div ng-hide="tile.checkPoint" class="dimension-spinner">
+                <button class="btn-spin" type="button" ng-click="tile.items.speedbumps > 0 ? tile.items.speedbumps = tile.items.speedbumps - 1 : 0">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <input class="spinner-input" type="number" ng-model="tile.items.speedbumps" min="0">
+                <button class="btn-spin" type="button" ng-click="tile.items.speedbumps = tile.items.speedbumps + 1">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div ng-show="tile.checkPoint" class="alert alert-soft-warning py-1 small mb-0">
+                {{"admin.lineMapEditor.cantset" | translate}}
+            </div>
+        </div>
+
+        <!-- Obstacles -->
+        <div class="settings-group card-mode">
+            <label class="settings-label">
+                <i class="fas fa-cube mr-1"></i>
+                {{"admin.lineMapEditor.obstacle" | translate}}
+            </label>
+            <div ng-hide="tile.checkPoint" class="dimension-spinner">
+                <button class="btn-spin" type="button" ng-click="tile.items.obstacles > 0 ? tile.items.obstacles = tile.items.obstacles - 1 : 0">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <input class="spinner-input" type="number" ng-model="tile.items.obstacles" min="0">
+                <button class="btn-spin" type="button" ng-click="tile.items.obstacles = tile.items.obstacles + 1">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div ng-show="tile.checkPoint" class="alert alert-soft-warning py-1 small mb-0">
+                {{"admin.lineMapEditor.cantset" | translate}}
+            </div>
+        </div>
+
+        <!-- Checkbox Properties Grid -->
+        <div class="settings-group full-width mb-0">
+            <div class="row">
+                <!-- Ramp Bonus -->
+                <div class="col-md-6 mb-2">
+                    <label class="settings-checkbox-container" ng-class="{'active': tile.items.rampPoints, 'disabled': tile.checkPoint}" for="isRampPoints">
+                        <input type="checkbox" ng-model="tile.items.rampPoints" id="isRampPoints" ng-disabled="tile.checkPoint">
+                        <span class="label-text">{{"admin.lineMapEditor.rampPoint" | translate}}</span>
+                        <i class="fas fa-mountain ml-auto text-muted"></i>
+                    </label>
+                </div>
+                <!-- Checkpoint -->
+                <div class="col-md-6 mb-2">
+                    <label class="settings-checkbox-container" ng-class="{'active': tile.checkPoint}" for="isCheckpoint" ng-hide="tile.items.speedbumps > 0 || tile.items.obstacles || tile.items.rampPoints || tile.tileType.gaps || tile.tileType.intersections || tile.tileType.seesaw">
+                        <input type="checkbox" ng-model="tile.checkPoint" id="isCheckpoint">
+                        <span class="label-text">{{"admin.lineMapEditor.checkpoint" | translate}}</span>
+                        <i class="fas fa-flag ml-auto text-muted"></i>
+                    </label>
+                </div>
+                <!-- Course Start -->
+                <div class="col-md-6 mb-0">
+                    <label class="settings-checkbox-container" ng-class="{'active': tile.start}" for="isStartCheck">
+                        <input type="checkbox" ng-model="tile.start" id="isStartCheck">
+                        <span class="label-text">{{"admin.lineMapEditor.courseStart" | translate}}</span>
+                        <i class="fas fa-play ml-auto text-success"></i>
+                    </label>
+                </div>
+                <!-- Restart after Evac -->
+                <div class="col-md-6 mb-0">
+                    <label class="settings-checkbox-container" ng-class="{'active': tile.start2}" for="isStartCheck2">
+                        <input type="checkbox" ng-model="tile.start2" id="isStartCheck2">
+                        <span class="label-text">{{"admin.lineMapEditor.evacRestart" | translate}}</span>
+                        <i class="fas fa-redo-alt ml-auto text-info"></i>
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
-    <hr>
-    <div ng-hide="tile.items.speedbumps>0 || tile.items.obstacles || tile.items.rampPoints || tile.tileType.gaps|| tile.tileType.intersections || tile.tileType.seesaw">
-        <input type="checkbox" ng-model="tile.checkPoint" id="isCheckpoint"><label class="checkbox" for="isCheckpoint"> {{"admin.lineMapEditor.setCheckpoint" | translate}}</label>
+
+    <!-- Section: Transitions (Simulator) -->
+    <div class="modal-section-title">
+        <i class="fas fa-cube"></i>
+        {{"admin.lineMapEditor.simulator3d" | translate}}
     </div>
-    <input type="checkbox" ng-model="tile.start" id="isStartCheck"><label class="checkbox" for="isStartCheck"> {{"admin.lineMapEditor.start" | translate}}</label>
-    <input type="checkbox" ng-model="tile.start2" id="isStartCheck2"><label class="checkbox" for="isStartCheck2"> {{"admin.lineMapEditor.start2" | translate}}</label>
-    
-    
+    <div class="modern-simulator-container">
+        <div class="simulator-header">
+            <div class="simulator-legend">
+                <div class="badge-legend up">
+                    <i class="fas fa-level-up-alt"></i>
+                    {{"admin.lineMapEditor.ascend" | translate}} (F+1)
+                </div>
+                <div class="badge-legend down">
+                    <i class="fas fa-level-down-alt"></i>
+                    {{"admin.lineMapEditor.descend" | translate}} (F-1)
+                </div>
+                <div class="badge-legend info">
+                    <i class="fas fa-mouse-pointer"></i>
+                    {{"admin.lineMapEditor.clickToCycle" | translate}}
+                </div>
+            </div>
+        </div>
 
-    <h5>{{"admin.lineMapEditor.down" | translate}}</h5>
-    <input type="radio" ng-model="tile.levelDown" value="top" id="isDownTop"><label class="radio" for="isDownTop">{{"admin.lineMapEditor.top" | translate}}</label> <br>
-    <input type="radio" ng-model="tile.levelDown" value="bottom" id="isDownBottom"><label class="radio" for="isDownBottom">{{"admin.lineMapEditor.bottom" | translate}}</label> <br>
-    <input type="radio" ng-model="tile.levelDown" value="left" id="isDownLeft"><label class="radio" for="isDownLeft">{{"admin.lineMapEditor.left" | translate}}</label> <br>
-    <input type="radio" ng-model="tile.levelDown" value="right" id="isDownRight"><label class="radio" for="isDownRight">{{"admin.lineMapEditor.right" | translate}}</label> <br>
-    <input type="radio" ng-model="tile.levelDown" ng-click="tile.levelDown = undefined" id="isDownNothing"><label class="radio" for="isDownNothing">{{"admin.lineMapEditor.nothing" | translate}}</label> <br>
-
-    <h5>{{"admin.lineMapEditor.up" | translate}}</h5>
-    <input type="radio" ng-model="tile.levelUp" value="top" id="isUpTop"><label class="radio" for="isUpTop">{{"admin.lineMapEditor.top" | translate}}</label> <br>
-    <input type="radio" ng-model="tile.levelUp" value="bottom" id="isUpBottom"><label class="radio" for="isUpBottom">{{"admin.lineMapEditor.bottom" | translate}}</label> <br>
-    <input type="radio" ng-model="tile.levelUp" value="left" id="isUpLeft"><label class="radio" for="isUpLeft">{{"admin.lineMapEditor.left" | translate}}</label> <br>
-    <input type="radio" ng-model="tile.levelUp" value="right" id="isUpRight"><label class="radio" for="isUpRight">{{"admin.lineMapEditor.right" | translate}}</label> <br>
-    <input type="radio" ng-model="tile.levelUp" ng-click="tile.levelUp = undefined" id="isUpNothing"><label class="radio" for="isUpNothing">{{"admin.lineMapEditor.nothing" | translate}}</label> <br>
-
+        <div class="simulator-3d-stage">
+            <div class="simulator-grid">
+                <!-- Row 1 -->
+                <div class="sim-tile-cell"></div>
+                <div class="sim-tile-cell">
+                    <div class="sim-tile-new" ng-class="{'is-up': tile.levelUp == 'top', 'is-down': tile.levelDown == 'top'}" ng-click="cycleTileLevel('top')">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>F{{tile.levelUp == 'top' ? z+1 : (tile.levelDown == 'top' ? z-1 : z)}}</span>
+                    </div>
+                </div>
+                <div class="sim-tile-cell"></div>
+                
+                <!-- Row 2 -->
+                <div class="sim-tile-cell">
+                    <div class="sim-tile-new" ng-class="{'is-up': tile.levelUp == 'left', 'is-down': tile.levelDown == 'left'}" ng-click="cycleTileLevel('left')">
+                        <i class="fas fa-arrow-left"></i>
+                        <span>F{{tile.levelUp == 'left' ? z+1 : (tile.levelDown == 'left' ? z-1 : z)}}</span>
+                    </div>
+                </div>
+                <div class="sim-tile-cell">
+                    <div class="sim-tile-new center">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>F{{z}}</span>
+                    </div>
+                </div>
+                <div class="sim-tile-cell">
+                    <div class="sim-tile-new" ng-class="{'is-up': tile.levelUp == 'right', 'is-down': tile.levelDown == 'right'}" ng-click="cycleTileLevel('right')">
+                        <i class="fas fa-arrow-right"></i>
+                        <span>F{{tile.levelUp == 'right' ? z+1 : (tile.levelDown == 'right' ? z-1 : z)}}</span>
+                    </div>
+                </div>
+                
+                <!-- Row 3 -->
+                <div class="sim-tile-cell"></div>
+                <div class="sim-tile-cell">
+                    <div class="sim-tile-new" ng-class="{'is-up': tile.levelUp == 'bottom', 'is-down': tile.levelDown == 'bottom'}" ng-click="cycleTileLevel('bottom')">
+                        <i class="fas fa-arrow-down"></i>
+                        <span>F{{tile.levelUp == 'bottom' ? z+1 : (tile.levelDown == 'bottom' ? z-1 : z)}}</span>
+                    </div>
+                </div>
+                <div class="sim-tile-cell"></div>
+            </div>
+        </div>
+    </div>
 </div>
-<div class="modal-footer">
-    <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
-    <!--  <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>-->
+<div class="modal-footer premium-modal-footer">
+    <button class="btn-cancel-action" type="button" ng-click="$dismiss()">
+        {{"common.cancel" | translate}}
+    </button>
+    <button class="btn-print-action" type="button" ng-click="ok()">
+        <i class="fas fa-check mr-2"></i>
+        {{"common.save" | translate}}
+    </button>
 </div>

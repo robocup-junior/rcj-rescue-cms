@@ -1,63 +1,102 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
-    - var ngAppDef = 'Scanner'
+  - var ngAppDef = 'Scanner'
+  - var ngInit = "mode = '" + mode + "'"
 
 append scripts
-    script.
-      var mode = "#{mode}"
-    script(src='/javascripts/scanner.js')
+  script.
+    var mode = "#{mode}"
+  script(src='/javascripts/scanner.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    span.breadcrumb-item.active Scanner
+block page_css
+  link(href='/stylesheets/scanner_modern.css', rel='stylesheet')
+  style.
+    html { scroll-behavior: auto !important; }
+    .maps-hero.ng-hide { display: none !important; }
 
-block content
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  span.breadcrumb-item.active Scanner
+
+block hero_title
+  span(ng-if="!mode")
     if mode == "home"
-        .row
-            .col-md-1
-            .col-md-10(style="text-align:center;")
-                h2 {{'scanner.selectMode' | translate}}
-                .row.row-height(style="display: flex;justify-content: space-between;")
-                    .col-md-6(style="margin-bottom:20px;")
-                        .card(ng-click="go('/home/scanner/input')" style="width:100%;height:100%;text-align:center;")
-                            img.card-img-top(ng-src="/images/inputter.png", alt='' style="max-height:300px;width:100%;object-fit: contain;")
-                            .card-body
-                                h3(style="text-align:center" ng-cloak) {{'scanner.input' | translate}}
-                    .col-md-6(style="margin-bottom:20px;")
-                        .card(ng-click="go('/home/scanner/check')" style="width:100%;height:100%;text-align:center;")
-                            img.card-img-top(ng-src="/images/checker.png", alt='' style="max-height:300px;width:100%;object-fit: contain;")
-                            .card-body
-                                h3(style="text-align:center" ng-cloak) {{'scanner.check' | translate}}
-    else if mode == "admin"
-        .row(ng-hide="entered")
-            .col-md-1
-            .col-md-10(style="text-align:center;")
-                h2 {{'scanner.description' | translate}}
-                input.form-control#first(type='text', placeholder='', ng-model='data',ng-keydown="handleKeydown($event)")
-                img(src="/images/barcode.png" style="")
-                h2 [{{'scanner.mode' | translate}}] #{mode}
-        .row(ng-show="entered")
-            .col-md-1
-            .col-md-10(style="text-align:center;")
-                h2 {{'scanner.selectMode' | translate}}
-                .row.row-height(style="display: flex;justify-content: space-between;")
-                    .col-md-6(style="margin-bottom:20px;")
-                        .card(ng-click="adminGo('input')" style="width:100%;height:100%;text-align:center;")
-                            img.card-img-top(ng-src="/images/inputter.png", alt='' style="max-height:300px;width:100%;object-fit: contain;")
-                            .card-body
-                                h3(style="text-align:center" ng-cloak) {{'scanner.input' | translate}}
-                    .col-md-6(style="margin-bottom:20px;")
-                        .card(ng-click="adminGo('check')" style="width:100%;height:100%;text-align:center;")
-                            img.card-img-top(ng-src="/images/checker.png", alt='' style="max-height:300px;width:100%;object-fit: contain;")
-                            .card-body
-                                h3(style="text-align:center" ng-cloak) {{'scanner.check' | translate}}
+      | {{'scanner.selectMode' | translate}}
     else
-        .row
-            .col-md-1
-            .col-md-10(style="text-align:center;")
-                h2 {{'scanner.description' | translate}}
-                input.form-control#first(type='text', placeholder='', ng-model='data',ng-keydown="handleKeydown($event)")
-                img(src="/images/barcode.png" style="")
-                h2 [{{'scanner.mode' | translate}}] #{mode}
+      | {{'scanner.mode' | translate}}: #{mode}
+  span(ng-if="mode == 'home' || (mode == 'admin' && !entered)", ng-cloak) {{'scanner.selectMode' | translate}}
+  span(ng-if="mode != 'home' && (mode != 'admin' || entered)", ng-cloak) {{'scanner.mode' | translate}}: {{mode}}
+
+block hero_subtitle
+  | {{'scanner.description' | translate}}
+
+block main_content
+  .scanner-container
+    //- Home Selection
+    div(ng-show="mode == 'home' || (!mode && '#{mode}' == 'home')")
+      .mode-selection-grid
+        .mode-card(ng-click="go('/home/scanner/input')")
+          .mode-icon-wrapper
+            i.fas.fa-file-signature
+          .mode-title {{'scanner.input' | translate}}
+          .mode-description Input scores from paper sheets
+          
+        .mode-card(ng-click="go('/home/scanner/check')")
+          .mode-icon-wrapper
+            i.fas.fa-clipboard-check
+          .mode-title {{'scanner.check' | translate}}
+          .mode-description Verify and check recorded scores
+
+    //- Admin Mode
+    div(ng-show="mode == 'admin' || (!mode && '#{mode}' == 'admin')")
+      div(ng-hide="entered")
+        .scan-box.active
+          .qr-scanner-visual
+            .scanner-laser
+            .qr-corner.top-left
+            .qr-corner.top-right
+            .qr-corner.bottom-left
+            .qr-pattern
+          
+          h2.font-weight-bold {{'scanner.description' | translate}}
+          input.form-control.scanner-input-field#first(type='text', placeholder='READY TO SCAN QR', ng-model='data', ng-keydown="handleKeydown($event)", autofocus)
+          .scanner-status-text WAITING FOR QR CODE...
+          p.text-muted.mt-4.small Mode: {{mode || '#{mode}'}}
+          
+      div(ng-show="entered")
+        .mode-selection-grid
+          .mode-card(ng-click="adminGo('input')")
+            .mode-icon-wrapper
+              i.fas.fa-file-signature
+            .mode-title {{'scanner.input' | translate}}
+            .mode-description Admin input mode
+            
+          .mode-card(ng-click="adminGo('check')")
+            .mode-icon-wrapper
+              i.fas.fa-clipboard-check
+            .mode-title {{'scanner.check' | translate}}
+            .mode-description Admin verify mode
+
+    //- Specific Scan Modes (input/check)
+    div(ng-show="(mode != 'home' && mode != 'admin' && mode) || (!mode && '#{mode}' != 'home' && '#{mode}' != 'admin')")
+      .scan-box.active
+        .qr-scanner-visual
+          .scanner-laser
+          .qr-corner.top-left
+          .qr-corner.top-right
+          .qr-corner.bottom-left
+          .qr-pattern
+        
+        h2.font-weight-bold {{'scanner.description' | translate}}
+        input.form-control.scanner-input-field#first(type='text', placeholder='READY TO SCAN QR', ng-model='data', ng-keydown="handleKeydown($event)", autofocus)
+        .scanner-status-text WAITING FOR QR CODE...
+        p.text-muted.mt-4.small Mode: {{mode || '#{mode}'}}
+        
+        .mt-5.text-center
+          button.btn.btn-outline-secondary.rounded-pill.px-4(ng-click="go('/home/scanner/home')")
+            i.fas.fa-arrow-left.mr-2
+            | Back to Selection

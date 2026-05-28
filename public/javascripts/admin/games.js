@@ -1,6 +1,9 @@
 var socket;
 var app = angular.module("RunAdmin", ['ngTouch','ngAnimate', 'ui.bootstrap', 'ui.bootstrap.datetimepicker', 'pascalprecht.translate', 'ngCookies', 'ngFileUpload']);
-app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'Upload', function ($scope, $http, $log, $location, Upload) {
+app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'Upload', '$uibModal', function ($scope, $http, $log, $location, Upload, $uibModal) {
+        $scope.runsReadFinished = false;
+        $scope.showAddRun = false;
+        $scope.showFilter = false;
         $scope.competitionId = competitionId
         $scope.showTeam = true;
 
@@ -104,6 +107,14 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
                 console.log(error)
                 swal("Oops!", error.data.err, "error");
             })
+        }
+
+        $scope.allChecked = false;
+        $scope.toggleAll = function () {
+            $scope.allChecked = !$scope.allChecked;
+            angular.forEach($scope.runs, function (run) {
+                if($scope.list_filter(run)) run.checked = $scope.allChecked;
+            });
         }
 
         $scope.selectAll = function () {
@@ -309,6 +320,7 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
                     $scope.Rrounds = objectSort(rounds)
                     $scope.Rfields = objectSort(fields)
                 }
+                $scope.runsReadFinished = true;
                 $('.loader').remove();
             })
         }
@@ -377,8 +389,12 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
 
         $scope.format = "yyyy-MM-dd"
 
+        $scope.startDateOptions = {
+            showWeeks: false
+        };
 
         var start = new Date(Date.now() + 1000 * 60 * 5)
+
         start.setMinutes(start.getMinutes() - start.getMinutes() % 5)
         start.setSeconds(0)
         start.setMilliseconds(0)
@@ -438,6 +454,33 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
         };
 
 
+        $scope.openScoreSheetModal = function () {
+          var modalInstance = $uibModal.open({
+            templateUrl: 'scoreSheetModal.html',
+            controller: 'ScoreSheetModalController',
+            size: 'md',
+            resolve: {
+              data: function () {
+                return {
+                  competitionId: $scope.competitionId,
+                  league: $scope.league,
+                  scoreSheetStartDateTime: $scope.scoreSheetStartDateTime,
+                  scoreSheetEndDateTime: $scope.scoreSheetEndDateTime,
+                  startDateOptions: $scope.startDateOptions
+                };
+              }
+            }
+          });
+
+          modalInstance.result.then(function (result) {
+            $scope.scoreSheetStartDateTime = result.start;
+            $scope.scoreSheetEndDateTime = result.end;
+            $scope.go_scoreSheetInTimeRange2();
+          }, function () {
+            // Cancelled
+          });
+        };
+
         $scope.go_scoreSheetInTimeRange2 = function () {
           window.open(`/api/runs/${$scope.league.type}/scoresheet2?competition=${$scope.competitionId}&startTime=${$scope.scoreSheetStartDateTime.getTime()}&endTime=${ $scope.scoreSheetEndDateTime.getTime()}&offset=${timeOffset}`, "_blank")
         };
@@ -458,6 +501,39 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
             }
         }
     }]);
+
+app.controller('ScoreSheetModalController', ['$scope', '$uibModalInstance', 'data', function ($scope, $uibModalInstance, data) {
+  $scope.competitionId = data.competitionId;
+  $scope.league = data.league;
+  $scope.scoreSheetStartDateTime = data.scoreSheetStartDateTime;
+  $scope.scoreSheetEndDateTime = data.scoreSheetEndDateTime;
+  $scope.startDateOptions = data.startDateOptions;
+
+  $scope.scoreSheetStartDatePopup = {
+    opened: false
+  }
+  $scope.openScoreSheetStartDate = function () {
+    $scope.scoreSheetStartDatePopup.opened = true
+  }
+
+  $scope.scoreSheetEndDatePopup = {
+    opened: false
+  }
+  $scope.openScoreSheetEndDate = function () {
+    $scope.scoreSheetEndDatePopup.opened = true
+  };
+
+  $scope.ok = function () {
+    $uibModalInstance.close({
+      start: $scope.scoreSheetStartDateTime,
+      end: $scope.scoreSheetEndDateTime
+    });
+  };
+
+  $scope.cancel = function () {
+    $uibModalInstance.dismiss('cancel');
+  };
+}]);
 
 
 $(window).on('beforeunload', function () {

@@ -1,0 +1,69 @@
+#loginModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='loginModalLabel' aria-hidden='true')
+    .modal-dialog.modal-dialog-centered(role='document')
+        .modal-content.premium-modal-content
+            .modal-header.border-0
+                button.close(type='button' data-dismiss='modal' aria-label='Close')
+                    span(aria-hidden='true') &times;
+            .modal-body.px-5.pb-5
+                .text-center.mb-4
+                    img.mb-3(src='/images/logo.png' alt='Logo' style='width: 80px;')
+                    h2.modal-title.font-weight-bold {{"login.title" | translate}}
+                    p.text-muted {{"login.description" | translate}}
+                
+                #modalLoginError.alert.alert-danger.mb-4(style='display: none; border-radius: 8px;')
+                    i.fas.fa-exclamation-circle.mr-2
+                    | {{"login.failed" | translate}}
+                
+                form#modalLoginForm
+                    .form-group.mb-4
+                        .input-group.premium-input-group
+                            .input-group-prepend
+                                span.input-group-text
+                                    i.fas.fa-user
+                            input#modalUsername.form-control(type='text' placeholder='Username' required)
+                    
+                    .form-group.mb-4
+                        .input-group.premium-input-group
+                            .input-group-prepend
+                                span.input-group-text
+                                    i.fas.fa-key
+                            input#modalPassword.form-control(type='password' placeholder='Password' required)
+                    
+                    button.btn.btn-premium.btn-block.btn-lg.py-3(type='submit')
+                        i.fas.fa-sign-in-alt.mr-2
+                        span.login-text {{"login.login" | translate}}
+
+span#translateLogin(style='display:none') {{"login.login" | translate}}
+
+script.
+    $(document).ready(function() {
+        $('#modalLoginForm').on('submit', function(e) {
+            e.preventDefault();
+            const username = $('#modalUsername').val();
+            const password = $('#modalPassword').val();
+            const $btn = $(this).find('button[type="submit"]');
+            const $text = $btn.find('.login-text');
+            const originalText = $('#translateLogin').text() || 'Login';
+            
+            $btn.prop('disabled', true);
+            $text.html('<i class="fas fa-spinner fa-spin mr-2"></i> Processing...');
+            
+            $.post('/api/auth/login', { username, password })
+                .done(function() {
+                    window.location.reload();
+                })
+                .fail(function() {
+                    $('#modalLoginError').fadeIn();
+                    $btn.prop('disabled', false);
+                    $text.text(originalText);
+                    // Shake effect for error
+                    $('.premium-modal-content').addClass('shake');
+                    setTimeout(() => $('.premium-modal-content').removeClass('shake'), 500);
+                });
+        });
+        
+        // Clear error when typing
+        $('#modalUsername, #modalPassword').on('input', function() {
+            $('#modalLoginError').fadeOut();
+        });
+    });

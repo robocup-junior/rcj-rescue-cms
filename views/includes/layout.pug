@@ -5,17 +5,19 @@ doctype html
 block vars
 html(style='height:100%; overflow-y:scroll;' ng-app=ngAppDef ng-init=ngInit)
     include ./head
-    body(ng-controller=ngAppDef+'Controller')
+    body(ng-controller=ngAppDef+'Controller', style='display: flex; flex-direction: column; min-height: 100vh;')
         block navbar
             include ./navbar
-        .container-fluid(style='overflow: hidden;min-height: calc(100vh - 82px);')
+        .container-fluid(style='overflow: hidden; flex-grow: 1;')
             block bread
                 .row
                     .col-md-1
                     .col-md-10
-                        nav.breadcrumb
+                        nav.breadcrumb.premium-breadcrumb
                             block location
                 br
             block content
         block footer
             include ./footer
+        include ./login_modal
+        include ./language_modal

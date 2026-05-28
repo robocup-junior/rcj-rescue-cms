@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'CompetitionAdmin'
@@ -9,102 +9,120 @@ append scripts
     var competitionId = "#{id}"
   script(src='/javascripts/admin/competition.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    span.breadcrumb-item.active {{competition.name}}
+block hero_breadcrumb
+  li.breadcrumb-item
+    a(ng-click="go('/home')") Home
+  li.breadcrumb-item
+    a(ng-click="go('/admin')") Admin
+  li.breadcrumb-item.active(aria-current="page") {{competition.name}}
 
+block hero_title_container
+  h1.comp-name-title(style="font-size: 3.2rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 0.5rem; color: rgba(255,255,255,0.95);") {{competition.name}}
 
-block content
+block hero_subtitle
+  .admin-indicator(style="display: flex; align-items: center; gap: 1rem; opacity: 0.6;")
+    .divider(style="height: 1px; width: 30px; background: rgba(255,255,255,0.3);")
+    span(style="color: white; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.25em; display: flex; align-items: center;")
+      i.fas.fa-shield-alt.mr-2(style="color: #60a5fa; opacity: 0.8;")
+      | {{'admin.competition.title' | translate}}
+
+block hero_extra
+  .comp-message-box(ng-if="competition.message" style="max-width: 800px; margin-top: 1.5rem; padding: 1.25rem; background: rgba(255,255,255,0.05); border-radius: 1rem; border: 1px solid rgba(255,255,255,0.1);")
+    h4(style="font-size: 0.9rem; font-weight: 800; text-transform: uppercase; opacity: 0.7; margin-bottom: 0.5rem;") {{'common.message' | translate}}
+    p(ng-bind-html="competition.message" style="font-size: 1rem; opacity: 0.9; margin-bottom: 0;")
+
+block main_content
+  //- SECTION 1: CORE ACTIONS
+  h5.text-heading-premium.mb-2(style="display: flex; align-items: center; font-size: 1.1rem; font-weight: 800; color: #64748b;")
+    i.fas.fa-rocket.mr-2(style="font-size: 0.9rem;")
+    | {{"admin.competition.common" | translate}}
+    
   .row
-    .col-md-1
-    .col-md-10
-      h1 {{"admin.competition.title" | translate}} - {{competition.name}}
-      hr
-      h3 {{"admin.competition.common" | translate}}
-      .row 
-        .col-md-4
-          button(ng-click="go('/admin/' + competitionId + '/teams')" class='btn btn-outline-dark btn-lg btn-block' style="margin-bottom:10px;")
-            i.fas.fa-user-friends.fa-2x 
-            br
-            span {{"admin.competition.teams" | translate}}
-        .col-md-4
-          button(ng-click="go('/admin/' + competitionId + '/rounds')" class='btn btn-outline-dark btn-lg btn-block' style="margin-bottom:10px;")
-            i.fas.fa-list-ol.fa-2x 
-            br
-            span {{"admin.competition.rounds" | translate}}
-        .col-md-4
-          button(ng-click="go('/admin/' + competitionId + '/fields')" class='btn btn-outline-dark btn-lg btn-block' style="margin-bottom:10px;")
-            i.fas.fa-map-pin.fa-2x 
-            br
-            span {{"admin.competition.fields" | translate}}
+    .col-md-4.mb-2
+      .action-card-character.hover-lift(ng-click="go('/admin/' + competitionId + '/teams')" style="padding: 1rem;")
+        i.fas.fa-users.bg-icon
+        .icon-box-premium(style="background: #eff6ff; color: #3b82f6; width: 40px; height: 40px; border-radius: 10px;")
+          i.fas.fa-users(style="font-size: 1.1rem;")
+        h6.text-heading-premium.mb-1(style="font-size: 1rem;") {{"admin.competition.teams" | translate}}
+        p.text-body-premium.mb-0(style="font-size: 0.8rem; line-height: 1.2;") {{"admin.competition.teams_desc" | translate}}
+    
+    .col-md-4.mb-2
+      .action-card-character.hover-lift(ng-click="go('/admin/' + competitionId + '/rounds')" style="padding: 1rem;")
+        i.fas.fa-layer-group.bg-icon
+        .icon-box-premium(style="background: #fdf4ff; color: #a855f7; width: 40px; height: 40px; border-radius: 10px;")
+          i.fas.fa-layer-group(style="font-size: 1.1rem;")
+        h6.text-heading-premium.mb-1(style="font-size: 1rem;") {{"admin.competition.rounds" | translate}}
+        p.text-body-premium.mb-0(style="font-size: 0.8rem; line-height: 1.2;") {{"admin.competition.rounds_desc" | translate}}
+    
+    .col-md-4.mb-2
+      .action-card-character.hover-lift(ng-click="go('/admin/' + competitionId + '/fields')" style="padding: 1rem;")
+        i.fas.fa-map-marker-alt.bg-icon
+        .icon-box-premium(style="background: #fff7ed; color: #f59e0b; width: 40px; height: 40px; border-radius: 10px;")
+          i.fas.fa-map-marker-alt(style="font-size: 1.1rem;")
+        h6.text-heading-premium.mb-1(style="font-size: 1rem;") {{"admin.competition.fields" | translate}}
+        p.text-body-premium.mb-0(style="font-size: 0.8rem; line-height: 1.2;") {{"admin.competition.fields_desc" | translate}}
 
-      hr
-      .row
-        div(ng-repeat="league in leagues" class="col-md-6 col-lg-4")
-          .card(style='width: 100%;margin-bottom:20px;')
-              a
-                img.card-img-top(ng-src="/images/leagues/{{leagueImage(league)}}.png" style="width:100%; height:auto;")
-              .card-body(style="z-index: 2;")
-                h3.card-title {{league.name}}
-                button(ng-disabled="league.type == 'simulation'" ng-click="go('/admin/' + competitionId + '/' + league.league + '/maps')" class='btn btn-dark btn-lg btn-block' style="margin-bottom:10px;")
-                  i.fas.fa-ruler-combined.fa-2x
-                  br
-                  span {{"admin.competition.maps" | translate}}
-                button(ng-click="go('/admin/' + competitionId + '/' + league.league + '/games')" class='btn btn-dark btn-lg btn-block' style="margin-bottom:10px;")
-                  i.fas.fa-clipboard-list.fa-2x
-                  br
-                  span {{"admin.competition.runs" | translate}}
-              .card-img-overlay.text-right
-                span.badge.badge-info(style="font-size: 15px;") {{league.rule}}
-      hr
-      h3 {{"admin.competition.tools" | translate}}
-      .row
-        .col-md-3(style="margin-bottom:30px;")
-          button(ng-click="go('/admin/' + competitionId + '/documents')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-            i.fas.fa-file-alt.fa-2x
-            br
-            span {{"document.admin.title" | translate}}
-        if mailEnable
-          .col-md-3(style="margin-bottom:30px;")
-            button(ng-click="go('/admin/' + competitionId + '/mails')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-              i.fas.fa-mail-bulk.fa-2x
-              br
-              span {{"mail.home.title" | translate}}
-          .col-md-3(style="margin-bottom:30px;")
-            button(ng-click="go('/admin/' + competitionId + '/registration')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-              i.fas.fa-pen-fancy.fa-2x
-              br
-              span {{"registration.title" | translate}}
-        .col-md-3(style="margin-bottom:30px;")
-          button(ng-click="go('/admin/' + competitionId + '/reservation')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-            i.fas.fa-calendar-day.fa-2x
-            br
-            span {{"reservation.title" | translate}}
-        .col-md-3(style="margin-bottom:30px;")
-          button(ng-click="go('/admin/' + competitionId + '/cabinet')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-            i.fas.fa-folder.fa-2x
-            br
-            span {{"cabinet.title" | translate}}
-        .col-md-3(style="margin-bottom:30px;")
-          button(ng-click="go('/admin/' + competitionId + '/survey')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-            i.far.fa-question-circle.fa-2x
-            br
-            span {{"survey.title" | translate}}
-      hr
-      h3 {{"admin.competition.management" | translate}}
-      .row 
-        .col-md-3(style="margin-bottom:10px;")
-          button(ng-click="go('/admin/' + competitionId + '/settings')" class='btn btn-outline-dark btn-lg btn-block')
-            i.fas.fa-cogs.fa-2x 
-            br
-            span {{"admin.competition.settings" | translate}}
-        .col-md-3(style="margin-bottom:10px;")
-          button(ng-click="go('/admin/' + competitionId + '/backup')" class='btn btn-outline-dark btn-lg btn-block')
-            i.fas.fa-archive.fa-2x 
-            br
-            span {{"admin.competition.backup" | translate}}
-      
-      br
+  //- SECTION 2: LEAGUES
+  h5.text-heading-premium.section-gap.mb-2(style="display: flex; align-items: center; font-size: 1.1rem; font-weight: 800; color: #64748b;")
+    i.fas.fa-trophy.mr-2(style="font-size: 0.9rem;")
+    | {{"admin.competition.leagues" | translate}}
+  
+  .row.league-grid-premium
+    div(ng-repeat="league in leagues" class="col-md-6 col-lg-4 mb-2")
+      .league-card-premium(ng-click="go('/admin/' + competitionId + '/' + league.league + '/games')" ng-style="{'--league-color': league.color || (league.type == 'line' ? '#10b981' : (league.type == 'maze' ? '#3b82f6' : '#f59e0b'))}")
+        img(ng-src="/images/leagues/{{leagueImage(league)}}.png")
+        .card-overlay
+        .league-accent
+        i.fas.bg-icon(ng-class="{'fa-route': league.type=='line', 'fa-border-all': league.type=='maze', 'fa-desktop': league.type=='simulation'}")
+        .card-content
+          h4.league-name
+            i.fas(ng-class="{'fa-route': league.type=='line', 'fa-border-all': league.type=='maze', 'fa-desktop': league.type=='simulation'}")
+            | {{league.name}}
+          .d-flex.justify-content-between
+            button.btn-premium.btn-premium-secondary.flex-grow-1(ng-disabled="league.type == 'simulation'" ng-click="go('/admin/' + competitionId + '/' + league.league + '/maps'); $event.stopPropagation();" style="padding: 0.8rem 0.5rem; font-size: 0.85rem; margin-right: 1.25rem;")
+              i.fas.fa-ruler-combined
+              | {{'admin.competition.maps_short' | translate}}
+            button.btn-premium.btn-premium-primary.flex-grow-1(style="padding: 0.8rem 0.5rem; font-size: 0.85rem;" ng-style="{'background': 'var(--league-color)', 'borderColor': 'var(--league-color)'}")
+              i.fas.fa-play
+              | {{'admin.competition.runs_short' | translate}}
 
+  //- SECTION 3: UTILITIES & SETTINGS
+  .row.section-gap(style="padding-bottom: 2rem;")
+    .col-lg-8
+      h5.text-heading-premium.mb-2(style="display: flex; align-items: center; font-size: 1.1rem; font-weight: 800; color: #64748b;")
+        i.fas.fa-tools.mr-2(style="font-size: 0.9rem;")
+        | {{"admin.competition.tools" | translate}}
+      .row.mx-n2
+        .col-md-4.px-2.mb-3(ng-repeat="tool in [{id:'documents', icon:'fa-file-alt', color:'#6366f1', t:'document.admin.title', d:'admin.competition.tools_doc_desc'}, {id:'mails', icon:'fa-mail-bulk', color:'#f43f5e', t:'mail.home.title', d:'admin.competition.tools_mail_desc', cond:'mailEnable'}, {id:'registration', icon:'fa-pen-fancy', color:'#ec4899', t:'registration.title', d:'admin.competition.tools_reg_desc', cond:'mailEnable'}, {id:'reservation', icon:'fa-calendar-day', color:'#8b5cf6', t:'reservation.title', d:'admin.competition.tools_res_desc'}, {id:'cabinet', icon:'fa-folder', color:'#14b8a6', t:'cabinet.title', d:'admin.competition.tools_cab_desc'}, {id:'survey', icon:'fa-question-circle', color:'#f59e0b', t:'survey.title', d:'admin.competition.tools_sur_desc'}]" ng-if="!tool.cond || $parent[tool.cond]")
+          .action-card-character.hover-lift.h-100(ng-click="go('/admin/' + competitionId + '/' + tool.id)" style="padding: 1rem; position: relative; overflow: hidden;")
+            i.fas.bg-icon(ng-class="tool.icon" style="font-size: 3.5rem; opacity: 0.03; position: absolute; right: -5px; bottom: -5px;")
+            .icon-box-premium.mb-2(style="background: rgba(248, 250, 252, 0.8); color: {{tool.color}}; width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center;")
+              i.fas(ng-class="tool.icon" style="font-size: 1.2rem;")
+            h6.text-heading-premium.mb-1(style="font-size: 0.95rem; font-weight: 800;") {{tool.t | translate}}
+            p.text-body-premium.mb-0(style="font-size: 0.75rem; line-height: 1.2; opacity: 0.8;") {{tool.d | translate}}
 
+    .col-lg-4
+      h5.text-heading-premium.mb-2(style="display: flex; align-items: center; font-size: 1.1rem; font-weight: 800; color: #64748b;")
+        i.fas.fa-shield-alt.mr-2(style="font-size: 0.9rem;")
+        | {{"admin.competition.management" | translate}}
+      .management-zone.px-2(style="background: transparent; border: none;")
+        .row.mx-n2
+          .col-12.px-2.mb-3
+            .action-card-character.hover-lift(ng-click="go('/admin/' + competitionId + '/settings')" style="padding: 1rem; position: relative; overflow: hidden; background: white;")
+              i.fas.fa-cogs.bg-icon(style="font-size: 3.5rem; opacity: 0.03; position: absolute; right: -5px; bottom: -5px;")
+              .d-flex.align-items-center
+                .icon-box-premium.mr-3(style="background: #eff6ff; color: #3b82f6; width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;")
+                  i.fas.fa-cogs(style="font-size: 1.2rem;")
+                div
+                  h6.text-heading-premium.mb-0(style="font-size: 0.95rem; font-weight: 800;") {{"admin.competition.settings" | translate}}
+                  p.text-body-premium.mb-0(style="font-size: 0.75rem; opacity: 0.8;") {{"admin.competition.settings_desc" | translate}}
+          
+          .col-12.px-2
+            .action-card-character.hover-lift(ng-click="go('/admin/' + competitionId + '/backup')" style="padding: 1rem; position: relative; overflow: hidden; background: white;")
+              i.fas.fa-archive.bg-icon(style="font-size: 3.5rem; opacity: 0.03; position: absolute; right: -5px; bottom: -5px;")
+              .d-flex.align-items-center
+                .icon-box-premium.mr-3(style="background: #fef2f2; color: #ef4444; width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;")
+                  i.fas.fa-archive(style="font-size: 1.2rem;")
+                div
+                  h6.text-heading-premium.mb-0(style="font-size: 0.95rem; font-weight: 800;") {{"admin.competition.backup" | translate}}
+                  p.text-body-premium.mb-0(style="font-size: 0.75rem; opacity: 0.8;") {{"admin.competition.backup_desc" | translate}}

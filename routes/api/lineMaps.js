@@ -1,11 +1,12 @@
 const express = require('express');
+const archiver = require('archiver');
+
 
 const publicRouter = express.Router();
 const privateRouter = express.Router();
 const adminRouter = express.Router();
 const { ObjectId } = require('mongoose').Types;
 const fs = require('fs');
-const mkdirp = require('mkdirp');
 const { lineMap } = require('../../models/lineMap');
 const { lineRun } = require('../../models/lineRun');
 const { tileType } = require('../../models/lineMap');
@@ -13,8 +14,19 @@ const { tileSet } = require('../../models/lineMap');
 const logger = require('../../config/logger').mainLogger;
 const initRun = require('../../helper/initRunData');
 const scoreCalculator = require('../../helper/scoreCalculator');
+const lineSSR = require('../../helper/lineSSR');
+const lineMapPDF = require('../../helper/lineMapPDF');
+const auth = require('../../helper/authLevels');
+const scoreSheetPDFLine2 = require('../../helper/scoreSheetPDFLine2');
+const { ACCESSLEVELS } = require('../../models/user');
 
 privateRouter.get('/', getLineMaps);
+publicRouter.get('/image/:mapid', getMapImage);
+publicRouter.post('/map-image-pdf', handlePublicMapImagePDF);
+publicRouter.post('/map-image-png', handlePublicMapImagePNG);
+publicRouter.post('/scoresheet', handleScoresheet);
+
+adminRouter.get('/export', handleExport);
 
 function getLineMaps(req, res) {
   const competition = req.query.competition || req.params.competition;
@@ -315,28 +327,8 @@ adminRouter.put('/:map', function (req, res, next) {
   });
 });
 
-adminRouter.post('/image/:map', function (req, res, next) {
-  const id = req.params.map;
-  if (!ObjectId.isValid(id)) {
-    return next();
-  }
-  const base64Data = req.body.img.replace(/^data:image\/png;base64,/, '');
-  let path = `${__dirname}/../../tmp/course`;
-  mkdirp.sync(path);
-  path += `/${id}.png`;
-  fs.writeFile(path, base64Data, 'base64', function (err) {
-    res.send(path);
-  });
-});
 
-adminRouter.get('/image/:map', function (req, res, next) {
-  const id = req.params.map;
 
-  if (!ObjectId.isValid(id)) {
-    return next();
-  }
-  /* 画像を送る */
-});
 
 adminRouter.delete('/:map', function (req, res, next) {
   const id = req.params.map;
@@ -655,6 +647,162 @@ privateRouter.get('/name/:competitionid/:name', function (req, res, next) {
     .select('_id');
 });
 
+async function handlePublicMapImagePDF(req, res, next) {
+  const map = req.body;
+  const paperSize = req.body.paperSize || 'A4';
+
+  if (!map || !map.tiles) {
+    return res.status(400).send({
+      msg: 'Invalid map data',
+    });
+  }
+
+  // Convert tiles from object map to array if necessary
+  if (!Array.isArray(map.tiles)) {
+    const tiles = [];
+    for (const i in map.tiles) {
+      if (map.tiles.hasOwnProperty(i)) {
+        const tile = map.tiles[i];
+        if (isNaN(i)) {
+          const coords = i.split(',');
+          tile.x = parseInt(coords[0]);
+          tile.y = parseInt(coords[1]);
+          tile.z = parseInt(coords[2]);
+        }
+        tiles.push(tile);
+      }
+    }
+    map.tiles = tiles;
+  }
+
+  await lineMapPDF.generateAndSendBulkMapImagesPDF(
+    res,
+    [map],
+    map.competitionName || 'Competition',
+    map.leagueName || 'League',
+    paperSize
+  );
+}
+
+async function handlePublicMapImagePNG(req, res, next) {
+  const map = req.body;
+
+  if (!map || !map.tiles) {
+    return res.status(400).send({
+      msg: 'Invalid map data',
+    });
+  }
+
+  // Convert tiles from object map to array if necessary
+  if (!Array.isArray(map.tiles)) {
+    const tiles = [];
+    for (const i in map.tiles) {
+      if (map.tiles.hasOwnProperty(i)) {
+        const tile = map.tiles[i];
+        if (isNaN(i)) {
+          const coords = i.split(',');
+          tile.x = parseInt(coords[0]);
+          tile.y = parseInt(coords[1]);
+          tile.z = parseInt(coords[2]);
+        }
+        tiles.push(tile);
+      }
+    }
+    map.tiles = tiles;
+  }
+
+  const buffer = await lineSSR.generatePNG(map, map.rule || '2026');
+  res.setHeader('Content-Type', 'image/png');
+  res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(map.name || 'map')}.png"`);
+  res.send(buffer);
+}
+
+function getMapsFromRequest(req, callback) {
+  const competitionId = req.query.competition;
+  const leagueId = req.query.league;
+  const mapIds = req.query.ids ? req.query.ids.split(',') : (req.params.map ? [req.params.map] : null);
+
+  let mapQuery;
+  if (mapIds) {
+    mapQuery = lineMap.find({ _id: { $in: mapIds.filter(ObjectId.isValid) } });
+  } else if (ObjectId.isValid(competitionId)) {
+    mapQuery = lineMap.find({ competition: competitionId, league: leagueId });
+  } else {
+    return callback(new Error('Missing selection'), null);
+  }
+
+  mapQuery.populate('tiles.tileType').populate('competition', 'name').lean().exec(callback);
+}
+
+function handleExport(req, res) {
+  const { type, format } = req.query;
+  const rule = req.query.rule || '2026';
+
+  getMapsFromRequest(req, async (err, maps) => {
+    if (err) {
+      return res.status(400).send({ msg: err.message });
+    }
+    if (!maps || maps.length === 0) {
+      return res.status(404).send({ msg: 'No maps found' });
+    }
+
+    const competitionId = maps[0].competition ? maps[0].competition._id : null;
+
+    if (!auth.authCompetition(req.user, competitionId, ACCESSLEVELS.ADMIN)) {
+      return res.status(401).send({
+        msg: 'You have no authority to access this api',
+      });
+    }
+
+    const competitionName = maps[0].competition ? maps[0].competition.name : 'Competition';
+    const leagueName = maps[0].league || 'League';
+
+    if (type === 'scoresheets') {
+      return await scoreSheetPDFLine2.generateScoreSheetsFromMaps(res, maps, rule, true);
+    }
+
+    if (type === 'maps') {
+      if (format === 'png') {
+        const archive = archiver('zip', { zlib: { level: 9 } });
+        res.attachment('maps.zip');
+        archive.pipe(res);
+        for (const map of maps) {
+          const buffer = await lineSSR.generatePNG(map, rule);
+          archive.append(buffer, { name: `${map.name || map._id}.png` });
+        }
+        return archive.finalize();
+      }
+      const paperSize = req.query.paperSize || 'A4';
+      return lineMapPDF.generateAndSendBulkMapImagesPDF(
+        res,
+        maps,
+        competitionName,
+        leagueName,
+        paperSize
+      );
+    }
+
+    res.status(400).send('Invalid export type');
+  });
+}
+
+function getMapImage(req, res) {
+  const mapid = req.params.mapid;
+  if (!ObjectId.isValid(mapid)) {
+    return res.status(400).send('Invalid map ID');
+  }
+
+  lineMap.findById(mapid).populate('tiles.tileType').lean().exec(async (err, map) => {
+    if (err || !map) {
+      return res.status(404).send('Map not found');
+    }
+    const buffer = await lineSSR.generatePNG(map, req.query.rule || '2026');
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(map.name || mapid)}.png"`);
+    res.send(buffer);
+  });
+}
+
 publicRouter.all('*', function (req, res, next) {
   next();
 });
@@ -665,6 +813,12 @@ privateRouter.all('*', function (req, res, next) {
 function undefied2false(data) {
   if (data) return true;
   return false;
+}
+
+async function handleScoresheet(req, res) {
+  const map = req.body;
+  const rule = map.rule || '2026';
+  await scoreSheetPDFLine2.generateScoreSheetFromMap(res, map, rule);
 }
 
 module.exports.public = publicRouter;

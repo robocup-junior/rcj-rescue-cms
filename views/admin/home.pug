@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'AdminHome'
@@ -9,88 +9,121 @@ append scripts
     var competitionId = "#{id}"
   script(src='/javascripts/admin/home.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    span.breadcrumb-item.active Admin
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  span.breadcrumb-item.active Admin
+
+block hero_title
+  i.fas.fa-shield-alt.mr-2
+  | {{"admin.competition.title" | translate}}
+
+block hero_subtitle
+  | {{"admin.home.description" | translate}}
 
 
-block content
+block main_content
   .row
-    .col-md-1
-    .col-md-10
-      .row
-        .col-md-6
-          h1
-            i.fas.fa-calendar &nbsp;{{"admin.home.competitions" | translate}}
-          table.custom
-            thead
-                tr
-                  th {{"common.name" | translate}}
-                  th {{"common.operation" | translate}}
-            tbody
-                tr
-                  td
-                    input(ng-model='competitionName' style="width:100%;")
-                  td
-                    button(ng-click='addCompetition()') {{"admin.home.add_c" | translate}}
-          br
-          br
-          table.custom
-            thead
-                tr
-                  th {{"common.name" | translate}}
-                  th {{"common.operation" | translate}}
-            tbody
-                tr(ng-repeat='competition in competitions')
-                  td
-                    a(ng-if='competition.authLevel >= 10' ng-bind='competition.name' ng-href="/admin/{{competition._id}}")
-                    span(ng-if='competition.authLevel < 10' ng-bind='competition.name')
-                  td
-                    a(ng-if='competition.authLevel >= 10' href="" ng-click='removeCompetition(competition)')
-                      i.far.fa-trash-alt &nbsp;{{"common.delete" | translate}}
+    .col-lg-7
+      .modern-card
+        .modern-card-header
+          i.fas.fa-trophy
+          | {{"admin.home.competitions" | translate}}
+        
+        //- Competition Items
+        .modern-item-card(ng-repeat='competition in competitions' ng-click="competition.authLevel >= 10 ? go('/admin/'+competition._id) : null" ng-style="{'cursor': competition.authLevel >= 10 ? 'pointer' : 'default'}")
+          .modern-item-info
+            .modern-item-icon(ng-style="{'background': competition.authLevel >= 10 ? '#f0f9ff' : '#f8fafc'}")
+              i.fas.fa-trophy(ng-style="{'color': competition.authLevel >= 10 ? 'var(--accent-color)' : '#94a3b8'}")
+            .modern-item-details
+              span.modern-item-name(ng-bind='competition.name' ng-style="{'color': competition.authLevel >= 10 ? '#1e293b' : '#64748b'}")
+              span.badge.badge-pill.badge-light.text-muted(style="width: fit-content; font-size: 0.7rem; font-weight: 600;" ng-if="competition.authLevel < 10") Read Only
+          .modern-item-actions
+            .btn-delete-item(ng-if='competition.authLevel >= 10' ng-click='removeCompetition(competition, $event)' title='{{"common.delete" | translate}}')
+              i.fas.fa-trash-alt
+        
+        //- Add Competition Row (Last)
+        .modern-item-card.is-add-button(ng-click='addCompetition()')
+          .modern-item-info
+            .modern-item-icon
+              i.fas.fa-plus-circle
+            span.modern-item-name {{"admin.home.add_c" | translate}}
 
-        .col-md-6
-          h1 
-            i.fas.fa-tools &nbsp;{{"admin.home.c_item" | translate}}
-          .row 
-            .col-md-4(style="margin-bottom:30px;")
-              button(ng-click="go('/admin/line/tilesets')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                i.fas.fa-road.fa-2x
-                br
-                span {{"admin.home.line_tSet" | translate}}
-            .col-md-4(style="margin-bottom:30px;")
-              button(ng-click="go('/signage/setting')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                i.fas.fa-tv.fa-2x
-                br
-                span {{"admin.home.signage" | translate}}
-            .col-md-4(style="margin-bottom:30px;")
-              button(ng-click="go('/admin/restore')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                i.fas.fa-trash-restore.fa-2x
-                br
-                span {{"admin.home.restore" | translate}}
-            .col-md-4(style="margin-bottom:30px;")
-              button(ng-click="go('/admin/mailTemplates')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                i.fas.fa-mail-bulk.fa-2x
-                br
-                span {{"admin.mailTemplates.title" | translate}}
+    .col-lg-5
+      .modern-card
+        .modern-card-header
+          i.fas.fa-tools
+          | {{"admin.home.c_item" | translate}}
+        .modern-card-body
+          .tools-grid-premium
+            div.action-card-premium(ng-click="go('/admin/line/tilesets')")
+              .icon-wrapper
+                i.fas.fa-road
+              span {{"admin.home.line_tSet" | translate}}
+            div.action-card-premium(ng-click="go('/signage/setting')")
+              .icon-wrapper
+                i.fas.fa-tv
+              span {{"admin.home.signage" | translate}}
+            div.action-card-premium(ng-click="go('/admin/restore')")
+              .icon-wrapper
+                i.fas.fa-trash-restore
+              span {{"admin.home.restore" | translate}}
+            div.action-card-premium(ng-click="go('/admin/mailTemplates')")
+              .icon-wrapper
+                i.fas.fa-mail-bulk
+              span {{"admin.mailTemplates.title" | translate}}
+            
             if user.superDuperAdmin
-              .col-md-4(style="margin-bottom:30px;")
-                button(ng-click="open('/admin/queues')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                  i.fas.fa-bullseye.fa-2x
-                  br
-                  span {{"admin.home.queue" | translate}}
-              .col-md-4(style="margin-bottom:30px;")
-                button(ng-click="open('/admin/mongo')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                  i.fas.fa-database.fa-2x
-                  br
-                  span {{"admin.home.mongo" | translate}}
-              .col-md-4(style="margin-bottom:30px;")
-                button(ng-click="go('/admin/short')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                  i.fas.fa-link.fa-2x
-                  br
-                  span {{"admin.shortURL.title" | translate}}
-              .col-md-4(style="margin-bottom:30px;")
-                button(ng-click="go('/admin/user')" class='btn btn-outline-dark btn-lg btn-block' style="height:100%;")
-                  i.fas.fa-users.fa-2x
-                  br
-                  span {{"admin.home.user" | translate}}
+              div.action-card-premium(ng-click="open('/admin/queues')")
+                .icon-wrapper
+                  i.fas.fa-bullseye
+                span {{"admin.home.queue" | translate}}
+              div.action-card-premium(ng-click="open('/admin/mongo')")
+                .icon-wrapper
+                  i.fas.fa-database
+                span {{"admin.home.mongo" | translate}}
+              div.action-card-premium(ng-click="go('/admin/short')")
+                .icon-wrapper
+                  i.fas.fa-link
+                span {{"admin.shortURL.title" | translate}}
+              div.action-card-premium(ng-click="go('/admin/user')")
+                .icon-wrapper
+                  i.fas.fa-users
+                span {{"admin.home.user" | translate}}
+
+  script(type="text/ng-template" id="createCompetitionModal.html")
+    .modal-header.premium-modal-header
+      h3.modal-title
+        i.fas.fa-plus-circle.mr-2
+        | {{"admin.home.add_c" | translate}}
+    .modal-body.premium-modal-body
+      .settings-group
+        label.settings-label {{"common.name" | translate}}
+        input.premium-input(ng-model="competitionName" placeholder='{{ "admin.home.add_c_placeholder" | translate }}' autofocus)
+    .modal-footer.premium-modal-footer
+      button.btn.btn-print-action(ng-click="ok()" ng-disabled="!competitionName")
+        i.fas.fa-magic.mr-2
+        span {{"common.create" | translate}}
+      button.btn.btn-cancel-action(ng-click="cancel()") {{"common.cancel" | translate}}
+
+  script(type="text/ng-template" id="removeCompetitionModal.html")
+    .modal-header.premium-modal-header
+      h3.modal-title
+        i.fas.fa-exclamation-triangle.mr-2(style="color: var(--danger-color) !important;")
+        | {{"admin.home.remove_c" | translate}}
+    .modal-body.premium-modal-body
+      p.mb-4(style="font-size: 1.1rem; color: #475569;")
+        | {{"admin.home.remove_c_msg" | translate}} 
+        strong.text-dark {{competition.name}}
+        | ?
+      
+      .settings-group
+        label.settings-label {{"admin.home.remove_c_confirm" | translate}}
+        input.premium-input(ng-model="confirmationText" placeholder='DELETE' autofocus style="border-color: #fca5a5;")
+    .modal-footer.premium-modal-footer
+      button.btn.btn-print-action(ng-click="ok()" ng-disabled="confirmationText != 'DELETE'" style="background: var(--danger-color) !important; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3) !important;")
+        i.fas.fa-trash-alt.mr-2
+        span {{"common.delete" | translate}}
+      button.btn.btn-cancel-action(ng-click="cancel()") {{"common.cancel" | translate}}
+

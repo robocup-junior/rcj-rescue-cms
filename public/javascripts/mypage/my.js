@@ -100,19 +100,47 @@ app.controller("MyPageController", ['$scope', '$http', '$translate', function ($
     }
 
     $scope.mailView = function(mail){
-        let mailUrl = `/api/mail/get/${teamId}/${token}/${mail.mailId}`;
+        var mailUrl = "/api/mail/get/" + teamId + "/" + token + "/" + mail.mailId;
         $http.get(mailUrl).then(function (response) {
-            let html = response.data.html;
-            let plain = response.data.plain.replace(/\r?\n/g, '<br>');
+            var html = response.data.html || "";
+            var subject = mail.subject || "";
+            var time = $scope.time(mail.time);
+
+            var modalHtml = 
+                '<div class="premium-modal-wrapper">' +
+                    '<button id="premium-close-btn" class="btn-header-close"><i class="fas fa-times"></i></button>' +
+                    '<div class="modal-header-section">' +
+                        '<div class="modal-icon-box"><i class="fas fa-envelope-open-text"></i></div>' +
+                        '<div class="modal-title-area">' +
+                            '<div class="modal-subject-text">' + subject + '</div>' +
+                            '<div class="modal-meta-line">' +
+                                '<span>' + time + '</span>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="modal-content-wrapper">' +
+                        '<div class="mail-body-text">' + html + '</div>' + 
+                    '</div>' +
+                '</div>';
+
+            var closeAction = function() {
+                if (typeof Swal !== 'undefined' && Swal.close) Swal.close();
+                else if (typeof swal !== 'undefined' && swal.close) swal.close();
+            };
+
             Swal.fire({
-                html:'<ul class="nav nav-tabs" id="mailType" role="tablist"><li class="nav-item"><a class="nav-link active" id="html-tab" data-toggle="tab" href="#html" role="tab" aria-controls="html" aria-selected="true">HTML</a></li><li class="nav-item"><a class="nav-link" id="plain-tab" data-toggle="tab" href="#plain" role="tab" aria-controls="plain" aria-selected="false">Plain Text</a></li></ul>'+
-                '<div class="tab-content" id="mailTypeContent">'+
-                    '<div class="tab-pane fade show active" id="html" role="tabpanel" aria-labelledby="html-tab" style="text-align:left;max-height:calc(100vh - 200px);overflow:auto;">' + html +'</div>'+
-                    '<div class="tab-pane fade" id="plain" role="tabpanel" aria-labelledby="plain-tab" style="text-align:left;max-height:calc(100vh - 200px);overflow:auto;">' + plain + '</div>'+
-                '</div>',
-                width: "100%",
-                height: "100%",
-                showCloseButton: true, 
+                html: modalHtml,
+                width: "1100px",
+                showConfirmButton: false,
+                customClass: 'premium-modal-popup-fix',
+                onOpen: function() {
+                    var btn = document.getElementById('premium-close-btn');
+                    if (btn) btn.onclick = closeAction;
+                },
+                didOpen: function() {
+                    var btn = document.getElementById('premium-close-btn');
+                    if (btn) btn.onclick = closeAction;
+                }
             })
         }, function (response) {
             Toast.fire({
@@ -121,7 +149,6 @@ app.controller("MyPageController", ['$scope', '$http', '$translate', function ($
                 html: response.data.msg
             })
         })
-        
     }
 
     function compositeColor(code, alpha) {

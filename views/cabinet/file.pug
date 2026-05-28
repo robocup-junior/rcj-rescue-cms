@@ -1,8 +1,9 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'CabinetFile'
+  - var hideLogin = true
 
 append scripts
   script.
@@ -13,82 +14,144 @@ append scripts
     var isTeam = #{isTeam}
     var isMyPage = #{isMyPage}
   script(src='/javascripts/cabinet/file.js')
-  script(src="/components/bootstrap-fileinput/js/fileinput.min.js")
-  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js")
-  script(src="/components/bootstrap-fileinput/js/locales/ja.js")
   script(src="/components/ng-file-upload/ng-file-upload.min.js")
 
 append css
-    link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
+  style.
+    .file-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1.5rem;
+      padding: 1rem 0;
+    }
+    .file-card {
+      background: white;
+      border: 1px solid #f1f5f9;
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    .file-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+      border-color: #3b82f6;
+    }
+    .file-icon-wrapper {
+      width: 64px;
+      height: 64px;
+      background: #f8fafc;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1rem;
+      color: #3b82f6;
+      font-size: 2rem;
+      transition: all 0.3s ease;
+    }
+    .file-card:hover .file-icon-wrapper {
+      background: #eff6ff;
+      transform: scale(1.1);
+    }
+    .file-name {
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 0.95rem;
+      margin-bottom: 1.25rem;
+      word-break: break-all;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      min-height: 2.8rem;
+    }
+    .file-actions {
+      margin-top: auto;
+      width: 100%;
+      display: flex;
+      gap: 0.5rem;
+    }
+    .upload-card {
+      border: 2px dashed #e2e8f0;
+      background: #f8fafc;
+      cursor: pointer;
+    }
+    .upload-card:hover {
+      background: #f1f5f9;
+      border-color: #3b82f6;
+    }
+    .empty-state {
+      padding: 4rem 2rem;
+      text-align: center;
+      color: #94a3b8;
+    }
+    .empty-state i {
+      font-size: 5rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.3;
+    }
+    .hero-dashboard {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      padding: 1rem 1.5rem;
+      width: fit-content;
+      margin-top: 1rem;
+    }
+    .hero-breadcrumb {
+      display: none !important;
+    }
 
-block navbar
-    nav.navbar(style='background-color: #283655; color: #fff; position: fixed; top: 0; z-index:10 ;  width: 100%')
-        .col-sm-11
-            span(style="font-size:20px;")
-                i.fas.fa-archive &nbsp;
-                | {{competition.name}} - Cabinet
-        .col-sm-1(style="text-align:right;")
-            button.btn.btn-primary(type='button', onclick="location.href='/locales'", ng-cloak, style="padding:2px 5px 0px 3px;margin-right:10px;")
-                i.fas.fa-language(style="font-size:30px;")
+block hero_breadcrumb
 
-block location
-  if !isMyPage
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId + '/cabinet')") Cabinet
-    span.breadcrumb-item.active {{cabinetName}}
-  else
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/mypage/'+ teamId + '/' + token)") #{teamName}
-    span.breadcrumb-item.active Cabinet
+block hero_title
+  span {{cabinetName}}
 
+block hero_subtitle
+  p.mb-2.opacity-50.small
+    i.fas.fa-trophy.mr-2
+    span {{competition.name}}
+  p.mb-0.opacity-75(style="font-size: 1.15rem; font-weight: 500; line-height: 1.6;")
+    i.fas.fa-archive.mr-2
+    span {{'cabinet.title' | translate}}
+    span.mx-3(style="opacity: 0.5;") -
+    span {{'cabinet.description2' | translate}}
 
+block main_content
+  .empty-state(ng-if="!loading && files.length == 0")
+    i.fas.fa-folder-open
+    h4 {{'cabinet.empty' | translate}}
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h4 {{competition.name}} -&nbsp;
-        i.fas.fa-archive &nbsp;
-        | {{'cabinet.title' | translate}}
-      h3 {{cabinetName}}
-      p {{'cabinet.description2' | translate}}
-      hr
-      .text-center(ng-if="files.length == 0", style="margin-top:10vh;")
-        i.fas.fa-folder-open.fa-10x
-        h4 {{'cabinet.empty' | translate}}
-      if !isMyPage
-        .row 
-          .col-md-4(ng-repeat='file in files', style="margin-top:60px;")
-            button(class='btn btn-outline-dark btn-lg btn-block' style="height:100%;border-radius: 4px 4px 0 0;" ng-click="download(file)")
-              i.fas.fa-2x(ng-class="fileIcon(file.type)")
-              br
-              span(style="overflow-wrap: break-word;") {{file.name}}
-            button(class='btn btn-danger btn-sm btn-block', style="margin-top:0px;border-radius: 0 0 4px 4px;", ng-click="delete(file)")
-              i.fas.fa-trash &nbsp;
-              span {{'cabinet.delete' | translate}}
-          .col-md-4(style="margin-top:60px;")
-            button(class='btn btn-success btn-lg btn-block' style="height:100%;" type='file' ngf-select='upload($file, $invalidFiles)' accept='*' ngf-max-size='500MB')
-              i.fas.fa-2x.fa-file-upload
-              br
-              span {{'cabinet.upload' | translate}}
-              div(style="color:#e74c3c;margin-left:10px;", ng-if="errFile.$error")
-                  span ERROR: {{errFile.$error}}
-              .flex-fill(style="margin:10px 0px 0px 10px;", ng-show="f.progress > 0")
-                  .progress
-                      .progress-bar(role='progressbar' style='width: {{f.progress}}%;' aria-valuenow='{{f.progress}}' aria-valuemin='0' aria-valuemax='100') {{f.progress}}%
-              div(style="color:#e74c3c;margin-top:10px;", ng-if="errorMsg")
-                  span {{errorMsg}}
-      else 
-        .row 
-          .col-md-4(ng-repeat='file in files', style="margin-top:30px;")
-            button(class='btn btn-outline-dark btn-lg btn-block' style="height:100%;" ng-click="download(file)")
-              i.fas.fa-2x(ng-class="fileIcon(file.type)")
-              br
-              span {{file.name}}
-  br
-  br
-  br
+  .file-grid
+    //- Upload Card (Admin Only)
+    if !isMyPage
+      .file-card.upload-card(type='file' ngf-select='upload($file, $invalidFiles)' accept='*' ngf-max-size='500MB')
+        .file-icon-wrapper
+          i.fas.fa-plus
+        .file-name {{'cabinet.upload' | translate}}
+        .w-100.mt-2(ng-if="f.progress > 0")
+          .progress(style="height: 6px; border-radius: 3px;")
+            .progress-bar.progress-bar-striped.progress-bar-animated(role='progressbar' style='width: {{f.progress}}%;')
+        .text-danger.small.mt-2(ng-if="errFile.$error") ERROR: {{errFile.$error}}
+        .text-danger.small.mt-2(ng-if="errorMsg") {{errorMsg}}
 
-      
+    //- File Cards
+    .file-card(ng-repeat='file in files')
+      .file-icon-wrapper
+        i.fas(ng-class="fileIcon(file.type)")
+      .file-name {{file.name}}
+      .file-actions
+        button.btn.btn-primary.btn-premium.btn-sm.flex-grow-1.rounded-pill(ng-click="download(file)")
+          i.fas.fa-download.mr-2
+          | Download
+        if !isMyPage
+          button.btn.btn-outline-danger.btn-sm.rounded-pill(ng-click="delete(file)", title="{{'cabinet.delete' | translate}}")
+            i.fas.fa-trash

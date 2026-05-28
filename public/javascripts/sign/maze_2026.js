@@ -20,17 +20,7 @@ const victimConstantWL = {
         "linearPoint": 5,
         "floatingPoint": 15
     },
-    "Red": {
-        "maxKitNum": 2,
-        "linearPoint": 10,
-        "floatingPoint": 30
-    },
-    "Yellow": {
-        "maxKitNum": 1,
-        "linearPoint": 10,
-        "floatingPoint": 30
-    },
-    "Green": {
+    "Cognitive": {
         "maxKitNum": 0,
         "linearPoint": 10,
         "floatingPoint": 30
@@ -177,12 +167,38 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                         $scope.leagueType = response.data.leagueType;
 
                         victimConstant = victimConstantWL;
+            $scope.victimConstantWL = victimConstantWL;
 
                         for (let i = 0; i < response.data.cells.length; i++) {
                             $scope.cells[response.data.cells[i].x + ',' +
                                 response.data.cells[i].y + ',' +
                                 response.data.cells[i].z] = response.data.cells[i];
                         }
+
+                        // Post-process cells to initialize cognitiveTargets for tiles with Cognitive victims
+                        // This handles backward compatibility with saved data that predates cognitiveTargets
+                        for (var key in $scope.cells) {
+                            var cell = $scope.cells[key];
+                            if (cell.isTile && cell.tile && cell.tile.victims) {
+                                var directions = ['top', 'right', 'bottom', 'left'];
+                                for (var j = 0; j < directions.length; j++) {
+                                    var dir = directions[j];
+                                    if (cell.tile.victims[dir] === 'Cognitive') {
+                                        // Initialize cognitiveTargets if not exists
+                                        if (!cell.tile.cognitiveTargets) {
+                                            cell.tile.cognitiveTargets = {};
+                                        }
+                                        // Initialize this direction if not exists
+                                        if (!cell.tile.cognitiveTargets[dir]) {
+                                            cell.tile.cognitiveTargets[dir] = {
+                                                rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' }
+                                            };
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
                         width = response.data.width;
                         length = response.data.length;
                         $timeout(tile_size, 0);
@@ -198,6 +214,47 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 }
             });
     }
+
+    const cognitiveColorValues = {
+        'K': -2,
+        'R': -1,
+        'Y': 0,
+        'G': 1,
+        'B': 2
+    };
+
+    $scope.getMaxKitNum = function (cell, direction) {
+        if (!cell || !cell.tile || !cell.tile.victims) return 0;
+        let type = cell.tile.victims[direction];
+        if (type === 'Cognitive') {
+            if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return 0;
+            let rings = cell.tile.cognitiveTargets[direction].rings;
+            let total = 0;
+            for (let i = 1; i <= 5; i++) {
+                total += cognitiveColorValues[rings['ring' + i]] || 0;
+            }
+            if (total === 2) return 2; // Harmed
+            if (total === 1) return 1; // Stable
+            return 0; // Unharmed or Dummy
+        }
+        return (victimConstant[type] ? victimConstant[type].maxKitNum : 0);
+    };
+
+    $scope.isDummy = function (cell, direction) {
+        if (!cell || !cell.tile || !cell.tile.victims) return false;
+        let type = cell.tile.victims[direction];
+        if (type === 'Cognitive') {
+            if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return true;
+            let rings = cell.tile.cognitiveTargets[direction].rings;
+            let total = 0;
+            for (let i = 1; i <= 5; i++) {
+                total += cognitiveColorValues[rings['ring' + i]] || 0;
+            }
+            if (total >= 0 && total <= 2) return false;
+            return true; // Dummy
+        }
+        return false;
+    };
 
     $scope.blueTilesVisited = function () {
         let count = 0;
@@ -364,28 +421,40 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         }
 
         if (cell.tile.victims.top != "None") {
-            possible++;
-            current += tile.scoredItems.victims.top;
-            possible += victimConstant[cell.tile.victims.top].maxKitNum;
-            if (tile.scoredItems.victims.top) current += Math.min(tile.scoredItems.rescueKits.top, victimConstant[cell.tile.victims.top].maxKitNum);
+            if (!$scope.isDummy(cell, 'top')) {
+                possible++;
+                current += tile.scoredItems.victims.top;
+                let mk = $scope.getMaxKitNum(cell, 'top');
+                possible += mk;
+                if (tile.scoredItems.victims.top) current += Math.min(tile.scoredItems.rescueKits.top, mk);
+            }
         }
         if (cell.tile.victims.left != "None") {
-            possible++;
-            current += tile.scoredItems.victims.left;
-            possible += victimConstant[cell.tile.victims.left].maxKitNum;
-            if (tile.scoredItems.victims.left) current += Math.min(tile.scoredItems.rescueKits.left, victimConstant[cell.tile.victims.left].maxKitNum);
+            if (!$scope.isDummy(cell, 'left')) {
+                possible++;
+                current += tile.scoredItems.victims.left;
+                let mk = $scope.getMaxKitNum(cell, 'left');
+                possible += mk;
+                if (tile.scoredItems.victims.left) current += Math.min(tile.scoredItems.rescueKits.left, mk);
+            }
         }
         if (cell.tile.victims.right != "None") {
-            possible++;
-            current += tile.scoredItems.victims.right;
-            possible += victimConstant[cell.tile.victims.right].maxKitNum;
-            if (tile.scoredItems.victims.right) current += Math.min(tile.scoredItems.rescueKits.right, victimConstant[cell.tile.victims.right].maxKitNum);
+            if (!$scope.isDummy(cell, 'right')) {
+                possible++;
+                current += tile.scoredItems.victims.right;
+                let mk = $scope.getMaxKitNum(cell, 'right');
+                possible += mk;
+                if (tile.scoredItems.victims.right) current += Math.min(tile.scoredItems.rescueKits.right, mk);
+            }
         }
         if (cell.tile.victims.bottom != "None") {
-            possible++;
-            current += tile.scoredItems.victims.bottom;
-            possible += victimConstant[cell.tile.victims.bottom].maxKitNum;
-            if (tile.scoredItems.victims.bottom) current += Math.min(tile.scoredItems.rescueKits.bottom, victimConstant[cell.tile.victims.bottom].maxKitNum);
+            if (!$scope.isDummy(cell, 'bottom')) {
+                possible++;
+                current += tile.scoredItems.victims.bottom;
+                let mk = $scope.getMaxKitNum(cell, 'bottom');
+                possible += mk;
+                if (tile.scoredItems.victims.bottom) current += Math.min(tile.scoredItems.rescueKits.bottom, mk);
+            }
         }
 
         if (cell.tile.blue) {
@@ -418,15 +487,24 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
         var tile = $scope.tiles[x + ',' + y + ',' + z];
 
-        var hasVictims = (cell.tile.victims.top != "None") ||
-            (cell.tile.victims.right != "None") ||
-            (cell.tile.victims.bottom != "None") ||
-            (cell.tile.victims.left != "None");
-        // Total number of scorable things on this tile
-        var total = !!cell.tile.speedbump + !!cell.tile.checkpoint + !!cell.tile.steps + cell.tile.ramp + hasVictims;
+        var validVictimsCount = 0;
+        for (let dir in cell.tile.victims) {
+            let type = cell.tile.victims[dir];
+            if (type != "None") {
+                if (type == "Cognitive") {
+                    if (!$scope.isDummy(cell, dir)) {
+                        validVictimsCount++;
+                    }
+                } else {
+                    validVictimsCount++;
+                }
+            }
+        }
 
-        if (total > 1 || hasVictims) {
-            // Open modal for multi-select
+        var scoreItemsCount = !!cell.tile.speedbump + !!cell.tile.checkpoint + !!cell.tile.steps + !!cell.tile.ramp + (!!cell.tile.blue ? 1 : 0);
+
+        if (validVictimsCount > 0 || scoreItemsCount > 0) {
+            // Open modal if there is at least one scorable thing
             $scope.open(x, y, z);
         }
 
@@ -500,39 +578,47 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         }
 
         if (cell.tile.victims.top in victimConstant) {
-            current += victimConstant[cell.tile.victims.top][wallPointType] * tile.scoredItems.victims.top;
-            if (tile.scoredItems.victims.top) {
-                current += kitScoreForVictim(
-                    tile.scoredItems.rescueKits.top,
-                    victimConstant[cell.tile.victims.top].maxKitNum
-                );
+            if (!$scope.isDummy(cell, 'top')) {
+                current += victimConstant[cell.tile.victims.top][wallPointType] * tile.scoredItems.victims.top;
+                if (tile.scoredItems.victims.top) {
+                    current += kitScoreForVictim(
+                        tile.scoredItems.rescueKits.top,
+                        $scope.getMaxKitNum(cell, 'top')
+                    );
+                }
             }
         }
         if (cell.tile.victims.right in victimConstant) {
-            current += victimConstant[cell.tile.victims.right][wallPointType] * tile.scoredItems.victims.right;
-            if (tile.scoredItems.victims.right) {
-                current += kitScoreForVictim(
-                    tile.scoredItems.rescueKits.right,
-                    victimConstant[cell.tile.victims.right].maxKitNum
-                );
+            if (!$scope.isDummy(cell, 'right')) {
+                current += victimConstant[cell.tile.victims.right][wallPointType] * tile.scoredItems.victims.right;
+                if (tile.scoredItems.victims.right) {
+                    current += kitScoreForVictim(
+                        tile.scoredItems.rescueKits.right,
+                        $scope.getMaxKitNum(cell, 'right')
+                    );
+                }
             }
         }
         if (cell.tile.victims.left in victimConstant) {
-            current += victimConstant[cell.tile.victims.left][wallPointType] * tile.scoredItems.victims.left;
-            if (tile.scoredItems.victims.left) {
-                current += kitScoreForVictim(
-                    tile.scoredItems.rescueKits.left,
-                    victimConstant[cell.tile.victims.left].maxKitNum
-                );
+            if (!$scope.isDummy(cell, 'left')) {
+                current += victimConstant[cell.tile.victims.left][wallPointType] * tile.scoredItems.victims.left;
+                if (tile.scoredItems.victims.left) {
+                    current += kitScoreForVictim(
+                        tile.scoredItems.rescueKits.left,
+                        $scope.getMaxKitNum(cell, 'left')
+                    );
+                }
             }
         }
         if (cell.tile.victims.bottom in victimConstant) {
-            current += victimConstant[cell.tile.victims.bottom][wallPointType] * tile.scoredItems.victims.bottom;
-            if (tile.scoredItems.victims.bottom) {
-                current += kitScoreForVictim(
-                    tile.scoredItems.rescueKits.bottom,
-                    victimConstant[cell.tile.victims.bottom].maxKitNum
-                );
+            if (!$scope.isDummy(cell, 'bottom')) {
+                current += victimConstant[cell.tile.victims.bottom][wallPointType] * tile.scoredItems.victims.bottom;
+                if (tile.scoredItems.victims.bottom) {
+                    current += kitScoreForVictim(
+                        tile.scoredItems.rescueKits.bottom,
+                        $scope.getMaxKitNum(cell, 'bottom')
+                    );
+                }
             }
         }
         const MAX_BLUE_BONUS = 40;
@@ -771,6 +857,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
 
 app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'cell', 'tile', 'sRotate', 'leagueType', function ($scope, $uibModalInstance, cell, tile, sRotate, leagueType) {
+    $scope.victimConstantWL = victimConstantWL;
     $scope.cell = cell;
     $scope.tile = tile;
     $scope.leagueType = leagueType;
@@ -784,9 +871,151 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'cell', 'til
         return false;
     };
 
-    $scope.kitStatus = function (light, kit, type) {
-        return (victimConstant[type].maxKitNum <= kit && light);
+    $scope.kitStatus = function (light, kit, direction) {
+        const mk = $scope.getModalMaxKitNum($scope.cell, direction);
+        return (Number(kit) >= mk);
     };
+
+    $scope.getModalCognitiveImage = function (cell, direction) {
+        if (!cell || !cell.tile || !cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction]) return '';
+        let rings = cell.tile.cognitiveTargets[direction].rings;
+        return '/images/cognitive_targets/' + rings.ring1 + rings.ring2 + rings.ring3 + rings.ring4 + rings.ring5 + '.png';
+    };
+
+    $scope.getColorValue = function (colorCode) {
+        switch (colorCode) {
+            case 'K': return 'Black';
+            case 'R': return 'Red';
+            case 'Y': return 'Yellow';
+            case 'G': return 'Green';
+            case 'B': return 'Blue';
+            default: return colorCode;
+        }
+    };
+
+    const cognitiveColorValues = {
+        'K': -2,
+        'R': -1,
+        'Y': 0,
+        'G': 1,
+        'B': 2
+    };
+
+    $scope.getModalMaxKitNum = function (cell, direction) {
+        if (!cell || !cell.tile || !cell.tile.victims) return 0;
+        if ($scope.leagueType === 'entry') return 1;
+        let type = cell.tile.victims[direction];
+        if (type === 'Cognitive') {
+            if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return 0;
+            let rings = cell.tile.cognitiveTargets[direction].rings;
+            let total = 0;
+            for (let i = 1; i <= 5; i++) {
+                total += cognitiveColorValues[rings['ring' + i]] || 0;
+            }
+            if (total === 2) return 2; // Harmed
+            if (total === 1) return 1; // Stable
+            return 0; // Unharmed or Dummy
+        }
+        return (victimConstant[type] ? victimConstant[type].maxKitNum : 0);
+    };
+
+    $scope.isModalDummy = function (cell, direction) {
+        if (!cell || !cell.tile || !cell.tile.victims) return false;
+        let type = cell.tile.victims[direction];
+        if (type === 'Cognitive') {
+            if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return true;
+            let rings = cell.tile.cognitiveTargets[direction].rings;
+            let total = 0;
+            for (let i = 1; i <= 5; i++) {
+                total += cognitiveColorValues[rings['ring' + i]] || 0;
+            }
+            if (total >= 0 && total <= 2) return false;
+            return true; // Dummy
+        }
+        return false;
+    };
+
+    $scope.hasRealVictims = function() {
+        if (!$scope.cell || !$scope.cell.tile || !$scope.cell.tile.victims) return false;
+        let directions = ['top', 'bottom', 'left', 'right'];
+        for (let dir of directions) {
+            let type = $scope.cell.tile.victims[dir];
+            if (type && type !== 'None') {
+                if (!$scope.isModalDummy($scope.cell, dir)) return true;
+            }
+        }
+        return false;
+    };
+
+    $scope.getModalVictimStatus = function (cell, direction) {
+        if (!cell || !cell.tile || !cell.tile.victims) return '';
+        let type = cell.tile.victims[direction];
+        if (type === 'None') return '';
+        if (type === 'PHI') return 'Harmed';
+        if (type === 'PSI') return 'Stable';
+        if (type === 'OMEGA') return 'Unharmed';
+        
+        if (type === 'Cognitive') {
+            if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return 'Dummy';
+            let rings = cell.tile.cognitiveTargets[direction].rings;
+            let total = 0;
+            for (let i = 1; i <= 5; i++) {
+                total += cognitiveColorValues[rings['ring' + i]] || 0;
+            }
+            if (total === 2) return 'Harmed';
+            if (total === 1) return 'Stable';
+            if (total === 0) return 'Unharmed';
+            return 'Dummy';
+        }
+        return '';
+    };
+
+    $scope.getModalVictimStatusColor = function(cell, direction) {
+        let status = $scope.getModalVictimStatus(cell, direction);
+        if (status === 'Harmed') return '#dc3545';
+        if (status === 'Stable') return '#ffc107';
+        if (status === 'Unharmed') return '#28a745';
+        return '#6c757d';
+    }
+
+    $scope.getModalKitColor = function(cell, direction) {
+        if (!cell || !cell.tile) return '#1e293b';
+        let required = $scope.getModalMaxKitNum(cell, direction);
+        let placed = $scope.tile.scoredItems.rescueKits[direction];
+        if (placed >= required) return '#10b981'; // Green
+        return '#ef4444'; // Red
+    };
+
+    $scope.modalRotateInv = function (dir) {
+        var ro;
+        switch (dir) {
+            case 'top':
+                ro = 0;
+                break;
+            case 'right':
+                ro = 90;
+                break;
+            case 'left':
+                ro = 270;
+                break;
+            case 'bottom':
+                ro = 180;
+                break;
+        }
+        ro -= sRotate;
+        if (ro < 0) ro += 360;
+        if (ro >= 360) ro -= 360;
+        switch (ro) {
+            case 0:
+                return 'top';
+            case 90:
+                return 'right';
+            case 180:
+                return 'bottom';
+            case 270:
+                return 'left';
+        }
+    }
 
     $scope.modalRotate = function (dir) {
         var ro;

@@ -1,14 +1,37 @@
 //- -*- tab-width: 2 -*-
 
-nav.navbar(style='background: linear-gradient(180deg,#cd2e3a 0%,#cd2e3a 5px,#0047a0 5px,#0047a0 100%);; color: #fff; position: fixed; top: 0; z-index:10 ;  width: 100%')
-    a.navbar-brand(href='/home', style="color: #ecf0f1;")
-        img.d-inline-block.align-top(src="/images/logo.png", style="height:23px;width:auto;")
-        | &nbsp;RCJ CMS
+nav.navbar.navbar-expand.premium-navbar
+    a.navbar-brand(href='/home')
+        img.d-inline-block.align-top(src="/images/logo.png" alt="Logo")
+        span.brand-text &nbsp;RCJ CMS
         if process.env.ENVIRONMENT != "PROD" && process.env.ENVIRONMENT != null
-            | &nbsp; (#{process.env.ENVIRONMENT})
-    if typeof(user) == "undefined"
-        i.fas.fa-user-circle.fa-2x(aria-hidden='true')
-    else
-        .fa-2x
-            i.fas.fa-user-circle(aria-hidden='true')
-            | &nbsp;#{user.username}
+            span.env-badge (#{process.env.ENVIRONMENT})
+    
+    .ml-auto.d-flex.align-items-center
+        a.nav-user-link.mr-2(href='#' data-toggle='modal' data-target='#languageModal' title="{{'select_lang' | translate}}")
+            i.fas.fa-globe-americas
+        if user
+            .dropdown
+                a.nav-user-link.dropdown-toggle(href='#' role='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
+                    i.fas.fa-user-circle
+                    span.username-text.d-none.d-sm-inline-block &nbsp;#{user.username}
+                .dropdown-menu.dropdown-menu-right.premium-dropdown
+                    .dropdown-header
+                        i.fas.fa-id-badge.mr-2
+                        | #{user.username}
+                    .dropdown-divider
+                    a.dropdown-item(href='/mypage')
+                        i.fas.fa-user-cog.mr-2
+                        | {{"common.mypage" | translate}}
+                    if user.admin
+                        a.dropdown-item(href='/admin')
+                            i.fas.fa-cog.mr-2
+                            | {{"admin.competition.title" | translate}}
+                    .dropdown-divider
+                    a.dropdown-item.text-danger(href='/logout')
+                        i.fas.fa-sign-out-alt.mr-2
+                        | {{"home.logout" | translate}}
+        else if !hideLogin
+            a.nav-user-link.login-btn(href='#' data-toggle='modal' data-target='#loginModal')
+                i.fas.fa-sign-in-alt
+                span.username-text.d-none.d-sm-inline-block &nbsp; {{"home.login" | translate}}

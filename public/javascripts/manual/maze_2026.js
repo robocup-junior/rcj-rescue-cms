@@ -15,58 +15,22 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.cells = {};
     $scope.tiles = {};
 
-    $scope.victimsList = {
-        "PHI": {
-            "image": "phi.png",
-            "kit": 2
-        },
-        "PSI": {
-            "image": "psi.png",
-            "kit": 1
-        },
-        "OMEGA": {
-            "image": "omega.png",
-            "kit": 0
-        },
-        "Red": {
-            "image": "Red.png",
-            "kit": 2
-        },
-        "Yellow": {
-            "image": "Yellow.png",
-            "kit": 1
-        },
-        "Green": {
-            "image": "Green.png",
-            "kit": 0
-        }
+    const maxKits = {
+        'PHI': 2, // Harmed (H)
+        'PSI': 1, // Stable (S)
+        'OMEGA': 0 // Unharmed (U)
+    };
+
+    const cognitiveColorValues = {
+        'K': -2,
+        'R': -1,
+        'Y': 0,
+        'G': 1,
+        'B': 2
     };
 
     $scope.itemList = {
-        "PHI":{
-            "linear":[],
-            "floating":[]
-        },
-        "PSI":{
-            "linear":[],
-            "floating":[]
-        },
-        "OMEGA":{
-            "linear":[],
-            "floating":[]
-        },
-        "Red":{
-            "linear":[],
-            "floating":[]
-        },
-        "Yellow":{
-            "linear":[],
-            "floating":[]
-        },
-        "Green":{
-            "linear":[],
-            "floating":[]
-        },
+        "allVictims": [],
         "checkpoint":[],
         "ramp":[],
         "speedbump":[],
@@ -74,202 +38,128 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         "blue":[],
     };
 
+
     var db_cells;
 
-    $http.get("/api/runs/maze/" + runId +
-        "?populate=true").then(function (response) {
-
-        console.log(response.data);
-        $scope.exitBonus = response.data.exitBonus;
-        $scope.field = response.data.field.name;
-        $scope.round = response.data.round.name;
+    $http.get("/api/runs/maze/" + runId + "?populate=true").then(function (response) {
         $scope.team = response.data.team;
-        $scope.league = response.data.team.league;
+        $scope.round = response.data.round.name;
+        $scope.field = response.data.field.name;
         $scope.competition = response.data.competition;
         $scope.LoPs = response.data.LoPs;
         $scope.MisIdent = response.data.misidentification;
-        $scope.score = response.data.score;
-
-        // Verified time by timekeeper
+        $scope.exitBonus = response.data.exitBonus;
         $scope.minutes = response.data.time.minutes;
         $scope.seconds = response.data.time.seconds;
+        $scope.score = response.data.score;
 
-        // Scoring elements of the tiles
         for (let i = 0; i < response.data.tiles.length; i++) {
             $scope.tiles[response.data.tiles[i].x + ',' +
                 response.data.tiles[i].y + ',' +
                 response.data.tiles[i].z] = response.data.tiles[i];
-            if (response.data.tiles[i].scoredItems.blue > 0) {
-                $scope.tiles[response.data.tiles[i].x + ',' +
-                response.data.tiles[i].y + ',' +
-                response.data.tiles[i].z].scoredItems.blueActive = true;
-            }
         }
 
-        let mapId = response.data.map;
+        let mapId = response.data.map._id || response.data.map;
 
-        function Range(first, last) {
-            var first = first.charCodeAt(0);
-            var last = last.charCodeAt(0);
-            var result = new Array();
-            for(var i = first; i <= last; i++) {
-                result.push(String.fromCodePoint(i));
+        $http.get("/api/maps/maze/" + mapId + "?populate=true").then(function (response) {
+            const cellsMap = {};
+            for (const cell of response.data.cells) {
+                cellsMap[`${cell.x},${cell.y},${cell.z}`] = cell;
             }
-            return result;
-        }
+            $scope.cells = cellsMap;
 
-        $http.get("/api/maps/maze/" + mapId +
-          "?populate=true").then(function (response) {
-            console.log(response.data);
-            $scope.startTile = response.data.startTile;
-            $scope.height = response.data.height;
-
-            $scope.width = response.data.width;
-            $scope.length = response.data.length;
-
-            for (let i = 0; i < response.data.cells.length; i++) {
-                $scope.cells[response.data.cells[i].x + ',' +
-                response.data.cells[i].y + ',' +
-                response.data.cells[i].z] = response.data.cells[i];
+            function Range(first, last) {
+                var first = first.charCodeAt(0);
+                var last = last.charCodeAt(0);
+                var result = new Array();
+                for(var i = first; i <= last; i++) {
+                    result.push(String.fromCodePoint(i));
+                }
+                return result;
             }
-
-            db_cells = response.data.cells;
 
             let map = response.data;
-            let cells = $scope.cells;
             let big = Range('A', 'Z');
-            let small = Range('α', 'ω');
+            let victimAlphabetIndex = 0;
 
             for(let j=1,l=map.length*2+1;j<l;j+=2) {
                 for (let i = 1, m = map.width * 2 + 1; i < m; i += 2) {
                     for (let k = 0; k < map.height; k++) {
-                        if (!cells[`${i},${j},${k}`]) continue
-                        let victimLF =  cells[`${i},${j},${k}`].isLinear?"linear":"floating";
-                        let victims = cells[`${i},${j},${k}`].tile.victims;
-                        let tile = cells[`${i},${j},${k}`].tile;
-                        let victimType = "None";
+                        const coord = `${i},${j},${k}`;
+                        if (!cellsMap[coord]) continue;
+                        
+                        let victims = cellsMap[coord].tile.victims;
+                        let tile = cellsMap[coord].tile;
+                        let victimPlaces = ['top', 'right', 'bottom', 'left'];
+                        
+                        for(let vp of victimPlaces) {
+                            let victimType = victims[vp];
+                            if(victimType && victimType !== "None") {
+                                let isDummy = false;
+                                if (victimType === 'Cognitive') {
+                                    if (tile.cognitiveTargets && tile.cognitiveTargets[vp] && tile.cognitiveTargets[vp].rings) {
+                                        let rings = tile.cognitiveTargets[vp].rings;
+                                        let total = 0;
+                                        for (let r = 1; r <= 5; r++) {
+                                            total += cognitiveColorValues[rings[`ring${r}`]] || 0;
+                                        }
+                                        if (total < 0 || total > 2) isDummy = true;
+                                    } else {
+                                        isDummy = true;
+                                    }
+                                }
 
-                        victimType = victims.top;
-                        if(victimType != "None"){
-                            let name;
-                            if(victimLF == "linear") name = big[$scope.itemList[victimType][victimLF].length];
-                            else name = small[$scope.itemList[victimType][victimLF].length];
-                            let tmp = {
-                                x: i,
-                                y: j,
-                                z: k,
-                                name: name,
-                                direction: "top"
+                                if(!isDummy) {
+                                    let name = big[victimAlphabetIndex % 26];
+                                    $scope.itemList.allVictims.push({
+                                        x: i, y: j, z: k,
+                                        name: name,
+                                        direction: vp,
+                                        type: victimType
+                                    });
+                                }
+                                victimAlphabetIndex++;
                             }
-                            $scope.itemList[victimType][victimLF].push(tmp);
                         }
-
-                        victimType = victims.left;
-                        if(victimType != "None"){
-                            let name;
-                            if(victimLF == "linear") name = big[$scope.itemList[victimType][victimLF].length];
-                            else name = small[$scope.itemList[victimType][victimLF].length];
-                            let tmp = {
-                                x: i,
-                                y: j,
-                                z: k,
-                                name: name,
-                                direction: "left"
-                            }
-                            $scope.itemList[victimType][victimLF].push(tmp);
-                        }
-
-                        victimType = victims.right;
-                        if(victimType != "None"){
-                            let name;
-                            if(victimLF == "linear") name = big[$scope.itemList[victimType][victimLF].length];
-                            else name = small[$scope.itemList[victimType][victimLF].length];
-                            let tmp = {
-                                x: i,
-                                y: j,
-                                z: k,
-                                name: name,
-                                direction: "right"
-                            }
-                            $scope.itemList[victimType][victimLF].push(tmp);
-                        }
-
-                        victimType = victims.bottom;
-                        if(victimType != "None"){
-                            let name;
-                            if(victimLF == "linear") name = big[$scope.itemList[victimType][victimLF].length];
-                            else name = small[$scope.itemList[victimType][victimLF].length];
-                            let tmp = {
-                                x: i,
-                                y: j,
-                                z: k,
-                                name: name,
-                                direction: "bottom"
-                            }
-                            $scope.itemList[victimType][victimLF].push(tmp);
-                        }
-
                         if(tile.checkpoint){
-                            let tmp = {
-                                x: i,
-                                y: j,
-                                z: k,
-                                name: $scope.itemList.checkpoint.length+1,
-                                type: "checkpoint"
-                            }
-                            $scope.itemList.checkpoint.push(tmp);
+                            $scope.itemList.checkpoint.push({
+                                x: i, y: j, z: k,
+                                name: $scope.itemList.checkpoint.length + 1,
+                                type: 'checkpoint'
+                            });
                         }
-
                         if(tile.speedbump){
-                            let tmp = {
-                                x: i,
-                                y: j,
-                                z: k,
-                                name: $scope.itemList.speedbump.length+1,
-                                type: "speedbump"
-                            }
-                            $scope.itemList.speedbump.push(tmp);
+                            $scope.itemList.speedbump.push({
+                                x: i, y: j, z: k,
+                                name: $scope.itemList.speedbump.length + 1,
+                                type: 'speedbump'
+                            });
                         }
-
                         if(tile.ramp){
-                            let tmp = {
-                                x: i,
-                                y: j,
-                                z: k,
-                                name: $scope.itemList.ramp.length+1,
-                                type: "ramp"
-                            }
-                            $scope.itemList.ramp.push(tmp);
+                            $scope.itemList.ramp.push({
+                                x: i, y: j, z: k,
+                                name: $scope.itemList.ramp.length + 1,
+                                type: 'ramp'
+                            });
                         }
-
                         if(tile.steps){
-                            let tmp = {
-                                x: i,
-                                y: j,
-                                z: k,
-                                name: $scope.itemList.steps.length+1,
-                                type: "steps"
-                            }
-                            $scope.itemList.steps.push(tmp);
+                            $scope.itemList.steps.push({
+                                x: i, y: j, z: k,
+                                name: $scope.itemList.steps.length + 1,
+                                type: 'steps'
+                            });
                         }
-
                         if(tile.blue){
-                            let tmp = {
-                                x: i,
-                                y: j,
-                                z: k,
-                                name: $scope.itemList.blue.length+1,
-                                type: "blue"
-                            }
-                            $scope.itemList.blue.push(tmp);
+                            $scope.itemList.blue.push({
+                                x: i, y: j, z: k,
+                                name: $scope.itemList.blue.length + 1,
+                                type: 'blue'
+                            });
                         }
                     }
                 }
             }
-        }, function (response) {
-            console.log("Error: " + response.statusText);
         });
-
     }, function (response) {
         console.log("Error: " + response.statusText);
         if (response.status == 401) {
@@ -277,6 +167,61 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         }
     });
 
+
+    $scope.getModalMaxKitNum = function (cell, direction) {
+        if (!cell || !cell.tile || !cell.tile.victims) return 0;
+        if ($scope.leagueType === 'entry') return 1;
+        let type = cell.tile.victims[direction];
+        if (type === 'Cognitive') {
+            if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return 0;
+            let rings = cell.tile.cognitiveTargets[direction].rings;
+            let total = 0;
+            for (let i = 1; i <= 5; i++) {
+                total += cognitiveColorValues[rings['ring' + i]] || 0;
+            }
+            if (total === 2) return 2; // Harmed
+            if (total === 1) return 1; // Stable
+            return 0; // Unharmed or Dummy
+        }
+        return (maxKits[type] || 0);
+    };
+
+    $scope.getModalVictimStatus = function (cell, direction) {
+        if (!cell || !cell.tile || !cell.tile.victims) return '';
+        let type = cell.tile.victims[direction];
+        if (type === 'None') return '';
+        if (type === 'PHI') return 'Harmed';
+        if (type === 'PSI') return 'Stable';
+        if (type === 'OMEGA') return 'Unharmed';
+        
+        if (type === 'Cognitive') {
+            if (!cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return 'Dummy';
+            let rings = cell.tile.cognitiveTargets[direction].rings;
+            let total = 0;
+            for (let i = 1; i <= 5; i++) {
+                total += cognitiveColorValues[rings['ring' + i]] || 0;
+            }
+            if (total === 2) return 'Harmed';
+            if (total === 1) return 'Stable';
+            if (total === 0) return 'Unharmed';
+            return 'Dummy';
+        }
+        return '';
+    };
+
+    $scope.getModalVictimStatusColor = function(cell, direction) {
+        let status = $scope.getModalVictimStatus(cell, direction);
+        if (status === 'Harmed') return '#dc3545';
+        if (status === 'Stable') return '#ffc107';
+        if (status === 'Unharmed') return '#28a745';
+        return '#6c757d';
+    }
+
+    $scope.getModalCognitiveImage = function (cell, direction) {
+        if (!cell || !cell.tile || !cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return '';
+        let rings = cell.tile.cognitiveTargets[direction].rings;
+        return `/images/cognitive_targets/${rings.ring1}${rings.ring2}${rings.ring3}${rings.ring4}${rings.ring5}.png`;
+    };
 
     $scope.range = function (n) {
         arr = [];
@@ -314,7 +259,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         if(item.direction){//Victims
             return $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.victims[item.direction];
         }else if(item.type == 'blue'){
-            return $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue > 0 || $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blueActive;
+            return $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue > 0;
         }else{
             return $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems[item.type];
         }
@@ -354,14 +299,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         if(item.direction) {//Victims
             $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.victims[item.direction] = !$scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.victims[item.direction];
         }else if(item.type == 'blue'){
-            $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blueActive = !$scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blueActive;
-            if (!$scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blueActive) {
-                $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue = 0;
-            } else {
-                if ($scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue == 0) {
-                    $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.blue = 1;
-                }
-            }
+            // No toggle for blue tiles now, just use stepper
+
         }else{
             $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems[item.type] = !$scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems[item.type];
         }
@@ -371,6 +310,54 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         playSound(sClick);
         $scope.tiles[item.x + ',' + item.y + ',' + item.z].scoredItems.rescueKits[item.direction] = number;
     }
+
+    $scope.timeBuffer = "";
+    
+    $scope.addTimeDigit = function(num) {
+        if ($scope.timeBuffer.length >= 4) return;
+        $scope.timeBuffer += num;
+        $scope.syncTime();
+    };
+
+    $scope.clearTime = function() {
+        $scope.timeBuffer = "";
+        $scope.syncTime();
+    };
+
+    $scope.backspaceTime = function() {
+        $scope.timeBuffer = $scope.timeBuffer.slice(0, -1);
+        $scope.syncTime();
+    };
+
+    $scope.syncTime = function() {
+        let val = parseInt($scope.timeBuffer) || 0;
+        let sec = val % 100;
+        let min = Math.floor(val / 100);
+        
+        if (sec > 59) sec = 59;
+        if (min > 8) min = 8;
+        
+        $scope.minutes = min;
+        $scope.seconds = sec;
+    };
+
+    $scope.getTimeDisplay = function() {
+        let s = $scope.timeBuffer.padStart(4, '0');
+        return s.slice(0, 2) + ":" + s.slice(2);
+    };
+
+    // Keyboard support for time entry
+    document.addEventListener('keydown', function(e) {
+        if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+        
+        if (e.key >= '0' && e.key <= '9') {
+            $scope.$apply(() => $scope.addTimeDigit(e.key));
+        } else if (e.key === 'Backspace') {
+            $scope.$apply(() => $scope.backspaceTime());
+        } else if (e.key === 'Escape' || e.key.toLowerCase() === 'c') {
+            $scope.$apply(() => $scope.clearTime());
+        }
+    });
 
     $scope.send = function () {
         playSound(sClick);
@@ -459,20 +446,15 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     };
 
     var saveContent = [];
-    $scope.focused = function (name) {
-        saveContent[name] = $scope[name];
-        $scope[name] = "";
+    $scope.focused = function (name, event) {
+        if (event && event.target) {
+            event.target.select();
+        }
     };
 
     $scope.blured = function (name) {
-        console.log($scope[name]);
-        if($scope[name] == ""){
-            if(typeof($scope[name]) == 'number'){
-                console.log("NUMBER");
-            }else{
-                $scope[name] = saveContent[name];
-            }
-
+        if ($scope[name] === null || $scope[name] === undefined || $scope[name] === "") {
+            $scope[name] = 0;
         }
     };
 

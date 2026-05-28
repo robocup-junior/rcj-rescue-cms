@@ -1,150 +1,574 @@
 html(ng-app="ddApp")
   head
-    title Rescue Line Approval
+    title Rescue Line Approval - Double Check
     script.
       var runId = "#{id}"
 
     include ../../includes/common_component
-
     script(src="/javascripts/manual/line_2026.js")
+
     script(src="/javascripts/translate_config.js")
     script(src='/components/lightbox2/dist/js/lightbox.min.js')
 
     link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css')
-    link(href="/stylesheets/fredrik.css" rel="stylesheet")
-    link(href="/components/css-toggle-switch/dist/toggle-switch.css" rel="stylesheet")
-
+    
     meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
+    
+    link(href="/stylesheets/fonts.css" rel="stylesheet")
+
+    style.
+        :root {
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --secondary: #64748b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --background: #f5f3ff;
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --check-purple: #7c3aed;
+            --checkpoint-bg: #f8fafc;
+        }
+
+        body {
+            background-color: var(--background);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            padding-top: 75px;
+            padding-bottom: 100px;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            height: 65px;
+        }
+
+        .navbar-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: white !important;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .mode-badge {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .card-entry-header {
+            padding: 10px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-entry-header h4 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--check-purple);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .scroll-area {
+            width: 100%;
+            padding: 12px;
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+
+        .checkpoint-column-wrap {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: wrap;
+            height: 560px;
+            align-content: flex-start;
+            gap: 8px;
+            padding: 2px;
+        }
+
+        .entry-item-compact {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0 8px;
+            display: grid;
+            grid-template-columns: 22px 42px 1fr 32px;
+            column-gap: 8px;
+            align-items: center;
+            transition: all 0.2s;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            height: 48px !important;
+            width: 190px;
+            overflow: hidden;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        .entry-item-compact.active {
+            border-color: var(--success);
+            background: #f0fdf4 !important;
+        }
+
+        .entry-item-compact.is-checkpoint {
+            border-color: #fb923c;
+            background: #fff7ed;
+        }
+
+        .entry-item-compact.is-checkpoint .item-id {
+            background: #ffedd5;
+            color: #ea580c;
+        }
+
+        .entry-item-compact.is-checkpoint.active {
+            border-color: var(--success);
+            background: #f0fdf4 !important;
+        }
+
+        .entry-item-compact .item-id {
+            width: 20px;
+            height: 25px;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            font-weight: 900;
+            color: var(--text-muted);
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .active .item-id { background: var(--success); color: white; }
+
+        .entry-item-compact .item-img-wrapper {
+            width: 40px;
+            height: 40px;
+            grid-column: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .entry-item-compact .item-img-wrapper img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .entry-item-compact .status-icon {
+            font-size: 1.4rem;
+            color: #cbd5e1;
+        }
+
+        .entry-item-compact .status-icon i.fa-check-circle {
+            color: var(--success);
+        }
+
+        .entry-item-compact.has-lop {
+            height: 104px !important;
+            grid-template-columns: 22px 42px 1fr 32px;
+            grid-template-rows: 40px 1fr;
+            padding: 6px 8px;
+            align-items: center;
+            box-sizing: border-box;
+            flex-shrink: 0;
+        }
+
+        .entry-item-compact.has-lop .item-id {
+            grid-row: 1;
+            grid-column: 1;
+        }
+
+        .entry-item-compact.has-lop .item-img-wrapper {
+            grid-row: 1;
+            grid-column: 2;
+            justify-self: start;
+        }
+
+        .entry-item-compact.has-lop .status-icon {
+            grid-row: 1;
+            grid-column: 4;
+            justify-self: end;
+        }
+
+        .entry-item-compact.has-lop .lop-input-wrapper {
+            grid-row: 2;
+            grid-column: 1 / span 4;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-top: 6px;
+            border-top: 1px dashed var(--border);
+            width: 100%;
+            height: 48px;
+        }
+
+        .lop-display-badge {
+            background: #fff1f2;
+            color: var(--primary);
+            padding: 4px 16px;
+            border-radius: 20px;
+            font-weight: 900;
+            font-size: 1.1rem;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .scroll-area::-webkit-scrollbar {
+            height: 8px;
+        }
+        .scroll-area::-webkit-scrollbar-track {
+            background: var(--background);
+        }
+        .scroll-area::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+        .scroll-area::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        .score-display {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 16px;
+            border-radius: 12px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .score-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            opacity: 0.9;
+        }
+
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+
+        /* Score Sheet Grid Styles */
+        .score-sheet-grid {
+            border: 2px solid #94a3b8;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .grid-header-row, .grid-data-row {
+            display: grid;
+            grid-template-columns: 100px repeat(3, 1fr);
+            min-width: 300px;
+        }
+
+        .grid-header-row {
+            background: #f8fafc;
+            border-bottom: 2px solid #94a3b8;
+        }
+
+        .grid-label, .grid-sequence {
+            padding: 4px 8px;
+            text-align: center;
+            font-weight: 800;
+            font-size: 0.7rem;
+            color: #64748b;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .grid-data-row { border-bottom: 1px solid #e2e8f0; }
+        .grid-data-row:last-child { border-bottom: none; }
+
+        .grid-zone-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+            gap: 2px;
+            border-right: 2px solid #94a3b8;
+            font-weight: 800;
+            font-size: 0.65rem;
+        }
+
+        .zone-green .grid-zone-label { background: #f0fdf4; color: #166534; }
+        .zone-red .grid-zone-label { background: #fef2f2; color: #991b1b; }
+
+        .grid-zone-label img { height: 24px; object-fit: contain; }
+
+        .grid-cell {
+            border-right: 1px solid #e2e8f0;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+        }
+
+        .cell-victim {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .cell-victim img { height: 28px; }
+        .victim-type-label { font-size: 0.9rem; font-weight: 900; }
+
+        .static-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .static-value {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--check-purple);
+            background: var(--background);
+            padding: 8px 16px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .calc-summary {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            padding: 15px 30px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .calc-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .calc-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .calc-val {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--text-main);
+        }
+
+        .calc-op {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .calc-result {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: var(--check-purple);
+        }
+
+        .footer-action {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            padding: 16px 32px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 1000;
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-premium {
+            padding: 12px 40px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border: none;
+        }
+
+        .btn-approve {
+            background: linear-gradient(135deg, #d946ef 0%, #a855f7 100%);
+            color: white;
+        }
+
+        .btn-reject {
+            background: #fee2e2;
+            color: #ef4444;
+            border: 2px solid #fecaca;
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px -3px rgba(244, 63, 94, 0.3);
+        }
 
   body(ng-controller="ddController")
-    nav.navbar(style='background-color: #8e44ad; color: #ecf0f1; position: fixed; top: 0; z-index:10 ;  width: 100%')
-      // Navbar content
-      .col-md-6.col-sm4.col-12
-        li.navbar-brand(href='#')
-          i.fas.fa-users
-          |  {{team.name}}
-      .col-md-3.col-sm4.col-12
-        li.navbar-brand(href='#')
-          i.fas.fa-hashtag
-          |  {{round}}
-      .col-md-2.col-sm4.col-12
-        li.navbar-brand(href='#')
-          i.fas.fa-map-marker-alt
-          |  {{field}}
-      .col-md-1.col-sm4.col-12
-        li.navbar-brand(href='#')
-          img(ng-src="{{competition.logo}}" height="30px")
+    nav.navbar.navbar-expand-lg.fixed-top
+      .container-fluid
+        .navbar-brand
+          i.fas.fa-shield-alt
+          | {{team.name}}
+          span.mode-badge.ms-2 STEP 2: VERIFICATION
+        .d-flex.gap-4.align-items-center
+          .d-flex.gap-2
+            span.badge.bg-white.text-dark(style="font-size: 0.9rem; padding: 8px 16px; border-radius: 10px;margin-right:5px;")
+              i.fas.fa-hashtag.me-1
+              | {{round}}
+            span.badge.bg-white.text-dark(style="font-size: 0.9rem; padding: 8px 16px; border-radius: 10px;margin-right:5px;")
+              i.fas.fa-map-marker-alt.me-1
+              | {{field}}
+          .score-display.ms-2
+            .score-label ESTIMATED SCORE
+            .score-value {{score}}
 
-    .container-fluid.nav-cont
-      div#inputcontent
-        .row
-          .col-md-12
-            .card
-              h4.card-header(style="background-color:#0984e3;")
-                i.fas.fa-clipboard(aria-hidden='true' style="color:white;") &nbsp;Checkpoints & Scored Elements
-              .card-body
-                .row
-                  .col-sm-2(ng-repeat="list in elementList")
-                    table(border="3")
-                      tr
-                        td No.
-                        td Success
-                      tr(ng-repeat="item in list" ng-style="numberStyle(item)")
-                        td(style="font-size:30px;text-align:center")
-                          span(ng-hide="item.afterLoP") {{item.index + 1}}
-                        td(style="text-align:center;")
-                          button.btn(type='button',ng-class="{'btn-success': itemSuccess(item),'btn-danger':!itemSuccess(item)}",ng-if="!item.afterLoP",style="width:100%;")
-                            i.far(ng-class="{'fa-check-square': itemSuccess(item), 'fa-times-circle': !itemSuccess(item)}")
-                          div(ng-if="item.LoP != null")
-                            div(ng-show="item.afterLoP")
-                              span After final checkpoint
-                              br
-                            span(style="font-size:38px;") {{LoPs[item.LoP]}}
+    .container-fluid.mt-4
+      // Checkpoints Section
+      .card-entry
+        .card-entry-header
+          h4
+            i.fas.fa-clipboard-check
+            | Checkpoints & Scored Elements
+        .scroll-area
+          .checkpoint-column-wrap
+            // Standard Elements from elementList
+            div(ng-repeat="list in elementList", style="display: contents;")
+              div.entry-item-compact(ng-repeat="item in list", ng-class="{'active': itemSuccess(item), 'has-lop': item.LoP != null && !item.afterLoP, 'is-checkpoint': isCheckPoint(item) || item.start}")
+                .item-id(ng-if="!item.afterLoP") {{item.index + 1}}
+                .item-id(ng-if="item.afterLoP"): i.fas.fa-flag-checkered
+                
+                .item-img-wrapper(ng-if="!item.afterLoP")
+                  img(ng-src="{{getTileImage(item)}}", ng-if="getTileImage(item)", style="width: 100%; height: 100%; object-fit: contain;")
+                
+                // Always show status icon for tiles
+                .status-icon(ng-if="!item.afterLoP")
+                  i.fas.fa-check-circle(ng-if="itemSuccess(item)")
+                  i.far.fa-circle(ng-if="!itemSuccess(item)")
+                
+                .lop-input-wrapper(ng-if="item.LoP != null", ng-style="!item.afterLoP ? {'grid-row': '2', 'grid-column': '1 / span 4', 'display': 'flex', 'align-items': 'center', 'justify-content': 'space-between', 'border-top': '1px dashed var(--border)', 'padding-top': '6px'} : {'grid-column': '2 / span 3', 'display': 'flex', 'align-items': 'center', 'gap': '8px'}")
+                  .lop-icon(style="color: var(--primary); font-size: 0.9rem;")
+                    i.fas.fa-undo.me-2
+                    span.small.fw-bold LoPs
+                  .lop-display-badge
+                    span {{LoPs[item.LoP]}}
 
+      // Victims Section
+      .card-entry
+        .card-entry-header
+          h4: i.fas.fa-user-injured
+            | Victims
+        .p-4
+            .score-sheet-grid
+                .grid-header-row
+                    .grid-label Zone
+                    .grid-sequence(ng-repeat="n in range(3)") {{n + 1}}
+                
+                .grid-data-row.zone-green
+                    .grid-zone-label
+                        img(src='/images/evacZone/green_lv2.png')
+                        span GREEN
+                    .grid-cell(ng-repeat="n in range(3)")
+                        .cell-victim(ng-if="getVictimAt(n, 'GREEN')")
+                            img(src='/images/liveVictim.png', ng-if="getVictimAt(n, 'GREEN').victimType == 'LIVE'")
+                            img(src='/images/deadVictim.png', ng-if="getVictimAt(n, 'GREEN').victimType == 'DEAD'")
+                            .victim-type-label {{getVictimAt(n, 'GREEN').victimType == 'LIVE' ? 'L' : 'D'}}
+                
+                .grid-data-row.zone-red
+                    .grid-zone-label
+                        img(src='/images/evacZone/red_lv2.png')
+                        span RED
+                    .grid-cell(ng-repeat="n in range(3)")
+                        .cell-victim(ng-if="getVictimAt(n, 'RED')")
+                            img(src='/images/liveVictim.png', ng-if="getVictimAt(n, 'RED').victimType == 'LIVE'")
+                            img(src='/images/deadVictim.png', ng-if="getVictimAt(n, 'RED').victimType == 'DEAD'")
+                            .victim-type-label {{getVictimAt(n, 'RED').victimType == 'LIVE' ? 'L' : 'D'}}
 
-          .col-md-12(style="margin-top:20px;")
-            .card
-              h4.card-header(style="background-color:#fd79a8;")
-                i.fas.fa-user-injured(aria-hidden='true' style="color:white;") &nbsp;Victims
-              .card-body
-                .row
-                  .col-md-12
-                    .row
-                      .col-12
-                        h6 {{'line.judge.rescuedVictims' | translate}}
-                        table(border='1', style='width:100%; text-align: center; margin-top: 10px;', ng-if='victim_list.length > 0')
-                          tbody
-                            tr
-                              th Zone
-                              th(style='text-align:center;', ng-repeat='i in range(3)') {{i+1}}
-                            tr
-                              td
-                                img(src='/images/evacZone/green_lv2.png', height='50px')
-                              td(ng-repeat='i in range(3)', ng-dblclick='delete_victim(i)', ng-swipe-left='delete_victim(i)')
-                                div(ng-if="victim_list[i].zoneType == 'GREEN'")
-                                  img(src='/images/liveVictim.png', width='30px', ng-if="victim_list[i].victimType == 'LIVE'")
-                                  img(src='/images/deadVictim.png', width='30px', ng-if="victim_list[i].victimType == 'DEAD'")
-                            tr
-                              td
-                                img(src='/images/evacZone/red_lv2.png', height='50px')
-                              td(ng-repeat='i in range(3)', ng-dblclick='delete_victim(i)', ng-swipe-left='delete_victim(i)')
-                                div(ng-if="victim_list[i].zoneType == 'RED'")
-                                  img(src='/images/liveVictim.png', width='30px', ng-if="victim_list[i].victimType == 'LIVE'")
-                                  img(src='/images/deadVictim.png', width='30px', ng-if="victim_list[i].victimType == 'DEAD'")
-          .col-md-12(style="margin-top:20px;")
-            .card
-              h4.card-header
-                i.fas.fa-ellipsis-h(aria-hidden='true') &nbsp;Others
-              .card-body
-                table(border="3")
-                  tr
-                    td Type
-                    td(style="width:50%;")
-                  tr
-                    td Time
-                    td
-                      .input-group.input-group-lg
-                        input.form-control(type='tel', placeholder='', aria-label='min', min='0', max='8', ng-model='minutes', disabled)
-                        .input-group-append
-                          span.input-group-text {{'common.min' | translate}}
-                        input.form-control(type='tel', placeholder='', aria-label='sec', min='0', max='60', ng-model='seconds', disabled)
-                        .input-group-append
-                          span.input-group-text {{'common.sec' | translate}}
-                  tr
-                    td Exit bonus
-                    td
-                      div(style='position: relative;')
-                        img.img-thumbnail(src='/images/line_bonus.png', width='186.3px', height='118px', ng-style="{'background-color': exitBonus?'#2ecc71':'#D91E18'}")
-                        div(style='position:absolute; top:15px; left:45px;')
-                          i.fas.fa-check.fa-fw.fa-5x(ng-show='exitBonus', style='color:#27ae60; opacity:0.9;')
-                          i.fas.fa-times.fa-fw.fa-5x(ng-show='!exitBonus ', style='padding-top:4px; color:#e74c3c; opacity:0.9;')
-        .row
-          .col-12
-            hr
-            h2 {{'line.sign.calc' | translate}}
-            .alert.alert-warning(style='margin-bottom:50px;text-align:center;', role='alert')
-              .row
-                .col-md-3
-                  p(style="height:10px;") {{'common.stotal' | translate}}
-                  h1 {{raw_score}} {{'common.point' | translate}}
-                .col-md-1
-                  p(style="height:10px;")
-                  h1 ×
-                .col-md-4
-                  p(style="height:10px;") {{'common.multipliers' | translate}}
-                  h1 {{multiplier}}
-                .col-md-1
-                  p(style="height:10px;")
-                  h1 =
-                .col-md-3
-                  p(style="height:10px;") {{'common.score' | translate}}
-                  h1 {{score}} {{'common.point' | translate}}
-          .col-12(style="text-align:center;")
-            hr
-            .row
-              .col-md-6
-                button.btn.btn-danger.btn-lg(type='button', ng-click='cancel()', style="margin-bottom:20px;")
-                  i.fas.fa-times.fa-2x(aria-hidden='true')  Reject
-              .col-md-6
-                button.btn.btn-success.btn-lg(type='button', ng-click='approval()', style="margin-bottom:20px;")
-                  i.fas.fa-check.fa-2x(aria-hidden='true')  Approve
+      // Others & Time Section
+      .row
+        .col-md-6
+          .card-entry.h-100
+            .card-entry-header: h4: i.fas.fa-award
+              | Final Bonus
+            .p-4.text-center
+              .bonus-visual(ng-style="{'background-color': exitBonus?'#f0fdf4':'#fef2f2', 'border-color': exitBonus?'#10b981':'#ef4444'}" style="border: 2px solid; padding: 20px; border-radius: 16px; transition: all 0.3s; display: flex; align-items: center; gap: 24px; justify-content: center;")
+                img(src='/images/line_bonus.png', style="height: 50px; object-fit: contain;")
+                .fw-bold(ng-style="{'color': exitBonus?'#10b981':'#ef4444'}" style="font-size: 1.2rem;")
+                  i.fas.me-2(ng-class="exitBonus?'fa-check-circle':'fa-times-circle'")
+                  | {{exitBonus?'Achieved':'No Bonus'}}
+        
+        .col-md-6
+          .card-entry.h-100
+            .card-entry-header: h4: i.fas.fa-clock
+              | Time
+            .p-4.d-flex.flex-column.align-items-center.justify-content-center
+              .static-label Recorded Time
+              .static-value {{minutes | numberFixedLen:2}} : {{seconds | numberFixedLen:2}}
+
+      // Final Calculation Large
+      .calc-summary.mb-5
+        .static-label Final Score Calculation
+        .calc-row
+          .calc-item
+            .calc-val {{raw_score}}
+            .small.text-muted points
+          .calc-op &times;
+          .calc-item
+            .calc-val {{multiplier}}
+            .small.text-muted multiplier
+          .calc-op =
+          .calc-item
+            .calc-result {{score}}
+            .small.text-muted final pts
+
+    .footer-action
+      button.btn-premium.btn-reject(type='button', ng-click='cancel()')
+        i.fas.fa-times
+        | Reject
+      button.btn-premium.btn-approve(type='button', ng-click='approval()')
+        i.fas.fa-check-double
+        | Approve & Submit Score
