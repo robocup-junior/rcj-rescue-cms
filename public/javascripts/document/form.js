@@ -316,7 +316,8 @@ app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http'
 
 
     $scope.deadline = function(){
-        let d = new Date(deadline * 1000);
+        if (!deadline) return;
+        let d = new Date(Number(deadline) * 1000);
         let options = { weekday: "short", year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric",timeZoneName:"long" };
         return(new Intl.DateTimeFormat(navigator.language, options).format(d));
     }

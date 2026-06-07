@@ -631,8 +631,8 @@ block hero_subtitle
         i.fas.fa-clock.mr-2
         span {{'document.deadline' | translate}}: 
         span.deadline-date {{deadline()}}
-        span.ml-3.status-badge-premium.bg-white.text-primary(ng-if="!isPastDeadline()") OPEN
-        span.ml-3.status-badge-premium.bg-danger.text-white(ng-if="isPastDeadline()") CLOSED
+        span.ml-3.status-badge-premium.bg-white.text-primary(ng-if="editable") OPEN
+        span.ml-3.status-badge-premium.bg-danger.text-white(ng-if="!editable") CLOSED
       
       button.btn.btn-tour-hero(type='button', ng-click='startTour()')
         i.fas.fa-question-circle.mr-2
