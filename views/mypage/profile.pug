@@ -37,7 +37,7 @@ block content
             p.value #{user.username}
           .info-item
             label {{"admin.users.email" | translate}}
-            p.value #{user.email || 'N/A'}
+            p.value #{(user && user.email) ? user.email : 'N/A'}
         
         hr.premium-divider
         

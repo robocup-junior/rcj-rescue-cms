@@ -62,7 +62,7 @@ block content
         tbody
             tr(ng-repeat='user in users')
               td(ng-bind='user.username')
-              td(ng-bind='user.email')
+              td(ng-bind='user.displayEmail')
               td
                 i(class="fa fa-check" aria-hidden="true" style="color:#2ecc71;" ng-if="user.superDuperAdmin")
                 i(class="fa fa-times" aria-hidden="true" style="color:#e74c3c;" ng-if="!user.superDuperAdmin")
