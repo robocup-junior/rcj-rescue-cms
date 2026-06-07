@@ -42,8 +42,3 @@ block content
         .comp-body
           h3.comp-name(ng-style="{'color': '#' + (competition.bkColor || '0f172a')}" ng-cloak) {{competition.name}}
           p.comp-desc(ng-if="competition.description", ng-bind-html="competition.description")
-
-    if typeof(user) != "undefined" && !user.admin
-      .access-info
-        i.fas.fa-user-shield.mr-2
-        span(translate="home.access_level", translate-values='{account: "'+ user.username + '"}')
