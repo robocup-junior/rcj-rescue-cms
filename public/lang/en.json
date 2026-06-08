@@ -791,7 +791,8 @@
             "simulator3d": "Floor Transitions",
             "clickToCycle": "Cycle on click",
             "ascend": "Ascend",
-            "descend": "Descend"
+            "descend": "Descend",
+            "duration": "Duration"
         },
         "teamBulk": {
             "title": "Teams Bulk Registration",
