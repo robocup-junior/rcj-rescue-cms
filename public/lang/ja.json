@@ -789,7 +789,8 @@
             "simulator3d": "フロアチェンジ設定",
             "clickToCycle": "クリックで切替",
             "ascend": "上昇",
-            "descend": "下降"
+            "descend": "下降",
+            "duration": "期間"
         },
         "teamBulk": {
             "title": "チーム一括登録",
