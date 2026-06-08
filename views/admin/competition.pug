@@ -7,6 +7,7 @@ block vars
 append scripts
   script.
     var competitionId = "#{id}"
+    var mailEnable = #{!!mailEnable}
   script(src='/javascripts/admin/competition.js')
 
 block hero_breadcrumb
@@ -93,7 +94,7 @@ block main_content
         i.fas.fa-tools.mr-2(style="font-size: 0.9rem;")
         | {{"admin.competition.tools" | translate}}
       .row.mx-n2
-        .col-md-4.px-2.mb-3(ng-repeat="tool in [{id:'documents', icon:'fa-file-alt', color:'#6366f1', t:'document.admin.title', d:'admin.competition.tools_doc_desc'}, {id:'mails', icon:'fa-mail-bulk', color:'#f43f5e', t:'mail.home.title', d:'admin.competition.tools_mail_desc', cond:'mailEnable'}, {id:'registration', icon:'fa-pen-fancy', color:'#ec4899', t:'registration.title', d:'admin.competition.tools_reg_desc', cond:'mailEnable'}, {id:'reservation', icon:'fa-calendar-day', color:'#8b5cf6', t:'reservation.title', d:'admin.competition.tools_res_desc'}, {id:'cabinet', icon:'fa-folder', color:'#14b8a6', t:'cabinet.title', d:'admin.competition.tools_cab_desc'}, {id:'survey', icon:'fa-question-circle', color:'#f59e0b', t:'survey.title', d:'admin.competition.tools_sur_desc'}]" ng-if="!tool.cond || $parent[tool.cond]")
+        .col-md-4.px-2.mb-3(ng-repeat="tool in [{id:'documents', icon:'fa-file-alt', color:'#6366f1', t:'document.admin.title', d:'admin.competition.tools_doc_desc'},{id:'mails', icon:'fa-mail-bulk', color:'#f43f5e', t:'mail.home.title', d:'admin.competition.tools_mail_desc', cond: mailEnable},{id:'registration', icon:'fa-pen-fancy', color:'#ec4899', t:'registration.title', d:'admin.competition.tools_reg_desc', cond: mailEnable},{id:'reservation', icon:'fa-calendar-day', color:'#8b5cf6', t:'reservation.title', d:'admin.competition.tools_res_desc'},{id:'cabinet', icon:'fa-folder', color:'#14b8a6', t:'cabinet.title', d:'admin.competition.tools_cab_desc'},{id:'survey', icon:'fa-question-circle', color:'#f59e0b', t:'survey.title', d:'admin.competition.tools_sur_desc'}]" ng-if="tool.cond !== false")
           .action-card-character.hover-lift.h-100(ng-click="go('/admin/' + competitionId + '/' + tool.id)" style="padding: 1rem; position: relative; overflow: hidden;")
             i.fas.bg-icon(ng-class="tool.icon" style="font-size: 3.5rem; opacity: 0.03; position: absolute; right: -5px; bottom: -5px;")
             .icon-box-premium.mb-2(style="background: rgba(248, 250, 252, 0.8); color: {{tool.color}}; width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center;")
