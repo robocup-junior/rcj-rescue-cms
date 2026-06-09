@@ -173,7 +173,6 @@ block main_content
                 .time-capsule-icon
                   i.fas.fa-clock
                 .time-capsule-label
-                  span(ng-if="!showTimeSetting") {{duration}}s
                   span(ng-if="showTimeSetting") {{"admin.lineMapEditor.duration" | translate}}
                 
                 .dimension-spinner(ng-show="showTimeSetting", ng-click="$event.stopPropagation()")
@@ -184,8 +183,14 @@ block main_content
                     i.fas.fa-plus
 
           .col-auto.px-3.border-left.d-flex.align-items-center
-            button.calc-btn-premium(type='button', ng-click='openMaxScore()', uib-tooltip='Calculate Max Score')
-              i.fas.fa-calculator
+            .premium-tool-group
+              button.status-icon-toggle(type='button', ng-click="finished = !finished", ng-class="{'active': finished}", uib-tooltip='{{"admin.lineMapEditor.finishedTooltip" | translate}}')
+                i.fas.fa-clipboard-check
+
+          .col-auto.px-3.border-left.d-flex.align-items-center
+            .premium-tool-group
+              button.calc-btn-premium(type='button', ng-click='openMaxScore()', uib-tooltip='Calculate Max Score')
+                i.fas.fa-calculator
       
       .row.no-gutters.flex-nowrap.align-items-stretch(style="height: calc(100vh - 120px); min-height: 600px; margin-bottom: -20px; width: 100%;")
         .col.flex-grow-1.mr-3.h-100(style="min-width: 0;")
@@ -262,19 +267,15 @@ block main_content
 
   .row.mt-5
     .col-12
-      .modern-card
-        .modern-card-header(data-toggle="collapse", data-target="#outputCollapse", style="cursor: pointer;")
-          i.fas.fa-file-export.mr-2
-          | {{"admin.mazeMapEditor.advancedTools" | translate}}
-          .ml-auto
-            i.fas.fa-chevron-down
+        .modern-card
+          .modern-card-header(data-toggle="collapse", data-target="#outputCollapse", style="cursor: pointer;")
+            i.fas.fa-file-export.mr-2
+            | {{"admin.mazeMapEditor.advancedTools" | translate}}
+            .ml-auto
+              i.fas.fa-chevron-down
         
         #outputCollapse.collapse.show
           .modern-card-body.bg-light
-            label.settings-checkbox-container(ng-class="{'active': finished}")
-              input#isFinished(type='checkbox',ng-model='finished')
-              i.fas.fa-flag-checkered.mr-2
-              Span {{"admin.lineMapEditor.finished" | translate}}
             .print-section
               label.section-title {{ 'admin.mazeMapAdmin.print.outputContent' | translate }}
               .option-tiles

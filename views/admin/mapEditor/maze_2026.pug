@@ -140,14 +140,10 @@ block main_content
                     i.fas.fa-plus
           .col-auto.px-3.border-left.d-flex.align-items-center
             .premium-tool-group
-              button.calc-btn-premium(type='button', ng-click='openMaxScore()', title='Calculate Max Score')
-                i.fas.fa-calculator
-              
               .time-capsule(ng-class="{'expanded': showTimeSetting}", ng-click="showTimeSetting = !showTimeSetting")
                 .time-capsule-icon
                   i.fas.fa-clock
                 .time-capsule-label
-                  span(ng-if="!showTimeSetting") {{duration}}s
                   span(ng-if="showTimeSetting") {{"admin.mazeMapEditor.time" | translate}}
                 
                 .dimension-spinner(ng-show="showTimeSetting", ng-click="$event.stopPropagation()")
@@ -156,6 +152,14 @@ block main_content
                   input.spinner-input(type='number', ng-model='duration', min='0', step='30')
                   button.btn-spin(type='button', ng-click="duration = (duration || 0) + 30")
                     i.fas.fa-plus
+          .col-auto.px-3.border-left.d-flex.align-items-center
+            .premium-tool-group
+              button.status-icon-toggle(type='button', ng-click="finished = !finished", ng-class="{'active': finished}", uib-tooltip='{{"admin.mazeMapEditor.finishedTooltip" | translate}}')
+                i.fas.fa-clipboard-check
+          .col-auto.px-3.border-left.d-flex.align-items-center
+            .premium-tool-group
+              button.calc-btn-premium(type='button', ng-click='openMaxScore()', title='Calculate Max Score')
+                i.fas.fa-calculator
 
       .d-flex.mb-3
         .floor-switcher-vertical.d-flex.flex-column.p-2.bg-dark.border-right(style="min-width: 60px; border-top-left-radius: 8px; border-bottom-left-radius: 8px;")
@@ -276,10 +280,6 @@ block main_content
         
         #outputCollapse.collapse
           .modern-card-body.bg-light
-            label.settings-checkbox-container(ng-class="{'active': finished}")
-              input#isFinished(type='checkbox',ng-model='finished')
-              i.fas.fa-flag-checkered.mr-2
-              Span {{"admin.lineMapEditor.finished" | translate}}
             .print-section
               label.section-title {{ 'admin.mazeMapAdmin.print.outputContent' | translate }}
               .option-tiles

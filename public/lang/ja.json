@@ -759,6 +759,7 @@
             "length": "最大長さ（縦）：",
             "check": "チェックポイントマーカーの数：",
             "finished": "マップが完成した（競技で使用する準備が整った）",
+            "finishedTooltip": "作成完了・使用準備完了を示します。マップの作成が終わったらチェックしてください。",
             "tileset": "タイルセットを選択",
             "item": "各種項目",
             "bump": "スピードバンプ：",
@@ -831,6 +832,7 @@
         "mazeMapEditor": {
             "dimensions": "マップサイズ",
             "time": "制限時間",
+            "finishedTooltip": "作成完了・使用準備完了を示します。マップの作成が終わったらチェックしてください。",
             "mapName": "マップ名",
             "advancedTools": "高度なツールと出力",
             "scoreSheetPreparation": "スコアシート準備",

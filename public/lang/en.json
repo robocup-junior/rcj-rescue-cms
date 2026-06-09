@@ -761,6 +761,7 @@
             "length": "Max length",
             "check": "Number of checkpoint markers:",
             "finished": "Finished for using in runs",
+            "finishedTooltip": "Marks the map as complete and ready to use. Please check this when map creation is finished.",
             "tileset": "Select tile set",
             "item": "Change items",
             "bump": "Speedbumps: ",
@@ -833,6 +834,7 @@
         "mazeMapEditor": {
             "dimensions": "DIMENSIONS",
             "time": "TIME",
+            "finishedTooltip": "Marks the map as complete and ready to use. Please check this when map creation is finished.",
             "mapName": "Map Name",
             "advancedTools": "ADVANCED TOOLS AND OUTPUT",
             "scoreSheetPreparation": "SCORE SHEET PREPARATION",
