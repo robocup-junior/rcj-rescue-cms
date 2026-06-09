@@ -314,7 +314,8 @@ app.controller('DocumentFormController', ['$scope', '$uibModal', '$log', '$http'
         });
     }
 
-
+    $scope.editable = editable;
+    
     $scope.deadline = function(){
         if (!deadline) return;
         let d = new Date(Number(deadline) * 1000);
