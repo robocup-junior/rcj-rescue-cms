@@ -80,7 +80,7 @@ block main_content
             i.fas(ng-class="{'fa-route': league.type=='line', 'fa-border-all': league.type=='maze', 'fa-desktop': league.type=='simulation'}")
             | {{league.name}}
           .d-flex.justify-content-between
-            button.btn-premium.btn-premium-secondary.flex-grow-1(ng-disabled="league.type == 'simulation'" ng-click="go('/admin/' + competitionId + '/' + league.league + '/maps'); $event.stopPropagation();" style="padding: 0.8rem 0.5rem; font-size: 0.85rem; margin-right: 1.25rem;")
+            button.btn-premium.btn-premium-secondary.flex-grow-1(ng-if="league.type != 'simulation'" ng-click="go('/admin/' + competitionId + '/' + league.league + '/maps'); $event.stopPropagation();" style="padding: 0.8rem 0.5rem; font-size: 0.85rem; margin-right: 1.25rem;")
               i.fas.fa-ruler-combined
               | {{'admin.competition.maps_short' | translate}}
             button.btn-premium.btn-premium-primary.flex-grow-1(style="padding: 0.8rem 0.5rem; font-size: 0.85rem;" ng-style="{'background': 'var(--league-color)', 'borderColor': 'var(--league-color)'}")
