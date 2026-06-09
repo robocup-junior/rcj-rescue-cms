@@ -218,7 +218,7 @@ block main_content
         //- Tile Palette Section
         .col-auto.h-100(style="width: 360px;")
           .modern-card(style="height: 100%; display: flex; flex-direction: column; margin-bottom: 0;")
-            .modern-card-header.py-2.px-3
+            .modern-card-header.py-3.px-3
               .d-flex.justify-content-between.align-items-center.w-100
                 span.small.font-weight-bold.text-uppercase.letter-spacing-1
                   i.fas.fa-palette.mr-2
@@ -271,6 +271,10 @@ block main_content
         
         #outputCollapse.collapse.show
           .modern-card-body.bg-light
+            label.settings-checkbox-container(ng-class="{'active': finished}")
+              input#isFinished(type='checkbox',ng-model='finished')
+              i.fas.fa-flag-checkered.mr-2
+              Span {{"admin.lineMapEditor.finished" | translate}}
             .print-section
               label.section-title {{ 'admin.mazeMapAdmin.print.outputContent' | translate }}
               .option-tiles

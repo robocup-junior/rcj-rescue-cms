@@ -464,3 +464,59 @@ tr:hover .grid-manage-row .btn-grid-manage {
     box-shadow: none;
     background: transparent;
 }
+
+.settings-checkbox-container {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  user-select: none;
+  font-weight: 700;
+}
+
+.settings-checkbox-container:hover {
+  border-color: #cbd5e1;
+  background: #f1f5f9;
+}
+
+.settings-checkbox-container input[type="checkbox"] {
+  display: none;
+}
+
+.settings-checkbox-container.active {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1e40af;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+}
+
+.settings-checkbox-container.active i {
+  color: #3b82f6 !important;
+}
+
+.settings-checkbox-container.active::after {
+  content: '\f058'; /* fa-check-circle */
+  font-family: "Font Awesome 5 Free";
+  font-weight: 900;
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: white;
+  color: #3b82f6;
+  font-size: 1.1rem;
+  line-height: 1;
+  border-radius: 50%;
+  z-index: 10;
+}
+
+.settings-checkbox-container.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  background: #f1f5f9;
+  pointer-events: none;
+}
