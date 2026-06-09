@@ -1,6 +1,7 @@
 var xmlHttp;
+var obj = [];
 
-var app = angular.module("RunAdmin", ['ngTouch','pascalprecht.translate', 'ngCookies']);
+var app = angular.module("RunAdmin", ['ngTouch','pascalprecht.translate', 'ngCookies', 'ui.select']);
 app.controller("RunAdminController", ['$scope', '$http', function ($scope, $http) {
     $scope.competitionId = competitionId;
     $scope.leagueId = leagueId;
@@ -8,17 +9,20 @@ app.controller("RunAdminController", ['$scope', '$http', function ($scope, $http
     $http.get(`/api/competitions/${competitionId}`).then(function (response) {
         $scope.competition = response.data;
         $scope.league = response.data.leagues.find((l) => l.league == leagueId);
-
+    
         $http.get(`/api/competitions/${competitionId}/${leagueId}/teams`).then(function (response) {
             $scope.teams = response.data
+            $scope.generator.selectedTeams = response.data.slice();
         })
         
         $http.get(`/api/competitions/${competitionId}/rounds`).then(function (response) {
             $scope.rounds = response.data
+            $scope.generator.selectedRounds = response.data.slice();
         })
         
         $http.get(`/api/competitions/${competitionId}/fields`).then(function (response) {
             $scope.fields = response.data
+            $scope.generator.selectedFields = response.data.slice();
         })
         
         if ($scope.league.type != 'simulation') {
@@ -29,6 +33,8 @@ app.controller("RunAdminController", ['$scope', '$http', function ($scope, $http
                         $scope.maps.push(response.data[i]);
                     }
                 }
+    
+                $scope.generator.selectedMaps = $scope.maps.slice();
             })
         }
     })
@@ -79,6 +85,271 @@ app.controller("RunAdminController", ['$scope', '$http', function ($scope, $http
     }
     $scope.go = function (path) {
         window.location = path
+    }
+    
+    $scope.mode = 'csv';
+    
+    $scope.generator = {
+        scheduleMode: 'fixedMap',
+        selectedTeams: [],
+        selectedRounds: [],
+        selectedFields: [],
+        selectedMaps: [],
+        slotMinutes: 12,
+        smallBreakMultiplier: 3,
+        lunchBreakMinutes: 90,
+        startTime: '',
+        totalDays: 2
+    };
+    
+    $scope.generatedRuns = [];
+
+    function formatDate(date) {
+        const y = date.getFullYear();
+        const m = String(date.getMonth() + 1).padStart(2, '0');
+        const d = String(date.getDate()).padStart(2, '0');
+        const h = String(date.getHours()).padStart(2, '0');
+        const min = String(date.getMinutes()).padStart(2, '0');
+        return `${y}/${m}/${d} ${h}:${min}`;
+    }
+
+    $scope.generateSchedule = function () {
+        if (!$scope.teams || !$scope.rounds || !$scope.fields) {
+            swal("Error", "Teams, rounds, or fields not loaded yet!", "error");
+            return;
+        }
+
+        if ($scope.league.type != 'simulation' && (!$scope.maps || !$scope.maps.length)) {
+            swal("Error", "Maps not loaded yet!", "error");
+            return;
+        }
+
+        const teams = ($scope.generator.selectedTeams || []).map(t => t.name);
+
+        const rounds = ($scope.generator.selectedRounds || []).map(r => r.name);
+        const fields = ($scope.generator.selectedFields || []).map(f => f.name);
+        const maps = ($scope.generator.selectedMaps || []).map(m => m.name);
+        
+        if (!teams.length || !rounds.length || !fields.length) {
+            swal('Error', 'Please select at least one team, one round and one field.', 'error');
+            return;
+        }
+        
+        if ($scope.league.type != 'simulation' && !maps.length) {
+            swal('Error', 'Please select at least one map.', 'error');
+            return;
+        }
+
+        if ($scope.league.type != 'simulation' && rounds.length !== maps.length) {
+            swal('Error', 'Number of selected rounds must match number of selected maps.', 'error');
+            return;
+        }
+        
+        const numFields = fields.length;
+        const totalDays = parseInt($scope.generator.totalDays) || 2;
+        const numRounds = rounds.length;
+        const numNormGroups = $scope.league.type != 'simulation' ? maps.length : rounds.length;
+
+        const scheduleMode = $scope.generator.scheduleMode || 'fixedMap';
+
+        if (numRounds % numFields !== 0) {
+            swal('Error', 'For a valid schedule, the number of rounds must be divisible by the number of selected fields.', 'error');
+            return;
+        }
+
+        const expectedDays = numRounds / numFields;
+        if (totalDays !== expectedDays) {
+            swal('Error', `Selected days (${totalDays}) must equal rounds / fields (${expectedDays}).`, 'error');
+            return;
+        }
+
+        const roundsPerDay = Math.floor(numRounds / totalDays);
+        const slotMinutes = parseInt($scope.generator.slotMinutes) || 12;
+        const smallBreakMultiplier = parseInt($scope.generator.smallBreakMultiplier) || 3;
+        const lunchBreakMinutes = parseInt($scope.generator.lunchBreakMinutes) || 90;
+
+        if (!numFields || !numRounds || !roundsPerDay) {
+            swal("Error", "Invalid generator configuration!", "error");
+            return;
+        }
+
+        let start = new Date($scope.generator.startTime);
+        if (isNaN(start.getTime())) {
+            start = new Date();
+        }
+
+        const originalStartHour = start.getHours();
+        const originalStartMinute = start.getMinutes();
+
+        const shuffledTeams = teams.slice();
+        for (let i = shuffledTeams.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            const tmp = shuffledTeams[i];
+            shuffledTeams[i] = shuffledTeams[j];
+            shuffledTeams[j] = tmp;
+        }
+
+        let columns = [];
+        for (let i = 0; i < numFields; i++) {
+            columns.push([]);
+        }
+        shuffledTeams.forEach(function (team, idx) {
+            columns[idx % numFields].push(team);
+        });
+
+        const rows = [];
+        const objRows = [];
+
+        const header = ['Round', 'Team name'];
+        if ($scope.league.type != 'simulation') {
+            header.push('Map name');
+        }
+        header.push('Field name', 'Start Time', 'Normalization Group ID');
+        rows.push(header);
+
+        let dayCount = 0;
+
+        for (let r = 0; r < numRounds; r++) {
+            const currentRoundInDay = r % roundsPerDay;
+
+            for (let i = 0; i < numFields; i++) {
+                if (columns[i].length > 0) {
+                    columns[i] = columns[i].slice(1).concat(columns[i].slice(0, 1));
+                }
+            }
+
+            let shiftCount;
+            if (numFields === 4 && totalDays === 2) {
+                const shiftCountList = [
+                    [0, 3, 1, 2],
+                    [2, 0, 1, 3]
+                ];
+                shiftCount = shiftCountList[dayCount] ? shiftCountList[dayCount][r % numFields] : r % numFields;
+            } else {
+                shiftCount = (dayCount + r) % numFields;
+            }
+
+            // fixedMap:
+            //   Round defines map/normalization group.
+            // scrambled:
+            //   Field defines map/normalization group and teams rotate between them.
+            const shiftedColumns = columns.slice(shiftCount).concat(columns.slice(0, shiftCount));
+            const maxLen = Math.max.apply(null, columns.map(function (column) { return column.length; }));
+
+            for (let slot = 0; slot < maxLen; slot++) {
+                const slotTime = new Date(start);
+
+                for (let idx = 0; idx < numFields; idx++) {
+                    const teamName = shiftedColumns[idx][slot] || '';
+                    if (teamName === '') {
+                        continue;
+                    }
+
+                    const roundName = rounds[r];
+                    let normId;
+                    let mapName;
+                    let fieldName;
+
+                    if (scheduleMode === 'fixedMap') {
+                        normId = r + 1;
+                        mapName = $scope.league.type != 'simulation' ? maps[r] : '';
+                        fieldName = fields[idx];
+                    } else {
+                        normId = idx + 1 + (numFields * dayCount);
+
+                        fieldName = fields[idx];
+
+                        mapName = $scope.league.type != 'simulation'
+                            ? (maps[normId - 1] || maps[(normId - 1) % maps.length])
+                            : '';
+                    }
+                    const startTime = formatDate(slotTime);
+
+                    if ($scope.league.type != 'simulation') {
+                        rows.push([roundName, teamName, mapName, fieldName, startTime, normId]);
+                    } else {
+                        rows.push([roundName, teamName, fieldName, startTime, normId]);
+                    }
+
+                    objRows.push({
+                        round: roundName,
+                        team: teamName,
+                        map: mapName,
+                        field: fieldName,
+                        startTime: startTime,
+                        normalizationGroup: normId
+                    });
+                }
+
+                start = new Date(start.getTime() + slotMinutes * 60000);
+            }
+
+            if ((r + 1) % roundsPerDay !== 0) {
+                if ((r + 1) % roundsPerDay === 2) {
+                    start = new Date(start.getTime() + lunchBreakMinutes * 60000);
+                } else {
+                    start = new Date(start.getTime() + (slotMinutes * smallBreakMultiplier * 60000));
+                }
+            }
+
+            if ((r + 1) % roundsPerDay === 0 && r !== numRounds - 1) {
+                const nextDay = new Date(start);
+                nextDay.setDate(nextDay.getDate() + 1);
+                nextDay.setHours(originalStartHour, originalStartMinute, 0, 0);
+                start = new Date(nextDay.getTime() + 60 * 60000);
+                dayCount++;
+            }
+        }
+
+        obj = rows;
+        $scope.generatedRuns = objRows;
+        renderPreview();
+    }
+
+    // --- Preview Table Renderer ---
+    function renderPreview() {
+        var result = document.getElementById('result');
+        if (!obj || !obj.length) {
+            result.innerHTML = '';
+            return;
+        }
+        var insert = '<table class="custom"><thead><tr><th>Round</th><th>Team name</th>';
+        if ($scope.league && $scope.league.type != 'simulation') {
+            insert += '<th>Map name</th>';
+        }
+        insert += '<th>Field name</th><th>Start Time</th><th>Normalization Group ID</th></tr></thead><tbody>';
+        for (var i = 1; i < obj.length; i++) {
+            insert += '<tr>';
+            insert += '<td>';
+            insert += obj[i][0];
+            insert += '</td>';
+
+            insert += '<td>';
+            insert += obj[i][1];
+            insert += '</td>';
+
+            if ($scope.league && $scope.league.type != 'simulation') {
+                insert += '<td>';
+                insert += obj[i][2];
+                insert += '</td>';
+            }
+
+            insert += '<td>';
+            insert += obj[i][$scope.league && $scope.league.type != 'simulation' ? 3 : 2];
+            insert += '</td>';
+
+            insert += '<td>';
+            insert += new Date(obj[i][$scope.league && $scope.league.type != 'simulation' ? 4 : 3]);
+            insert += '</td>';
+
+            insert += '<td>';
+            insert += obj[i][$scope.league && $scope.league.type != 'simulation' ? 5 : 4];
+            insert += '</td>';
+
+            insert += '</tr>';
+        }
+        insert += '</tbody></table>';
+        result.innerHTML = insert;
     }
 
     
@@ -155,46 +426,7 @@ app.controller("RunAdminController", ['$scope', '$http', function ($scope, $http
                     // 行単位で配列にする
                     obj = $.csv()(reader.result);
                     console.log(obj)
-
-                    // tableで出力
-                    var insert = '<table class="custom"><thead><tr><th>Round</th><th>Team name</th>';
-                    if ($scope.league.type != 'simulation') {
-                        insert += '<th>Map name</th>';
-                    }
-                    insert += '<th>Field name</th><th>Start Time</th><th>Normalization Group ID</th></tr></thead><tbody>';
-                    
-                    for (var i = 1; i < obj.length; i++) {
-                        insert += '<tr>';
-                        insert += '<td>';
-                        insert += obj[i][0];
-                        insert += '</td>';
-
-                        insert += '<td>';
-                        insert += obj[i][1];
-                        insert += '</td>';
-
-                        if ($scope.league.type != 'simulation') {
-                            insert += '<td>';
-                            insert += obj[i][2];
-                            insert += '</td>';
-                        }
-
-                        insert += '<td>';
-                        insert += obj[i][3];
-                        insert += '</td>';
-
-                        insert += '<td>';
-                        insert += new Date(obj[i][4]);
-                        insert += '</td>';
-
-                        insert += '<td>';
-                        insert += obj[i][5];
-                        insert += '</td>';
-
-                        insert += '</tr>';
-                    }
-                    insert += '</tbody></table>';
-                    result.innerHTML = insert;
+                    renderPreview();
                 }
 
                 // ファイル読み取りを実行
