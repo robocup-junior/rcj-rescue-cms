@@ -198,8 +198,8 @@ block content
           .col-md-12
             label Schedule Mode
             select.form-control(ng-model='generator.scheduleMode')
-              option(value='fixedMap') Fixed Map / Fixed Normalization Group
               option(value='scrambled') Scrambled / Rotating Normalization Groups
+              option(value='fixedMap') Fixed Map / Fixed Normalization Group
 
             small.form-text.text-muted(ng-if="generator.scheduleMode == 'fixedMap'")
               | Fixed Map Mode: Each round corresponds to exactly one map and normalization group. Teams stay on the same challenge for the entire round and fields are only used as parallel execution locations.

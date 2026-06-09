@@ -90,7 +90,7 @@ app.controller("RunAdminController", ['$scope', '$http', function ($scope, $http
     $scope.mode = 'csv';
     
     $scope.generator = {
-        scheduleMode: 'fixedMap',
+        scheduleMode: 'scrambled',
         selectedTeams: [],
         selectedRounds: [],
         selectedFields: [],
