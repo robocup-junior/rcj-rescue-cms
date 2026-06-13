@@ -20,20 +20,26 @@ async function ensureMapImages(runs) {
     fs.mkdirSync(tmpDir, { recursive: true });
   }
 
-  const mapIds = new Set();
+  const mapKeys = new Set();
   for (const run of runs) {
-    if (run.map && run.map._id) {
-      if (!mapIds.has(run.map._id.toString())) {
-        mapIds.add(run.map._id.toString());
-        // Determine rule - use run's league rule if possible, else default to 2026
+    if (run.map) {
+      const mapKey = run.map._id ? run.map._id.toString() : `inline-${runs.indexOf(run)}`;
+      if (!mapKeys.has(mapKey)) {
+        mapKeys.add(mapKey);
         let rule = '2026';
-        if (run.competition && run.competition.leagues) {
+        if (run.competition && run.competition.leagues && run.team) {
           const league = run.competition.leagues.find((l) => l.league == run.team.league);
           if (league) rule = league.rule;
         }
-        
-        const buffer = await lineSSR.generatePNG(run.map, rule);
+
+        run.mapImageBuffer = await lineSSR.generatePNG(run.map, rule);
+        if (!run.map._id) continue;
+
+        const buffer = run.mapImageBuffer;
         fs.writeFileSync(path.join(tmpDir, `${run.map._id}.png`), buffer);
+      } else if (run.map._id) {
+        const existingPath = path.join(tmpDir, `${run.map._id}.png`);
+        if (fs.existsSync(existingPath)) run.mapImageBuffer = fs.readFileSync(existingPath);
       }
     }
   }

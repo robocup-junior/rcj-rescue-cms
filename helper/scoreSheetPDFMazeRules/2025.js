@@ -141,7 +141,17 @@ function drawRun(doc, config, scoringRun) {
   );
 
   // Draw map image
-  if (isExistFile(`${__dirname}/../../tmp/course/${scoringRun.map._id}.png`)) {
+  if (scoringRun.mapImageBuffer) {
+    pdf.drawImage(
+      doc,
+      30,
+      92,
+      scoringRun.mapImageBuffer,
+      418,
+      475,
+      'center'
+    );
+  } else if (isExistFile(`${__dirname}/../../tmp/course/${scoringRun.map._id}.png`)) {
     pdf.drawImage(
       doc,
       30,
