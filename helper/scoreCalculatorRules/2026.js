@@ -179,7 +179,9 @@ module.exports.calculateMazeScore = function (run) {
 
       if (blueVisits > 0) {
         score +=  Math.max(0, MAX_BLUE_BONUS - blueVisits * BLUE_VISIT_PENALTY);
-        blueTilesVisited++;
+        if (Number(blueVisits) === 1) {
+          blueTilesVisited++;
+        }
       }
     }
 

@@ -259,7 +259,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.blueTilesVisited = function () {
         let count = 0;
         for (const key in $scope.tiles) {
-            if ($scope.tiles[key].scoredItems.blue > 0) {
+            if (Number($scope.tiles[key].scoredItems.blue) === 1) {
                 count++;
             }
         }
