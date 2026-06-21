@@ -1010,3 +1010,50 @@ tile,
 .time-capsule.expanded .time-capsule-icon {
     margin-right: 8px !important;
 }
+
+/* Compact map settings: expand only when editing */
+.compact-map-settings .time-capsule {
+    width: 38px !important;
+    min-width: 38px !important;
+    max-width: 38px;
+    height: 38px !important;
+    padding: 2px !important;
+    border-radius: 50% !important;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.compact-map-settings .time-capsule.expanded {
+    width: auto !important;
+    max-width: none;
+    min-width: 220px !important;
+    border-radius: 20px !important;
+    justify-content: flex-start;
+    padding: 2px 4px 2px 2px !important;
+}
+
+.compact-map-settings .time-capsule .time-capsule-icon {
+    margin-right: 0 !important;
+}
+
+.compact-map-settings .time-capsule.expanded .time-capsule-icon {
+    margin-right: 8px !important;
+}
+
+.compact-map-settings .time-capsule .time-capsule-label,
+.compact-map-settings .time-capsule .dimension-spinner {
+    display: none;
+}
+
+.compact-map-settings .time-capsule.expanded .time-capsule-label,
+.compact-map-settings .time-capsule.expanded .dimension-spinner {
+    display: flex;
+}
+
+.compact-map-settings .time-capsule.expanded .time-capsule-label {
+    align-items: center;
+    max-width: 92px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

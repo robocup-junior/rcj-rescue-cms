@@ -139,13 +139,12 @@ block main_content
                   button.btn-spin(type='button', ng-click="length = length + 1")
                     i.fas.fa-plus
           .col.px-3.border-left
-            .d-flex.align-items-center.justify-content-end.gap-4
+            .d-flex.align-items-center.justify-content-end.gap-4.compact-map-settings
               //- Live Victims Capsule
-              .time-capsule(ng-class="{'expanded': showLiveVSetting}", ng-click="showLiveVSetting = !showLiveVSetting")
+              .time-capsule(ng-class="{'expanded': showLiveVSetting}", ng-click="showLiveVSetting = !showLiveVSetting", uib-tooltip='{{"admin.lineMapEditor.liveVictim" | translate}}: {{liveV}}')
                 .time-capsule-icon
                   i.fas.fa-heart.text-danger
                 .time-capsule-label
-                  span(ng-if="!showLiveVSetting") {{liveV}}
                   span(ng-if="showLiveVSetting") {{"admin.lineMapEditor.liveVictim" | translate}}
                 .dimension-spinner(ng-show="showLiveVSetting", ng-click="$event.stopPropagation()")
                   button.btn-spin(type='button', ng-click="liveV = liveV > 0 ? liveV - 1 : 0")
@@ -155,11 +154,10 @@ block main_content
                     i.fas.fa-plus
               
               //- Dead Victims Capsule
-              .time-capsule(ng-class="{'expanded': showDeadVSetting}", ng-click="showDeadVSetting = !showDeadVSetting")
+              .time-capsule(ng-class="{'expanded': showDeadVSetting}", ng-click="showDeadVSetting = !showDeadVSetting", uib-tooltip='{{"admin.lineMapEditor.deadVictim" | translate}}: {{deadV}}')
                 .time-capsule-icon
                   i.fas.fa-skull.text-secondary
                 .time-capsule-label
-                  span(ng-if="!showDeadVSetting") {{deadV}}
                   span(ng-if="showDeadVSetting") {{"admin.lineMapEditor.deadVictim" | translate}}
                 .dimension-spinner(ng-show="showDeadVSetting", ng-click="$event.stopPropagation()")
                   button.btn-spin(type='button', ng-click="deadV = deadV > 0 ? deadV - 1 : 0")
@@ -169,7 +167,7 @@ block main_content
                     i.fas.fa-plus
 
               //- Time Capsule
-              .time-capsule(ng-class="{'expanded': showTimeSetting}", ng-click="showTimeSetting = !showTimeSetting")
+              .time-capsule(ng-class="{'expanded': showTimeSetting}", ng-click="showTimeSetting = !showTimeSetting", uib-tooltip='{{"admin.lineMapEditor.duration" | translate}}: {{duration}}s')
                 .time-capsule-icon
                   i.fas.fa-clock
                 .time-capsule-label
