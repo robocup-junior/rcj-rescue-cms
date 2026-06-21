@@ -2168,7 +2168,7 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
                             randomOffset = [0, orgRound(getRandomArbitrary(-0.1 * tileScale[2], 0.1 * tileScale[2]), 0.001)]
                         }
                     }
-
+                    randomOffset=[0,0] //remove random offset because its causing too many issues with CT
                     if (tile.wall_token_type >= 5){ //hazards (includes HUMAN_CT_FAKE=9)
                         humanPos[0] = humanPos[0] + hazardOffset[tile.wall_token_place][0] + randomOffset[0]
                         humanPos[1] = humanPos[1] + hazardOffset[tile.wall_token_place][1] + randomOffset[1]
