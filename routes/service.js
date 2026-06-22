@@ -22,6 +22,10 @@ router.get('/editor/simulation/2025', async function (req, res, next) {
   res.render('sim_editor/sim_editor_2025', { user: req.user, pubService: true });
 });
 
+router.get('/editor/simulation/2026', async function (req, res, next) {
+  res.render('sim_editor/sim_editor_2026', { user: req.user, pubService: true });
+});
+
 router.get('/editor/line/:rule', function (req, res, next) {
   const { rule } = req.params;
   res.render(`admin/mapEditor/line_${rule}`, { user: req.user, pubService: true, leagueId: "Line" });

@@ -1,0 +1,206 @@
+<style>
+  .innerTileImg {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .modal-dialog {
+    margin: auto;
+    width: 80vw; 
+    min-width: 80vw;
+  }
+
+</style>
+<div class="modal-header">
+  <h3 class="modal-title">{{"admin.simMapEditor.item" | translate}}</h3>
+</div>
+<div class="modal-body" >
+  <ul>
+    <li>
+      <input type="checkbox" ng-model="cell.tile.checkpoint" id="isCheckpoint"><label class="checkbox" for="isCheckpoint">{{"admin.simMapEditor.cp" | translate}}</label>
+    </li>
+    <li>
+      <input type="checkbox" ng-model="cell.tile.black" id="isBlack" ng-change="blackChanged()"><label class="checkbox" for="isBlack">{{"admin.simMapEditor.black" | translate}}</label>
+    </li>
+    <li>
+      <input type="checkbox" ng-model="cell.tile.swamp" id="isSwamp"><label class="checkbox" for="isSwamp">{{"admin.simMapEditor.swamp" | translate}}</label>
+    </li>
+    <li>
+      <input type="checkbox" ng-model="cell.tile.obstacle" id="isObstacle"><label class="checkbox" for="isObstacle">{{"admin.simMapEditor.obstacle" | translate}}</label>
+    </li>
+    <li>
+      <label for="singleSelect">{{"admin.simMapEditor.cellColor" | translate}}</label>
+      <select name="singleSelect" ng-model="cell.tile.color" id="cellColor">
+        <option value="">None</option>
+        <option value="#1a1ae6">Blue (Room 1 ←→ Room 2)</option>
+        <option value="#4d1a99">Purple (Room 2 ←→ Room 3)</option>
+        <option value="#e71a1a">Red (Room 3 ←→ Room 4)</option>
+        <option value="#08D508">Green (Room 1 ←→ Room 4)</option>
+        <option value="#e7991a">Orange (Room 2 ←→ Room 4)</option>
+        <option value="#e7e71a">Yellow (Room 1 ←→ Room 3)</option>
+      </select>
+    </li>
+  </ul>
+
+  <input type="checkbox" ng-model="isStart" ng-disabled="isStart" ng-change="startChanged()" id="isStart"><label class="checkbox" for="isStart">{{"admin.simMapEditor.start" | translate}}</label>
+  
+  <h5>{{"admin.simMapEditor.placement" | translate}}</h5>
+  <h5>{{"admin.simMapEditor.oneVictim" | translate}}</h5>
+
+  
+  <table align="center">
+    <tr align="center">
+      <th>&nbsp;</th>
+      <th><img src="/images/no_victims.png" alt="None" height="20"></th>
+      <th>Φ</th>
+      <th>Ψ</th>
+      <th>Ω</th>
+      <th><img src="/images/COG_nobg.png" alt="None" height="20"></th>
+    </tr>
+    <tr align="center">
+      <th>{{"admin.simMapEditor.top" | translate}}</th>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="None" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="H" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="S" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="U" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+        <td style="white-space: nowrap">
+          <input type="text" cognitive-input ng-model="cell.tile.cognitives.top_code" maxlength="5" style="display: inline-block; width:8ch" ng-click="cell.tile.victims={}; setCognitiveVictim(cell, 'top', cell.tile.cognitives.top_code)" ng-change="setCognitiveVictim(cell, 'top', cell.tile.cognitives.top_code)">
+        </td>
+    </tr>
+    <tr align="center">
+      <th>{{"admin.simMapEditor.bottom" | translate}}</th>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="None" style="display: block;"  ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="H" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="S" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="U" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+        <td style="white-space: nowrap">
+          <input type="text" cognitive-input ng-model="cell.tile.cognitives.bottom_code" maxlength="5" style="display: inline-block; width:8ch" ng-click="cell.tile.victims={}; setCognitiveVictim(cell, 'bottom', cell.tile.cognitives.bottom_code)" ng-change="setCognitiveVictim(cell, 'bottom', cell.tile.cognitives.bottom_code)">
+        </td>
+    </tr>
+    <tr align="center">
+      <th>{{"admin.simMapEditor.left" | translate}}</th>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="None" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="H" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="S" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="U" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+        <td style="white-space: nowrap">
+          <input type="text" cognitive-input ng-model="cell.tile.cognitives.left_code" maxlength="5" style="display: inline-block; width:8ch" ng-click="cell.tile.victims={}; setCognitiveVictim(cell, 'left', cell.tile.cognitives.left_code)" ng-change="setCognitiveVictim(cell, 'left', cell.tile.cognitives.left_code)">
+        </td>
+    </tr>
+    <tr align="center">
+      <th>{{"admin.simMapEditor.right" | translate}}</th>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="None" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="H" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="S" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="U" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+        <td style="white-space: nowrap">
+          <input type="text" cognitive-input ng-model="cell.tile.cognitives.right_code" maxlength="5" style="display: inline-block; width:8ch" ng-click="cell.tile.victims={}; setCognitiveVictim(cell, 'right', cell.tile.cognitives.right_code)" ng-change="setCognitiveVictim(cell, 'right', cell.tile.cognitives.right_code)">
+        </td>
+    </tr>
+  </table>
+  
+  <div style="text-align: center; margin-top: 20px">
+  <div style="margin: auto;">
+    {{"admin.simMapEditor.victimRotation" | translate}}
+    <input type="number" name="rotation-spinbox" ng-model="cell.tile.single_victim_rotation" min="0" max="359" value="0" step="1" style="display: inline-block;" ng-disabled="cell.tile.victim_is_fake || (cell.tile.cognitives && ((cell.tile.cognitives.top_code && cell.tile.cognitives.top_code.length === 5) || (cell.tile.cognitives.bottom_code && cell.tile.cognitives.bottom_code.length === 5) || (cell.tile.cognitives.left_code && cell.tile.cognitives.left_code.length === 5) || (cell.tile.cognitives.right_code && cell.tile.cognitives.right_code.length === 5)))">
+
+    {{"admin.simMapEditor.victimIsFake" | translate}}
+    <input type="checkbox" name="is-fake-checkbox" ng-model="cell.tile.victim_is_fake" style="display: inline-block;" ng-change="cell.tile.victim_is_fake && (cell.tile.single_victim_rotation = 0)" ng-disabled="cell.tile.cognitives && ((cell.tile.cognitives.top_code && cell.tile.cognitives.top_code.length === 5) || (cell.tile.cognitives.bottom_code && cell.tile.cognitives.bottom_code.length === 5) || (cell.tile.cognitives.left_code && cell.tile.cognitives.left_code.length === 5) || (cell.tile.cognitives.right_code && cell.tile.cognitives.right_code.length === 5))">
+  </div>
+  </div>
+
+  <br>
+  <div id="halfTileSlot" ng-if="cell && cell.tile && cell.tile.halfTile">
+    <h4>{{"admin.simMapEditor.innerTile" | translate}}</h4>
+    <table style="float: left; margin: 10px;">
+      <tr ng-repeat="r in range(5)">
+        <td ng-repeat="c in range(5)" ng-click="innerTileClick(r, c)" ng-class="{'inner-tile': (r % 2 == 1 && c % 2 == 1), 'wall': isHalfWall(r, c)}" style="position: relative;">
+            <img ng-src='/images/curvedWall/curved_NE.png' width="35" height="35" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.curve[(r - 1) + (c - 1) / 2] == 1" class="innerTileImg">
+            <img ng-src='/images/curvedWall/curved_SE.png' width="35" height="35" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.curve[(r - 1) + (c - 1) / 2] == 2" class="innerTileImg">
+            <img ng-src='/images/curvedWall/curved_SW.png' width="35" height="35" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.curve[(r - 1) + (c - 1) / 2] == 3" class="innerTileImg">
+            <img ng-src='/images/curvedWall/curved_NW.png' width="35" height="35" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.curve[(r - 1) + (c - 1) / 2] == 4" class="innerTileImg">
+            <img ng-src='/images/h_top.png'    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 1" class="innerTileImg">
+            <img ng-src='/images/h_right.png'  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 1" class="innerTileImg">
+            <img ng-src='/images/h_bottom.png' width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 1" class="innerTileImg">
+            <img ng-src='/images/h_left.png'   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 1" class="innerTileImg">
+            <img ng-src='/images/u_top.png'    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 2" class="innerTileImg">
+            <img ng-src='/images/u_right.png'  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 2" class="innerTileImg">
+            <img ng-src='/images/u_bottom.png' width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 2" class="innerTileImg">
+            <img ng-src='/images/u_left.png'   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 2" class="innerTileImg">
+            <img ng-src='/images/s_top.png'    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 3" class="innerTileImg">
+            <img ng-src='/images/s_right.png'  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 3" class="innerTileImg">
+            <img ng-src='/images/s_bottom.png' width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 3" class="innerTileImg">
+            <img ng-src='/images/s_left.png'   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 3" class="innerTileImg">
+            <img ng-src='/images/f_top.png'    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 5 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+0)" class="innerTileImg">
+            <img ng-src='/images/f_right.png'  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 5 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+1)" class="innerTileImg">
+            <img ng-src='/images/f_bottom.png' width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 5 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+2)" class="innerTileImg">
+            <img ng-src='/images/f_left.png'   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 5 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+3)" class="innerTileImg">
+            <img ng-src='/images/p_top.png'    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 6 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+0)" class="innerTileImg">
+            <img ng-src='/images/p_right.png'  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 6 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+1)" class="innerTileImg">
+            <img ng-src='/images/p_bottom.png' width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 6 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+2)" class="innerTileImg">
+            <img ng-src='/images/p_left.png'   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 6 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+3)" class="innerTileImg">
+            <img ng-src='/images/c_top.png'    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 7 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+0)" class="innerTileImg">
+            <img ng-src='/images/c_right.png'  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 7 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+1)" class="innerTileImg">
+            <img ng-src='/images/c_bottom.png' width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 7 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+2)" class="innerTileImg">
+            <img ng-src='/images/c_left.png'   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 7 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+3)" class="innerTileImg">
+            <img ng-src='/images/o_top.png'    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 8 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+0)" class="innerTileImg">
+            <img ng-src='/images/o_right.png'  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 8 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+1)" class="innerTileImg">
+            <img ng-src='/images/o_bottom.png' width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 8 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+2)" class="innerTileImg">
+            <img ng-src='/images/o_left.png'   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 8 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+3)" class="innerTileImg">
+            <span ng-show="r % 2 == 1 && c % 2 == 1 && halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+0)" ng-bind="halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+0)" style="position:absolute;top:1px;left:50%;transform:translateX(-50%);font-size:14px;font-weight:900;line-height:1;z-index:3;pointer-events:none;" ng-style="cogLetterStyle(halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+0))"></span>
+            <img ng-src='/images/cog_top.png'    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && halfWallCogIsFake(cell.tile, ((r-1)+(c-1)/2)*4+0)" class="innerTileImg">
+            <span ng-show="r % 2 == 1 && c % 2 == 1 && halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+1)" ng-bind="halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+1)" style="position:absolute;right:1px;top:50%;transform:translateY(-50%);font-size:14px;font-weight:900;line-height:1;z-index:3;pointer-events:none;" ng-style="cogLetterStyle(halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+1))"></span>
+            <img ng-src='/images/cog_right.png'  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && halfWallCogIsFake(cell.tile, ((r-1)+(c-1)/2)*4+1)" class="innerTileImg">
+            <span ng-show="r % 2 == 1 && c % 2 == 1 && halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+2)" ng-bind="halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+2)" style="position:absolute;bottom:1px;left:50%;transform:translateX(-50%);font-size:14px;font-weight:900;line-height:1;z-index:3;pointer-events:none;" ng-style="cogLetterStyle(halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+2))"></span>
+            <img ng-src='/images/cog_bottom.png' width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && halfWallCogIsFake(cell.tile, ((r-1)+(c-1)/2)*4+2)" class="innerTileImg">
+            <span ng-show="r % 2 == 1 && c % 2 == 1 && halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+3)" ng-bind="halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+3)" style="position:absolute;left:1px;top:50%;transform:translateY(-50%);font-size:14px;font-weight:900;line-height:1;z-index:3;pointer-events:none;" ng-style="cogLetterStyle(halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+3))"></span>
+            <img ng-src='/images/cog_left.png'   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && halfWallCogIsFake(cell.tile, ((r-1)+(c-1)/2)*4+3)" class="innerTileImg">
+        </td>
+    </tr>
+
+    </table>
+    <img ng-src='/images/curvedWall/halfWallVic.png' style="margin: 10px" width="115" height="115">
+    <br>
+
+    <table style="width: 100%; min-width: 100%; --row-width: 7ch">
+      <tr style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)">
+        <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)"></th>
+        <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)" ng-repeat="c in range(16)">{{c + 1}}</th>
+      </tr>
+      <tr>
+        <th style="width: var(--row-with)">Φ</th>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="1" style="display: block;" ng-change="cell.tile.halfWallCognitives[c] = ''"> </td>
+      </tr>
+      <tr>
+        <th style="width: var(--row-with)">Ψ</th>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="3" style="display: block;" ng-change="cell.tile.halfWallCognitives[c] = ''"> </td>
+      </tr>
+      <tr>
+        <th style="width: var(--row-with)">Ω</th>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="2" style="display: block;" ng-change="cell.tile.halfWallCognitives[c] = ''"> </td>
+      </tr>
+      <tr>
+        <th style="width: var(--row-with)">{{"admin.simMapEditor.cognitives" | translate}}</th>
+        <td ng-repeat="c in range(16)">
+          <input type="text" cognitive-input ng-model="cell.tile.halfWallCognitives[c]" maxlength="5" style="width: 100%; display: block;" ng-change="setHalfWallCognitive(cell, c, cell.tile.halfWallCognitives[c])">
+        </td>
+      </tr>
+      <tr>
+        <th style="width: var(--row-with)"><img src="/images/no_victims.png" alt="None" height="20"/></th>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="" style="display: block;" ng-change="cell.tile.halfWallCognitives[c] = ''"> </td>
+      </tr>
+      <tr>
+        <th style="width: var(--row-with)">{{"admin.simMapEditor.victimRotation" | translate}}</th>
+        <td ng-repeat="c in range(16)"> <input type="number" min="0" max="359" style="width: 100%; display: block;" ng-model="cell.tile.halfWallVicRots[c]" value="0" ng-disabled="cell.tile.halfWallVicFakes[c] || (cell.tile.halfWallCognitives && cell.tile.halfWallCognitives[c] && cell.tile.halfWallCognitives[c].length === 5)"> </td>
+      </tr>
+      <tr>
+        <th style="width: var(--row-with)">{{"admin.simMapEditor.victimIsFake" | translate}}</th>
+        <td ng-repeat="c in range(16)"> <input type="checkbox" style="width: 100%; display: block;" ng-model="cell.tile.halfWallVicFakes[c]" value="false" ng-change="cell.tile.halfWallVicFakes[c] && (cell.tile.halfWallVicRots[c] = 0)" ng-disabled="cell.tile.halfWallCognitives && cell.tile.halfWallCognitives[c] && cell.tile.halfWallCognitives[c].length === 5"> </td>
+      </tr>
+    </table>
+    <br>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+</div>

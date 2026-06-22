@@ -924,6 +924,9 @@
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
             "placement" : "Placement of victims:",
+            "victimRotation": "Victim orientation:",
+            "victimIsFake": "Victim is fake:",
+            "cognitives": "Cognitives",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "exportW": "Export this map as a world file for Erebus",
@@ -935,8 +938,8 @@
             "select3": "Select Room 3 Tiles (Curved Walls)",
             "select4": "Select Room 4 Tiles (Anything)",
             "pick4": "Select Room 4 Configuration",
+            "extWalls": "Create ext walls",
             "innerTile": "Inner Tile Walls",
-
             "js":{
                 "startTileError": "Please set the start tile."
             }
