@@ -3,6 +3,17 @@ app.controller("SimulationScoreController", ['$scope', '$http', '$sce', '$transl
     $scope.competitionId = competitionId;
 
     $scope.showTeam = true;
+    $scope.showTime = true;
+
+    $scope.finalScoreDecimals = 2;
+    $scope.normalScoreDecimals = 2;
+    $scope.teamWidth = 240;
+
+    $scope.formatNumber = function (value, decimals) {
+        if (value == null || value === '') return '';
+        if (value === 1) return '1';
+        return Number(value).toFixed(decimals);
+    }
 
     $scope.go = function (path) {
         window.location = path
@@ -28,7 +39,7 @@ app.controller("SimulationScoreController", ['$scope', '$http', '$sce', '$transl
         $scope.league = response.data.leagues.find((l) => l.league == leagueId);
         $scope.comment.top = $scope.league.name;
     })
-    
+
     function updateTime(){
         $scope.time--;
         if($scope.time == 0){
@@ -63,6 +74,7 @@ app.controller("SimulationScoreController", ['$scope', '$http', '$sce', '$transl
             $scope.showMode.teamCode = $scope.ranking.some(t => t.team.teamCode);
 
             $scope.maxGameNum = $scope.runGroups.length;
+            $scope.updateGameRowSpan();
 
             if (callback != null && callback.constructor == Function) {
                 callback()
@@ -132,6 +144,12 @@ app.controller("SimulationScoreController", ['$scope', '$http', '$sce', '$transl
               })
         }
     }
+
+    $scope.updateGameRowSpan = function () {
+        $scope.gameRowSpan =
+            $scope.maxGameNum + 1 +
+            ($scope.showTime ? 1 : 0);
+    };
 }])
 
 $(window).on('beforeunload', function () {

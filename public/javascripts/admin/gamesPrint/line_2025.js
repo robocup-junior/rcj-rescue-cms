@@ -306,6 +306,12 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
                 });
         }
 
+        $scope.getRoundColspan = function () {
+            return $scope.selectedRankingGroups.length *
+                (($scope.tableOptions.showRaw ? 1 : 0) +
+                 ($scope.tableOptions.showNorm ? 1 : 0));
+        };
+
         function updateRunList() {
             $http.get(`/api/runs/${$scope.league.type}/competition/${competitionId}?normalized=true`).then(function (response) {
                 var runs = response.data.filter(r => r.team.league == leagueId);

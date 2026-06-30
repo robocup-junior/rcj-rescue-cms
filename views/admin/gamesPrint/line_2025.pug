@@ -15,6 +15,8 @@ html(ng-app="RunAdmin")
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js')
     script(src='/components/ng-file-upload/ng-file-upload-all.min.js')
     script(src="/javascripts/translate_config.js")
+
+    link(rel='stylesheet', href='/stylesheets/admin/live_ranking/live_ranking.css')
     style(type='text/css').
       .uib-time input {
         padding-left: 0;
@@ -33,9 +35,9 @@ html(ng-app="RunAdmin")
           display: none;
         }
 
-        @page {
-          margin: 10mm;
-        }
+        //- @page {
+        //-   margin: 10mm;
+        //- }
 
         body{
           overflow-y: visible;
@@ -72,9 +74,6 @@ html(ng-app="RunAdmin")
                   button.btn.btn-success(type='button' ng-if='displayMode == DisplayMode.RANKING' ng-click='exportRankingXlsx()' style='margin-right:10px;')
                     i.fas.fa-file-excel
                     |  Export XLSX
-                  //button.btn.btn-danger(type='button' ng-if='displayMode == DisplayMode.RANKING' ng-click='exportRankingPdf()' style='margin-right:10px;')
-                    i.fas.fa-file-pdf
-                    |  Export PDF
                   button(onclick="window.print();" class='btn btn-info' style="text-align:right;")
                     i.fas.fa-print &nbsp;{{"common.print" | translate}}
             .card-body.text-dark
@@ -194,21 +193,23 @@ html(ng-app="RunAdmin")
       table(class="custom" style="margin-bottom:10px;" ng-if="displayMode == DisplayMode.RANKING")
         thead
           tr
-            th Rank
-            th(ng-if='tableOptions.showTeamCode') Team Code
-            th(ng-if='tableOptions.showTeamName') Team
-            th(ng-repeat-start='group in selectedRankingGroups' ng-if='tableOptions.showRaw') Round {{group}}
-            th(ng-repeat-end ng-if='tableOptions.showNorm') Normalized
-             br
-             | Round {{group}}
-            th(ng-if='tableOptions.showRaw && !tableOptions.showNorm') TOTAL
-            th(ng-if='tableOptions.showNorm') Mean of 
+            th(rowspan='2') Rank
+            th(rowspan='2' ng-if='tableOptions.showTeamCode') Team Code
+            th(rowspan='2' ng-if='tableOptions.showTeamName') Team
+            th(rowspan='1' colspan='{{getRoundColspan()}}' ng-if='tableOptions.showRaw') Round Scores
+            th(rowspan='2' ng-if='tableOptions.showRaw && !tableOptions.showNorm') TOTAL
+            th(rowspan='2' ng-if='tableOptions.showNorm') Mean of 
               br
               | Normalized
               br
               | TOTAL
-            th(ng-if='tableOptions.showTime') Total Time
-            th(ng-if='tableOptions.showRuns') Runs
+            th(rowspan='2' ng-if='tableOptions.showTime') Total Time
+            th(rowspan='2' ng-if='tableOptions.showRuns') Runs
+          tr
+            th(rowspan='1' ng-repeat-start='group in selectedRankingGroups' ng-if='tableOptions.showRaw') Round {{group}}
+            th(rowspan='1' ng-repeat-end ng-if='tableOptions.showNorm') Normalized
+             br
+             | Round {{group}}
         tbody
           tr(ng-repeat='team in rankingTable')
             td {{$index + 1}}

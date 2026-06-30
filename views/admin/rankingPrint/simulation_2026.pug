@@ -8,8 +8,9 @@ html(ng-app="SimulationScore")
     script.
       var competitionId = "#{competitionId}"
       var leagueId = "#{leagueId}"
-    
+
     script(src='/javascripts/ranking/simulation_2026.js')
+    link(rel='stylesheet', href='/stylesheets/admin/final_ranking.css')
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js')
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js')
     script(src = '/components/datatables/media/js/jquery.dataTables.min.js')
@@ -55,7 +56,7 @@ html(ng-app="SimulationScore")
         .refine.no_print
           .card.border-dark.mb-3(style='width:100%;')
             .card-header.bg-transparent.border-dark.fa-2x
-              .row 
+              .row
                 .col-md-6
                   i.fas.fa-cog(aria-hidden='true') Config
                 .col-md-6(style="text-align:right;")
@@ -63,19 +64,33 @@ html(ng-app="SimulationScore")
                     i.fas.fa-print &nbsp;{{"common.print" | translate}}
             .card-body.text-dark
               h6.card-title Display items
-                br
-                br
-                input(type='checkbox' ng-model='showCode' id="showCode" ng-show="showMode.teamCode")
-                label.checkbox(for="showCode") Code
-                input(type='checkbox' ng-model='showTeam' id="showTeam")
-                label.checkbox(for="showTeam") Team
+              br
+              br
+              input(type='checkbox' ng-model='showCode' id="showCode" ng-show="showMode.teamCode")
+              label.checkbox(for="showCode") Code
+              input(type='checkbox' ng-model='showTeam' id="showTeam")
+              label.checkbox(for="showTeam") Team
+              input(type='checkbox' ng-model='showTime' id="showTime" ng-change="updateGameRowSpan()")
+              label.checkbox(for="showTime") Time
+              br
+              br
+              label(for="finalScoreDecimals") Final Score Decimals
+              input.form-control(type="number" min="0" max="10" ng-model="finalScoreDecimals" id="finalScoreDecimals" style="width:100px;display:inline-block;margin-left:10px;")
+              br
+              br
+              label(for="normalScoreDecimals") Normal Score Decimals
+              input.form-control(type="number" min="0" max="10" ng-model="normalScoreDecimals" id="normalScoreDecimals" style="width:100px;display:inline-block;margin-left:10px;")
+              br
+              br
+              label(for="teamWidth") Team Width (px)
+              input.form-control(type="number" min="50" max="1000" ng-model="teamWidth" id="teamWidth" style="width:100px;display:inline-block;margin-left:10px;")
               hr
               h6.card-title Comment
               p Top
               input(ng-model="comment.top" style="width:100%")
               p Bottom
               input(ng-model="comment.bottom" style="width:100%")
-        
+
         include ../../ranking/include/simulation_2026
 
         h6(style="text-align:center;margin-top:10px;", ng-if="comment.bottom")

@@ -78,36 +78,35 @@ block content
         br
 
       div(ng-show="mode == 'generator'")
-        h3 Schedule Generator
+        h3 {{'admin.lineRunBulk.generatorTitle' | translate}}
 
         .alert.alert-info
-          strong Information
+          strong {{'admin.lineRunBulk.generatorInfoTitle' | translate}}
           br
-          | This generator is intended to create an initial competition schedule and bulk registration without CSV.
+          | {{'admin.lineRunBulk.generatorInfo1' | translate}}
           br
-          | There are two modes for schedule generation:
+          | {{'admin.lineRunBulk.generatorInfo2' | translate}}
           br
-          | 1. Teams are rotated through normalization groups (maps) so that every team should receive each selected map exactly once. Every field hosts a different map.
+          | {{'admin.lineRunBulk.generatorInfo3' | translate}}
           br
-          | 2. All fields host the same map and normalization group in each round. All teams compete on the same map in each round and fields are just for parallel execution.
+          | {{'admin.lineRunBulk.generatorInfo4' | translate}}
           br
-          | The number of selected rounds must match the number of selected maps.
+          | {{'admin.lineRunBulk.generatorInfo5' | translate}}
           br
-          | Maps define normalization groups.
+          | {{'admin.lineRunBulk.generatorInfo6' | translate}}
           br
-          | Fields only define how many runs can take place in parallel, as they are physical locations.
+          | {{'admin.lineRunBulk.generatorInfo7' | translate}}
           br
-          | Teams, rounds, fields and maps are preselected automatically and can be adjusted before generation.
+          | {{'admin.lineRunBulk.generatorInfo8' | translate}}
           br
-          | Always verify the generated schedule before importing it into the competition!
-
+          | {{'admin.lineRunBulk.generatorInfo9' | translate}}
         p.text-muted
-          strong Example:
-          |  8 rounds + 8 maps = 8 normalization groups. The number of fields only affects throughput and schedule duration.
+          strong {{'admin.lineRunBulk.generatorExampleTitle' | translate}}
+          |  {{'admin.lineRunBulk.generatorExampleText' | translate}}
 
         .row
           .col-md-12
-            label Teams
+            label {{'admin.lineRunBulk.generatorTeams' | translate}}
             ui-select(
               multiple=''
               ng-model='generator.selectedTeams'
@@ -117,14 +116,14 @@ block content
               reset-search-input='false'
               style='width:100%;'
             )
-              ui-select-match(placeholder='Search and select teams...')
+              ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchTeams' | translate}}")
                 | {{$item.name}}
               ui-select-choices(repeat='team in teams | filter: $select.search')
                 span {{team.name}}
 
         .row
           .col-md-12
-            label Rounds
+            label {{'admin.lineRunBulk.generatorRounds' | translate}}
             ui-select(
               multiple=''
               ng-model='generator.selectedRounds'
@@ -134,14 +133,14 @@ block content
               reset-search-input='false'
               style='width:100%;'
             )
-              ui-select-match(placeholder='Search and select rounds...')
+              ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchRounds' | translate}}")
                 | {{$item.name}}
               ui-select-choices(repeat='round in rounds | filter: $select.search')
                 span {{round.name}}
 
         .row
           .col-md-12
-            label Fields
+            label {{'admin.lineRunBulk.generatorFields' | translate}}
             ui-select(
               multiple=''
               ng-model='generator.selectedFields'
@@ -151,14 +150,14 @@ block content
               reset-search-input='false'
               style='width:100%;'
             )
-              ui-select-match(placeholder='Search and select fields...')
+              ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchFields' | translate}}")
                 | {{$item.name}}
               ui-select-choices(repeat='field in fields | filter: $select.search')
                 span {{field.name}}
 
         .row
           .col-md-12
-            label Maps
+            label {{'admin.lineRunBulk.generatorMaps' | translate}}
             ui-select(
               multiple=''
               ng-model='generator.selectedMaps'
@@ -168,54 +167,54 @@ block content
               reset-search-input='false'
               style='width:100%;'
             )
-              ui-select-match(placeholder='Search and select maps...')
+              ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchMaps' | translate}}")
                 | {{$item.name}}
               ui-select-choices(repeat='map in maps | filter: $select.search')
                 span {{map.name}}
 
         .row(style='margin-top:15px')
           .col-md-2
-            label Days
+            label {{'admin.lineRunBulk.generatorDays' | translate}}
             input.form-control(type='number' ng-model='generator.totalDays')
 
           .col-md-2
-            label Slot Minutes
+            label {{'admin.lineRunBulk.generatorSlotMinutes' | translate}}
             input.form-control(type='number' ng-model='generator.slotMinutes')
 
           .col-md-2
-            label Small Break Multiplier
+            label {{'admin.lineRunBulk.generatorSmallBreakMultiplier' | translate}}
             input.form-control(type='number' ng-model='generator.smallBreakMultiplier')
 
           .col-md-2
-            label Lunch Minutes
+            label {{'admin.lineRunBulk.generatorLunchMinutes' | translate}}
             input.form-control(type='number' ng-model='generator.lunchBreakMinutes')
 
           .col-md-4
-            label Start Time
+            label {{'admin.lineRunBulk.generatorStartTime' | translate}}
             input.form-control(type='datetime-local' ng-model='generator.startTime')
 
         .row(style='margin-top:15px')
           .col-md-12
-            label Schedule Mode
+            label {{'admin.lineRunBulk.generatorScheduleMode' | translate}}
             select.form-control(ng-model='generator.scheduleMode')
-              option(value='scrambled') Scrambled / Rotating Normalization Groups
-              option(value='fixedMap') Fixed Map / Fixed Normalization Group
+              option(value='scrambled') {{'admin.lineRunBulk.generatorModeScrambled' | translate}}
+              option(value='fixedMap') {{'admin.lineRunBulk.generatorModeFixed' | translate}}
 
             small.form-text.text-muted(ng-if="generator.scheduleMode == 'fixedMap'")
-              | Fixed Map Mode: Each round corresponds to exactly one map and normalization group. Teams stay on the same challenge for the entire round and fields are only used as parallel execution locations.
+              | {{'admin.lineRunBulk.generatorModeFixedDesc1' | translate}}
               br
-              | Fields need to be physically rebuild after every round.
-
+              | {{'admin.lineRunBulk.generatorModeFixedDesc2' | translate}}
             small.form-text.text-muted(ng-if="generator.scheduleMode == 'scrambled'")
-              | Scrambled Mode: Maps are assigned to normalization groups hosted on different fields. Teams rotate between fields and normalization groups across rounds so that each team visits every selected map exactly once.
+              | {{'admin.lineRunBulk.generatorModeScrambledDesc' | translate}}
+           
 
         br
-        button.btn.btn-success(ng-click='generateSchedule()') Generate Schedule
+        button.btn.btn-success(ng-click='generateSchedule()') {{'admin.lineRunBulk.generatorButton' | translate}}
         br
         br
         .alert.alert-warning
-          strong Disclaimer:
-          |  The generated schedule is based on the selected configuration and available teams. Organizers are responsible for reviewing the final schedule, map assignments, field assignments, timing and normalization groups before importing runs into the competition.
+          strong {{'admin.lineRunBulk.generatorDisclaimerTitle' | translate}}
+          |  {{'admin.lineRunBulk.generatorDisclaimerText' | translate}}
 
       div(ng-show="mode == 'csv'")
         h3 {{"admin.lineRunBulk.s2T" | translate}}
