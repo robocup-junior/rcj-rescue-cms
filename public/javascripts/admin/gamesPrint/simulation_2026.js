@@ -4,6 +4,23 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
         $scope.competitionId = competitionId
         $scope.showTeam = true;
 
+        $scope.DisplayMode = {
+            LIST: 'list',
+            RANKING: 'ranking'
+        };
+
+        $scope.displayMode = $scope.DisplayMode.LIST;
+        $scope.rankingTable = [];
+
+        $scope.tableOptions = {
+            showRaw: true,
+            showNorm: false,
+            showRuns: false,
+            showTeamCode: true,
+            showTeamName: true,
+            showTime: true
+        };
+
         var runListTimer = null;
         var runListChanged = false;
 
@@ -40,9 +57,12 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
             $scope.league = response.data.leagues.find((l) => l.league == leagueId);
             launchSocketIo();
             updateRunList();
-            $scope.topComment = `${$scope.competition.name} - ${$scope.league.name}`;
+            $scope.list = { comment: `${$scope.competition.name} - ${$scope.league.name}` };
+            $scope.ranking = { comment: `${$scope.league.name} - Round Scores` };
         })
-        
+
+        // --- Ranking helpers ---
+
         var showAllRounds = true
         var showAllFields = true
         var showAllTeams = true
@@ -50,7 +70,6 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
 
         $scope.$watch('Rrounds', function (newValue, oldValue) {
             showAllRounds = true
-            //console.log(newValue)
             for (let round in newValue) {
                 if (newValue.hasOwnProperty(round)) {
                     if (newValue[round]) {
@@ -61,7 +80,6 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
             }
         }, true)
         $scope.$watch('Rfields', function (newValue, oldValue) {
-            //console.log(newValue)
             showAllFields = true
             for (let field in newValue) {
                 if (newValue.hasOwnProperty(field)) {
@@ -93,13 +111,202 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
                 }
             }
             arr.sort();
-            //arr.reverse();
 
             for (var i = 0; i < arr.length; i++) {
                 sorted[arr[i]] = object[arr[i]];
             }
             return sorted;
         }
+
+        function initializeRankingView() {
+            if (!$scope.runs) return;
+
+            const groups = {};
+
+            for (const run of $scope.runs) {
+                const group = run.normalizationGroup;
+
+                if (group != null) {
+                    groups[String(group)] = true;
+                }
+            }
+
+            $scope.Rgroups = objectSort(groups);
+
+            // false means "not explicitly selected".
+            // rebuildRankingTable() treats "no groups selected" as "show all groups".
+            Object.keys($scope.Rgroups).forEach(g => {
+                $scope.Rgroups[g] = false;
+            });
+        }
+
+        // --- Ranking Table ---
+        function rebuildRankingTable() {
+            if (!$scope.runs) {
+                $scope.rankingTable = [];
+                $scope.selectedRankingGroups = [];
+                return;
+            }
+
+            if (!$scope.Rgroups) {
+                initializeRankingView();
+            }
+
+            if (!$scope.Rgroups) {
+                $scope.rankingTable = [];
+                $scope.selectedRankingGroups = [];
+                return;
+            }
+
+            // Get selected normalization groups
+            const selectedGroups = Object.keys($scope.Rgroups).filter(g => $scope.Rgroups[g]);
+            $scope.selectedRankingGroups = selectedGroups.length
+                ? selectedGroups.sort()
+                : Object.keys($scope.Rgroups || {}).sort();
+            const activeGroups = $scope.selectedRankingGroups;
+
+            // Group runs by team
+            const teams = {};
+            for (const run of $scope.runs) {
+                if (!run.team) continue;
+                const teamId = run.team._id || run.team.teamCode || run.team.name;
+                const groupKey = String(run.normalizationGroup);
+                if (!activeGroups.includes(groupKey)) {
+                    continue;
+                }
+                if (!teams[teamId]) {
+                    teams[teamId] = {
+                        name: run.team.name,
+                        teamCode: run.team.teamCode,
+                        totalRawScore: 0,
+                        totalNormalizedScore: 0,
+                        totalSeconds: 0,
+                        runCount: 0,
+                        groups: {}
+                    };
+                }
+                if (!teams[teamId].groups[groupKey]) {
+                    teams[teamId].groups[groupKey] = {
+                        rawScore: null,
+                        normalizedScore: null,
+                        runCount: 0
+                    };
+                }
+                // Only count the best run per group per team
+                const group = teams[teamId].groups[groupKey];
+                // Calculate run time in seconds
+                const runTimeSeconds =
+                    Number(run.time?.minutes || 0) * 60 +
+                    Number(run.time?.seconds || 0);
+
+                // If there is no run yet, or this run has a higher normalized score, or same score but lower time
+                if (
+                    group.normalizedScore === null ||
+                    run.normalizedScore > group.normalizedScore ||
+                    (
+                        run.normalizedScore === group.normalizedScore &&
+                        runTimeSeconds < (group.timeSeconds ?? Infinity)
+                    )
+                ) {
+                    group.rawScore = run.score;
+                    group.normalizedScore = run.normalizedScore;
+                    group.timeSeconds = runTimeSeconds;
+                    group.runCount = 1;
+                }
+            }
+            // Calculate totals and build $scope.rankingTable
+            $scope.rankingTable = Object.values(teams)
+                .map(team => {
+                    let totalNorm = 0;
+                    let totalRaw = 0;
+                    let runCount = 0;
+                    let totalSeconds = 0;
+                    activeGroups.forEach(group => {
+                        const g = team.groups[group];
+                        if (g && g.rawScore !== null) {
+                            totalRaw += Number(g.rawScore || 0);
+                        }
+                        if (g && g.normalizedScore !== null) {
+                            totalNorm += g.normalizedScore;
+                            runCount += 1;
+                            if (g.timeSeconds != null) {
+                                totalSeconds += g.timeSeconds;
+                            }
+                        }
+                    });
+                    const groupScores = {};
+                    activeGroups.forEach(group => {
+                        groupScores[group] = team.groups[group] || {
+                            rawScore: null,
+                            normalizedScore: null,
+                            runCount: 0
+                        };
+                    });
+                    Object.keys(groupScores).forEach(group => {
+                        const score = groupScores[group].normalizedScore;
+
+                        groupScores[group].formattedNormalizedScore =
+                            score == null
+                                ? null
+                                : (score === 1
+                                    ? '1'
+                                    : Number(score).toFixed(2));
+                    });
+                    return {
+                        ...team,
+                        totalRawScore: parseFloat(totalRaw.toFixed(10)),
+                        totalNormalizedScore: totalNorm,
+                        runCount: runCount,
+                        totalSeconds: totalSeconds,
+                        groupScores,
+                        meanNormalizedScore: runCount > 0 ? totalNorm / runCount : 0,
+                        totalTime:
+                            Math.floor(totalSeconds / 60) + ':' +
+                            String(totalSeconds % 60).padStart(2, '0')
+                    };
+                })
+                .filter(team => team.runCount > 0);
+            // Custom sort
+            $scope.rankingTable.sort(function(a, b) {
+                const scoreA = $scope.tableOptions.showNorm
+                    ? (a.meanNormalizedScore || 0)
+                    : (a.totalRawScore || 0);
+
+                const scoreB = $scope.tableOptions.showNorm
+                    ? (b.meanNormalizedScore || 0)
+                    : (b.totalRawScore || 0);
+
+                if (scoreB !== scoreA) {
+                    return scoreB - scoreA;
+                }
+
+                return (a.totalSeconds || 0) - (b.totalSeconds || 0);
+            });
+        }
+
+        $scope.getRoundColspan = function () {
+            return $scope.selectedRankingGroups.length *
+                (($scope.tableOptions.showRaw ? 1 : 0) +
+                 ($scope.tableOptions.showNorm ? 1 : 0));
+        };
+
+        $scope.$watch('displayMode', function(newValue) {
+            if (newValue === $scope.DisplayMode.RANKING) {
+                rebuildRankingTable();
+            }
+        });
+
+        $scope.$watch('Rgroups', function () {
+            if ($scope.displayMode === $scope.DisplayMode.RANKING) {
+                rebuildRankingTable();
+            }
+        }, true);
+
+        $scope.$watch('tableOptions', function () {
+            if ($scope.displayMode === $scope.DisplayMode.RANKING) {
+                rebuildRankingTable();
+            }
+        }, true);
 
         function updateRunList() {
             $http.get(`/api/runs/simulation/competition/${competitionId}?normalized=true`).then(function (response) {
@@ -134,8 +341,6 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
                         } catch (e) {
 
                         }
-
-
                     }
 
                     $scope.Rrounds = objectSort(rounds)

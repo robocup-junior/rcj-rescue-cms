@@ -94,7 +94,7 @@
         "score": "Score",
         "mean": "Mean",
         "sum": "Sum",
-        "weightedSum": "Weighted sum",
+        "weightedSum": "Weighted\nsum",
         "gamesScore": "Games score",
         "documentScore": "Normalized score for document",
         "normalizedScore": "Normalized score",
@@ -748,7 +748,50 @@
             "s3D": "After selecting the file, please check the contents displayed below.",
             "exe": "Execution",
             "inpro": "Registration in progress ...",
-            "complete": "Registration completed"
+
+            "generatorTitle": "Schedule Generator",
+            "generatorInfoTitle": "Information",
+            "generatorInfo1": "This generator is intended to create an initial competition schedule and bulk registration without CSV.",
+            "generatorInfo2": "There are two modes for schedule generation:",
+            "generatorInfo3": "1. Teams are rotated through normalization groups (maps) so that every team should receive each selected map exactly once. Every field hosts a different map.",
+            "generatorInfo4": "2. All fields host the same map and normalization group in each round. All teams compete on the same map in each round and fields are just for parallel execution.",
+            "generatorInfo5": "The number of selected rounds must match the number of selected maps.",
+            "generatorInfo6": "Maps define normalization groups.",
+            "generatorInfo7": "Fields only define how many runs can take place in parallel, as they are physical locations.",
+            "generatorInfo8": "Teams, rounds, fields and maps are preselected automatically and can be adjusted before generation.",
+            "generatorInfo9": "Always verify the generated schedule before importing it into the competition!",
+            "generatorExampleTitle": "Example:",
+            "generatorExampleText": "8 rounds + 8 maps = 8 normalization groups. The number of fields only affects throughput and schedule duration.",
+
+            "generatorTeams": "Teams",
+            "generatorRounds": "Rounds",
+            "generatorFields": "Fields",
+            "generatorMaps": "Maps",
+
+            "generatorSearchTeams": "Search and select teams...",
+            "generatorSearchRounds": "Search and select rounds...",
+            "generatorSearchFields": "Search and select fields...",
+            "generatorSearchMaps": "Search and select maps...",
+
+            "generatorDays": "Days",
+            "generatorSlotMinutes": "Slot Minutes",
+            "generatorSmallBreakMultiplier": "Small Break Multiplier",
+            "generatorLunchMinutes": "Lunch Minutes",
+            "generatorStartTime": "Start Time",
+
+            "generatorScheduleMode": "Schedule Mode",
+            "generatorModeScrambled": "Scrambled / Rotating Normalization Groups",
+            "generatorModeFixed": "Fixed Map / Fixed Normalization Group",
+
+            "generatorModeFixedDesc1": "Fixed Map Mode: Each round corresponds to exactly one map and normalization group. Teams stay on the same challenge for the entire round and fields are only used as parallel execution locations.",
+            "generatorModeFixedDesc2": "Fields need to be physically rebuilt after every round.",
+
+            "generatorModeScrambledDesc": "Scrambled Mode: Maps are assigned to normalization groups hosted on different fields. Teams rotate between fields and normalization groups across rounds so that each team visits every selected map exactly once.",
+
+            "generatorButton": "Generate Schedule",
+
+            "generatorDisclaimerTitle": "Disclaimer:",
+            "generatorDisclaimerText": "The generated schedule is based on the selected configuration and available teams. Organizers are responsible for reviewing the final schedule, map assignments, field assignments, timing and normalization groups before importing runs into the competition."
         },
         "lineMapEditor": {
             "title": "Map Editor",

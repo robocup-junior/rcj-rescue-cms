@@ -3,6 +3,19 @@ app.controller("MazeScoreController", ['$scope', '$http', '$sce', '$translate', 
     $scope.competitionId = competitionId;
 
     $scope.showTeam = true;
+    $scope.showTime = true;
+    $scope.showVictims = true;
+    $scope.showLops = true;
+
+    $scope.finalScoreDecimals = 2;
+    $scope.normalScoreDecimals = 2;
+    $scope.teamWidth = 240;
+
+    $scope.formatNumber = function (value, decimals) {
+        if (value == null || value === '') return '';
+        if (value === 1) return '1';
+        return Number(value).toFixed(decimals);
+    }
 
     $scope.go = function (path) {
         window.location = path
@@ -28,7 +41,7 @@ app.controller("MazeScoreController", ['$scope', '$http', '$sce', '$translate', 
         $scope.league = response.data.leagues.find((l) => l.league == leagueId);
         $scope.comment.top = $scope.league.name;
     })
-    
+
     function updateTime(){
         $scope.time--;
         if($scope.time == 0){
@@ -47,18 +60,19 @@ app.controller("MazeScoreController", ['$scope', '$http', '$sce', '$translate', 
     $scope.startSig = function(){
         inter = setInterval(updateTime, 1000);
     }
-    
+
     function getRankInfo(callback) {
         $http.get(`/api/ranking/${competitionId}/${leagueId}`).then(function (response) {
             var rankingInfo = response.data;
             $scope.documentBlock = response.data.documentBlockTitles;
             $scope.ranking = rankingInfo.ranking;
             $scope.runGroups = rankingInfo.runGroups;
-            
+
             $scope.showMode = rankingInfo.modeDetails;
             $scope.showMode.teamCode = $scope.ranking.some(t => t.team.teamCode);
 
             $scope.maxGameNum = $scope.runGroups.length;
+            $scope.updateGameRowSpan();
 
             if (callback != null && callback.constructor == Function) {
                 callback()
@@ -149,6 +163,14 @@ app.controller("MazeScoreController", ['$scope', '$http', '$sce', '$translate', 
             'Cognitive': 7
         };
         return order[victim.type] || 99;
+    };
+
+    $scope.updateGameRowSpan = function () {
+        $scope.gameRowSpan =
+            $scope.maxGameNum + 1 +
+            ($scope.showTime ? 1 : 0) +
+            ($scope.showVictims ? 1 : 0) +
+            ($scope.showLops ? 1 : 0);
     };
 }])
 

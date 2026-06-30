@@ -9,6 +9,7 @@ html(ng-app="RunAdmin")
     include ../../includes/common_component
 
     script(src='/javascripts/admin/gamesPrint/maze_2026.js')
+    link(rel='stylesheet', href='/stylesheets/admin/live_ranking.css')
 
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js')
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js')
@@ -48,43 +49,93 @@ html(ng-app="RunAdmin")
       }
 
   body(ng-controller="RunAdminController")
-    .row
-      .col-10(style="text-align:center;")
-        h1 {{topComment}}
-      .col-2(style="text-align:right;")
-        img(ng-src="{{competition.logo}}" style="max-width:100%;max-height:50px;")
+    // Removed for Ranking in favor of styled table header for better print layout
+    #ranking-export(ng-if="displayMode == DisplayMode.LIST")
+      .row
+        .col-10(style="text-align:center;")
+          h1 {{list.comment}}
+        .col-2(style="text-align:right;")
+          img(ng-src="{{competition.logo}}" style="max-width:100%;max-height:50px;")
     .row
       .col-12
         .refine.no_print
           .card.border-dark.mb-3(style='width:100%;')
             .card-header.bg-transparent.border-dark.fa-2x
-              .row 
+              .row
                 .col-md-6
                   i.fas.fa-cog(aria-hidden='true') Config
                 .col-md-6(style="text-align:right;")
-                  button(onclick="window.print();" class='btn btn-info' style="margin-left:100px; text-align:right;")
+                  button.btn.btn-secondary(type='button' ng-click="displayMode = displayMode == DisplayMode.LIST ? DisplayMode.RANKING : DisplayMode.LIST" style="margin-right:10px;")
+                    i.fas.fa-table(ng-if="displayMode == DisplayMode.LIST")
+                    i.fas.fa-list(ng-if="displayMode == DisplayMode.RANKING")
+                    span(ng-if="displayMode == DisplayMode.LIST") &nbsp;Ranking View
+                    span(ng-if="displayMode == DisplayMode.RANKING") &nbsp;Run List
+
+                  button(onclick="window.print();" class='btn btn-info' style="text-align:right;")
                     i.fas.fa-print &nbsp;{{"common.print" | translate}}
             .card-body.text-dark
-              p Please use Google Chrome to print this page.
-              hr
-              h6.card-title {{'line.competition.refine.round' | translate}}
-              span(ng-repeat='(key, value) in Rrounds track by key')
-                input(type='checkbox' ng-model='Rrounds[key]' id="checkR_{{key}}")
-                label.checkbox(for="checkR_{{key}}") {{key}}
-              hr
-              h6.card-title {{'line.competition.refine.field' | translate}}
-              span(ng-repeat='(key, value) in Rfields track by key')
-                input(type='checkbox' ng-model='Rfields[key]' id="checkF_{{key}}")
-                label.checkbox(for="checkF_{{key}}") {{key}}
-              hr
-              h6.card-title {{'line.competition.refine.team' | translate}}
-              .input-group
-                .input-group-prepend
-                  span.input-group-text
-                    i.fas.fa-users(aria-hidden='true')
-                input.form-control(type='text', placeholder='Team name', aria-label='Username', aria-describedby='basic-addon1' ng-model='teamName')
-              hr
-              h6.card-title Display items
+              div(ng-if="displayMode == DisplayMode.LIST")
+                p Please use Google Chrome to print this page.
+                hr
+                h6.card-title {{'line.competition.refine.round' | translate}}
+                span(ng-repeat='(key, value) in Rrounds track by key')
+                  input(type='checkbox' ng-model='Rrounds[key]' id="checkR_{{key}}")
+                  label.checkbox(for="checkR_{{key}}") {{key}}
+
+              div(ng-if="displayMode == DisplayMode.RANKING")
+                hr
+                h6.card-title Rounds (Normalization Groups)
+                span(ng-repeat='(key, value) in Rgroups track by key')
+                  input(type='checkbox' ng-model='Rgroups[key]' id="checkG_{{key}}")
+                  label.checkbox(for="checkG_{{key}}") Group {{key}}
+
+              div(ng-if="displayMode == DisplayMode.LIST")
+                hr
+                h6.card-title {{'line.competition.refine.field' | translate}}
+                span(ng-repeat='(key, value) in Rfields track by key')
+                  input(type='checkbox' ng-model='Rfields[key]' id="checkF_{{key}}")
+                  label.checkbox(for="checkF_{{key}}") {{key}}
+                hr
+                h6.card-title {{'line.competition.refine.team' | translate}}
+                .input-group
+                  .input-group-prepend
+                    span.input-group-text
+                      i.fas.fa-users(aria-hidden='true')
+                  input.form-control(type='text', placeholder='Team name', aria-label='Username', aria-describedby='basic-addon1' ng-model='teamName')
+
+              div(ng-if="displayMode == DisplayMode.RANKING")
+                hr
+                h6.card-title Ranking Table Settings
+
+                input(type='checkbox' ng-model='tableOptions.showRaw' ng-change='$evalAsync()' id='tableShowRaw')
+                label.checkbox(for='tableShowRaw') Show Raw Score
+
+                input(type='checkbox' ng-model='tableOptions.showNorm' ng-change='$evalAsync()' id='tableShowNorm')
+                label.checkbox(for='tableShowNorm') Show Normalized Score
+
+                input(type='checkbox' ng-model='tableOptions.showTeamCode' ng-change='$evalAsync()' id='tableShowTeamCode')
+                label.checkbox(for='tableShowTeamCode') Team Code
+
+                input(type='checkbox' ng-model='tableOptions.showTeamName' ng-change='$evalAsync()' id='tableShowTeamName')
+                label.checkbox(for='tableShowTeamName') Team Name
+
+                input(type='checkbox' ng-model='tableOptions.showTime' ng-change='$evalAsync()' id='tableShowTime')
+                label.checkbox(for='tableShowTime') Total Time
+
+                input(type='checkbox' ng-model='tableOptions.showRuns' ng-change='$evalAsync()' id='tableShowRuns')
+                label.checkbox(for='tableShowRuns') Number of Runs
+
+                hr
+                h6.card-title Comment
+                .input-group
+                  .input-group-prepend
+                    span.input-group-text
+                      i.fas.fa-pen(aria-hidden='true')
+                  input.form-control(type='text', placeholder='', aria-label='comment', aria-describedby='basic-addon1' ng-model='ranking.comment')
+
+              div(ng-if="displayMode == DisplayMode.LIST")
+                hr
+                h6.card-title Display items
                 br
                 br
                 input(type='checkbox' ng-model='showTeam' id="showTeam")
@@ -111,19 +162,19 @@ html(ng-app="RunAdmin")
                 label.checkbox(for="showVictim") Victim
                 input(type='checkbox' ng-model='showExit' id="showExit")
                 label.checkbox(for="showExit") Exit
-              hr
-              h6.card-title Comment
-                .input-group
-                  .input-group-prepend
-                    span.input-group-text
-                      i.fas.fa-pen(aria-hidden='true')
-                  input.form-control(type='text', placeholder='', aria-label='Username', aria-describedby='basic-addon1' ng-model='topComment')
+                hr
+                h6.card-title Comment
+                  .input-group
+                    .input-group-prepend
+                      span.input-group-text
+                        i.fas.fa-pen(aria-hidden='true')
+                    input.form-control(type='text', placeholder='', aria-label='Username', aria-describedby='basic-addon1' ng-model='list.comment')
 
         center
           .loader
             img(src="/images/loader2.gif")
             p Now Loading...
-        table(class="custom" style="margin-bottom:10px;")
+        table(class="custom" style="margin-bottom:10px;" ng-if="displayMode == DisplayMode.LIST")
           thead
             tr
               th {{"common.starttime" | translate}}
@@ -163,3 +214,51 @@ html(ng-app="RunAdmin")
                 i(class="fas fa-check" aria-hidden="true" style="color:#2ecc71;" ng-if="run.exitBonus")
                 i(class="fas fa-times" aria-hidden="true" style="color:#e74c3c;" ng-if="!run.exitBonus")
 
+    #ranking-export
+      .ranking-header
+        .ranking-title
+          h3 {{competition.name}}
+          h2 {{ranking.comment}}
+
+        img.competition-logo(
+          ng-if="competition.logo"
+          ng-src="{{competition.logo}}"
+          alt="Competition Logo"
+        )
+      table(class="custom" style="margin-bottom:10px;" ng-if="displayMode == DisplayMode.RANKING")
+        thead
+          tr
+            th(rowspan='2') Rank
+            th(rowspan='2' ng-if='tableOptions.showTeamCode') Team Code
+            th(rowspan='2' ng-if='tableOptions.showTeamName') Team
+            th(rowspan='1' colspan='{{getRoundColspan()}}' ng-if='tableOptions.showRaw || tableOptions.showNorm') Round Scores
+            th(rowspan='2' ng-if='tableOptions.showRaw && !tableOptions.showNorm') TOTAL
+            th(rowspan='2' ng-if='tableOptions.showNorm') Mean of
+              br
+              | Normalized
+              br
+              | TOTAL
+            th(rowspan='2' ng-if='tableOptions.showTime') Total Time
+            th(rowspan='2' ng-if='tableOptions.showRuns') Runs
+          tr
+            th(ng-repeat-start='group in selectedRankingGroups' ng-if='tableOptions.showRaw') Round {{group}}
+            th(ng-if='tableOptions.showNorm') Normalized
+              br
+              | Round {{group}}
+            th(ng-repeat-end style='display:none')
+        tbody
+          tr(ng-repeat='team in rankingTable')
+            td {{$index + 1}}
+            td(ng-if='tableOptions.showTeamCode') {{team.teamCode}}
+            td(ng-if='tableOptions.showTeamName') {{team.name}}
+            td(ng-repeat-start='group in selectedRankingGroups' ng-if='tableOptions.showRaw')
+              span(ng-if='team.groupScores[group]') {{team.groupScores[group].rawScore}}
+              span(ng-if='!team.groupScores[group]') -
+            td(ng-if='tableOptions.showNorm')
+              span(ng-if='team.groupScores[group]') {{team.groupScores[group].formattedNormalizedScore}}
+              span(ng-if='!team.groupScores[group]') -
+            td(ng-repeat-end style='display:none')
+            td(ng-if='tableOptions.showRaw && !tableOptions.showNorm') {{team.totalRawScore}}
+            td(ng-if='tableOptions.showNorm') {{team.meanNormalizedScore | number:3}}
+            td(ng-if='tableOptions.showTime') {{team.totalTime || '-'}}
+            td(ng-if='tableOptions.showRuns') {{team.runCount}}
