@@ -438,7 +438,7 @@ adminRouter.delete('/:runids', function (req, res) {
  * @apiGroup Run
  * @apiVersion 1.0.0
  */
-adminRouter.post('/', function (req, res) {
+adminRouter.post('/', function (req, res, next) {
   const run = req.body;
   if (!ObjectId.isValid(run.competition)) {
     return next();

@@ -355,19 +355,20 @@ app.controller("RunAdminController", ['$scope', '$http', function ($scope, $http
     
 
     exe = function () {
-        var time = new Date(obj[$scope.now][4]);
+        const isSim = $scope.league && $scope.league.type == 'simulation';
+        var time = new Date(obj[$scope.now][isSim ? 3 : 4]);
 
         var run = {
             round: find($scope.rounds,obj[$scope.now][0]),
             team: findT($scope.teams,obj[$scope.now][1]),
             group: findTG($scope.teams,obj[$scope.now][1]),
-            field: find($scope.fields,obj[$scope.now][3]),
+            field: find($scope.fields,obj[$scope.now][isSim ? 2 : 3]),
             competition: competitionId,
             startTime: time.getTime(),
-            normalizationGroup: obj[$scope.now][5]
+            normalizationGroup: obj[$scope.now][isSim ? 4 : 5]
         }
 
-        if ($scope.league.type != 'simulation') {
+        if (!isSim) {
             run['map'] = find($scope.maps,obj[$scope.now][2]);
         }
         
