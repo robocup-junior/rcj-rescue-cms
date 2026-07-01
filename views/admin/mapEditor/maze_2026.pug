@@ -280,10 +280,6 @@ block main_content
         
         #outputCollapse.collapse
           .modern-card-body.bg-light
-          label.settings-checkbox-container(ng-class="{'active': finished}")
-              input#isFinished(type='checkbox',ng-model='finished')
-              i.fas.fa-flag-checkered.mr-2
-              Span {{"admin.mazeMapEditor.finished" | translate}}
             .print-section
               label.section-title {{ 'admin.mazeMapAdmin.print.outputContent' | translate }}
               .option-tiles
