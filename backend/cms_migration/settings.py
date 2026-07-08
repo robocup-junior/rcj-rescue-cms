@@ -13,6 +13,7 @@ INSTALLED_APPS = [
     'compat_auth',
     'competitions',
     'shorturl',
+    'cms_users',
 ]
 
 MIDDLEWARE = [

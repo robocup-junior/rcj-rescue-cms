@@ -52,3 +52,17 @@ def require_super(view_func):
         request.cms_user = user
         return view_func(request, *args, **kwargs)
     return wrapped
+
+
+def has_competition_access(user, competition_id, level):
+    """Mirrors helper/authLevels.js authCompetition: superDuperAdmin bypasses
+    everything, otherwise the user needs a per-competition access grant at
+    or above `level` for this specific competition_id."""
+    if user is None:
+        return False
+    if user.super_duper_admin:
+        return True
+    return any(
+        access.competition_id == competition_id and access.access_level >= level
+        for access in user.competition_accesses.all()
+    )

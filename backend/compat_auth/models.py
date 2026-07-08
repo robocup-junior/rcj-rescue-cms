@@ -15,7 +15,24 @@ ACCESS_LEVELS = {
 ROLES = ('VIEW', 'JUDGE', 'INTERVIEW', 'ADMIN')
 
 
+class CmsUserManager(models.Manager):
+    def find_by_legacy_or_pk(self, object_id):
+        """CmsUser is addressed externally by legacy_public_dict()'s `_id`,
+        which is `legacy_id` for genuinely-migrated users or `str(pk)` for
+        users created directly in Django -- callers (e.g. cms_users views
+        handling routes/api/users.js's :userid params) need to resolve
+        either form back to a row."""
+        user = self.filter(legacy_id=object_id).first()
+        if user is not None:
+            return user
+        if object_id.isdigit():
+            return self.filter(pk=int(object_id)).first()
+        return None
+
+
 class CmsUser(models.Model):
+    objects = CmsUserManager()
+
     legacy_id = models.CharField(max_length=24, unique=True, null=True, blank=True, db_index=True)
     username = models.CharField(max_length=150, unique=True)
     password = models.CharField(max_length=128)
