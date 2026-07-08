@@ -9,4 +9,5 @@ urlpatterns = [
     path('api/competitions', include(competitions_urlpatterns)),
     path('api/short', include('shorturl.urls')),
     path('api/users', include('cms_users.urls')),
+    path('api/signage', include('signage.urls')),
 ]

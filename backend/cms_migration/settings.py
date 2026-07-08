@@ -2,6 +2,11 @@ import os
 from urllib.parse import urlparse
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# The repo root (one level above backend/) -- the Express app and this
+# Django app must read/write the *same* public/signage_content directory
+# on disk, since Express's static middleware still serves it either way.
+REPO_ROOT = os.path.dirname(BASE_DIR)
+SIGNAGE_CONTENT_DIR = os.path.join(REPO_ROOT, 'public', 'signage_content')
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'development-only-rcj-rescue-cms-migration')
 DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',')
@@ -14,6 +19,7 @@ INSTALLED_APPS = [
     'competitions',
     'shorturl',
     'cms_users',
+    'signage',
 ]
 
 MIDDLEWARE = [
