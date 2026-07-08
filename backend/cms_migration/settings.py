@@ -12,6 +12,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'compat_auth',
     'competitions',
+    'shorturl',
 ]
 
 MIDDLEWARE = [

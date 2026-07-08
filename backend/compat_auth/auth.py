@@ -40,3 +40,15 @@ def require_admin(view_func):
         request.cms_user = user
         return view_func(request, *args, **kwargs)
     return wrapped
+
+
+def require_super(view_func):
+    """Mirrors Express's pass.ensureSuperApi: superDuperAdmin flag, plain-text 400 body."""
+    @functools.wraps(view_func)
+    def wrapped(request, *args, **kwargs):
+        user = get_current_user(request)
+        if user is None or not user.super_duper_admin:
+            return HttpResponse("You need to be 'superDuperAdmin' to do this", status=400)
+        request.cms_user = user
+        return view_func(request, *args, **kwargs)
+    return wrapped

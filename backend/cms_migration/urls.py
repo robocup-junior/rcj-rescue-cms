@@ -7,4 +7,5 @@ urlpatterns = [
     path('api/rounds', include(rounds_urlpatterns)),
     path('api/fields', include(fields_urlpatterns)),
     path('api/competitions', include(competitions_urlpatterns)),
+    path('api/short', include('shorturl.urls')),
 ]
