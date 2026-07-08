@@ -11,6 +11,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'rest_framework',
     'compat_auth',
+    'competitions',
 ]
 
 MIDDLEWARE = [
@@ -20,6 +21,11 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'cms_migration.urls'
+# W002 (leading slash in a sub-pattern) is intentional here: several apps
+# mount their urls.py against a no-trailing-slash prefix (e.g. 'api/rounds',
+# not 'api/rounds/') to match Express's exact no-trailing-slash routes
+# without triggering an APPEND_SLASH redirect that would break POST/DELETE.
+SILENCED_SYSTEM_CHECKS = ['urls.W002']
 TEMPLATES = []
 WSGI_APPLICATION = 'cms_migration.wsgi.application'
 ASGI_APPLICATION = 'cms_migration.asgi.application'
