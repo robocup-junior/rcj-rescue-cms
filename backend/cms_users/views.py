@@ -2,12 +2,14 @@ import json
 import logging
 import re
 
+from django.db import IntegrityError, transaction
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 
 from compat_auth.auth import require_login, require_super, has_competition_access
 from compat_auth.models import ACCESS_LEVELS, CmsUser, UserCompetitionAccess
+from competitions.models import Competition
 
 logger = logging.getLogger(__name__)
 
@@ -97,31 +99,40 @@ def create_or_update_user(request):
         existing.super_duper_admin = super_duper_admin
         existing.email = email
         try:
-            existing.save()
+            with transaction.atomic():
+                existing.save()
         except Exception as exc:  # noqa: BLE001 - mirror Express's generic save-error shape
             logger.error(exc)
             return JsonResponse({'msg': 'Could not regist user :('}, status=400)
     else:
+        # Express only seeds `competitions` from the request body on brand
+        # new users, never on update. Unlike Express/Mongoose (refs aren't
+        # enforced FKs there), a bogus competition id here would otherwise
+        # raise an uncaught IntegrityError -- check existence up front and
+        # report it like the rest of the request, rather than 500.
+        competition_entries = [e for e in (body.get('competitions') or []) if e.get('id')]
+        unknown_ids = [
+            e['id'] for e in competition_entries
+            if not Competition.objects.filter(pk=e['id']).exists()
+        ]
+        if unknown_ids:
+            return JsonResponse({'msg': 'Could not regist user :(', 'err': f'competition not found: {unknown_ids[0]}'}, status=400)
+
         new_user = CmsUser(username=username, admin=admin, super_duper_admin=super_duper_admin, email=email)
         new_user.set_password(password or '')
         try:
-            new_user.save()
+            with transaction.atomic():
+                new_user.save()
+                for entry in competition_entries:
+                    UserCompetitionAccess.objects.create(
+                        user=new_user,
+                        competition_id=entry['id'],
+                        access_level=entry.get('accessLevel', ACCESS_LEVELS['NONE']),
+                        role=entry.get('role') or [],
+                    )
         except Exception as exc:  # noqa: BLE001
             logger.error(exc)
             return JsonResponse({'msg': 'Could not regist user :('}, status=400)
-
-        # Express only seeds `competitions` from the request body on brand
-        # new users, never on update.
-        for entry in body.get('competitions') or []:
-            competition_id = entry.get('id')
-            if not competition_id:
-                continue
-            UserCompetitionAccess.objects.create(
-                user=new_user,
-                competition_id=competition_id,
-                access_level=entry.get('accessLevel', ACCESS_LEVELS['NONE']),
-                role=entry.get('role') or [],
-            )
 
     if body.get('emailNotification') and email:
         _send_welcome_email(username, password, email)
@@ -139,18 +150,21 @@ def update_role(request, userid, competitionid):
     user = CmsUser.objects.find_by_legacy_or_pk(userid)
     if user is None:
         return JsonResponse({'msg': 'Could not get user', 'err': 'not found'}, status=400)
+    if not Competition.objects.filter(pk=competitionid).exists():
+        return JsonResponse({'msg': 'Could not save changes', 'err': 'competition not found'}, status=400)
 
     body = _parse_json_body(request)
     # Express: `Array.from(new Set(req.body))` -- req.body is the raw JSON
     # array itself here, not a wrapper object. De-dupe, preserve order.
     role = list(dict.fromkeys(body)) if isinstance(body, list) else []
 
-    access, _created = UserCompetitionAccess.objects.get_or_create(
-        user=user, competition_id=competitionid, defaults={'access_level': ACCESS_LEVELS['NONE'], 'role': role},
-    )
-    if not _created:
-        access.role = role
-        access.save()
+    with transaction.atomic():
+        access, _created = UserCompetitionAccess.objects.get_or_create(
+            user=user, competition_id=competitionid, defaults={'access_level': ACCESS_LEVELS['NONE'], 'role': role},
+        )
+        if not _created:
+            access.role = role
+            access.save()
 
     return JsonResponse({'msg': 'Saved changes'})
 
@@ -165,18 +179,21 @@ def update_access_level(request, userid, competitionid, alevel):
     user = CmsUser.objects.find_by_legacy_or_pk(userid)
     if user is None:
         return JsonResponse({'msg': 'Could not get user', 'err': 'not found'}, status=400)
+    if not Competition.objects.filter(pk=competitionid).exists():
+        return JsonResponse({'msg': 'Could not save changes', 'err': 'competition not found'}, status=400)
 
     try:
         access_level = int(alevel)
     except ValueError:
         return JsonResponse({'msg': 'Could not save changes', 'err': 'invalid access level'}, status=400)
 
-    access, _created = UserCompetitionAccess.objects.get_or_create(
-        user=user, competition_id=competitionid, defaults={'access_level': access_level, 'role': []},
-    )
-    if not _created:
-        access.access_level = access_level
-        access.save()
+    with transaction.atomic():
+        access, _created = UserCompetitionAccess.objects.get_or_create(
+            user=user, competition_id=competitionid, defaults={'access_level': access_level, 'role': []},
+        )
+        if not _created:
+            access.access_level = access_level
+            access.save()
 
     return JsonResponse({'msg': 'Saved changes'})
 

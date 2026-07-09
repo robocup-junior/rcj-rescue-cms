@@ -22,10 +22,17 @@ fields_urlpatterns = [
     path('/<str:object_id>', views.field_item, name='field-item'),
 ]
 
-# Mirrors the round/field sub-routes nested under routes/api/competitions.js.
+# Mirrors routes/api/competitions.js's competition CRUD plus the
+# round/field sub-routes nested under it. Ordering matters: literal paths
+# ('', '/leagues', '/leagues/<id>') must come before the generic
+# '/<str:competition_id>' detail pattern, or the latter would shadow them.
 competitions_urlpatterns = [
+    path('', views.competition_list_or_create, name='competition-collection'),
+    path('/leagues', views.league_reference_list, name='competition-leagues'),
+    path('/leagues/<str:league_id>', views.league_reference_detail, name='competition-league-detail'),
     path('/<str:competition_id>/rounds', views.rounds_by_competition, name='competition-rounds'),
     path('/<str:competition_id>/rounds/<str:name>', views.rounds_by_competition_and_name, name='competition-round-by-name'),
     path('/<str:competition_id>/fields', views.fields_by_competition, name='competition-fields'),
     path('/<str:competition_id>/fields/<str:name>', views.fields_by_competition_and_name, name='competition-field-by-name'),
+    path('/<str:competition_id>', views.competition_item, name='competition-item'),
 ]

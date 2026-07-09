@@ -1,5 +1,7 @@
 from django.test import TestCase
 
+from competitions.models import Competition
+
 from .models import CmsUser, UserCompetitionAccess
 
 
@@ -79,9 +81,10 @@ class CompatibilityAuthEndpointTests(TestCase):
             admin=True,
             super_duper_admin=True,
         )
+        competition = Competition.objects.create(id='64f7c926f62d4dc53f7a0101', name='Some Competition')
         UserCompetitionAccess.objects.create(
             user=user,
-            competition_id='64f7c926f62d4dc53f7a0101',
+            competition=competition,
             access_level=10,
             role=['ADMIN', 'JUDGE'],
         )

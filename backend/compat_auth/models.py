@@ -73,14 +73,19 @@ class CmsUser(models.Model):
 
 class UserCompetitionAccess(models.Model):
     user = models.ForeignKey(CmsUser, related_name='competition_accesses', on_delete=models.CASCADE)
-    competition_id = models.CharField(max_length=24, db_index=True)
+    # Real FK, not a bare id string -- Competition now exists in Postgres
+    # (competitions app). Express's competitionSchema pre-delete hooks
+    # never clean up User.competitions when a competition is deleted (a
+    # real gap there, dangling references left behind); CASCADE here is a
+    # deliberate improvement, not a compatibility requirement.
+    competition = models.ForeignKey('competitions.Competition', related_name='user_accesses', on_delete=models.CASCADE)
     access_level = models.PositiveSmallIntegerField(default=ACCESS_LEVELS['NONE'])
     role = models.JSONField(default=list, blank=True)
 
     class Meta:
         db_table = 'cms_user_competition_access'
         constraints = [
-            models.UniqueConstraint(fields=['user', 'competition_id'], name='uniq_cms_user_competition_access'),
+            models.UniqueConstraint(fields=['user', 'competition'], name='uniq_cms_user_competition_access'),
         ]
 
     def legacy_dict(self):

@@ -1,6 +1,7 @@
 from django.test import TestCase
 
 from compat_auth.models import CmsUser, UserCompetitionAccess
+from competitions.models import Competition
 
 
 class UsersEndpointTests(TestCase):
@@ -14,6 +15,9 @@ class UsersEndpointTests(TestCase):
 
     def alevel_url(self, userid, competitionid, alevel):
         return f'{self.collection_url}/{userid}/{competitionid}/{alevel}'
+
+    def make_competition(self, name='Some Competition'):
+        return Competition.objects.create(name=name)
 
     def make_user(self, *, username, password='secret-pass', admin=False, super_duper_admin=False, **attrs):
         salt = f'{username}-salt'
@@ -53,8 +57,9 @@ class UsersEndpointTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_list_includes_email_and_competition_access(self):
+        competition = self.make_competition()
         user = self.make_user(username='captain', email='captain@example.com')
-        UserCompetitionAccess.objects.create(user=user, competition_id='a' * 24, access_level=10, role=['ADMIN'])
+        UserCompetitionAccess.objects.create(user=user, competition=competition, access_level=10, role=['ADMIN'])
         self.login('captain')
 
         response = self.client.get(self.collection_url)
@@ -62,7 +67,7 @@ class UsersEndpointTests(TestCase):
         rows = response.json()
         row = next(r for r in rows if r['username'] == 'captain')
         self.assertEqual(row['email'], 'captain@example.com')
-        self.assertEqual(row['competitions'], [{'id': 'a' * 24, 'accessLevel': 10, 'role': ['ADMIN']}])
+        self.assertEqual(row['competitions'], [{'id': competition.id, 'accessLevel': 10, 'role': ['ADMIN']}])
 
     # -- POST / (super only, create-or-update-by-username) --------------
 
@@ -77,6 +82,7 @@ class UsersEndpointTests(TestCase):
         self.assertFalse(CmsUser.objects.filter(username='new-guy').exists())
 
     def test_create_new_user_hashes_password_and_seeds_competitions(self):
+        competition = self.make_competition()
         self.make_user(username='root', super_duper_admin=True)
         self.login('root')
 
@@ -85,7 +91,7 @@ class UsersEndpointTests(TestCase):
             'password': 'plaintext-pass',
             'email': 'new-guy@example.com',
             'admin': True,
-            'competitions': [{'id': 'b' * 24, 'accessLevel': 5, 'role': ['JUDGE']}],
+            'competitions': [{'id': competition.id, 'accessLevel': 5, 'role': ['JUDGE']}],
         })
 
         self.assertEqual(response.status_code, 200)
@@ -96,13 +102,27 @@ class UsersEndpointTests(TestCase):
         self.assertTrue(created.compare_password('plaintext-pass'))
         self.assertTrue(created.admin)
         access = created.competition_accesses.get()
-        self.assertEqual(access.competition_id, 'b' * 24)
+        self.assertEqual(access.competition_id, competition.id)
         self.assertEqual(access.access_level, 5)
 
+    def test_create_new_user_with_unknown_competition_id_is_rejected(self):
+        self.make_user(username='root', super_duper_admin=True)
+        self.login('root')
+
+        response = self.post_json(self.collection_url, {
+            'username': 'new-guy',
+            'password': 'plaintext-pass',
+            'competitions': [{'id': 'a' * 24, 'accessLevel': 5, 'role': ['JUDGE']}],
+        })
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(CmsUser.objects.filter(username='new-guy').exists())
+
     def test_update_existing_user_does_not_touch_competitions(self):
+        competition = self.make_competition()
         self.make_user(username='root', super_duper_admin=True)
         existing = self.make_user(username='captain', password='old-pass')
-        UserCompetitionAccess.objects.create(user=existing, competition_id='c' * 24, access_level=1, role=[])
+        UserCompetitionAccess.objects.create(user=existing, competition=competition, access_level=1, role=[])
         self.login('root')
 
         response = self.post_json(self.collection_url, {
@@ -111,6 +131,7 @@ class UsersEndpointTests(TestCase):
             'admin': True,
             # Even though a `competitions` array is sent, updates ignore it --
             # only the two dedicated role/access-level endpoints may touch it.
+            # Not even a real competition id, to prove it's never looked at.
             'competitions': [{'id': 'd' * 24, 'accessLevel': 10, 'role': ['ADMIN']}],
         })
 
@@ -119,69 +140,94 @@ class UsersEndpointTests(TestCase):
         self.assertTrue(existing.compare_password('new-pass'))
         self.assertTrue(existing.admin)
         self.assertEqual(existing.competition_accesses.count(), 1)
-        self.assertEqual(existing.competition_accesses.get().competition_id, 'c' * 24)
+        self.assertEqual(existing.competition_accesses.get().competition_id, competition.id)
 
     # -- PUT /:id/:competitionid/role ------------------------------------
 
     def test_update_role_requires_competition_admin_access(self):
+        competition = self.make_competition()
         target = self.make_user(username='target')
         actor = self.make_user(username='low-access')
-        UserCompetitionAccess.objects.create(user=actor, competition_id='e' * 24, access_level=1, role=[])
+        UserCompetitionAccess.objects.create(user=actor, competition=competition, access_level=1, role=[])
         self.login('low-access')
 
-        response = self.put_json(self.role_url(target.pk, 'e' * 24), ['JUDGE'])
+        response = self.put_json(self.role_url(target.pk, competition.id), ['JUDGE'])
 
         self.assertEqual(response.status_code, 401)
         self.assertFalse(UserCompetitionAccess.objects.filter(user=target).exists())
 
+    def test_update_role_against_unknown_competition_is_rejected(self):
+        target = self.make_user(username='target')
+        self.make_user(username='root', super_duper_admin=True)
+        self.login('root')
+
+        response = self.put_json(self.role_url(target.pk, 'a' * 24), ['JUDGE'])
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(UserCompetitionAccess.objects.filter(user=target).exists())
+
     def test_update_role_creates_access_with_zero_level_when_missing(self):
+        competition = self.make_competition()
         target = self.make_user(username='target')
         actor = self.make_user(username='comp-admin')
-        UserCompetitionAccess.objects.create(user=actor, competition_id='f' * 24, access_level=10, role=[])
+        UserCompetitionAccess.objects.create(user=actor, competition=competition, access_level=10, role=[])
         self.login('comp-admin')
 
-        response = self.put_json(self.role_url(target.pk, 'f' * 24), ['JUDGE', 'JUDGE', 'VIEW'])
+        response = self.put_json(self.role_url(target.pk, competition.id), ['JUDGE', 'JUDGE', 'VIEW'])
 
         self.assertEqual(response.status_code, 200)
-        access = UserCompetitionAccess.objects.get(user=target, competition_id='f' * 24)
+        access = UserCompetitionAccess.objects.get(user=target, competition=competition)
         self.assertEqual(access.access_level, 0)
         self.assertEqual(access.role, ['JUDGE', 'VIEW'])
 
     def test_update_role_preserves_existing_access_level(self):
+        competition = self.make_competition()
         target = self.make_user(username='target')
-        UserCompetitionAccess.objects.create(user=target, competition_id='f' * 24, access_level=5, role=['VIEW'])
-        actor = self.make_user(username='comp-admin', super_duper_admin=True)
+        UserCompetitionAccess.objects.create(user=target, competition=competition, access_level=5, role=['VIEW'])
+        self.make_user(username='comp-admin', super_duper_admin=True)
         self.login('comp-admin')
 
-        self.put_json(self.role_url(target.pk, 'f' * 24), ['ADMIN'])
+        self.put_json(self.role_url(target.pk, competition.id), ['ADMIN'])
 
-        access = UserCompetitionAccess.objects.get(user=target, competition_id='f' * 24)
+        access = UserCompetitionAccess.objects.get(user=target, competition=competition)
         self.assertEqual(access.access_level, 5)
         self.assertEqual(access.role, ['ADMIN'])
 
     # -- PUT /:id/:competitionid/:aLevel ----------------------------------
 
     def test_update_access_level_creates_with_empty_role_when_missing(self):
+        competition = self.make_competition()
         target = self.make_user(username='target')
-        actor = self.make_user(username='root', super_duper_admin=True)
-        self.login('root')
-
-        response = self.put_json(self.alevel_url(target.pk, 'g' * 24, '10'), {})
-
-        self.assertEqual(response.status_code, 200)
-        access = UserCompetitionAccess.objects.get(user=target, competition_id='g' * 24)
-        self.assertEqual(access.access_level, 10)
-        self.assertEqual(access.role, [])
-
-    def test_update_access_level_preserves_existing_role(self):
-        target = self.make_user(username='target')
-        UserCompetitionAccess.objects.create(user=target, competition_id='g' * 24, access_level=1, role=['VIEW'])
         self.make_user(username='root', super_duper_admin=True)
         self.login('root')
 
-        self.put_json(self.alevel_url(target.pk, 'g' * 24, '10'), {})
+        response = self.put_json(self.alevel_url(target.pk, competition.id, '10'), {})
 
-        access = UserCompetitionAccess.objects.get(user=target, competition_id='g' * 24)
+        self.assertEqual(response.status_code, 200)
+        access = UserCompetitionAccess.objects.get(user=target, competition=competition)
+        self.assertEqual(access.access_level, 10)
+        self.assertEqual(access.role, [])
+
+    def test_update_access_level_against_unknown_competition_is_rejected(self):
+        target = self.make_user(username='target')
+        self.make_user(username='root', super_duper_admin=True)
+        self.login('root')
+
+        response = self.put_json(self.alevel_url(target.pk, 'a' * 24, '10'), {})
+
+        self.assertEqual(response.status_code, 400)
+        self.assertFalse(UserCompetitionAccess.objects.filter(user=target).exists())
+
+    def test_update_access_level_preserves_existing_role(self):
+        competition = self.make_competition()
+        target = self.make_user(username='target')
+        UserCompetitionAccess.objects.create(user=target, competition=competition, access_level=1, role=['VIEW'])
+        self.make_user(username='root', super_duper_admin=True)
+        self.login('root')
+
+        self.put_json(self.alevel_url(target.pk, competition.id, '10'), {})
+
+        access = UserCompetitionAccess.objects.get(user=target, competition=competition)
         self.assertEqual(access.access_level, 10)
         self.assertEqual(access.role, ['VIEW'])
 

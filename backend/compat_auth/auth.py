@@ -66,3 +66,20 @@ def has_competition_access(user, competition_id, level):
         access.competition_id == competition_id and access.access_level >= level
         for access in user.competition_accesses.all()
     )
+
+
+def competition_access_level(user, competition_id):
+    """Mirrors helper/authLevels.js competitionLevel: the numeric access
+    level (ACCESS_LEVELS) a user has for one specific competition, used by
+    GET /api/competitions to annotate each row with the viewer's level."""
+    from .models import ACCESS_LEVELS
+
+    if user is None or competition_id is None:
+        return ACCESS_LEVELS['NONE']
+    if user.super_duper_admin:
+        return ACCESS_LEVELS['SUPERADMIN']
+    access = next(
+        (a for a in user.competition_accesses.all() if a.competition_id == competition_id),
+        None,
+    )
+    return access.access_level if access else ACCESS_LEVELS['NONE']

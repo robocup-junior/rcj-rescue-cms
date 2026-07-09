@@ -1,3 +1,4 @@
+import json
 import os
 from urllib.parse import urlparse
 
@@ -7,6 +8,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # on disk, since Express's static middleware still serves it either way.
 REPO_ROOT = os.path.dirname(BASE_DIR)
 SIGNAGE_CONTENT_DIR = os.path.join(REPO_ROOT, 'public', 'signage_content')
+
+# leagues.json is static reference data (league id/type/name/rules), not a
+# Mongo collection -- both apps read the same file rather than duplicating
+# it, same reasoning as SIGNAGE_CONTENT_DIR above.
+with open(os.path.join(REPO_ROOT, 'leagues.json')) as _leagues_fh:
+    LEAGUES_JSON = json.load(_leagues_fh)
+LEAGUE_IDS = [entry['id'] for entry in LEAGUES_JSON]
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'development-only-rcj-rescue-cms-migration')
 DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
 ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,testserver').split(',')
