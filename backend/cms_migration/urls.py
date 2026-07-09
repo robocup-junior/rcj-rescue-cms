@@ -10,4 +10,6 @@ urlpatterns = [
     path('api/short', include('shorturl.urls')),
     path('api/users', include('cms_users.urls')),
     path('api/signage', include('signage.urls')),
+    # Dev-only demo page (backend/devdemo), not a migrated Express route.
+    path('login', include('devdemo.urls')),
 ]

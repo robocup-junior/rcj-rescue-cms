@@ -20,6 +20,7 @@ INSTALLED_APPS = [
     'shorturl',
     'cms_users',
     'signage',
+    'devdemo',
 ]
 
 MIDDLEWARE = [
