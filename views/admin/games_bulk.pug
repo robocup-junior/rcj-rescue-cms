@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'RunAdmin'
@@ -11,75 +11,59 @@ append scripts
   script(src='/javascripts/admin/games_bulk.js')
 
 append css
-    style.
-        .dropdown-submenu {
-            position: relative;
-        }
+  link(href='/stylesheets/common/modern_editor.css', rel='stylesheet')
+  style.
+    .ui-select-bootstrap .dropdown-menu {
+      display: initial;
+    }
+    .ui-select-bootstrap .ui-select-choices-row.active>span {
+      color: initial;
+      text-decoration: none;
+      outline: 0;
+      background-color: initial;
+    }
+    .ui-select-bootstrap .ui-select-choices-row > span {
+      color: black !important;
+      display: block;
+      padding: 5px;
+    }
 
-        .dropdown-submenu a::after {
-            transform: rotate(-90deg);
-            position: absolute;
-            right: 6px;
-            top: .8em;
-        }
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')") Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId+'/' + leagueId + '/games')") {{leagueId}} Games
+  span.breadcrumb-item.active Bulk Registration
 
-        .dropdown-submenu .dropdown-menu {
-            top: 0;
-            left: 100%;
-            margin-left: .1rem;
-            margin-right: .1rem;
-        }
-        .ui-select-bootstrap .dropdown-menu {
-            display: initial;
-        }
-        .btn-default {
-            background-color: #3498db;
-            color: #fff;
-            font-size: 10px;
-        }
-        .ui-select-bootstrap .ui-select-choices-row.active>span {
-            color: initial;
-            text-decoration: none;
-            outline: 0;
-            background-color: initial;
-        }
-        .ui-select-bootstrap .ui-select-choices-row > span {
-          color: black !important;
-          display: block;
-          padding: 5px;
-        }
+block hero_title
+  | {{competition.name}}
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId+'/' + leagueId + '/games')") {{leagueId}} Games
-    span.breadcrumb-item.active Bulk Registration
+block hero_subtitle
+  i.fas.fa-file-import.mr-2
+  | {{league.name}} - {{"admin.lineRunBulk.title" | translate}}
 
+block main_content
+  .premium-btn-group.mb-3(role='group' style="display: inline-flex;")
+    button.btn(type='button' ng-click="mode='csv'" ng-class="{'active': mode == 'csv'}") CSV Import
+    button.btn(type='button' ng-click="mode='generator'" ng-class="{'active': mode == 'generator'}") Generator
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h3 {{competition.name}}
-      h2 {{league.name}} - {{"admin.lineRunBulk.title" | translate}}
-      br
-      
-      .btn-group(role='group')
-        button.btn.btn-secondary(type='button' ng-click="mode='csv'" ng-class="{'active': mode == 'csv'}") CSV Import
-        button.btn.btn-primary(type='button' ng-click="mode='generator'" ng-class="{'active': mode == 'generator'}") Generator
-      br
-      br
-      div(ng-if="mode == 'csv'")
-        h3 {{"admin.lineRunBulk.s1T" | translate}}
+  div(ng-if="mode == 'csv'")
+    h5.section-heading.mb-2
+      i.fas.fa-download
+      | {{"admin.lineRunBulk.s1T" | translate}}
+    .modern-card
+      .modern-card-body
         p {{"admin.lineRunBulk.s1D" | translate}}
-        a(href="/tmp/run_bulk.csv") Download!
-        br
-        br
+        a.btn-premium.btn-premium-dark(href="/tmp/run_bulk.csv")
+          i.fas.fa-download
+          | Download!
 
-      div(ng-show="mode == 'generator'")
-        h3 {{'admin.lineRunBulk.generatorTitle' | translate}}
-
+  div(ng-show="mode == 'generator'")
+    h5.section-heading.mb-2
+      i.fas.fa-magic
+      | {{'admin.lineRunBulk.generatorTitle' | translate}}
+    .modern-card
+      .modern-card-body
         .alert.alert-info
           strong {{'admin.lineRunBulk.generatorInfoTitle' | translate}}
           br
@@ -104,189 +88,199 @@ block content
           strong {{'admin.lineRunBulk.generatorExampleTitle' | translate}}
           |  {{'admin.lineRunBulk.generatorExampleText' | translate}}
 
-        .row
-          .col-md-12
-            label {{'admin.lineRunBulk.generatorTeams' | translate}}
-            ui-select(
-              multiple=''
-              ng-model='generator.selectedTeams'
-              theme='bootstrap'
-              sortable='true'
-              close-on-select='false'
-              reset-search-input='false'
-              style='width:100%;'
-            )
-              ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchTeams' | translate}}")
-                | {{$item.name}}
-              ui-select-choices(repeat='team in teams | filter: $select.search')
-                span {{team.name}}
+        .settings-group
+          label.settings-label {{'admin.lineRunBulk.generatorTeams' | translate}}
+          ui-select(
+            multiple=''
+            ng-model='generator.selectedTeams'
+            theme='bootstrap'
+            sortable='true'
+            close-on-select='false'
+            reset-search-input='false'
+            style='width:100%;'
+          )
+            ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchTeams' | translate}}")
+              | {{$item.name}}
+            ui-select-choices(repeat='team in teams | filter: $select.search')
+              span {{team.name}}
+
+        .settings-group
+          label.settings-label {{'admin.lineRunBulk.generatorRounds' | translate}}
+          ui-select(
+            multiple=''
+            ng-model='generator.selectedRounds'
+            theme='bootstrap'
+            sortable='true'
+            close-on-select='false'
+            reset-search-input='false'
+            style='width:100%;'
+          )
+            ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchRounds' | translate}}")
+              | {{$item.name}}
+            ui-select-choices(repeat='round in rounds | filter: $select.search')
+              span {{round.name}}
+
+        .settings-group
+          label.settings-label {{'admin.lineRunBulk.generatorFields' | translate}}
+          ui-select(
+            multiple=''
+            ng-model='generator.selectedFields'
+            theme='bootstrap'
+            sortable='true'
+            close-on-select='false'
+            reset-search-input='false'
+            style='width:100%;'
+          )
+            ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchFields' | translate}}")
+              | {{$item.name}}
+            ui-select-choices(repeat='field in fields | filter: $select.search')
+              span {{field.name}}
+
+        .settings-group
+          label.settings-label {{'admin.lineRunBulk.generatorMaps' | translate}}
+          ui-select(
+            multiple=''
+            ng-model='generator.selectedMaps'
+            theme='bootstrap'
+            sortable='true'
+            close-on-select='false'
+            reset-search-input='false'
+            style='width:100%;'
+          )
+            ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchMaps' | translate}}")
+              | {{$item.name}}
+            ui-select-choices(repeat='map in maps | filter: $select.search')
+              span {{map.name}}
 
         .row
-          .col-md-12
-            label {{'admin.lineRunBulk.generatorRounds' | translate}}
-            ui-select(
-              multiple=''
-              ng-model='generator.selectedRounds'
-              theme='bootstrap'
-              sortable='true'
-              close-on-select='false'
-              reset-search-input='false'
-              style='width:100%;'
-            )
-              ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchRounds' | translate}}")
-                | {{$item.name}}
-              ui-select-choices(repeat='round in rounds | filter: $select.search')
-                span {{round.name}}
-
-        .row
-          .col-md-12
-            label {{'admin.lineRunBulk.generatorFields' | translate}}
-            ui-select(
-              multiple=''
-              ng-model='generator.selectedFields'
-              theme='bootstrap'
-              sortable='true'
-              close-on-select='false'
-              reset-search-input='false'
-              style='width:100%;'
-            )
-              ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchFields' | translate}}")
-                | {{$item.name}}
-              ui-select-choices(repeat='field in fields | filter: $select.search')
-                span {{field.name}}
-
-        .row
-          .col-md-12
-            label {{'admin.lineRunBulk.generatorMaps' | translate}}
-            ui-select(
-              multiple=''
-              ng-model='generator.selectedMaps'
-              theme='bootstrap'
-              sortable='true'
-              close-on-select='false'
-              reset-search-input='false'
-              style='width:100%;'
-            )
-              ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchMaps' | translate}}")
-                | {{$item.name}}
-              ui-select-choices(repeat='map in maps | filter: $select.search')
-                span {{map.name}}
-
-        .row(style='margin-top:15px')
           .col-md-2
-            label {{'admin.lineRunBulk.generatorDays' | translate}}
-            input.form-control(type='number' ng-model='generator.totalDays')
+            .settings-group
+              label.settings-label {{'admin.lineRunBulk.generatorDays' | translate}}
+              input.premium-input(type='number' ng-model='generator.totalDays')
 
           .col-md-2
-            label {{'admin.lineRunBulk.generatorSlotMinutes' | translate}}
-            input.form-control(type='number' ng-model='generator.slotMinutes')
+            .settings-group
+              label.settings-label {{'admin.lineRunBulk.generatorSlotMinutes' | translate}}
+              input.premium-input(type='number' ng-model='generator.slotMinutes')
 
           .col-md-2
-            label {{'admin.lineRunBulk.generatorSmallBreakMultiplier' | translate}}
-            input.form-control(type='number' ng-model='generator.smallBreakMultiplier')
+            .settings-group
+              label.settings-label {{'admin.lineRunBulk.generatorSmallBreakMultiplier' | translate}}
+              input.premium-input(type='number' ng-model='generator.smallBreakMultiplier')
 
           .col-md-2
-            label {{'admin.lineRunBulk.generatorLunchMinutes' | translate}}
-            input.form-control(type='number' ng-model='generator.lunchBreakMinutes')
+            .settings-group
+              label.settings-label {{'admin.lineRunBulk.generatorLunchMinutes' | translate}}
+              input.premium-input(type='number' ng-model='generator.lunchBreakMinutes')
 
           .col-md-4
-            label {{'admin.lineRunBulk.generatorStartTime' | translate}}
-            input.form-control(type='datetime-local' ng-model='generator.startTime')
+            .settings-group
+              label.settings-label {{'admin.lineRunBulk.generatorStartTime' | translate}}
+              input.premium-input(type='datetime-local' ng-model='generator.startTime')
 
-        .row(style='margin-top:15px')
-          .col-md-12
-            label {{'admin.lineRunBulk.generatorScheduleMode' | translate}}
-            select.form-control(ng-model='generator.scheduleMode')
-              option(value='scrambled') {{'admin.lineRunBulk.generatorModeScrambled' | translate}}
-              option(value='fixedMap') {{'admin.lineRunBulk.generatorModeFixed' | translate}}
+        .settings-group.mb-0
+          label.settings-label {{'admin.lineRunBulk.generatorScheduleMode' | translate}}
+          select.premium-select(ng-model='generator.scheduleMode')
+            option(value='scrambled') {{'admin.lineRunBulk.generatorModeScrambled' | translate}}
+            option(value='fixedMap') {{'admin.lineRunBulk.generatorModeFixed' | translate}}
 
-            small.form-text.text-muted(ng-if="generator.scheduleMode == 'fixedMap'")
-              | {{'admin.lineRunBulk.generatorModeFixedDesc1' | translate}}
-              br
-              | {{'admin.lineRunBulk.generatorModeFixedDesc2' | translate}}
-            small.form-text.text-muted(ng-if="generator.scheduleMode == 'scrambled'")
-              | {{'admin.lineRunBulk.generatorModeScrambledDesc' | translate}}
-           
+          small.form-text.text-muted(ng-if="generator.scheduleMode == 'fixedMap'")
+            | {{'admin.lineRunBulk.generatorModeFixedDesc1' | translate}}
+            br
+            | {{'admin.lineRunBulk.generatorModeFixedDesc2' | translate}}
+          small.form-text.text-muted(ng-if="generator.scheduleMode == 'scrambled'")
+            | {{'admin.lineRunBulk.generatorModeScrambledDesc' | translate}}
 
-        br
-        button.btn.btn-success(ng-click='generateSchedule()') {{'admin.lineRunBulk.generatorButton' | translate}}
-        br
-        br
-        .alert.alert-warning
+        .add-item-row
+          button.btn-premium.btn-premium-primary(ng-click='generateSchedule()')
+            i.fas.fa-magic
+            | {{'admin.lineRunBulk.generatorButton' | translate}}
+
+        .alert.alert-warning.mb-0
           strong {{'admin.lineRunBulk.generatorDisclaimerTitle' | translate}}
           |  {{'admin.lineRunBulk.generatorDisclaimerText' | translate}}
 
-      div(ng-show="mode == 'csv'")
-        h3 {{"admin.lineRunBulk.s2T" | translate}}
+  div(ng-show="mode == 'csv'")
+    h5.section-heading.section-gap.mb-2
+      i.fas.fa-info-circle
+      | {{"admin.lineRunBulk.s2T" | translate}}
+    .modern-card
+      .modern-card-body
         p {{"admin.lineRunBulk.s2D1" | translate}}
         p {{"admin.lineRunBulk.s2D2" | translate}}
 
-        table.custom
-          thead
-            tr
-              th {{"common.round" | translate}}
-          tbody
-            tr(ng-repeat='round in rounds')
-              td(ng-bind='round.name')
+        .modern-table-card
+          table.custom
+            thead
+              tr
+                th {{"common.round" | translate}}
+            tbody
+              tr(ng-repeat='round in rounds')
+                td(ng-bind='round.name')
 
         hr
 
         p {{"admin.lineRunBulk.s2D3" | translate}}
-        table.custom
-          thead
-            tr
-              th {{"common.team" | translate}}
-          tbody
-            tr(ng-repeat='team in teams')
-              td(ng-bind='team.name')
+        .modern-table-card
+          table.custom
+            thead
+              tr
+                th {{"common.team" | translate}}
+            tbody
+              tr(ng-repeat='team in teams')
+                td(ng-bind='team.name')
 
         hr
 
         div(ng-hide="league.type == 'simulation'")
           p {{"admin.lineRunBulk.s2D4" | translate}}
-          table.custom
-            thead
-              tr
-                th {{"common.map" | translate}}
-            tbody
-              tr(ng-repeat='map in maps')
-                td(ng-bind='map.name')
+          .modern-table-card
+            table.custom
+              thead
+                tr
+                  th {{"common.map" | translate}}
+              tbody
+                tr(ng-repeat='map in maps')
+                  td(ng-bind='map.name')
           hr
 
         p {{"admin.lineRunBulk.s2D5" | translate}}
-        table.custom
-          thead
-            tr
-              th {{"common.field" | translate}}
-          tbody
-            tr(ng-repeat='field in fields')
-              td(ng-bind='field.name')
+        .modern-table-card
+          table.custom
+            thead
+              tr
+                th {{"common.field" | translate}}
+            tbody
+              tr(ng-repeat='field in fields')
+                td(ng-bind='field.name')
 
         hr
 
         p {{"admin.lineRunBulk.s2D6" | translate}}
-        p yyyy/mm/dd hh:ss
-        | ex) 2017/07/27 10:35
+        p.mb-0 yyyy/mm/dd hh:ss
+          | ex) 2017/07/27 10:35
 
-        hr
-        br
-
-        h3 {{"admin.lineRunBulk.s3T" | translate}}
+    h5.section-heading.section-gap.mb-2
+      i.fas.fa-upload
+      | {{"admin.lineRunBulk.s3T" | translate}}
+    .modern-card
+      .modern-card-body.mb-0
         input#select(type="file" name="select")
-        p {{"admin.lineRunBulk.s3D" | translate}}
-      br
-      #result
-      br
-      br
-      center(ng-if="processing")
-        img(src="/images/loader2.gif")
-        p {{now}} / {{total}} {{"admin.lineRunBulk.inpro" | translate}}
-      center(ng-if="completed" style="color:#2ecc71;")
-        i.far.fa-check-circle.fa-5x(aria-hidden="true")
-        p {{total}} {{"admin.lineRunBulk.complete" | translate}}
-      center(ng-if="error" style="color:#e74c3c;")
-        i.fas.fa-exclamation-circle.fa-5x(aria-hidden="true")
-        p {{now}} / {{total}} ERROR
-      br
-      br
-      button(ng-click="addRun()" class='btn btn-primary') {{"admin.lineRunBulk.exe" | translate}}
+        p.mb-0 {{"admin.lineRunBulk.s3D" | translate}}
+
+  #result
+  br
+  center(ng-if="processing")
+    img(src="/images/loader2.gif")
+    p {{now}} / {{total}} {{"admin.lineRunBulk.inpro" | translate}}
+  center(ng-if="completed" style="color:#2ecc71;")
+    i.far.fa-check-circle.fa-5x(aria-hidden="true")
+    p {{total}} {{"admin.lineRunBulk.complete" | translate}}
+  center(ng-if="error" style="color:#e74c3c;")
+    i.fas.fa-exclamation-circle.fa-5x(aria-hidden="true")
+    p {{now}} / {{total}} ERROR
+
+  .add-item-row
+    button.btn-premium.btn-premium-primary(ng-click="addRun()")
+      i.fas.fa-check
+      | {{"admin.lineRunBulk.exe" | translate}}

@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'login'
@@ -7,26 +7,29 @@ block vars
 append scripts
   script(src='/javascripts/login.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    span.breadcrumb-item.active Login
-block content
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')") Home
+  span.breadcrumb-item.active Login
+
+block hero_title
+  | {{'login.title' | translate}}
+
+block hero_subtitle
+  | {{'login.description' | translate}}
+
+block main_content
   .row
     .col-md-3.col-sm-2
     .col-md-6.col-sm-8
-      .alert.alert-secondary(role='alert' ng-if="return" style="border-radius: 12px; border: none; background: #f1f5f9; color: #475569; font-weight: 600;") 
+      .alert.alert-secondary(role='alert' ng-if="return" style="border-radius: 12px; border: none; background: #f1f5f9; color: #475569; font-weight: 600;")
         i.fas.fa-info-circle.mr-2
         | {{'login.return' | translate}}
-      
+
       .premium-card
-        .text-center.mb-5
-          img.mb-3(src='/images/logo.png', alt='Logo' style="width: 100px;")
-          h1.font-weight-bold {{'login.title' | translate}}
-          p.text-muted {{'login.description' | translate}}
-        .alert.alert-danger(role='alert' ng-if="isFailed" style="border-radius: 12px; animation: shake 0.5s;") 
+        .alert.alert-danger(role='alert' ng-if="isFailed" style="border-radius: 12px; animation: shake 0.5s;")
           i.fas.fa-exclamation-circle.mr-2
           | {{'login.failed' | translate}}
-        
+
         form(ng-submit="login()")
           .form-group.mb-4
             .input-group.premium-input-group
@@ -34,18 +37,15 @@ block content
                 span.input-group-text
                   i.fas.fa-user
               input.form-control(type='text' autocorrect="off" autocapitalize="off" placeholder='Username' ng-model="username" ng-class="isFailed?'is-invalid':''" required)
-          
+
           .form-group.mb-4
             .input-group.premium-input-group
               .input-group-prepend
                 span.input-group-text
                   i.fas.fa-key
               input.form-control(type='password', placeholder='Password' ng-model="password" ng-class="isFailed?'is-invalid':''" required)
-          
+
           .text-center.mt-5
             button.btn.btn-premium.btn-block.btn-lg.py-3(type='submit')
               i.fas.fa-sign-in-alt.mr-2
               | {{'login.login' | translate}}
-
-
-

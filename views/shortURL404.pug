@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'AD'
@@ -7,24 +7,18 @@ block vars
 append scripts
   script(src='/javascripts/access_denied.js')
 
-block location
+block hero_breadcrumb
   a.breadcrumb-item(ng-click="go('/home')") Home
   span.breadcrumb-item.active 404 Not Found
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      div(style="text-align:center;")
-        i.fas.fa-trash-alt(aria-hidden="true"  style="color:#f1c40f;font-size:200px") &nbsp;404
-        br
-        h1(style="font-size:50px") {{"shortURL404.title" | translate}}
-        br
-        h2 {{"shortURL404.description1" | translate}}
-        p {{"shortURL404.description2" | translate}}
-      br
+block hero_title
+  | {{"shortURL404.title" | translate}}
 
-      br
-      button(onclick="location.href=document.referrer" class='btn btn-secondary btn-lg btn-block')
-        i.fas.fa-undo.fa-2x(aria-hidden="true") {{'common.back' | translate}}
-      
+block main_content
+  .empty-state
+    i.fas.fa-trash-alt
+    h2 {{"shortURL404.description1" | translate}}
+    p {{"shortURL404.description2" | translate}}
+    button.btn-premium.btn-premium-dark(onclick="location.href=document.referrer")
+      i.fas.fa-undo
+      | {{'common.back' | translate}}

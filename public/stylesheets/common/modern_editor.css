@@ -1,0 +1,107 @@
+/* Shared components for document editor pages (form_editor, review_editor, ...) */
+
+.document-card {
+  margin-bottom: 2rem;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: white;
+}
+
+.document-card-header {
+  padding: 1.25rem 1.5rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.document-card-header i {
+  color: var(--accent-color);
+  margin-right: 0.5rem;
+}
+
+.document-card-body {
+  padding: 1.5rem;
+}
+
+.question-editor-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem;
+  margin-top: 1.25rem;
+  background: #f8fafc;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.icon-btn-premium {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.icon-btn-premium:hover:not(:disabled) {
+  background: #eff6ff;
+  color: var(--accent-color);
+  border-color: #bfdbfe;
+}
+
+.icon-btn-premium.danger:hover:not(:disabled) {
+  background: #fef2f2;
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+.icon-btn-premium:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.add-item-row {
+  text-align: center;
+  margin: 1.5rem 0;
+}
+
+.premium-tabs.nav-tabs {
+  border-bottom: none;
+  background: #f1f5f9;
+  padding: 0.4rem;
+  border-radius: 12px;
+  display: inline-flex;
+}
+
+.premium-tabs.nav-tabs .nav-link {
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  color: #64748b;
+  padding: 0.5rem 1rem;
+}
+
+.premium-tabs.nav-tabs .nav-link.active {
+  background: white;
+  color: var(--accent-color);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.quill-editor-wrapper .ql-container {
+  border-radius: 0 0 12px 12px;
+}
+
+.quill-editor-wrapper .ql-toolbar {
+  border-radius: 12px 12px 0 0;
+}

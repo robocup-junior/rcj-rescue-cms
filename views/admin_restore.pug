@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'AdminRestore'
@@ -13,33 +13,31 @@ append scripts
   script(src="/components/bootstrap-fileinput/js/locales/ja.js")
   script(src="/components/ng-file-upload/ng-file-upload.min.js")
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    span.breadcrumb-item.active Restore
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')") Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  span.breadcrumb-item.active Restore
 
+block hero_title
+  | {{"admin.restore.title" | translate}}
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{"admin.restore.title" | translate}}
-      p {{"admin.restore.description" | translate}}
-      br
-      button(class='btn btn-success btn-lg btn-block' type='file' ngf-select='upload($file, $invalidFiles)' accept='*' ngf-max-size='5000MB' ng-hide="job")
-        i.fas.fa-2x.fa-file-upload
-        br
+block main_content
+  .modern-card
+    .modern-card-body
+      p.text-body-premium {{"admin.restore.description" | translate}}
+      button.btn-premium.btn-premium-primary(class='btn-block' type='file' ngf-select='upload($file, $invalidFiles)' accept='*' ngf-max-size='5000MB' ng-hide="job")
+        i.fas.fa-file-upload
         span {{'cabinet.upload' | translate}}
         div(style="color:#e74c3c;margin-left:10px;", ng-if="errFile.$error")
-            span ERROR: {{errFile.$error}}
+          span ERROR: {{errFile.$error}}
         .flex-fill(style="margin:10px 0px 0px 10px;", ng-show="f.progress > 0")
-            .progress
-                .progress-bar(role='progressbar' style='width: {{f.progress}}%;' aria-valuenow='{{f.progress}}' aria-valuemin='0' aria-valuemax='100') {{f.progress}}%
+          .progress
+            .progress-bar(role='progressbar' style='width: {{f.progress}}%;' aria-valuenow='{{f.progress}}' aria-valuemin='0' aria-valuemax='100') {{f.progress}}%
         div(style="color:#e74c3c;margin-top:10px;", ng-if="errorMsg")
-            span {{errorMsg}}
-      hr
-      .text-center(ng-if="job.state")
-        h1
+          span {{errorMsg}}
+
+      .settings-group.mb-0(ng-if="job.state")
+        .text-center
           span.badge(ng-class="statusColour(job.state)")
             i.fas(ng-class="statusIcon(job.state)")
             | &nbsp;{{firstUpper(job.state)}}

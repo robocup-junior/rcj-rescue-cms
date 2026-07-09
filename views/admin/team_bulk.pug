@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'TeamAdmin'
@@ -9,61 +9,74 @@ append scripts
     var competitionId = "#{id}"
   script(src='/javascripts/admin/team_bulk.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId+'/teams')") Teams
-    span.breadcrumb-item.active Bulk Registration
+append css
+  link(href='/stylesheets/common/modern_editor.css', rel='stylesheet')
 
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')") Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId+'/teams')") Teams
+  span.breadcrumb-item.active Bulk Registration
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{competition.name}} - {{"admin.teamBulk.title" | translate}}
-      br
-      br
-      h3 {{"admin.teamBulk.s1T" | translate}}
+block hero_title
+  | {{competition.name}}
+
+block hero_subtitle
+  i.fas.fa-file-import.mr-2
+  | {{"admin.teamBulk.title" | translate}}
+
+block main_content
+  h5.section-heading.mb-2
+    i.fas.fa-download
+    | {{"admin.teamBulk.s1T" | translate}}
+  .modern-card
+    .modern-card-body
       p {{"admin.teamBulk.s1D" | translate}}
-      a(href="/tmp/team_bulk.csv") Download!
-      br
-      br
-      h3 {{"admin.teamBulk.s2T" | translate}}
+      a.btn-premium.btn-premium-dark(href="/tmp/team_bulk.csv")
+        i.fas.fa-download
+        | Download!
+
+  h5.section-heading.section-gap.mb-2
+    i.fas.fa-info-circle
+    | {{"admin.teamBulk.s2T" | translate}}
+  .modern-card
+    .modern-card-body.mb-0
       p {{"admin.teamBulk.s2D1" | translate}}
-      p {{"admin.teamBulk.s2D2" | translate}}{{leagues}}
-      br
-      br
-      h3 {{"admin.teamBulk.s3T" | translate}}
-      input#select(type="file" name="select")
-      p {{"admin.teamBulk.s3D" | translate}}
-      
-      table.custom(style="margin-bottom:60px;")
-        thead
-          tr
-            th(ng-repeat="h in header track by $index")
-              select(ng-model='header[$index]' style="width:100%;")
-                option(value="teamCode") {{"common.teamCode" | translate}}
-                option(value="name") {{"common.team" | translate}}
-                option(value="country") {{"common.region" | translate}}
-                option(value="league") {{"common.league" | translate}}
-                option(value="email") {{"common.email" | translate}}
-              div(style="height:12px;")
-                span(style="font-size:10px;") {{csv[0][$index]}}
+      p.mb-0 {{"admin.teamBulk.s2D2" | translate}}{{leagues}}
 
-        tbody
-          tr(ng-repeat="row in csv track by $index", ng-if="!$first")
-            td(ng-repeat="d in row track by $index", ng-bind="d")
+  h5.section-heading.section-gap.mb-2
+    i.fas.fa-upload
+    | {{"admin.teamBulk.s3T" | translate}}
+  .modern-card
+    .modern-card-body
+      .settings-group.mb-0
+        input#select(type="file" name="select")
+        p.mb-0 {{"admin.teamBulk.s3D" | translate}}
 
-      div(style="text-align:center;", ng-hide="total > 0")
-        button.btn.btn-primary.btn-lg(ng-click="addBulkTeam()", ng-if="csv") {{"admin.teamBulk.exe" | translate}}
-      br
-      
-      center(ng-if="total > 0" style="color:#2ecc71;")
-        i.far.fa-check-circle.fa-5x(aria-hidden="true")
-        p {{total}} {{"admin.teamBulk.complete" | translate}}
-      br
-      br
-      
-      
-      
+  .modern-table-card
+    table.custom(style="margin-bottom:60px;")
+      thead
+        tr
+          th(ng-repeat="h in header track by $index")
+            select.premium-select(ng-model='header[$index]')
+              option(value="teamCode") {{"common.teamCode" | translate}}
+              option(value="name") {{"common.team" | translate}}
+              option(value="country") {{"common.region" | translate}}
+              option(value="league") {{"common.league" | translate}}
+              option(value="email") {{"common.email" | translate}}
+            div(style="height:12px;")
+              span(style="font-size:10px;") {{csv[0][$index]}}
+
+      tbody
+        tr(ng-repeat="row in csv track by $index", ng-if="!$first")
+          td(ng-repeat="d in row track by $index", ng-bind="d")
+
+  .add-item-row(ng-hide="total > 0")
+    button.btn-premium.btn-premium-primary(ng-click="addBulkTeam()", ng-if="csv")
+      i.fas.fa-check
+      | {{"admin.teamBulk.exe" | translate}}
+
+  center(ng-if="total > 0" style="color:#2ecc71;")
+    i.far.fa-check-circle.fa-5x(aria-hidden="true")
+    p {{total}} {{"admin.teamBulk.complete" | translate}}

@@ -1,8 +1,12 @@
 //- -*- tab-width: 2 -*-
-extends ../../includes/layout
+extends ../../includes/modern_layout
 
 block vars
   - var ngAppDef = 'MazeEditor'
+  - var heroContainerStyle = "max-width: 100%;"
+  - var contentContainerStyle = "max-width: 100%;"
+  - var contentContainerClass = "mt-n4"
+  - var hideLogin = pubService
 
 append scripts
   script.
@@ -12,180 +16,214 @@ append scripts
     var leagueId = "#{leagueId}"
 
   script(src="/javascripts/admin/mapEditor/maze_2026E.js")
-  
+
   script(src="/javascripts/lvl-uuid.js")
   script(src="/components/bootstrap-fileinput/js/fileinput.min.js")
   script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js")
   script(src="/components/bootstrap-fileinput/js/locales/ja.js")
   script(src="/components/html2canvas/index.js")
 
-append css
+block page_css
   link(href="/stylesheets/maze_edit.css" rel="stylesheet")
   link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
+  link(href="/stylesheets/admin/mapEditor/maze_modern.css" rel="stylesheet")
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    if !pubService
-        a.breadcrumb-item(ng-click="go('/admin')") Admin
-        a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-        a.breadcrumb-item(ng-click="go('/admin/'+competitionId + '/' + league.league + '/maps')") #{leagueId} maps
-        span.breadcrumb-item.active Editor
-    else
-        a.breadcrumb-item(ng-click="go('/service')") Public services
-        span.breadcrumb-item.active #{leagueId} editor
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  if !pubService
+    a.breadcrumb-item(ng-click="go('/admin')") Admin
+    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+    a.breadcrumb-item(ng-click="go('/admin/'+competitionId + '/' + league.league + '/maps')") #{leagueId} Maps
+    span.breadcrumb-item.active Editor
+  else
+    a.breadcrumb-item(ng-click="go('/service')") Public services
+    span.breadcrumb-item.active #{leagueId} Editor
 
-block content
-    if !pubService
-        h3 {{competition.name}}
-    h1 {{league.name}} {{"admin.mazeMapEditor.title" | translate}} 2026
-    p {{"admin.mazeMapEditor.desc" | translate}}
-    h2(ng-if='parent') {{"admin.mazeMapEditor.parent" | translate}}
-    button.btn.btn-info(type='button', ng-click='saveMap(parent)', ng-if='parent') {{"admin.mazeMapEditor.backToParent" | translate}}
-    div(style='margin-top:50px;')
-        .row
-            .col-md-4
-                button.btn.btn-dark(type='button', ng-click='export()') {{"admin.mazeMapEditor.export" | translate}}
-            .col-md-4
-                input#select(type='file', name='select')
-            .col-md-4(style="text-align:right;")
-                button.btn.btn-info(type='button', ng-click='makeImageDl()') {{"admin.mazeMapEditor.scoreSheetPreparation" | translate}}
-        br
-        .row
-            .col-md-12
-                if pubService
-                    .input-group.mb-3
-                        .input-group-prepend
-                            span.input-group-text {{"admin.mazeMapEditor.name" | translate}}
-                        input.form-control(type='text', ng-model='name')
-                        .input-group-append
-                            button.btn.btn-secondary(type='button', ng-click='export()') {{"admin.mazeMapEditor.export" | translate}}
-                    hr
-                if !pubService
-                    .input-group.mb-3
-                        .input-group-prepend
-                            span.input-group-text {{"admin.mazeMapEditor.name" | translate}}
-                        input.form-control(type='text', ng-model='name')
-                        .input-group-append
-                            button.btn.btn-secondary(type='button', ng-click='saveMap()') {{"admin.mazeMapEditor.save" | translate}}
-                    hr
-                    .input-group.mb-3(ng-if='!parent')
-                        .input-group-prepend
-                            span.input-group-text {{"admin.mazeMapEditor.name" | translate}}
-                        input.form-control(type='text', ng-model='asname')
-                        .input-group-append
-                            span.input-group-text(for="selectComp") @
-                        select.custom-select#selectComp(ng-model='$parent.se_competition', ng-options='b_competitions._id as b_competitions.name for b_competitions in competitions')
-                        .input-group-append
-                            button.btn.btn-secondary(type='button', ng-click='saveMapAs(asname)') {{"admin.mazeMapEditor.saveAs" | translate}}
-                    hr
-                .input-group.mb-3
-                    .input-group-prepend
-                        span.input-group-text {{"admin.mazeMapEditor.width" | translate}}
-                    input.form-control(type='number', ng-model='width', min='1')
-                    .input-group-append
-                        span.input-group-text {{"admin.mazeMapEditor.length" | translate}}
-                    input.form-control(type='number', ng-model='length', min='1')
-                    .input-group-append
-                        span.input-group-text {{"admin.simMapEditor.timelimit" | translate}}:
-                    input.form-control(type='number', ng-model='duration', min = '1')
-                hr
-                if !pubService
-                    div(ng-if='!parent')
-                        i.fas.fa-dice.fa-2x(style="margin-bottom:10px;") {{"admin.mazeMapEditor.pattern" | translate}}
-                        p(ng-if="mapId == ''")
-                            | {{"admin.mazeMapEditor.patSave" | translate}}
-                        table.custom(style='table-layout: auto;', ng-if="mapId != ''")
-                            tbody
-                                tr
-                                    th No.
-                                    th {{"common.map" | translate}}
-                                    th {{"common.operation" | translate}}
-                                    th {{"common.operation" | translate}}
-                                tr(ng-repeat='i in range(6)')
-                                    th(style="width:30px;") {{i+1}}
-                                    td
-                                        select(ng-model='dice[i]', ng-options='b_maps._id as b_maps.name for b_maps in maps')
-                                    td
-                                        button.btn.btn-primary(type='button', ng-click='childNew(i+1)') {{"admin.mazeMapEditor.create" | translate}}
-                                    td
-                                        button.btn.btn-secondary(type='button', ng-click='saveMap(dice[i])') {{"admin.mazeMapEditor.edit" | translate}}
-                    br
-                if !pubService
-                    div(ng-show='(dice[0]&&dice[1]&&dice[2]&&dice[3]&&dice[4]&&dice[5]) || parent')
-                        input#isFinished(type='checkbox', ng-model='finished')
-                        label.checkbox(for='isFinished') {{"admin.mazeMapEditor.finished" | translate}}
-                    .error(ng-if='!(dice[0]&&dice[1]&&dice[2]&&dice[3]&&dice[4]&&dice[5])&&!parent') {{"admin.mazeMapEditor.patYet" | translate}}
-                    br
-                    .error(ng-if='startNotSet()') {{"admin.mazeMapEditor.noStart" | translate}}
-        .row
-            .col-11
-                table
-                    tbody
-                        tr(ng-repeat='r in range(2*length + 1)')
-                            td(ng-repeat='c in range(2*width + 1)', ng-class="{'wallspot': $odd != $parent.$odd, 'tile': $odd && $parent.$odd, 'wall': cells[c+','+r+','+z].isWall, 'checkpoint': cells[c+','+r+','+z].tile.checkpoint, 'black': cells[c+','+r+','+z].tile.black, 'linear': cells[c+','+r+','+z].tile.reachable && cells[c+','+r+','+z].isLinear, 'floating': cells[c+','+r+','+z].tile.reachable && !cells[c+','+r+','+z].isLinear}", ng-click='cellClick(c, r, z, $odd != $parent.$odd, $odd && $parent.$odd)', ng-style="wallColor(c,r,z)")
-                                .tile-image-container(ng-show="$odd && $parent.$odd")
-                                    img.tile-image(ng-src='/images/log.png', ng-show="cells[c+','+r+','+z].tile.speedbump")
-                                    img.tile-image(ng-src='/images/start.png', ng-show='startTile.x == c && startTile.y == r && startTile.z == z')
-                                    img.tile-image(ng-src='/images/red_floor.png', ng-show="cells[c+','+r+','+z].tile.victims.floor == 'Red'")
-                                    img.tile-image(ng-src='/images/green_floor.png', ng-show="cells[c+','+r+','+z].tile.victims.floor == 'Green'")
+block hero_title_container
+  .hero-title-container
+    input.hero-title-input(type="text", ng-model="name", placeholder='{{"admin.mazeMapEditor.mapName" | translate}}')
+    i.fas.fa-pen.title-edit-icon
 
-            .col-1 
-                if !pubService
-                    button.btn.btn-info(type='button', ng-click='openMaxScore()')
-                        i.fas.fa-calculator
+block hero_subtitle
+  if pubService
+    | Rescue Maze Entry Map Editor 2026
+  else
+    | {{competition.name}} - {{league.name}} Map Editor 2026
+
+block hero_actions
+  if !pubService
+    .action-group.flex-column.align-items-center(style="position: relative;")
+      .alert.alert-danger.small.py-1.px-2.mb-0(ng-if='startNotSet()', style="position: absolute; top: -45px; left: 0; border-radius: 12px; border: none; background: #fee2e2; color: #b91c1c; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 10;")
+        i.fas.fa-exclamation-circle.mr-1
+        | {{"admin.mazeMapEditor.noStart" | translate}}
+      span.action-label.mb-1 SAVE
+      .d-flex
+        button.btn-hero-icon.btn-save(type='button', ng-click='saveMap()', title='{{"admin.mazeMapEditor.save" | translate}}')
+          i.fas.fa-save
+
+  .action-divider
+
+  .action-group.flex-column.align-items-center
+    span.action-label.mb-1 JSON
+    .d-flex
+      button.btn-hero-icon.mr-2(type='button', ng-click='export()', title='{{"admin.mazeMapEditor.export" | translate}}')
+        i.fas.fa-file-export
+      button.btn-hero-icon(type='button', onclick="$('#select').click()", title='{{"admin.mazeMapEditor.import" | translate}}')
+        i.fas.fa-file-import
+      input#select(type='file', name='select', style="display:none;")
+
+  if parent
+    .action-divider
+    .action-group.flex-column.align-items-center
+      span.action-label.mb-1 BACK
+      button.btn-hero-icon(type='button', ng-click='saveMap(parent)', title='{{"admin.mazeMapEditor.backToParent" | translate}}')
+        i.fas.fa-chevron-left
+
+block main_content
+  .modern-card.mb-3
+    .modern-card-body
+      .alert.alert-info.py-2.px-3.small.mb-3(ng-if='parent')
+        i.fas.fa-info-circle.mr-1
+        | {{"admin.mazeMapEditor.parent" | translate}}
+      if pubService
+        .settings-group
+          label.settings-label {{"admin.mazeMapEditor.name" | translate}}
+          .toolbar-actions
+            input.premium-input(type='text', ng-model='name')
+            button.btn-premium.btn-premium-dark(type='button', ng-click='export()') {{"admin.mazeMapEditor.export" | translate}}
+      if !pubService
+        .settings-group(ng-if='!parent')
+          label.settings-label {{"admin.mazeMapEditor.name" | translate}}
+          input.premium-input(type='text', ng-model='asname')
+        .row(ng-if='!parent')
+          .col-md-8
+            .settings-group.mb-0
+              label.settings-label {{"admin.mazeMapEditor.saveAsModal.targetCompetition" | translate}}
+              select.premium-select(ng-model='$parent.se_competition', ng-options='b_competitions._id as b_competitions.name for b_competitions in competitions')
+          .col-md-4.d-flex.align-items-end
+            button.btn-premium.btn-premium-primary.mb-0.w-100(type='button', ng-click='saveMapAs(asname)') {{"admin.mazeMapEditor.saveAsModal.createCopy" | translate}}
+
+      .row.mt-3
+        .col-md-4
+          .dimension-spinner
+            label.small.mb-0.mr-2.text-muted {{"admin.mazeMapEditor.width" | translate}}
+            input.spinner-input(type='number', ng-model='width', min='1')
+        .col-md-4
+          .dimension-spinner
+            label.small.mb-0.mr-2.text-muted {{"admin.mazeMapEditor.length" | translate}}
+            input.spinner-input(type='number', ng-model='length', min='1')
+        .col-md-4
+          .dimension-spinner
+            label.small.mb-0.mr-2.text-muted {{"admin.simMapEditor.timelimit" | translate}}
+            input.spinner-input(type='number', ng-model='duration', min = '1')
+
+      if !pubService
+        div(ng-if='!parent')
+          hr
+          h5.section-heading.mb-2
+            i.fas.fa-dice
+            | {{"admin.mazeMapEditor.pattern" | translate}}
+          p.text-muted.small(ng-if="mapId == ''")
+            | {{"admin.mazeMapEditor.patSave" | translate}}
+          .modern-table-card(ng-if="mapId != ''")
+            table.custom(style='table-layout: auto;')
+              tbody
+                tr
+                  th No.
+                  th {{"common.map" | translate}}
+                  th {{"common.operation" | translate}}
+                  th {{"common.operation" | translate}}
+                tr(ng-repeat='i in range(6)')
+                  th(style="width:30px;") {{i+1}}
+                  td
+                    select.premium-select(ng-model='dice[i]', ng-options='b_maps._id as b_maps.name for b_maps in maps')
+                  td
+                    button.btn-premium.btn-premium-primary(type='button', ng-click='childNew(i+1)') {{"admin.mazeMapEditor.create" | translate}}
+                  td
+                    button.btn-premium.btn-premium-dark(type='button', ng-click='saveMap(dice[i])') {{"admin.mazeMapEditor.edit" | translate}}
+
         hr
-        .row
-            .col-6
-                h3 {{"admin.mazeMapEditor.scoreSheetPreparation" | translate}}
-            .col-6
-                button.btn.btn-info(type='button', ng-click='makeImageDl()') {{"admin.mazeMapEditor.scoreSheetPreparation" | translate}}
-        .row
-            #outputImageArea(style="float:left;padding-top:100px;padding-left:0px;padding-right:0px;padding-bottom:100px;")
-                style.
-                    .maru {
-                        display: inline-flex;
-                        justify-content: center;
-                        align-items: center;
-                        border-radius: 50%;
-                        flex-flow: column;
-                        vertical-align: top;
-                    }
-                    .size_normal{
-                        width: 15px;
-                        height: 15px;
-                    }
-                    .letter3 {
-                        font-size: 1em;
-                        line-height: 1.5em;
-                        color: white;
-                    }
-                    .blue1 {
-                        color: #3498db;
-                        background-color: #3498db;
-                    }
-                    .pink1 {
-                        color: #e84393;
-                        background-color: #e84393;
-                    }
-                table
-                    tbody
-                        tr(ng-repeat='r in range(2*length + 1)')
-                            td(ng-repeat='c in range(2*width + 1)', ng-class="{'wallspot': $odd != $parent.$odd, 'tile': $odd && $parent.$odd, 'wall': cells[c+','+r+','+z].isWall, 'checkpoint': cells[c+','+r+','+z].tile.checkpoint, 'black': cells[c+','+r+','+z].tile.black, 'blue': cells[c+','+r+','+z].tile.blue, 'linear': cells[c+','+r+','+z].tile.reachable && cells[c+','+r+','+z].isLinear, 'floating': cells[c+','+r+','+z].tile.reachable && !cells[c+','+r+','+z].isLinear}" , ng-style="wallColor(c,r,z)")
-                                .tile-image-container(ng-show="$odd && $parent.$odd")
-                                    div.maru.size_normal.blue1(style="left:1px;top:1px;position: absolute;border-radius:0%;z-index:3;" ng-if="cells[c+','+r+','+z].tile.checkpoint")
-                                        div.letter3(ng-bind="itemNumber('checkpoint',c,r,z)")
-                                    img.tile-image(ng-src='/images/log.png', ng-show="cells[c+','+r+','+z].tile.speedbump")
-                                    div.maru.size_normal.blue1(style="right:1px;bottom:1px;position: absolute;z-index:3;" ng-if="cells[c+','+r+','+z].tile.speedbump")
-                                        div.letter3(ng-bind="itemNumber('speedbump',c,r,z)")
-                                    img.tile-image(ng-src='/images/start.png', ng-show='startTile.x == c && startTile.y == r && startTile.z == z')
+        div(ng-show='(dice[0]&&dice[1]&&dice[2]&&dice[3]&&dice[4]&&dice[5]) || parent')
+          .premium-tool-group
+            button.status-icon-toggle(type='button', ng-click="finished = !finished", ng-class="{'active': finished}")
+              i.fas.fa-clipboard-check
+            label.small.text-muted.mb-0.ml-2(for='isFinished') {{"admin.mazeMapEditor.finished" | translate}}
+        .alert.alert-danger.py-2.px-3.small.mb-0(ng-if='!(dice[0]&&dice[1]&&dice[2]&&dice[3]&&dice[4]&&dice[5])&&!parent') {{"admin.mazeMapEditor.patYet" | translate}}
 
-                                    div(ng-if="cells[c+','+r+','+z].tile.victims.floor == 'Red'")
-                                        img.tile-image(ng-src='/images/red_floor.png')
-                                        div.maru.size_normal.pink1(style="right:5px;top:-10px;position: absolute;z-index:3;")
-                                            div.letter3(ng-bind="victimNumber('Red',c,r,z,'floor')")
-                                    div(ng-if="cells[c+','+r+','+z].tile.victims.floor == 'Green'")
-                                        img.tile-image(ng-src='/images/green_floor.png')
-                                        div.maru.size_normal.pink1(style="left:5px;bottom:-10px;position: absolute;z-index:3;")
-                                            div.letter3(ng-bind="victimNumber('Green',c,r,z,'floor')")
+  .row
+    .col-11
+      .modern-card
+        .modern-card-body.p-0
+          .map-container(style="overflow-x: auto;")
+            table
+              tbody
+                tr(ng-repeat='r in range(2*length + 1)')
+                  td(ng-repeat='c in range(2*width + 1)', ng-class="{'wallspot': $odd != $parent.$odd, 'tile': $odd && $parent.$odd, 'wall': cells[c+','+r+','+z].isWall, 'checkpoint': cells[c+','+r+','+z].tile.checkpoint, 'black': cells[c+','+r+','+z].tile.black, 'linear': cells[c+','+r+','+z].tile.reachable && cells[c+','+r+','+z].isLinear, 'floating': cells[c+','+r+','+z].tile.reachable && !cells[c+','+r+','+z].isLinear}", ng-click='cellClick(c, r, z, $odd != $parent.$odd, $odd && $parent.$odd)', ng-style="wallColor(c,r,z)")
+                    .tile-image-container(ng-show="$odd && $parent.$odd")
+                      img.tile-image(ng-src='/images/log.png', ng-show="cells[c+','+r+','+z].tile.speedbump")
+                      img.tile-image(ng-src='/images/start.png', ng-show='startTile.x == c && startTile.y == r && startTile.z == z')
+                      img.tile-image(ng-src='/images/red_floor.png', ng-show="cells[c+','+r+','+z].tile.victims.floor == 'Red'")
+                      img.tile-image(ng-src='/images/green_floor.png', ng-show="cells[c+','+r+','+z].tile.victims.floor == 'Green'")
+    .col-1
+      if !pubService
+        button.btn-hero-icon(type='button', ng-click='openMaxScore()')
+          i.fas.fa-calculator
 
+  .row.mt-4
+    .col-12
+      .modern-card
+        .modern-card-header
+          i.fas.fa-image
+          | {{"admin.mazeMapEditor.scoreSheetPreparation" | translate}}
+          .ml-auto
+            button.btn-premium.btn-premium-dark(type='button', ng-click='makeImageDl()') {{"admin.mazeMapEditor.scoreSheetPreparation" | translate}}
+        .modern-card-body
+          #outputImageArea(style="float:left;padding-top:100px;padding-left:0px;padding-right:0px;padding-bottom:100px;")
+            style.
+              .maru {
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                border-radius: 50%;
+                flex-flow: column;
+                vertical-align: top;
+              }
+              .size_normal{
+                width: 15px;
+                height: 15px;
+              }
+              .letter3 {
+                font-size: 1em;
+                line-height: 1.5em;
+                color: white;
+              }
+              .blue1 {
+                color: #3498db;
+                background-color: #3498db;
+              }
+              .pink1 {
+                color: #e84393;
+                background-color: #e84393;
+              }
+            table
+              tbody
+                tr(ng-repeat='r in range(2*length + 1)')
+                  td(ng-repeat='c in range(2*width + 1)', ng-class="{'wallspot': $odd != $parent.$odd, 'tile': $odd && $parent.$odd, 'wall': cells[c+','+r+','+z].isWall, 'checkpoint': cells[c+','+r+','+z].tile.checkpoint, 'black': cells[c+','+r+','+z].tile.black, 'blue': cells[c+','+r+','+z].tile.blue, 'linear': cells[c+','+r+','+z].tile.reachable && cells[c+','+r+','+z].isLinear, 'floating': cells[c+','+r+','+z].tile.reachable && !cells[c+','+r+','+z].isLinear}" , ng-style="wallColor(c,r,z)")
+                    .tile-image-container(ng-show="$odd && $parent.$odd")
+                      div.maru.size_normal.blue1(style="left:1px;top:1px;position: absolute;border-radius:0%;z-index:3;" ng-if="cells[c+','+r+','+z].tile.checkpoint")
+                        div.letter3(ng-bind="itemNumber('checkpoint',c,r,z)")
+                      img.tile-image(ng-src='/images/log.png', ng-show="cells[c+','+r+','+z].tile.speedbump")
+                      div.maru.size_normal.blue1(style="right:1px;bottom:1px;position: absolute;z-index:3;" ng-if="cells[c+','+r+','+z].tile.speedbump")
+                        div.letter3(ng-bind="itemNumber('speedbump',c,r,z)")
+                      img.tile-image(ng-src='/images/start.png', ng-show='startTile.x == c && startTile.y == r && startTile.z == z')
 
+                      div(ng-if="cells[c+','+r+','+z].tile.victims.floor == 'Red'")
+                        img.tile-image(ng-src='/images/red_floor.png')
+                        div.maru.size_normal.pink1(style="right:5px;top:-10px;position: absolute;z-index:3;")
+                          div.letter3(ng-bind="victimNumber('Red',c,r,z,'floor')")
+                      div(ng-if="cells[c+','+r+','+z].tile.victims.floor == 'Green'")
+                        img.tile-image(ng-src='/images/green_floor.png')
+                        div.maru.size_normal.pink1(style="left:5px;bottom:-10px;position: absolute;z-index:3;")
+                          div.letter3(ng-bind="victimNumber('Green',c,r,z,'floor')")

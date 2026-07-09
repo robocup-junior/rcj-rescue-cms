@@ -128,8 +128,16 @@ app.controller("CabinetFileController", ['$scope', '$http', '$translate', 'Uploa
         return "fa-file";
     }
 
-    $scope.upload = function(file, errFiles) {
-        $scope.f = file;
+    $scope.upload = function(files, errFiles) {
+        if (!files) {
+            files = [];
+        } else if (Array.isArray(files)) {
+            files = files;
+        } else if (files.length != null && !files.name) {
+            files = Array.prototype.slice.call(files);
+        } else {
+            files = [files];
+        }
         $scope.errFile = errFiles && errFiles[0];
         if($scope.errFile){
             Toast.fire({
@@ -138,21 +146,26 @@ app.controller("CabinetFileController", ['$scope', '$http', '$translate', 'Uploa
                 html: $scope.errFile.$error + ' : ' + $scope.errFile.$errorParam
             })
         }
-        if (file) {
-            $scope.uploading = true;
+        if (!files.length) return;
+
+        $scope.uploading = true;
+        $scope.errorMsg = null;
+        $scope.uploadTotal = files.length;
+        $scope.uploadedCount = 0;
+        $scope.uploadProgress = 0;
+
+        let progressByFile = files.map(() => 0);
+        let uploads = files.map(function(file, index) {
             file.upload = Upload.upload({
                 url: `/api/cabinet/${competitionId}/upload/${leagueTeam}`,
                 data: {file: file}
             });
 
-            file.upload.then(function (response) {
-                    updateFiles();
+            return file.upload.then(function (response) {
                     file.result = response.data;
-                    Toast.fire({
-                        type: 'success',
-                        title: upload_mes
-                    })
-                    delete $scope.f;
+                    progressByFile[index] = 100;
+                    $scope.uploadedCount++;
+                    $scope.uploadProgress = Math.round(progressByFile.reduce((sum, value) => sum + value, 0) / files.length);
             }, function (response) {
                 if (response.status > 0){
                     $scope.errorMsg = response.status + ': ' + response.data.msg;
@@ -163,10 +176,25 @@ app.controller("CabinetFileController", ['$scope', '$http', '$translate', 'Uploa
                     })
                 }
             }, function (evt) {
-                file.progress = Math.min(100, parseInt(100.0 * 
+                progressByFile[index] = Math.min(100, parseInt(100.0 *
                                          evt.loaded / evt.total));
+                $scope.uploadProgress = Math.round(progressByFile.reduce((sum, value) => sum + value, 0) / files.length);
             });
-        }   
+        });
+
+        Promise.all(uploads).then(function () {
+            updateFiles();
+            Toast.fire({
+                type: 'success',
+                title: upload_mes
+            });
+        }).finally(function () {
+            $scope.uploading = false;
+            $scope.uploadProgress = 0;
+            $scope.uploadTotal = 0;
+            $scope.uploadedCount = 0;
+            $scope.$applyAsync();
+        });
     }
 
     $scope.delete = function(file){

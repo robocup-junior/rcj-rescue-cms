@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'MailTemplates'
@@ -8,36 +8,36 @@ append scripts
   script.
   script(src='/javascripts/mail_templates.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    span.breadcrumb-item.active Mail Templates
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')") Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  span.breadcrumb-item.active Mail Templates
 
-block content
-  .row
-    .col-md-2
-    .col-md-8
-      h1 {{"admin.mailTemplates.title" | translate}}
-      button(onclick="location.href='/admin/mailTemplates/editor'" class='btn btn-primary') {{"admin.mailTemplates.create" | translate}}
-      br
-      span {{"admin.mailTemplates.4duplicate" | translate}}
-      br
-      br
-      table.custom
-        thead
-            tr
-              th {{"admin.mailTemplates.subject" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
-            tr(ng-repeat='mail in mails')
-              td
-                a(ng-bind='mail.name')
-              td
-                button.btn.btn-info(type='button', ng-click='go("/admin/mailTemplates/editor/"+mail.name)' style="margin-right:10px;")
-                  i.fas.fa-edit &nbsp;
-                  |{{"admin.mailTemplates.edit" | translate}}
-                button.btn.btn-danger(type='button', ng-click='removeTemplate(mail)', ng-if="deleteable(mail.name)")
-                  i.fas.fa-trash &nbsp;
-                  | {{"common.delete" | translate}}
-                
+block hero_title
+  | {{"admin.mailTemplates.title" | translate}}
 
+block hero_actions
+  button.btn-premium.btn-premium-dark(onclick="location.href='/admin/mailTemplates/editor'")
+    i.fas.fa-plus
+    | {{"admin.mailTemplates.create" | translate}}
+
+block main_content
+  p.text-body-premium {{"admin.mailTemplates.4duplicate" | translate}}
+
+  .modern-table-card
+    table.custom
+      thead
+        tr
+          th {{"admin.mailTemplates.subject" | translate}}
+          th {{"common.operation" | translate}}
+      tbody
+        tr(ng-repeat='mail in mails')
+          td
+            a(ng-bind='mail.name')
+          td
+            button.btn-table-action(type='button', ng-click='go("/admin/mailTemplates/editor/"+mail.name)' style="margin-right:10px;")
+              i.fas.fa-edit
+              | {{"admin.mailTemplates.edit" | translate}}
+            button.btn-table-action(type='button', ng-click='removeTemplate(mail)', ng-if="deleteable(mail.name)")
+              i.fas.fa-trash
+              | {{"common.delete" | translate}}

@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'MyPage'
@@ -16,98 +16,78 @@ append scripts
 
 append css
   link(rel='stylesheet', href='/components/angular-toastr/dist/angular-toastr.css')
-  link(href="/stylesheets/fonts.css" rel="stylesheet")
-  link(rel='stylesheet', href='/stylesheets/home_premium.css')
-  link(rel='stylesheet', href='/stylesheets/my_premium.css')
   style.
-    /* Custom icon backgrounds to restore theme colors while staying premium */
-    .bg-survey { background: rgba(5, 196, 107, 0.1); color: #05c46b; }
-    .bg-document { background: rgba(10, 189, 227, 0.1); color: #0abde3; }
-    .bg-reservation { background: rgba(255, 107, 107, 0.1); color: #ff6b6b; }
-    .bg-cabinet { background: rgba(254, 202, 87, 0.1); color: #feca57; }
-
-    /* Hide Login/User menu */
     .login-btn, .nav-user-link.dropdown-toggle {
       display: none !important;
     }
 
-block bread
-  // Breadcrumbs removed as requested
+block hero_title_container
+  img.hero-logo(ng-if="competition.logo" ng-src="{{competition.logo}}" style="max-height: 60px; margin-bottom: 0.75rem;")
+  h1.hero-title
+    | {{competition.name}}
 
-block content
-  .home-hero
-    .hero-content.hero-vertical
-      img.hero-logo(ng-if="competition.logo" ng-src="{{competition.logo}}")
-      .hero-text-wrapper
-        h1.hero-title {{competition.name}}
-        p.hero-subtitle {{leagueName}}
-        .team-badge
-          i.fas.fa-users
-          span #{teamCode} #{teamName}
+block hero_subtitle
+  | {{leagueName}}
 
-  .comp-container
-    .comp-grid
-      //- We use comp-card style but adapted for the dashboard items
-      
-      // Surveys
-      a.comp-card(ng-repeat="surv in survey", ng-click="goSurv(surv._id)")
-        div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; z-index: 10; background: #05c46b;")
-        span.card-status.status-editable(ng-if="surv.editable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #dcfce7; color: #166534; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
+block hero_actions
+  .team-badge(style="display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 1rem; padding: 0.6rem 1.1rem; color: white; font-weight: 700;")
+    i.fas.fa-users
+    span #{teamCode} #{teamName}
+
+block main_content
+  .row
+    a.action-card-character.hover-lift.col-md-4.mb-2(ng-repeat="surv in survey", ng-click="goSurv(surv._id)" style="padding: 1rem; position: relative; overflow: hidden; display: block;")
+      div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: #05c46b;")
+      span(ng-if="surv.editable" style="position: absolute; top: 1rem; right: 1rem; background: #dcfce7; color: #166534; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
+        i.fas.fa-pen
+      span(ng-if="!surv.editable" style="position: absolute; top: 1rem; right: 1rem; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
+        i.fas.fa-lock
+      .icon-box-premium.mb-2(style="background: rgba(5, 196, 107, 0.1); color: #05c46b; width: 42px; height: 42px; border-radius: 10px;")
+        i.fas.fa-question-circle(style="font-size: 1.2rem;")
+      h6.text-heading-premium.mb-1(style="font-size: 1rem;") {{surv.name}}
+      p.text-body-premium.mb-0(ng-bind="surv.myDescription" style="font-size: 0.8rem; line-height: 1.2;")
+
+    if documentEnable
+      a.action-card-character.hover-lift.col-md-4.mb-2(ng-if="competition.documents.enable", href=`/document/${team}/${token}`, target="_blank" style="padding: 1rem; position: relative; overflow: hidden; display: block;")
+        div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: #0abde3;")
+        span(ng-if="docEditable" style="position: absolute; top: 1rem; right: 1rem; background: #dcfce7; color: #166534; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
           i.fas.fa-pen
-        span.card-status.status-locked(ng-if="!surv.editable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
+        span(ng-if="!docEditable" style="position: absolute; top: 1rem; right: 1rem; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
           i.fas.fa-lock
-        .comp-logo-area
-          i.fas.fa-question-circle(style="font-size: 4rem; color: #05c46b; opacity: 0.8;")
-        .comp-body
-          h3.comp-name(style="color: #05c46b;") {{surv.name}}
-          p.comp-desc(ng-bind="surv.myDescription")
+        .icon-box-premium.mb-2(style="background: rgba(10, 189, 227, 0.1); color: #0abde3; width: 42px; height: 42px; border-radius: 10px;")
+          i.fas.fa-book(style="font-size: 1.2rem;")
+        h6.text-heading-premium.mb-1(style="font-size: 1rem;") {{"document.admin.title" | translate}}
+        p.text-body-premium.mb-0(style="font-size: 0.8rem; line-height: 1.2;") {{"mypage.document" | translate}}
 
-      // Documents
-      if documentEnable
-        a.comp-card(ng-if="competition.documents.enable", href=`/document/${team}/${token}`, target="_blank")
-          div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; z-index: 10; background: #0abde3;")
-          span.card-status.status-editable(ng-if="docEditable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #dcfce7; color: #166534; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
-            i.fas.fa-pen
-          span.card-status.status-locked(ng-if="!docEditable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
-            i.fas.fa-lock
-          .comp-logo-area
-            i.fas.fa-book(style="font-size: 4rem; color: #0abde3; opacity: 0.8;")
-          .comp-body
-            h3.comp-name(style="color: #0abde3;") {{"document.admin.title" | translate}}
-            p.comp-desc {{"mypage.document" | translate}}
+    a.action-card-character.hover-lift.col-md-4.mb-2(ng-repeat="resv in reservations", ng-click="goResv(resv._id)" style="padding: 1rem; position: relative; overflow: hidden; display: block;")
+      div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: #ff6b6b;")
+      span(ng-if="resv.editable" style="position: absolute; top: 1rem; right: 1rem; background: #dcfce7; color: #166534; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
+        i.fas.fa-pen
+      span(ng-if="!resv.editable" style="position: absolute; top: 1rem; right: 1rem; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
+        i.fas.fa-lock
+      .icon-box-premium.mb-2(style="background: rgba(255, 107, 107, 0.1); color: #ff6b6b; width: 42px; height: 42px; border-radius: 10px;")
+        i.fas.fa-calendar-day(style="font-size: 1.2rem;")
+      h6.text-heading-premium.mb-1(style="font-size: 1rem;") {{resv.name}}
+      p.text-body-premium.mb-0(ng-bind="resv.myDescription" style="font-size: 0.8rem; line-height: 1.2;")
 
-      // Reservations
-      a.comp-card(ng-repeat="resv in reservations", ng-click="goResv(resv._id)")
-        div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; z-index: 10; background: #ff6b6b;")
-        span.card-status.status-editable(ng-if="resv.editable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #dcfce7; color: #166534; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
-          i.fas.fa-pen
-        span.card-status.status-locked(ng-if="!resv.editable", style="position: absolute; top: 1rem; right: 1rem; z-index: 11; background: #f1f5f9; color: #64748b; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem;")
-          i.fas.fa-lock
-        .comp-logo-area
-          i.fas.fa-calendar-day(style="font-size: 4rem; color: #ff6b6b; opacity: 0.8;")
-        .comp-body
-          h3.comp-name(style="color: #ff6b6b;") {{resv.name}}
-          p.comp-desc(ng-bind="resv.myDescription")
+    a.action-card-character.hover-lift.col-md-4.mb-2(href=`/mypage/${team}/${token}/cabinet`, target="_blank" style="padding: 1rem; position: relative; overflow: hidden; display: block;")
+      div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; background: #feca57;")
+      .icon-box-premium.mb-2(style="background: rgba(254, 202, 87, 0.1); color: #feca57; width: 42px; height: 42px; border-radius: 10px;")
+        i.fas.fa-archive(style="font-size: 1.2rem;")
+      h6.text-heading-premium.mb-1(style="font-size: 1rem;") {{"cabinet.title" | translate}}
+      p.text-body-premium.mb-0(style="font-size: 0.8rem; line-height: 1.2;") {{"mypage.cabinet" | translate}}
 
-      // Cabinet
-      a.comp-card(href=`/mypage/${team}/${token}/cabinet`, target="_blank")
-        div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; z-index: 10; background: #feca57;")
-        .comp-logo-area(style="height: 180px;")
-          i.fas.fa-archive(style="font-size: 4rem; color: #feca57; opacity: 0.8;")
-        .comp-body
-          h3.comp-name(style="color: #feca57;") {{"cabinet.title" | translate}}
-          p.comp-desc {{"mypage.cabinet" | translate}}
-
-    // Messages Section
-    .message-section(ng-show="mails.length>0")
-      .message-header
-        i.fas.fa-envelope-open-text
-        h2 {{"mypage.message" | translate}}
-      
-      .message-list
-        .message-item(ng-repeat='mail in mails', ng-click="mailView(mail)")
-          .message-info
-            .message-subject(ng-bind="mail.subject")
-            .message-date(ng-bind="time(mail.time)")
-          .message-arrow
-            i.fas.fa-chevron-right
+  div(ng-show="mails.length>0")
+    h5.section-heading.section-gap.mb-2
+      i.fas.fa-envelope-open-text
+      | {{"mypage.message" | translate}}
+    .modern-list
+      .modern-item-card(ng-repeat='mail in mails', ng-click="mailView(mail)")
+        .modern-item-info
+          .modern-item-icon
+            i.fas.fa-envelope
+          .modern-item-details
+            span.modern-item-name(ng-bind="mail.subject")
+            span.text-body-premium(ng-bind="time(mail.time)")
+        .modern-item-actions
+          i.fas.fa-chevron-right

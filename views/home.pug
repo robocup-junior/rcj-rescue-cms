@@ -1,8 +1,9 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'Home'
+  - var contentContainerStyle = "max-width: 1400px;"
 
 append scripts
   script(src='/javascripts/home.js')
@@ -10,35 +11,29 @@ append scripts
     navigator.serviceWorker.getRegistrations().then(function(registrations) {
       for(let registration of registrations) {
         registration.unregister()
-      } 
+      }
     })
 
 append css
-  link(href="/stylesheets/fonts.css" rel="stylesheet")
   link(rel='stylesheet', href='/stylesheets/home_premium.css')
 
-block bread
-  // Breadcrumbs removed as requested
+block hero_title_container
+  img.hero-logo(src="/images/logo.png", alt="RCJ Logo")
+  h1.hero-title RoboCupJunior CMS 2026
 
-block content
-  .home-hero
-    .hero-content
-      img.hero-logo(src="/images/logo.png", alt="RCJ Logo")
-      .hero-text-wrapper
-        h1.hero-title RoboCupJunior CMS 2026
-      
-      .hero-info-capsule(ng-cloak)
-        p {{'home.about' | translate}}
+block hero_subtitle
+  .hero-info-capsule(ng-cloak)
+    p {{'home.about' | translate}}
 
-  .comp-container
-    .comp-grid
-      a.comp-card(ng-repeat='competition in competitions', ng-click="go('/home/' + competition._id)")
-        //- Card top accent using competition theme color
-        div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; z-index: 10;" ng-style="{'backgroundColor': '#' + (competition.bkColor || '3b82f6')}")
-        
-        .comp-logo-area
-          img.comp-logo(ng-src="{{competition.logo}}", alt='')
-        
-        .comp-body
-          h3.comp-name(ng-style="{'color': '#' + (competition.bkColor || '0f172a')}" ng-cloak) {{competition.name}}
-          p.comp-desc(ng-if="competition.description", ng-bind-html="competition.description")
+block main_content
+  .comp-grid
+    a.comp-card(ng-repeat='competition in competitions', ng-click="go('/home/' + competition._id)")
+      //- Card top accent using competition theme color
+      div(style="position: absolute; top: 0; left: 0; width: 100%; height: 6px; z-index: 10;" ng-style="{'backgroundColor': '#' + (competition.bkColor || '3b82f6')}")
+
+      .comp-logo-area
+        img.comp-logo(ng-src="{{competition.logo}}", alt='')
+
+      .comp-body
+        h3.comp-name(ng-style="{'color': '#' + (competition.bkColor || '0f172a')}" ng-cloak) {{competition.name}}
+        p.comp-desc(ng-if="competition.description", ng-bind-html="competition.description")

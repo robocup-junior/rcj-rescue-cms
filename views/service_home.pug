@@ -1,9 +1,10 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'Home'
   - var hideLogin = true
+  - var contentContainerStyle = "max-width: 1400px;"
 
 append scripts
   script(src='/javascripts/home.js')
@@ -11,91 +12,85 @@ append scripts
     navigator.serviceWorker.getRegistrations().then(function(registrations) {
       for(let registration of registrations) {
         registration.unregister()
-      } 
+      }
     })
 
 append css
-  link(href="/stylesheets/fonts.css" rel="stylesheet")
   link(rel='stylesheet', href='/stylesheets/home_premium.css')
   link(rel='stylesheet', href='/stylesheets/competition_premium.css')
 
-block bread
-  // Breadcrumbs removed to match home page style
+block hero_title_container
+  img.hero-logo(src="/images/logo.png", alt="RCJ Logo")
+  h1.hero-title RoboCupJunior CMS 2026
 
-block content
-  .home-hero
-    .hero-content
-      img.hero-logo(src="/images/logo.png", alt="RCJ Logo")
-      .hero-text-wrapper
-        h1.hero-title RoboCupJunior CMS 2026
-      
-      .hero-info-capsule(ng-cloak)
-        p {{'service_home.about' | translate}}
+block hero_subtitle
+  .hero-info-capsule(ng-cloak)
+    p {{'service_home.about' | translate}}
 
-  .comp-container
-    .league-grid
-      //- Line Map Editor 2025
-      .league-card(ng-click="go('/service/editor/line/2025')")
-        .card-accent(style="background-color: #2ecc71;")
-        .league-image-area
-          img(src="/images/lineEditor.png", alt='Line 2025')
-        .league-body
-          h3.league-name(style="color: #27ae60;") Line Map Editor 2025
-          .btn-enter-premium
-            i.fas.fa-arrow-right
-            | {{'admin.lineMapEditor.title' | translate}}
+block main_content
+  .league-grid
+    //- Line Map Editor 2025
+    .league-card(ng-click="go('/service/editor/line/2025')")
+      .card-accent(style="background-color: #2ecc71;")
+      .league-image-area
+        img(src="/images/lineEditor.png", alt='Line 2025')
+      .league-body
+        h3.league-name(style="color: #27ae60;") Line Map Editor 2025
+        .btn-enter-premium
+          i.fas.fa-arrow-right
+          | {{'admin.lineMapEditor.title' | translate}}
 
-      //- Line Map Editor 2026
-      .league-card(ng-click="go('/service/editor/line/2026')")
-        .card-accent(style="background-color: #2ecc71;")
-        .league-image-area
-          img(src="/images/lineEditor.png", alt='Line 2026')
-        .league-body
-          h3.league-name(style="color: #27ae60;") Line Map Editor 2026
-          .btn-enter-premium
-            i.fas.fa-arrow-right
-            | {{'admin.lineMapEditor.title' | translate}}
+    //- Line Map Editor 2026
+    .league-card(ng-click="go('/service/editor/line/2026')")
+      .card-accent(style="background-color: #2ecc71;")
+      .league-image-area
+        img(src="/images/lineEditor.png", alt='Line 2026')
+      .league-body
+        h3.league-name(style="color: #27ae60;") Line Map Editor 2026
+        .btn-enter-premium
+          i.fas.fa-arrow-right
+          | {{'admin.lineMapEditor.title' | translate}}
 
-      //- Maze Map Editor 2025
-      .league-card(ng-click="go('/service/editor/maze/2025')")
-        .card-accent(style="background-color: #3498db;")
-        .league-image-area
-          img(src="/images/mazeEditor.png", alt='Maze 2025')
-        .league-body
-          h3.league-name(style="color: #2980b9;") Maze Map Editor 2025
-          .btn-enter-premium
-            i.fas.fa-arrow-right
-            | {{'admin.lineMapEditor.title' | translate}}
+    //- Maze Map Editor 2025
+    .league-card(ng-click="go('/service/editor/maze/2025')")
+      .card-accent(style="background-color: #3498db;")
+      .league-image-area
+        img(src="/images/mazeEditor.png", alt='Maze 2025')
+      .league-body
+        h3.league-name(style="color: #2980b9;") Maze Map Editor 2025
+        .btn-enter-premium
+          i.fas.fa-arrow-right
+          | {{'admin.lineMapEditor.title' | translate}}
 
-      //- Maze Map Editor 2026
-      .league-card(ng-click="go('/service/editor/maze/2026')")
-        .card-accent(style="background-color: #3498db;")
-        .league-image-area
-          img(src="/images/mazeEditor.png", alt='Maze 2026')
-        .league-body
-          h3.league-name(style="color: #2980b9;") Maze Map Editor 2026
-          .btn-enter-premium
-            i.fas.fa-arrow-right
-            |{{'admin.lineMapEditor.title' | translate}}
+    //- Maze Map Editor 2026
+    .league-card(ng-click="go('/service/editor/maze/2026')")
+      .card-accent(style="background-color: #3498db;")
+      .league-image-area
+        img(src="/images/mazeEditor.png", alt='Maze 2026')
+      .league-body
+        h3.league-name(style="color: #2980b9;") Maze Map Editor 2026
+        .btn-enter-premium
+          i.fas.fa-arrow-right
+          |{{'admin.lineMapEditor.title' | translate}}
 
-      //- Simulation World Editor 2025
-      .league-card(ng-click="go('/service/editor/simulation/2025')")
-        .card-accent(style="background-color: #f1c40f;")
-        .league-image-area
-          img(src="/images/simEditor.png", alt='Sim 2025')
-        .league-body
-          h3.league-name(style="color: #f39c12;") Simulation World Editor for Erebus 2025
-          .btn-enter-premium
-            i.fas.fa-arrow-right
-            | {{'admin.lineMapEditor.title' | translate}}
+    //- Simulation World Editor 2025
+    .league-card(ng-click="go('/service/editor/simulation/2025')")
+      .card-accent(style="background-color: #f1c40f;")
+      .league-image-area
+        img(src="/images/simEditor.png", alt='Sim 2025')
+      .league-body
+        h3.league-name(style="color: #f39c12;") Simulation World Editor for Erebus 2025
+        .btn-enter-premium
+          i.fas.fa-arrow-right
+          | {{'admin.lineMapEditor.title' | translate}}
 
-      //- Simulation World Editor 2026
-      .league-card(ng-click="go('/service/editor/simulation/2026')")
-        .card-accent(style="background-color: #f1c40f;")
-        .league-image-area
-          img(src="/images/simEditor.png", alt='Sim 2026')
-        .league-body
-          h3.league-name(style="color: #f39c12;") Simulation World Editor for Erebus 2026
-          .btn-enter-premium
-            i.fas.fa-arrow-right
-            | {{'admin.lineMapEditor.title' | translate}}
+    //- Simulation World Editor 2026
+    .league-card(ng-click="go('/service/editor/simulation/2026')")
+      .card-accent(style="background-color: #f1c40f;")
+      .league-image-area
+        img(src="/images/simEditor.png", alt='Sim 2026')
+      .league-body
+        h3.league-name(style="color: #f39c12;") Simulation World Editor for Erebus 2026
+        .btn-enter-premium
+          i.fas.fa-arrow-right
+          | {{'admin.lineMapEditor.title' | translate}}

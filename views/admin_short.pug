@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'AdminShort'
@@ -8,46 +8,55 @@ append scripts
   script.
     var sigId = "#{id}"
   script(src="/javascripts/admin_short.js")
-  
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    span.breadcrumb-item.active URL Shorting Setting
 
-block content
-    h1 {{"admin.shortURL.title" | translate}}
-    div(style='margin-top:50px;')
-        p {{"admin.shortURL.description" | translate}}
-        .row
-            .col-md-12
-                .input-group(style="width:100%;margin 0 auto;")
-                    .input-group-prepend
-                        span.input-group-text {{"admin.shortURL.name" | translate}}
-                    input.form-control(type='string', ng-model='name' style="width:200px;!important")
-                    .input-group-append
-                        span.input-group-text {{"admin.shortURL.short" | translate}} : {{urlHead}}
-                    input.form-control(type='string', ng-model='short' style="width:150px;!important")
-                    .input-group-append
-                        span.input-group-text {{"admin.shortURL.original" | translate}}
-                    input.form-control(type='text', ng-model='transfer' style="width:1000px;")
-                    .input-group-append
-                        button.btn.btn-success(type='button', ng-click='set()')
-                            i.fas.fa-check
-        hr
-        .row
-        .col-md-12
-            br
-            div(style="margin: 20px;" ng-repeat="content in list track by $index")
-                .input-group(style="width:100%;margin 0 auto;")
-                    .input-group-prepend
-                        span.input-group-text {{"admin.shortURL.name" | translate}}
-                        span.input-group-text(style="background-color:#fff") {{content.name}}
-                        span.input-group-text {{"admin.shortURL.short" | translate}}
-                        span.input-group-text(style="background-color:#fff") {{urlHead}}{{content.shorted}}
-                        span.input-group-text {{"admin.shortURL.original" | translate}}
-                        span.input-group-text(style="background-color:#fff") {{content.transfer}}
-                    .input-group-append
-                        button.btn.btn-danger(type='button', ng-click='del(content._id)')
-                            i.fas.fa-times
-            br
+append css
+  link(href='/stylesheets/common/modern_editor.css', rel='stylesheet')
 
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')") Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  span.breadcrumb-item.active URL Shorting Setting
+
+block hero_title
+  | {{"admin.shortURL.title" | translate}}
+
+block main_content
+  .modern-card
+    .modern-card-body
+      p.text-body-premium {{"admin.shortURL.description" | translate}}
+      .row
+        .col-md-4
+          .settings-group
+            label.settings-label {{"admin.shortURL.name" | translate}}
+            input.premium-input(type='string', ng-model='name')
+        .col-md-4
+          .settings-group
+            label.settings-label {{"admin.shortURL.short" | translate}}: {{urlHead}}
+            input.premium-input(type='string', ng-model='short')
+        .col-md-4
+          .settings-group
+            label.settings-label {{"admin.shortURL.original" | translate}}
+            input.premium-input(type='text', ng-model='transfer')
+      button.btn-premium.btn-premium-primary(type='button', ng-click='set()')
+        i.fas.fa-check
+        | {{"admin.settings.set" | translate}}
+
+  h5.section-heading.section-gap.mb-2
+    i.fas.fa-list
+    | Existing URLs
+  .modern-table-card
+    table.custom
+      thead
+        tr
+          th {{"admin.shortURL.name" | translate}}
+          th {{"admin.shortURL.short" | translate}}
+          th {{"admin.shortURL.original" | translate}}
+          th {{"common.operation" | translate}}
+      tbody
+        tr(ng-repeat="content in list track by $index")
+          td(ng-bind="content.name")
+          td {{urlHead}}{{content.shorted}}
+          td(ng-bind="content.transfer")
+          td
+            button.icon-btn-premium.danger(type='button', ng-click='del(content._id)')
+              i.fas.fa-times

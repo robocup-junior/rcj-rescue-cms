@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'DocumentsAdmin'
@@ -12,60 +12,98 @@ append scripts
 
 append css
   link(rel='stylesheet', href='/components/angular-toastr/dist/angular-toastr.css')
-  
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
-    span.breadcrumb-item.active Document settings
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
+  span.breadcrumb-item.active Document settings
 
+block hero_title
+  | {{competition.name}}
 
-block content
+block hero_subtitle
+  i.fas.fa-file-alt.mr-2
+  | {{"document.admin.title" | translate}}
+
+block main_content
+  //- SECTION 1: SETUP
+  h5.text-heading-premium.mb-2(style="display: flex; align-items: center; font-size: 1.1rem; font-weight: 800; color: #64748b;")
+    i.fas.fa-sliders-h.mr-2(style="font-size: 0.9rem;")
+    | {{"document.admin.overall" | translate}}
+
   .row
-    .col-md-1
-    .col-md-10
-      h1 {{"document.admin.title" | translate}} - {{competition.name}}
-      hr
-      h3 {{"document.admin.overall" | translate}}
-      .row
-        .col-md-4
-          .input-group(style="width:100%;margin 0 auto;")
-            .input-group-prepend
-              span.input-group-text {{"document.admin.access" | translate}}
-            select.custom-select(ng-model='docSystemEnabled', ng-style="{backgroundColor: docSystemEnabled ? '#bcffbc':'#ffcccc'}")
-              option(ng-value='true') {{"common.enable" | translate}}
-              option(ng-value='false') {{"common.disable" | translate}}
-        .col-md-6
-          .input-group(style="width:100%;margin 0 auto;")
-            .input-group-prepend
-              span.input-group-text {{"document.deadline" | translate}}
-            input.form-control(type='datetime-local', step=1, ng-model='defaultDeadline', ng-style="{backgroundColor: deadlineColour(defaultDeadline)}")
-        .col-md-2(style="text-align:right;")
-          button.btn.btn-success(type='button', ng-click='set()')
-            i.fas.fa-check &nbsp;{{"admin.settings.set" | translate}}
-      hr
-      h3 {{"document.admin.team" | translate}}
-      button(ng-click="go('/admin/' + competitionId + '/documents/teams')" class='btn btn-outline-primary btn-lg btn-block' style="margin-bottom:20px;")
-            i.fas.fa-user(aria-hidden='true') &nbsp; {{"document.teamAdmin.title" | translate}}
-      hr
-      .row
-        .col-md-6
-          h3 {{"document.admin.question" | translate}}
-          div(ng-repeat="league in leagues")
-              button(ng-click="go('/admin/' + competitionId + '/documents/' + league.id + '/form')" class='btn btn-outline-danger btn-lg btn-block' style="margin-bottom:20px;")
-                i.fas.fa-question-circle(aria-hidden='true') &nbsp; {{league.name}}
-        .col-md-6
-          h3 {{"document.admin.review" | translate}}
-          div(ng-repeat="league in leagues")
-              button(ng-click="go('/admin/' + competitionId + '/documents/' + league.id + '/review')" class='btn btn-outline-danger btn-lg btn-block' style="margin-bottom:20px;")
-                i.fas.fa-question-circle(aria-hidden='true') &nbsp; {{league.name}}
-      hr
-      h3 Review Status
-      button(ng-click="go('/admin/' + competitionId + '/documents/reviewStatus')" class='btn btn-outline-secondary btn-lg btn-block' style="margin-bottom:20px;")
-        i.fas.fa-tasks(aria-hidden='true') &nbsp; Check Review Status
-      hr
-      h3 {{"document.admin.result" | translate}}
-      div(ng-repeat="league in leagues")
-        button(ng-click="go('/admin/' + competitionId + '/documents/' + league.id + '/results')" class='btn btn-outline-success btn-lg btn-block' style="margin-bottom:20px;")
-          i.fas.fa-edit(aria-hidden='true') &nbsp; {{league.name}}
+    .col-12.mb-2
+      .modern-card
+        .modern-card-body
+          .d-flex.align-items-end(style="gap: 1rem; flex-wrap: wrap;")
+            div
+              label.settings-label {{"document.admin.access" | translate}}
+              select.premium-select(ng-model='docSystemEnabled' ng-style="{backgroundColor: docSystemEnabled ? '#f0fdf4':'#fef2f2'}")
+                option(ng-value='true') {{"common.enable" | translate}}
+                option(ng-value='false') {{"common.disable" | translate}}
+            div
+              label.settings-label {{"document.deadline" | translate}}
+              input.premium-input(type='datetime-local' step=1 ng-model='defaultDeadline' ng-style="{backgroundColor: deadlineColour(defaultDeadline)}")
+            button.btn-premium.btn-premium-primary(type='button' ng-click='set()' style="margin-bottom: 0;")
+              i.fas.fa-check
+              | {{"admin.settings.set" | translate}}
+
+    .col-md-4.mb-2
+      .action-card-character.hover-lift(ng-click="go('/admin/' + competitionId + '/documents/teams')" style="padding: 1rem;")
+        i.fas.fa-users-cog.bg-icon
+        .icon-box-premium(style="background: #eff6ff; color: #3b82f6; width: 40px; height: 40px; border-radius: 10px;")
+          i.fas.fa-users-cog(style="font-size: 1.1rem;")
+        h6.text-heading-premium.mb-1(style="font-size: 1rem;") {{"document.admin.team" | translate}}
+        p.text-body-premium.mb-0(style="font-size: 0.8rem; line-height: 1.2;") {{"document.teamAdmin.title" | translate}}
+    .col-md-4.mb-2
+      .action-card-character.hover-lift(ng-click="go('/admin/' + competitionId + '/documents/reviewStatus')" style="padding: 1rem;")
+        i.fas.fa-tasks.bg-icon
+        .icon-box-premium(style="background: #f8fafc; color: #64748b; width: 40px; height: 40px; border-radius: 10px;")
+          i.fas.fa-tasks(style="font-size: 1.1rem;")
+        h6.text-heading-premium.mb-1(style="font-size: 1rem;") Check Review Status
+        p.text-body-premium.mb-0(style="font-size: 0.8rem; line-height: 1.2;") {{"document.admin.review" | translate}}
+
+  //- SECTION 2: REVIEW
+  h5.text-heading-premium.section-gap.mb-2(style="display: flex; align-items: center; font-size: 1.1rem; font-weight: 800; color: #64748b;")
+    i.fas.fa-clipboard-check.mr-2(style="font-size: 0.9rem;")
+    | {{"document.admin.review" | translate}}
+
+  .row
+    .col-md-4.mb-2
+      .modern-card
+        .modern-card-body
+          p.text-heading-premium.mb-2(style="font-size: 0.85rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;")
+            i.fas.fa-question-circle.mr-1
+            | {{"document.admin.question" | translate}}
+          .tools-grid-premium
+            .action-card-premium(ng-repeat="league in leagues" ng-click="go('/admin/' + competitionId + '/documents/' + league.id + '/form')")
+              .icon-wrapper
+                i.fas(ng-class="{'fa-route': league.type=='line', 'fa-border-all': league.type=='maze', 'fa-desktop': league.type=='simulation'}")
+              span {{league.name}}
+
+    .col-md-4.mb-2
+      .modern-card
+        .modern-card-body
+          p.text-heading-premium.mb-2(style="font-size: 0.85rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;")
+            i.fas.fa-clipboard-check.mr-1
+            | {{"document.admin.review" | translate}}
+          .tools-grid-premium
+            .action-card-premium(ng-repeat="league in leagues" ng-click="go('/admin/' + competitionId + '/documents/' + league.id + '/review')")
+              .icon-wrapper
+                i.fas(ng-class="{'fa-route': league.type=='line', 'fa-border-all': league.type=='maze', 'fa-desktop': league.type=='simulation'}")
+              span {{league.name}}
+
+    .col-md-4.mb-2
+      .modern-card
+        .modern-card-body
+          p.text-heading-premium.mb-2(style="font-size: 0.85rem; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;")
+            i.fas.fa-poll.mr-1
+            | {{"document.admin.result" | translate}}
+          .tools-grid-premium
+            .action-card-premium(ng-repeat="league in leagues" ng-click="go('/admin/' + competitionId + '/documents/' + league.id + '/results')")
+              .icon-wrapper
+                i.fas.fa-edit
+              span {{league.name}}

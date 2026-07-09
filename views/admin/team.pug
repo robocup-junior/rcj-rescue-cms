@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'TeamAdmin'
@@ -9,132 +9,236 @@ append scripts
     var competitionId = "#{id}"
   script(src='/javascripts/admin/team.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-    span.breadcrumb-item.active Teams
+append css
+  link(href='/stylesheets/common/modern_editor.css', rel='stylesheet')
+  style.
+    .teams-base-table-wrapper {
+      overflow-x: auto;
+      border-radius: 0 0 0.75rem 0.75rem;
+    }
+    .teams-base-table {
+      min-width: 1160px;
+      margin-bottom: 0;
+      border: 0;
+      border-radius: 0 0 0.75rem 0.75rem;
+      box-shadow: none;
+    }
+    .teams-base-table .base-table-header,
+    .teams-base-table .base-table-row {
+      grid-template-columns: 40px 36px minmax(5.5rem, 0.65fr) minmax(10rem, 1.2fr) minmax(8rem, 0.85fr) minmax(8rem, 0.75fr) minmax(16rem, 1.6fr) minmax(8.5rem, auto);
+    }
+    .teams-base-table .premium-input,
+    .teams-base-table .premium-select {
+      width: 100%;
+      min-width: 0;
+    }
+    .teams-base-table-email {
+      line-height: 1.4;
+    }
+    .team-email-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+    .team-email-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      min-width: 0;
+    }
+    .team-email-row .premium-input {
+      flex: 1 1 auto;
+    }
+    .team-email-row .icon-btn-premium {
+      flex: 0 0 36px;
+    }
+    .team-email-add {
+      align-self: flex-start;
+      min-height: 2.35rem;
+      padding: 0.4rem 0.7rem;
+    }
+    .teams-widget-header {
+      gap: 1rem;
+    }
+    @media (max-width: 991.98px) {
+      .teams-widget-header {
+        align-items: flex-start !important;
+        flex-direction: column;
+      }
+    }
 
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')") Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+  span.breadcrumb-item.active Teams
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{competition.name}} - {{"admin.teams.title" | translate}}
-      p(ng-if="showMd5" ng-bind="md5(competition.name)")
-      table.custom
-        thead
-            tr
-                th {{"common.teamCode" | translate}}
-                th {{"common.team" | translate}}
-                th {{"common.region" | translate}}
-                th {{"common.league" | translate}}
-                th {{"common.email" | translate}}
-                th {{"common.operation" | translate}}
-        tbody
-            tr
-                td
-                  input(ng-model='teamCode' style="width:100%;")
-                td
-                  input(ng-model='teamName' style="width:100%;")
-                td
-                  input(ng-model='country' style="width:100%;")
-                td
-                  select(ng-model='teamLeague' ng-options='league for league in leagues' style="width:100%;")
-                td
-                  div(ng-repeat="em in email track by $index")
-                    input(type="email", ng-model='email[$index]' style="width:100%;margin-bottom:5px;")
-                    button.btn.btn-success(type='button', ng-click='addEmail()', style="padding:0px 6px;margin: 5px;", ng-if="$last && email[$index]")
-                        i.fas.fa-plus
-                td
-                    button(ng-click='addTeam()' style="width:100%;") {{"admin.teams.add" | translate}}
-      a(ng-href='/admin/{{competitionId}}/teams/bulk') {{"admin.teams.bulk" | translate}}
-      br
-      br
-      .refine
-        .card.border-dark.mb-3(style='width:100%;')
-          .card-header.bg-transparent.border-dark.fa-2x
-            i.fas.fa-search(aria-hidden='true') &nbsp;
-            | {{'common.refine' | translate}}
-          .card-body.text-dark
-            h6.card-title {{"common.teamCode" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-list-ol(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.teamCode" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineCode')
-            hr
-            h6.card-title {{"common.team" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-users(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.team" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineName')
-            hr
-            h6.card-title {{"common.region" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-globe-asia(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.region" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineRegion')
-            hr
-            h6.card-title {{"common.league" | translate}}
-            span(ng-repeat='(key, value) in Rleagues track by key')
-              input(type='checkbox' ng-model='Rleagues[key]' id="checkL_{{key}}")
-              label.checkbox(for="checkL_{{key}}") {{key}}
-            
-      
-      div
-          button(ng-click="selectAll()" class='btn btn-primary' style="margin: 5px 5px 5px 5px;") {{"common.selectAll" | translate}}
-          button(ng-click="removeSelectedTeam()" class='btn btn-danger' style="margin: 5px 5px 5px 5px;") {{"common.delS" | translate}}
-          button(ng-click="reset_kiosk()" class='btn btn-secondary' style="margin: 5px 5px 5px 5px; text-align:right;") Reset Kiosk
-      table.custom(style="margin-bottom:60px;")
-        thead
-            tr
-              th
-              th {{"common.teamCode" | translate}}
-              th {{"common.team" | translate}}
-              th {{"common.region" | translate}}
-              th {{"common.league" | translate}}
-              th {{"common.email" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
-            tr(ng-repeat='team in teams | filter:list_filter | orderBy:"[teamCode, name]"')
-              td
-                input(type='checkbox' ng-model='team.checked' style="display:initial;")
-              td
-                span(ng-bind='team.teamCode', ng-hide="team.edit")
-                input(ng-model="team.teamCode", ng-show="team.edit",style="width:100%;")
-              td
-                span(ng-bind='team.name', ng-hide="team.edit")
-                input(ng-model="team.name", ng-show="team.edit",style="width:100%;")
-              td
-                span(ng-bind='team.country', ng-hide="team.edit")
-                input(ng-model="team.country", ng-show="team.edit",style="width:100%;")
-              td
-                span(ng-bind='team.league', ng-hide="team.edit")
-                select(ng-model='team.league' ng-options='league for league in leagues' style="width:100%;", ng-show="team.edit")
-              td
-                div(ng-repeat="em in team.email track by $index", ng-hide="team.edit")
+block hero_title
+  | {{competition.name}}
+
+block hero_subtitle
+  i.fas.fa-users.mr-2
+  | {{"admin.teams.title" | translate}}
+
+block hero_actions
+  a.btn-premium.btn-premium-secondary(ng-href='/admin/{{competitionId}}/teams/bulk')
+    i.fas.fa-file-import
+    | {{"admin.teams.bulk" | translate}}
+
+block main_content
+  p(ng-if="showMd5" ng-bind="md5(competition.name)")
+
+  .modern-card
+    .modern-card-header(ng-click="showAddTeam = !showAddTeam")
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-plus
+          | {{"admin.teams.add" | translate}}
+        .btn-table-group
+          i.fas(ng-class="showAddTeam ? 'fa-chevron-up' : 'fa-chevron-down'")
+    .filter-collapse(ng-show="showAddTeam" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 1.5rem;")
+      .row(style="row-gap: 1.25rem;")
+        .col-md-3
+          .settings-group.mb-0
+            label.settings-label {{"common.teamCode" | translate}}
+            input.premium-input(ng-model='teamCode')
+        .col-md-3
+          .settings-group.mb-0
+            label.settings-label {{"common.team" | translate}}
+            input.premium-input(ng-model='teamName')
+        .col-md-2
+          .settings-group.mb-0
+            label.settings-label {{"common.region" | translate}}
+            input.premium-input(ng-model='country')
+        .col-md-2
+          .settings-group.mb-0
+            label.settings-label {{"common.league" | translate}}
+            select.premium-select(ng-model='teamLeague' ng-options='league for league in leagues')
+        .col-md-2
+          .settings-group.mb-0
+            label.settings-label {{"common.email" | translate}}
+            div(ng-repeat="em in email track by $index")
+              .team-email-row
+                input.premium-input(type="email", ng-model='email[$index]')
+                button.icon-btn-premium(type='button', ng-click='addEmail()', ng-if="$last && email[$index]")
+                  i.fas.fa-plus
+                button.icon-btn-premium.danger(type='button', ng-click='removeEmail($index)', ng-if="email.length > 1 || email[$index]" title='{{"common.delete" | translate}}')
+                  i.fas.fa-trash-alt
+      .add-item-row.mb-0
+        button.btn-premium.btn-premium-primary(ng-click='addTeam()')
+          i.fas.fa-check
+          | {{"admin.teams.add" | translate}}
+
+  .modern-card.section-gap
+    .modern-card-header(ng-click="showFilter = !showFilter")
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-search
+          | {{'common.refine' | translate}}
+        .btn-table-group
+          i.fas(ng-class="showFilter ? 'fa-chevron-up' : 'fa-chevron-down'")
+    .filter-collapse(ng-show="showFilter" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 1.5rem;")
+      .row(style="row-gap: 1.25rem;")
+        .col-md-4
+          .settings-group.mb-0
+            label.settings-label {{"common.teamCode" | translate}}
+            input.premium-input(type='text', ng-model='refineCode')
+        .col-md-4
+          .settings-group.mb-0
+            label.settings-label {{"common.team" | translate}}
+            input.premium-input(type='text', ng-model='refineName')
+        .col-md-4
+          .settings-group.mb-0
+            label.settings-label {{"common.region" | translate}}
+            input.premium-input(type='text', ng-model='refineRegion')
+        .col-12
+          .settings-group.mb-0
+            label.settings-label {{"common.league" | translate}}
+            .toolbar-actions(style="display: flex; flex-wrap: wrap; gap: 0.75rem;")
+              span(ng-repeat='(key, value) in Rleagues track by key')
+                input(type='checkbox' ng-model='Rleagues[key]' id="checkL_{{key}}")
+                label.checkbox(for="checkL_{{key}}") &nbsp;{{key}}
+
+  .modern-card.section-gap
+    .modern-card-header
+      .d-flex.justify-content-between.align-items-center.w-100.teams-widget-header
+        div
+          i.fas.fa-list
+          | {{"admin.teams.title" | translate}}
+        .btn-table-group
+          div.btn-table-action.danger.icon-only(ng-class="{'disabled': !hasSelectedTeams()}" ng-click="hasSelectedTeams() && removeSelectedTeam()" title='{{"common.delete" | translate}}')
+            i.fas.fa-trash-alt
+          div.btn-table-action(ng-click="reset_kiosk()")
+            i.fas.fa-desktop
+            | Reset Kiosk
+    .modern-card-body.p-0
+      .teams-base-table-wrapper
+        .base-table.teams-base-table
+          .base-table-header
+            .base-table-selection(ng-click="toggleAll()" style="cursor: pointer;" title="{{allVisibleChecked() ? ('admin.mazeMapAdmin.unselectAll' | translate) : ('common.selectAll' | translate)}}")
+              .custom-checkbox(ng-class="{'checked': allVisibleChecked()}")
+                i.fas.fa-check(ng-if="allVisibleChecked()")
+            .base-table-cell
+            .base-table-cell {{"common.teamCode" | translate}}
+            .base-table-cell {{"common.team" | translate}}
+            .base-table-cell {{"common.region" | translate}}
+            .base-table-cell {{"common.league" | translate}}
+            .base-table-cell {{"common.email" | translate}}
+            .base-table-cell.text-right {{"common.operation" | translate}}
+          .base-table-row(ng-repeat='team in teams | filter:list_filter | orderBy:"[teamCode, name]"' ng-class="{'selected': team.checked, 'team-editing': team.edit}")
+            .base-table-selection(ng-click="team.checked = !team.checked")
+              .custom-checkbox(ng-class="{'checked': team.checked}")
+                i.fas.fa-check(ng-if="team.checked")
+            .base-table-icon
+              i.fas.fa-users
+            .base-table-cell
+              span(ng-hide="team.edit") {{team.teamCode}}
+              input.premium-input(ng-show="team.edit" ng-model="team.teamCode" placeholder="{{'common.teamCode' | translate}}")
+            .base-table-cell
+              span.base-table-name(ng-hide="team.edit") {{team.name}}
+              input.premium-input(ng-show="team.edit" ng-model="team.name" placeholder="{{'common.team' | translate}}")
+            .base-table-cell
+              span(ng-hide="team.edit") {{team.country}}
+              input.premium-input(ng-show="team.edit" ng-model="team.country" placeholder="{{'common.region' | translate}}")
+            .base-table-cell
+              span(ng-hide="team.edit") {{team.league}}
+              select.premium-select(ng-show="team.edit" ng-model='team.league' ng-options='league for league in leagues')
+            .base-table-cell.teams-base-table-email
+              div(ng-hide="team.edit")
+                span(ng-repeat="em in team.email track by $index")
                   span(ng-bind="em")
-                  br
-                did(ng-show="team.edit")
-                  div(ng-repeat="em in team.email track by $index")
-                    input(type="email", ng-model='team.email[$index]' style="width:100%;margin-bottom:5px;")
-                    button.btn.btn-success(type='button', ng-click='addTeamEmail(team)', style="padding:0px 6px;margin: 5px;", ng-if="$last && team.email[$index]")
-                        i.fas.fa-plus
-                  input(type="email", ng-model='team.email[0]' style="width:100%;margin-bottom:5px;", ng-if="team.email.length == 0")
-              td
-                div(ng-hide="team.edit")
-                  .dropdown
-                  button#dropdownMenu.btn.btn-secondary.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false') {{"common.action" | translate}}
-                  .dropdown-menu(aria-labelledby='dropdownMenu')
-                      button.dropdown-item(type='button' ng-click="edit(team)") {{"common.edit" | translate}}
-                      button.dropdown-item(type='button' ng-click="goMyPage(team)") {{"common.mypage" | translate}}
-                      .dropdown-divider
-                      button.dropdown-item(type='button' ng-click='removeTeam(team._id)') {{"common.delete" | translate}}
-                
-                div(ng-show="team.edit")
-                  button(ng-click="update(team)" class='btn btn-success') {{"common.save" | translate}}
-
-      
+                  span(ng-if="!$last") ,
+              .team-email-list(ng-show="team.edit")
+                div(ng-repeat="em in team.email track by $index")
+                  .team-email-row
+                    input.premium-input(type="email", ng-model='team.email[$index]' placeholder="{{'common.email' | translate}}")
+                    button.icon-btn-premium.danger(type='button', ng-click='removeTeamEmail(team, $index)', ng-if="team.email.length > 1 || team.email[$index]" title='{{"common.delete" | translate}}')
+                      i.fas.fa-trash-alt
+                .team-email-row(ng-if="team.email.length == 0")
+                  input.premium-input(type="email", ng-model='team.email[0]' placeholder="{{'common.email' | translate}}")
+                button.btn-table-action.primary.team-email-add(type='button', ng-click='addTeamEmail(team)', ng-if="team.email.length == 0 || team.email[team.email.length - 1]")
+                  i.fas.fa-plus
+                  | {{"common.email" | translate}}
+            .base-table-actions
+              .dropdown.table-action-dropdown(ng-hide="team.edit")
+                button.btn-table-action.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')
+                  | {{"common.action" | translate}}
+                .dropdown-menu.dropdown-menu-right
+                  button.dropdown-item(type='button' ng-click="edit(team)")
+                    i.fas.fa-pen
+                    | {{"common.edit" | translate}}
+                  button.dropdown-item(type='button' ng-click="goMyPage(team)")
+                    i.fas.fa-user
+                    | {{"common.mypage" | translate}}
+                  .dropdown-divider
+                  button.dropdown-item.text-danger(type='button' ng-click='removeTeam(team._id)')
+                    i.fas.fa-trash-alt
+                    | {{"common.delete" | translate}}
+              .dropdown.table-action-dropdown(ng-show="team.edit")
+                button.btn-table-action.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')
+                  | {{"common.action" | translate}}
+                .dropdown-menu.dropdown-menu-right
+                  button.dropdown-item(type='button', ng-click="update(team)")
+                    i.fas.fa-save
+                    | {{"common.save" | translate}}

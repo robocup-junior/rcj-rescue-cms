@@ -16,6 +16,8 @@ app.controller("TeamAdminController", ['$scope', '$http', '$translate', function
     
     $scope.competitionId = competitionId;
     $scope.email = [""];
+    $scope.showFilter = true;
+    $scope.showAddTeam = false;
     updateTeamList();
 
     $http.get("/api/competitions/" + competitionId).then(function (response) {
@@ -40,7 +42,7 @@ app.controller("TeamAdminController", ['$scope', '$http', '$translate', function
             league: $scope.teamLeague,
             competition: competitionId,
             country: $scope.country,
-            email : $scope.email
+            email : $scope.email.filter(function (email) { return email; })
         };
 
         $http.post("/api/teams", team).then(function (response) {
@@ -64,20 +66,34 @@ app.controller("TeamAdminController", ['$scope', '$http', '$translate', function
         $scope.email.push("");
     }
 
+    $scope.removeEmail = function(index){
+        $scope.email.splice(index, 1);
+        if (!$scope.email.length) $scope.email.push("");
+    }
+
     $scope.addTeamEmail = function(team){
+        if (!Array.isArray(team.email)) team.email = [];
         team.email.push("");
+    }
+
+    $scope.removeTeamEmail = function(team, index){
+        if (!Array.isArray(team.email)) {
+            team.email = [];
+            return;
+        }
+        team.email.splice(index, 1);
     }
 
 
     $scope.edit = function (team) {
+        if (!Array.isArray(team.email)) team.email = [];
+        team.email = team.email.filter(function (email) { return email; });
         team.edit = true;
     }
 
     $scope.update = function (team) {
-        for(let m in team.email){
-            console.log(team.email[m])
-            if(!team.email[m]) team.email.splice(m,1);
-        }
+        if (!Array.isArray(team.email)) team.email = [];
+        team.email = team.email.filter(function (email) { return email; });
         $http.put("/api/teams/" + team.competition + "/" + team._id, team).then(function (response) {
             updateTeamList()
             Toast.fire({
@@ -95,10 +111,31 @@ app.controller("TeamAdminController", ['$scope', '$http', '$translate', function
         })   
     }
 
-    $scope.selectAll = function () {
+    $scope.allVisibleChecked = function () {
+        let hasVisibleTeam = false;
+        let allChecked = true;
         angular.forEach($scope.teams, function (team) {
-            if($scope.list_filter(team)) team.checked = true;
+            if ($scope.list_filter(team)) {
+                hasVisibleTeam = true;
+                allChecked = allChecked && !!team.checked;
+            }
         });
+        return hasVisibleTeam && allChecked;
+    }
+
+    $scope.toggleAll = function () {
+        const shouldCheck = !$scope.allVisibleChecked();
+        angular.forEach($scope.teams, function (team) {
+            if($scope.list_filter(team)) team.checked = shouldCheck;
+        });
+    }
+
+    $scope.hasSelectedTeams = function () {
+        let hasSelected = false;
+        angular.forEach($scope.teams, function (team) {
+            hasSelected = hasSelected || !!team.checked;
+        });
+        return hasSelected;
     }
 
 
@@ -107,6 +144,7 @@ app.controller("TeamAdminController", ['$scope', '$http', '$translate', function
         angular.forEach($scope.teams, function (team) {
             if (team.checked) chk.push(team._id);
         });
+        if (!chk.length) return;
         $scope.removeTeam(chk.join(","));
     }
     
@@ -147,9 +185,10 @@ app.controller("TeamAdminController", ['$scope', '$http', '$translate', function
 
             $scope.showCode = false;
             for(let t of $scope.teams){
+                if (!Array.isArray(t.email)) t.email = [];
+                t.email = t.email.filter(function (email) { return email; });
                 if(t.teamCode != ""){
                     $scope.showCode = true;
-                    break;
                 }
             }
         })

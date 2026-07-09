@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'Inspection'
@@ -12,134 +12,135 @@ append scripts
   script(src='/components/ng-file-upload/ng-file-upload-all.min.js')
   script(src='/components/lightbox2/dist/js/lightbox.min.js')
   script(src='/javascripts/jquery.slideToUnlock.js')
-  
+
 append css
-    link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css')
-    link(rel='stylesheet',href='/stylesheets/slideToUnlock.css')
+  link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css')
+  link(rel='stylesheet',href='/stylesheets/slideToUnlock.css')
 
-block location
-    a.breadcrumb-item(onclick="location.href='/home'") Home
-    a.breadcrumb-item(ng-click='go("/home/"+ competitionId)') {{competition.name}}
-    a.breadcrumb-item(ng-click="go('/home/' + competitionId + '/teams')") Teams
-    span.breadcrumb-item.active Inspection - {{team.name}}
+block hero_breadcrumb
+  a.breadcrumb-item(onclick="location.href='/home'") Home
+  a.breadcrumb-item(ng-click='go("/home/"+ competitionId)') {{competition.name}}
+  a.breadcrumb-item(ng-click="go('/home/' + competitionId + '/teams')") Teams
+  span.breadcrumb-item.active Inspection - {{team.name}}
 
+block hero_title
+  | {{team.name}}
 
-block content
+block hero_subtitle
+  i.fas.fa-clipboard-check.mr-2
+  | {{"common.inspection" | translate}}
+
+block hero_actions
+  button.btn-premium.btn-premium-secondary(type='button', ng-click="getParam('return')? go(getParam('return')):go('/home/' + competitionId + '/teams')")
+    i.fas.fa-undo
+    | {{'common.back' | translate}}
+
+block main_content
+  //h2 {{'interview.runs' | translate}}
+  //#compe
+      table(class="custom")
+        thead
+          tr
+            th {{'common.round' | translate}}
+            th {{'common.field' | translate}}
+            th {{'common.starttime' | translate}}
+            th {{'common.score' | translate}}
+            th {{'common.time' | translate}}
+            th {{'common.lops' | translate}}
+            th
+        tbody
+          tr(ng-repeat='run in lruns | filter: teamId | orderBy:"[startTime,round.name,field.name,team.name]" ')
+            td(ng-bind='run.round.name' data-content="{{'common.round' | translate}}")
+            td(ng-bind='run.field.name' data-content="{{'common.field' | translate}}")
+            td(ng-bind='run.startTime | date:"dd EEE HH:mm"' data-content="{{'common.starttime' | translate}}")
+            td {{run.score}}
+            td {{("00"+run.time.minutes).slice(-2)}}:{{("00"+run.time.seconds).slice(-2)}}
+            td {{run.LoPsNum}}
+            td
+              button(ng-click="go('/line/view/' + run._id + '?return=/interview/'+competitionId + '/do/'+teamId)" class='btn btn-info' style="width:45%; margin-right:5px;") {{'common.view' | translate}}
+          tr(ng-repeat='run in mruns | filter: teamId | orderBy:"[startTime]" ')
+            td(ng-bind='run.round.name' data-content="{{'common.round' | translate}}")
+            td(ng-bind='run.field.name' data-content="{{'common.field' | translate}}")
+            td(ng-bind='run.startTime | date:"dd EEE HH:mm"' data-content="{{'common.starttime' | translate}}")
+            td(ng-bind='run.score' data-content="{{'common.score' | translate}}")
+            td {{("00"+run.time.minutes).slice(-2)}}:{{("00"+run.time.seconds).slice(-2)}}
+            td {{run.LoPs}}
+            td
+              button(ng-click="go('/maze/view/' + run._id + '?return=/interview/'+competitionId + '/do/'+teamId)" class='btn btn-info' style="width:45%; margin-right:5px;") {{'common.view' | translate}}
+
+  h5.section-heading.mb-2
+    i.fas.fa-images
+    | Photos
   .row
-    .col-md-1
-    .col-md-10
-      h1 {{team.name}} - {{"common.inspection" | translate}}
-      button.btn.btn-secondary(style='margin:0 10px 10px 0;', type='button', ng-click="getParam('return')? go(getParam('return')):go('/home/' + competitionId + '/teams')")
-        i.fas.fa-undo(aria-hidden='true') {{'common.back' | translate}}
-      br
-      //h2 {{'interview.runs' | translate}}
-      //#compe
-          table(class="custom")
-            thead
-              tr
-                th {{'common.round' | translate}}
-                th {{'common.field' | translate}}
-                th {{'common.starttime' | translate}}
-                th {{'common.score' | translate}}
-                th {{'common.time' | translate}}
-                th {{'common.lops' | translate}}
-                th
-            tbody
-              tr(ng-repeat='run in lruns | filter: teamId | orderBy:"[startTime,round.name,field.name,team.name]" ')
-                td(ng-bind='run.round.name' data-content="{{'common.round' | translate}}")
-                td(ng-bind='run.field.name' data-content="{{'common.field' | translate}}")
-                td(ng-bind='run.startTime | date:"dd EEE HH:mm"' data-content="{{'common.starttime' | translate}}")
-                td {{run.score}}
-                td {{("00"+run.time.minutes).slice(-2)}}:{{("00"+run.time.seconds).slice(-2)}}
-                td {{run.LoPsNum}}
-                td
-                  button(ng-click="go('/line/view/' + run._id + '?return=/interview/'+competitionId + '/do/'+teamId)" class='btn btn-info' style="width:45%; margin-right:5px;") {{'common.view' | translate}}
-              tr(ng-repeat='run in mruns | filter: teamId | orderBy:"[startTime]" ')
-                td(ng-bind='run.round.name' data-content="{{'common.round' | translate}}")
-                td(ng-bind='run.field.name' data-content="{{'common.field' | translate}}")
-                td(ng-bind='run.startTime | date:"dd EEE HH:mm"' data-content="{{'common.starttime' | translate}}")
-                td(ng-bind='run.score' data-content="{{'common.score' | translate}}")
-                td {{("00"+run.time.minutes).slice(-2)}}:{{("00"+run.time.seconds).slice(-2)}}
-                td {{run.LoPs}}
-                td
-                  button(ng-click="go('/maze/view/' + run._id + '?return=/interview/'+competitionId + '/do/'+teamId)" class='btn btn-info' style="width:45%; margin-right:5px;") {{'common.view' | translate}}
-      br
-      .row(style="margin-bottom:30px;")
-        .col-md-6
-          .card
-              h3.card-header
-                i.far.fa-images(aria-hidden='true') {{'interview.me_pic' | translate}}
-              .card-body
-                div
-                    a(style="max-width: 100%;height: auto; margin-bottom:20px;" ng-href="/api/document/inspection/files/{{teamId}}/teamPhoto?dummy={{updateTime}}" data-lightbox="image")
-                        img.img-thumbnail(style="max-width: 100%;height: auto;margin-bottom:20px;" ng-src="/api/document/inspection/files/{{teamId}}/teamPhoto?dummy={{updateTime}}")
-                .d-sm-flex.flex-row
-                  div
-                      button.btn.btn-warning(type='file' ngf-select='uploadFiles(teamPhoto, $file, $invalidFiles)' accept='image/*' ngf-max-size='5MB')
-                          i.far.fa-folder-open
-                          | {{"document.form.selectFile" | translate}}
-                  div(style="color:#e74c3c;margin-left:10px;", ng-if="teamPhoto.errFile.$error")
-                      span ERROR: {{teamPhoto.errFile.$error}}
-                  .flex-fill(style="margin:10px 0px 0px 10px;", ng-show="teamPhoto.f.progress > 0")
-                      .progress
-                          .progress-bar(role='progressbar' style='width: {{teamPhoto.f.progress}}%;' aria-valuenow='{{teamPhoto.f.progress}}' aria-valuemin='0' aria-valuemax='100') {{teamPhoto.f.progress}}%
-                  div(style="color:#e74c3c;margin-top:10px;", ng-if="teamPhoto.errorMsg")
-                      span {{teamPhoto.errorMsg}}
-                    
-        .col-md-6
-          .card
-              h3.card-header
-                i.far.fa-images(aria-hidden='true') {{'interview.ma_pic' | translate}}
-              .card-body
-                div
-                    a(style="max-width: 100%;height: auto; margin-bottom:20px;" ng-href="/api/document/inspection/files/{{teamId}}/robotPhoto?dummy={{updateTime}}" data-lightbox="image")
-                        img.img-thumbnail(style="max-width: 100%;height: auto;margin-bottom:20px;" ng-src="/api/document/inspection/files/{{teamId}}/robotPhoto?dummy={{updateTime}}")
-                .d-sm-flex.flex-row
-                  div
-                      button.btn.btn-warning(type='file' ngf-select='uploadFiles(robotPhoto, $file, $invalidFiles)' accept='image/*' ngf-max-size='5MB')
-                          i.far.fa-folder-open
-                          | {{"document.form.selectFile" | translate}}
-                  div(style="color:#e74c3c;margin-left:10px;", ng-if="robotPhoto.errFile.$error")
-                      span ERROR: {{robotPhoto.errFile.$error}}
-                  .flex-fill(style="margin:10px 0px 0px 10px;", ng-show="robotPhoto.f.progress > 0")
-                      .progress
-                          .progress-bar(role='progressbar' style='width: {{robotPhoto.f.progress}}%;' aria-valuenow='{{robotPhoto.f.progress}}' aria-valuemin='0' aria-valuemax='100') {{robotPhoto.f.progress}}%
-                  div(style="color:#e74c3c;margin-top:10px;", ng-if="robotPhoto.errorMsg")
-                      span {{robotPhoto.errorMsg}}
-        .col-12
-          hr
-          style(ng-if="!team.inspected").
-            .locked {
-                color: #692003;
-                font-size: 18px;  
-                background-color: #eff3ea;   
-            }
-            .unlocked {
-                background-color: #2ecc71;
-            }
-          style(ng-if="team.inspected").
-            .locked {
-                color: #692003;
-                font-size: 18px;  
-                background-color: #ffbcbc;   
-            }
-            .unlocked {
-                background-color: #e74c3c;
-            }
+    .col-md-6
+      .modern-card
+        .modern-card-body
+          h6.text-heading-premium.mb-3
+            i.far.fa-images.mr-2
+            | {{'interview.me_pic' | translate}}
+          div
+            a(style="max-width: 100%;height: auto; margin-bottom:20px;" ng-href="/api/document/inspection/files/{{teamId}}/teamPhoto?dummy={{updateTime}}" data-lightbox="image")
+              img.img-thumbnail(style="max-width: 100%;height: auto;margin-bottom:20px;" ng-src="/api/document/inspection/files/{{teamId}}/teamPhoto?dummy={{updateTime}}")
+          .d-sm-flex.flex-row
+            div
+              button.btn.btn-warning(type='file' ngf-select='uploadFiles(teamPhoto, $file, $invalidFiles)' accept='image/*' ngf-max-size='5MB')
+                i.far.fa-folder-open
+                | {{"document.form.selectFile" | translate}}
+            div(style="color:#e74c3c;margin-left:10px;", ng-if="teamPhoto.errFile.$error")
+              span ERROR: {{teamPhoto.errFile.$error}}
+            .flex-fill(style="margin:10px 0px 0px 10px;", ng-show="teamPhoto.f.progress > 0")
+              .progress
+                .progress-bar(role='progressbar' style='width: {{teamPhoto.f.progress}}%;' aria-valuenow='{{teamPhoto.f.progress}}' aria-valuemin='0' aria-valuemax='100') {{teamPhoto.f.progress}}%
+            div(style="color:#e74c3c;margin-top:10px;", ng-if="teamPhoto.errorMsg")
+              span {{teamPhoto.errorMsg}}
 
-          div(ng-hide="team.inspected")
-            h3 {{"document.inspection.do" | translate}}
-            div(style="text-align:center;",)
-                
+    .col-md-6
+      .modern-card
+        .modern-card-body
+          h6.text-heading-premium.mb-3
+            i.far.fa-images.mr-2
+            | {{'interview.ma_pic' | translate}}
+          div
+            a(style="max-width: 100%;height: auto; margin-bottom:20px;" ng-href="/api/document/inspection/files/{{teamId}}/robotPhoto?dummy={{updateTime}}" data-lightbox="image")
+              img.img-thumbnail(style="max-width: 100%;height: auto;margin-bottom:20px;" ng-src="/api/document/inspection/files/{{teamId}}/robotPhoto?dummy={{updateTime}}")
+          .d-sm-flex.flex-row
+            div
+              button.btn.btn-warning(type='file' ngf-select='uploadFiles(robotPhoto, $file, $invalidFiles)' accept='image/*' ngf-max-size='5MB')
+                i.far.fa-folder-open
+                | {{"document.form.selectFile" | translate}}
+            div(style="color:#e74c3c;margin-left:10px;", ng-if="robotPhoto.errFile.$error")
+              span ERROR: {{robotPhoto.errFile.$error}}
+            .flex-fill(style="margin:10px 0px 0px 10px;", ng-show="robotPhoto.f.progress > 0")
+              .progress
+                .progress-bar(role='progressbar' style='width: {{robotPhoto.f.progress}}%;' aria-valuenow='{{robotPhoto.f.progress}}' aria-valuemin='0' aria-valuemax='100') {{robotPhoto.f.progress}}%
+            div(style="color:#e74c3c;margin-top:10px;", ng-if="robotPhoto.errorMsg")
+              span {{robotPhoto.errorMsg}}
 
-              #slider-inspected(data-lock-text='Swipe >>>', data-unlock-text='Completed!')  
-          div(ng-show="team.inspected")
-            h3 {{"document.inspection.cancel" | translate}}
-            div(style="text-align:center;")
-                
-              #slider-cancel(data-lock-text='Swipe >>>', data-unlock-text='Canceled!')  
+    .col-12
+      style(ng-if="!team.inspected").
+        .locked {
+            color: #692003;
+            font-size: 18px;
+            background-color: #eff3ea;
+        }
+        .unlocked {
+            background-color: #2ecc71;
+        }
+      style(ng-if="team.inspected").
+        .locked {
+            color: #692003;
+            font-size: 18px;
+            background-color: #ffbcbc;
+        }
+        .unlocked {
+            background-color: #e74c3c;
+        }
 
-
-      
-
-
+      div(ng-hide="team.inspected")
+        h5.section-heading.section-gap.mb-2 {{"document.inspection.do" | translate}}
+        div(style="text-align:center;")
+          #slider-inspected(data-lock-text='Swipe >>>', data-unlock-text='Completed!')
+      div(ng-show="team.inspected")
+        h5.section-heading.section-gap.mb-2 {{"document.inspection.cancel" | translate}}
+        div(style="text-align:center;")
+          #slider-cancel(data-lock-text='Swipe >>>', data-unlock-text='Canceled!')

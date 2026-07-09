@@ -9,6 +9,26 @@ app.controller('ReviewStatusController', ['$scope', '$uibModal', '$log', '$http'
 
     $scope.mode = "select";
 
+    $scope.filter = { show: false, reviewer: '', team: '', league: '' };
+
+    $scope.filteredLeagues = function () {
+        if (!$scope.leagues) return [];
+        if (!$scope.filter.league) return $scope.leagues;
+        return $scope.leagues.filter(l => l.id === $scope.filter.league);
+    };
+
+    $scope.reviewerVisible = function (user) {
+        if (!$scope.filter.reviewer) return true;
+        return user.userName.toLowerCase().includes($scope.filter.reviewer.toLowerCase());
+    };
+
+    $scope.teamVisible = function (team) {
+        if (!$scope.filter.team) return true;
+        const q = $scope.filter.team.toLowerCase();
+        return (team.name || '').toLowerCase().includes(q) ||
+               (team.code || '').toLowerCase().includes(q);
+    };
+
     $http.get(`/api/document/${competitionId}/reviewStatus`).then(function (response) {
         $scope.reviewStatus = response.data
     })

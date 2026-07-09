@@ -87,6 +87,25 @@ append css
       background: #f1f5f9;
       border-color: #3b82f6;
     }
+    .upload-card.upload-card-dragover {
+      background: #eff6ff;
+      border-color: #2563eb;
+      box-shadow: 0 16px 32px -12px rgba(37, 99, 235, 0.35);
+      transform: translateY(-5px);
+    }
+    .upload-card.upload-card-dragover .file-icon-wrapper {
+      background: #dbeafe;
+      color: #1d4ed8;
+      transform: scale(1.1);
+    }
+    .upload-hint {
+      color: #64748b;
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-top: -0.75rem;
+      margin-bottom: 1rem;
+    }
     .empty-state {
       padding: 4rem 2rem;
       text-align: center;
@@ -133,13 +152,15 @@ block main_content
   .file-grid
     //- Upload Card (Admin Only)
     if !isMyPage
-      .file-card.upload-card(type='file' ngf-select='upload($file, $invalidFiles)' accept='*' ngf-max-size='500MB')
+      .file-card.upload-card(type='file' ngf-select='upload($files, $invalidFiles)' ngf-drop='upload($files, $invalidFiles)' ngf-drag-over-class="'upload-card-dragover'" ngf-multiple='true' accept='*' ngf-max-size='500MB')
         .file-icon-wrapper
-          i.fas.fa-plus
+          i.fas.fa-cloud-upload-alt
         .file-name {{'cabinet.upload' | translate}}
-        .w-100.mt-2(ng-if="f.progress > 0")
+        .upload-hint {{'cabinet.uploadHint' | translate}}
+        .w-100.mt-2(ng-if="uploadProgress > 0")
           .progress(style="height: 6px; border-radius: 3px;")
-            .progress-bar.progress-bar-striped.progress-bar-animated(role='progressbar' style='width: {{f.progress}}%;')
+            .progress-bar.progress-bar-striped.progress-bar-animated(role='progressbar' style='width: {{uploadProgress}}%;')
+          .small.text-muted.mt-2(ng-if="uploading") {{uploadedCount}} / {{uploadTotal}} files
         .text-danger.small.mt-2(ng-if="errFile.$error") ERROR: {{errFile.$error}}
         .text-danger.small.mt-2(ng-if="errorMsg") {{errorMsg}}
 

@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'RoundAdmin'
@@ -9,40 +9,55 @@ append scripts
     var competitionId = "#{id}"
   script(src='/javascripts/admin/round.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-    span.breadcrumb-item.active Rounds
+append css
+  link(href='/stylesheets/common/modern_editor.css', rel='stylesheet')
+  style.
+    .rounds-base-table .base-table-header,
+    .rounds-base-table .base-table-row {
+      grid-template-columns: 36px 1fr auto;
+    }
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{competition.name}} - {{"admin.rounds.title" | translate}}
-      table.custom
-        thead
-            tr
-                th {{"common.name" | translate}}
-                th {{"common.operation" | translate}}
-        tbody
-            tr
-                td
-                    input(ng-model='roundName' style="width:100%;")
-                td
-                    button(ng-click='addRound()' style="width:100%;") {{"admin.rounds.add" | translate}}
-      
-      
-      br
-      hr
-      br
-      table.custom
-        thead
-            tr
-              th {{"common.name" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
-            tr(ng-repeat='round in rounds')
-              td(ng-bind='round.name')
-              td
-                a(href="" ng-click='removeRound(round)') {{"common.delete" | translate}}
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')") Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+  span.breadcrumb-item.active Rounds
+
+block hero_title
+  | {{competition.name}}
+
+block hero_subtitle
+  i.fas.fa-layer-group.mr-2
+  | {{"admin.rounds.title" | translate}}
+
+block main_content
+  h5.section-heading.mb-2
+    i.fas.fa-plus
+    | {{"admin.rounds.add" | translate}}
+  .modern-card
+    .modern-card-body
+      .toolbar-actions
+        input.premium-input(ng-model='roundName' style="max-width: 320px;")
+        button.btn-premium.btn-premium-primary(ng-click='addRound()')
+          i.fas.fa-check
+          | {{"admin.rounds.add" | translate}}
+
+  .modern-card.section-gap
+    .modern-card-header
+      i.fas.fa-layer-group
+      | {{"admin.rounds.title" | translate}}
+    .modern-card-body.p-0
+      .base-table.rounds-base-table
+        .base-table-header
+          .base-table-cell
+          .base-table-cell {{"common.name" | translate}}
+          .base-table-cell.text-right {{"common.operation" | translate}}
+        .base-table-row(ng-repeat='round in rounds')
+          .base-table-icon
+            i.fas.fa-layer-group
+          .base-table-cell
+            span.base-table-name(ng-bind='round.name')
+          .base-table-actions
+            button.btn-table-action(type='button' ng-click='removeRound(round)')
+              i.fas.fa-trash-alt
+              | {{"common.delete" | translate}}

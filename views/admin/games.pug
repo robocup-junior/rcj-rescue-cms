@@ -3,6 +3,7 @@ extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'RunAdmin'
+  - var contentContainerStyle = "max-width: 100%;"
 
 append scripts
   script.
@@ -324,62 +325,44 @@ append css
     }
     
     .status-indicator {
-
-
       width: 8px;
       height: 100%;
       position: absolute;
       left: 0;
       top: 0;
     }
-    
-    .table-modern {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0 0.5rem;
+
+    .games-base-table-wrapper {
+      overflow-x: auto;
+      border-radius: 0 0 0.75rem 0.75rem;
     }
-    
-    .table-modern thead th {
-      padding: 1rem 0.75rem;
-      font-weight: 800;
-      text-transform: uppercase;
-      font-size: 0.75rem;
-      color: #94a3b8;
-      letter-spacing: 0.05em;
-      border: none;
+
+    .games-base-table {
+      min-width: 1500px;
+      margin-bottom: 0;
+      border: 0;
+      border-radius: 0 0 0.75rem 0.75rem;
+      box-shadow: none;
     }
-    
-    .table-modern tbody tr {
-      background: white;
-      transition: all 0.2s ease;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+
+    .games-base-table .base-table-header,
+    .games-base-table .base-table-row {
+      grid-template-columns: 40px minmax(7rem, 0.9fr) minmax(5rem, 0.6fr) minmax(5.5rem, 0.6fr) minmax(9rem, 1.3fr) minmax(5.5rem, 0.65fr) minmax(5.5rem, 0.65fr) minmax(6rem, 0.7fr) minmax(4.5rem, 0.55fr) minmax(4.5rem, 0.5fr) minmax(4.5rem, 0.55fr) minmax(8rem, 1fr) minmax(8rem, auto);
     }
-    
-    .table-modern tbody tr:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+
+    .games-base-table.no-map .base-table-header,
+    .games-base-table.no-map .base-table-row {
+      grid-template-columns: 40px minmax(7rem, 0.9fr) minmax(5rem, 0.6fr) minmax(5.5rem, 0.6fr) minmax(9rem, 1.3fr) minmax(5.5rem, 0.65fr) minmax(6rem, 0.7fr) minmax(4.5rem, 0.55fr) minmax(4.5rem, 0.5fr) minmax(4.5rem, 0.55fr) minmax(8rem, 1fr) minmax(8rem, auto);
     }
-    
-    .table-modern tbody td {
-      padding: 1rem 0.75rem;
-      vertical-align: middle;
-      border-top: 1px solid #f1f5f9;
-      border-bottom: 1px solid #f1f5f9;
-      position: relative;
+
+    .games-base-table .base-table-cell.games-adj input.premium-input {
+      width: 70px;
     }
-    
-    .table-modern tbody td:first-child {
-      border-left: 1px solid #f1f5f9;
-      border-top-left-radius: 0.75rem;
-      border-bottom-left-radius: 0.75rem;
+
+    .games-base-table .base-table-header .base-table-cell {
+      overflow-wrap: normal;
     }
-    
-    .table-modern tbody td:last-child {
-      border-right: 1px solid #f1f5f9;
-      border-top-right-radius: 0.75rem;
-      border-bottom-right-radius: 0.75rem;
-    }
-    
+
     .filter-badge {
       display: inline-block;
       padding: 0.25rem 0.75rem;
@@ -397,115 +380,10 @@ append css
       color: white;
     }
     
-    .btn-action-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .btn-action-icon:hover {
-      background: white;
-      color: var(--accent-color);
-      transform: translateY(-2px);
-    }
-
-    .btn-table-group {
-      display: inline-flex;
-      align-items: center;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-    }
-
-    .btn-table-action {
-      background: transparent;
-      border: none;
-      border-left: 1px solid #f1f5f9;
-      color: #64748b;
-      font-weight: 700;
-      font-size: 0.85rem;
-      padding: 0;
-      width: 64px;
-      height: 42px;
-      transition: all 0.2s ease;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .btn-table-action:first-child {
-      border-left: none;
-    }
-
-    .btn-table-action:hover {
-      background: #f8fafc;
-      color: #334155;
-    }
-
-    .btn-table-action i {
-      font-size: 1rem;
-      opacity: 0.8;
-      margin: 0 !important;
-    }
-
-    .btn-table-action.active-blue {
-      background: rgba(59, 130, 246, 0.08) !important;
-      color: #2563eb !important;
-    }
-    
     .btn-table-action.active-green {
-      background: rgba(16, 185, 129, 0.08) !important;
-      color: #059669 !important;
-    }
-
-    .btn-table-action.danger {
-      color: #ef4444;
-    }
-
-    .btn-table-action.danger:hover {
-      background: rgba(239, 68, 68, 0.05);
-    }
-    
-    .btn-table-action.primary {
-      color: #3b82f6;
-    }
-    
-    .btn-table-action.primary:hover {
-      background: rgba(59, 130, 246, 0.05);
-    }
-
-    .custom-checkbox {
-      width: 20px;
-      height: 20px;
-      border: 2px solid #e2e8f0;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      background: white;
-      margin: 0 auto;
-    }
-    
-    .custom-checkbox.checked {
-      background: var(--accent-color);
-      border-color: var(--accent-color);
-    }
-    
-    .custom-checkbox i {
-      color: white !important;
-      font-size: 0.75rem;
+      background: #ecfdf5;
+      border-color: #059669;
+      color: #059669;
     }
 
     .print-row {
@@ -526,28 +404,6 @@ append css
       letter-spacing: 0.05em;
     }
 
-    /* Fix for dropdown clipping */
-    .modern-card, .modern-card-body, .table-responsive {
-      overflow: visible !important;
-    }
-    
-    .table-modern tbody tr {
-      position: relative;
-    }
-    
-    .table-modern tbody tr:hover,
-    .table-modern tbody tr:focus-within {
-      z-index: 10 !important;
-    }
-
-    .dropdown-menu {
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-      border: 1px solid #e2e8f0 !important;
-      border-radius: 12px !important;
-      padding: 0.5rem !important;
-      z-index: 1060 !important;
-    }
-    
     /* Mobile Responsiveness */
     @media (max-width: 576px) {
       .premium-datetime-group {
@@ -576,21 +432,11 @@ append css
       .uib-datepicker-popup .uib-button-bar {
         margin: 0.5rem -0.75rem -0.75rem -0.75rem !important;
       }
-      
+
       .modern-card-header .d-flex {
         flex-direction: column;
         align-items: flex-start !important;
         gap: 1rem;
-      }
-      
-      .btn-table-group {
-        width: 100%;
-        display: flex;
-      }
-      
-      .btn-table-action {
-        flex: 1;
-        width: auto;
       }
 
       .print-row {
@@ -598,89 +444,10 @@ append css
         align-items: flex-start;
         gap: 0.5rem;
       }
-      
+
       .section-title {
         min-width: unset;
       }
-    }
-
-    /* Mobile Table Transformation */
-    @media (max-width: 991px) {
-      .table-modern thead {
-        display: none !important;
-      }
-      .table-modern, .table-modern tbody, .table-modern tr, .table-modern td {
-        display: block !important;
-        width: 100% !important;
-      }
-      .table-modern tr {
-        margin-bottom: 1.5rem !important;
-        background: white !important;
-        border-radius: 1.25rem !important;
-        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05) !important;
-        padding: 1rem 1rem 1rem 1.5rem !important;
-        border: 1px solid #f1f5f9 !important;
-        position: relative !important;
-        overflow: hidden;
-      }
-      .table-modern td {
-        text-align: right !important;
-        padding: 0.85rem 0 !important;
-        border: none !important;
-        border-bottom: 1px solid #f8fafc !important;
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        min-height: 3rem;
-        position: static !important;
-      }
-      .table-modern td:last-child {
-        border-bottom: none !important;
-      }
-      .table-modern td::before {
-        content: attr(data-label);
-        font-weight: 800;
-        text-transform: uppercase;
-        font-size: 0.7rem;
-        color: #94a3b8;
-        padding-right: 1rem;
-        text-align: left;
-      }
-      /* Special handling for checkbox and indicator */
-      .table-modern td:first-child {
-        justify-content: flex-start !important;
-        border-bottom: 2px solid #f1f5f9 !important;
-        margin-bottom: 0.5rem;
-      }
-      .table-modern td:first-child::before {
-        display: none;
-      }
-      .status-indicator {
-        position: absolute !important;
-        width: 8px !important;
-        height: 100% !important;
-        left: 0 !important;
-        top: 0 !important;
-        border-radius: 0 !important;
-      }
-    }
-
-    .dropdown-item {
-      border-radius: 8px !important;
-      padding: 0.5rem 1rem !important;
-      font-weight: 600 !important;
-      color: #475569 !important;
-      transition: all 0.2s ease;
-    }
-    
-    .dropdown-item:hover {
-      background: #f1f5f9 !important;
-      color: var(--accent-color) !important;
-    }
-    
-    .dropdown-item i {
-      width: 20px;
-      text-align: center;
     }
 
 block hero_breadcrumb
@@ -698,13 +465,13 @@ block hero_subtitle
   | {{league.name}} - {{"admin.lineRun.title" | translate}}
 
 block hero_actions
-  button.btn-action-icon(ng-hide="league.type == 'simulation'" ng-click="go('/signage/games/'+ competitionId + '?league=' + league.type)" uib-tooltip='{{"admin.lineRun.monitor" | translate}}' tooltip-placement="bottom")
+  button.btn-hero-icon(ng-hide="league.type == 'simulation'" ng-click="go('/signage/games/'+ competitionId + '?league=' + league.type)" uib-tooltip='{{"admin.lineRun.monitor" | translate}}' tooltip-placement="bottom")
     i.fas.fa-desktop
-  button.btn-action-icon(ng-show="league.league == 'Line' || league.league == 'Maze'" ng-click="openScoreSheetModal()" uib-tooltip='{{"admin.lineRun.scoresheetTitle" | translate}}' tooltip-placement="bottom")
+  button.btn-hero-icon(ng-show="league.league == 'Line' || league.league == 'Maze'" ng-click="openScoreSheetModal()" uib-tooltip='{{"admin.lineRun.scoresheetTitle" | translate}}' tooltip-placement="bottom")
     i.fas.fa-file-signature
-  button.btn-action-icon(ng-click="go('/admin/' + competitionId +'/' + league.league + '/games/print')" uib-tooltip='{{"admin.lineRun.printRuns" | translate}}' tooltip-placement="bottom")
+  button.btn-hero-icon(ng-click="go('/admin/' + competitionId +'/' + league.league + '/games/print')" uib-tooltip='{{"admin.lineRun.printRuns" | translate}}' tooltip-placement="bottom")
     i.fas.fa-print
-  button.btn-action-icon(ng-click="go('/admin/' + competition._id + '/' + league.league + '/games/ranking/')" uib-tooltip='{{"admin.lineRun.printRanking" | translate}}' tooltip-placement="bottom")
+  button.btn-hero-icon(ng-click="go('/admin/' + competition._id + '/' + league.league + '/games/ranking/')" uib-tooltip='{{"admin.lineRun.printRanking" | translate}}' tooltip-placement="bottom")
     i.fas.fa-trophy
 
 
@@ -777,13 +544,13 @@ block main_content
           i.fas.fa-list
           | {{"admin.lineRun.title" | translate}}
         .btn-table-group
-          div.btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'line.competition.refine.filter' | translate}}" tooltip-placement="top")
+          button.btn-table-action.primary.icon-only(type='button' ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'line.competition.refine.filter' | translate}}" tooltip-placement="top")
             i.fas.fa-filter
-          div.btn-table-action.danger(ng-click="removeSelectedRun()" uib-tooltip="{{'admin.lineRun.delS' | translate}}" tooltip-placement="top")
+          button.btn-table-action.danger.icon-only(type='button' ng-click="removeSelectedRun()" uib-tooltip="{{'admin.lineRun.delS' | translate}}" tooltip-placement="top")
             i.fas.fa-trash-alt
-          div.btn-table-action(ng-click="toggleEdit()" ng-class="editMode ? 'active-green' : ''" uib-tooltip="{{editMode ? ('common.save' | translate) : ('common.edit' | translate)}}" tooltip-placement="top")
+          button.btn-table-action.icon-only(type='button' ng-click="toggleEdit()" ng-class="editMode ? 'active-green' : ''" uib-tooltip="{{editMode ? ('common.save' | translate) : ('common.edit' | translate)}}" tooltip-placement="top")
             i.fas(ng-class="editMode ? 'fa-save' : 'fa-edit'")
-          div.btn-table-action(ng-click="exportScheduleXlsx()" uib-tooltip="Export schedule as XLSX" tooltip-placement="top" style="color:#217346;")
+          button.btn-table-action.icon-only(type='button' ng-click="exportScheduleXlsx()" uib-tooltip="Export schedule as XLSX" tooltip-placement="top" style="color:#217346;")
             i.fas.fa-file-excel
     
     .filter-collapse(ng-show="showFilter" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 1.5rem;")
@@ -810,90 +577,87 @@ block main_content
             input.form-control.form-control-sm(type='text', placeholder='Team name' ng-model='teamName')
 
     .modern-card-body.p-0
-      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
-        center(ng-show="!runsReadFinished")
-          .loader.my-5
-            img(src="/images/loader2.gif")
-            p.mt-2 Now Loading...
-        
-        table.table-modern(ng-show="runsReadFinished")
-          thead
-            tr
-              th(style="width: 50px;")
-                .custom-checkbox(ng-class="{'checked': allChecked}" ng-click="toggleAll()")
-                  i.fas.fa-check(ng-if="allChecked")
-              th {{"common.starttime" | translate}}
-              th {{"common.round" | translate}}
-              th {{"common.teamCode" | translate}}
-              th {{"common.team" | translate}}
-              th {{"common.field" | translate}}
-              th(ng-hide="league.type == 'simulation'") {{"common.map" | translate}}
-              th {{"admin.common.normalization_group_id" | translate}}
-              th {{"common.score" | translate}}
-              th Adj.
-              th {{"common.time" | translate}}
-              th {{"admin.lineRun.status" | translate}}
-              th {{"common.operation" | translate}}
-          tbody
-            tr(ng-repeat='run in runs | filter:list_filter | orderBy:"[startTime,round.name,field.name,team.name]"' runs-read-finished='')
-              td
-                .custom-checkbox(ng-class="{'checked': run.checked}" ng-click="run.checked = !run.checked")
-                  i.fas.fa-check(ng-if="run.checked")
-              td(data-label='{{"common.starttime" | translate}}')
-                .status-indicator(ng-style="{'background-color':statusColor(run.status)}")
-                | {{run.startTime | date:"dd EEE HH:mm"}}
-              td(data-label='{{"common.round" | translate}}' ng-bind='run.round.name')
-              td(data-label='{{"common.teamCode" | translate}}' ng-bind='run.team.teamCode')
-              td(data-label='{{"common.team" | translate}}' ng-bind='run.team.name')
-              td(data-label='{{"common.field" | translate}}' ng-bind='run.field.name')
-              td(ng-hide="league.type == 'simulation'" data-label='{{"common.map" | translate}}' ng-bind='run.map.name')
-              td(data-label='{{"admin.common.normalization_group_id" | translate}}' ng-bind='run.normalizationGroup')
-              td(data-label='{{"common.score" | translate}}')
-                span.font-weight-bold {{run.score}}
-                span.text-muted.small(ng-show="run.score != run.originalScore")
-                  br
-                  | ({{run.originalScore}})
-              td(data-label='Adj.')
-                span(ng-hide="editMode") {{run.adjustment}} %
-                input.form-control.form-control-sm(ng-model='run.adjustment' style="width:60px;" ng-show="editMode")
-              td(data-label='{{"common.time" | translate}}' ng-bind="run.time.minutes*60*1000+run.time.seconds*1000 | date:'mm:ss'")
-              td(data-label='{{"admin.lineRun.status" | translate}}')
-                span.badge.badge-pill(ng-style="{'background-color':statusColor(run.status), 'color': '#fff'}")
-                  span(ng-if="run.status==-1") No CPs
-                  span(ng-if="run.status==0") {{"admin.lineRun.st0" | translate}}
-                  span(ng-if="run.status==1") {{"admin.lineRun.st1" | translate}}
-                  span(ng-if="run.status==2") {{"admin.lineRun.st2" | translate}}
-                  span(ng-if="run.status==3") {{"admin.lineRun.st3" | translate}}
-                  span(ng-if="run.status==4") {{"admin.lineRun.st4" | translate}}
-                  span(ng-if="run.status==5") {{"admin.lineRun.st5" | translate}}
-                  span(ng-if="run.status==6") {{"admin.lineRun.st6" | translate}}
-                i.fas.fa-comment.ml-2.text-muted(ng-if="run.comment" uib-popover="{{run.comment}}" popover-trigger="'outsideClick'" style="cursor:pointer;")
-              td(data-label='{{"common.operation" | translate}}')
-                .dropdown
-                  button.btn.btn-sm.btn-light.dropdown-toggle(type='button', data-toggle='dropdown') {{"common.action" | translate}}
-                  .dropdown-menu.dropdown-menu-right
-                    button.dropdown-item(ng-hide="league.type == 'simulation'" type='button' ng-click="go_scoreSheet2(run._id)")
-                      i.fas.fa-file-pdf.mr-2
-                      | {{"common.generateSheet" | translate}}
-                    button.dropdown-item(type='button' ng-click="go('/' + league.type + '/view/' + run._id)")
-                      i.fas.fa-eye.mr-2
-                      | {{"common.view" | translate}}
-                    button.dropdown-item(type='button' ng-click="go_judge(run._id)")
-                      i.fas.fa-gavel.mr-2
-                      | {{"common.judge" | translate}}
-                    button.dropdown-item(type='button' ng-click="go_sign(run._id)")
-                      i.fas.fa-signature.mr-2
-                      | {{"common.sign" | translate}}
-                    .dropdown-divider
-                    button.dropdown-item(ng-hide="league.type == 'simulation'" type='button' ng-click="go_input(run._id)")
-                      i.fas.fa-keyboard.mr-2
-                      | Manual input
-                    button.dropdown-item(type='button' ng-click='statusReset(run._id)')
-                      i.fas.fa-undo.mr-2
-                      | {{"admin.lineRun.statusReset" | translate}}
-                    button.dropdown-item.text-danger(type='button' ng-click='removeRun(run._id)')
-                      i.fas.fa-trash-alt.mr-2
-                      | {{"common.delete" | translate}}
+      center(ng-show="!runsReadFinished")
+        .loader.my-5
+          img(src="/images/loader2.gif")
+          p.mt-2 Now Loading...
+
+      .games-base-table-wrapper(ng-show="runsReadFinished")
+        .base-table.games-base-table(ng-class="{'no-map': league.type == 'simulation'}")
+          .base-table-header
+            .base-table-selection(ng-click="toggleAll()" style="cursor: pointer;")
+              .custom-checkbox(ng-class="{'checked': allChecked}")
+                i.fas.fa-check(ng-if="allChecked")
+            .base-table-cell {{"common.starttime" | translate}}
+            .base-table-cell {{"common.round" | translate}}
+            .base-table-cell {{"common.teamCode" | translate}}
+            .base-table-cell {{"common.team" | translate}}
+            .base-table-cell {{"common.field" | translate}}
+            .base-table-cell(ng-if="league.type != 'simulation'") {{"common.map" | translate}}
+            .base-table-cell {{"admin.common.normalization_group_id" | translate}}
+            .base-table-cell {{"common.score" | translate}}
+            .base-table-cell Adj.
+            .base-table-cell {{"common.time" | translate}}
+            .base-table-cell {{"admin.lineRun.status" | translate}}
+            .base-table-cell.text-right {{"common.operation" | translate}}
+          .base-table-row(ng-repeat='run in runs | filter:list_filter | orderBy:"[startTime,round.name,field.name,team.name]"' runs-read-finished='' ng-class="{'selected': run.checked}")
+            .status-indicator(ng-style="{'background-color':statusColor(run.status)}")
+            .base-table-selection(ng-click="run.checked = !run.checked" style="cursor: pointer;")
+              .custom-checkbox(ng-class="{'checked': run.checked}")
+                i.fas.fa-check(ng-if="run.checked")
+            .base-table-cell {{run.startTime | date:"dd EEE HH:mm"}}
+            .base-table-cell(ng-bind='run.round.name')
+            .base-table-cell(ng-bind='run.team.teamCode')
+            .base-table-cell(ng-bind='run.team.name')
+            .base-table-cell(ng-bind='run.field.name')
+            .base-table-cell(ng-if="league.type != 'simulation'" ng-bind='run.map.name')
+            .base-table-cell(ng-bind='run.normalizationGroup')
+            .base-table-cell
+              span.font-weight-bold {{run.score}}
+              span.text-muted.small(ng-show="run.score != run.originalScore")
+                br
+                | ({{run.originalScore}})
+            .base-table-cell.games-adj
+              span(ng-hide="editMode") {{run.adjustment}} %
+              input.premium-input(type='number' step='1' ng-model='run.adjustment' ng-show="editMode" onfocus="this.select()")
+            .base-table-cell {{run.time.minutes*60*1000+run.time.seconds*1000 | date:'mm:ss'}}
+            .base-table-cell
+              span.badge.badge-pill(ng-style="{'background-color':statusColor(run.status), 'color': '#fff'}")
+                span(ng-if="run.status==-1") No CPs
+                span(ng-if="run.status==0") {{"admin.lineRun.st0" | translate}}
+                span(ng-if="run.status==1") {{"admin.lineRun.st1" | translate}}
+                span(ng-if="run.status==2") {{"admin.lineRun.st2" | translate}}
+                span(ng-if="run.status==3") {{"admin.lineRun.st3" | translate}}
+                span(ng-if="run.status==4") {{"admin.lineRun.st4" | translate}}
+                span(ng-if="run.status==5") {{"admin.lineRun.st5" | translate}}
+                span(ng-if="run.status==6") {{"admin.lineRun.st6" | translate}}
+              i.fas.fa-comment.ml-2.text-muted(ng-if="run.comment" uib-popover="{{run.comment}}" popover-trigger="'outsideClick'" style="cursor:pointer;")
+            .base-table-actions
+              .dropdown.table-action-dropdown
+                button.btn-table-action.dropdown-toggle(type='button', data-toggle='dropdown') {{"common.action" | translate}}
+                .dropdown-menu.dropdown-menu-right
+                  button.dropdown-item(ng-hide="league.type == 'simulation'" type='button' ng-click="go_scoreSheet2(run._id)")
+                    i.fas.fa-file-pdf.mr-2
+                    | {{"common.generateSheet" | translate}}
+                  button.dropdown-item(type='button' ng-click="go('/' + league.type + '/view/' + run._id)")
+                    i.fas.fa-eye.mr-2
+                    | {{"common.view" | translate}}
+                  button.dropdown-item(type='button' ng-click="go_judge(run._id)")
+                    i.fas.fa-gavel.mr-2
+                    | {{"common.judge" | translate}}
+                  button.dropdown-item(type='button' ng-click="go_sign(run._id)")
+                    i.fas.fa-signature.mr-2
+                    | {{"common.sign" | translate}}
+                  .dropdown-divider
+                  button.dropdown-item(ng-hide="league.type == 'simulation'" type='button' ng-click="go_input(run._id)")
+                    i.fas.fa-keyboard.mr-2
+                    | Manual input
+                  button.dropdown-item(type='button' ng-click='statusReset(run._id)')
+                    i.fas.fa-undo.mr-2
+                    | {{"admin.lineRun.statusReset" | translate}}
+                  button.dropdown-item.text-danger(type='button' ng-click='removeRun(run._id)')
+                    i.fas.fa-trash-alt.mr-2
+                    | {{"common.delete" | translate}}
   
   script(type="text/ng-template" id="scoreSheetModal.html")
     .modal-header.premium-modal-header

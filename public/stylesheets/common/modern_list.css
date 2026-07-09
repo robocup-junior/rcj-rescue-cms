@@ -104,6 +104,7 @@
   justify-content: center;
   transition: all 0.2s ease;
   background: white;
+  cursor: pointer;
 }
 
 .custom-checkbox.checked {
@@ -232,4 +233,360 @@
   font-weight: 800;
   font-size: 1rem;
   color: var(--accent-color);
+}
+
+/* Static data tables: rows are informational, with actions inside cells.
+   Use .modern-list/.modern-item-card for clickable row lists like maps. */
+.data-table-card,
+.modern-table-card {
+  background: white;
+  border-radius: 1rem;
+  overflow-x: auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+  margin-bottom: 2rem;
+}
+
+.data-table,
+.data-table-card table,
+.modern-table-card table {
+  width: 100%;
+  margin-bottom: 0;
+  table-layout: fixed;
+  border: 0;
+  border-spacing: 0;
+}
+
+.data-table thead th,
+.data-table-card table thead th,
+.modern-table-card table thead th {
+  padding: 1rem 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: #64748b;
+  letter-spacing: 0.08em;
+  border: none;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+
+.data-table tbody td,
+.data-table-card table tbody td,
+.modern-table-card table tbody td {
+  padding: 0.85rem 1rem;
+  border-top: 1px solid #f1f5f9;
+  vertical-align: middle;
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.data-table th,
+.data-table td,
+.data-table-card table th,
+.data-table-card table td,
+.modern-table-card table th,
+.modern-table-card table td {
+  border-left: 0;
+  border-bottom: 0;
+  text-align: left;
+}
+
+.data-table--static tbody tr:hover,
+.data-table-card table tbody tr:hover,
+.modern-table-card table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.data-table--clickable {
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+
+.data-table--clickable tbody tr {
+  background: white;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+}
+
+.data-table--clickable tbody tr:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+}
+
+.data-table--clickable tbody td:first-child {
+  border-left: 1px solid #f1f5f9;
+  border-top-left-radius: 0.75rem;
+  border-bottom-left-radius: 0.75rem;
+}
+
+.data-table--clickable tbody td:last-child {
+  border-right: 1px solid #f1f5f9;
+  border-top-right-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+}
+
+.table-col-select {
+  width: 56px;
+  text-align: center !important;
+}
+
+.table-col-code {
+  width: 11%;
+}
+
+.table-col-name {
+  width: 17%;
+}
+
+.table-col-region {
+  width: 15%;
+}
+
+.table-col-league {
+  width: 10%;
+}
+
+.table-col-email {
+  width: 34%;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+
+.table-col-actions {
+  width: 160px;
+}
+
+.btn-table-group,
+.data-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-table-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.55rem 0.9rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 800;
+  font-size: 0.85rem;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn-table-action:hover {
+  background: white;
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+
+.btn-table-action.disabled,
+.btn-table-action:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+  pointer-events: none;
+  box-shadow: none;
+}
+
+.btn-table-action.primary,
+.btn-table-action.active-blue {
+  color: #2563eb;
+}
+
+.btn-table-action.primary:hover,
+.btn-table-action.primary.active-blue,
+.btn-table-action.active-blue {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+.btn-table-action.danger {
+  color: #dc2626;
+}
+
+.btn-table-action.danger:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+  color: #b91c1c;
+}
+
+.btn-table-action.icon-only {
+  width: 44px;
+  min-width: 44px;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.btn-table-action.icon-only i {
+  margin: 0;
+}
+
+.table-action-dropdown {
+  display: inline-flex;
+  justify-content: center;
+}
+
+.table-action-dropdown .dropdown-menu {
+  min-width: 12rem;
+  padding: 0.4rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.6rem;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.16);
+}
+
+.table-action-dropdown .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 0.45rem;
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.table-action-dropdown .dropdown-item:hover,
+.table-action-dropdown .dropdown-item:focus {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+/* .base-table/.modern-card clip their content to keep rounded corners, which
+   also clips a .table-action-dropdown menu when it flips upward near the
+   bottom of the table. table_dropdown_overflow.js toggles this class on the
+   nearest .base-table/.modern-card while a dropdown is open. */
+.base-table.dropdown-open,
+.modern-card.dropdown-open {
+  overflow: visible;
+}
+
+/* Base row table pattern.
+   This is the canonical admin table style for interactive widget lists.
+   Maps use the same visual language; new admin tables should use these
+   base-table classes and place bulk actions in the surrounding widget header. */
+.base-table {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  margin-bottom: 2rem;
+  background: white;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f1f5f9;
+}
+
+.base-table-header,
+.base-table-row {
+  display: grid;
+  align-items: center;
+  column-gap: 1rem;
+}
+
+.base-table-header {
+  padding: 0.75rem 1.25rem;
+  color: #94a3b8;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.base-table-row {
+  background: white;
+  padding: 0.4rem 1.25rem;
+  min-height: 66px;
+  position: relative;
+  transition: all 0.2s ease;
+  border: none;
+  border-bottom: 1px solid #f8fafc;
+  border-radius: 0;
+  z-index: 0;
+}
+
+.base-table-row:hover,
+.base-table-row:focus-within {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+  border-color: var(--accent-color);
+  z-index: 20;
+}
+
+.base-table-row.selected {
+  background: #f0f9ff;
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.base-table-row::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--accent-color);
+  opacity: 0.3;
+}
+
+.base-table-cell {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.base-table-selection {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.base-table-icon {
+  width: 36px;
+  height: 36px;
+  background: #f0f9ff;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-color);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.base-table-row:hover .base-table-icon {
+  background: var(--accent-color);
+  color: white;
+  transform: scale(1.05) rotate(-5deg);
+}
+
+.base-table-name {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 1.2rem;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.base-table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
 }

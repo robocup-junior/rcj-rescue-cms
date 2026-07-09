@@ -16,6 +16,7 @@ app.controller('TeamAdminController', ['$scope', '$uibModal', '$log', '$http', '
     });
 
     $scope.competitionId = competitionId;
+    $scope.showFilter = false;
     updateTeamList();
 
     $http.get("/api/competitions/" + competitionId).then(function (response) {
@@ -148,13 +149,13 @@ app.controller('TeamAdminController', ['$scope', '$uibModal', '$log', '$http', '
 
         tomorrow.setDate(today.getDate() + 1);
 
-        if(deadline > tomorrow) return '#bcffbc';
-        if(deadline > today) return '#ffffc6';
-        return '#ffcccc';
+        if(deadline > tomorrow) return '#dcfce7';
+        if(deadline > today) return '#fef3c7';
+        return '#fee2e2';
     }
 
     $scope.penaltyColor = function(penalty){
         if(penalty == 0) return '';
-        return '#ffcccc';
+        return '#fee2e2';
     }
 }]);

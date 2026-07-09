@@ -1,0 +1,163 @@
+//- -*- tab-width: 2 -*-
+extends ../includes/modern_layout
+
+block vars
+  - var ngAppDef = 'ReviewStatus'
+  - var contentContainerStyle = "max-width: 100%;"
+
+append scripts
+  script.
+    var competitionId = "#{id}"
+  script(src='/javascripts/admin/documents/reviewStatus.js')
+
+append css
+  style.
+    .review-status-table {
+      width: 100%;
+      table-layout: fixed;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .review-status-table thead th {
+      background: #f8fafc;
+      border-bottom: 1px solid #e2e8f0;
+      color: #64748b;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      padding: 0.9rem 1rem;
+      text-transform: uppercase;
+      vertical-align: middle;
+    }
+    .review-status-table tbody td {
+      border-bottom: 1px solid #f1f5f9;
+      padding: 0.9rem 1rem;
+      vertical-align: top;
+    }
+    .review-status-table tbody tr:hover {
+      background: #f8fafc;
+    }
+    .review-status-name-col {
+      box-sizing: border-box;
+      width: 180px;
+    }
+    .review-status-name {
+      color: #334155;
+      font-size: 0.95rem;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+    .review-status-league-col {
+      width: auto;
+    }
+    .review-badge-grid {
+      align-items: flex-start;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .review-badge-cell {
+      min-width: 0;
+    }
+    .review-badge {
+      border-radius: 0.75rem;
+      cursor: pointer;
+      display: inline-block;
+      font-size: 0.78rem;
+      font-weight: 700;
+      line-height: 1.35;
+      padding: 0.55rem 0.7rem;
+      text-align: left;
+      white-space: normal;
+    }
+    .review-badge.badge-success {
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid #22c55e;
+      color: #15803d;
+    }
+    .review-badge.badge-danger {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid #ef4444;
+      color: #b91c1c;
+    }
+    .review-badge.badge-warning {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid #f59e0b;
+      color: #b45309;
+    }
+
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')") Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{reviewStatus.competitonName}}
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId + '/documents')") Document settings
+  span.breadcrumb-item.active ReviewStatus
+
+block hero_title
+  | {{reviewStatus.competitonName}}
+
+block hero_subtitle
+  i.fas.fa-tasks.mr-2
+  | Review Status
+
+block hero_actions
+  button.btn-premium.btn-premium-dark(ng-click="sendReminder()")
+    i.fas.fa-envelope
+    | Send a reminder
+
+block main_content
+  .modern-card
+    .modern-card-header
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-tasks
+          | Review Status
+        .btn-table-group
+          div.btn-table-action.primary(ng-click="filter.show = !filter.show" ng-class="filter.show ? 'active-blue' : ''")
+            i.fas.fa-filter
+
+    .filter-collapse(ng-show="filter.show" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 1.5rem;")
+      .row
+        .col-md-4
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 Reviewer
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-user
+            input.form-control.form-control-sm(type='text' placeholder='Filter by reviewer…' ng-model='filter.reviewer')
+        .col-md-4
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 Team name / code
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-users
+            input.form-control.form-control-sm(type='text' placeholder='Filter by team…' ng-model='filter.team')
+        .col-md-4
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 League
+          select.form-control.form-control-sm(ng-model='filter.league')
+            option(value='') All leagues
+            option(ng-repeat='league in leagues' value='{{league.id}}') {{league.name}}
+
+    .modern-card-body.p-0
+      .table-responsive
+        table.review-status-table
+          thead
+            tr
+              th.review-status-name-col {{"admin.users.name" | translate}}
+              th.review-status-league-col(ng-repeat="league in filteredLeagues()") {{league.name}}
+          tbody
+            tr(ng-repeat='user in reviewStatus.reviewStatus | orderBy:"[userName]"' ng-show='reviewerVisible(user)')
+              td.review-status-name-col
+                .review-status-name(ng-bind='user.userName')
+              td.review-status-league-col(ng-repeat="league in filteredLeagues()")
+                .review-badge-grid
+                  div.review-badge-cell(ng-repeat='team in user.assignedTeams[league.id] | orderBy:"[code, name]"' ng-show='teamVisible(team)')
+                    span.badge.review-badge(ng-click="goReviewed(team._id)" ng-class="getBadgeColor(team)")
+                      | {{team.code}} {{team.name}}
+                      br
+                      | {{team.reviewItems.join(" / ")}}
+                      br
+                      i.fas.fa-check-circle(ng-if="team.answeredQuestionsNum == team.assienedQuestionsNum") &nbsp;
+                      i.fas.fa-times-circle(ng-if="team.answeredQuestionsNum == 0") &nbsp;
+                      i.fas.fa-hourglass-half(ng-if="team.answeredQuestionsNum > 0 && team.answeredQuestionsNum != team.assienedQuestionsNum") &nbsp;
+                      | {{team.answeredQuestionsNum}} / {{team.assienedQuestionsNum}}

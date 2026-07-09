@@ -396,6 +396,23 @@ hr {
   line-height: 1.6;
 }
 
+/* Plain section header used above a row of action cards or a bare modern-card.
+   Use .modern-card + .modern-card-header only for cards that are individually
+   extendable or carry their own action row (e.g. a repeated item with move/delete
+   controls) - not as a generic section title. */
+.section-heading {
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.section-heading i {
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+}
+
 /* Utilities for Alignment */
 .gap-premium { gap: 1.5rem; }
 .p-card { padding: 2.5rem; }

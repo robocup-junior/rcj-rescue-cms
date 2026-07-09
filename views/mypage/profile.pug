@@ -1,80 +1,67 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'MyPage'
 
-append css
-  link(href="/stylesheets/fonts.css" rel="stylesheet")
-  link(rel='stylesheet', href='/stylesheets/home_premium.css')
-  link(rel='stylesheet', href='/stylesheets/mypage_premium.css')
-
 append scripts
   script(src='/javascripts/mypage.js')
 
-block bread
-  // Breadcrumbs removed as requested
+block hero_title_container
+  h1.hero-title
+    | #{user.username}
 
-block content
-  .home-hero
-    .hero-content.hero-vertical
-      .hero-logo-profile
-        i.fas.fa-user-astronaut
-      .hero-text-wrapper
-        h1.hero-title #{user.username}
-        p.hero-subtitle {{"common.mypage" | translate}}
+block hero_subtitle
+  | {{"common.mypage" | translate}}
 
-  .comp-container
-    .premium-card.profile-card
-      .card-body
-        h2.section-title
-          i.fas.fa-id-card
-          | {{"mypage.profile" | translate}}
-        
-        .info-grid
-          .info-item
-            label {{"admin.users.name" | translate}}
-            p.value #{user.username}
-          .info-item
-            label {{"admin.users.email" | translate}}
-            p.value #{(user && user.email) ? user.email : 'N/A'}
-        
-        hr.premium-divider
-        
-        .password-section
-          h2.section-title
-            i.fas.fa-shield-alt
-            | {{"mypage.changePassword" | translate}}
-          
-          .rule-card
-            i.fas.fa-info-circle
-            span {{"mypage.passwordRule" | translate}}
-          
-          form.premium-form(ng-submit="changePassword()")
-            .row
-              .col-md-12
-                .form-group
-                  label {{"mypage.currentPassword" | translate}}
-                  input.form-control.premium-input(type="password" ng-model="pass.current" placeholder="••••••••" required)
-            
-            .row.mt-3
-              .col-md-6
-                .form-group
-                  label {{"mypage.newPassword" | translate}}
-                  input.form-control.premium-input(type="password" ng-model="pass.new" ng-change="checkPassword()" placeholder="••••••••" required)
-                  .strength-meter(ng-if="pass.new")
-                    .progress
-                      .progress-bar(role="progressbar" ng-style="{'width': strengthWidth, 'background-color': strengthColor}")
-                    small.label(ng-style="{'color': strengthColor}" ng-bind="strengthText")
-              .col-md-6
-                .form-group
-                  label {{"mypage.confirmPassword" | translate}}
-                  input.form-control.premium-input(type="password" ng-model="pass.confirm" ng-change="checkPassword()" placeholder="••••••••" required)
-                  small.text-danger.mt-2.d-block(ng-if="pass.new != pass.confirm && pass.confirm") 
-                    i.fas.fa-exclamation-triangle.mr-1
-                    | {{"mypage.passwordMismatch" | translate}}
-            
-            .form-actions.mt-5.text-right
-              button.btn-premium(type="submit" ng-disabled="!validPassword || pass.new != pass.confirm")
-                i.fas.fa-check-circle.mr-2
-                | {{"common.save" | translate}}
+block main_content
+  h5.section-heading.mb-2
+    i.fas.fa-id-card
+    | {{"mypage.profile" | translate}}
+  .modern-card
+    .modern-card-body
+      .row
+        .col-md-6
+          .settings-group.mb-0
+            label.settings-label {{"admin.users.name" | translate}}
+            p.text-heading-premium.mb-0 #{user.username}
+        .col-md-6
+          .settings-group.mb-0
+            label.settings-label {{"admin.users.email" | translate}}
+            p.text-heading-premium.mb-0 #{(user && user.email) ? user.email : 'N/A'}
+
+  h5.section-heading.section-gap.mb-2
+    i.fas.fa-shield-alt
+    | {{"mypage.changePassword" | translate}}
+  .modern-card
+    .modern-card-body
+      .settings-group(style="display: flex; align-items: center; gap: 0.75rem; background: #eff6ff; border-radius: 12px; padding: 1rem;")
+        i.fas.fa-info-circle
+        span {{"mypage.passwordRule" | translate}}
+
+      form(ng-submit="changePassword()")
+        .settings-group
+          label.settings-label {{"mypage.currentPassword" | translate}}
+          input.premium-input(type="password" ng-model="pass.current" placeholder="••••••••" required)
+
+        .row
+          .col-md-6
+            .settings-group
+              label.settings-label {{"mypage.newPassword" | translate}}
+              input.premium-input(type="password" ng-model="pass.new" ng-change="checkPassword()" placeholder="••••••••" required)
+              .mt-2(ng-if="pass.new")
+                .progress(style="height: 6px; border-radius: 4px;")
+                  .progress-bar(role="progressbar" ng-style="{'width': strengthWidth, 'background-color': strengthColor}")
+                small.d-block.mt-1(ng-style="{'color': strengthColor}" ng-bind="strengthText")
+          .col-md-6
+            .settings-group
+              label.settings-label {{"mypage.confirmPassword" | translate}}
+              input.premium-input(type="password" ng-model="pass.confirm" ng-change="checkPassword()" placeholder="••••••••" required)
+              small.text-danger.mt-2.d-block(ng-if="pass.new != pass.confirm && pass.confirm")
+                i.fas.fa-exclamation-triangle.mr-1
+                | {{"mypage.passwordMismatch" | translate}}
+
+        .text-right
+          button.btn-premium.btn-premium-primary(type="submit" ng-disabled="!validPassword || pass.new != pass.confirm")
+            i.fas.fa-check-circle
+            | {{"common.save" | translate}}

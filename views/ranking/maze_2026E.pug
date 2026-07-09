@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'MazeScore'
@@ -13,19 +13,25 @@ append scripts
   script(src = '/components/datatables/media/js/jquery.dataTables.min.js')
   script(src = '/components/angular-datatables/demo/src/archives/dist/angular-datatables.min.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click='go("/home/"+ competitionId )') {{competition.name}}
-    a.breadcrumb-item(ng-click="go('/maze/'+ competitionId + '/' + league.league)") {{league.name}}
-    span.breadcrumb-item.active Ranking
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')") Home
+  a.breadcrumb-item(ng-click='go("/home/"+ competitionId )') {{competition.name}}
+  a.breadcrumb-item(ng-click="go('/maze/'+ competitionId + '/' + league.league)") {{league.name}}
+  span.breadcrumb-item.active Ranking
 
-block content
-  .row
-  .col-md12
-    button.btn.btn-secondary(style='margin:0 10px 10px 0;', type='button', ng-click="go('/maze/' + competitionId + '/' + league.league)")
-      i.fa.fa-undo(aria-hidden='true') {{'common.back' | translate}}
-  br
+block hero_title
+  | {{league.name}}
 
+block hero_subtitle
+  i.fas.fa-trophy.mr-2
+  | Ranking
+
+block hero_actions
+  button.btn-premium.btn-premium-secondary(type='button', ng-click="go('/maze/' + competitionId + '/' + league.league)")
+    i.fa.fa-undo
+    | {{'common.back' | translate}}
+
+block main_content
   .alert.alert-success(role='alert' ng-if="competition.message")
     h4.alert-heading {{'common.message' | translate}}
     p(ng-bind-html="competition.message")

@@ -277,10 +277,11 @@
         "description2": "This page will contain the files distributed by the organisers.",
         "toLeague": "Bulk distribution to leagues",
         "toTeam": "Individual distribution to teams",
-        "empty": "It seems that no files have been stored yet...",
-        "delete": "Delete",
-        "upload": "Upload",
-        "js": {
+    "empty": "It seems that no files have been stored yet...",
+    "delete": "Delete",
+    "upload": "Upload",
+    "uploadHint": "Drop a file here or click to browse",
+    "js": {
             "delAsk": "Delete?",
             "delConfirm": "Are you sure you want to delete this file? This operation cannot be undone.",
             "delComplete": "Deleted",

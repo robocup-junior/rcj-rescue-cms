@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'CabinetAdmin'
@@ -8,67 +8,144 @@ append scripts
   script.
     var competitionId = "#{id}"
   script(src='/javascripts/cabinet/admin.js')
-  
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
-    span.breadcrumb-item.active Cabinet
+append css
+  style.
+    .cabinet-folder-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.75rem;
+    }
+    .cabinet-folder-item {
+      width: 100%;
+      min-height: 4.25rem;
+      padding: 0.9rem 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      background: #ffffff;
+      color: #1e293b;
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    .cabinet-folder-item:hover {
+      border-color: #3b82f6;
+      background: #f8fbff;
+      box-shadow: 0 8px 20px -12px rgba(37, 99, 235, 0.35);
+      transform: translateY(-2px);
+    }
+    .cabinet-folder-icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 10px;
+      background: #eff6ff;
+      color: #2563eb;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      font-size: 1.05rem;
+    }
+    .cabinet-folder-item:hover .cabinet-folder-icon {
+      background: #2563eb;
+      color: #ffffff;
+    }
+    .cabinet-folder-content {
+      min-width: 0;
+      flex: 1;
+    }
+    .cabinet-folder-title {
+      font-weight: 800;
+      line-height: 1.25;
+      color: #1e293b;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .cabinet-folder-meta {
+      margin-top: 0.15rem;
+      color: #64748b;
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .cabinet-folder-arrow {
+      color: #94a3b8;
+      flex: 0 0 auto;
+      transition: transform 0.2s ease;
+    }
+    .cabinet-folder-item:hover .cabinet-folder-arrow {
+      color: #2563eb;
+      transform: translateX(2px);
+    }
 
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')") Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
+  span.breadcrumb-item.active Cabinet
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h4 {{competition.name}}
-      h1 {{'cabinet.title' | translate}}
-      p {{'cabinet.description' | translate}}
-      hr
-      h3 {{'cabinet.toLeague' | translate}}
-      .row 
-        .col-md-3(ng-repeat='league in leagues', style="margin-bottom:30px;")
-          button(ng-click="go('/admin/' + competitionId + '/cabinet/' + league.id)" class='btn btn-dark btn-lg btn-block' style="height:100%;")
-            i.fas.fa-folder.fa-2x
-            br
-            span {{league.name}}
-      hr
+block hero_title
+  | {{competition.name}}
 
-      h3 {{'cabinet.toTeam' | translate}}
-      .refine
-        .card.border-dark.mb-3(style='width:100%;')
-          .card-header.bg-transparent.border-dark.fa-2x
-            i.fas.fa-search(aria-hidden='true') &nbsp;
-            | {{'common.refine' | translate}}
-          .card-body.text-dark
-            h6.card-title {{"common.teamCode" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-list-ol(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.teamCode" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineCode')
-            hr
-            h6.card-title {{"common.team" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-users(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.team" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineName')
-            hr
-            h6.card-title {{"common.region" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-globe-asia(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.region" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineRegion')
-            hr
-            h6.card-title {{"common.league" | translate}}
-            span(ng-repeat='(key, value) in Rleagues track by key')
-              input(type='checkbox' ng-model='Rleagues[key]' id="checkL_{{key}}")
-              label.checkbox(for="checkL_{{key}}") {{key}}
-      .row 
-        .col-md-3(ng-repeat='team in teams | filter:list_filter | orderBy:"[teamCode,name]"', style="margin-bottom:30px;")
-          button(ng-click="go('/admin/' + competitionId + '/cabinet/' + team._id)" class='btn btn-dark btn-lg btn-block' style="height:100%;")
-            i.fas.fa-folder.fa-2x
-            br
-            span {{team.teamCode}} {{team.name}}
+block hero_subtitle
+  i.fas.fa-archive.mr-2
+  | {{'cabinet.title' | translate}}
+
+block hero_extra
+  p.text-body-premium(style="color: rgba(255,255,255,0.7); max-width: 700px; margin-top: 0.5rem;") {{'cabinet.description' | translate}}
+
+block main_content
+  h5.section-heading.mb-2
+    i.fas.fa-trophy
+    | {{'cabinet.toLeague' | translate}}
+  .cabinet-folder-grid
+    button.cabinet-folder-item(type='button' ng-repeat='league in leagues' ng-click="go('/admin/' + competitionId + '/cabinet/' + league.id)")
+      .cabinet-folder-icon
+        i.fas.fa-folder
+      .cabinet-folder-content
+        .cabinet-folder-title {{league.name}}
+        .cabinet-folder-meta {{league.id}}
+      i.fas.fa-chevron-right.cabinet-folder-arrow
+
+  h5.section-heading.section-gap.mb-2
+    i.fas.fa-search
+    | {{'common.refine' | translate}}
+  .modern-card
+    .modern-card-body
+      .row
+        .col-md-4
+          .settings-group
+            label.settings-label {{"common.teamCode" | translate}}
+            input.premium-input(type='text', ng-model='refineCode')
+        .col-md-4
+          .settings-group
+            label.settings-label {{"common.team" | translate}}
+            input.premium-input(type='text', ng-model='refineName')
+        .col-md-4
+          .settings-group
+            label.settings-label {{"common.region" | translate}}
+            input.premium-input(type='text', ng-model='refineRegion')
+      .settings-group.mb-0
+        label.settings-label {{"common.league" | translate}}
+        .toolbar-actions(style="display: flex; flex-wrap: wrap; gap: 0.75rem;")
+          span(ng-repeat='(key, value) in Rleagues track by key')
+            input(type='checkbox' ng-model='Rleagues[key]' id="checkL_{{key}}")
+            label.checkbox(for="checkL_{{key}}") &nbsp;{{key}}
+
+  h5.section-heading.section-gap.mb-2
+    i.fas.fa-users
+    | {{'cabinet.toTeam' | translate}}
+  .cabinet-folder-grid
+    button.cabinet-folder-item(type='button' ng-repeat='team in teams | filter:list_filter | orderBy:"[teamCode,name]"' ng-click="go('/admin/' + competitionId + '/cabinet/' + team._id)")
+      .cabinet-folder-icon
+        i.fas.fa-folder
+      .cabinet-folder-content
+        .cabinet-folder-title {{team.name}}
+        .cabinet-folder-meta {{team.teamCode}} · {{team.league}} · {{team.country}}
+      i.fas.fa-chevron-right.cabinet-folder-arrow

@@ -178,7 +178,7 @@ router.get('/:competitionid/documents/reviewStatus', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('admin/documents/reviewStatus', { id, user: req.user });
+    res.render('document/reviewStatus', { id, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 
