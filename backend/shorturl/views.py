@@ -2,7 +2,7 @@ import json
 import re
 
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -61,16 +61,18 @@ def create(request):
         existing.shorted = shorted
         existing.transfer = transfer
         try:
-            existing.full_clean()
-            existing.save()
+            with transaction.atomic():
+                existing.full_clean()
+                existing.save()
         except (ValidationError, IntegrityError):
             return JsonResponse({'msg': 'Could not register url shortening :('}, status=400)
         return JsonResponse({'msg': 'Setting has been registered!'})
 
     new_url = ShortUrl(name=name, shorted=shorted, transfer=transfer)
     try:
-        new_url.full_clean(exclude=['id'])
-        new_url.save()
+        with transaction.atomic():
+            new_url.full_clean(exclude=['id'])
+            new_url.save()
     except (ValidationError, IntegrityError):
         # Express's pre-save hook: duplicate `shorted` slug on a new doc.
         return JsonResponse({'msg': 'Could not register url shortening :('}, status=400)

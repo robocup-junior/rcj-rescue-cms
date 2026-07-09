@@ -5,7 +5,7 @@ import re
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 from django.http import Http404, HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
@@ -65,8 +65,9 @@ def create_signage(request):
 
     row = Signage(name=name, content=content, news=body.get('news') or [])
     try:
-        row.full_clean(exclude=['id', 'content', 'news'])
-        row.save()
+        with transaction.atomic():
+            row.full_clean(exclude=['id', 'content', 'news'])
+            row.save()
     except (ValidationError, IntegrityError):
         return JsonResponse(
             {'msg': 'Error saving signage setting in db', 'err': f'Signage setting with name "{name}" already exists!'},
@@ -230,8 +231,9 @@ def update_signage(request, object_id):
     row.content = content
     row.news = body.get('news') or []
     try:
-        row.full_clean(exclude=['id', 'content', 'news'])
-        row.save()
+        with transaction.atomic():
+            row.full_clean(exclude=['id', 'content', 'news'])
+            row.save()
     except (ValidationError, IntegrityError) as exc:
         return JsonResponse({'msg': 'Could not save change', 'err': str(exc)}, status=400)
 
