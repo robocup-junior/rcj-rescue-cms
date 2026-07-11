@@ -3,6 +3,8 @@ extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'RunAdmin'
+  - var heroContainerStyle = 'max-width: 1600px;'
+  - var contentContainerStyle = 'max-width: 1600px;'
 
 append scripts
   script.
@@ -335,6 +337,8 @@ append css
     
     .table-modern {
       width: 100%;
+      max-width: 100%;
+      table-layout: fixed;
       border-collapse: separate;
       border-spacing: 0 0.5rem;
     }
@@ -351,18 +355,19 @@ append css
     
     .table-modern tbody tr {
       background: white;
-      transition: all 0.2s ease;
+      position: relative;
+      transition: box-shadow 0.2s ease;
       box-shadow: 0 2px 5px rgba(0,0,0,0.02);
     }
     
     .table-modern tbody tr:hover {
-      transform: translateY(-2px);
       box-shadow: 0 8px 15px rgba(0,0,0,0.05);
     }
     
     .table-modern tbody td {
       padding: 1rem 0.75rem;
       vertical-align: middle;
+      overflow-wrap: anywhere;
       border-top: 1px solid #f1f5f9;
       border-bottom: 1px solid #f1f5f9;
       position: relative;
@@ -526,21 +531,23 @@ append css
       letter-spacing: 0.05em;
     }
 
-    /* Fix for dropdown clipping */
-    .modern-card, .modern-card-body, .table-responsive {
+    /* Let action menus extend beyond their row without creating row-level
+       stacking contexts. The open dropdown stays below the navbar (1030). */
+    .modern-card, .modern-card-body {
+      overflow: visible !important;
+    }
+
+    .table-responsive {
+      max-width: 100%;
       overflow: visible !important;
     }
     
-    .table-modern tbody tr {
+    .table-modern .dropdown.show {
       position: relative;
-    }
-    
-    .table-modern tbody tr:hover,
-    .table-modern tbody tr:focus-within {
-      z-index: 10 !important;
+      z-index: 1020;
     }
 
-    .dropdown-menu {
+    .table-modern .dropdown-menu {
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
       border: 1px solid #e2e8f0 !important;
       border-radius: 12px !important;
@@ -621,7 +628,7 @@ append css
         padding: 1rem 1rem 1rem 1.5rem !important;
         border: 1px solid #f1f5f9 !important;
         position: relative !important;
-        overflow: hidden;
+        overflow: visible;
       }
       .table-modern td {
         text-align: right !important;
@@ -934,4 +941,3 @@ block main_content
         i.fas.fa-magic.mr-2
         | {{"common.generateSheet" | translate}}
       button.btn.btn-cancel-action(ng-click="cancel()") {{ 'common.cancel' | translate }}
-
