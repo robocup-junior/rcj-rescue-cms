@@ -135,6 +135,41 @@ writing):
   Project-wide: 2981 passing, same 2 pre-existing unrelated `soccer/`
   failures.
 
+- **Rescue league -> deterministic subleague -> auto-provisioned stages
+  (2026-08-01, same session, closes a real modeling gap):** a Rescue
+  league was previously an arbitrary bag of stages the host assembled
+  by hand -- any mix of Line/Maze/Simulation/Technical Challenge stage
+  types, any count of each, with no relationship to the source's actual
+  catalogue (`leagues.json` is exactly five leagues, each tied to one
+  discipline). Added `core.League.RescueSubleague` (nested `TextChoices`
+  like the existing `Type` enum: Line/Line Entry/Maze/Maze Entry/
+  Simulation) + `rescue_subleague` field, required by `LeagueForm`/the
+  admin form whenever `league_type == RESCUE` (same required-when-
+  gating shape as the existing soccer-scoring fields), forced blank
+  otherwise. New `rescue/league_provisioning.py::provision_default_
+  stages` creates "Main competition" (stage_type driven by the chosen
+  subleague) + "Technical Challenge", called once from
+  `LeagueCreateView.form_valid` inside the same transaction as the
+  league insert -- `LeagueUpdateView` is untouched, so editing an
+  existing league never re-provisions or duplicates stages (verified
+  live). `import_cms.py` now also sets `rescue_subleague` on the
+  leagues it creates, so the manual-creation and CMS-import paths agree
+  on what a Rescue league "is" -- caught and fixed a stale comment
+  there claiming Simulation has no scoreboard-side model at all (it
+  does, as of this session's Simulation run-wiring; the importer's
+  team/simRuns gap is real but separate, left alone). Stage CRUD itself
+  is deliberately untouched -- a host can still add further stages by
+  hand (extra heats, practice stages) after the deterministic two.
+  18 new tests. Verified live: League-type=Rescue reveals the subleague
+  select (soccer-scoring panel hides, `league_type_toggle.js`
+  generalized to drive both panels); creating a Rescue Maze league
+  produced exactly "Main competition" (`stage_type=maze`) +
+  "Technical Challenge"; submitting without a subleague re-rendered
+  with a field error and created nothing.
+
+  Project-wide: 2996 passing, same 2 pre-existing unrelated `soccer/`
+  failures.
+
 - **Phase 1 (app shell):** `rescue` app wired into `INSTALLED_APPS`, URLs,
   `core.context_processors`, sidebar, `pyproject.toml` testpaths.
 - **Phase 3a (admin console), all sub-phases 3a-1..3a-6:** tournament/league/
