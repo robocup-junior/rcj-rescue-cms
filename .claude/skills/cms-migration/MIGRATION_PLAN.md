@@ -87,6 +87,54 @@ writing):
   decision on which Stage an imported score attaches to and was left
   alone rather than guessed.
 
+- **Simulation run/schedule/ranking wiring + ranking print export
+  (2026-08-01, same session, closes two more real gaps):**
+  Simulation was a selectable Rescue stage type with **no working path
+  at all** -- `RUN_STAGE_TYPES` gated maps/runs/schedule generation/
+  ranking to Line/Maze only and `RescueRun.map` was a required FK, so a
+  host could create a Simulation stage but never generate a schedule or
+  create a run; `judging_simulation.py`'s judge-stopwatch scoring view
+  existed with nothing to score. Fixed by splitting the stage-type gate:
+  `MAP_STAGE_TYPES` (Line/Maze only -- Simulation genuinely has no map
+  concept, matching `models/simRun.js`, which carries no `map` field at
+  all, confirmed against `routes/api/simRuns.js` and the source's own
+  `games.pug`/`games_bulk.pug` admin screens, which reuse the identical
+  Line/Maze schedule UI for Simulation with the map column/selector
+  simply `ng-hide`d) and a widened `RUN_STAGE_TYPES` (Line/Maze/
+  Simulation) for `RescueRun`/`RescueRankingConfig`. `RescueRun.map` is
+  now nullable: required by `clean()` for Line/Maze, forbidden for
+  Simulation. `rescue/schedule_generator.py`'s pure functions take a new
+  `require_maps` flag (the generator itself already tolerated an empty
+  maps list -- only the validation layer was too strict); the manual run
+  form drops the `map` field entirely for Simulation; the CSV schedule
+  importer's `Map` column is optional for map-less stages. Every map-only
+  view (list/editor/export/import/save-as/PDF) now gates on the
+  narrower `MAP_STAGE_TYPES` via a new `_require_map_stage`, not the
+  widened `RUN_STAGE_TYPES`, so Simulation still correctly 404s on all
+  of them. 32 new/updated tests. Verified live: created a Simulation
+  stage, generated + executed a schedule with zero maps selected, scored
+  a run through the judge stopwatch UI, and confirmed it appears
+  correctly in Ranking.
+
+  Separately, no ranking export/print existed anywhere (Rescue or
+  soccer) -- re-read the source and found its own "Print ranking"
+  button (`views/admin/games.pug:474`) opens a dedicated print-only HTML
+  page (`admin/rankingPrint/<type>_<rule>.pug`) for the browser's
+  Ctrl+P -> Save as PDF, **not** a server-generated PDF binary (the only
+  server-generated PDFs anywhere, source or port, are map scoresheets --
+  `helper/scoreSheetPDFLine2.js` etc.). Ported the equivalent:
+  `RescueRankingPrintView` + a standalone chrome-free
+  `ranking_print.html` (own `<html>`, no topbar/sidebar/footer,
+  `@media print` rules), reachable via a "Print / Export PDF" action on
+  the normal ranking page, reusing `RescueRankingView`'s exact disclose/
+  visibility gate -- a disclosed ranking on a public tournament is
+  reachable with **zero authentication**, verified with a cookie-less
+  `curl` request returning the real standings HTML (200, team names
+  present) for both the normal and print views. 3 new tests.
+
+  Project-wide: 2981 passing, same 2 pre-existing unrelated `soccer/`
+  failures.
+
 - **Phase 1 (app shell):** `rescue` app wired into `INSTALLED_APPS`, URLs,
   `core.context_processors`, sidebar, `pyproject.toml` testpaths.
 - **Phase 3a (admin console), all sub-phases 3a-1..3a-6:** tournament/league/
