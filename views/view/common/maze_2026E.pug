@@ -104,9 +104,9 @@
                 img.tile-image(ng-src='/images/green_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'Green'")
                 img.tile-image(ng-src='/images/red_floor.png', ng-show="cells[c+','+r+','+z].tile.victims.floor == 'Red'")
                 img.tile-image(ng-src='/images/green_floor.png', ng-show="cells[c+','+r+','+z].tile.victims.floor == 'Green'")
-                i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9;')
-                i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9;')
-                i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9;')
+                i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9; z-index: 10;')
+                i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9; z-index: 10;')
+                i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9; z-index: 10;')
       table.map.mx-auto(ng-if='sRotate == 90')#mapTable
         tbody
           tr(ng-repeat='r in range(2*width + 1)')
@@ -143,9 +143,9 @@
                 img.tile-image(ng-src='/images/green_top.png', ng-show="cells[r+','+(2*length - c)+','+z].tile.victims.left == 'Green'")
                 img.tile-image(ng-src='/images/red_floor.png', ng-show="cells[r+','+(2*length - c)+','+z].tile.victims.floor == 'Red'")
                 img.tile-image(ng-src='/images/green_floor.png', ng-show="cells[r+','+(2*length - c)+','+z].tile.victims.floor == 'Green'")
-                i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(r,(2*length - c),z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9;')
-                i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(r,(2*length - c),z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9;')
-                i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(r,(2*length - c),z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9;')
+                i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(r,(2*length - c),z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9; z-index: 10;')
+                i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(r,(2*length - c),z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9; z-index: 10;')
+                i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(r,(2*length - c),z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9; z-index: 10;')
       table.map.mx-auto(ng-if='sRotate == 180')#mapTable
         tbody
           tr(ng-repeat='r in range(2*length + 1)')
@@ -182,9 +182,9 @@
                 img.tile-image(ng-src='/images/green_right.png', ng-show="cells[2*width - c+','+(2*length - r)+','+z].tile.victims.left == 'Green'")
                 img.tile-image(ng-src='/images/red_floor.png', ng-show="cells[2*width - c+','+(2*length - r)+','+z].tile.victims.floor == 'Red'")
                 img.tile-image(ng-src='/images/green_floor.png', ng-show="cells[2*width - c+','+(2*length - r)+','+z].tile.victims.floor == 'Green'")
-                i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9;')
-                i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9;')
-                i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9;')
+                i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9; z-index: 10;')
+                i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9; z-index: 10;')
+                i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9; z-index: 10;')
       table.map.mx-auto(ng-if='sRotate == 270')#mapTable
         tbody
           tr(ng-repeat='r in range(2*width + 1)')
@@ -221,64 +221,33 @@
                 img.tile-image(ng-src='/images/green_bottom.png', ng-show="cells[2*width - r+','+c+','+z].tile.victims.left == 'Green'")
                 img.tile-image(ng-src='/images/red_floor.png', ng-show="cells[2*width - r+','+c+','+z].tile.victims.floor == 'Red'")
                 img.tile-image(ng-src='/images/green_floor.png', ng-show="cells[2*width - r+','+c+','+z].tile.victims.floor == 'Green'")
-                i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(2*width - r,c,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9;')
-                i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(2*width - r,c,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9;')
-                i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(2*width - r,c,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9;')    
+                i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(2*width - r,c,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9; z-index: 10;')
+                i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(2*width - r,c,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9; z-index: 10;')
+                i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(2*width - r,c,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9; z-index: 10;')    
 hr
 h2 {{'maze.sign.reliability' | translate}}
-.alert.alert-info(style='margin-bottom:30px;text-align:center;', role='alert', ng-if="leagueType=='standard'")
-  .row
-    .col-md-2
-      p(style='text-align:center;height:40px;') {{'maze.sign.rescue' | translate}}
+.alert.alert-info(style='margin-bottom:30px;text-align:center;', role='alert')
+  .row(style='display: flex; align-items: center;')
+    .col-md-3
+      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.rescue' | translate}}
       i.fas.fa-child.fa-2x(aria-hidden='true')
         | : {{foundVictims}}
-        br
-        br
-        |                     {{foundVictims * 10}} {{'common.point' | translate}}
+      br
+      br
+      |                     {{foundVictims * 10}} {{'common.point' | translate}}
     .col-md-1
-      h1(style='line-height:140px;text-align:center;') +
-    .col-md-2
-      p(style='text-align:center;height:40px;') {{'maze.sign.kits' | translate}}
-      i.fas.fa-medkit.fa-2x(aria-hidden='true')
-        | : {{distKits}}
-        br
-        br
-        |                     {{distKits * 10}} {{'common.point' | translate}}
-    .col-md-1
-      h1(style='line-height:140px;text-align:center;') -
-    .col-md-2
-      p(style='text-align:center;height:40px;') {{'maze.sign.total_lops' | translate}}
+      h1(style='text-align:center; margin:0;') -
+    .col-md-4
+      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.total_lops' | translate}}
       i.fas.fa-step-forward.fa-2x(aria-hidden='true')
         | : {{LoPs}}
-        br
-        br
-        |                     {{reliabilityLoPs()}} {{'common.point' | translate}}
+      br
+      br
+      |                     {{reliabilityLoPs()}} {{'common.point' | translate}}
     .col-md-1
-      h1(style='line-height:140px;text-align:center;') =
+      h1(style='text-align:center; margin:0;') =
     .col-md-3
-      h1(style='line-height:140px;text-align:center;') {{reliability()}} {{'common.point' | translate}}
-.alert.alert-info(style='margin-bottom:30px;text-align:center;', role='alert', ng-if="leagueType=='entry'")
-  .row
-    .col-md-3
-      p(style='text-align:center;height:40px;') {{'maze.sign.rescue' | translate}}
-      i.fas.fa-child.fa-2x(aria-hidden='true')
-        | : {{foundVictims}}
-        br
-        br
-        |                     {{foundVictims * 10}} {{'common.point' | translate}}
-    .col-md-1
-      h1(style='line-height:140px;text-align:center;') -
-    .col-md-3
-      p(style='text-align:center;height:40px;') {{'maze.sign.total_lops' | translate}}
-      i.fas.fa-step-forward.fa-2x(aria-hidden='true')
-        | : {{LoPs}}
-        br
-        br
-        |                     {{reliabilityLoPs()}} {{'common.point' | translate}}
-    .col-md-1
-      h1(style='line-height:140px;text-align:center;') =
-    .col-md-3
-      h1(style='line-height:140px;text-align:center;') {{reliability()}} {{'common.point' | translate}}
+      h1(style='text-align:center; margin:0;') {{reliability()}} {{'common.point' | translate}}
 h2 {{'maze.sign.calc' | translate}}
 .alert.alert-warning(style='margin-bottom:80px;text-align:center;', role='alert')
   .row

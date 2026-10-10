@@ -9,6 +9,16 @@ var txt_ramp;
 var txt_intersection;
 var txt_bump;
 var rotate = 0;
+// Intersections are not scoring elements in the Entry rules
+function removeIntersections(tiles) {
+  for (let i in tiles) {
+    if (tiles[i] && tiles[i].scoredItems) {
+      tiles[i].scoredItems = tiles[i].scoredItems.filter(item => item.item != 'intersection');
+    }
+  }
+  return tiles;
+}
+
 // function referenced by the drop target
 app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$http', '$translate', '$cookies', function ($scope, $uibModal, $log, $timeout, $http, $translate, $cookies) {
 
@@ -127,7 +137,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 $scope.evacuationLevel = data.evacuationLevel;
                 $scope.kitLevel = data.kitLevel;
                 $scope.exitBonus = data.exitBonus;
-                $scope.stiles = data.tiles;
+                $scope.stiles = removeIntersections(data.tiles);
                 $scope.score = data.score;
                 $scope.raw_score = data.raw_score;
                 $scope.normalizedScore = data.normalizedScore;
@@ -218,7 +228,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 $scope.comment = response.data.comment;
 
                 // Scoring elements of the tiles
-                $scope.stiles = response.data.tiles;
+                $scope.stiles = removeIntersections(response.data.tiles);
 
                 let checkPointNumber = 1;
                 $scope.checkPointDistance = [];
@@ -279,6 +289,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                         $scope.EvacuationAreaLoPIndex = response.data.EvacuationAreaLoPIndex;
 
                         for (let i = 0; i < response.data.tiles.length; i++) {
+                            // Intersections are not scoring elements in the Entry rules
+                            response.data.tiles[i].tileType.intersections = 0;
                             $scope.mtiles[response.data.tiles[i].x + ',' +
                                 response.data.tiles[i].y + ',' +
                                 response.data.tiles[i].z] = response.data.tiles[i];
@@ -893,9 +905,6 @@ app.directive('tile', function () {
                         switch ($scope.$parent.stiles[tile.index[i]].scoredItems[j].item) {
                             case "gap":
                                 successfully += 10 * $scope.$parent.stiles[tile.index[i]].scoredItems[j].scored;
-                                break;
-                            case "intersection":
-                                successfully += 10 * $scope.$parent.stiles[tile.index[i]].scoredItems[j].scored * $scope.$parent.stiles[tile.index[i]].scoredItems[j].count;
                                 break;
                             case "obstacle":
                                 successfully += 20 * $scope.$parent.stiles[tile.index[i]].scoredItems[j].scored * $scope.$parent.stiles[tile.index[i]].scoredItems[j].count;

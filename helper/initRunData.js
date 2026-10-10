@@ -45,8 +45,8 @@ module.exports.initLine = async function (run, rule, scored = false) {
           })
         }
 
-        // Intersection
-        if (m.tileType.intersections > 0) {
+        // Intersection (not a scoring element in the Entry rules)
+        if (m.tileType.intersections > 0 && rule != '2026E') {
           run.tiles[i].scoredItems.push({
             item: "intersection",
             scored: scored,

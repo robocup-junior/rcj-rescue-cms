@@ -971,22 +971,35 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.tile_size = function () {
         try {
             var mapTable = $('#mapTable');
+            var mapTopLeft = $('#mapTopLeft');
 
-            let areaTopLeftX = document.getElementById("mapTopLeft").getBoundingClientRect().left + window.pageXOffset;
-            let areaTopLeftY = document.getElementById("mapTopLeft").getBoundingClientRect().top + window.pageYOffset;
+            // Use the content width of the map column (excludes column padding and the scrollbar)
+            let areaWidth = mapTopLeft.width();
+            let areaTopLeftY = mapTopLeft.offset().top;
+            let tableWidth = mapTable.outerWidth();
+            let tableHeight = mapTable.outerHeight();
+            if (!areaWidth || !tableWidth) throw new Error('Map is not rendered yet');
 
-            let scaleX = (window.innerWidth - areaTopLeftX - 10) / mapTable.width();
-            let scaleY = (window.innerHeight - areaTopLeftY - 10) / mapTable.height();
-            let scale = Math.min(scaleX, scaleY);
+            let scaleX = (areaWidth - 10) / tableWidth;
+            let scaleY = (window.innerHeight - areaTopLeftY - 10) / tableHeight;
+            // Below the md breakpoint the map column is stacked under the side panel, so fit to width only
+            let stacked = window.matchMedia('(max-width: 767.98px)').matches;
+            let scale = (stacked || scaleY <= 0) ? scaleX : Math.min(scaleX, scaleY);
 
-            if (scaleX > scaleY) {
-                $('#wrapTile').css('transform-origin', 'top center');
-            } else {
-                $('#wrapTile').css('transform-origin', 'top left');
-            }
-
-            $('#wrapTile').css('transform', `scale(${scale})`);
-            $('.tilearea').css('height', mapTable.height() * scale + areaTopLeftY - 50);
+            // Scale from the top-left corner and center the scaled map in the column
+            $('#wrapTile').css({
+                'width': tableWidth + 'px',
+                'transform-origin': 'top left',
+                'transform': `scale(${scale})`,
+                'margin-left': Math.max(0, (areaWidth - tableWidth * scale) / 2) + 'px'
+            });
+            // The unscaled layout box of the map must not widen the page
+            let tileArea = $('.tilearea');
+            let requiredHeight = (areaTopLeftY - tileArea.offset().top) + 5 + tableHeight * scale + 10;
+            tileArea.css({
+                'height': Math.max(tableHeight * scale + areaTopLeftY - 50, requiredHeight),
+                'overflow': 'hidden'
+            });
         } catch (e) {
             $timeout($scope.tile_size, 500);
         }

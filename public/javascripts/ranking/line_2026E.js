@@ -5,6 +5,19 @@ app.controller("LineScoreController", ['$scope', '$http', '$sce', '$translate', 
     $scope.competitionId = competitionId
 
     $scope.showTeam = true;
+    $scope.showTime = true;
+    $scope.showVictims = true;
+    $scope.showLops = true;
+
+    $scope.finalScoreDecimals = 2;
+    $scope.normalScoreDecimals = 2;
+    $scope.teamWidth = 240;
+
+    $scope.formatNumber = function (value, decimals) {
+        if (value == null || value === '') return '';
+        if (value === 1) return '1';
+        return Number(value).toFixed(decimals);
+    }
 
     $scope.go = function (path) {
         window.location = path
@@ -61,6 +74,7 @@ app.controller("LineScoreController", ['$scope', '$http', '$sce', '$translate', 
             $scope.showMode.teamCode = $scope.ranking.some(t => t.team.teamCode);
 
             $scope.maxGameNum = $scope.runGroups.length;
+            $scope.updateGameRowSpan();
 
             if (callback != null && callback.constructor == Function) {
                 callback()
@@ -156,6 +170,13 @@ app.controller("LineScoreController", ['$scope', '$http', '$sce', '$translate', 
                 return "#ffd6d6";
         }
     }
+    $scope.updateGameRowSpan = function () {
+        $scope.gameRowSpan =
+            $scope.maxGameNum + 1 +
+            ($scope.showTime ? 1 : 0) +
+            ($scope.showVictims ? 1 : 0) +
+            ($scope.showLops ? 1 : 0);
+    };
 }]);
 
 $(window).on('beforeunload', function () {

@@ -119,6 +119,9 @@ app.controller("MapAdminController", ['$scope', '$http', '$uibModal', function (
                         includeLetterVictims: false,
                         includeCognitiveTargets: true
                     };
+                },
+                league: function () {
+                    return $scope.league;
                 }
             }
         });
@@ -169,8 +172,9 @@ app.controller("MapAdminController", ['$scope', '$http', '$uibModal', function (
     }
 }])
 
-app.controller('PrintSettingsModalController', ['$scope', '$uibModalInstance', 'settings', function ($scope, $uibModalInstance, settings) {
+app.controller('PrintSettingsModalController', ['$scope', '$uibModalInstance', 'settings', 'league', function ($scope, $uibModalInstance, settings, league) {
     $scope.settings = settings;
+    $scope.league = league;
 
     $scope.ok = function () {
         $uibModalInstance.close($scope.settings);

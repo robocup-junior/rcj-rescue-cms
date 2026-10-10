@@ -65,7 +65,7 @@ function getVictimNumber(map, x, y, z, place) {
       for (let k = 0; k < map.height; k++) {
         const cell = map.cells.find(c => c.x === j && c.y === i && c.z === k);
         if (cell && cell.tile && cell.tile.victims) {
-          const victimPlaces = ['top', 'left', 'right', 'bottom'];
+          const victimPlaces = ['top', 'left', 'right', 'bottom', 'floor'];
           for (const vp of victimPlaces) {
             if (cell.tile.victims[vp] && cell.tile.victims[vp] !== 'None') {
               count++;
@@ -398,6 +398,10 @@ async function drawMazeCanvas(map) {
               }
             }
           }
+          // Floor victims (Entry league)
+          if (['Red', 'Green'].includes(victims.floor)) {
+            await drawIcon(`${victims.floor.toLowerCase()}_floor.png`);
+          }
         }
       }
     }
@@ -476,7 +480,8 @@ async function drawMazeCanvas(map) {
           top: { x: tx + tw - 5 - 7.5, y: ty - 10 + 7.5 },
           right: { x: tx + tw - (-10) - 7.5, y: ty + th - 5 - 7.5 },
           left: { x: tx + (-10) + 7.5, y: ty + 5 + 7.5 },
-          bottom: { x: tx + 5 + 7.5, y: ty + th - (-10) - 7.5 }
+          bottom: { x: tx + 5 + 7.5, y: ty + th - (-10) - 7.5 },
+          floor: { x: tx + tw - 1 - 7.5, y: ty + 1 + 7.5 }
         };
 
         for (const dir in vPositions) {

@@ -13,6 +13,16 @@ var txt_intersection;
 var txt_bump;
 var txt_checkpoint;
 
+// Intersections are not scoring elements in the Entry rules
+function removeIntersections(tiles) {
+  for (let i in tiles) {
+    if (tiles[i] && tiles[i].scoredItems) {
+      tiles[i].scoredItems = tiles[i].scoredItems.filter(item => item.item != 'intersection');
+    }
+  }
+  return tiles;
+}
+
 // function referenced by the drop target
 app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$http', '$translate', '$cookies', function ($scope, $uibModal, $log, $timeout, $http, $translate, $cookies) {
 
@@ -278,7 +288,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
 
       // Scoring elements of the tiles
-      $scope.stiles = response.data.tiles;
+      $scope.stiles = removeIntersections(response.data.tiles);
       let checkPointNumber = 1;
       for(let i in $scope.stiles){
         if ($scope.isCheckPoint($scope.stiles[i])) {
@@ -316,6 +326,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
         db_mtile = response.data.tiles;
         for (var i = 0; i < response.data.tiles.length; i++) {
+          // Intersections are not scoring elements in the Entry rules
+          response.data.tiles[i].tileType.intersections = 0;
           $scope.mtiles[response.data.tiles[i].x + ',' +
           response.data.tiles[i].y + ',' +
           response.data.tiles[i].z] = response.data.tiles[i];
@@ -736,7 +748,6 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       var total = (mtile.items.obstacles > 0 ||
         mtile.items.speedbumps > 0 ||
         mtile.tileType.gaps > 0 ||
-        mtile.tileType.intersections > 0 ||
         mtile.tileType.seesaw > 0 ||
         undefined2false(mtile.items.rampPoints)) * mtile.index.length;
 
@@ -1259,7 +1270,6 @@ app.directive('tile', function () {
         count(tile.scoredItems.gaps);
         count(tile.scoredItems.seesaw);
         count(tile.scoredItems.speedbumps);
-        count(tile.scoredItems.intersections);
         count(tile.scoredItems.obstacles);
         if (possible != 0) return;
 
@@ -1324,7 +1334,6 @@ app.directive('tile', function () {
           !tile.items.rampPoints &&
           tile.tileType.gaps == 0 &&
           tile.tileType.seesaw == 0 &&
-          tile.tileType.intersections == 0 &&
           !$scope.isCheckPointTile(tile) && !isStart(tile)
         ) {
           return;

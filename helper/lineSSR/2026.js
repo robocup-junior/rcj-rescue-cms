@@ -121,6 +121,8 @@ function getEntranceOrExit(map, tile) {
 
 async function drawLineCanvas(map) {
   const numFloors = Math.max(1, map.height || 1);
+  // Intersections are not scoring elements in the Entry rules
+  const isEntry = map.league === 'LineNL' || map.leagueName === 'LineNL';
   const floorGap = 20;
 
   const tiles = Array.isArray(map.tiles)
@@ -265,7 +267,7 @@ async function drawLineCanvas(map) {
       }
 
       // 3. Index Numbers
-      const isScoring = tile.items && (tile.items.obstacles || tile.items.rampPoints || tile.items.speedbumps || (tile.tileType && (tile.tileType.gaps || tile.tileType.intersections || tile.tileType.seesaw)));
+      const isScoring = tile.items && (tile.items.obstacles || tile.items.rampPoints || tile.items.speedbumps || (tile.tileType && (tile.tileType.gaps || (!isEntry && tile.tileType.intersections) || tile.tileType.seesaw)));
       
       if (tile.checkPoint || isStartTile || isScoring) {
         const indexText = (tile.index || []).map(i => i + 1).join(' , ');

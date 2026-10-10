@@ -87,7 +87,7 @@ block main_content
             .option-label {{ 'admin.mazeMapAdmin.print.mapImages' | translate }}
             .option-check
               i.fas.fa-check-circle
-          .option-tile(ng-class="{'active': settings.exportType === 'Scoresheets'}" ng-click="settings.exportType = 'Scoresheets'")
+          .option-tile(ng-class="{'active': settings.exportType === 'Scoresheets'}" ng-click="settings.exportType = 'Scoresheets'" ng-if="league.rule != '2026E'")
             .option-visual
               i.fas.fa-file-signature
             .option-label {{ 'admin.mazeMapAdmin.print.scoreSheets' | translate }}

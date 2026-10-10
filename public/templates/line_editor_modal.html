@@ -79,7 +79,7 @@
                     </label>
                 </div>
                 <!-- Restart after Evac -->
-                <div class="col-md-6 mb-0">
+                <div class="col-md-6 mb-0" ng-if="!hideRestart">
                     <label class="settings-checkbox-container" ng-class="{'active': tile.start2}" for="isStartCheck2">
                         <input type="checkbox" ng-model="tile.start2" id="isStartCheck2">
                         <span class="label-text">{{"admin.lineMapEditor.evacRestart" | translate}}</span>

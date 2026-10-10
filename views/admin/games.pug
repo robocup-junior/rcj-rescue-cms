@@ -879,7 +879,7 @@ block main_content
                 .dropdown
                   button.btn.btn-sm.btn-light.dropdown-toggle(type='button', data-toggle='dropdown') {{"common.action" | translate}}
                   .dropdown-menu.dropdown-menu-right
-                    button.dropdown-item(ng-hide="league.type == 'simulation'" type='button' ng-click="go_scoreSheet2(run._id)")
+                    button.dropdown-item(ng-hide="league.type == 'simulation' || league.rule == '2026E'" type='button' ng-click="go_scoreSheet2(run._id)")
                       i.fas.fa-file-pdf.mr-2
                       | {{"common.generateSheet" | translate}}
                     button.dropdown-item(type='button' ng-click="go('/' + league.type + '/view/' + run._id)")

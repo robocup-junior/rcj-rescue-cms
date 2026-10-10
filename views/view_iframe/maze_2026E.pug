@@ -21,10 +21,10 @@ html(ng-app="ddApp")
                 let scaleY = (window.innerHeight - areaTopLeftY - bottomBox.outerHeight(true) - 10) / mapTable.height();
                 let scale = Math.min(scaleX, scaleY);
 
-                if (scale < 1) {
-                    $('#wrapTile').css('transform-origin', 'top left');
-                } else {
+                if (scaleX > scaleY) {
                     $('#wrapTile').css('transform-origin', 'top center');
+                } else {
+                    $('#wrapTile').css('transform-origin', 'top left');
                 }
 
                 $('#wrapTile').css('transform', `scale(${scale})`);
@@ -95,16 +95,20 @@ html(ng-app="ddApp")
                       img.tile-image(ng-src='/images/green_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'Green'")
                       img.tile-image(ng-src='/images/red_floor.png', ng-show="cells[c+','+r+','+z].tile.victims.floor == 'Red'")
                       img.tile-image(ng-src='/images/green_floor.png', ng-show="cells[c+','+r+','+z].tile.victims.floor == 'Green'")
-                      i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9;')
-                      i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9;')
-                      i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9;')
-    .alert.alert-info(role='alert')#bottomBox
-      .row
-        .col-4
-          i.fas.fa-step-forward(aria-hidden='true')  : {{LoPs}} times
-        .col-4
-          i.fas Misidentification : {{MisIdent}} times
-        .col-4
-          i.fas.fa-home(aria-hidden='true')
-            | : Exit Bonus:
-            b {{exitBonus}}
+                      i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9; z-index: 10;')
+                      i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9; z-index: 10;')
+                      i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9; z-index: 10;')
+    .alert.alert-info(role='alert', style="margin-bottom: 0; padding: 5px;")#bottomBox
+      .row.text-center
+        .col
+          i.fas.fa-step-forward(title="{{'maze.sign.total_lops' | translate}}")
+          |  {{LoPs}}
+        .col
+          i.fas.fa-exclamation-triangle(title="{{'maze.judge.misidentification' | translate}}")
+          |  {{MisIdent}}
+        .col
+          i.fas.fa-child(title="{{'maze.sign.rescue' | translate}}")
+          |  {{foundVictims}}
+        .col
+          i.fas.fa-home(title="{{'maze.sign.exit' | translate}}")
+          |  {{exitBonus}}

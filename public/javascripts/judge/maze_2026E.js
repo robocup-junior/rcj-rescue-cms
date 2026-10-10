@@ -240,22 +240,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             $scope.length = response.data.length;
             $scope.duration = response.data.duration || 480;
             $scope.leagueType = response.data.leagueType;
-            if (response.data.leagueType == "entry") {
-                // Identification bonus
-                maxKit={
-                    'Red': 1,
-                    'Green': 1
-                };
-            } else {
-                maxKit={
-                    'H': 3,
-                    'S': 2,
-                    'U': 0,
-                    'Red': 1,
-                    'Yellow': 1,
-                    'Green': 0
-                };
-            }
+            // Identification bonus
+            maxKit={
+                'Red': 1,
+                'Green': 1
+            };
 
             if(response.data.parent){
                 if(!$scope.dice){
@@ -550,6 +539,22 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     }
 
 
+    $scope.tilePoint = function (x, y, z, isTile) {
+        var cell = $scope.cells[x + ',' + y + ',' + z];
+        if (!cell || !isTile) return 0;
+        var tile = $scope.tiles[x + ',' + y + ',' + z];
+        if (!tile) return 0;
+
+        var current = 0;
+        if (cell.tile.speedbump && tile.scoredItems.speedbump) current += 5;
+        if (cell.tile.checkpoint && tile.scoredItems.checkpoint) current += 10;
+        if (cell.tile.victims.floor && cell.tile.victims.floor != "None" && tile.scoredItems.victims.floor) {
+            current += cell.isLinear ? 15 : 30;
+            if (tile.scoredItems.rescueKits.floor > 0) current += 10;
+        }
+        return current;
+    };
+
     $scope.cellClick = function (x, y, z, isWall, isTile) {
         var cell = $scope.cells[x + ',' + y + ',' + z];
         if (!cell)
@@ -624,7 +629,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.open = function (x, y, z) {
         var modalInstance = $uibModal.open({
             animation: true,
-            templateUrl: '/templates/maze_judge_modal.html',
+            templateUrl: '/templates/maze_judge_modal_2026E.html',
             controller: 'ModalInstanceCtrl',
             size: 'lm',
             resolve: {
@@ -761,22 +766,35 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.tile_size = function () {
         try {
             var mapTable = $('#mapTable');
+            var mapTopLeft = $('#mapTopLeft');
 
-            let areaTopLeftX = document.getElementById("mapTopLeft").getBoundingClientRect().left + window.pageXOffset;
-            let areaTopLeftY = document.getElementById("mapTopLeft").getBoundingClientRect().top + window.pageYOffset;
+            // Use the content width of the map column (excludes column padding and the scrollbar)
+            let areaWidth = mapTopLeft.width();
+            let areaTopLeftY = mapTopLeft.offset().top;
+            let tableWidth = mapTable.outerWidth();
+            let tableHeight = mapTable.outerHeight();
+            if (!areaWidth || !tableWidth) throw new Error('Map is not rendered yet');
 
-            let scaleX = (window.innerWidth - areaTopLeftX - 10) / mapTable.width();
-            let scaleY = (window.innerHeight - areaTopLeftY - 10) / mapTable.height();
-            let scale = Math.min(scaleX, scaleY);
+            let scaleX = (areaWidth - 10) / tableWidth;
+            let scaleY = (window.innerHeight - areaTopLeftY - 10) / tableHeight;
+            // Below the md breakpoint the map column is stacked under the side panel, so fit to width only
+            let stacked = window.matchMedia('(max-width: 767.98px)').matches;
+            let scale = (stacked || scaleY <= 0) ? scaleX : Math.min(scaleX, scaleY);
 
-            if (scaleX > scaleY) {
-                $('#wrapTile').css('transform-origin', 'top center');
-            } else {
-                $('#wrapTile').css('transform-origin', 'top left');
-            }
-
-            $('#wrapTile').css('transform', `scale(${scale})`);
-            $('.tilearea').css('height', mapTable.height() * scale + areaTopLeftY - 50);
+            // Scale from the top-left corner and center the scaled map in the column
+            $('#wrapTile').css({
+                'width': tableWidth + 'px',
+                'transform-origin': 'top left',
+                'transform': `scale(${scale})`,
+                'margin-left': Math.max(0, (areaWidth - tableWidth * scale) / 2) + 'px'
+            });
+            // The unscaled layout box of the map must not widen the page
+            let tileArea = $('.tilearea');
+            let requiredHeight = (areaTopLeftY - tileArea.offset().top) + 5 + tableHeight * scale + 10;
+            tileArea.css({
+                'height': Math.max(tableHeight * scale + areaTopLeftY - 50, requiredHeight),
+                'overflow': 'hidden'
+            });
         } catch (e) {
             $timeout($scope.tile_size, 500);
         }
@@ -846,12 +864,20 @@ app.controller('ModalInstanceCtrl', ['$scope','$uibModalInstance','cell','tile',
         $scope.tile.scoredItems.steps = !$scope.tile.scoredItems.steps;
     };
 
-    $scope.applyEntryVictimRestriction= function(direction) {
+    $scope.toggleVictim = function (direction) {
         playSound(sClick);
+        $scope.tile.scoredItems.victims[direction] = !$scope.tile.scoredItems.victims[direction];
+        // Identification is only valid for a found victim
         if (!$scope.tile.scoredItems.victims[direction]) {
             $scope.tile.scoredItems.rescueKits[direction] = 0;
         }
-    }
+    };
+
+    $scope.toggleIdentified = function (direction) {
+        if (!$scope.tile.scoredItems.victims[direction]) return;
+        playSound(sClick);
+        $scope.tile.scoredItems.rescueKits[direction] = $scope.tile.scoredItems.rescueKits[direction] > 0 ? 0 : 1;
+    };
 
 
     $scope.lightStatus = function(light, kit){

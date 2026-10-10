@@ -4,39 +4,6 @@ var marker = {};
 var socket;
 let victimConstant = {};
 let victimTypes = [];
-const victimConstantWL = {
-    "H": {
-        "maxKitNum": 3,
-        "linearPoint": 10,
-        "floatingPoint": 30
-    },
-    "S": {
-        "maxKitNum": 2,
-        "linearPoint": 10,
-        "floatingPoint": 30
-    },
-    "U": {
-        "maxKitNum": 0,
-        "linearPoint": 10,
-        "floatingPoint": 30
-    },
-    "Red": {
-        "maxKitNum": 1,
-        "linearPoint": 5,
-        "floatingPoint": 15
-    },
-    "Yellow": {
-        "maxKitNum": 1,
-        "linearPoint": 5,
-        "floatingPoint": 15
-    },
-    "Green": {
-        "maxKitNum": 0,
-        "linearPoint": 5,
-        "floatingPoint": 15
-    }
-};
-
 const victimConstantNL = {
     "Red": {
         "maxKitNum": 1,
@@ -187,12 +154,9 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                         $scope.width = response.data.width;
                         $scope.length = response.data.length;
 
-                        $scope.leagueType = response.data.leagueType;
-                        if ($scope.leagueType == "entry") {
-                            victimConstant = victimConstantNL;
-                        } else {
-                            victimConstant = victimConstantWL;
-                        }
+                        // Maze Entry 2026 is always scored with the entry rules
+                        $scope.leagueType = "entry";
+                        victimConstant = victimConstantNL;
 
                         for (let i = 0; i < response.data.cells.length; i++) {
                             $scope.cells[response.data.cells[i].x + ',' +
