@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'AssignedDocuments'
@@ -9,55 +9,56 @@ append scripts
     var competitionId = "#{competition}"
   script(src='/javascripts/document/assigned.js')
 
-block location
-  a.breadcrumb-item(ng-click="go('/home')") Home
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
   a.breadcrumb-item(ng-click="go('/home/'+competitionId)") {{assigned.competitonName}}
   span.breadcrumb-item.active Assigned Reviews
 
+block hero_title
+  | {{assigned.competitonName}}
 
+block hero_subtitle
+  | Assigned Reviews
 
-block content
-  .row
-    .col-12
-      h1 Assigned Reviews - {{assigned.competitonName}}
-
-      hr
-
-      div(ng-repeat="leagueId in asKeys")
-        div(ng-show="assigned.assignedTeams[leagueId].length > 0")
-          h2 {{getLeagueName(leagueId)}}
-      
-          table.custom(style="margin-bottom:20px;")
+block main_content
+  div(ng-repeat="leagueId in asKeys")
+    .modern-card.mb-4(ng-show="assigned.assignedTeams[leagueId].length > 0")
+      .modern-card-header
+        i.fas.fa-clipboard-check.mr-2
+        | {{getLeagueName(leagueId)}}
+      .modern-card-body.p-0
+        .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+          table.table-modern.table-auto
             thead
-                tr
-                  th {{"common.teamCode" | translate}}
-                  th {{"common.team" | translate}}
-                  th {{"common.region" | translate}}
-                  th Review Items
-                  th Review Status
-                  th {{'common.operation' | translate}}
+              tr
+                th {{"common.teamCode" | translate}}
+                th {{"common.team" | translate}}
+                th {{"common.region" | translate}}
+                th Review Items
+                th Review Status
+                th {{'common.operation' | translate}}
             tbody
-                tr(ng-repeat='team in assigned.assignedTeams[leagueId] | orderBy:"[code, name]"')
-                  td(ng-bind='team.code')
-                  td(ng-bind='team.name')
-                  td(ng-bind='team.region')
-                  td
-                    div(ng-repeat="item in team.reviewItems")
-                      span {{item}}
-                  td
-                    h5
-                      span.badge(ng-class="getBadgeColor(team)")
-                        i.fas.fa-check-circle(ng-if="team.answeredQuestionsNum == team.assienedQuestionsNum") &nbsp;
-                        i.fas.fa-exclamation-circle(ng-if="team.answeredQuestionsNum != team.assienedQuestionsNum") &nbsp;
-                        | {{team.answeredQuestionsNum}} / {{team.assienedQuestionsNum}}
-                  td
-                    p(ng-show="isFormOpen(team.deadline)") The submission form for this team is still open.
-                      br
-                      | Please review it after the following date and time:&nbsp;
-                      strong(ng-bind="deadline(team.deadline)")
-                    button.btn.btn-primary(ng-show="team.answeredQuestionsNum != team.assienedQuestionsNum" type='button',ng-click='goReview(team._id)')
-                      i.fas.fa-arrow-circle-right &nbsp;
-                      | Evaluate
-                    button.btn.btn-secondary(ng-show="team.answeredQuestionsNum == team.assienedQuestionsNum" type='button',ng-click='goReview(team._id)')
-                      i.fas.fa-arrow-circle-right &nbsp;
-                      | Evaluate
+              tr(ng-repeat='team in assigned.assignedTeams[leagueId] | orderBy:"[code, name]"')
+                td(ng-bind='team.code')
+                td.font-weight-bold(ng-bind='team.name')
+                td(ng-bind='team.region')
+                td
+                  div.small(ng-repeat="item in team.reviewItems") {{item}}
+                td
+                  span.badge.badge-pill(ng-class="getBadgeColor(team)" style="font-size: 0.85rem;")
+                    i.fas.fa-check-circle.mr-1(ng-if="team.answeredQuestionsNum == team.assienedQuestionsNum")
+                    i.fas.fa-exclamation-circle.mr-1(ng-if="team.answeredQuestionsNum != team.assienedQuestionsNum")
+                    | {{team.answeredQuestionsNum}} / {{team.assienedQuestionsNum}}
+                td
+                  p.small.text-muted.mb-2(ng-show="isFormOpen(team.deadline)") The submission form for this team is still open.
+                    br
+                    | Please review it after the following date and time:&nbsp;
+                    strong(ng-bind="deadline(team.deadline)")
+                  button.btn.btn-sm.btn-premium-primary(ng-show="team.answeredQuestionsNum != team.assienedQuestionsNum" type='button' ng-click='goReview(team._id)')
+                    i.fas.fa-arrow-circle-right.mr-1
+                    | Evaluate
+                  button.btn.btn-sm.btn-light(ng-show="team.answeredQuestionsNum == team.assienedQuestionsNum" type='button' ng-click='goReview(team._id)')
+                    i.fas.fa-arrow-circle-right.mr-1
+                    | Evaluate

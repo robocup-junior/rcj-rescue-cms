@@ -1,8 +1,10 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'SurveyAnswers'
+  - var heroContainerStyle = 'max-width: 1600px;'
+  - var contentContainerStyle = 'max-width: 1600px;'
 
 append scripts
   script.
@@ -11,45 +13,53 @@ append scripts
   script(src='/javascripts/survey/answers.js')
   script(src='/components/exceljs/index.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId + '/survey')") Survey
-    span.breadcrumb-item.active {{langContent(survey.i18n, 'name')}}
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId + '/survey')") Survey
+  span.breadcrumb-item.active {{langContent(survey.i18n, 'name')}}
 
 append css
-    style.
-        p{
-            margin-bottom: 0;
-        }
+  style.
+    .table-modern p {
+      margin-bottom: 0;
+    }
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{langContent(survey.i18n, 'name')}}
-      hr
-      div(style="overflow-x: scroll;")
-        table.custom(style="margin-bottom:20px;")
+block hero_title
+  | {{langContent(survey.i18n, 'name')}}
+
+block hero_subtitle
+  | {{competition.name}}
+
+block hero_actions
+  button.btn-action-icon(type='button' ng-click="downloadExcel()" uib-tooltip='Export' tooltip-placement="bottom")
+    i.fas.fa-file-excel
+
+block main_content
+  .modern-card
+    .modern-card-header
+      i.fas.fa-list.mr-2
+      | Answers
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
           thead
-              tr
-                th {{"common.teamCode" | translate}}
-                th {{"common.team" | translate}}
-                th(ng-hide="question.type=='explanationOnly'" ng-repeat="question in survey.questions" ng-bind="langContent(question.i18n, 'title')")
-                th {{"common.operation" | translate}}
-                
+            tr
+              th {{"common.teamCode" | translate}}
+              th {{"common.team" | translate}}
+              th(ng-hide="question.type=='explanationOnly'" ng-repeat="question in survey.questions" ng-bind="langContent(question.i18n, 'title')")
+              th(style="width: 140px;") {{"common.operation" | translate}}
           tbody
-              tr(ng-repeat="ans in answers | orderBy: ['team.teamCode','team.name']")
-                td(ng-bind="ans.team.teamCode")
-                td(ng-bind="ans.team.name")
-                td(ng-hide="question.type=='explanationOnly'" ng-repeat="question in survey.questions" ng-bind-html="getAnswer(ans, question)")
-                td
-                  button.btn.btn-primary.btn-sm(type='button', ng-click="edit(ans)", style="margin:0 5px;")
+            tr(ng-repeat="ans in answers | orderBy: ['team.teamCode','team.name']")
+              td(ng-bind="ans.team.teamCode")
+              td.font-weight-bold(ng-bind="ans.team.name")
+              td(ng-hide="question.type=='explanationOnly'" ng-repeat="question in survey.questions" ng-bind-html="getAnswer(ans, question)")
+              td
+                .btn-table-group
+                  .btn-table-action.primary(ng-click="edit(ans)" uib-tooltip='{{"common.edit" | translate}}')
                     i.fas.fa-edit
-                  button.btn.btn-danger.btn-sm(type='button', ng-click='delete(ans)', style="margin:0 5px;")
+                  .btn-table-action.danger(ng-click='delete(ans)' uib-tooltip='{{"common.delete" | translate}}')
                     i.fas.fa-trash-alt
-      hr
-      button.btn.btn-sm.btn-success(ng-click="downloadExcel()")
-        i.fas.fa-file-excel &nbsp;
-        | Export

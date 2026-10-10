@@ -2,8 +2,46 @@ var xmlHttp;
 var obj = [];
 
 var app = angular.module("RunAdmin", ['ngTouch','pascalprecht.translate', 'ngCookies', 'ui.select']);
-app.controller("RunAdminController", ['$scope', '$http', function ($scope, $http) {
+app.controller("RunAdminController", ['$scope', '$http', '$translate', function ($scope, $http, $translate) {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 1500
+    });
+
     $scope.competitionId = competitionId;
+
+    // Copy a name listed in STEP2 so it can be pasted into the CSV
+    $scope.copyName = function (text) {
+        const notify = function () {
+            Toast.fire({
+                type: 'success',
+                titleText: $translate.instant('admin.lineRunBulk.copied') + ': ' + text
+            });
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(notify, function () {
+                fallbackCopy(text);
+                notify();
+            });
+        } else {
+            fallbackCopy(text);
+            notify();
+        }
+    };
+
+    // Clipboard API is unavailable on plain HTTP, so use a temporary textarea
+    function fallbackCopy(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+    }
     $scope.leagueId = leagueId;
 
     $http.get(`/api/competitions/${competitionId}`).then(function (response) {
@@ -313,7 +351,7 @@ app.controller("RunAdminController", ['$scope', '$http', function ($scope, $http
             result.innerHTML = '';
             return;
         }
-        var insert = '<table class="custom"><thead><tr><th>Round</th><th>Team name</th>';
+        var insert = '<table class="table-modern table-auto"><thead><tr><th>Round</th><th>Team name</th>';
         if ($scope.league && $scope.league.type != 'simulation') {
             insert += '<th>Map name</th>';
         }

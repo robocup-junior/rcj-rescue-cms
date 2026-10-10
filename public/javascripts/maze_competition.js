@@ -51,6 +51,13 @@ app.controller("MazeCompetitionController", ['$scope', '$http', '$translate', fu
             $scope.league = response.data
         })
 
+        // Manual input is not prepared for the Entry 2026 rules
+        $scope.manualInputEnabled = function () {
+            if (!$scope.competition) return false;
+            const leagueSetting = $scope.competition.leagues.find((l) => l.league == league);
+            return !!leagueSetting && leagueSetting.rule != '2026E';
+        };
+
         // launch socket.io
         socket = io(window.location.origin, {
             transports: ['websocket']

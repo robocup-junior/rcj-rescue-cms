@@ -1,0 +1,299 @@
+/* Shared table and action styles for admin pages using the modern layout */
+.table-modern {
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0 0.5rem;
+}
+
+.table-modern thead th {
+  padding: 1rem 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+  border: none;
+}
+
+.table-modern tbody tr {
+  background: white;
+  position: relative;
+  transition: box-shadow 0.2s ease;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+}
+
+.table-modern tbody tr:hover {
+  box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+}
+
+.table-modern tbody td {
+  padding: 1rem 0.75rem;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+  position: relative;
+}
+
+.table-modern tbody td:first-child {
+  border-left: 1px solid #f1f5f9;
+  border-top-left-radius: 0.75rem;
+  border-bottom-left-radius: 0.75rem;
+}
+
+.table-modern tbody td:last-child {
+  border-right: 1px solid #f1f5f9;
+  border-top-right-radius: 0.75rem;
+  border-bottom-right-radius: 0.75rem;
+}
+
+.filter-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 2rem;
+  background: #f1f5f9;
+  font-size: 0.8rem;
+  margin: 0.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+}
+
+.filter-badge.active {
+  background: var(--accent-color);
+  color: white;
+}
+
+.btn-action-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.btn-action-icon:hover {
+  background: white;
+  color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+.btn-table-group {
+  display: inline-flex;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn-table-action {
+  background: transparent;
+  border: none;
+  border-left: 1px solid #f1f5f9;
+  color: #64748b;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0;
+  width: 64px;
+  height: 42px;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.btn-table-action:first-child {
+  border-left: none;
+}
+
+.btn-table-action:hover {
+  background: #f8fafc;
+  color: #334155;
+}
+
+.btn-table-action i {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin: 0 !important;
+}
+
+.btn-table-action.active-blue {
+  background: rgba(59, 130, 246, 0.08) !important;
+  color: #2563eb !important;
+}
+
+.btn-table-action.active-green {
+  background: rgba(16, 185, 129, 0.08) !important;
+  color: #059669 !important;
+}
+
+.btn-table-action.danger {
+  color: #ef4444;
+}
+
+.btn-table-action.danger:hover {
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.btn-table-action.primary {
+  color: #3b82f6;
+}
+
+.btn-table-action.primary:hover {
+  background: rgba(59, 130, 246, 0.05);
+}
+
+/* ---- Admin page helpers ---- */
+.section-heading {
+  display: flex;
+  align-items: center;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #64748b;
+  margin-bottom: 0.75rem;
+}
+
+.section-heading i {
+  font-size: 0.9rem;
+  margin-right: 0.5rem;
+}
+
+
+.step-block {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.step-number {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #3b82f6;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.step-content h6 {
+  font-weight: 800;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+}
+
+.step-content p {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.result-state {
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+.result-state i {
+  font-size: 3.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.result-state.success {
+  color: #10b981;
+}
+
+.result-state.error {
+  color: #ef4444;
+}
+
+.table-modern.table-auto {
+  table-layout: auto;
+}
+
+.table-modern .form-control {
+  min-width: 0;
+}
+
+.copy-cell {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.copy-cell i {
+  float: right;
+  color: #cbd5e1;
+  margin-top: 0.2rem;
+  transition: color 0.15s ease;
+}
+
+.copy-cell:hover {
+  background-color: #eff6ff;
+}
+
+.copy-cell:hover i {
+  color: #3b82f6;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  vertical-align: middle;
+}
+
+.preview-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.35rem;
+}
+
+.preview-stepper .preview-number {
+  min-width: 3rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+
+.mail-preview-box {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  background: white;
+}
+
+.scroll-box {
+  max-height: 220px;
+  overflow: auto;
+}
+
+/* Icons inside buttons in a card header keep the button's colour and spacing */
+.modern-card-header .btn i {
+  color: inherit;
+  font-size: inherit;
+  filter: none;
+  margin-right: 0.35rem;
+}
+
+.modern-card-header .btn i:only-child {
+  margin-right: 0;
+}

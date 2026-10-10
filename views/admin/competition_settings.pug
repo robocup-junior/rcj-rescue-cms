@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'AdminSettings'
@@ -9,143 +9,152 @@ append scripts
     var competitionId = "#{competition_id}"
   script(src='/javascripts/admin/competition_settings.js')
   link(rel='stylesheet', href='/components/angular-color-picker/dist/angularjs-color-picker.min.css')
-  //link(rel='stylesheet', href='/components/angular-color-picker/dist/themes/angularjs-color-picker-bootstrap.min.css')
   script(src='/components/tinycolor/dist/tinycolor-min.js')
   script(src='/components/angular-color-picker/dist/angularjs-color-picker.min.js')
 
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+  span.breadcrumb-item.active Settings
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-    span.breadcrumb-item.active Settings
+block hero_title
+  | {{competition.name}}
 
+block hero_subtitle
+  | {{"admin.settings.title" | translate}}
 
-block content
+block hero_actions
+  button.btn-hero-action(type='button' ng-click='set()')
+    i.fas.fa-check
+    | {{"admin.settings.set" | translate}}
+
+block main_content
+  //- Competition profile
   .row
-    .col-md-1
-    .col-md-10
-      h1 {{"admin.settings.title" | translate}}
-      br
-      .row
-        .col-9
-          .input-group(style="width:100%;margin 0 auto;")
-            .input-group-prepend
-              span.input-group-text {{"admin.settings.cname" | translate}}
-            input.form-control(type='string', ng-model='cName' style="")
-        .col-3(style="text-align:right;")
-          button.btn.btn-success(type='button', ng-click='set()')
-            i.fas.fa-check &nbsp;{{"admin.settings.set" | translate}}
-
-      br
-      .row
-        .col-md-4
+    .col-lg-8
+      .modern-card.mb-4
+        .modern-card-header
+          i.fas.fa-id-card.mr-2
+          | {{"admin.settings.title" | translate}}
+        .modern-card-body
+          .form-group
+            label {{"admin.settings.cname" | translate}}
+            input.form-control(type='text' ng-model='cName')
           .row
-            .col-6
-              .input-group(style="width:100%;margin 0 auto;")
-                span {{"admin.settings.color" | translate}}
-                  color-picker(ng-model='cColor' options="{'format':'HEX'}")
-            .col-6
-              .input-group(style="width:100%;margin 0 auto;")
-                span {{"admin.settings.bkColor" | translate}}
-                  color-picker(ng-model='bColor' options="{'format':'HEX'}")
-          hr
-          span {{"admin.settings.description" | translate}}
-            textarea.form-control(ng-model="description" rows=5 style="width:100%")
+            .col-md-6
+              .form-group
+                label {{"admin.settings.color" | translate}}
+                color-picker(ng-model='cColor' options="{'format':'HEX'}")
+            .col-md-6
+              .form-group
+                label {{"admin.settings.bkColor" | translate}}
+                color-picker(ng-model='bColor' options="{'format':'HEX'}")
+          .form-group
+            label {{"admin.settings.description" | translate}}
+            textarea.form-control(ng-model="description" rows=4)
+          .row
+            .col-md-6
+              .form-group
+                label {{"admin.settings.logo" | translate}}
+                canvas#canvas(style="display:none;")
+                input#select.form-control-file(type='file' name='select')
+            .col-md-6
+              .form-group
+                label {{"admin.settings.preparation" | translate}}
+                div
+                  label.toggle-button-001
+                    input(type='checkbox' ng-model="preparation")
+          .form-group.mb-0
+            label {{"admin.settings.mes" | translate}}
+            textarea.form-control(ng-model="message" rows=5)
 
-        .col-md-4
-          div(style="display: flex;")
-              span(style="margin-top:5px;") {{"admin.settings.preparation" | translate}} &nbsp;
-              label.toggle-button-001
-                input(type='checkbox' ng-model="preparation")
-          hr
-          span {{"admin.settings.logo" | translate}}
-            br
-            canvas#canvas(style="display:none;")
-            input#select(type='file', name='select')
-          br
-          hr
-          span {{"admin.settings.mes" | translate}}
-            textarea.form-control(ng-model="message" rows=8 style="width:100%")
-        .col-md-4
-          p {{"admin.settings.preview" | translate}}
-          .card(ng-click="go('/home/' + competition._id)" style="width:100%;text-align:center;" ng-style="{'backgroundColor': '#' + bColor}")
-            img.card-img-top(ng-src="{{logo}}", alt='' style="max-height:300px;width:100%;object-fit: contain;")
+    .col-lg-4
+      .modern-card.mb-4
+        .modern-card-header
+          i.fas.fa-eye.mr-2
+          | {{"admin.settings.preview" | translate}}
+        .modern-card-body
+          .card(ng-click="go('/home/' + competition._id)" style="width:100%; text-align:center; border-radius: 1rem; overflow: hidden; cursor: pointer;" ng-style="{'backgroundColor': '#' + bColor}")
+            img.card-img-top(ng-src="{{logo}}" alt='' style="max-height:300px; width:100%; object-fit: contain;")
             .card-body
               h3(style="text-align:center" ng-style="{'color': '#' + cColor}") {{cName}}
-              br
               p(ng-if="description" style="text-align:center" ng-style="{'color': '#' + cColor}" ng-bind-html="description")
-      hr
-      h1 {{"admin.settings.ranking" | translate}}
-      .row
-        .col-10
-          br
-          div(ng-repeat="league in leagues track by $index" style="margin-top:10px;")
-            span(style="font-size:30px;") {{allLeagues[league.league].name}} &nbsp;
-            div(style="display: flex;margin-top:10px;")
-              span(style="margin-top:5px;") {{"admin.settings.discloseRanking" | translate}} &nbsp;
-              label.toggle-button-001
-                input(type='checkbox' ng-model="league.disclose")
-            .input-group(style="width:100%;margin 0 auto;")
-              .input-group-prepend
-                span.input-group-text {{"admin.settings.rankingMode" | translate}}
-              select.custom-select(ng-model='league.mode')
-                option(value="SUM_OF_BEST_N_GAMES") SUM OF BEST N GAMES
-                option(value="MEAN_OF_NORMALIZED_BEST_N_GAMES") MEAN OF NORMALIZED BEST N GAMES
-                option(value="MEAN_OF_NORMALIZED_BEST_N_GAMES_NORMALIZED_DOCUMENT") 0.8 GAMES + 0.2 DOCUMENT
-                option(value="GAMES_DOCUMENT_CHALLENGE") 0.6 GAMES + 0.2 DOCUMENT + 0.2 TECHNICAL CHALLENGE
-              .input-group-prepend
-                span.input-group-text {{"admin.settings.num" | translate}}
-              input.form-control(type='number', ng-model='league.num' style="max-width:100px;")
-              .input-group-prepend 
-                span.input-group-text {{"common.rule" | translate}}
-              select.custom-select(ng-model='league.rule' ng-options='rule for rule in allLeagues[league.league].rules' style="max-width: 100px;")
-        .col-2(style="text-align:right;")
-          button.btn.btn-success(type='button', ng-click='set()')
-            i.fas.fa-check &nbsp;{{"admin.settings.set" | translate}}
 
+  //- Ranking
+  .modern-card.mb-4
+    .modern-card-header
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-trophy.mr-2
+          | {{"admin.settings.ranking" | translate}}
+        button.btn.btn-sm.btn-premium-primary(type='button' ng-click='set()')
+          i.fas.fa-check.mr-1
+          | {{"admin.settings.set" | translate}}
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
+          thead
+            tr
+              th {{"common.league" | translate}}
+              th {{"admin.settings.discloseRanking" | translate}}
+              th {{"admin.settings.rankingMode" | translate}}
+              th(style="width: 110px;") {{"admin.settings.num" | translate}}
+              th(style="width: 130px;") {{"common.rule" | translate}}
+          tbody
+            tr(ng-repeat="league in leagues track by $index")
+              td.font-weight-bold {{allLeagues[league.league].name}}
+              td
+                label.toggle-button-001.mb-0
+                  input(type='checkbox' ng-model="league.disclose")
+              td
+                select.form-control.form-control-sm(ng-model='league.mode')
+                  option(value="SUM_OF_BEST_N_GAMES") SUM OF BEST N GAMES
+                  option(value="MEAN_OF_NORMALIZED_BEST_N_GAMES") MEAN OF NORMALIZED BEST N GAMES
+                  option(value="MEAN_OF_NORMALIZED_BEST_N_GAMES_NORMALIZED_DOCUMENT") 0.8 GAMES + 0.2 DOCUMENT
+                  option(value="GAMES_DOCUMENT_CHALLENGE") 0.6 GAMES + 0.2 DOCUMENT + 0.2 TECHNICAL CHALLENGE
+              td
+                input.form-control.form-control-sm(type='number' ng-model='league.num')
+              td
+                select.form-control.form-control-sm(ng-model='league.rule' ng-options='rule for rule in allLeagues[league.league].rules')
 
-
-  hr
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{"admin.authority.title" | translate}}
-      p {{"admin.authority.description" | translate}}
-      br
-      table.custom
-        thead
+  //- Authority
+  .modern-card.mb-4
+    .modern-card-header
+      i.fas.fa-user-shield.mr-2
+      | {{"admin.authority.title" | translate}}
+    .modern-card-body.p-0
+      p.text-muted.small.px-4.pt-3.mb-0 {{"admin.authority.description" | translate}}
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
+          thead
             tr
               th {{"admin.authority.name" | translate}}
               th {{"admin.authority.nowLevel" | translate}}
-              th
-              th
-              th
-              th
-              th
-        tbody
+              th {{"common.operation" | translate}}
+          tbody
             tr(ng-repeat='user in users')
               td
-                i.fas.fa-user-tie(ng-if="!user.admin && !user.superDuperAdmin") &nbsp;
-                i.fas.fa-user-shield(ng-if="user.admin") &nbsp;
-                | {{user.username}}
+                i.fas.fa-user-tie.mr-2.text-muted(ng-if="!user.admin && !user.superDuperAdmin")
+                i.fas.fa-user-shield.mr-2.text-primary(ng-if="user.admin")
+                span.font-weight-bold {{user.username}}
               td
-                span(ng-if="user.superDuperAdmin") {{"admin.users.super" | translate}}
-                span(ng-if="!user.superDuperAdmin && user.nowAuth <= 0") {{"admin.authority.level0" | translate}}
-                span(ng-if="!user.superDuperAdmin && user.nowAuth == 1") {{"admin.authority.level1" | translate}}
-                span(ng-if="!user.superDuperAdmin && user.nowAuth == 5") {{"admin.authority.level5" | translate}}
-                span(ng-if="!user.superDuperAdmin && user.nowAuth >= 10") {{"admin.authority.level10" | translate}}
+                span.badge.badge-pill.badge-dark(ng-if="user.superDuperAdmin") {{"admin.users.super" | translate}}
+                span.badge.badge-pill.badge-secondary(ng-if="!user.superDuperAdmin && user.nowAuth <= 0") {{"admin.authority.level0" | translate}}
+                span.badge.badge-pill.badge-info(ng-if="!user.superDuperAdmin && user.nowAuth == 1") {{"admin.authority.level1" | translate}}
+                span.badge.badge-pill.badge-primary(ng-if="!user.superDuperAdmin && user.nowAuth == 5") {{"admin.authority.level5" | translate}}
+                span.badge.badge-pill.badge-success(ng-if="!user.superDuperAdmin && user.nowAuth >= 10") {{"admin.authority.level10" | translate}}
               td
-                button(ng-click='updateAuthority(user._id , 0)' style="width:100%;" type="button" class="btn btn-secondary" ng-disabled="user.superDuperAdmin") {{"admin.authority.doLevel0" | translate}}
-              td
-                button(ng-click='updateAuthority(user._id , 1)' style="width:100%;" type="button" class="btn btn-info" ng-disabled="user.superDuperAdmin") {{"admin.authority.doLevel1" | translate}}
-              td
-                button(ng-click='updateAuthority(user._id , 5)' style="width:100%;" type="button" class="btn btn-primary" ng-disabled="user.superDuperAdmin") {{"admin.authority.doLevel5" | translate}}
-              td
-                button(ng-click='updateAuthority(user._id , 10)' style="width:100%;" type="button" class="btn btn-success" ng-disabled="user.superDuperAdmin || !user.admin") {{"admin.authority.doLevel10" | translate}}
-              td
-                button(ng-show='!hasRole(user, "INTERVIEW")' ng-click='grantRole(user , "INTERVIEW")' style="width:100%;" type="button" class="btn btn-outline-warning")
-                  i.far.fa-square &nbsp;INTERVIEW
-                button(ng-show='hasRole(user, "INTERVIEW")' ng-click='revokeRole(user , "INTERVIEW")' style="width:100%;" type="button" class="btn btn-warning")
-                  i.fas.fa-check-square &nbsp;INTERVIEW
-      br
+                .d-flex.flex-wrap(style="gap: 0.4rem;")
+                  button.btn.btn-sm.btn-outline-secondary(ng-click='updateAuthority(user._id , 0)' type="button" ng-disabled="user.superDuperAdmin") {{"admin.authority.doLevel0" | translate}}
+                  button.btn.btn-sm.btn-outline-info(ng-click='updateAuthority(user._id , 1)' type="button" ng-disabled="user.superDuperAdmin") {{"admin.authority.doLevel1" | translate}}
+                  button.btn.btn-sm.btn-outline-primary(ng-click='updateAuthority(user._id , 5)' type="button" ng-disabled="user.superDuperAdmin") {{"admin.authority.doLevel5" | translate}}
+                  button.btn.btn-sm.btn-outline-success(ng-click='updateAuthority(user._id , 10)' type="button" ng-disabled="user.superDuperAdmin || !user.admin") {{"admin.authority.doLevel10" | translate}}
+                  button.btn.btn-sm.btn-outline-warning(ng-show='!hasRole(user, "INTERVIEW")' ng-click='grantRole(user , "INTERVIEW")' type="button")
+                    i.far.fa-square.mr-1
+                    | INTERVIEW
+                  button.btn.btn-sm.btn-warning(ng-show='hasRole(user, "INTERVIEW")' ng-click='revokeRole(user , "INTERVIEW")' type="button")
+                    i.fas.fa-check-square.mr-1
+                    | INTERVIEW

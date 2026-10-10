@@ -1,43 +1,48 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'MailTemplates'
 
 append scripts
-  script.
   script(src='/javascripts/mail_templates.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    span.breadcrumb-item.active Mail Templates
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  span.breadcrumb-item.active Mail Templates
 
-block content
-  .row
-    .col-md-2
-    .col-md-8
-      h1 {{"admin.mailTemplates.title" | translate}}
-      button(onclick="location.href='/admin/mailTemplates/editor'" class='btn btn-primary') {{"admin.mailTemplates.create" | translate}}
-      br
-      span {{"admin.mailTemplates.4duplicate" | translate}}
-      br
-      br
-      table.custom
-        thead
+block hero_title
+  | {{"admin.mailTemplates.title" | translate}}
+
+block hero_subtitle
+  | {{"admin.mailTemplates.4duplicate" | translate}}
+
+block hero_actions
+  a.btn-create-map(href='/admin/mailTemplates/editor')
+    i.fas.fa-plus-circle
+    span {{"admin.mailTemplates.create" | translate}}
+
+block main_content
+  .modern-card
+    .modern-card-header
+      i.fas.fa-envelope.mr-2
+      | {{"admin.mailTemplates.title" | translate}}
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
+          thead
             tr
               th {{"admin.mailTemplates.subject" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
+              th(style="width: 140px;") {{"common.operation" | translate}}
+          tbody
             tr(ng-repeat='mail in mails')
+              td.font-weight-bold(ng-bind='mail.name')
               td
-                a(ng-bind='mail.name')
-              td
-                button.btn.btn-info(type='button', ng-click='go("/admin/mailTemplates/editor/"+mail.name)' style="margin-right:10px;")
-                  i.fas.fa-edit &nbsp;
-                  |{{"admin.mailTemplates.edit" | translate}}
-                button.btn.btn-danger(type='button', ng-click='removeTemplate(mail)', ng-if="deleteable(mail.name)")
-                  i.fas.fa-trash &nbsp;
-                  | {{"common.delete" | translate}}
-                
-
+                .btn-table-group
+                  .btn-table-action.primary(ng-click='go("/admin/mailTemplates/editor/"+mail.name)' uib-tooltip='{{"admin.mailTemplates.edit" | translate}}')
+                    i.fas.fa-edit
+                  .btn-table-action.danger(ng-click='removeTemplate(mail)' ng-if="deleteable(mail.name)" uib-tooltip='{{"common.delete" | translate}}')
+                    i.fas.fa-trash-alt

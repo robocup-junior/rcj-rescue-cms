@@ -892,7 +892,7 @@ block main_content
                       i.fas.fa-signature.mr-2
                       | {{"common.sign" | translate}}
                     .dropdown-divider
-                    button.dropdown-item(ng-hide="league.type == 'simulation'" type='button' ng-click="go_input(run._id)")
+                    button.dropdown-item(ng-hide="league.type == 'simulation' || league.rule == '2026E'" type='button' ng-click="go_input(run._id)")
                       i.fas.fa-keyboard.mr-2
                       | Manual input
                     button.dropdown-item(type='button' ng-click='statusReset(run._id)')

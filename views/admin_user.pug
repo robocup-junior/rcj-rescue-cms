@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'AdminUser'
@@ -9,65 +9,78 @@ append scripts
     var competitionId = "#{id}"
   script(src='/javascripts/admin_user.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    span.breadcrumb-item.active Users
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  span.breadcrumb-item.active Users
 
+block hero_title
+  | {{"admin.users.title" | translate}}
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{"admin.users.title" | translate}}
-      table.custom
-        thead
-            tr
-                th {{"common.name" | translate}}
-                th {{"admin.users.password" | translate}}
-                th {{"admin.users.email" | translate}}
-                th {{"admin.users.authoritySuper" | translate}}
-                th {{"admin.users.authorityAdmin" | translate}}
-                th {{"admin.users.emailNotification" | translate}}
-                th {{"common.operation" | translate}}
-        tbody
-            tr
-                td
-                    input(ng-model='userName' style="width:100%;")
-                td
-                    input(ng-model='userPass' style="width:100%;")
-                td
-                    input(ng-model='userEmail' style="width:100%;")
-                td
-                    input(type='checkbox' ng-model='userAuthSuper' id="checkSuper")
-                    label.checkbox(for="checkSuper") {{"admin.users.authorization" | translate}}
-                td
-                    input(type='checkbox' ng-model='userAuthAdmin' id="checkAdmin")
-                    label.checkbox(for="checkAdmin") {{"admin.users.authorization" | translate}}
-                td
-                    input(type='checkbox' ng-model='emailNotification' id="checkEmailNotification")
-                    label.checkbox(for="checkEmailNotification") {{"admin.users.emailNotification" | translate}}
-                td
-                    button(ng-click='addUser()' style="width:100%;") {{"admin.users.add" | translate}}
-      br
-      br
-      table.custom
-        thead
+block hero_subtitle
+  | Admin
+
+block main_content
+  .modern-card.mb-4
+    .modern-card-header
+      i.fas.fa-user-plus.mr-2
+      | {{"admin.users.add" | translate}}
+    .modern-card-body
+      .row
+        .col-md-4
+          .form-group
+            label {{"common.name" | translate}}
+            input.form-control(ng-model='userName')
+        .col-md-4
+          .form-group
+            label {{"admin.users.password" | translate}}
+            input.form-control(ng-model='userPass')
+        .col-md-4
+          .form-group
+            label {{"admin.users.email" | translate}}
+            input.form-control(ng-model='userEmail')
+      .d-flex.flex-wrap.align-items-center(style="gap: 1.5rem;")
+        .custom-control.custom-switch
+          input.custom-control-input(type='checkbox' ng-model='userAuthSuper' id="checkSuper")
+          label.custom-control-label(for="checkSuper") {{"admin.users.authoritySuper" | translate}}
+        .custom-control.custom-switch
+          input.custom-control-input(type='checkbox' ng-model='userAuthAdmin' id="checkAdmin")
+          label.custom-control-label(for="checkAdmin") {{"admin.users.authorityAdmin" | translate}}
+        .custom-control.custom-switch
+          input.custom-control-input(type='checkbox' ng-model='emailNotification' id="checkEmailNotification")
+          label.custom-control-label(for="checkEmailNotification") {{"admin.users.emailNotification" | translate}}
+        .ml-auto
+          button.btn.btn-premium-primary(ng-click='addUser()')
+            i.fas.fa-plus.mr-2
+            | {{"admin.users.add" | translate}}
+
+  .modern-card
+    .modern-card-header
+      i.fas.fa-users-cog.mr-2
+      | {{"admin.users.title" | translate}}
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
+          thead
             tr
               th {{"admin.users.name" | translate}}
               th {{"admin.users.email" | translate}}
-              th {{"admin.users.super" | translate}}
-              th {{"admin.users.admin" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
+              th.text-center {{"admin.users.super" | translate}}
+              th.text-center {{"admin.users.admin" | translate}}
+              th(style="width: 120px;") {{"common.operation" | translate}}
+          tbody
             tr(ng-repeat='user in users')
-              td(ng-bind='user.username')
+              td.font-weight-bold(ng-bind='user.username')
               td(ng-bind='user.displayEmail')
+              td.text-center
+                i.fas.fa-check-circle.text-success(ng-if="user.superDuperAdmin")
+                i.fas.fa-times-circle.text-muted(ng-if="!user.superDuperAdmin")
+              td.text-center
+                i.fas.fa-check-circle.text-success(ng-if="user.admin")
+                i.fas.fa-times-circle.text-muted(ng-if="!user.admin")
               td
-                i(class="fa fa-check" aria-hidden="true" style="color:#2ecc71;" ng-if="user.superDuperAdmin")
-                i(class="fa fa-times" aria-hidden="true" style="color:#e74c3c;" ng-if="!user.superDuperAdmin")
-              td
-                i(class="fa fa-check" aria-hidden="true" style="color:#2ecc71;" ng-if="user.admin")
-                i(class="fa fa-times" aria-hidden="true" style="color:#e74c3c;" ng-if="!user.admin")
-              td
-                a(href="" ng-click='removeUser(user)') {{"common.delete" | translate}}
+                .btn-table-group
+                  .btn-table-action.danger(ng-click='removeUser(user)' uib-tooltip='{{"common.delete" | translate}}')
+                    i.fas.fa-trash-alt

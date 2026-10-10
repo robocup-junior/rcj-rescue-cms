@@ -1,38 +1,53 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'SignageSetting'
 
 append scripts
-  script.
   script(src='/javascripts/signage/setting.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    span.breadcrumb-item.active Signage setting
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  span.breadcrumb-item.active Signage setting
 
-block content
-  .row
-    .col-md-2
-    .col-md-8
-      h1 {{"admin.home.signage" | translate}}
-      button(onclick="location.href='/signage/setting/editor'" class='btn btn-primary') {{"signage.create" | translate}}
-      button(onclick="location.href='/signage/setting/files'" class='btn btn-primary' style="margin-left:10px;") Upload Files
-      br
-      br
-      table.custom
-        thead
+block hero_title
+  | {{"admin.home.signage" | translate}}
+
+block hero_subtitle
+  | Admin
+
+block hero_actions
+  button.btn-action-icon(type='button' onclick="location.href='/signage/setting/files'" uib-tooltip='Upload Files' tooltip-placement="bottom")
+    i.fas.fa-file-upload
+  a.btn-create-map(href='/signage/setting/editor')
+    i.fas.fa-plus-circle
+    span {{"signage.create" | translate}}
+
+block main_content
+  .modern-card
+    .modern-card-header
+      i.fas.fa-desktop.mr-2
+      | {{"admin.home.signage" | translate}}
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
+          thead
             tr
               th {{"common.name" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
+              th(style="width: 210px;") {{"common.operation" | translate}}
+          tbody
             tr(ng-repeat='sign in signs')
-              td
+              td.font-weight-bold
                 a(ng-bind='sign.name' ng-href="/signage/setting/editor/{{sign._id}}")
               td
-                button.btn.btn-info(type='button', ng-click='go("/signage/display/"+sign._id+"/0")' style="margin-right:10px;") {{"common.view" | translate}}
-                button.btn.btn-danger(type='button', ng-click='removeSig(sign)') {{"common.delete" | translate}}
-                
-
+                .btn-table-group
+                  .btn-table-action.primary(ng-click='go("/signage/setting/editor/"+sign._id)' uib-tooltip='{{"common.edit" | translate}}')
+                    i.fas.fa-edit
+                  .btn-table-action(ng-click='go("/signage/display/"+sign._id+"/0")' uib-tooltip='{{"common.view" | translate}}')
+                    i.fas.fa-eye
+                  .btn-table-action.danger(ng-click='removeSig(sign)' uib-tooltip='{{"common.delete" | translate}}')
+                    i.fas.fa-trash-alt

@@ -1,48 +1,56 @@
 //- -*- tab-width: 2 -*-
-extends ../../includes/layout
+extends ../../includes/modern_layout
 
 block vars
   - var ngAppDef = 'ReviewStatus'
+  - var heroContainerStyle = 'max-width: 1600px;'
+  - var contentContainerStyle = 'max-width: 1600px;'
 
 append scripts
   script.
     var competitionId = "#{id}"
   script(src='/javascripts/admin/documents/reviewStatus.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{reviewStatus.competitonName}}
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId + '/documents')") Document settings
-    span.breadcrumb-item.active ReviewStatus
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{reviewStatus.competitonName}}
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId + '/documents')") Document settings
+  span.breadcrumb-item.active ReviewStatus
 
+block hero_title
+  | {{reviewStatus.competitonName}}
 
+block hero_subtitle
+  | Review Status
 
-block content
-  .row
-    .col-12
-      h1 Review Status - {{reviewStatus.competitonName}}
+block hero_actions
+  button.btn-hero-action(type='button' ng-click="sendReminder()")
+    i.fas.fa-envelope
+    | Send a reminder
 
-      hr
-
-      button.btn.btn-sm.btn-info(ng-click="sendReminder()" style="margin:10px;")
-        i.fas.fa-envelope &nbsp;
-        | Send a reminder
-
-      table.custom(style="margin-bottom:20px;")
-        thead
+block main_content
+  .modern-card
+    .modern-card-header
+      i.fas.fa-tasks.mr-2
+      | Review Status
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
+          thead
             tr
               th {{"admin.users.name" | translate}}
               th(ng-repeat="league in leagues") {{league.name}}
-        tbody
+          tbody
             tr(ng-repeat='user in reviewStatus.reviewStatus | orderBy:"[userName]"')
-              td(ng-bind='user.userName')
+              td.font-weight-bold(ng-bind='user.userName')
               td(ng-repeat="league in leagues")
                 div(ng-repeat='team in user.assignedTeams[league.id] | orderBy:"[code, name]"')
-                  span.badge(ng-click="goReviewed(team._id)" ng-class="getBadgeColor(team)" style="font-size: 12px;margin: 1px 0 1px 0") {{team.code}} {{team.name}}
+                  span.badge.text-left(ng-click="goReviewed(team._id)" ng-class="getBadgeColor(team)" style="font-size: 12px; margin: 2px 0; cursor: pointer; white-space: normal;") {{team.code}} {{team.name}}
                     br
                     | {{team.reviewItems.join(" / ")}}
                     br
-                    i.fas.fa-tasks &nbsp;
+                    i.fas.fa-tasks.mr-1
                     | {{team.answeredQuestionsNum}} / {{team.assienedQuestionsNum}}
-              

@@ -744,6 +744,8 @@
             "s2D4": "For Map name, select one from the following and enter.",
             "s2D5": "For Field name, select one from the following and enter. ",
             "s2D6": "Enter start time in the following format ",
+            "clickToCopy": "Click a name to copy it to the clipboard",
+            "copied": "Copied",
             "s3T": "STEP3 Upload the file",
             "s3D": "After selecting the file, please check the contents displayed below.",
             "exe": "Execution",

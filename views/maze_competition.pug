@@ -31,13 +31,23 @@ block page_css
     .btn-table-action i { font-size:1rem; opacity:0.8; margin:0 !important; }
     .btn-table-action.active-blue { background:rgba(59,130,246,0.08) !important; color:#2563eb !important; }
     .btn-table-action.active-green { background:rgba(16,185,129,0.08) !important; color:#059669 !important; }
-    .btn-run-action { display:inline-flex; align-items:center; gap:0.4rem; padding:0.4rem 0.8rem; border-radius:10px; font-size:0.82rem; font-weight:700; border:none; cursor:pointer; transition:all 0.2s ease; }
-    .btn-run-view { background:#eff6ff; color:#3b82f6; }
-    .btn-run-view:hover { background:#dbeafe; }
-    .btn-run-judge { background:#fef2f2; color:#ef4444; }
-    .btn-run-judge:hover { background:#fee2e2; }
-    .btn-run-input { background:#fffbeb; color:#d97706; }
-    .btn-run-input:hover { background:#fef3c7; }
+    .run-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:0.5rem; }
+    .btn-run-action { display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; min-height:48px; min-width:96px; padding:0.6rem 1.1rem; border-radius:12px; font-size:0.95rem; font-weight:700; border:2px solid transparent; cursor:pointer; white-space:nowrap; transition:background-color 0.15s ease, transform 0.1s ease; touch-action:manipulation; -webkit-tap-highlight-color:transparent; user-select:none; }
+    .btn-run-action i { font-size:1.05rem; }
+    .btn-run-action:active { transform:scale(0.96); }
+    .btn-run-action:focus-visible { outline:3px solid rgba(59,130,246,0.45); outline-offset:2px; }
+    .btn-run-view { background:#eff6ff; color:#2563eb; border-color:#bfdbfe; }
+    .btn-run-view:hover, .btn-run-view:active { background:#dbeafe; }
+    .btn-run-judge { background:#ef4444; color:#ffffff; box-shadow:0 4px 10px rgba(239,68,68,0.25); }
+    .btn-run-judge:hover, .btn-run-judge:active { background:#dc2626; }
+    .btn-run-input { background:#fffbeb; color:#b45309; border-color:#fde68a; }
+    .btn-run-input:hover, .btn-run-input:active { background:#fef3c7; }
+    @media (hover:none), (pointer:coarse) {
+      .run-table-modern tbody tr:hover { transform:none; box-shadow:0 2px 6px rgba(0,0,0,0.03); }
+      .btn-table-action { width:56px; height:48px; }
+      .btn-table-action i { font-size:1.15rem; }
+      .filter-badge { padding:0.5rem 1rem; font-size:0.9rem; }
+    }
     .action-cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
     .action-card { background: white; border-radius: 1rem; padding: 1.25rem 1.5rem; display: flex; align-items: center; gap: 1rem; cursor: pointer; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.02); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
     .action-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.01); border-color: #cbd5e1; }
@@ -59,6 +69,10 @@ block page_css
       .run-table-modern tr { margin-bottom:1rem !important; border-radius:1rem !important; box-shadow:0 4px 12px rgba(0,0,0,0.05) !important; padding:1rem !important; border:1px solid #f1f5f9 !important; }
       .run-table-modern td { border:none !important; padding:0.5rem 0 !important; border-bottom:1px solid #f8fafc !important; display:flex !important; justify-content:space-between !important; align-items:center !important; }
       .run-table-modern td::before { content:attr(data-content); font-weight:800; text-transform:uppercase; font-size:0.7rem; color:#94a3b8; }
+      .run-table-modern td.run-actions-cell { display:block !important; border-bottom:none !important; padding-top:0.75rem !important; }
+      .run-table-modern td.run-actions-cell::before { display:none; }
+      .run-actions { justify-content:stretch; }
+      .run-actions .btn-run-action { flex:1 1 0; }
     }
 
 block hero_breadcrumb
@@ -143,8 +157,8 @@ block main_content
                 td(ng-bind='run.startTime | date:"dd EEE HH:mm"' data-content="{{'common.starttime' | translate}}")
                 td(ng-bind='run.round.name' data-content="{{'common.round' | translate}}")
                 td(ng-bind='run.field.name' data-content="{{'common.field' | translate}}")
-                td(data-content="Actions")
-                  .btn-table-group
+                td.run-actions-cell(data-content="Actions")
+                  .run-actions
                     button.btn-run-action.btn-run-view(ng-if="run.field != null" ng-click="go('/maze/view/' + run._id)")
                       i.fas.fa-eye
                       | {{'common.view' | translate}}
@@ -154,6 +168,6 @@ block main_content
                     button.btn-run-action.btn-run-judge(ng-click="go_judge('/maze/judge/' + run._id , run.team.name)" ng-if="run.status<2 && isJudge == 1")
                       i.fas.fa-gavel
                       | {{'common.judge' | translate}}
-                    button.btn-run-action.btn-run-input(ng-click="go_judge('/maze/input/' + run._id + '?return=/maze/' + competition._id + '/' + league.id, run.team.name)" ng-if="run.status<2 && isJudge == 1")
+                    button.btn-run-action.btn-run-input(ng-click="go_judge('/maze/input/' + run._id + '?return=/maze/' + competition._id + '/' + league.id, run.team.name)" ng-if="run.status<2 && isJudge == 1 && manualInputEnabled()")
                       i.fas.fa-keyboard
                       | Manual Input

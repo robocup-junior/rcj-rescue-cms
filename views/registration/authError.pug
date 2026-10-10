@@ -1,31 +1,29 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
+  - var contentContainerStyle = 'max-width: 760px;'
   - var ngAppDef = 'authError'
 
 append scripts
   script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js')
   script(src='/javascripts/registration/authError.js')
 
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  span.breadcrumb-item.active Registration
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    span.breadcrumb-item.active Registration
-block content
-  .row
-    .col-md-2.col-sm-1
-    .col-md-8.col-sm-10
-      h2 
-      .card(style='width: 100%; margin-bottom:50px;')
-          .card-body
-            .text-center
-                h1.card-title {{"registration.error" | translate}}
-                
-            hr
-            div(style="text-align:center;")
-                i.fas.fa-exclamation-triangle.fa-10x(style="color:#f1c40f;margin-bottom:30px;")
-                p.card-subtitle.mb-2.text-muted {{"registration.errorMes" | translate}}
+block hero_title
+  | {{"registration.error" | translate}}
 
+block hero_subtitle
+  | Registration
 
-
+block main_content
+  .modern-card.mb-5
+    .modern-card-body
+      .result-state
+        i.fas.fa-exclamation-triangle(style="color: #f59e0b;")
+        p.text-muted {{"registration.errorMes" | translate}}

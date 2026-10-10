@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'SurveyList'
@@ -9,34 +9,45 @@ append scripts
     var competitionId = "#{id}"
   script(src='/javascripts/survey/list.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-    span.breadcrumb-item.active Survey
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
+  span.breadcrumb-item.active Survey
 
-block content
-  .row
-    .col-md-2
-    .col-md-8
-      h1 {{competition.name}} - {{"survey.title" | translate}}
-      button(onclick="location.href='/admin/'+competitionId+'/survey/edit'" class='btn btn-primary') {{"survey.new" | translate}}
-      br
-      br
-      table.custom
-        thead
+block hero_title
+  | {{competition.name}}
+
+block hero_subtitle
+  | {{"survey.title" | translate}}
+
+block hero_actions
+  a.btn-create-map(ng-href="/admin/{{competitionId}}/survey/edit")
+    i.fas.fa-plus-circle
+    span {{"survey.new" | translate}}
+
+block main_content
+  .modern-card
+    .modern-card-header
+      i.fas.fa-question-circle.mr-2
+      | {{"survey.title" | translate}}
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
+          thead
             tr
               th {{"common.name" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
+              th(style="width: 210px;") {{"common.operation" | translate}}
+          tbody
             tr(ng-repeat='s in survey')
+              td.font-weight-bold(ng-bind='s.name')
               td
-                a(ng-bind='s.name')
-              td
-                button.btn.btn-primary.btn-sm(type='button', ng-click="edit(s._id)", style="margin:0 5px;")
-                  i.fas.fa-edit
-                button.btn.btn-warning.btn-sm(type='button', ng-click='answers(s._id)', style="margin:0 5px;")
-                  i.fas.fa-list
-                button.btn.btn-danger.btn-sm(type='button', ng-click='delete(s)', style="margin:0 5px;")
-                  i.fas.fa-trash-alt
-                
+                .btn-table-group
+                  .btn-table-action.primary(ng-click="edit(s._id)" uib-tooltip='{{"common.edit" | translate}}')
+                    i.fas.fa-edit
+                  .btn-table-action(ng-click='answers(s._id)' uib-tooltip='Answers')
+                    i.fas.fa-list
+                  .btn-table-action.danger(ng-click='delete(s)' uib-tooltip='{{"common.delete" | translate}}')
+                    i.fas.fa-trash-alt
