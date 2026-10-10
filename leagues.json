@@ -4,7 +4,6 @@
     "id": "Line",
     "name": "Rescue Line",
     "rules": [
-      "2025",
       "2026"
     ]
   },
@@ -13,7 +12,6 @@
     "id": "LineNL",
     "name": "Rescue Line Entry",
     "rules": [
-      "2025E",
       "2026E"
     ]
   },
@@ -22,7 +20,6 @@
     "id": "Maze",
     "name": "Rescue Maze",
     "rules": [
-      "2025",
       "2026"
     ]
   },
@@ -31,7 +28,6 @@
     "id": "MazeNL",
     "name": "Rescue Maze Entry",
     "rules": [
-      "2025E",
       "2026E"
     ]
   },
@@ -40,7 +36,6 @@
     "id": "Erebus",
     "name": "Rescue Simulation",
     "rules": [
-      "2025",
       "2026"
     ]
   }

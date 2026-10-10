@@ -29,7 +29,7 @@
     },
     "service_home": {
         "about": "Design field maps, generate images and scoresheets for RoboCupJunior Rescue Line/Maze, or create world files for the Erebus simulation platform.",
-        "line_editor_desc": "Design and simulate challenge-ready Line Rescue maps for the 2025/2026 ruleset.",
+        "line_editor_desc": "Design and simulate challenge-ready Line Rescue maps for the 2026 ruleset.",
         "maze_editor_desc": "Create intricate Maze Rescue fields with dynamic victim placement and multi-floor support.",
         "sim_editor_desc": "Build and export high-fidelity worlds for the Erebus simulation platform."
     },
