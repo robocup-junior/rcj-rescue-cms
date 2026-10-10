@@ -161,6 +161,34 @@ We use GitHub Issues for tracking bugs, enhancements, and feature requests:
 2. Update the database connection string in your environment file if needed
 3. Run any necessary migrations or seed commands
 
+### Running Tests
+
+```bash
+npm test
+```
+
+The tests use Node.js's built-in test runner and do not need a running MongoDB or Redis: the integration tests start an in-memory MongoDB (`mongodb-memory-server`, downloaded on the first run). They also run on GitHub Actions for every push and pull request (`.github/workflows/test.yml`).
+
+| File | What it checks |
+|---|---|
+| `test/views.compile.test.js` | Every Pug template compiles, and every view passed to `res.render()` exists |
+| `test/assets.references.test.js` | Scripts, styles, images and modal templates referenced from pages exist in `public/` |
+| `test/rules.coverage.test.js` | Every rule in `leagues.json` has its pages and score calculator |
+| `test/client.syntax.test.js` | Client-side scripts in `public/javascripts` parse |
+| `test/i18n.test.js` | `en.json` and `ja.json` define the same keys |
+| `test/scoring.line.test.js`, `test/scoring.maze.test.js` | Score calculation for each rule set |
+| `test/ssr.test.js` | Server-side map images still render |
+| `test/mazeLinear.test.js` | Linear / floating tiles and reachability in the Maze map editor (`mazeLinear.js`) |
+| `test/mazeFill.test.js` | Reachable tiles computed on the server when a Maze map is saved |
+| `test/pathFinder.test.js` | Line course numbering: tile order, intersections, checkpoints, evacuation zone, floors |
+| `test/models.integration.test.js` | Map validation on save and run initialisation from a map |
+| `test/api.integration.test.js` | The Line and Maze run APIs store the judge's input and score it with the league's rule |
+| `test/ranking.integration.test.js` | Rankings: best-N runs, normalisation, score adjustments, tie-breaks, victim totals, disclosure |
+| `test/maps.integration.test.js` | Maximum score shown in the Line and Maze map editors |
+| `test/outputs.integration.test.js` | Score sheet and map image PDF/PNG generation |
+
+When you add a rule set (for example for a new season), add score calculation cases for it as well.
+
 ## Community
 
 - Join our discussions in GitHub Issues
