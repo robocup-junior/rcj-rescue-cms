@@ -177,13 +177,10 @@ app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http', 
                 } catch (e) {
                     $scope.parent = "";
                 }
-                if (response.data.dice) {
-                    $scope.dice = response.data.dice;
-                } else {
-                    $scope.dice = [];
-                    for (let i = 0; i < 6; i++) {
-                        $scope.dice[i] = mapId
-                    }
+                $scope.dice = Array.isArray(response.data.dice) ? response.data.dice : [];
+                // Patterns that are not set yet default to this map itself (Self); child maps use the parent's patterns
+                for (let i = 0; i < 6 && !$scope.parent; i++) {
+                    if (!$scope.dice[i]) $scope.dice[i] = mapId;
                 }
 
 
