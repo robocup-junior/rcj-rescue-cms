@@ -47,6 +47,8 @@ async function ensureMapImages(runs) {
 
 module.exports.generateScoreSheet = async function (res, runs) {
   await ensureMapImages(runs);
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', 'inline; filename="scoresheet.pdf"');
   if (runs.length > 0) {
     let run = runs[0];
     const league = run.competition.leagues.find((l) => l.league == run.team.league);

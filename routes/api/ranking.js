@@ -326,7 +326,7 @@ publicRouter.get('/:competitionId/:leagueId', async function (req, res, next) {
     teamRuns[e].gameSum.victims = bestRuns.flatMap(run => run.foundVictims).reduce(function (result, current) {
       var element = result.find(p => p.type == current.type);
       if (element) {
-        element.count ++;
+        element.count += current.count;
       } else {
         result.push({
           type: current.type,

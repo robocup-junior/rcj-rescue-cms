@@ -84,22 +84,6 @@ module.exports.initLine = async function (run, rule, scored = false) {
       }
     }
 
-    if (rule == '2026E') {
-      // Consider continued ramp tiles as a ramp
-      let rampContinueFlag = false;
-      for (let index = run.tiles.length - 1; index >= 0; index--) {
-        if (run.tiles[index].scoredItems.some(item => item.item == "ramp")) {
-          if (rampContinueFlag) {
-            run.tiles[index].scoredItems.splice(run.tiles[index].scoredItems.findIndex(item => item.item === 'ramp'), 1);
-          } else {
-            rampContinueFlag = true;
-          }
-        } else {
-          rampContinueFlag = false;
-        }
-      }
-    }
-
     // Init LoPs Backet
     run.LoPs = new Array(checkPointCount + 1).fill(0);
 

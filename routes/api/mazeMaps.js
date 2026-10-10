@@ -213,6 +213,10 @@ adminRouter.get('/:map/maxScore', async function (req, res, next) {
         msg: 'Could not get map',
         err: err.message,
       });
+    } else if (!data) {
+      res.status(404).send({
+        msg: 'Map not found',
+      });
     } else {
       let tiles = data.cells.filter(c => c.isTile && c.tile.reachable).map(c => Object({
         x: c.x,

@@ -186,14 +186,18 @@ adminRouter.get('/:map/maxScore', async function (req, res, next) {
       select: 'leagues'
     },
   ]).select("competition league").lean().exec(async function (err, data) {
-    const rule = data.competition.leagues.find((l) => l.league == data.league).rule;
     if (err) {
       logger.error(err);
       res.status(400).send({
         msg: 'Could not get map',
         err: err.message,
       });
+    } else if (!data) {
+      res.status(404).send({
+        msg: 'Map not found',
+      });
     } else {
+      const rule = data.competition.leagues.find((l) => l.league == data.league).rule;
       let run = await initRun.initLine(
         {
           competition: data.competition,

@@ -746,6 +746,7 @@
             "s2D6": "Enter start time in the following format ",
             "clickToCopy": "Click a name to copy it to the clipboard",
             "copied": "Copied",
+            "complete": "runs registered",
             "s3T": "STEP3 Upload the file",
             "s3D": "After selecting the file, please check the contents displayed below.",
             "exe": "Execution",
@@ -895,6 +896,11 @@
             "map": "Map Editor",
             "title": "Map Editor",
             "desc": "Click on the wall to create a maze. Click on the floor of the maze to set items such as victims, checkpoints, bumps and others.",
+            "tour": {
+                "teamInfo": "Confirm your team information here.",
+                "save": "Please click the Save button regularly. You can re-edit as many times as you like until the deadline.",
+                "charLimit": "If there is a character limit, you can check the current character count here."
+            },
             "save": "@:admin.lineMapEditor.save",
             "saveAs": "@:admin.lineMapEditor.saveAs",
             "name": "@:admin.lineMapEditor.name",
@@ -1137,6 +1143,7 @@
             "select4": "Select Room 4 Tiles (Anything)",
             "pick4": "Select Room 4 Configuration",
             "innerTile": "Inner Tile Walls",
+            "victimRotation": "Victim Rotation",
             "js": {
                 "startTileError": "Please set the start tile."
             }
