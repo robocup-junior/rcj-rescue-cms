@@ -96,6 +96,8 @@ mazeRunSchema.pre('save', function (next) {
   self.populate('map', "name finished", function (err, populatedRun) {
     if (err) {
       return next(err)
+    } else if (!populatedRun.map) {
+      return next(new Error('No map with that id!'))
     } else if (!populatedRun.map.finished) {
       err = new Error('Map "' + populatedRun.map.name + '" is not finished!')
       return next(err)

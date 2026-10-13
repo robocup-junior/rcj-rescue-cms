@@ -93,7 +93,7 @@ publicRouter.get('/competition/:competitionId', function (req, res, next) {
 
         // Apply score adjustment
         if (run.adjustment != null) {
-          run.score = new Decimal(run.score).times((run.adjustment + 100) / 100);
+          run.score = new Decimal(run.score).times((run.adjustment + 100) / 100).toNumber();
         }
       })
 
@@ -192,6 +192,9 @@ publicRouter.get('/:runid', async function (req, res, next) {
       }
       return res.status(200).send(dbRun);
     }
+    return res.status(404).send({
+      msg: 'Run not found',
+    });
   });
 });
 
@@ -386,7 +389,7 @@ privateRouter.put('/:runid', function (req, res, next) {
  * @apiGroup Run
  * @apiVersion 1.0.0
  */
-adminRouter.delete('/:runids', function (req, res) {
+adminRouter.delete('/:runids', function (req, res, next) {
   const ids = req.params.runids.split(',');
   if (ids.some(id => !ObjectId.isValid(id))) {
     return next();
@@ -397,7 +400,7 @@ adminRouter.delete('/:runids', function (req, res) {
     .exec(function (err, dbRun) {
       if (err) {
         logger.error(err);
-        res.status(400).send({
+        return res.status(400).send({
           msg: 'Could not get run',
           err: err.message,
         });
@@ -409,6 +412,10 @@ adminRouter.delete('/:runids', function (req, res) {
             msg: 'You have no authority to access this api',
           });
         }
+      } else {
+        return res.status(404).send({
+          msg: 'Run not found',
+        });
       }
       simRun.deleteMany(
         {
