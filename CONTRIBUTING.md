@@ -183,7 +183,9 @@ The tests use Node.js's built-in test runner and do not need a running MongoDB o
 | `test/pathFinder.test.js` | Line course numbering: tile order, intersections, checkpoints, evacuation zone, floors |
 | `test/models.integration.test.js` | Map validation on save and run initialisation from a map |
 | `test/api.integration.test.js` | The Line and Maze run APIs store the judge's input and score it with the league's rule |
-| `test/ranking.integration.test.js` | Rankings: best-N runs, normalisation, score adjustments, tie-breaks, victim totals, disclosure |
+| `test/authLevels.test.js` | Access checks: competition levels and roles, who may see or judge a run |
+| `test/runs.lifecycle.integration.test.js` | Creating, viewing, adjusting and deleting runs through the APIs, with the login/admin guards |
+| `test/ranking.integration.test.js` | Line and Maze rankings: best-N runs, normalisation, score adjustments, tie-breaks, victim totals, disclosure |
 | `test/maps.integration.test.js` | Maximum score shown in the Line and Maze map editors |
 | `test/outputs.integration.test.js` | Score sheet and map image PDF/PNG generation |
 
