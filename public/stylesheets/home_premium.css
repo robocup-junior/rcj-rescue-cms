@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Outfit:wght@300;400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap');
 
 :root {
   --primary-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
@@ -10,7 +10,7 @@
 
 body {
   background-color: #f8fafc;
-  font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+  font-family: 'Outfit', sans-serif;
   color: #1e293b;
 }
 

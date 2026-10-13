@@ -53,3 +53,12 @@
   font-weight: 700;
   font-style: normal;
 }
+
+/*
+ * Outfit and Inter have no Japanese glyphs. With lang="ja" (set by translate_config.js),
+ * Japanese text falls back to Japanese fonts instead of Chinese or Korean ones: the generic
+ * sans-serif in each stylesheet follows the page language, and this sets the inherited default.
+ */
+html:lang(ja) {
+  font-family: 'Outfit', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'BIZ UDPGothic', 'Yu Gothic UI', 'Yu Gothic', Meiryo, 'Noto Sans JP', 'Noto Sans CJK JP', sans-serif;
+}
