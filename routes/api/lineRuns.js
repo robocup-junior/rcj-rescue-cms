@@ -333,15 +333,15 @@ publicRouter.get('/:runid', async function (req, res, next) {
         dbRun.tiles = initDbRun.tiles;
         dbRun.LoPs = initDbRun.LoPs;
         dbRun.nl = initDbRun.nl;
-        await dbRun.save(function (err) {
-          if (err) {
-            logger.error(err);
-            return res.status(400).send({
-              err: err.message,
-              msg: 'Could not get run',
-            });
-          }
-        });
+        try {
+          await dbRun.save();
+        } catch (err) {
+          logger.error(err);
+          return res.status(400).send({
+            err: err.message,
+            msg: 'Could not get run',
+          });
+        }
       }
       
       dbRun = dbRun.toObject();
