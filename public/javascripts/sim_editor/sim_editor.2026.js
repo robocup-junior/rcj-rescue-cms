@@ -142,7 +142,6 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
     ]
 
     // Custom room 4 setup
-    let useCustomRoom4 = document.getElementById("showRoom4Canvas");
     $scope.room4Img = new Image;
     /*let imgElement = document.getElementById("inputImg");
     let inputElement = document.getElementById("selectImg");
@@ -2621,16 +2620,19 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
         }
     }
 
-    $scope.updateRoom4Pick = function() {
-        if ($scope.area4Room.value == "Custom Room") {
-            //inputElement.style.display = "inline";
-            useCustomRoom4.style.display = "inline";
-        }
-        else {
-            //inputElement.style.display = "none";
-            useCustomRoom4.style.display = "none";
-        }
-    }
+    // The "Create Custom Room 4" button is shown by the page (ng-show) when the custom room is picked
+    $scope.updateRoom4Pick = function() {};
+
+    // Starts as "None" (this used to be done by ng-init on the old select)
+    if (!$scope.area4Room) $scope.area4Room = $scope.area4[0];
+
+    $scope.pickArea4Room = function(room) {
+        $scope.area4Room = room;
+    };
+
+    $scope.isArea4Room = function(room) {
+        return !!$scope.area4Room && $scope.area4Room.value === room.value;
+    };
     
     // tag custom room 4
     function room4CorrectSize() {
@@ -3310,6 +3312,28 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
         return direct || _firstCogLabel(tile.halfWallCognitives, [3, 11, 2, 8]);
     };
 
+    // Fake victims (Φ/Ψ/Ω exported as decoys worth 0 points) are drawn in their own colour on the map.
+    // Each map image shows one victim type on one side of the tile, which can stand for the wall victim
+    // and several half-wall positions: 'fake' when all of them are fake, 'mixed' when only some are.
+    const _sideHalfWallIndices = { top: [0, 4, 1, 7], right: [5, 13, 6, 12], bottom: [10, 14, 9, 15], left: [3, 11, 2, 8] };
+    const _letterToHalfWallNum = { H: 1, U: 2, S: 3 };
+
+    $scope.victimImageClass = function(tile, side, letter) {
+        if (!tile) return '';
+        let fake = 0, real = 0;
+        if (tile.victims && tile.victims[side] === letter) {
+            if (tile.victim_is_fake) fake++; else real++;
+        }
+        if (tile.halfWallVic) {
+            for (const i of _sideHalfWallIndices[side]) {
+                if (Number(tile.halfWallVic[i]) !== _letterToHalfWallNum[letter]) continue;
+                if (tile.halfWallVicFakes && tile.halfWallVicFakes[i]) fake++; else real++;
+            }
+        }
+        if (!fake) return '';
+        return real ? 'sim-fake-victim-mixed' : 'sim-fake-victim';
+    };
+
     $scope.cogTopIsFake = function(tile) {
         if (!tile) return false;
         var hasCode = (tile.cognitives && tile.cognitives.top_code && tile.cognitives.top_code.length === 5) || _hasCogCode(tile.halfWallCognitives, [0, 4, 1, 7]);
@@ -3394,30 +3418,33 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
 
         if(victimScore > 0) exitBonus += (victimScore + checkpointScore) * 0.1
 
+        const t = function (key) { return $translate.instant('admin.simMapEditor.maxScore.' + key); };
+        const fmt = function (value) { return Number(value).toFixed(2).replace(/\.00$/, ''); };
+        const rows = [
+            { icon: 'fa-user-injured', label: t('tokens'), value: victimScore },
+            { icon: 'fa-flag-checkered', label: t('checkpoints'), value: checkpointScore },
+            { icon: 'fa-door-open', label: t('exitBonus'), value: exitBonus },
+            { icon: 'fa-map', label: t('mapBonus'), value: 1.2*(victimScore + checkpointScore + exitBonus) }
+        ];
         let html = `
-            <div class='text-center'>
-                <i class='fas fa-calculator fa-3x'></i>
-            </div><hr>
-            <table class='custom'>
-                <thead>
-                    <th>Victim / Hazard map score</th>
-                    <th>Checkpoint score</th>
-                    <th>Exit bonus</th>
-                    <th>Map bonus</th>
-                    <th>Total score</th>
-                </thead>
-                <tbody>
-                    <td>${victimScore.toFixed(2)}</td>
-                    <td>${checkpointScore.toFixed(2)}</td>
-                    <td>${exitBonus.toFixed(2)}</td>
-                    <td>${(1.2*(victimScore + checkpointScore + exitBonus)).toFixed(2)}</td>
-                    <td>${(2.2*(victimScore + checkpointScore + exitBonus)).toFixed(2)}</td>
-                </tbody>
-            </table>
+            <div class='sim-score'>
+                <div class='sim-score-total'>
+                    <span class='sim-score-total-label'><i class='fas fa-calculator'></i>${t('total')}</span>
+                    <span class='sim-score-total-value'>${fmt(2.2*(victimScore + checkpointScore + exitBonus))}</span>
+                </div>
+                <div class='sim-score-rows'>
+                    ${rows.map(function (row) {
+                        return `<div class='sim-score-row'><span><i class='fas ${row.icon}'></i>${row.label}</span><strong>${fmt(row.value)}</strong></div>`;
+                    }).join('')}
+                </div>
+                <div class='sim-score-note'>${t('note')}</div>
+            </div>
         `;
         Swal.fire({
             html: html,
-            showCloseButton: true, 
+            showCloseButton: true,
+            customClass: 'sim-score-popup',
+            confirmButtonText: 'OK'
         })
 
     }
@@ -3471,7 +3498,53 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
 // Please note that $uibModalInstance represents a modal window (instance) dependency.
 // It is not the same as the $uibModal service used above.
 
-app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', 'x', 'y', 'z', function ($scope, $uibModalInstance, x, y, z) {
+// Cognitive targets are stored as a 5-letter ring code (K, R, Y, G, B). The type is decided by the
+// sum of the ring values, as in the Maze editor: 0 = F, 1 = P, 2 = C, 3 = O, anything else is fake.
+var SimCognitive = (function () {
+    var values = { K: -2, R: -1, Y: 0, G: 1, B: 2 };
+    var types = [
+        { letter: 'F', sum: 0, color: '#d32f2f', bg: '#fdecea', name: 'admin.simMapEditor.ctF' },
+        { letter: 'P', sum: 1, color: '#6a1b9a', bg: '#f3e5f5', name: 'admin.simMapEditor.ctP' },
+        { letter: 'C', sum: 2, color: '#1565c0', bg: '#e3f2fd', name: 'admin.simMapEditor.ctC' },
+        { letter: 'O', sum: 3, color: '#e65100', bg: '#fff3e0', name: 'admin.simMapEditor.ctO' },
+        { letter: null, sum: null, color: '#6c757d', bg: '#f1f3f5', name: 'admin.simMapEditor.ctFake' }
+    ];
+    function isCode(code) {
+        return typeof code === 'string' && /^[KRYGB]{5}$/.test(code);
+    }
+    function sum(code) {
+        var total = 0;
+        for (var i = 0; i < code.length; i++) total += values[code[i]] || 0;
+        return total;
+    }
+    function type(code) {
+        if (!isCode(code)) return null;
+        var total = sum(code);
+        return types.find(function (t) { return t.sum === total; }) || types[types.length - 1];
+    }
+    return {
+        values: values,
+        types: types,
+        isCode: isCode,
+        sum: sum,
+        type: type,
+        image: function (code) {
+            return isCode(code) ? '/images/cognitive_targets/' + code + '.png' : '';
+        }
+    };
+})();
+
+app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', '$uibModal', '$translate', 'x', 'y', 'z', function ($scope, $uibModalInstance, $uibModal, $translate, x, y, z) {
+    // Floor colours of the one-tile passages between areas (rules 3.3.4 / 3.4). The values are what
+    // the world export looks for, so they must not change.
+    $scope.passageColors = [
+        { color: '#1a1ae6', from: 1, to: 2, name: 'admin.simMapEditor.passageBlue' },
+        { color: '#e7e71a', from: 1, to: 3, name: 'admin.simMapEditor.passageYellow' },
+        { color: '#08D508', from: 1, to: 4, name: 'admin.simMapEditor.passageGreen' },
+        { color: '#4d1a99', from: 2, to: 3, name: 'admin.simMapEditor.passagePurple' },
+        { color: '#e7991a', from: 2, to: 4, name: 'admin.simMapEditor.passageOrange' },
+        { color: '#e71a1a', from: 3, to: 4, name: 'admin.simMapEditor.passageRed' }
+    ];
     console.log($scope.cell)
     $scope.cell = $scope.$parent.cells[x + ',' + y + ',' + z];
     $scope.isStart = $scope.$parent.startTile.x == x &&
@@ -3532,6 +3605,130 @@ app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', 'x', 'y', 'z'
         }
         return arr;
     }
+    // Cognitive targets: edited in their own dialog, like the Maze editor
+    function openCognitiveTarget(code, label, onSet) {
+        $uibModal.open({
+            animation: true,
+            templateUrl: '/templates/sim_editor/cognitive_target_modal.2026.html',
+            controller: 'SimCognitiveTargetModalCtrl',
+            size: 'lg',
+            resolve: {
+                code: function () { return code; },
+                label: function () { return label; }
+            }
+        }).result.then(onSet, angular.noop);
+    }
+
+    $scope.cogImage = SimCognitive.image;
+    $scope.cogType = SimCognitive.type;
+
+    $scope.wallCogCode = function (dir) {
+        return ($scope.cell.tile.cognitives && $scope.cell.tile.cognitives[dir + '_code']) || '';
+    };
+
+    $scope.editWallCognitive = function (dir) {
+        $translate('admin.simMapEditor.' + dir).then(function (label) { return label; }, function () { return dir; }).then(function (label) {
+            openCognitiveTarget($scope.wallCogCode(dir), label, function (code) {
+                // Only one victim per tile
+                $scope.cell.tile.victims = {};
+                $scope.cell.tile.cognitives = {};
+                $scope.cell.tile.cognitives[dir + '_code'] = code;
+                $scope.setCognitiveVictim($scope.cell, dir, code);
+            });
+        });
+    };
+
+    $scope.clearWallCognitive = function (dir) {
+        if ($scope.cell.tile.cognitives) $scope.cell.tile.cognitives[dir + '_code'] = '';
+        $scope.setCognitiveVictim($scope.cell, dir, '');
+    };
+
+    $scope.halfWallCogCode = function (idx) {
+        return ($scope.cell.tile.halfWallCognitives && $scope.cell.tile.halfWallCognitives[idx]) || '';
+    };
+
+    $scope.editHalfWallCognitive = function (idx) {
+        openCognitiveTarget($scope.halfWallCogCode(idx), '#' + (idx + 1), function (code) {
+            if (!$scope.cell.tile.halfWallCognitives) $scope.cell.tile.halfWallCognitives = {};
+            $scope.cell.tile.halfWallCognitives[idx] = code;
+            $scope.setHalfWallCognitive($scope.cell, idx, code);
+        });
+    };
+
+    $scope.clearHalfWallCognitive = function (idx) {
+        if ($scope.cell.tile.halfWallCognitives) $scope.cell.tile.halfWallCognitives[idx] = '';
+        $scope.setHalfWallCognitive($scope.cell, idx, '');
+    };
+
+    // Victim rotation: symbol shown in the dial preview
+    const _wallSymbols = { H: 'Φ', S: 'Ψ', U: 'Ω' };
+    const _halfWallSymbols = { 1: 'Φ', 3: 'Ψ', 2: 'Ω' };
+
+    $scope.wallVictimSymbol = function () {
+        const victims = $scope.cell.tile.victims || {};
+        for (const dir of ['top', 'right', 'bottom', 'left']) {
+            if (_wallSymbols[victims[dir]]) return _wallSymbols[victims[dir]];
+        }
+        return '';
+    };
+
+    $scope.wallVictimDir = function () {
+        const victims = $scope.cell.tile.victims || {};
+        return ['top', 'right', 'bottom', 'left'].find(function (dir) { return _wallSymbols[victims[dir]]; }) || '';
+    };
+
+    $scope.wallHasCognitive = function () {
+        const cognitives = $scope.cell.tile.cognitives || {};
+        return ['top', 'right', 'bottom', 'left'].some(function (dir) { return SimCognitive.isCode(cognitives[dir + '_code']); });
+    };
+
+    // Rotation and "fake" exist only for letter victims (Φ/Ψ/Ω). When the letter victim goes away
+    // (None, or a cognitive target instead), clear them so they don't linger, e.g. in the max score.
+    $scope.$watch(function () { return $scope.wallVictimSymbol(); }, function (symbol) {
+        if (symbol) return;
+        if ($scope.cell.tile.victim_is_fake) $scope.cell.tile.victim_is_fake = false;
+        if ($scope.cell.tile.single_victim_rotation) $scope.cell.tile.single_victim_rotation = 0;
+    });
+
+    $scope.$watch(function () {
+        let key = '';
+        for (let i = 0; i < 16; i++) key += $scope.halfWallSymbol(i) ? '1' : '0';
+        return key;
+    }, function (key) {
+        const tile = $scope.cell.tile;
+        for (let i = 0; i < 16; i++) {
+            if (key[i] === '1') continue;
+            if (tile.halfWallVicFakes && tile.halfWallVicFakes[i]) tile.halfWallVicFakes[i] = false;
+            if (tile.halfWallVicRots && Number(tile.halfWallVicRots[i])) tile.halfWallVicRots[i] = 0;
+        }
+    });
+
+    $scope.halfWallSymbol = function (idx) {
+        return (($scope.cell.tile.halfWallVic && _halfWallSymbols[Number($scope.cell.tile.halfWallVic[idx])]) || '');
+    };
+
+    $scope.halfWallRotation = function (idx) {
+        return Number(($scope.cell.tile.halfWallVicRots && $scope.cell.tile.halfWallVicRots[idx]) || 0);
+    };
+
+    $scope.editHalfWallRotation = function (idx) {
+        $uibModal.open({
+            animation: true,
+            templateUrl: '/templates/sim_editor/rotation_modal.html',
+            controller: 'SimRotationModalCtrl',
+            windowClass: 'sim-rot-modal',
+            resolve: {
+                angle: function () { return $scope.halfWallRotation(idx); },
+                symbol: function () { return $scope.halfWallSymbol(idx); },
+                image: function () { return ''; },
+                label: function () { return '#' + (idx + 1); }
+            }
+        }).result.then(function (angle) {
+            if (!$scope.cell.tile.halfWallVicRots) $scope.cell.tile.halfWallVicRots = {};
+            $scope.cell.tile.halfWallVicRots[idx] = angle;
+        }, angular.noop);
+    };
+
     $scope.ok = function () {
         $scope.$parent.recalculateLinear();
         $uibModalInstance.close();
@@ -3539,30 +3736,169 @@ app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', 'x', 'y', 'z'
 
 }]);
 
-app.directive('cognitiveInput', function() {
+app.controller('SimCognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'code', 'label', function ($scope, $uibModalInstance, code, label) {
+    $scope.label = label;
+    $scope.rings = (SimCognitive.isCode(code) ? code : 'YYYYY').split('');
+    $scope.ringNumbers = [1, 2, 3, 4, 5];
+    $scope.types = SimCognitive.types;
+    $scope.colors = [
+        { code: 'K', name: 'admin.mazeMapEditor.cBlack', active: 'btn-dark', idle: 'btn-outline-secondary' },
+        { code: 'R', name: 'admin.mazeMapEditor.cRed', active: 'btn-danger', idle: 'btn-outline-danger' },
+        { code: 'Y', name: 'admin.mazeMapEditor.yellow', active: 'btn-warning', idle: 'btn-outline-warning' },
+        { code: 'G', name: 'admin.mazeMapEditor.green', active: 'btn-success', idle: 'btn-outline-success' },
+        { code: 'B', name: 'admin.mazeMapEditor.cyan', active: 'btn-info', idle: 'btn-outline-info' }
+    ];
+
+    function currentCode() {
+        return $scope.rings.join('');
+    }
+
+    $scope.setRing = function (i, color) {
+        $scope.rings[i] = color;
+    };
+    $scope.colorValue = function (color) {
+        return SimCognitive.values[color];
+    };
+    $scope.total = function () {
+        return SimCognitive.sum(currentCode());
+    };
+    $scope.previewImage = function () {
+        return SimCognitive.image(currentCode());
+    };
+    $scope.typeLetter = function () {
+        return SimCognitive.type(currentCode()).letter;
+    };
+    $scope.typeName = function () {
+        return SimCognitive.type(currentCode()).name;
+    };
+    $scope.typeColor = function () {
+        return SimCognitive.type(currentCode()).color;
+    };
+    $scope.typeBgColor = function () {
+        return SimCognitive.type(currentCode()).bg;
+    };
+
+    // Pick random rings that give the requested type
+    $scope.autoSet = function (type) {
+        var letters = Object.keys(SimCognitive.values);
+        for (var attempt = 0; attempt < 500; attempt++) {
+            var rings = [];
+            for (var i = 0; i < 5; i++) rings.push(letters[Math.floor(Math.random() * letters.length)]);
+            if (SimCognitive.type(rings.join('')) === type) {
+                $scope.rings = rings;
+                return;
+            }
+        }
+    };
+
+    $scope.ok = function () {
+        $uibModalInstance.close(currentCode());
+    };
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+}]);
+
+app.controller('SimRotationModalCtrl', ['$scope', '$uibModalInstance', 'angle', 'symbol', 'image', 'label', function ($scope, $uibModalInstance, angle, symbol, image, label) {
+    $scope.value = { angle: angle };
+    $scope.symbol = symbol;
+    $scope.image = image;
+    $scope.label = label;
+    $scope.ok = function () {
+        $uibModalInstance.close($scope.value.angle);
+    };
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+}]);
+
+// Rotation of a victim symbol on its wall, in degrees (0-359). Seen from the robot, a positive
+// angle turns the symbol clockwise, the same way the preview is drawn.
+app.directive('simRotationDial', function () {
+    function normalize(value) {
+        const n = Math.round(Number(value) || 0);
+        return ((n % 360) + 360) % 360;
+    }
+
     return {
-        restrict: 'A',
+        restrict: 'E',
         require: 'ngModel',
-        link: function(scope, element, attrs, ngModel) {
-            element.on('input', function() {
-                var val = (element.val() || '').toUpperCase().replace(/[^KYRGB]/g, '').slice(0, 5);
-                element.val(val);
-                ngModel.$setViewValue(val);
-                scope.$apply();
-            });
-            element.on('blur', function() {
-                var val = (element.val() || '');
-                if (val.length > 0 && val.length < 5) {
-                    Swal.fire({
-                        icon: 'warning',
-                        title: 'Invalid Cognitive Target',
-                        text: 'The code must be exactly 5 characters (e.g. KYRGB).',
-                        confirmButtonText: 'OK'
-                    });
-                    element.val('');
-                    ngModel.$setViewValue('');
-                    scope.$apply();
+        scope: {
+            symbol: '<',
+            image: '<?',
+            isDisabled: '<?ngDisabled'
+        },
+        templateUrl: '/templates/sim_editor/rotation_dial.html',
+        link: function (scope, element, attrs, ngModel) {
+            scope.angle = 0;
+            scope.angleInput = 0;
+
+            ngModel.$render = function () {
+                scope.angle = normalize(ngModel.$viewValue);
+                scope.angleInput = scope.angle;
+            };
+
+            function set(value) {
+                if (scope.isDisabled) return;
+                scope.angle = normalize(value);
+                scope.angleInput = scope.angle;
+                ngModel.$setViewValue(scope.angle);
+            }
+
+            scope.set = set;
+            scope.step = function (delta) {
+                set(scope.angle + delta);
+            };
+            scope.random = function () {
+                set(Math.floor(Math.random() * 360));
+            };
+            scope.typed = function () {
+                if (scope.angleInput === null || scope.angleInput === undefined || scope.angleInput === '') return;
+                set(scope.angleInput);
+            };
+
+            // Dragging on the dial: 0° at the top, clockwise. Snaps to 5°, or 1° with Shift.
+            function angleFromEvent(dial, event) {
+                const rect = dial.getBoundingClientRect();
+                const dx = event.clientX - (rect.left + rect.width / 2);
+                const dy = event.clientY - (rect.top + rect.height / 2);
+                let deg = Math.atan2(dx, -dy) * 180 / Math.PI;
+                const snap = event.shiftKey ? 1 : 5;
+                return Math.round(deg / snap) * snap;
+            }
+
+            const root = element[0];
+            root.addEventListener('pointerdown', function (event) {
+                const dial = event.target.closest('.sim-rot-dial');
+                if (!dial || scope.isDisabled) return;
+                event.preventDefault();
+                dial.focus();
+                dial.setPointerCapture(event.pointerId);
+                scope.$apply(function () { set(angleFromEvent(dial, event)); });
+
+                function move(e) {
+                    scope.$apply(function () { set(angleFromEvent(dial, e)); });
                 }
+                function up() {
+                    dial.removeEventListener('pointermove', move);
+                    dial.removeEventListener('pointerup', up);
+                    dial.removeEventListener('pointercancel', up);
+                }
+                dial.addEventListener('pointermove', move);
+                dial.addEventListener('pointerup', up);
+                dial.addEventListener('pointercancel', up);
+            });
+
+            // Arrow keys: 1° (15° with Shift)
+            root.addEventListener('keydown', function (event) {
+                if (!event.target.closest('.sim-rot-dial') || scope.isDisabled) return;
+                const amount = event.shiftKey ? 15 : 1;
+                let delta = 0;
+                if (event.key === 'ArrowRight' || event.key === 'ArrowUp') delta = amount;
+                if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') delta = -amount;
+                if (!delta) return;
+                event.preventDefault();
+                scope.$apply(function () { scope.step(delta); });
             });
         }
     };

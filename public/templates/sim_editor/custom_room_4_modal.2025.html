@@ -1,32 +1,36 @@
 <div class="modal-header sim-modal-header">
-  <h3 class="modal-title"><i class="fas fa-paint-brush"></i>Custom Room 4 Creator</h3>
+  <h3 class="modal-title"><i class="fas fa-paint-brush"></i>{{"admin.simMapEditor.room4Creator.title" | translate}}</h3>
 </div>
 <div class="modal-body sim-modal-body">
   <div class="sim-room4-creator">
     <div id="test"></div>
+
+    <div class="sim-room4-toolbar">
+      <!-- The canvas code keeps these three checkboxes mutually exclusive -->
+      <div class="sim-room4-tools">
+        <label class="sim-room4-tool tool-wall"><input type="checkbox" id="drawWall" checked /><i class="fas fa-pen"></i>{{"admin.simMapEditor.room4Creator.drawWalls" | translate}}</label>
+        <label class="sim-room4-tool tool-victim"><input type="checkbox" id="drawVic" /><i class="fas fa-user-injured"></i>{{"admin.simMapEditor.room4Creator.drawVictims" | translate}}</label>
+        <label class="sim-room4-tool tool-erase"><input type="checkbox" id="erase" /><i class="fas fa-eraser"></i>{{"admin.simMapEditor.room4Creator.erase" | translate}}</label>
+      </div>
+      <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" ng-click="clearCanvas()">
+        <i class="fas fa-trash-alt mr-1"></i>{{"admin.simMapEditor.room4Creator.clear" | translate}}
+      </button>
+    </div>
+
     <canvas id="room4Canvas" drawing></canvas>
 
-    <div class="sim-room4-panel">
-      <label><input type="checkbox" id="drawWall" checked />Draw Walls (Black)</label>
-      <label><input type="checkbox" id="drawVic" />Draw Victims (Red)</label>
-      <label><input type="checkbox" id="erase" />Erase</label>
-      <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" ng-click="clearCanvas()">
-        <i class="fas fa-eraser mr-1"></i>Clear Canvas
-      </button>
-    </div>
-
-    <div class="sim-room4-panel">
-      <label for="importCanvas">Import Room 4 Picture to Canvas:</label>
-      <input type="file" id="importCanvas" accept="image/png, image/jpeg" onclick="this.value=null;" />
-    </div>
-
-    <div class="sim-room4-panel">
+    <div class="sim-room4-toolbar">
+      <label class="btn btn-sm btn-outline-primary rounded-pill mb-0" for="importCanvas">
+        <i class="fas fa-file-image mr-1"></i>{{"admin.simMapEditor.room4Creator.import" | translate}}
+        <input type="file" id="importCanvas" accept="image/png, image/jpeg" onclick="this.value=null;" hidden />
+      </label>
       <button class="btn btn-sm btn-outline-primary rounded-pill" type="button" ng-click="downloadCanvas()">
-        <i class="fas fa-download mr-1"></i>Download Custom Room 4
+        <i class="fas fa-download mr-1"></i>{{"admin.simMapEditor.room4Creator.download" | translate}}
       </button>
+      <span class="sim-room4-note">{{"admin.simMapEditor.room4Creator.hint" | translate}}</span>
     </div>
   </div>
 </div>
 <div class="modal-footer sim-modal-footer">
-  <button class="btn btn-primary" type="button" ng-click="closeRoom4()">OK</button>
+  <button class="btn btn-primary" type="button" ng-click="closeRoom4()"><i class="fas fa-check mr-1"></i>OK</button>
 </div>

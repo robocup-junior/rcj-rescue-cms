@@ -24,24 +24,42 @@
       <label class="sim-chip" ng-class="{active: cell.tile.swamp}"><input type="checkbox" ng-model="cell.tile.swamp" id="isSwamp"><i class="fas fa-water"></i>{{"admin.simMapEditor.swamp" | translate}}</label>
       <label class="sim-chip" ng-class="{active: cell.tile.obstacle}"><input type="checkbox" ng-model="cell.tile.obstacle" id="isObstacle"><img src="/images/obstacle.png" height="20" alt="">{{"admin.simMapEditor.obstacle" | translate}}</label>
       <label class="sim-chip start" ng-class="{active: isStart, disabled: isStart}"><input type="checkbox" ng-model="isStart" ng-disabled="isStart" ng-change="startChanged()" id="isStart"><i class="fas fa-play"></i>{{"admin.simMapEditor.start" | translate}}</label>
-      <label class="sim-chip-select" for="cellColor">{{"admin.simMapEditor.cellColor" | translate}}
-        <select class="form-control form-control-sm" name="singleSelect" ng-model="cell.tile.color" id="cellColor">
-      <option value="">None</option>
-      <option value="#1a1ae6">Blue (Room 1 ←→ Room 2)</option>
-      <option value="#4d1a99">Purple (Room 2 ←→ Room 3)</option>
-      <option value="#e71a1a">Red (Room 3 ←→ Room 4)</option>
-      <option value="#08D508">Green (Room 1 ←→ Room 4)</option>
-      <option value="#e7991a">Orange (Room 2 ←→ Room 4)</option>
-      <option value="#e7e71a">Yellow (Room 1 ←→ Room 3)</option>
-        </select>
-      </label>
     </div>
   </div>
   
   <div class="sim-modal-section">
+    <div class="sim-modal-section-title passage">{{"admin.simMapEditor.passageTitle" | translate}}<small>{{"admin.simMapEditor.passageHint" | translate}}</small></div>
+    <div class="sim-passage-grid">
+      <button type="button" class="sim-passage" ng-class="{'active': !cell.tile.color}" ng-click="cell.tile.color = ''">
+        <span class="sim-passage-swatch none"><i class="fas fa-ban"></i></span>
+        <span class="sim-passage-text">
+          <span class="sim-passage-rooms">{{"admin.simMapEditor.passageNone" | translate}}</span>
+        </span>
+      </button>
+      <button type="button" class="sim-passage" ng-repeat="p in passageColors" ng-class="{'active': cell.tile.color === p.color}" ng-click="cell.tile.color = p.color" ng-style="{'--passage-color': p.color}">
+        <span class="sim-passage-swatch"></span>
+        <span class="sim-passage-text">
+          <span class="sim-passage-rooms">
+            <span class="sim-passage-room">{{"admin.simMapEditor.areaShort" | translate}}{{p.from}}</span><i class="fas fa-exchange-alt"></i><span class="sim-passage-room">{{"admin.simMapEditor.areaShort" | translate}}{{p.to}}</span>
+          </span>
+          <span class="sim-passage-name">{{p.name | translate}}</span>
+        </span>
+        <i class="fas fa-check-circle sim-passage-check"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="sim-modal-section">
   <div class="sim-modal-section-title victims">{{"admin.simMapEditor.placement" | translate}}<small>{{"admin.simMapEditor.oneVictim" | translate}}</small></div>
-  <div class="sim-table-scroll">
-  <table class="sim-victim-table">
+  <div class="sim-victim-layout">
+  <div class="sim-victim-main sim-table-scroll">
+  <table class="sim-victim-table sim-placement-table">
+    <tr class="sim-group-row">
+      <th></th>
+      <th class="sim-group-none"></th>
+      <th class="sim-group-letter" colspan="3">{{"admin.simMapEditor.letterVictims" | translate}}<small>{{"admin.simMapEditor.letterOnlyHint" | translate}}</small></th>
+      <th class="sim-group-ct">{{"admin.simMapEditor.ctGroup" | translate}}<small>{{"admin.simMapEditor.ctGroupHint" | translate}}</small></th>
+    </tr>
     <tr align="center">
       <th>&nbsp;</th>
       <th><img src="/images/no_victims.png" alt="None" height="20"></th>
@@ -56,8 +74,16 @@
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="H" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="S" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="U" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
-        <td style="white-space: nowrap">
-          <input type="text" cognitive-input ng-model="cell.tile.cognitives.top_code" maxlength="5" style="display: inline-block; width:8ch" ng-click="cell.tile.victims={}; setCognitiveVictim(cell, 'top', cell.tile.cognitives.top_code)" ng-change="setCognitiveVictim(cell, 'top', cell.tile.cognitives.top_code)">
+        <td class="sim-ct-cell">
+          <span class="sim-ct-wrap">
+            <button type="button" class="sim-ct-chip" ng-click="editWallCognitive('top')" ng-style="wallCogCode('top') ? {'border-color': cogType(wallCogCode('top')).color, 'background-color': cogType(wallCogCode('top')).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
+              <img ng-if="wallCogCode('top')" ng-src="{{cogImage(wallCogCode('top'))}}" alt="">
+              <span ng-if="wallCogCode('top')" class="sim-ct-chip-letter" ng-style="{'color': cogType(wallCogCode('top')).color}">{{cogType(wallCogCode('top')).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
+              <i ng-if="!wallCogCode('top')" class="fas fa-plus"></i>
+              <i class="fas fa-cog sim-ct-chip-gear"></i>
+            </button>
+            <button ng-if="wallCogCode('top')" type="button" class="sim-ct-clear" ng-click="clearWallCognitive('top')" title="{{'admin.simMapEditor.ctRemove' | translate}}"><i class="fas fa-times"></i></button>
+          </span>
         </td>
     </tr>
     <tr align="center">
@@ -66,8 +92,16 @@
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="H" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="S" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="U" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
-        <td style="white-space: nowrap">
-          <input type="text" cognitive-input ng-model="cell.tile.cognitives.bottom_code" maxlength="5" style="display: inline-block; width:8ch" ng-click="cell.tile.victims={}; setCognitiveVictim(cell, 'bottom', cell.tile.cognitives.bottom_code)" ng-change="setCognitiveVictim(cell, 'bottom', cell.tile.cognitives.bottom_code)">
+        <td class="sim-ct-cell">
+          <span class="sim-ct-wrap">
+            <button type="button" class="sim-ct-chip" ng-click="editWallCognitive('bottom')" ng-style="wallCogCode('bottom') ? {'border-color': cogType(wallCogCode('bottom')).color, 'background-color': cogType(wallCogCode('bottom')).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
+              <img ng-if="wallCogCode('bottom')" ng-src="{{cogImage(wallCogCode('bottom'))}}" alt="">
+              <span ng-if="wallCogCode('bottom')" class="sim-ct-chip-letter" ng-style="{'color': cogType(wallCogCode('bottom')).color}">{{cogType(wallCogCode('bottom')).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
+              <i ng-if="!wallCogCode('bottom')" class="fas fa-plus"></i>
+              <i class="fas fa-cog sim-ct-chip-gear"></i>
+            </button>
+            <button ng-if="wallCogCode('bottom')" type="button" class="sim-ct-clear" ng-click="clearWallCognitive('bottom')" title="{{'admin.simMapEditor.ctRemove' | translate}}"><i class="fas fa-times"></i></button>
+          </span>
         </td>
     </tr>
     <tr align="center">
@@ -76,8 +110,16 @@
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="H" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="S" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="U" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
-        <td style="white-space: nowrap">
-          <input type="text" cognitive-input ng-model="cell.tile.cognitives.left_code" maxlength="5" style="display: inline-block; width:8ch" ng-click="cell.tile.victims={}; setCognitiveVictim(cell, 'left', cell.tile.cognitives.left_code)" ng-change="setCognitiveVictim(cell, 'left', cell.tile.cognitives.left_code)">
+        <td class="sim-ct-cell">
+          <span class="sim-ct-wrap">
+            <button type="button" class="sim-ct-chip" ng-click="editWallCognitive('left')" ng-style="wallCogCode('left') ? {'border-color': cogType(wallCogCode('left')).color, 'background-color': cogType(wallCogCode('left')).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
+              <img ng-if="wallCogCode('left')" ng-src="{{cogImage(wallCogCode('left'))}}" alt="">
+              <span ng-if="wallCogCode('left')" class="sim-ct-chip-letter" ng-style="{'color': cogType(wallCogCode('left')).color}">{{cogType(wallCogCode('left')).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
+              <i ng-if="!wallCogCode('left')" class="fas fa-plus"></i>
+              <i class="fas fa-cog sim-ct-chip-gear"></i>
+            </button>
+            <button ng-if="wallCogCode('left')" type="button" class="sim-ct-clear" ng-click="clearWallCognitive('left')" title="{{'admin.simMapEditor.ctRemove' | translate}}"><i class="fas fa-times"></i></button>
+          </span>
         </td>
     </tr>
     <tr align="center">
@@ -86,20 +128,46 @@
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="H" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="S" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="U" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
-        <td style="white-space: nowrap">
-          <input type="text" cognitive-input ng-model="cell.tile.cognitives.right_code" maxlength="5" style="display: inline-block; width:8ch" ng-click="cell.tile.victims={}; setCognitiveVictim(cell, 'right', cell.tile.cognitives.right_code)" ng-change="setCognitiveVictim(cell, 'right', cell.tile.cognitives.right_code)">
+        <td class="sim-ct-cell">
+          <span class="sim-ct-wrap">
+            <button type="button" class="sim-ct-chip" ng-click="editWallCognitive('right')" ng-style="wallCogCode('right') ? {'border-color': cogType(wallCogCode('right')).color, 'background-color': cogType(wallCogCode('right')).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
+              <img ng-if="wallCogCode('right')" ng-src="{{cogImage(wallCogCode('right'))}}" alt="">
+              <span ng-if="wallCogCode('right')" class="sim-ct-chip-letter" ng-style="{'color': cogType(wallCogCode('right')).color}">{{cogType(wallCogCode('right')).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
+              <i ng-if="!wallCogCode('right')" class="fas fa-plus"></i>
+              <i class="fas fa-cog sim-ct-chip-gear"></i>
+            </button>
+            <button ng-if="wallCogCode('right')" type="button" class="sim-ct-clear" ng-click="clearWallCognitive('right')" title="{{'admin.simMapEditor.ctRemove' | translate}}"><i class="fas fa-times"></i></button>
+          </span>
         </td>
     </tr>
   </table>
   </div>
 
-  <div>
-  <div class="sim-victim-options">
-    {{"admin.simMapEditor.victimRotation" | translate}}
-    <input type="number" name="rotation-spinbox" ng-model="cell.tile.single_victim_rotation" min="0" max="359" value="0" step="1" style="display: inline-block;" ng-disabled="cell.tile.victim_is_fake || (cell.tile.cognitives && ((cell.tile.cognitives.top_code && cell.tile.cognitives.top_code.length === 5) || (cell.tile.cognitives.bottom_code && cell.tile.cognitives.bottom_code.length === 5) || (cell.tile.cognitives.left_code && cell.tile.cognitives.left_code.length === 5) || (cell.tile.cognitives.right_code && cell.tile.cognitives.right_code.length === 5)))">
-
-    {{"admin.simMapEditor.victimIsFake" | translate}}
-    <input type="checkbox" name="is-fake-checkbox" ng-model="cell.tile.victim_is_fake" style="display: inline-block;" ng-change="cell.tile.victim_is_fake && (cell.tile.single_victim_rotation = 0)" ng-disabled="cell.tile.cognitives && ((cell.tile.cognitives.top_code && cell.tile.cognitives.top_code.length === 5) || (cell.tile.cognitives.bottom_code && cell.tile.cognitives.bottom_code.length === 5) || (cell.tile.cognitives.left_code && cell.tile.cognitives.left_code.length === 5) || (cell.tile.cognitives.right_code && cell.tile.cognitives.right_code.length === 5))">
+  <div class="sim-victim-side sim-letter-panel" ng-class="{'inactive': !wallVictimSymbol()}">
+    <div class="sim-letter-panel-head">
+      <span class="sim-letter-panel-title">{{"admin.simMapEditor.letterSettings" | translate}}</span>
+      <span class="sim-letter-badges"><span>Φ</span><span>Ψ</span><span>Ω</span></span>
+    </div>
+    <div class="sim-letter-state" ng-if="wallVictimSymbol()">
+      <i class="fas fa-crosshairs"></i>{{("admin.simMapEditor." + wallVictimDir()) | translate}} : <strong>{{wallVictimSymbol()}}</strong>
+    </div>
+    <div class="sim-letter-state muted" ng-if="!wallVictimSymbol() && !wallHasCognitive()">
+      <i class="fas fa-info-circle"></i>{{"admin.simMapEditor.noLetterVictim" | translate}}
+    </div>
+    <div class="sim-letter-state ct" ng-if="wallHasCognitive()">
+      <i class="fas fa-bullseye"></i>{{"admin.simMapEditor.ctNoLetterSettings" | translate}}
+    </div>
+    <div class="sim-option-block">
+      <div class="sim-option-label"><i class="fas fa-sync-alt"></i>{{"admin.simMapEditor.victimRotation" | translate}}</div>
+      <sim-rotation-dial ng-model="cell.tile.single_victim_rotation" symbol="wallVictimSymbol()" ng-disabled="!wallVictimSymbol()"></sim-rotation-dial>
+    </div>
+    <label class="sim-option-block sim-fake-toggle" ng-class="{'active': cell.tile.victim_is_fake, 'disabled': !wallVictimSymbol()}">
+      <input type="checkbox" name="is-fake-checkbox" ng-model="cell.tile.victim_is_fake" ng-disabled="!wallVictimSymbol()">
+      <span class="sim-fake-text">
+        <span class="sim-option-label"><i class="fas fa-user-secret"></i>{{"admin.simMapEditor.victimIsFake" | translate}}</span>
+        <span class="sim-fake-hint">{{"admin.simMapEditor.fakeHint" | translate}}</span>
+      </span>
+    </label>
   </div>
   </div>
 
@@ -114,18 +182,18 @@
             <img ng-src='/images/curvedWall/curved_SE.png' width="35" height="35" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.curve[(r - 1) + (c - 1) / 2] == 2" class="innerTileImg">
             <img ng-src='/images/curvedWall/curved_SW.png' width="35" height="35" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.curve[(r - 1) + (c - 1) / 2] == 3" class="innerTileImg">
             <img ng-src='/images/curvedWall/curved_NW.png' width="35" height="35" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.curve[(r - 1) + (c - 1) / 2] == 4" class="innerTileImg">
-            <img ng-src='/images/h_top.png'    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 1" class="innerTileImg">
-            <img ng-src='/images/h_right.png'  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 1" class="innerTileImg">
-            <img ng-src='/images/h_bottom.png' width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 1" class="innerTileImg">
-            <img ng-src='/images/h_left.png'   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 1" class="innerTileImg">
-            <img ng-src='/images/u_top.png'    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 2" class="innerTileImg">
-            <img ng-src='/images/u_right.png'  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 2" class="innerTileImg">
-            <img ng-src='/images/u_bottom.png' width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 2" class="innerTileImg">
-            <img ng-src='/images/u_left.png'   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 2" class="innerTileImg">
-            <img ng-src='/images/s_top.png'    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 3" class="innerTileImg">
-            <img ng-src='/images/s_right.png'  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 3" class="innerTileImg">
-            <img ng-src='/images/s_bottom.png' width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 3" class="innerTileImg">
-            <img ng-src='/images/s_left.png'   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 3" class="innerTileImg">
+            <img ng-src='/images/h_top.png' ng-class="{'sim-fake-victim': cell.tile.halfWallVicFakes && cell.tile.halfWallVicFakes[((r - 1) + (c - 1) / 2) * 4 + 0]}"    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 1" class="innerTileImg">
+            <img ng-src='/images/h_right.png' ng-class="{'sim-fake-victim': cell.tile.halfWallVicFakes && cell.tile.halfWallVicFakes[((r - 1) + (c - 1) / 2) * 4 + 1]}"  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 1" class="innerTileImg">
+            <img ng-src='/images/h_bottom.png' ng-class="{'sim-fake-victim': cell.tile.halfWallVicFakes && cell.tile.halfWallVicFakes[((r - 1) + (c - 1) / 2) * 4 + 2]}" width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 1" class="innerTileImg">
+            <img ng-src='/images/h_left.png' ng-class="{'sim-fake-victim': cell.tile.halfWallVicFakes && cell.tile.halfWallVicFakes[((r - 1) + (c - 1) / 2) * 4 + 3]}"   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 1" class="innerTileImg">
+            <img ng-src='/images/u_top.png' ng-class="{'sim-fake-victim': cell.tile.halfWallVicFakes && cell.tile.halfWallVicFakes[((r - 1) + (c - 1) / 2) * 4 + 0]}"    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 2" class="innerTileImg">
+            <img ng-src='/images/u_right.png' ng-class="{'sim-fake-victim': cell.tile.halfWallVicFakes && cell.tile.halfWallVicFakes[((r - 1) + (c - 1) / 2) * 4 + 1]}"  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 2" class="innerTileImg">
+            <img ng-src='/images/u_bottom.png' ng-class="{'sim-fake-victim': cell.tile.halfWallVicFakes && cell.tile.halfWallVicFakes[((r - 1) + (c - 1) / 2) * 4 + 2]}" width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 2" class="innerTileImg">
+            <img ng-src='/images/u_left.png' ng-class="{'sim-fake-victim': cell.tile.halfWallVicFakes && cell.tile.halfWallVicFakes[((r - 1) + (c - 1) / 2) * 4 + 3]}"   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 2" class="innerTileImg">
+            <img ng-src='/images/s_top.png' ng-class="{'sim-fake-victim': cell.tile.halfWallVicFakes && cell.tile.halfWallVicFakes[((r - 1) + (c - 1) / 2) * 4 + 0]}"    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 3" class="innerTileImg">
+            <img ng-src='/images/s_right.png' ng-class="{'sim-fake-victim': cell.tile.halfWallVicFakes && cell.tile.halfWallVicFakes[((r - 1) + (c - 1) / 2) * 4 + 1]}"  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 3" class="innerTileImg">
+            <img ng-src='/images/s_bottom.png' ng-class="{'sim-fake-victim': cell.tile.halfWallVicFakes && cell.tile.halfWallVicFakes[((r - 1) + (c - 1) / 2) * 4 + 2]}" width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 3" class="innerTileImg">
+            <img ng-src='/images/s_left.png' ng-class="{'sim-fake-victim': cell.tile.halfWallVicFakes && cell.tile.halfWallVicFakes[((r - 1) + (c - 1) / 2) * 4 + 3]}"   width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 3] == 3" class="innerTileImg">
             <img ng-src='/images/f_top.png'    width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 0] == 5 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+0)" class="innerTileImg">
             <img ng-src='/images/f_right.png'  width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 1] == 5 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+1)" class="innerTileImg">
             <img ng-src='/images/f_bottom.png' width="100%" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.halfWallVic[((r - 1) + (c - 1) / 2) * 4 + 2] == 5 && !halfWallCogLabel(cell.tile, ((r-1)+(c-1)/2)*4+2)" class="innerTileImg">
@@ -158,7 +226,7 @@
     </div>
 
     <div class="sim-table-scroll">
-    <table class="sim-victim-table" style="width: 100%; min-width: 100%; --row-width: 7ch">
+    <table class="sim-victim-table sim-halfwall-table" style="width: 100%; min-width: 100%; --row-width: 7ch">
       <tr style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)">
         <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)"></th>
         <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)" ng-repeat="c in range(16)">{{c + 1}}</th>
@@ -177,21 +245,34 @@
       </tr>
       <tr>
         <th style="width: var(--row-with)">{{"admin.simMapEditor.cognitives" | translate}}</th>
-        <td ng-repeat="c in range(16)">
-          <input type="text" cognitive-input ng-model="cell.tile.halfWallCognitives[c]" maxlength="5" style="width: 100%; display: block;" ng-change="setHalfWallCognitive(cell, c, cell.tile.halfWallCognitives[c])">
+        <td ng-repeat="c in range(16)" class="sim-ct-cell">
+          <span class="sim-ct-wrap">
+            <button type="button" class="sim-ct-chip sim-ct-chip-small" ng-click="editHalfWallCognitive(c)" ng-style="halfWallCogCode(c) ? {'border-color': cogType(halfWallCogCode(c)).color, 'background-color': cogType(halfWallCogCode(c)).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
+              <img ng-if="halfWallCogCode(c)" ng-src="{{cogImage(halfWallCogCode(c))}}" alt="">
+              <span ng-if="halfWallCogCode(c)" class="sim-ct-chip-letter" ng-style="{'color': cogType(halfWallCogCode(c)).color}">{{cogType(halfWallCogCode(c)).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
+              <i ng-if="!halfWallCogCode(c)" class="fas fa-plus"></i>
+            </button>
+            <button ng-if="halfWallCogCode(c)" type="button" class="sim-ct-clear" ng-click="clearHalfWallCognitive(c)" title="{{'admin.simMapEditor.ctRemove' | translate}}"><i class="fas fa-times"></i></button>
+          </span>
         </td>
       </tr>
       <tr>
         <th style="width: var(--row-with)"><img src="/images/no_victims.png" alt="None" height="20"/></th>
         <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="" style="display: block;" ng-change="cell.tile.halfWallCognitives[c] = ''"> </td>
       </tr>
-      <tr>
-        <th style="width: var(--row-with)">{{"admin.simMapEditor.victimRotation" | translate}}</th>
-        <td ng-repeat="c in range(16)"> <input type="number" min="0" max="359" style="width: 100%; display: block;" ng-model="cell.tile.halfWallVicRots[c]" value="0" ng-disabled="cell.tile.halfWallVicFakes[c] || (cell.tile.halfWallCognitives && cell.tile.halfWallCognitives[c] && cell.tile.halfWallCognitives[c].length === 5)"> </td>
+      <tr class="sim-letter-row">
+        <th class="sim-letter-row-head" style="width: var(--row-with)">{{"admin.simMapEditor.victimRotation" | translate}}<small class="sim-letter-only">Φ Ψ Ω</small></th>
+        <td ng-repeat="c in range(16)">
+          <button type="button" class="sim-rot-mini" ng-click="editHalfWallRotation(c)" ng-disabled="!halfWallSymbol(c) || (cell.tile.halfWallCognitives && cell.tile.halfWallCognitives[c] && cell.tile.halfWallCognitives[c].length === 5)" title="{{'admin.simMapEditor.victimRotation' | translate}}">
+            <span ng-if="halfWallSymbol(c)" class="sim-rot-mini-symbol" ng-style="{'transform': 'rotate(' + halfWallRotation(c) + 'deg)'}">{{halfWallSymbol(c)}}</span>
+            <span ng-if="halfWallSymbol(c)" class="sim-rot-mini-value sim-rot-num">{{halfWallRotation(c)}}<span class="sim-rot-deg">°</span></span>
+            <span ng-if="!halfWallSymbol(c)" class="sim-rot-mini-empty">–</span>
+          </button>
+        </td>
       </tr>
-      <tr>
-        <th style="width: var(--row-with)">{{"admin.simMapEditor.victimIsFake" | translate}}</th>
-        <td ng-repeat="c in range(16)"> <input type="checkbox" style="width: 100%; display: block;" ng-model="cell.tile.halfWallVicFakes[c]" value="false" ng-change="cell.tile.halfWallVicFakes[c] && (cell.tile.halfWallVicRots[c] = 0)" ng-disabled="cell.tile.halfWallCognitives && cell.tile.halfWallCognitives[c] && cell.tile.halfWallCognitives[c].length === 5"> </td>
+      <tr class="sim-letter-row">
+        <th class="sim-letter-row-head" style="width: var(--row-with)">{{"admin.simMapEditor.victimIsFake" | translate}}<small class="sim-letter-only">Φ Ψ Ω</small></th>
+        <td ng-repeat="c in range(16)"> <input type="checkbox" style="width: 100%; display: block;" ng-model="cell.tile.halfWallVicFakes[c]" value="false" ng-disabled="!halfWallSymbol(c)"> </td>
       </tr>
     </table>
     </div>

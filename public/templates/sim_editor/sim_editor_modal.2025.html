@@ -24,24 +24,42 @@
       <label class="sim-chip" ng-class="{active: cell.tile.swamp}"><input type="checkbox" ng-model="cell.tile.swamp" id="isSwamp"><i class="fas fa-water"></i>{{"admin.simMapEditor.swamp" | translate}}</label>
       <label class="sim-chip" ng-class="{active: cell.tile.obstacle}"><input type="checkbox" ng-model="cell.tile.obstacle" id="isObstacle"><img src="/images/obstacle.png" height="20" alt="">{{"admin.simMapEditor.obstacle" | translate}}</label>
       <label class="sim-chip start" ng-class="{active: isStart, disabled: isStart}"><input type="checkbox" ng-model="isStart" ng-disabled="isStart" ng-change="startChanged()" id="isStart"><i class="fas fa-play"></i>{{"admin.simMapEditor.start" | translate}}</label>
-      <label class="sim-chip-select" for="cellColor">{{"admin.simMapEditor.cellColor" | translate}}
-        <select class="form-control form-control-sm" name="singleSelect" ng-model="cell.tile.color" id="cellColor">
-      <option value="">None</option>
-      <option value="#1a1ae6">Blue (Room 1 ←→ Room 2)</option>
-      <option value="#4d1a99">Purple (Room 2 ←→ Room 3)</option>
-      <option value="#e71a1a">Red (Room 3 ←→ Room 4)</option>
-      <option value="#08D508">Green (Room 1 ←→ Room 4)</option>
-      <option value="#e7991a">Orange (Room 2 ←→ Room 4)</option>
-      <option value="#e7e71a">Yellow (Room 1 ←→ Room 3)</option>
-        </select>
-      </label>
     </div>
   </div>
   
   <div class="sim-modal-section">
+    <div class="sim-modal-section-title passage">{{"admin.simMapEditor.passageTitle" | translate}}<small>{{"admin.simMapEditor.passageHint" | translate}}</small></div>
+    <div class="sim-passage-grid">
+      <button type="button" class="sim-passage" ng-class="{'active': !cell.tile.color}" ng-click="cell.tile.color = ''">
+        <span class="sim-passage-swatch none"><i class="fas fa-ban"></i></span>
+        <span class="sim-passage-text">
+          <span class="sim-passage-rooms">{{"admin.simMapEditor.passageNone" | translate}}</span>
+        </span>
+      </button>
+      <button type="button" class="sim-passage" ng-repeat="p in passageColors" ng-class="{'active': cell.tile.color === p.color}" ng-click="cell.tile.color = p.color" ng-style="{'--passage-color': p.color}">
+        <span class="sim-passage-swatch"></span>
+        <span class="sim-passage-text">
+          <span class="sim-passage-rooms">
+            <span class="sim-passage-room">{{"admin.simMapEditor.areaShort" | translate}}{{p.from}}</span><i class="fas fa-exchange-alt"></i><span class="sim-passage-room">{{"admin.simMapEditor.areaShort" | translate}}{{p.to}}</span>
+          </span>
+          <span class="sim-passage-name">{{p.name | translate}}</span>
+        </span>
+        <i class="fas fa-check-circle sim-passage-check"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="sim-modal-section">
   <div class="sim-modal-section-title victims">{{"admin.simMapEditor.placement" | translate}}<small>{{"admin.simMapEditor.oneVictim" | translate}}</small></div>
-  <div class="sim-table-scroll">
-  <table class="sim-victim-table">
+  <div class="sim-victim-layout">
+  <div class="sim-victim-main sim-table-scroll">
+  <table class="sim-victim-table sim-placement-table sim-placement-2025">
+    <tr class="sim-group-row">
+      <th></th>
+      <th class="sim-group-none"></th>
+      <th class="sim-group-letter" colspan="3">{{"admin.simMapEditor.victimsGroup" | translate}}</th>
+      <th class="sim-group-ct" colspan="4">{{"admin.simMapEditor.hazmatGroup" | translate}}</th>
+    </tr>
     <tr align="center">
       <th>&nbsp;</th>
       <th><img src="/images/no_victims.png" alt="None" height="20"></th>
@@ -100,10 +118,22 @@
   </table>
   </div>
 
-  <div>
-  <div class="sim-victim-options">
-    {{"admin.simMapEditor.victimRotation" | translate}}
-    <input type="number" name="rotation-spinbox" ng-model="cell.tile.single_victim_rotation" value="0" step="1" style="display: inline-block;">
+  <div class="sim-victim-side sim-letter-panel" ng-class="{'inactive': !wallVictimSymbol()}">
+    <div class="sim-letter-panel-head">
+      <span class="sim-letter-panel-title">{{"admin.simMapEditor.tokenSettings" | translate}}</span>
+    </div>
+    <div class="sim-letter-state" ng-if="wallVictimSymbol()">
+      <i class="fas fa-crosshairs"></i>{{("admin.simMapEditor." + wallVictimDir()) | translate}} :
+      <img ng-if="wallVictimImage()" ng-src="{{wallVictimImage()}}" alt="{{wallVictimSymbol()}}" height="20">
+      <strong ng-if="!wallVictimImage()">{{wallVictimSymbol()}}</strong>
+    </div>
+    <div class="sim-letter-state muted" ng-if="!wallVictimSymbol()">
+      <i class="fas fa-info-circle"></i>{{"admin.simMapEditor.noTokenPlaced" | translate}}
+    </div>
+    <div class="sim-option-block">
+      <div class="sim-option-label"><i class="fas fa-sync-alt"></i>{{"admin.simMapEditor.victimRotation" | translate}}</div>
+      <sim-rotation-dial ng-model="cell.tile.single_victim_rotation" symbol="wallVictimSymbol()" image="wallVictimImage()" ng-disabled="!wallVictimSymbol()"></sim-rotation-dial>
+    </div>
   </div>
   </div>
 
@@ -154,7 +184,7 @@
     </div>
 
     <div class="sim-table-scroll">
-    <table class="sim-victim-table" style="width: 100%; min-width: 100%; --row-width: 7ch">
+    <table class="sim-victim-table sim-halfwall-table sim-halfwall-2025" style="width: 100%; min-width: 100%; --row-width: 7ch">
       <tr style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)">
         <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)"></th>
         <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)" ng-repeat="c in range(16)">{{c + 1}}</th>
@@ -193,7 +223,14 @@
       </tr>
       <tr>
         <th style="width: var(--row-with)">{{"admin.simMapEditor.victimRotation" | translate}}</th>
-        <td ng-repeat="c in range(16)"> <input type="number" style="width: 100%; display: block;" ng-model="cell.tile.halfWallVicRots[c]" value="0"> </td>
+        <td ng-repeat="c in range(16)">
+          <button type="button" class="sim-rot-mini" ng-click="editHalfWallRotation(c)" ng-disabled="!halfWallSymbol(c)" title="{{'admin.simMapEditor.victimRotation' | translate}}">
+            <img ng-if="halfWallImage(c)" class="sim-rot-mini-image" ng-src="{{halfWallImage(c)}}" alt="{{halfWallSymbol(c)}}" ng-style="{'transform': 'rotate(' + halfWallRotation(c) + 'deg)'}">
+            <span ng-if="halfWallSymbol(c) && !halfWallImage(c)" class="sim-rot-mini-symbol" ng-style="{'transform': 'rotate(' + halfWallRotation(c) + 'deg)'}">{{halfWallSymbol(c)}}</span>
+            <span ng-if="halfWallSymbol(c)" class="sim-rot-mini-value sim-rot-num">{{halfWallRotation(c)}}<span class="sim-rot-deg">°</span></span>
+            <span ng-if="!halfWallSymbol(c)" class="sim-rot-mini-empty">–</span>
+          </button>
+        </td>
       </tr>
     </table>
     </div>

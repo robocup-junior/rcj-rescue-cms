@@ -117,15 +117,42 @@ block main_content
           i.far(ng-class="selectRoom == 2 ? 'fa-check-square' : 'fa-square'")
           | {{"admin.simMapEditor.select4" | translate}}
 
-      .sim-room-config
-        label.small.text-muted.mb-0.mr-2 {{"admin.simMapEditor.pick4" | translate}}
-        select.form-control.form-control-sm.sim-room4-select(ng-model='area4Room', ng-options="room as room.value for room in area4", ng-init="area4Room=area4[0]", ng-change="updateRoom4Pick()")
-        button.btn.btn-sm.btn-outline-primary.rounded-pill.ml-2#showRoom4Canvas(type='button', ng-click='openCustomRoom4()', style="display:none;")
-          i.fas.fa-paint-brush.mr-1
-          | Create Custom Room 4
         block room_tools_extra
+
+      //- Only relevant once the map has a room 4 (or while its tiles are being picked)
+      .sim-room4(ng-if="selectRoom == 2 || roomTiles[2].length > 0 || (area4Room && area4Room.type !== 0)")
+        .sim-room4-head
+          span.sim-room4-title
+            i.fas.fa-shapes.mr-2
+            | {{"admin.simMapEditor.pick4" | translate}}
+          span.sim-room4-hint {{"admin.simMapEditor.room4Hint" | translate}}
+        .sim-room4-options
+          button.sim-room4-option(type='button', ng-repeat="room in area4", ng-class="{'active': isArea4Room(room)}", ng-click="pickArea4Room(room)")
+            span.sim-room4-icon
+              i.fas(ng-class="room.type === 0 ? 'fa-ban' : (room.type === 1 ? 'fa-paint-brush' : 'fa-th-large')")
+            span.sim-room4-text
+              span.sim-room4-name(ng-if="room.type === 0") {{"admin.simMapEditor.room4None" | translate}}
+              span.sim-room4-name(ng-if="room.type === 1") {{"admin.simMapEditor.room4Custom" | translate}}
+              span.sim-room4-name(ng-if="room.type >= 2") {{"admin.simMapEditor.room4Preset" | translate}} {{room.type - 1}}
+              span.sim-room4-meta(ng-if="room.type === 0") {{"admin.simMapEditor.room4NoneHint" | translate}}
+              span.sim-room4-meta(ng-if="room.type === 1") {{"admin.simMapEditor.room4CustomHint" | translate}}
+              span.sim-room4-meta(ng-if="room.type >= 2")
+                span.sim-room4-size {{room.width}} × {{room.height}}
+                span
+                  i.fas.fa-user-injured.mr-1
+                  | {{room.humans.length}}
+                span
+                  i.fas.fa-bullseye.mr-1
+                  | {{room.hazards.length}}
+            i.fas.fa-check-circle.sim-room4-check
+        .sim-room4-custom(ng-show="area4Room && area4Room.type === 1")
+          button.btn.btn-sm.btn-primary.rounded-pill(type='button', ng-click='openCustomRoom4()')
+            i.fas.fa-paint-brush.mr-1
+            | {{"admin.simMapEditor.room4Creator.open" | translate}}
+          span.sim-room4-hint {{"admin.simMapEditor.room4CustomSteps" | translate}}
 
   .modern-card.mb-4.overflow-hidden
     .modern-card-body.p-0
       .map-container
         block map_table
+    block map_legend

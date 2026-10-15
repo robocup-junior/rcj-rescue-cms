@@ -142,7 +142,6 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
     ]
 
     // Custom room 4 setup
-    let useCustomRoom4 = document.getElementById("showRoom4Canvas");
     $scope.room4Img = new Image;
     /*let imgElement = document.getElementById("inputImg");
     let inputElement = document.getElementById("selectImg");
@@ -2377,16 +2376,19 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
         }
     }
 
-    $scope.updateRoom4Pick = function() {
-        if ($scope.area4Room.value == "Custom Room") {
-            //inputElement.style.display = "inline";
-            useCustomRoom4.style.display = "inline";
-        }
-        else {
-            //inputElement.style.display = "none";
-            useCustomRoom4.style.display = "none";
-        }
-    }
+    // The "Create Custom Room 4" button is shown by the page (ng-show) when the custom room is picked
+    $scope.updateRoom4Pick = function() {};
+
+    // Starts as "None" (this used to be done by ng-init on the old select)
+    if (!$scope.area4Room) $scope.area4Room = $scope.area4[0];
+
+    $scope.pickArea4Room = function(room) {
+        $scope.area4Room = room;
+    };
+
+    $scope.isArea4Room = function(room) {
+        return !!$scope.area4Room && $scope.area4Room.value === room.value;
+    };
     
     // tag custom room 4
     function room4CorrectSize() {
@@ -2928,30 +2930,33 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
 
         if(victimScore > 0) exitBonus += (victimScore + checkpointScore) * 0.1
 
+        const t = function (key) { return $translate.instant('admin.simMapEditor.maxScore.' + key); };
+        const fmt = function (value) { return Number(value).toFixed(2).replace(/\.00$/, ''); };
+        const rows = [
+            { icon: 'fa-user-injured', label: t('tokens'), value: victimScore },
+            { icon: 'fa-flag-checkered', label: t('checkpoints'), value: checkpointScore },
+            { icon: 'fa-door-open', label: t('exitBonus'), value: exitBonus },
+            { icon: 'fa-map', label: t('mapBonus'), value: (victimScore + checkpointScore + exitBonus) }
+        ];
         let html = `
-            <div class='text-center'>
-                <i class='fas fa-calculator fa-3x'></i>
-            </div><hr>
-            <table class='custom'>
-                <thead>
-                    <th>Victim / Hazard map score</th>
-                    <th>Checkpoint score</th>
-                    <th>Exit bonus</th>
-                    <th>Map bonus</th>
-                    <th>Total score</th>
-                </thead>
-                <tbody>
-                    <td>${victimScore}</td>
-                    <td>${checkpointScore}</td>
-                    <td>${exitBonus}</td>
-                    <td>${(victimScore + checkpointScore + exitBonus)}</td>
-                    <td>${2*(victimScore + checkpointScore + exitBonus)}</td>
-                </tbody>
-            </table>
+            <div class='sim-score'>
+                <div class='sim-score-total'>
+                    <span class='sim-score-total-label'><i class='fas fa-calculator'></i>${t('total')}</span>
+                    <span class='sim-score-total-value'>${fmt(2*(victimScore + checkpointScore + exitBonus))}</span>
+                </div>
+                <div class='sim-score-rows'>
+                    ${rows.map(function (row) {
+                        return `<div class='sim-score-row'><span><i class='fas ${row.icon}'></i>${row.label}</span><strong>${fmt(row.value)}</strong></div>`;
+                    }).join('')}
+                </div>
+                <div class='sim-score-note'>${t('note')}</div>
+            </div>
         `;
         Swal.fire({
             html: html,
-            showCloseButton: true, 
+            showCloseButton: true,
+            customClass: 'sim-score-popup',
+            confirmButtonText: 'OK'
         })
 
     }
@@ -3005,7 +3010,17 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
 // Please note that $uibModalInstance represents a modal window (instance) dependency.
 // It is not the same as the $uibModal service used above.
 
-app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', 'x', 'y', 'z', function ($scope, $uibModalInstance, x, y, z) {
+app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', '$uibModal', 'x', 'y', 'z', function ($scope, $uibModalInstance, $uibModal, x, y, z) {
+    // Floor colours of the one-tile passages between areas (rules 3.3.4 / 3.4). The values are what
+    // the world export looks for, so they must not change.
+    $scope.passageColors = [
+        { color: '#1a1ae6', from: 1, to: 2, name: 'admin.simMapEditor.passageBlue' },
+        { color: '#e7e71a', from: 1, to: 3, name: 'admin.simMapEditor.passageYellow' },
+        { color: '#08D508', from: 1, to: 4, name: 'admin.simMapEditor.passageGreen' },
+        { color: '#4d1a99', from: 2, to: 3, name: 'admin.simMapEditor.passagePurple' },
+        { color: '#e7991a', from: 2, to: 4, name: 'admin.simMapEditor.passageOrange' },
+        { color: '#e71a1a', from: 3, to: 4, name: 'admin.simMapEditor.passageRed' }
+    ];
     console.log($scope.cell)
     $scope.cell = $scope.$parent.cells[x + ',' + y + ',' + z];
     $scope.isStart = $scope.$parent.startTile.x == x &&
@@ -3066,12 +3081,176 @@ app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', 'x', 'y', 'z'
         }
         return arr;
     }
+    // Token rotation: symbol shown in the dial preview (2025 tokens: H/S/U victims and F/P/C/O hazmats)
+    const _wallSymbols = { H: 'H', S: 'S', U: 'U', F: 'F', P: 'P', C: 'C', O: 'O' };
+    const _halfWallSymbols = { 1: 'H', 2: 'U', 3: 'S', 5: 'F', 6: 'P', 7: 'C', 8: 'O' };
+
+    $scope.wallVictimSymbol = function () {
+        const victims = $scope.cell.tile.victims || {};
+        for (const dir of ['top', 'right', 'bottom', 'left']) {
+            if (_wallSymbols[victims[dir]]) return _wallSymbols[victims[dir]];
+        }
+        return '';
+    };
+
+    $scope.wallVictimDir = function () {
+        const victims = $scope.cell.tile.victims || {};
+        return ['top', 'right', 'bottom', 'left'].find(function (dir) { return _wallSymbols[victims[dir]]; }) || '';
+    };
+
+    $scope.halfWallSymbol = function (idx) {
+        return (($scope.cell.tile.halfWallVic && _halfWallSymbols[Number($scope.cell.tile.halfWallVic[idx])]) || '');
+    };
+
+    // Hazmat placards are shown as their real images in the rotation preview
+    const _placardImages = {
+        F: '/images/placard-2-flammable-gas.png',
+        P: '/images/placard-6-poison.png',
+        C: '/images/placard-8-corrosive.png',
+        O: '/images/placard-5.2-organic-peroxide.png'
+    };
+
+    $scope.wallVictimImage = function () {
+        return _placardImages[$scope.wallVictimSymbol()] || '';
+    };
+
+    $scope.halfWallImage = function (idx) {
+        return _placardImages[$scope.halfWallSymbol(idx)] || '';
+    };
+
+    $scope.halfWallRotation = function (idx) {
+        return Number(($scope.cell.tile.halfWallVicRots && $scope.cell.tile.halfWallVicRots[idx]) || 0);
+    };
+
+    $scope.editHalfWallRotation = function (idx) {
+        $uibModal.open({
+            animation: true,
+            templateUrl: '/templates/sim_editor/rotation_modal.html',
+            controller: 'SimRotationModalCtrl',
+            windowClass: 'sim-rot-modal',
+            resolve: {
+                angle: function () { return $scope.halfWallRotation(idx); },
+                symbol: function () { return $scope.halfWallSymbol(idx); },
+                image: function () { return $scope.halfWallImage(idx); },
+                label: function () { return '#' + (idx + 1); }
+            }
+        }).result.then(function (angle) {
+            if (!$scope.cell.tile.halfWallVicRots) $scope.cell.tile.halfWallVicRots = {};
+            $scope.cell.tile.halfWallVicRots[idx] = angle;
+        }, angular.noop);
+    };
+
     $scope.ok = function () {
         $scope.$parent.recalculateLinear();
         $uibModalInstance.close();
     };
 
 }]);
+
+app.controller('SimRotationModalCtrl', ['$scope', '$uibModalInstance', 'angle', 'symbol', 'image', 'label', function ($scope, $uibModalInstance, angle, symbol, image, label) {
+    $scope.value = { angle: angle };
+    $scope.symbol = symbol;
+    $scope.image = image;
+    $scope.label = label;
+    $scope.ok = function () {
+        $uibModalInstance.close($scope.value.angle);
+    };
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
+}]);
+
+// Rotation of a victim symbol on its wall, in degrees (0-359). Seen from the robot, a positive
+// angle turns the symbol clockwise, the same way the preview is drawn.
+app.directive('simRotationDial', function () {
+    function normalize(value) {
+        const n = Math.round(Number(value) || 0);
+        return ((n % 360) + 360) % 360;
+    }
+
+    return {
+        restrict: 'E',
+        require: 'ngModel',
+        scope: {
+            symbol: '<',
+            image: '<?',
+            isDisabled: '<?ngDisabled'
+        },
+        templateUrl: '/templates/sim_editor/rotation_dial.html',
+        link: function (scope, element, attrs, ngModel) {
+            scope.angle = 0;
+            scope.angleInput = 0;
+
+            ngModel.$render = function () {
+                scope.angle = normalize(ngModel.$viewValue);
+                scope.angleInput = scope.angle;
+            };
+
+            function set(value) {
+                if (scope.isDisabled) return;
+                scope.angle = normalize(value);
+                scope.angleInput = scope.angle;
+                ngModel.$setViewValue(scope.angle);
+            }
+
+            scope.set = set;
+            scope.step = function (delta) {
+                set(scope.angle + delta);
+            };
+            scope.random = function () {
+                set(Math.floor(Math.random() * 360));
+            };
+            scope.typed = function () {
+                if (scope.angleInput === null || scope.angleInput === undefined || scope.angleInput === '') return;
+                set(scope.angleInput);
+            };
+
+            // Dragging on the dial: 0° at the top, clockwise. Snaps to 5°, or 1° with Shift.
+            function angleFromEvent(dial, event) {
+                const rect = dial.getBoundingClientRect();
+                const dx = event.clientX - (rect.left + rect.width / 2);
+                const dy = event.clientY - (rect.top + rect.height / 2);
+                let deg = Math.atan2(dx, -dy) * 180 / Math.PI;
+                const snap = event.shiftKey ? 1 : 5;
+                return Math.round(deg / snap) * snap;
+            }
+
+            const root = element[0];
+            root.addEventListener('pointerdown', function (event) {
+                const dial = event.target.closest('.sim-rot-dial');
+                if (!dial || scope.isDisabled) return;
+                event.preventDefault();
+                dial.focus();
+                dial.setPointerCapture(event.pointerId);
+                scope.$apply(function () { set(angleFromEvent(dial, event)); });
+
+                function move(e) {
+                    scope.$apply(function () { set(angleFromEvent(dial, e)); });
+                }
+                function up() {
+                    dial.removeEventListener('pointermove', move);
+                    dial.removeEventListener('pointerup', up);
+                    dial.removeEventListener('pointercancel', up);
+                }
+                dial.addEventListener('pointermove', move);
+                dial.addEventListener('pointerup', up);
+                dial.addEventListener('pointercancel', up);
+            });
+
+            // Arrow keys: 1° (15° with Shift)
+            root.addEventListener('keydown', function (event) {
+                if (!event.target.closest('.sim-rot-dial') || scope.isDisabled) return;
+                const amount = event.shiftKey ? 15 : 1;
+                let delta = 0;
+                if (event.key === 'ArrowRight' || event.key === 'ArrowUp') delta = amount;
+                if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') delta = -amount;
+                if (!delta) return;
+                event.preventDefault();
+                scope.$apply(function () { scope.step(delta); });
+            });
+        }
+    };
+});
 
 app.controller('CustomRoom4ModalCtrl',['$scope', '$uibModalInstance', function ($scope, $uibModalInstance){
 
