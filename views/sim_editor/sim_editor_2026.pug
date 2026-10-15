@@ -21,6 +21,11 @@ append css
   link(href="/stylesheets/admin/mapEditor/maze_edit.css" rel="stylesheet")
   link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
 
+block location
+    a.breadcrumb-item(ng-click="go('/home')") Home
+    a.breadcrumb-item(ng-click="go('/service')") Public services
+    span.breadcrumb-item.active Simulation world editor
+
 block content
     h1 {{"admin.simMapEditor.title" | translate}} 2026
     p {{"admin.simMapEditor.desc" | translate}}
