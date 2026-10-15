@@ -14,6 +14,11 @@ router.get('/editor/maze/:rule', async function (req, res, next) {
   res.render(`admin/mapEditor/maze_${rule}`, { user: req.user, pubService: true, leagueId: "Maze" });
 });
 
+// The public Simulation world editor still supports the 2025 rules, unlike the rest of the CMS
+router.get('/editor/simulation/2025', async function (req, res, next) {
+  res.render('sim_editor/sim_editor_2025', { user: req.user, pubService: true });
+});
+
 router.get('/editor/simulation/2026', async function (req, res, next) {
   res.render('sim_editor/sim_editor_2026', { user: req.user, pubService: true });
 });

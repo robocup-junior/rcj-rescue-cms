@@ -56,6 +56,17 @@ block content
             i.fas.fa-arrow-right
             |{{'admin.lineMapEditor.title' | translate}}
 
+      //- Simulation World Editor 2025 (kept for the public service only)
+      .league-card(ng-click="go('/service/editor/simulation/2025')")
+        .card-accent(style="background-color: #f1c40f;")
+        .league-image-area
+          img(src="/images/simEditor.png", alt='Sim 2025')
+        .league-body
+          h3.league-name(style="color: #f39c12;") Simulation World Editor for Erebus 2025
+          .btn-enter-premium
+            i.fas.fa-arrow-right
+            | {{'admin.lineMapEditor.title' | translate}}
+
       //- Simulation World Editor 2026
       .league-card(ng-click="go('/service/editor/simulation/2026')")
         .card-accent(style="background-color: #f1c40f;")
