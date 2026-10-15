@@ -1,0 +1,370 @@
+/* Rescue Simulation world editor: additions to the shared map editor styles (maze_modern.css). */
+
+.sim-editor-desc {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0 0 1rem;
+}
+
+/* ---------- Toolbar ---------- */
+
+.sim-toolbar {
+    flex-wrap: wrap;
+    gap: 0;
+    padding: 0.5rem 0;
+}
+
+.sim-toolbar-group {
+    display: flex;
+    align-items: center;
+    padding: 0.25rem 1rem;
+    border-right: 1px solid #e2e8f0;
+}
+
+.sim-toolbar-group:last-child {
+    border-right: none;
+}
+
+.sim-toolbar-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #64748b;
+    margin-right: 0.75rem;
+    white-space: nowrap;
+}
+
+.spinner-input.spinner-input-wide {
+    width: 64px;
+}
+
+/* ---------- Rooms ---------- */
+
+.sim-room-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+}
+
+.sim-room-toggles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.sim-room-toggle {
+    --room-color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    border: 2px solid #e2e8f0;
+    background: white;
+    color: #334155;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.15s ease;
+}
+
+.sim-room-toggle:hover {
+    border-color: var(--room-color);
+}
+
+.sim-room-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.sim-room-toggle.active {
+    background: var(--room-color);
+    border-color: var(--room-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+/* Same colours the map uses for each room */
+.sim-room-toggle.room2 { --room-color: rgb(53, 158, 244); }
+.sim-room-toggle.room3 { --room-color: #d97ddb; }
+.sim-room-toggle.room4 { --room-color: #7500ff; }
+
+.sim-room-config {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 1 1 320px;
+    padding-left: 1rem;
+    border-left: 1px solid #e2e8f0;
+}
+
+.sim-room4-select {
+    width: auto;
+    min-width: 160px;
+    border-radius: 8px;
+}
+
+@media (max-width: 767px) {
+    .sim-toolbar-group {
+        border-right: none;
+        padding: 0.5rem 1rem;
+    }
+
+    .sim-room-config {
+        padding-left: 0;
+        border-left: none;
+    }
+}
+
+/* ---------- Dialogs ---------- */
+
+.sim-modal-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.sim-modal-header .modal-title {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 1.25rem;
+}
+
+.sim-modal-header .modal-title i {
+    color: #3b82f6;
+    margin-right: 0.5rem;
+}
+
+.sim-modal-body {
+    padding: 1.25rem 1.5rem;
+}
+
+.sim-modal-section {
+    margin-bottom: 1.5rem;
+}
+
+.sim-modal-section-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #334155;
+    border-left: 4px solid #3b82f6;
+    padding-left: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+
+.sim-modal-section-title.victims {
+    border-left-color: #10b981;
+}
+
+.sim-modal-section-title small {
+    font-weight: 500;
+    color: #64748b;
+    margin-left: 0.5rem;
+}
+
+/* Tile properties: checkboxes shown as toggle chips */
+.sim-chip-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.sim-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    min-height: 42px;
+    padding: 0.4rem 0.9rem;
+    border-radius: 999px;
+    border: 2px solid #e2e8f0;
+    background: white;
+    color: #334155;
+    font-weight: 600;
+    cursor: pointer;
+    user-select: none;
+    transition: all 0.15s ease;
+}
+
+.sim-chip input[type="checkbox"] {
+    display: none;
+}
+
+.sim-chip:hover {
+    border-color: #94a3b8;
+}
+
+.sim-chip.active {
+    background: #1e293b;
+    border-color: #1e293b;
+    color: white;
+}
+
+.sim-chip.active.start {
+    background: #10b981;
+    border-color: #10b981;
+}
+
+.sim-chip.disabled {
+    cursor: default;
+}
+
+.sim-chip-select {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.sim-chip-select select {
+    width: auto;
+    border-radius: 8px;
+}
+
+/* Victim tables */
+.sim-victim-table {
+    margin: 0 auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.sim-victim-table th,
+.sim-victim-table td {
+    padding: 0.5rem 0.75rem;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.sim-victim-table tr:first-child th {
+    background: #f8fafc;
+    font-size: 1.1rem;
+}
+
+.sim-victim-table th:first-child {
+    background: #f8fafc;
+    text-align: left;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.sim-victim-table tr:last-child th,
+.sim-victim-table tr:last-child td {
+    border-bottom: none;
+}
+
+.sim-victim-table input[type="radio"],
+.sim-victim-table input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0 auto;
+    cursor: pointer;
+}
+
+.sim-victim-table input[type="text"],
+.sim-victim-table input[type="number"] {
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 2px 6px;
+}
+
+.sim-victim-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+    font-weight: 600;
+    color: #334155;
+}
+
+.sim-victim-options label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.sim-victim-options input[type="number"] {
+    width: 90px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    padding: 2px 6px;
+}
+
+.sim-victim-options input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+.sim-inner-tile {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.sim-table-scroll {
+    overflow-x: auto;
+}
+
+.sim-modal-footer {
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.sim-modal-footer .btn {
+    border-radius: 999px;
+    padding: 0.5rem 2rem;
+    font-weight: 700;
+}
+
+/* Custom room 4 creator */
+.sim-room4-creator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sim-room4-creator canvas {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    max-width: 100%;
+}
+
+.sim-room4-panel {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+}
+
+.sim-room4-panel label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+/* style.css hides checkboxes globally; these are plain checkboxes read by the canvas code */
+.sim-room4-panel input[type="checkbox"] {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}

@@ -12,44 +12,36 @@
   }
 
 </style>
-<div class="modal-header">
-  <h3 class="modal-title">{{"admin.simMapEditor.item" | translate}}</h3>
+<div class="modal-header sim-modal-header">
+  <h3 class="modal-title"><i class="fas fa-cube"></i>{{"admin.simMapEditor.item" | translate}}</h3>
 </div>
-<div class="modal-body" >
-  <ul>
-    <li>
-      <input type="checkbox" ng-model="cell.tile.checkpoint" id="isCheckpoint"><label class="checkbox" for="isCheckpoint">{{"admin.simMapEditor.cp" | translate}}</label>
-    </li>
-    <li>
-      <input type="checkbox" ng-model="cell.tile.black" id="isBlack" ng-change="blackChanged()"><label class="checkbox" for="isBlack">{{"admin.simMapEditor.black" | translate}}</label>
-    </li>
-    <li>
-      <input type="checkbox" ng-model="cell.tile.swamp" id="isSwamp"><label class="checkbox" for="isSwamp">{{"admin.simMapEditor.swamp" | translate}}</label>
-    </li>
-    <li>
-      <input type="checkbox" ng-model="cell.tile.obstacle" id="isObstacle"><label class="checkbox" for="isObstacle">{{"admin.simMapEditor.obstacle" | translate}}</label>
-    </li>
-    <li>
-      <label for="singleSelect">{{"admin.simMapEditor.cellColor" | translate}}</label>
-      <select name="singleSelect" ng-model="cell.tile.color" id="cellColor">
-        <option value="">None</option>
-        <option value="#1a1ae6">Blue (Room 1 ←→ Room 2)</option>
-        <option value="#4d1a99">Purple (Room 2 ←→ Room 3)</option>
-        <option value="#e71a1a">Red (Room 3 ←→ Room 4)</option>
-        <option value="#08D508">Green (Room 1 ←→ Room 4)</option>
-        <option value="#e7991a">Orange (Room 2 ←→ Room 4)</option>
-        <option value="#e7e71a">Yellow (Room 1 ←→ Room 3)</option>
-      </select>
-    </li>
-  </ul>
-
-  <input type="checkbox" ng-model="isStart" ng-disabled="isStart" ng-change="startChanged()" id="isStart"><label class="checkbox" for="isStart">{{"admin.simMapEditor.start" | translate}}</label>
+<div class="modal-body sim-modal-body">
+  <div class="sim-modal-section">
+    <div class="sim-modal-section-title">{{"admin.mazeMapEditor.tileProperties" | translate}}</div>
+    <div class="sim-chip-group">
+      <label class="sim-chip" ng-class="{active: cell.tile.checkpoint}"><input type="checkbox" ng-model="cell.tile.checkpoint" id="isCheckpoint"><img src="/images/checkpoint.png" height="20" alt="">{{"admin.simMapEditor.cp" | translate}}</label>
+      <label class="sim-chip" ng-class="{active: cell.tile.black}"><input type="checkbox" ng-model="cell.tile.black" id="isBlack" ng-change="blackChanged()"><i class="fas fa-square"></i>{{"admin.simMapEditor.black" | translate}}</label>
+      <label class="sim-chip" ng-class="{active: cell.tile.swamp}"><input type="checkbox" ng-model="cell.tile.swamp" id="isSwamp"><i class="fas fa-water"></i>{{"admin.simMapEditor.swamp" | translate}}</label>
+      <label class="sim-chip" ng-class="{active: cell.tile.obstacle}"><input type="checkbox" ng-model="cell.tile.obstacle" id="isObstacle"><img src="/images/obstacle.png" height="20" alt="">{{"admin.simMapEditor.obstacle" | translate}}</label>
+      <label class="sim-chip start" ng-class="{active: isStart, disabled: isStart}"><input type="checkbox" ng-model="isStart" ng-disabled="isStart" ng-change="startChanged()" id="isStart"><i class="fas fa-play"></i>{{"admin.simMapEditor.start" | translate}}</label>
+      <label class="sim-chip-select" for="cellColor">{{"admin.simMapEditor.cellColor" | translate}}
+        <select class="form-control form-control-sm" name="singleSelect" ng-model="cell.tile.color" id="cellColor">
+      <option value="">None</option>
+      <option value="#1a1ae6">Blue (Room 1 ←→ Room 2)</option>
+      <option value="#4d1a99">Purple (Room 2 ←→ Room 3)</option>
+      <option value="#e71a1a">Red (Room 3 ←→ Room 4)</option>
+      <option value="#08D508">Green (Room 1 ←→ Room 4)</option>
+      <option value="#e7991a">Orange (Room 2 ←→ Room 4)</option>
+      <option value="#e7e71a">Yellow (Room 1 ←→ Room 3)</option>
+        </select>
+      </label>
+    </div>
+  </div>
   
-  <h5>{{"admin.simMapEditor.placement" | translate}}</h5>
-  <h5>{{"admin.simMapEditor.oneVictim" | translate}}</h5>
-
-  
-  <table align="center">
+  <div class="sim-modal-section">
+  <div class="sim-modal-section-title victims">{{"admin.simMapEditor.placement" | translate}}<small>{{"admin.simMapEditor.oneVictim" | translate}}</small></div>
+  <div class="sim-table-scroll">
+  <table class="sim-victim-table">
     <tr align="center">
       <th>&nbsp;</th>
       <th><img src="/images/no_victims.png" alt="None" height="20"></th>
@@ -106,18 +98,20 @@
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="O" style="display: block;" ng-click="cell.tile.victims={}"></td>
     </tr>
   </table>
-  
-  <div style="text-align: center; margin-top: 20px">
-  <div style="margin: auto;">
+  </div>
+
+  <div>
+  <div class="sim-victim-options">
     {{"admin.simMapEditor.victimRotation" | translate}}
     <input type="number" name="rotation-spinbox" ng-model="cell.tile.single_victim_rotation" value="0" step="1" style="display: inline-block;">
   </div>
   </div>
 
-  <br>
-  <div id="halfTileSlot" ng-if="cell && cell.tile && cell.tile.halfTile">
-    <h4>{{"admin.simMapEditor.innerTile" | translate}}</h4>
-    <table style="float: left; margin: 10px;">
+  </div>
+  <div id="halfTileSlot" class="sim-modal-section" ng-if="cell && cell.tile && cell.tile.halfTile">
+    <div class="sim-modal-section-title">{{"admin.simMapEditor.innerTile" | translate}}</div>
+    <div class="sim-inner-tile">
+    <table>
       <tr ng-repeat="r in range(5)">
         <td ng-repeat="c in range(5)" ng-click="innerTileClick(r, c)" ng-class="{'inner-tile': (r % 2 == 1 && c % 2 == 1), 'wall': isHalfWall(r, c)}" style="position: relative;">
             <img ng-src='/images/curvedWall/curved_NE.png' width="35" height="35" ng-show="r % 2 == 1 && c % 2 == 1 && cell.tile.curve[(r - 1) + (c - 1) / 2] == 1" class="innerTileImg">
@@ -156,10 +150,11 @@
     </tr>
 
     </table>
-    <img ng-src='/images/curvedWall/halfWallVic.png' style="margin: 10px" width="115" height="115">
-    <br>
+    <img ng-src='/images/curvedWall/halfWallVic.png' width="115" height="115">
+    </div>
 
-    <table style="width: 100%; min-width: 100%; --row-width: 7ch">
+    <div class="sim-table-scroll">
+    <table class="sim-victim-table" style="width: 100%; min-width: 100%; --row-width: 7ch">
       <tr style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)">
         <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)"></th>
         <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)" ng-repeat="c in range(16)">{{c + 1}}</th>
@@ -201,8 +196,9 @@
         <td ng-repeat="c in range(16)"> <input type="number" style="width: 100%; display: block;" ng-model="cell.tile.halfWallVicRots[c]" value="0"> </td>
       </tr>
     </table>
-    <br>
+    </div>
 </div>
-<div class="modal-footer">
+</div>
+<div class="modal-footer sim-modal-footer">
   <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
 </div>

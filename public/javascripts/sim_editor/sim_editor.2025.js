@@ -32,11 +32,6 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
 
     $scope.competitionId = competitionId;
     $scope.mapId = mapId;
-    $translate('admin.simMapEditor.import').then(function (val) {
-        $("#select").fileinput({'showUpload':false, 'showPreview':false, 'showRemove':false, 'showCancel':false  ,'msgPlaceholder': val,allowedFileExtensions: ['json'] , msgValidationError: "ERROR"});
-    }, function (translationId) {
-        // = translationId;
-    });
 
     let trans = [];
     function loadTranslation(tag){

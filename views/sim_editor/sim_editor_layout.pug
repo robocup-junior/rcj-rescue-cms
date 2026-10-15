@@ -1,0 +1,131 @@
+//- -*- tab-width: 2 -*-
+//- Shared page for the Rescue Simulation world editors (public service).
+//- A year page sets `simYear`, appends its editor script and fills `map_table`.
+extends ../includes/modern_layout
+
+block vars
+  - var ngAppDef = 'SimEditor'
+  - var contentContainerStyle = "max-width: 1600px;"
+  - var contentContainerClass = "mt-n4"
+  - var hideLogin = pubService
+
+append scripts
+  script.
+    var mapId = "#{mapid}"
+    var competitionId = "#{compid}"
+    var pubService = "#{pubService}"
+
+  script(src="/javascripts/lvl-uuid.js")
+  script(src="/components/html2canvas/index.js")
+  script(src="/javascripts/opencv.js")
+  block editor_script
+
+block page_css
+  link(href="/stylesheets/admin/mapEditor/maze_edit.css" rel="stylesheet")
+  link(href="/stylesheets/admin/mapEditor/maze_modern.css" rel="stylesheet")
+  link(href="/stylesheets/sim_editor/sim_modern.css" rel="stylesheet")
+
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/service')") Public services
+  span.breadcrumb-item.active Simulation world editor #{simYear}
+
+block hero_title_container
+  .hero-title-container
+    input.hero-title-input(type='text', ng-model='name', placeholder='{{"admin.simMapEditor.name" | translate}}')
+    i.fas.fa-pen.title-edit-icon
+
+block hero_subtitle
+  | {{"admin.simMapEditor.title" | translate}} #{simYear}
+
+block hero_actions
+  .action-group.flex-column.align-items-center
+    span.action-label.mb-1 JSON
+    .d-flex
+      button.btn-hero-icon.mr-2(type='button', ng-click='export()', title='{{"admin.simMapEditor.export" | translate}}')
+        i.fas.fa-file-export
+      button.btn-hero-icon(type='button', onclick="$('#select').click()", title='{{"admin.simMapEditor.import" | translate}}')
+        i.fas.fa-file-import
+      input#select(type='file', name='select', accept='.json,application/json', onclick='this.value=null', style="display:none;")
+
+  .action-divider
+
+  .action-group.flex-column.align-items-center
+    span.action-label.mb-1 EREBUS
+    button.btn-hero-action(type='button', ng-click='exportW()', title='{{"admin.simMapEditor.exportW" | translate}}')
+      i.fas.fa-globe
+      | .wbt
+
+block main_content
+  p.sim-editor-desc
+    i.fas.fa-info-circle.mr-2
+    | {{"admin.simMapEditor.desc" | translate}}
+
+  .modern-toolbar.sim-toolbar
+    .sim-toolbar-group
+      span.sim-toolbar-label
+        i.fas.fa-ruler-combined.mr-2
+      .d-flex.align-items-center.mr-3(title='{{"admin.simMapEditor.width" | translate}}')
+        label.small.mb-0.mr-2.text-muted
+          i.fas.fa-arrows-alt-h
+        .dimension-spinner
+          button.btn-spin(type='button', ng-click="width = width > 1 ? width - 1 : 1")
+            i.fas.fa-minus
+          input.spinner-input(type='number', ng-model='width', min='1')
+          button.btn-spin(type='button', ng-click="width = width + 1")
+            i.fas.fa-plus
+      .d-flex.align-items-center(title='{{"admin.simMapEditor.length" | translate}}')
+        label.small.mb-0.mr-2.text-muted
+          i.fas.fa-arrows-alt-v
+        .dimension-spinner
+          button.btn-spin(type='button', ng-click="length = length > 1 ? length - 1 : 1")
+            i.fas.fa-minus
+          input.spinner-input(type='number', ng-model='length', min='1')
+          button.btn-spin(type='button', ng-click="length = length + 1")
+            i.fas.fa-plus
+
+    .sim-toolbar-group(title='{{"admin.simMapEditor.timelimit" | translate}}')
+      span.sim-toolbar-label
+        i.fas.fa-clock.mr-2
+        | {{"admin.simMapEditor.timelimit" | translate}}
+      .dimension-spinner
+        button.btn-spin(type='button', ng-click="time = time > 30 ? time - 30 : 1")
+          i.fas.fa-minus
+        input.spinner-input.spinner-input-wide(type='number', ng-model='time', min='1')
+        button.btn-spin(type='button', ng-click="time = (time || 0) + 30")
+          i.fas.fa-plus
+
+    .sim-toolbar-group.ml-auto
+      button.calc-btn-premium(type='button', ng-click='openMaxScore()', title='Calculate Max Score')
+        i.fas.fa-calculator
+
+  .modern-card.mb-3
+    .modern-card-header
+      i.fas.fa-door-open.mr-2
+      | {{"admin.simMapEditor.rooms" | translate}}
+    .modern-card-body.sim-room-tools
+      .sim-room-toggles
+        button.sim-room-toggle.room2(type='button', ng-click='selectRoom2()', ng-class="{'active': selectRoom == 0}")
+          i.far(ng-class="selectRoom == 0 ? 'fa-check-square' : 'fa-square'")
+          | {{"admin.simMapEditor.select2" | translate}}
+        button.sim-room-toggle.room3(type='button', ng-click='selectRoom3()', ng-class="{'active': selectRoom == 1}")
+          i.far(ng-class="selectRoom == 1 ? 'fa-check-square' : 'fa-square'")
+          | {{"admin.simMapEditor.select3" | translate}}
+        button.sim-room-toggle.room4(type='button', ng-click='selectRoom4()', ng-class="{'active': selectRoom == 2}")
+          i.far(ng-class="selectRoom == 2 ? 'fa-check-square' : 'fa-square'")
+          | {{"admin.simMapEditor.select4" | translate}}
+
+      .sim-room-config
+        label.small.text-muted.mb-0.mr-2 {{"admin.simMapEditor.pick4" | translate}}
+        select.form-control.form-control-sm.sim-room4-select(ng-model='area4Room', ng-options="room as room.value for room in area4", ng-init="area4Room=area4[0]", ng-change="updateRoom4Pick()")
+        button.btn.btn-sm.btn-outline-primary.rounded-pill.ml-2#showRoom4Canvas(type='button', ng-click='openCustomRoom4()', style="display:none;")
+          i.fas.fa-paint-brush.mr-1
+          | Create Custom Room 4
+        block room_tools_extra
+
+  .modern-card.mb-4.overflow-hidden
+    .modern-card-body.p-0
+      .map-container
+        block map_table

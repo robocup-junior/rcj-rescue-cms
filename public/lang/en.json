@@ -1145,6 +1145,7 @@
             "select3": "Select Room 3 Tiles (Curved Walls)",
             "select4": "Select Room 4 Tiles (Anything)",
             "pick4": "Select Room 4 Configuration",
+            "rooms": "Rooms",
             "innerTile": "Inner Tile Walls",
             "victimRotation": "Victim Rotation",
             "js": {
