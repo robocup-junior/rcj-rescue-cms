@@ -1,0 +1,66 @@
+name: Rule Change
+description: Track implementation of an official rule update
+title: "[Rule]: "
+labels:
+  - "rule: [year]"
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to track the implementation of an official rule update.
+
+  - type: textarea
+    id: rule_reference
+    attributes:
+      label: Rule Reference
+      description: Reference the official rule section.
+      value: |
+        - Rulebook version:
+        - Section / Paragraph:
+        - Link (if available):
+    validations:
+      required: true
+
+  - type: textarea
+    id: rule_change_description
+    attributes:
+      label: Description of the Rule Change
+      description: Clearly describe what the rule requires.
+      placeholder: Describe what changed and what is required.
+    validations:
+      required: true
+
+  - type: textarea
+    id: interpretation
+    attributes:
+      label: Interpretation (if applicable)
+      description: |
+        Explain how this rule is interpreted for implementation.
+        Note any ambiguities or discussion points.
+      placeholder: Add interpretation notes, edge cases, and implementation guidance.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: required_changes
+    attributes:
+      label: Required Changes
+      description: List the concrete implementation steps required.
+      options:
+        - label: Update scoring logic
+        - label: Update validation logic
+        - label: Adjust UI (if necessary)
+        - label: Update documentation
+        - label: Add / update tests
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      description: Add any relevant discussion, screenshots, or related issues.
+      placeholder: Links to related issues/PRs, screenshots, extra notes.
+    validations:
+      required: false
