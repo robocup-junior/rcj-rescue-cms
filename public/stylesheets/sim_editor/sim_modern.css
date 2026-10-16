@@ -257,8 +257,188 @@
     display: flex;
     flex-wrap: wrap;
     align-items: flex-start;
-    gap: 1rem;
+    gap: 1.5rem;
     margin-bottom: 1rem;
+}
+
+/* Inner walls: diagram of the tile */
+.sim-inner-figure {
+    flex: 0 0 auto;
+    width: 260px;
+    max-width: 100%;
+}
+
+.sim-inner-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    user-select: none;
+}
+
+.sim-in-floor { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 2; }
+.sim-in-quarter { fill: transparent; }
+.sim-in-quarter.hover { fill: rgba(37, 99, 235, 0.10); }
+.sim-in-quarter.clickable { cursor: pointer; }
+.sim-in-grid { pointer-events: none; stroke: #cbd5e1; stroke-width: 1.5; stroke-dasharray: 4 6; }
+.sim-in-outer { pointer-events: none; stroke: #64748b; stroke-width: 12; stroke-linecap: square; }
+.sim-in-curve { pointer-events: none; fill: none; stroke: #1e293b; stroke-width: 12; stroke-linecap: butt; }
+.sim-in-curve.bad { stroke: #dc2626; stroke-dasharray: 14 8; }
+
+.sim-in-arm { cursor: pointer; }
+.sim-in-arm-hit { stroke: transparent; stroke-width: 30; }
+.sim-in-arm-line { stroke: #94a3b8; stroke-width: 4; stroke-dasharray: 8 7; stroke-linecap: round; transition: stroke 0.12s; }
+.sim-in-arm:hover .sim-in-arm-line,
+.sim-in-arm.hover .sim-in-arm-line { stroke: #2563eb; stroke-width: 8; stroke-dasharray: none; opacity: 0.6; }
+.sim-in-arm.on .sim-in-arm-line { stroke: #1e293b; stroke-width: 12; stroke-dasharray: none; stroke-linecap: square; opacity: 1; }
+.sim-in-arm.on:hover .sim-in-arm-line,
+.sim-in-arm.on.hover .sim-in-arm-line { stroke: #dc2626; }
+
+.sim-in-slot { pointer-events: none; }
+.sim-in-slot circle { fill: #fff; stroke: #94a3b8; stroke-width: 1.5; }
+.sim-in-slot text { font-size: 12px; font-weight: 700; fill: #475569; text-anchor: middle; dominant-baseline: central; }
+.sim-in-slot.nowall { opacity: 0.35; }
+.sim-in-slot.used circle { fill: #2563eb; stroke: #2563eb; }
+.sim-in-slot.used text { fill: #fff; }
+.sim-in-slot.hover circle { stroke: #f59e0b; stroke-width: 4; }
+
+.sim-inner-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+.sim-inner-legend span { display: flex; align-items: center; gap: 0.4rem; }
+
+.sim-in-key {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 22px;
+    height: 0;
+    border-top: 5px solid #64748b;
+}
+
+.sim-in-key.arm { border-top: 3px dashed #94a3b8; }
+
+.sim-in-key.slot {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid #94a3b8;
+    border-radius: 50%;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 15px;
+    text-align: center;
+    color: #475569;
+}
+
+/* Inner walls: controls */
+.sim-inner-controls {
+    flex: 1 1 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+}
+
+.sim-inner-group {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 0.75rem 0.9rem;
+    background: #fff;
+}
+
+.sim-inner-group .sim-option-label { margin-bottom: 0.25rem; }
+
+.sim-inner-hint {
+    margin: 0 0 0.6rem;
+    font-size: 0.82rem;
+    color: #64748b;
+}
+
+.sim-inner-arms { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+.sim-inner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.8rem;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 999px;
+    background: #fff;
+    color: #334155;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.sim-inner-btn:hover { border-color: #2563eb; color: #2563eb; }
+.sim-inner-btn.active { background: #1e293b; border-color: #1e293b; color: #fff; }
+
+.sim-inner-curves {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem 1rem;
+}
+
+.sim-inner-quarter {
+    padding: 0.35rem 0.4rem;
+    border-radius: 8px;
+}
+
+.sim-inner-quarter:hover { background: #eff6ff; }
+
+.sim-inner-quarter-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #475569;
+    margin-bottom: 0.25rem;
+}
+
+.sim-inner-curve-btns { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+
+.sim-inner-curve-btn {
+    width: 38px;
+    height: 38px;
+    padding: 3px;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    background: #fff;
+    cursor: pointer;
+}
+
+.sim-inner-curve-btn svg { display: block; width: 100%; height: 100%; }
+.sim-inner-curve-btn:hover { border-color: #2563eb; }
+.sim-inner-curve-btn.active { border-color: #2563eb; background: #dbeafe; box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25); }
+
+.sim-in-mini-box { fill: none; stroke: #cbd5e1; stroke-width: 6; stroke-dasharray: 10 8; }
+.sim-in-mini-curve { fill: none; stroke: #1e293b; stroke-width: 14; }
+.sim-in-mini-none { stroke: #94a3b8; stroke-width: 8; stroke-linecap: round; }
+
+.sim-inner-lock {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.85rem;
+}
+
+.sim-inner-lock > .fas { margin-top: 0.15rem; color: #94a3b8; }
+
+.sim-inner-lock-warn {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.4rem;
+    color: #b91c1c;
+    font-weight: 600;
 }
 
 .sim-table-scroll {

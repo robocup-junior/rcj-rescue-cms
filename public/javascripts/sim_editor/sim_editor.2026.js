@@ -3938,6 +3938,7 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
                     if ($scope.selectRoom == 0) {
                         $(".tile").get(i).style.setProperty("--tileColor", "#359ef4");
                         get_cell(x, y, z).tile.halfTile = 1;
+                        get_cell(x, y, z).tile.curve = [0, 0, 0, 0];   // room 2 has no curved walls
                         console.log('a')
                     }
                     else if ($scope.selectRoom == 1) {
@@ -4375,37 +4376,78 @@ app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', '$uibModal', 
        $scope.$parent.recalculateLinear();
     }
 
-     $scope.isHalfWall = function(r, c) {
-        var ind = -1, tmp = r * 10 + c;
-        if (tmp == 12) ind = 0;
-        else if (tmp == 23) ind = 1;
-        else if (tmp == 32) ind = 2;
-        else if (tmp == 21) ind = 3;
-        if (((r % 2 == 1) ^ (c % 2 == 1)) && (r != 0 && c != 0 && r != 4 && c != 4) && 
-            $scope.cell && $scope.cell.tile && $scope.cell.tile.curve != undefined && $scope.cell.tile.halfWallIn[ind])
-            return 1;
-        return 0;
-     }
-     
-     $scope.innerTileClick = function(r, c) {
-         console.log(r)
-         console.log(c)
-        var ind = -1, tmp = r * 10 + c;
-        if (tmp == 12) ind = 0;
-        else if (tmp == 23) ind = 1;
-        else if (tmp == 32) ind = 2;
-        else if (tmp == 21) ind = 3;
-        if ($scope.cell && $scope.cell.tile) {
-            if (r % 2 == 1 && c % 2 == 1) { //curved
-                quad = parseInt(r / 2) * 2 + parseInt(c / 2);
-                $scope.cell.tile.curve[quad] = ($scope.cell.tile.curve[quad] + 1) % 5;
-            }
-            else if (((r % 2 == 1) ^ (c % 2 == 1)) && (r != 0 && c != 0 && r != 4 && c != 4)){//half wall
-                $scope.cell.tile.halfWallIn[ind] = !$scope.cell.tile.halfWallIn[ind];
-            } 
-                
+    // Inner walls of a room 2 / room 3 tile, drawn as a 240 x 240 diagram (quarter tiles 120).
+    // Half walls run from the centre to the middle of a side (0 up, 1 right, 2 down, 3 left).
+    // Curves are quarter circles in a quarter tile (NW, NE, SW, SE); the value names where the
+    // arc bulges (1 NE, 2 SE, 3 SW, 4 NW). Room 2 takes half walls only, so it gets no curves.
+    $scope.isRoom2 = (($scope.$parent.roomTiles && $scope.$parent.roomTiles[0]) || []).indexOf(x + ',' + y + ',' + z) > -1;
+    $scope.inner = { hoverQ: -1, hoverSlot: -1, hoverArm: -1 };
+    $scope.innerArms = [
+        { i: 0, x1: 120, y1: 0, x2: 120, y2: 120, icon: 'fa-arrow-up', name: 'top' },
+        { i: 1, x1: 120, y1: 120, x2: 240, y2: 120, icon: 'fa-arrow-right', name: 'right' },
+        { i: 2, x1: 120, y1: 120, x2: 120, y2: 240, icon: 'fa-arrow-down', name: 'bottom' },
+        { i: 3, x1: 0, y1: 120, x2: 120, y2: 120, icon: 'fa-arrow-left', name: 'left' }
+    ];
+    $scope.innerQuarters = ['nw', 'ne', 'sw', 'se'].map(function (name, q) {
+        return { q: q, name: name, x: (q % 2) * 120, y: Math.floor(q / 2) * 120 };
+    });
+    $scope.innerSlots = [];
+    $scope.innerQuarters.forEach(function (Q) {
+        [[60, 20], [100, 60], [60, 100], [20, 60]].forEach(function (p, side) {
+            $scope.innerSlots.push({ i: Q.q * 4 + side, x: Q.x + p[0], y: Q.y + p[1] });
+        });
+    });
+    // walls on the tile's sides (edited on the map), whole or half (1 = left / lower half)
+    $scope.innerOuter = [];
+    [[0, -1, 0, 0, 240, 0], [1, 0, 240, 0, 240, 240], [0, 1, 0, 240, 240, 240], [-1, 0, 0, 0, 0, 240]].forEach(function (s) {
+        const c = edgeCell(s[0], s[1]);
+        if (!c) return;
+        let a = [s[2], s[3]], b = [s[4], s[5]];
+        if (!c.isWall) {
+            if (c.halfWall != 1 && c.halfWall != 2) return;
+            const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+            const lowerOrLeft = c.halfWall == 1;
+            if (s[1] !== 0) { if (lowerOrLeft) b = m; else a = m; }   // top / bottom: 1 = left half
+            else { if (lowerOrLeft) a = m; else b = m; }              // left / right: 1 = lower half
         }
-     }
+        $scope.innerOuter.push({ x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
+    });
+    $scope.curvePath = function (q, v, size) {
+        const s = size || 120, ox = size ? 0 : (q % 2) * 120, oy = size ? 0 : Math.floor(q / 2) * 120;
+        const c = [[0, 1], [0, 0], [1, 0], [1, 1]][v - 1];
+        if (!c) return '';
+        const cx = ox + c[0] * s, cy = oy + c[1] * s, dx = c[0] === 0 ? 1 : -1, dy = c[1] === 0 ? 1 : -1;
+        return 'M' + (cx + dx * s) + ' ' + cy + ' A' + s + ' ' + s + ' 0 0 ' + (dx * dy > 0 ? 1 : 0) + ' ' + cx + ' ' + (cy + dy * s);
+    };
+    $scope.toggleArm = function (i) {
+        const t = $scope.cell && $scope.cell.tile;
+        if (!t) return;
+        if (!t.halfWallIn) t.halfWallIn = [0, 0, 0, 0];
+        t.halfWallIn[i] = !t.halfWallIn[i];
+    };
+    $scope.setCurve = function (q, v) {
+        const t = $scope.cell && $scope.cell.tile;
+        if (!t || (v && $scope.isRoom2)) return;
+        if (!t.curve) t.curve = [0, 0, 0, 0];
+        t.curve[q] = v;
+    };
+    // clicking a quarter tile in the diagram steps through no curve and the four curves
+    $scope.cycleCurve = function (q) {
+        const t = $scope.cell && $scope.cell.tile;
+        if (!t || $scope.isRoom2) return;
+        $scope.setCurve(q, ((Number(t.curve && t.curve[q]) || 0) + 1) % 5);
+    };
+    $scope.hasCurve = function () {
+        const t = $scope.cell && $scope.cell.tile;
+        return !!(t && t.curve && t.curve.some(function (v) { return v; }));
+    };
+    $scope.clearCurves = function () {
+        for (let q = 0; q < 4; q++) $scope.setCurve(q, 0);
+    };
+    $scope.slotUsed = function (i) {
+        const t = $scope.cell && $scope.cell.tile;
+        return !!(t && ((t.halfWallVic && t.halfWallVic[i] && t.halfWallVic[i] != 0) || (t.halfWallCognitives && t.halfWallCognitives[i])));
+    };
 
     $scope.range = function (n) {
         arr = [];
