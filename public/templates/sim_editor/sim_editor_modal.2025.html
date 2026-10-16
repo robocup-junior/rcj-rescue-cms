@@ -29,6 +29,16 @@
   
   <div class="sim-modal-section">
     <div class="sim-modal-section-title passage">{{"admin.simMapEditor.passageTitle" | translate}}<small>{{"admin.simMapEditor.passageHint" | translate}}</small></div>
+    <div class="sim-passage-context" ng-if="passageInfo">
+      <i class="fas fa-map-marker-alt"></i>
+      <span>{{"admin.simMapEditor.passageCtx.here" | translate:{room: passageInfo.room} }}</span>
+      <span class="sim-passage-context-borders" ng-if="passageInfo.borders.length && passageInfo.ownOpen">
+        {{"admin.simMapEditor.passageCtx.borders" | translate}}
+        <span class="sim-passage-context-room" ng-repeat="r in passageInfo.borders">{{"admin.simMapEditor.areaShort" | translate}}{{r}}</span>
+      </span>
+      <span class="sim-passage-context-none" ng-if="!passageInfo.borders.length">{{"admin.simMapEditor.passageCtx.noBorder" | translate}}</span>
+      <span class="sim-passage-context-none" ng-if="passageInfo.borders.length && !passageInfo.ownOpen">{{"admin.simMapEditor.passageCtx.ownClosed" | translate:{room: passageInfo.room} }}</span>
+    </div>
     <div class="sim-passage-grid">
       <button type="button" class="sim-passage" ng-class="{'active': !cell.tile.color}" ng-click="cell.tile.color = ''">
         <span class="sim-passage-swatch none"><i class="fas fa-ban"></i></span>
@@ -36,13 +46,14 @@
           <span class="sim-passage-rooms">{{"admin.simMapEditor.passageNone" | translate}}</span>
         </span>
       </button>
-      <button type="button" class="sim-passage" ng-repeat="p in passageColors" ng-class="{'active': cell.tile.color === p.color}" ng-click="cell.tile.color = p.color" ng-style="{'--passage-color': p.color}">
+      <button type="button" class="sim-passage" ng-repeat="p in passageColors" ng-class="{'active': cell.tile.color === p.color, 'unavailable': !passageOk(p)}" ng-click="cell.tile.color = p.color" ng-disabled="!passageOk(p) && cell.tile.color !== p.color" ng-style="{'--passage-color': p.color}" title="{{passageOk(p) ? '' : ('admin.simMapEditor.passageCtx.only' | translate:{from: p.from, to: p.to})}}">
         <span class="sim-passage-swatch"></span>
         <span class="sim-passage-text">
           <span class="sim-passage-rooms">
             <span class="sim-passage-room">{{"admin.simMapEditor.areaShort" | translate}}{{p.from}}</span><i class="fas fa-exchange-alt"></i><span class="sim-passage-room">{{"admin.simMapEditor.areaShort" | translate}}{{p.to}}</span>
           </span>
-          <span class="sim-passage-name">{{p.name | translate}}</span>
+          <span class="sim-passage-name" ng-if="passageOk(p)">{{p.name | translate}}</span>
+          <span class="sim-passage-name" ng-if="!passageOk(p)">{{"admin.simMapEditor.passageCtx.only" | translate:{from: p.from, to: p.to} }}</span>
         </span>
         <i class="fas fa-check-circle sim-passage-check"></i>
       </button>
@@ -72,48 +83,48 @@
       <th><img src="/images/placard-5.2-organic-peroxide.png" alt="None" height="20"></th>
     </tr>
     <tr align="center">
-      <th>{{"admin.simMapEditor.top" | translate}}</th>
+      <th>{{"admin.simMapEditor.top" | translate}}<small class="sim-nowall" ng-if="!wallAt('top')">{{"admin.simMapEditor.noWall" | translate}}</small></th>
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="None" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="H" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="S" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="U" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="F" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="P" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="C" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="O" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="H" ng-disabled="!wallAt('top') && cell.tile.victims.top !== 'H'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="S" ng-disabled="!wallAt('top') && cell.tile.victims.top !== 'S'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="U" ng-disabled="!wallAt('top') && cell.tile.victims.top !== 'U'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="F" ng-disabled="!wallAt('top') && cell.tile.victims.top !== 'F'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="P" ng-disabled="!wallAt('top') && cell.tile.victims.top !== 'P'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="C" ng-disabled="!wallAt('top') && cell.tile.victims.top !== 'C'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="O" ng-disabled="!wallAt('top') && cell.tile.victims.top !== 'O'" style="display: block;" ng-click="cell.tile.victims={}"></td>
     </tr>
     <tr align="center">
-      <th>{{"admin.simMapEditor.bottom" | translate}}</th>
+      <th>{{"admin.simMapEditor.bottom" | translate}}<small class="sim-nowall" ng-if="!wallAt('bottom')">{{"admin.simMapEditor.noWall" | translate}}</small></th>
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="None" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="H" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="S" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="U" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="F" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="P" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="C" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="O" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="H" ng-disabled="!wallAt('bottom') && cell.tile.victims.bottom !== 'H'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="S" ng-disabled="!wallAt('bottom') && cell.tile.victims.bottom !== 'S'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="U" ng-disabled="!wallAt('bottom') && cell.tile.victims.bottom !== 'U'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="F" ng-disabled="!wallAt('bottom') && cell.tile.victims.bottom !== 'F'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="P" ng-disabled="!wallAt('bottom') && cell.tile.victims.bottom !== 'P'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="C" ng-disabled="!wallAt('bottom') && cell.tile.victims.bottom !== 'C'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="O" ng-disabled="!wallAt('bottom') && cell.tile.victims.bottom !== 'O'" style="display: block;" ng-click="cell.tile.victims={}"></td>
     </tr>
     <tr align="center">
-      <th>{{"admin.simMapEditor.left" | translate}}</th>
+      <th>{{"admin.simMapEditor.left" | translate}}<small class="sim-nowall" ng-if="!wallAt('left')">{{"admin.simMapEditor.noWall" | translate}}</small></th>
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="None" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="H" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="S" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="U" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="F" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="P" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="C" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="O" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="H" ng-disabled="!wallAt('left') && cell.tile.victims.left !== 'H'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="S" ng-disabled="!wallAt('left') && cell.tile.victims.left !== 'S'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="U" ng-disabled="!wallAt('left') && cell.tile.victims.left !== 'U'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="F" ng-disabled="!wallAt('left') && cell.tile.victims.left !== 'F'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="P" ng-disabled="!wallAt('left') && cell.tile.victims.left !== 'P'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="C" ng-disabled="!wallAt('left') && cell.tile.victims.left !== 'C'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="O" ng-disabled="!wallAt('left') && cell.tile.victims.left !== 'O'" style="display: block;" ng-click="cell.tile.victims={}"></td>
     </tr>
     <tr align="center">
-      <th>{{"admin.simMapEditor.right" | translate}}</th>
+      <th>{{"admin.simMapEditor.right" | translate}}<small class="sim-nowall" ng-if="!wallAt('right')">{{"admin.simMapEditor.noWall" | translate}}</small></th>
       <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="None" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="H" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="S" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="U" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="F" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="P" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="C" style="display: block;" ng-click="cell.tile.victims={}"></td>
-      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="O" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="H" ng-disabled="!wallAt('right') && cell.tile.victims.right !== 'H'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="S" ng-disabled="!wallAt('right') && cell.tile.victims.right !== 'S'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="U" ng-disabled="!wallAt('right') && cell.tile.victims.right !== 'U'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="F" ng-disabled="!wallAt('right') && cell.tile.victims.right !== 'F'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="P" ng-disabled="!wallAt('right') && cell.tile.victims.right !== 'P'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="C" ng-disabled="!wallAt('right') && cell.tile.victims.right !== 'C'" style="display: block;" ng-click="cell.tile.victims={}"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="O" ng-disabled="!wallAt('right') && cell.tile.victims.right !== 'O'" style="display: block;" ng-click="cell.tile.victims={}"></td>
     </tr>
   </table>
   </div>
@@ -187,35 +198,35 @@
     <table class="sim-victim-table sim-halfwall-table sim-halfwall-2025" style="width: 100%; min-width: 100%; --row-width: 7ch">
       <tr style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)">
         <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)"></th>
-        <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)" ng-repeat="c in range(16)">{{c + 1}}</th>
+        <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)" ng-repeat="c in range(16)" ng-class="{'sim-nowall-col': !halfWallSlotHasWall(c)}" title="{{halfWallSlotHasWall(c) ? '' : ('admin.simMapEditor.noWall' | translate)}}">{{c + 1}}</th>
       </tr>
       <tr>
         <th style="width: var(--row-with)">H</th>
-        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="1" style="display: block;"> </td>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="1" ng-disabled="!halfWallSlotHasWall(c) && cell.tile.halfWallVic[c] != 1" style="display: block;"> </td>
       </tr>
       <tr>
         <th style="width: var(--row-with)">S</th>
-        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="3" style="display: block;"> </td>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="3" ng-disabled="!halfWallSlotHasWall(c) && cell.tile.halfWallVic[c] != 3" style="display: block;"> </td>
       </tr>
       <tr>
         <th style="width: var(--row-with)">U</th>
-        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="2" style="display: block;"> </td>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="2" ng-disabled="!halfWallSlotHasWall(c) && cell.tile.halfWallVic[c] != 2" style="display: block;"> </td>
       </tr>
       <tr>
         <th style="width: var(--row-with)"><img src="/images/placard-2-flammable-gas.png" alt="None" height="20"/></th>
-        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="5" style="display: block;"> </td>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="5" ng-disabled="!halfWallSlotHasWall(c) && cell.tile.halfWallVic[c] != 5" style="display: block;"> </td>
       </tr>
       <tr>
         <th style="width: var(--row-with)"><img src="/images/placard-6-poison.png" alt="None" height="20"/></th>
-        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="6" style="display: block;"> </td>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="6" ng-disabled="!halfWallSlotHasWall(c) && cell.tile.halfWallVic[c] != 6" style="display: block;"> </td>
       </tr>
       <tr>
         <th style="width: var(--row-with)"><img src="/images/placard-8-corrosive.png" alt="None" height="20"/></th>
-        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="7" style="display: block;"> </td>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="7" ng-disabled="!halfWallSlotHasWall(c) && cell.tile.halfWallVic[c] != 7" style="display: block;"> </td>
       </tr>
       <tr>
         <th style="width: var(--row-with)"><img src="/images/placard-5.2-organic-peroxide.png" alt="None" height="20"/></th>
-        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="8" style="display: block;"> </td>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="8" ng-disabled="!halfWallSlotHasWall(c) && cell.tile.halfWallVic[c] != 8" style="display: block;"> </td>
       </tr>
       <tr>
         <th style="width: var(--row-with)"><img src="/images/no_victims.png" alt="None" height="20"/></th>

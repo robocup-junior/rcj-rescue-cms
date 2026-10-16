@@ -1759,3 +1759,424 @@ img.sim-fake-victim-mixed {
 .sim-placement-2025 tr:nth-child(2) th img {
     height: 28px;
 }
+
+/* ---------- Room 4 presets: fit status and map preview ---------- */
+
+.sim-room4-option.unavailable {
+    opacity: 0.55;
+    cursor: not-allowed;
+    background: #f8fafc;
+}
+
+.sim-room4-option.unavailable:hover {
+    border-color: #e2e8f0;
+}
+
+.sim-room4-fit {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    margin-top: 2px;
+}
+
+.sim-room4-fit.ok { color: #059669; }
+.sim-room4-fit.warn { color: #d97706; }
+.sim-room4-fit.off { color: #64748b; font-weight: 600; }
+
+.sim-room4-now {
+    font-weight: 500;
+}
+
+.sim-room4-status {
+    margin-top: 0.75rem;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    font-size: 0.85rem;
+}
+
+.sim-room4-status.ok {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.sim-room4-status.warn {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.sim-room4-status-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 800;
+    margin-bottom: 0.3rem;
+}
+
+.sim-room4-status ul {
+    margin: 0 0 0.3rem;
+    padding-left: 1.2rem;
+}
+
+.sim-room4-status .sim-room4-hint {
+    display: block;
+    margin-top: 0.3rem;
+}
+
+/* Map overlay on a tile */
+.sim-area4-mark {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    font-weight: 900;
+    line-height: 1 !important;
+}
+
+/* Footprint of a preset that fits */
+.sim-area4-mark.is-fit {
+    background: repeating-linear-gradient(-45deg, rgba(117, 0, 255, 0.28) 0 5px, transparent 5px 10px);
+    box-shadow: inset 0 0 0 1px rgba(117, 0, 255, 0.45);
+}
+
+/* Room 4 area while the passages are not right yet */
+.sim-area4-mark.is-pending {
+    background: rgba(117, 0, 255, 0.1);
+    box-shadow: inset 0 0 0 2px rgba(117, 0, 255, 0.55);
+    outline: 1px dashed rgba(117, 0, 255, 0.8);
+    outline-offset: -5px;
+}
+
+/* Where a passage has to be placed */
+.sim-area4-mark.is-need-green,
+.sim-area4-mark.is-need-red {
+    border: 3px dashed;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.sim-area4-mark.is-need-green { border-color: #08D508; color: #059669; }
+.sim-area4-mark.is-need-red { border-color: #e71a1a; color: #dc2626; }
+
+.sim-room4-now {
+    display: block;
+}
+
+/* Room connection check: a quiet panel; the hints carry the colour, warnings stay muted */
+.sim-conn-status {
+    margin-top: 0.75rem;
+    padding: 0.65rem 0.9rem;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    background: #fff;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+}
+
+.sim-conn-status.off {
+    background: #f8fafc;
+    color: #64748b;
+}
+
+.sim-conn-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.sim-conn-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    color: #334155;
+}
+
+.sim-conn-status.ok .sim-conn-title i { color: #10b981; }
+.sim-conn-status.warn .sim-conn-title i { color: #d97706; }
+.sim-conn-status.off .sim-conn-title i { color: #94a3b8; }
+
+/* On / off switch */
+.sim-conn-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+.sim-conn-switch input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sim-conn-switch-track {
+    position: relative;
+    width: 30px;
+    height: 17px;
+    border-radius: 999px;
+    background: #cbd5e1;
+    transition: background 0.15s;
+}
+
+.sim-conn-switch-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.25);
+    transition: transform 0.15s;
+}
+
+.sim-conn-switch input:checked + .sim-conn-switch-track { background: #10b981; }
+.sim-conn-switch input:checked + .sim-conn-switch-track::after { transform: translateX(13px); }
+.sim-conn-switch input:focus-visible + .sim-conn-switch-track { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3); }
+
+.sim-conn-switch-label {
+    min-width: 2em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.sim-conn-offnote,
+.sim-conn-summary {
+    margin-top: 0.3rem;
+}
+
+.sim-conn-room {
+    padding: 0.35rem 0;
+    border-top: 1px solid #f1f5f9;
+    margin-top: 0.35rem;
+}
+
+.sim-conn-room-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.sim-conn-room-head > i { font-size: 0.8rem; }
+.sim-conn-room.ok .sim-conn-room-head > i { color: #10b981; }
+.sim-conn-room.warn .sim-conn-room-head > i { color: #f59e0b; font-size: 0.5rem; }
+
+.sim-conn-room-name {
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.sim-conn-room-body {
+    margin-top: 0.25rem;
+    padding-left: 1.2rem;
+}
+
+.sim-conn-options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.3rem;
+}
+
+.sim-conn-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    color: #374151;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.sim-conn-chip.option {
+    padding: 0.2rem 0.65rem;
+    border-color: #cbd5e1;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.sim-conn-swatch {
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.sim-conn-issues {
+    margin: 0.45rem 0 0;
+    padding-left: 1.1rem;
+    color: #64748b;
+}
+
+.sim-conn-issues li::marker { color: #f59e0b; }
+
+.sim-conn-foot {
+    margin-top: 0.45rem;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.sim-conn-foot > div + div { margin-top: 0.2rem; }
+
+/* Map marks for passage tiles */
+.sim-conn-mark {
+    position: absolute;
+    inset: 3px;
+    z-index: 3;
+    pointer-events: none;
+    border-radius: 4px;
+}
+
+/* where a passage tile can go */
+.sim-conn-mark.is-hint {
+    border: 3px dashed;
+    background: rgba(255, 255, 255, 0.35);
+}
+
+/* a gap without a passage tile: a thin frame in the passage colour and a small badge */
+.sim-conn-mark.is-gap {
+    border: 2px dashed;
+    opacity: 0.85;
+}
+
+.sim-conn-mark.is-gap::after,
+.sim-conn-mark.is-bad::after {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    font: 700 10px/14px system-ui, sans-serif;
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 0 0 1.5px #fff;
+}
+
+.sim-conn-mark.is-gap::after {
+    content: '!';
+    background: #f59e0b;
+}
+
+/* a passage tile in the wrong place */
+.sim-conn-mark.is-bad {
+    border: 2px solid rgba(220, 38, 38, 0.55);
+}
+
+.sim-conn-mark.is-bad::after {
+    content: '×';
+    background: #dc2626;
+}
+
+/* Tile dialog: where this tile lies, and passage colours it cannot take */
+.sim-passage-context {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.6rem;
+    padding: 0.4rem 0.7rem;
+    border-radius: 8px;
+    background: #f8fafc;
+    color: #475569;
+    font-size: 0.82rem;
+}
+
+.sim-passage-context > i { color: #94a3b8; }
+
+.sim-passage-context-borders {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: 0.4rem;
+    padding-left: 0.6rem;
+    border-left: 1px solid #e2e8f0;
+}
+
+.sim-passage-context-room {
+    padding: 0 0.45rem;
+    border-radius: 999px;
+    background: #e2e8f0;
+    font-weight: 700;
+    font-size: 0.75rem;
+}
+
+.sim-passage-context-none {
+    margin-left: 0.4rem;
+    color: #94a3b8;
+}
+
+.sim-passage.unavailable {
+    border-style: dashed;
+    background: #f8fafc;
+    color: #94a3b8;
+    box-shadow: none;
+}
+
+.sim-passage.unavailable:disabled {
+    cursor: not-allowed;
+}
+
+.sim-passage.unavailable:hover {
+    border-color: #e2e8f0;
+}
+
+.sim-passage.unavailable .sim-passage-swatch {
+    opacity: 0.3;
+}
+
+.sim-passage.unavailable .sim-passage-rooms i,
+.sim-passage.unavailable .sim-passage-name {
+    color: #94a3b8;
+}
+
+/* a colour already set that does not fit here stays selectable so it can be seen and changed */
+.sim-passage.unavailable.active {
+    border-style: solid;
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+
+/* Wall token places without a wall */
+.sim-nowall {
+    display: block;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: #94a3b8;
+    white-space: nowrap;
+}
+
+.sim-placement-table tr:has(.sim-nowall) td {
+    background: #f8fafc;
+}
+
+.sim-placement-table tr:has(.sim-nowall) td input[type="radio"]:disabled,
+.sim-halfwall-table td input[type="radio"]:disabled {
+    opacity: 0.25;
+    cursor: not-allowed;
+}
+
+.sim-ct-chip:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.sim-halfwall-table th.sim-nowall-col {
+    color: #cbd5e1;
+    text-decoration: line-through;
+}

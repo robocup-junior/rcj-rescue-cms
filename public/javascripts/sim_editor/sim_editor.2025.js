@@ -1016,6 +1016,7 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
             area4Room      : $scope.area4Room,
             room4CanvasSave: $scope.room4CanvasSave,
             room4VicTypes  : $scope.room4VicTypes,
+            connCheckOff   : !!$scope.connCheckOff,
         };
          var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(map))
          var downloadLink = document.createElement('a')
@@ -1032,6 +1033,28 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
                 type: 'error',
                 title: 'Oops...',
                 text: trans['startTileError'],
+            });
+            return;
+        }
+        const area4Problems = presetProblems();
+        if (area4Problems.length) {
+            Swal.fire({
+                type: 'error',
+                title: $translate.instant('admin.simMapEditor.area4Check.exportTitle'),
+                html: '<ul style="text-align:left">' + area4Problems.map(function (key) {
+                    return '<li>' + $translate.instant('admin.simMapEditor.area4Check.' + key) + '</li>';
+                }).join('') + '</ul>'
+            });
+            return;
+        }
+        const roomProblems = $scope.connCheckOff ? [] : connectionProblems();
+        if (roomProblems.length) {
+            Swal.fire({
+                type: 'error',
+                title: $translate.instant('admin.simMapEditor.connCheck.exportTitle'),
+                html: '<ul style="text-align:left">' + roomProblems.map(function (text) {
+                    return '<li>' + text + '</li>';
+                }).join('') + '</ul>'
             });
             return;
         }
@@ -2331,6 +2354,7 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
 
                 $scope.roomTiles       = data.roomTiles;
                 $scope.area4Room       = data.area4Room;
+                $scope.connCheckOff    = !!data.connCheckOff;
                 $scope.room4CanvasSave = data.room4CanvasSave;
                 $scope.room4Img.src = $scope.room4CanvasSave;
                 if (data.room4VicTypes != undefined)
@@ -2383,12 +2407,479 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
     if (!$scope.area4Room) $scope.area4Room = $scope.area4[0];
 
     $scope.pickArea4Room = function(room) {
+        if (!$scope.presetAvailable(room)) return;
         $scope.area4Room = room;
     };
 
     $scope.isArea4Room = function(room) {
         return !!$scope.area4Room && $scope.area4Room.value === room.value;
     };
+
+    // ---- Room 4 presets: where they can go -------------------------------------------------
+    // A preset (Erebus Area4_1 / Area4_2) has a fixed size in tiles. The world export anchors it on
+    // the 1<->4 passage (green) and turns it so the 3<->4 passage (red) lands on the preset's own
+    // entrance (room1Tile / room3Tile). The checks below use the same geometry as the export, so
+    // the editor only offers a preset that the export will really place on the room 4 area.
+    const PASSAGE_14 = '#08D508';
+    const PASSAGE_34 = '#e71a1a';
+
+    function rotateTiles(v, dir) {   // same as vectorRotate in the world export
+        switch (dir) {
+            case 0: return [v[0], v[1]];
+            case 1: return [-v[1], v[0]];
+            case 2: return [-v[0], -v[1]];
+            case 3: return [v[1], -v[0]];
+        }
+    }
+
+    // Tiles covered by a preset whose tile 0 is at `origin`, turned by `dir`. Erebus places tiles and
+    // the Area4 protos by tile centre and turns Area4 about the centre of its tile 0, so tile indices
+    // rotate like points (as in the export).
+    function presetBounds(preset, origin, dir) {
+        const corners = [[0, 0], [preset.width - 1, 0], [0, preset.height - 1], [preset.width - 1, preset.height - 1]]
+            .map(function (c) { return rotateTiles(c, dir); });
+        const xs = corners.map(function (c) { return c[0]; });
+        const ys = corners.map(function (c) { return c[1]; });
+        return {
+            minX: origin[0] + Math.min.apply(null, xs), maxX: origin[0] + Math.max.apply(null, xs),
+            minY: origin[1] + Math.min.apply(null, ys), maxY: origin[1] + Math.max.apply(null, ys)
+        };
+    }
+
+    function room4Region() {
+        const tiles = ($scope.roomTiles && $scope.roomTiles[2]) || [];
+        if (!tiles.length) return null;
+        const pts = tiles.map(function (key) {
+            const p = key.split(',').map(Number);
+            return [(p[0] - 1) / 2, (p[1] - 1) / 2];
+        });
+        const xs = pts.map(function (p) { return p[0]; });
+        const ys = pts.map(function (p) { return p[1]; });
+        const r = { minX: Math.min.apply(null, xs), maxX: Math.max.apply(null, xs), minY: Math.min.apply(null, ys), maxY: Math.max.apply(null, ys) };
+        r.w = r.maxX - r.minX + 1;
+        r.h = r.maxY - r.minY + 1;
+        r.isRect = new Set(pts.map(function (p) { return p[0] + ',' + p[1]; })).size === r.w * r.h;
+        return r;
+    }
+
+    function passageTiles(color) {
+        const found = [];
+        Object.keys($scope.cells).forEach(function (key) {
+            const cell = $scope.cells[key];
+            if (!cell.isTile || !cell.tile || cell.tile.color !== color) return;
+            const p = key.split(',').map(Number);
+            found.push([(p[0] - 1) / 2, (p[1] - 1) / 2]);
+        });
+        return found;
+    }
+
+    function samePoint(a, b) {
+        return a[0] === b[0] && a[1] === b[1];
+    }
+
+    function inMap(p) {
+        return p[0] >= 0 && p[1] >= 0 && p[0] < $scope.width && p[1] < $scope.length;
+    }
+
+    // Everything the page needs about one preset: can it be chosen, does it fit, where it goes
+    function presetStatus(preset, region, greens, reds) {
+        const status = { size: preset.width + ' × ' + preset.height, sizeOk: false, ok: false, issues: [], candidates: [], placement: null };
+        if (!region) { status.issues.push('noRegion'); return status; }
+        status.region = region.w + ' × ' + region.h;
+        if (!region.isRect) { status.issues.push('notRect'); return status; }
+        status.sizeOk = (region.w === preset.width && region.h === preset.height) || (region.w === preset.height && region.h === preset.width);
+        if (!status.sizeOk) { status.issues.push('wrongSize'); return status; }
+
+        // Orientations whose footprint is exactly the room 4 area, and the passage tiles they need
+        for (let dir = 0; dir < 4; dir++) {
+            const b = presetBounds(preset, [0, 0], dir);
+            if (b.maxX - b.minX + 1 !== region.w || b.maxY - b.minY + 1 !== region.h) continue;
+            const origin = [region.minX - b.minX, region.minY - b.minY];
+            const green = [origin[0] + rotateTiles(preset.room1Tile, dir)[0], origin[1] + rotateTiles(preset.room1Tile, dir)[1]];
+            const red = [origin[0] + rotateTiles(preset.room3Tile, dir)[0], origin[1] + rotateTiles(preset.room3Tile, dir)[1]];
+            if (!inMap(green) || !inMap(red)) continue;
+            status.candidates.push({ dir: dir, origin: origin, green: green, red: red });
+        }
+        if (!status.candidates.length) { status.issues.push('noRoomForPassages'); return status; }
+
+        if (greens.length !== 1) status.issues.push(greens.length ? 'manyGreen' : 'noGreen');
+        if (reds.length !== 1) status.issues.push(reds.length ? 'manyRed' : 'noRed');
+        if (greens.length === 1 && reds.length === 1) {
+            const match = status.candidates.find(function (c) { return samePoint(c.green, greens[0]) && samePoint(c.red, reds[0]); });
+            if (match) status.placement = match;
+            else status.issues.push('passageMismatch');
+        }
+        status.ok = !!status.placement;
+        return status;
+    }
+
+    // Recomputed when the room 4 area, the passages or the chosen room change
+    $scope.area4Status = {};
+    $scope.area4Overlay = {};
+    $scope.$watch(function () {
+        const region = (($scope.roomTiles && $scope.roomTiles[2]) || []).join(';');
+        const passages = passageTiles(PASSAGE_14).join(';') + '|' + passageTiles(PASSAGE_34).join(';');
+        return [region, passages, $scope.area4Room && $scope.area4Room.type, $scope.width, $scope.length].join('#');
+    }, function () {
+        const region = room4Region();
+        const greens = passageTiles(PASSAGE_14);
+        const reds = passageTiles(PASSAGE_34);
+        const statuses = {};
+        $scope.area4.forEach(function (room) {
+            if (room.type >= 2) statuses[room.type] = presetStatus(room, region, greens, reds);
+        });
+        $scope.area4Status = statuses;
+
+        // Map preview for the chosen preset: its footprint, and where the passages have to be
+        const overlay = {};
+        const chosen = $scope.area4Room && statuses[$scope.area4Room.type];
+        if (chosen) {
+            const cellKey = function (p) { return (2 * p[0] + 1) + ',' + (2 * p[1] + 1); };
+            if (chosen.placement) {
+                const b = presetBounds($scope.area4Room, chosen.placement.origin, chosen.placement.dir);
+                for (let x = b.minX; x <= b.maxX; x++) for (let y = b.minY; y <= b.maxY; y++) overlay[cellKey([x, y])] = { cls: 'fit' };
+            } else if (region && chosen.sizeOk) {
+                for (let x = region.minX; x <= region.maxX; x++) for (let y = region.minY; y <= region.maxY; y++) overlay[cellKey([x, y])] = { cls: 'pending' };
+                const many = chosen.candidates.length > 1;
+                chosen.candidates.forEach(function (c, i) {
+                    const mark = many ? String.fromCharCode(65 + i) : '';
+                    overlay[cellKey(c.green)] = { cls: 'need-green', label: mark };
+                    overlay[cellKey(c.red)] = { cls: 'need-red', label: mark };
+                });
+            }
+        }
+        $scope.area4Overlay = overlay;
+    });
+
+    $scope.area4OverlayAt = function (c, r) {
+        return $scope.area4Overlay[c + ',' + r];
+    };
+
+    $scope.presetAvailable = function (room) {
+        if (room.type < 2) return true;
+        const st = $scope.area4Status[room.type];
+        return !!st && st.sizeOk;
+    };
+
+    $scope.presetStatusOf = function (room) {
+        return $scope.area4Status[room.type];
+    };
+
+    // ---- Passages between rooms -----------------------------------------------------------
+    // Areas are joined by one-tile passages with a coloured floor (rules 3.3.2 / 3.3.4 / 3.4). Where
+    // two different rooms meet, every gap a robot might get through has to be such a passage tile
+    // (or be closed by a wall). A passage tile belongs to one of its two rooms and opens onto both,
+    // and a room counts as connected once passages link it, directly or through other rooms, to room 1.
+    const ROOM_PASSAGES = [
+        { color: '#1a1ae6', from: 1, to: 2, name: 'admin.simMapEditor.passageBlue' },
+        { color: '#e7e71a', from: 1, to: 3, name: 'admin.simMapEditor.passageYellow' },
+        { color: '#08D508', from: 1, to: 4, name: 'admin.simMapEditor.passageGreen' },
+        { color: '#4d1a99', from: 2, to: 3, name: 'admin.simMapEditor.passagePurple' },
+        { color: '#e7991a', from: 2, to: 4, name: 'admin.simMapEditor.passageOrange' },
+        { color: '#e71a1a', from: 3, to: 4, name: 'admin.simMapEditor.passageRed' }
+    ];
+
+    // Room number of every tile on the first floor, keyed by tile index "x,y"
+    function tileRooms() {
+        const rooms = {};
+        for (let x = 0; x < $scope.width; x++) for (let y = 0; y < $scope.length; y++) rooms[x + ',' + y] = 1;
+        ($scope.roomTiles || []).forEach(function (list, i) {
+            (list || []).forEach(function (key) {
+                const p = key.split(',').map(Number);
+                const k = (p[0] - 1) / 2 + ',' + (p[1] - 1) / 2;
+                if (p[2] === 0 && k in rooms) rooms[k] = i + 2;
+            });
+        });
+        return rooms;
+    }
+
+    function tileNeighbours(k, rooms) {
+        const p = k.split(',').map(Number);
+        return [[1, 0], [-1, 0], [0, 1], [0, -1]]
+            .map(function (d) { return (p[0] + d[0]) + ',' + (p[1] + d[1]); })
+            .filter(function (n) { return n in rooms; });
+    }
+
+    function tileAt(k) {
+        const p = k.split(',').map(Number);
+        const cell = $scope.cells[(2 * p[0] + 1) + ',' + (2 * p[1] + 1) + ',0'];
+        return cell && cell.tile;
+    }
+
+    // ---- Where the robot fits ---------------------------------------------------------------
+    // Sizes in cm as built by Erebus: 12 cm tiles, 1 cm walls, and a robot body that is a cylinder
+    // of radius 3.7 cm (E-puck-custom-default-FLU.proto). So a half-tile gap (5 cm between the
+    // walls) is too narrow, while a whole tile or a half wall next to an open edge is not.
+    const TILE_CM = 12, WALL_HALF_CM = 0.5, ROBOT_RADIUS_CM = 3.7;
+
+    // Wall centre lines on the first floor: tile edges, half walls, inner half walls and the
+    // quarter-circle walls (radius 6 cm, centred on a corner of their quarter tile)
+    function wallShapes() {
+        const shapes = [];
+        const seg = function (x1, y1, x2, y2) { shapes.push({ type: 'seg', x1: x1, y1: y1, x2: x2, y2: y2 }); };
+        Object.keys($scope.cells).forEach(function (key) {
+            const p = key.split(',').map(Number);
+            if (p[2] !== 0) return;
+            const cell = $scope.cells[key];
+            const ex = p[0], ey = p[1];
+            if (ex % 2 === 0 && ey % 2 === 1) {          // vertical edge; half wall 1 = lower half
+                if (cell.isWall) seg(6 * ex, 6 * (ey - 1), 6 * ex, 6 * (ey + 1));
+                else if (cell.halfWall == 1) seg(6 * ex, 6 * ey, 6 * ex, 6 * (ey + 1));
+                else if (cell.halfWall == 2) seg(6 * ex, 6 * (ey - 1), 6 * ex, 6 * ey);
+            } else if (ex % 2 === 1 && ey % 2 === 0) {   // horizontal edge; half wall 1 = left half
+                if (cell.isWall) seg(6 * (ex - 1), 6 * ey, 6 * (ex + 1), 6 * ey);
+                else if (cell.halfWall == 1) seg(6 * (ex - 1), 6 * ey, 6 * ex, 6 * ey);
+                else if (cell.halfWall == 2) seg(6 * ex, 6 * ey, 6 * (ex + 1), 6 * ey);
+            } else if (ex % 2 === 1 && ey % 2 === 1 && cell.tile) {
+                const cx = 6 * ex, cy = 6 * ey;          // tile centre
+                const inner = cell.tile.halfWallIn || [];
+                if (inner[0]) seg(cx, cy - 6, cx, cy);    // up, right, down, left from the centre
+                if (inner[1]) seg(cx, cy, cx + 6, cy);
+                if (inner[2]) seg(cx, cy, cx, cy + 6);
+                if (inner[3]) seg(cx - 6, cy, cx, cy);
+                (cell.tile.curve || []).forEach(function (v, q) {
+                    if (!v) return;
+                    // quarter tiles NW, NE, SW, SE; the curve value names where the arc bulges, so
+                    // its centre is the opposite corner: 1 (NE) -> SW, 2 (SE) -> NW, 3 (SW) -> NE, 4 (NW) -> SE
+                    const ox = cx - 6 + (q % 2) * 6, oy = cy - 6 + Math.floor(q / 2) * 6;
+                    const c = [[0, 6], [0, 0], [6, 0], [6, 6]][v - 1];
+                    if (!c) return;
+                    shapes.push({ type: 'arc', cx: ox + c[0], cy: oy + c[1], r: 6, dx: c[0] === 0 ? 1 : -1, dy: c[1] === 0 ? 1 : -1 });
+                });
+            }
+        });
+        return shapes;
+    }
+
+    function shapeDistance(s, x, y) {
+        if (s.type === 'seg') {
+            const vx = s.x2 - s.x1, vy = s.y2 - s.y1;
+            const t = Math.max(0, Math.min(1, ((x - s.x1) * vx + (y - s.y1) * vy) / (vx * vx + vy * vy)));
+            return Math.hypot(x - s.x1 - t * vx, y - s.y1 - t * vy);
+        }
+        // the arc runs from (cx + dx r, cy) to (cx, cy + dy r)
+        const px = x - s.cx, py = y - s.cy;
+        if (px * s.dx >= 0 && py * s.dy >= 0) return Math.abs(Math.hypot(px, py) - s.r);
+        return Math.min(Math.hypot(px - s.dx * s.r, py), Math.hypot(px, py - s.dy * s.r));
+    }
+
+    // fits(x, y): whether the robot body fits with its centre at (x, y) cm
+    function robotFits() {
+        const reach = ROBOT_RADIUS_CM + WALL_HALF_CM;
+        const buckets = {};
+        wallShapes().forEach(function (s) {
+            const box = s.type === 'seg'
+                ? [Math.min(s.x1, s.x2), Math.min(s.y1, s.y2), Math.max(s.x1, s.x2), Math.max(s.y1, s.y2)]
+                : [s.cx - s.r, s.cy - s.r, s.cx + s.r, s.cy + s.r];
+            for (let i = Math.floor((box[0] - reach) / TILE_CM); i <= Math.floor((box[2] + reach) / TILE_CM); i++)
+                for (let j = Math.floor((box[1] - reach) / TILE_CM); j <= Math.floor((box[3] + reach) / TILE_CM); j++)
+                    (buckets[i + ',' + j] = buckets[i + ',' + j] || []).push(s);
+        });
+        return function (x, y) {
+            const list = buckets[Math.floor(x / TILE_CM) + ',' + Math.floor(y / TILE_CM)] || [];
+            return list.every(function (s) { return shapeDistance(s, x, y) >= reach; });
+        };
+    }
+
+    // Whether the robot can cross the edge between the neighbouring tiles a and b: somewhere on
+    // that edge its centre fits between the walls, and neither side is a hole
+    function edgePassable(a, b, fits) {
+        const ta = tileAt(a), tb = tileAt(b);
+        if ((ta && ta.black) || (tb && tb.black)) return false;
+        const p = a.split(',').map(Number), q = b.split(',').map(Number);
+        for (let d = 0.125; d < TILE_CM; d += 0.25) {
+            const x = p[0] === q[0] ? TILE_CM * p[0] + d : TILE_CM * Math.max(p[0], q[0]);
+            const y = p[1] === q[1] ? TILE_CM * p[1] + d : TILE_CM * Math.max(p[1], q[1]);
+            if (fits(x, y)) return true;
+        }
+        return false;
+    }
+
+    function passageBetween(r1, r2) {
+        return ROOM_PASSAGES.find(function (pass) {
+            return (pass.from === r1 && pass.to === r2) || (pass.from === r2 && pass.to === r1);
+        });
+    }
+
+    function connectionStatus() {
+        const rooms = tileRooms();
+        const keys = Object.keys(rooms);
+        const present = { 1: true };
+        keys.forEach(function (k) { present[rooms[k]] = true; });
+        const status = { show: false, ok: true, rooms: [], issues: [], marks: {} };
+        const fits = robotFits();
+        // A room 4 preset brings its own walls, open only at its entrances (checked by the preset
+        // placement check), so the room 4 border is left to that check
+        const presetRoom4 = $scope.area4Room && $scope.area4Room.type >= 2;
+
+        // The passage tiles that are placed, and whether each really opens onto its two rooms
+        const links = [];
+        ROOM_PASSAGES.forEach(function (pass) {
+            let missing = 0, misplaced = false;
+            keys.forEach(function (k) {
+                const tile = tileAt(k);
+                if (!tile || tile.color !== pass.color) return;
+                status.show = true;
+                if (!present[pass.from] || !present[pass.to]) {
+                    missing = present[pass.from] ? pass.to : pass.from;
+                    status.marks[k] = { cls: 'bad' };
+                    return;
+                }
+                const own = rooms[k];
+                const other = own === pass.from ? pass.to : pass.from;
+                const opens = function (room) {
+                    return tileNeighbours(k, rooms).some(function (n) { return rooms[n] === room && edgePassable(k, n, fits); });
+                };
+                if ((own === pass.from || own === pass.to) && opens(own) && opens(other)) links.push(pass);
+                else { misplaced = true; status.marks[k] = { cls: 'bad' }; }
+            });
+            if (missing) status.issues.push({ key: 'passageNoRoom', pass: pass, room: missing });
+            if (misplaced) status.issues.push({ key: 'passageMisplaced', pass: pass });
+        });
+
+        // Gaps the robot fits through between two different rooms that are not a passage tile of their colour
+        const gaps = {};
+        const gapRooms = {};
+        keys.forEach(function (k) {
+            tileNeighbours(k, rooms).forEach(function (n) {
+                if (k > n) return;   // each edge once
+                const ra = rooms[k], rb = rooms[n];
+                if (ra === rb || (presetRoom4 && (ra === 4 || rb === 4)) || !edgePassable(k, n, fits)) return;
+                const pass = passageBetween(ra, rb);
+                const tk = tileAt(k), tn = tileAt(n);
+                if ((tk && tk.color === pass.color) || (tn && tn.color === pass.color)) return;
+                if (!gaps[pass.color]) gaps[pass.color] = { key: 'unmarkedGap', pass: pass, count: 0 };
+                gaps[pass.color].count++;
+                gapRooms[ra] = gapRooms[rb] = true;
+                // marked on the side of the higher-numbered room, the room being joined
+                const t = ra > rb ? k : n;
+                if (!status.marks[t] || status.marks[t].cls === 'hint') status.marks[t] = { cls: 'gap', style: { 'border-color': pass.color } };
+            });
+        });
+        ROOM_PASSAGES.forEach(function (pass) {
+            if (gaps[pass.color]) status.issues.push(gaps[pass.color]);
+        });
+
+        // Rooms reached from room 1 through the passages
+        const reached = { 1: true };
+        let grew = true;
+        while (grew) {
+            grew = false;
+            links.forEach(function (l) {
+                if (reached[l.from] !== reached[l.to]) { reached[l.from] = reached[l.to] = true; grew = true; }
+            });
+        }
+
+        [2, 3, 4].forEach(function (room) {
+            if (!present[room]) return;
+            status.show = true;
+            const own = keys.filter(function (k) { return rooms[k] === room; });
+            const linked = ROOM_PASSAGES.filter(function (pass) {
+                return (pass.from === room || pass.to === room) && links.indexOf(pass) > -1;
+            });
+            // Passages that could join this room: the rooms it borders, and the tiles on the border
+            const options = [];
+            ROOM_PASSAGES.forEach(function (pass) {
+                if (pass.from !== room && pass.to !== room) return;
+                const other = pass.from === room ? pass.to : pass.from;
+                if (!present[other]) return;
+                const border = own.filter(function (k) {
+                    return tileNeighbours(k, rooms).some(function (n) { return rooms[n] === other; });
+                });
+                if (border.length) options.push({ pass: pass, border: border });
+            });
+            const entry = { room: room, linked: linked, reached: !!reached[room], gap: !!gapRooms[room], options: options };
+            status.rooms.push(entry);
+            if (entry.reached) return;
+            status.ok = false;
+            // Where to put a passage, unless the preset frames or the gap marks already show it
+            if ((room === 4 && presetRoom4) || gapRooms[room]) return;
+            options.forEach(function (o) {
+                o.border.forEach(function (k) {
+                    if (!status.marks[k]) status.marks[k] = { cls: 'hint', style: { 'border-color': o.pass.color } };
+                });
+            });
+        });
+        if (status.issues.length) status.ok = false;
+        return status;
+    }
+
+    // The check can be switched off for a map (saved with it): then nothing is checked, marked,
+    // restricted or blocked
+    $scope.connCheckOff = false;
+    $scope.toggleConnCheck = function () {
+        $scope.connCheckOff = !$scope.connCheckOff;
+    };
+    $scope.connStatus = { show: false, ok: true, rooms: [], issues: [], marks: {} };
+    $scope.$watch(function () {
+        if ($scope.connCheckOff) return 'off';
+        const parts = [];
+        Object.keys($scope.cells).forEach(function (key) {
+            const cell = $scope.cells[key];
+            if (cell.isWall || cell.halfWall > 0) parts.push(key + (cell.isWall ? 'w' : 'h' + cell.halfWall));
+            if (cell.isTile && cell.tile) {
+                const t = cell.tile;
+                const inner = (t.halfWallIn || []).join('') + (t.curve || []).join('');
+                if (t.color || t.black || /[1-9]/.test(inner)) parts.push(key + '=' + (t.color || '') + (t.black ? 'b' : '') + inner);
+            }
+        });
+        return [($scope.roomTiles || []).map(function (l) { return (l || []).join(';'); }).join('|'),
+            parts.join(';'), $scope.area4Room && $scope.area4Room.type, $scope.width, $scope.length].join('#');
+    }, function () {
+        $scope.connStatus = $scope.connCheckOff ? { show: false, ok: true, rooms: [], issues: [], marks: {} } : connectionStatus();
+    });
+
+    $scope.connMarkAt = function (c, r) {
+        return $scope.connStatus.marks[(c - 1) / 2 + ',' + (r - 1) / 2];
+    };
+
+    // For the tile dialog: the room of the tile at cell (x, y, z), the other rooms the robot can
+    // get to from it, and whether it opens onto its own room. A passage colour can be chosen only
+    // where the check would accept it: the tile is in one of the two rooms and the robot can pass
+    // from it into both (walls, half walls, curved walls and holes taken into account).
+    // Null / always allowed when the check is off or off the first floor.
+    $scope.tileRoomInfo = function (x, y, z) {
+        if ($scope.connCheckOff || z != 0) return null;
+        const rooms = tileRooms();
+        const k = (x - 1) / 2 + ',' + (y - 1) / 2;
+        if (!(k in rooms)) return null;
+        const fits = robotFits();
+        const borders = [];
+        let ownOpen = false;
+        tileNeighbours(k, rooms).forEach(function (n) {
+            if (!edgePassable(k, n, fits)) return;
+            if (rooms[n] === rooms[k]) ownOpen = true;
+            else if (borders.indexOf(rooms[n]) < 0) borders.push(rooms[n]);
+        });
+        return { room: rooms[k], borders: borders.sort(), ownOpen: ownOpen };
+    };
+
+    $scope.passageAllowed = function (info, pass) {
+        if (!info) return true;
+        if (!info.ownOpen || (info.room !== pass.from && info.room !== pass.to)) return false;
+        return info.borders.indexOf(info.room === pass.from ? pass.to : pass.from) > -1;
+    };
+
+    // Connection problems as messages (for the world export)
+    function connectionProblems() {
+        const st = connectionStatus();
+        const t = function (key, params) { return $translate.instant('admin.simMapEditor.connCheck.' + key, params); };
+        const problems = st.rooms.filter(function (entry) { return !entry.reached; }).map(function (entry) {
+            return t('notConnected', { room: entry.room });
+        });
+        st.issues.forEach(function (issue) {
+            problems.push(t(issue.key, { name: $translate.instant(issue.pass.name), from: issue.pass.from, to: issue.pass.to, room: issue.room, count: issue.count }));
+        });
+        return problems;
+    }
+
+    // Problems that stop the chosen preset from being placed (for the world export)
+    function presetProblems() {
+        if (!$scope.area4Room || $scope.area4Room.type < 2) return [];
+        const st = $scope.area4Status[$scope.area4Room.type];
+        if (!st) return ['noRegion'];
+        return st.ok ? [] : st.issues;
+    }
     
     // tag custom room 4
     function room4CorrectSize() {
@@ -3021,6 +3512,47 @@ app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', '$uibModal', 
         { color: '#e7991a', from: 2, to: 4, name: 'admin.simMapEditor.passageOrange' },
         { color: '#e71a1a', from: 3, to: 4, name: 'admin.simMapEditor.passageRed' }
     ];
+    // Only the colours of the rooms this tile lies between can be chosen (unless the room
+    // connection check is off)
+    $scope.passageInfo = $scope.$parent.tileRoomInfo ? $scope.$parent.tileRoomInfo(x, y, z) : null;
+    $scope.passageOk = function (p) {
+        return !$scope.$parent.passageAllowed || $scope.$parent.passageAllowed($scope.passageInfo, p);
+    };
+    $scope.passageAvailable = function () {
+        return $scope.passageColors.some($scope.passageOk);
+    };
+
+    // Wall tokens go on walls only (rules 3.7.2), so a place without a wall cannot take one. A token
+    // already there stays selectable so it can be seen and removed.
+    function edgeCell(dx, dy) {
+        return $scope.$parent.cells[(Number(x) + dx) + ',' + (Number(y) + dy) + ',' + z];
+    }
+    const WALL_SIDES = { top: [0, -1], right: [1, 0], bottom: [0, 1], left: [-1, 0] };
+    $scope.wallAt = function (dir) {
+        const c = edgeCell(WALL_SIDES[dir][0], WALL_SIDES[dir][1]);
+        return !!(c && c.isWall);
+    };
+    // Half-wall slot i = quarter tile (NW, NE, SW, SE) * 4 + side (top, right, bottom, left). A slot
+    // sits on the tile edge (whole wall, or the half wall covering that half: 1 = left / lower half),
+    // on an inner half wall, or - when its quarter tile has a curved wall - on that curve.
+    $scope.halfWallSlotHasWall = function (i) {
+        const q = Math.floor(i / 4), side = i % 4, qx = q % 2, qy = Math.floor(q / 2);
+        const t = $scope.cell && $scope.cell.tile;
+        if (!t) return false;
+        if (t.curve && t.curve[q]) return true;
+        const inner = t.halfWallIn || [];
+        const outer = function (dx, dy, half) {
+            const c = edgeCell(dx, dy);
+            return !!c && (c.isWall || c.halfWall == half);
+        };
+        switch (side) {
+            case 0: return qy === 0 ? outer(0, -1, qx + 1) : !!inner[qx ? 1 : 3];
+            case 1: return qx === 1 ? outer(1, 0, qy ? 1 : 2) : !!inner[qy ? 2 : 0];
+            case 2: return qy === 1 ? outer(0, 1, qx + 1) : !!inner[qx ? 1 : 3];
+            case 3: return qx === 0 ? outer(-1, 0, qy ? 1 : 2) : !!inner[qy ? 2 : 0];
+        }
+        return false;
+    };
     console.log($scope.cell)
     $scope.cell = $scope.$parent.cells[x + ',' + y + ',' + z];
     $scope.isStart = $scope.$parent.startTile.x == x &&

@@ -14,6 +14,10 @@ block map_table
               td(ng-repeat='c in range(2*width + 1)', ng-class="{'wallspot': $odd != $parent.$odd, 'tile': $odd && $parent.$odd, 'wall': cells[c+','+r+','+z].isWall}", ng-click='cellClick(c, r, z, $odd != $parent.$odd, $odd && $parent.$odd)', ng-style="tileColour(c,r,z)")
                   .tile-image-container(ng-show="$odd && $parent.$odd")
                       img.tile-image(ng-src='/images/start.png', ng-show='startTile.x == c && startTile.y == r && startTile.z == z')
+                      //- Room 4 preset preview: its footprint and where its passages go
+                      .sim-area4-mark(ng-if="area4OverlayAt && z == 0 && area4OverlayAt(c, r)", ng-class="'is-' + area4OverlayAt(c, r).cls") {{area4OverlayAt(c, r).label}}
+                      //- Passage tiles: where one can go, or one in the wrong place
+                      .sim-conn-mark(ng-if="connMarkAt && z == 0 && connMarkAt(c, r)", ng-class="'is-' + connMarkAt(c, r).cls", ng-style="connMarkAt(c, r).style")
                       img.tile-image(ng-src='/images/h_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'H' || cells[c+','+r+','+z].tile.halfWallVic[0] == 1 ||  cells[c+','+r+','+z].tile.halfWallVic[4] == 1 || cells[c+','+r+','+z].tile.halfWallVic[1] == 1 || cells[c+','+r+','+z].tile.halfWallVic[7] == 1")
                       img.tile-image(ng-src='/images/h_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'H' || cells[c+','+r+','+z].tile.halfWallVic[5] == 1 ||  cells[c+','+r+','+z].tile.halfWallVic[13] == 1 || cells[c+','+r+','+z].tile.halfWallVic[6] == 1 || cells[c+','+r+','+z].tile.halfWallVic[12] == 1")
                       img.tile-image(ng-src='/images/h_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'H' || cells[c+','+r+','+z].tile.halfWallVic[10] == 1 ||  cells[c+','+r+','+z].tile.halfWallVic[14] == 1 || cells[c+','+r+','+z].tile.halfWallVic[9] == 1 || cells[c+','+r+','+z].tile.halfWallVic[15] == 1")

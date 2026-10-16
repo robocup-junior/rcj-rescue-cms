@@ -127,7 +127,7 @@ block main_content
             | {{"admin.simMapEditor.pick4" | translate}}
           span.sim-room4-hint {{"admin.simMapEditor.room4Hint" | translate}}
         .sim-room4-options
-          button.sim-room4-option(type='button', ng-repeat="room in area4", ng-class="{'active': isArea4Room(room)}", ng-click="pickArea4Room(room)")
+          button.sim-room4-option(type='button', ng-repeat="room in area4", ng-class="{'active': isArea4Room(room), 'unavailable': presetAvailable && !presetAvailable(room)}", ng-click="pickArea4Room(room)", ng-disabled="presetAvailable && !presetAvailable(room) && !isArea4Room(room)")
             span.sim-room4-icon
               i.fas(ng-class="room.type === 0 ? 'fa-ban' : (room.type === 1 ? 'fa-paint-brush' : 'fa-th-large')")
             span.sim-room4-text
@@ -144,12 +144,72 @@ block main_content
                 span
                   i.fas.fa-bullseye.mr-1
                   | {{room.hazards.length}}
+              //- Whether the preset fits the room 4 area (only where the editor checks it)
+              span.sim-room4-fit(ng-if="room.type >= 2 && presetStatusOf && presetStatusOf(room)", ng-class="presetStatusOf(room).ok ? 'ok' : (presetStatusOf(room).sizeOk ? 'warn' : 'off')")
+                span(ng-if="presetStatusOf(room).ok")
+                  i.fas.fa-check-circle.mr-1
+                  | {{"admin.simMapEditor.area4Check.ok" | translate}}
+                span(ng-if="presetStatusOf(room).sizeOk && !presetStatusOf(room).ok")
+                  i.fas.fa-exclamation-triangle.mr-1
+                  | {{"admin.simMapEditor.area4Check.check" | translate}}
+                span(ng-if="!presetStatusOf(room).sizeOk")
+                  i.fas.fa-lock.mr-1
+                  | {{"admin.simMapEditor.area4Check.needSize" | translate:{size: room.width + ' × ' + room.height} }}
+                  span.sim-room4-now {{"admin.simMapEditor.area4Check.now" | translate:{now: presetStatusOf(room).region || ("admin.simMapEditor.area4Check.none" | translate)} }}
             i.fas.fa-check-circle.sim-room4-check
+        //- Placement check for the chosen preset
+        .sim-room4-status(ng-if="area4Room && area4Room.type >= 2 && presetStatusOf && presetStatusOf(area4Room)", ng-class="presetStatusOf(area4Room).ok ? 'ok' : 'warn'")
+          .sim-room4-status-title
+            i.fas(ng-class="presetStatusOf(area4Room).ok ? 'fa-check-circle' : 'fa-exclamation-triangle'")
+            | {{"admin.simMapEditor.area4Check.title" | translate}}
+          div(ng-if="presetStatusOf(area4Room).ok") {{"admin.simMapEditor.area4Check.ok" | translate}}
+          ul(ng-if="!presetStatusOf(area4Room).ok")
+            li(ng-repeat="issue in presetStatusOf(area4Room).issues") {{("admin.simMapEditor.area4Check." + issue) | translate}}
+          .sim-room4-hint(ng-if="!presetStatusOf(area4Room).ok") {{"admin.simMapEditor.area4Check.mapHint" | translate}}
+          .sim-room4-hint(ng-if="presetStatusOf(area4Room).ok") {{"admin.simMapEditor.area4Check.mapHintOk" | translate}}
         .sim-room4-custom(ng-show="area4Room && area4Room.type === 1")
           button.btn.btn-sm.btn-primary.rounded-pill(type='button', ng-click='openCustomRoom4()')
             i.fas.fa-paint-brush.mr-1
             | {{"admin.simMapEditor.room4Creator.open" | translate}}
           span.sim-room4-hint {{"admin.simMapEditor.room4CustomSteps" | translate}}
+
+      //- How the rooms are joined: a passage tile (floor colour) for each gap between rooms.
+      //- The check can be switched off for the map; then nothing is checked or blocked.
+      .sim-conn-status(ng-if="connCheckOff || (connStatus && connStatus.show)", ng-class="connCheckOff ? 'off' : (connStatus.ok ? 'ok' : 'warn')")
+        .sim-conn-head
+          span.sim-conn-title
+            i.fas(ng-class="connCheckOff ? 'fa-power-off' : (connStatus.ok ? 'fa-check-circle' : 'fa-info-circle')")
+            | {{"admin.simMapEditor.connCheck.title" | translate}}
+          label.sim-conn-switch(title="{{'admin.simMapEditor.connCheck.switchHint' | translate}}")
+            input(type='checkbox', ng-checked='!connCheckOff', ng-click='toggleConnCheck()')
+            span.sim-conn-switch-track
+            span.sim-conn-switch-label {{(connCheckOff ? "admin.simMapEditor.connCheck.off" : "admin.simMapEditor.connCheck.on") | translate}}
+        div.sim-conn-offnote(ng-if="connCheckOff") {{"admin.simMapEditor.connCheck.offNote" | translate}}
+        div(ng-if="!connCheckOff")
+          .sim-conn-summary(ng-if="connStatus.ok") {{"admin.simMapEditor.connCheck.ok" | translate}}
+          .sim-conn-room(ng-repeat="entry in connStatus.rooms", ng-class="entry.reached && !entry.gap ? 'ok' : 'warn'")
+            .sim-conn-room-head
+              i.fas(ng-class="entry.reached && !entry.gap ? 'fa-check-circle' : 'fa-circle'")
+              span.sim-conn-room-name {{"admin.simMapEditor.connCheck.room" | translate:{room: entry.room} }}
+              span.sim-conn-chip(ng-repeat="pass in entry.linked")
+                span.sim-conn-swatch(ng-style="{'background-color': pass.color}")
+                | {{pass.from}} ⇄ {{pass.to}}
+            .sim-conn-room-body(ng-if="!entry.reached")
+              div(ng-if="!entry.options.length") {{"admin.simMapEditor.connCheck.isolated" | translate}}
+              div(ng-if="entry.options.length")
+                div {{(entry.linked.length ? "admin.simMapEditor.connCheck.notReached" : "admin.simMapEditor.connCheck.notLinked") | translate}}
+                .sim-conn-options
+                  span.sim-conn-chip.option(ng-repeat="o in entry.options")
+                    span.sim-conn-swatch(ng-style="{'background-color': o.pass.color}")
+                    | {{"admin.simMapEditor.connCheck.option" | translate:{from: o.pass.from, to: o.pass.to, name: (o.pass.name | translate)} }}
+                .sim-room4-hint(ng-if="entry.room === 4 && area4Room && area4Room.type >= 2") {{"admin.simMapEditor.connCheck.presetNote" | translate}}
+          ul.sim-conn-issues(ng-if="connStatus.issues.length")
+            li(ng-repeat="issue in connStatus.issues") {{("admin.simMapEditor.connCheck." + issue.key) | translate:{name: (issue.pass.name | translate), from: issue.pass.from, to: issue.pass.to, room: issue.room, count: issue.count} }}
+          .sim-conn-foot(ng-if="!connStatus.ok")
+            div {{"admin.simMapEditor.connCheck.mapHint" | translate}}
+            div
+              i.fas.fa-lock.mr-1
+              | {{"admin.simMapEditor.connCheck.exportNote" | translate}}
 
   .modern-card.mb-4.overflow-hidden
     .modern-card-body.p-0
