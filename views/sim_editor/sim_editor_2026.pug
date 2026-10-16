@@ -22,9 +22,25 @@ block map_legend
       | {{"admin.simMapEditor.fakeLegendMixed" | translate}}
 
 block map_table
-  table
+  //- Insert (+) between and remove (x) rows / columns, as in the Maze editor
+  table.grid-manage-table
+      thead
+          tr
+              th.grid-manage-corner
+              th.grid-manage-col(ng-repeat='c in range(2*width + 1)')
+                  .btn-grid-manage-group
+                      button.btn-grid-manage.btn-add(ng-if='$even', type='button', ng-click='addColumn(c)', title='{{"admin.simMapEditor.insertColumn" | translate}}')
+                          i.fas.fa-plus-circle
+                      button.btn-grid-manage.btn-remove(ng-if='$odd', type='button', ng-click='removeColumn(c)', title='{{"admin.simMapEditor.removeColumn" | translate}}')
+                          i.fas.fa-times-circle
       tbody
           tr(ng-repeat='r in range(2*length + 1)')
+              td.grid-manage-row
+                  .btn-grid-manage-group
+                      button.btn-grid-manage.btn-add(ng-if='$even', type='button', ng-click='addRow(r)', title='{{"admin.simMapEditor.insertRow" | translate}}')
+                          i.fas.fa-plus-circle
+                      button.btn-grid-manage.btn-remove(ng-if='$odd', type='button', ng-click='removeRow(r)', title='{{"admin.simMapEditor.removeRow" | translate}}')
+                          i.fas.fa-times-circle
               td(ng-repeat='c in range(2*width + 1)', ng-class="{'wallspot': $odd != $parent.$odd, 'tile': $odd && $parent.$odd, 'wall': cells[c+','+r+','+z].isWall}", ng-click='cellClick(c, r, z, $odd != $parent.$odd, $odd && $parent.$odd)', ng-style="tileColour(c,r,z)")
                   .tile-image-container(ng-show="$odd && $parent.$odd")
                       img.tile-image(ng-src='/images/start.png', ng-show='startTile.x == c && startTile.y == r && startTile.z == z')

@@ -2180,3 +2180,973 @@ img.sim-fake-victim-mixed {
     color: #cbd5e1;
     text-decoration: line-through;
 }
+
+/* ---------- Custom room 4 creator: tools, stamps and the drawing stage ---------- */
+.sim-r4 {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.sim-r4-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.sim-r4-tools {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    padding: 3px;
+    border-radius: 12px;
+    background: #f1f5f9;
+}
+
+.sim-r4-tool {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.7rem;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: #475569;
+    font-weight: 700;
+    font-size: 0.82rem;
+}
+
+.sim-r4-tool:hover { background: rgba(255, 255, 255, 0.7); }
+.sim-r4-tool:focus { outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35); }
+
+.sim-r4-tool.active {
+    background: #fff;
+    color: #1d4ed8;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15);
+}
+
+.sim-r4-actions {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.sim-r4-icon {
+    width: 34px;
+    height: 34px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #fff;
+    color: #475569;
+}
+
+.sim-r4-icon:hover:not(:disabled) { border-color: #93c5fd; color: #1d4ed8; }
+.sim-r4-icon.danger:hover:not(:disabled) { border-color: #fca5a5; color: #dc2626; }
+.sim-r4-icon:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.sim-r4-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    min-height: 34px;
+    padding: 0.45rem 0.7rem;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+}
+
+.sim-r4-tool-hint {
+    flex: 1 1 220px;
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+.sim-r4-option-row {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sim-r4-option-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #475569;
+}
+
+.sim-r4-seg {
+    display: inline-flex;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.sim-r4-seg button {
+    padding: 0.15rem 0.7rem;
+    border: 0;
+    background: #fff;
+    color: #475569;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.sim-r4-seg button + button { border-left: 1px solid #e2e8f0; }
+.sim-r4-seg button.active { background: #1d4ed8; color: #fff; }
+
+.sim-r4-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    user-select: none;
+}
+
+.sim-r4-switch input { position: absolute; opacity: 0; pointer-events: none; }
+
+.sim-r4-switch-track {
+    position: relative;
+    width: 30px;
+    height: 17px;
+    border-radius: 999px;
+    background: #cbd5e1;
+    transition: background 0.15s;
+}
+
+.sim-r4-switch-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.25);
+    transition: transform 0.15s;
+}
+
+.sim-r4-switch input:checked + .sim-r4-switch-track { background: #3b82f6; }
+.sim-r4-switch input:checked + .sim-r4-switch-track::after { transform: translateX(13px); }
+
+/* Stamp palette */
+.sim-r4-stamps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.9rem;
+    width: 100%;
+}
+
+.sim-r4-stamp-group {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+}
+
+.sim-r4-stamp-group-label {
+    margin-right: 2px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #94a3b8;
+}
+
+.sim-r4-stamp {
+    --stamp-color: #1e293b;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.15rem 0.55rem 0.15rem 0.2rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 999px;
+    background: #fff;
+    color: #334155;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.sim-r4-stamp:hover { border-color: var(--stamp-color); }
+
+.sim-r4-stamp.active {
+    border-color: var(--stamp-color);
+    background: color-mix(in srgb, var(--stamp-color) 10%, white);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.15);
+}
+
+.sim-r4-stamp-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 3px;
+    border-radius: 999px;
+    background: var(--stamp-color, #1e293b);
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.75rem;
+}
+
+.kind-fake .sim-r4-stamp-badge {
+    background: #fff;
+    color: #f97316;
+    box-shadow: inset 0 0 0 1.5px #f97316;
+}
+
+.kind-random { --stamp-color: #94a3b8; }
+
+/* Drawing stage: the picture, with the grid / badges / previews on top */
+.sim-r4-stage {
+    position: relative;
+    align-self: center;
+    max-width: 100%;
+    line-height: 0;
+    border-radius: 8px;
+    box-shadow: 0 0 0 1px #cbd5e1;
+    overflow: hidden;
+}
+
+.sim-r4-stage canvas.r4-main {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.sim-r4-stage canvas.r4-over {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    cursor: crosshair;
+}
+
+.sim-r4-stage.tool-stamp canvas.r4-over { cursor: copy; }
+.sim-r4-stage.tool-erase canvas.r4-over { cursor: cell; }
+
+.sim-r4-message {
+    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 0.8rem;
+}
+
+.sim-r4-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    color: #475569;
+}
+
+.sim-r4-summary-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 700;
+}
+
+.sim-r4-summary-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-weight: 600;
+}
+
+.sim-r4-summary-warn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: #b45309;
+}
+
+.sim-r4-files {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* One row per stamp group; "random" is set apart since it picks from all of them */
+.sim-r4-stamps .sim-r4-stamp-group {
+    flex-basis: 100%;
+}
+
+.sim-r4-stamp-group-label {
+    min-width: 6.5em;
+}
+
+.sim-r4-stamp-group.random {
+    padding-top: 0.35rem;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.sim-r4-stamp-group-note {
+    margin-left: 0.3rem;
+    font-size: 0.72rem;
+    color: #94a3b8;
+}
+
+/* Custom room 4 creator, screen-wide: tools on the left, the picture as large as the window allows */
+.sim-r4-window .modal-dialog {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    margin: 12px auto;
+}
+
+.sim-r4 {
+    display: grid;
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.sim-r4-side {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
+}
+
+.sim-r4-side .sim-r4-bar {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.sim-r4-side .sim-r4-tools {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.sim-r4-side .sim-r4-tool {
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.2rem;
+    padding: 0.45rem 0.2rem;
+}
+
+.sim-r4-side .sim-r4-tool i {
+    font-size: 1rem;
+}
+
+.sim-r4-side .sim-r4-actions {
+    justify-content: flex-end;
+}
+
+.sim-r4-side .sim-r4-options {
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.sim-r4-side .sim-r4-tool-hint {
+    flex: none;
+}
+
+.sim-r4-side .sim-r4-stamp-group-label {
+    flex-basis: 100%;
+    min-width: 0;
+}
+
+.sim-r4-side .sim-r4-option-row {
+    justify-content: space-between;
+}
+
+.sim-r4-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.sim-r4-main .sim-r4-stage {
+    display: inline-block;
+}
+
+.sim-r4-main canvas.r4-main {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: calc(100vh - 190px);
+}
+
+@media (max-width: 991.98px) {
+    .sim-r4 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sim-r4-main canvas.r4-main {
+        max-height: calc(100vh - 160px);
+    }
+}
+
+/* Custom room 4 creator: view options and legend */
+.sim-r4-view {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: 10px;
+    background: #f8fafc;
+    border: 1px solid #eef2f7;
+}
+
+.sim-r4-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    font-size: 0.75rem;
+    color: #64748b;
+}
+
+.sim-r4-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.sim-r4-legend-reach {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: rgba(239, 68, 68, 0.3);
+}
+
+.sim-r4-legend-wall {
+    width: 14px;
+    height: 4px;
+    border-radius: 1px;
+    background: #475569;
+}
+
+.sim-r4-view-note {
+    font-size: 0.75rem;
+    color: #92400e;
+}
+
+.sim-r4-view-note i {
+    margin-right: 0.3rem;
+}
+
+/* Custom room 4 creator: shape tool */
+.sim-r4-side .sim-r4-tools {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.sim-r4-side .sim-r4-tool span {
+    font-size: 0.72rem;
+}
+
+.sim-r4-shape {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.sim-r4-seg-full {
+    display: flex;
+}
+
+.sim-r4-seg-full button {
+    flex: 1;
+    padding: 0.3rem 0.5rem;
+}
+
+.sim-r4-shape-icons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.sim-r4-icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(34px, 1fr));
+    gap: 4px;
+    max-height: 180px;
+    overflow-y: auto;
+    padding: 2px;
+}
+
+.sim-r4-icon-grid button {
+    height: 34px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+    color: #334155;
+    font-size: 1rem;
+}
+
+.sim-r4-icon-grid button:hover { border-color: #93c5fd; color: #1d4ed8; }
+.sim-r4-icon-grid button.active { border-color: #1d4ed8; background: #eff6ff; color: #1d4ed8; }
+
+.sim-r4-shape-note {
+    font-size: 0.72rem;
+    color: #64748b;
+}
+
+.sim-r4-shape-picture {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+}
+
+.sim-r4-shape-current {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 8px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    font-size: 0.75rem;
+    color: #475569;
+    word-break: break-all;
+}
+
+.sim-r4-shape-current img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.sim-r4-seg button:disabled {
+    color: #334155;
+    background: #f8fafc;
+    min-width: 3.2em;
+}
+
+/* Stamp palette rows (letter victims: real / fake) */
+.sim-r4-stamp-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    flex-basis: 100%;
+}
+
+.sim-r4-stamp-row-label {
+    min-width: 4.5em;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #94a3b8;
+}
+
+/* Custom room 4 creator: selection, random placement, templates, guides */
+.sim-r4-sel-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.sim-r4-random {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding-top: 0.35rem;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.sim-r4-random-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.sim-r4-templates {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.45rem;
+}
+
+.sim-r4-template-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 5px;
+}
+
+.sim-r4-template {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.5rem 0.2rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    background: #fff;
+    color: #475569;
+}
+
+.sim-r4-template i { font-size: 1.1rem; }
+.sim-r4-template-name { font-size: 0.72rem; font-weight: 700; }
+.sim-r4-template:hover { border-color: #93c5fd; }
+.sim-r4-template.active { border-color: #1d4ed8; background: #eff6ff; color: #1d4ed8; }
+
+.sim-r4-templates > .btn {
+    align-self: flex-start;
+}
+
+.sim-r4-legend-entrance {
+    width: 14px;
+    height: 5px;
+    border-radius: 1px;
+    background: #08D508;
+}
+
+.sim-r4-legend-cp {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    background: linear-gradient(135deg, #94a3b8, #e2e8f0, #94a3b8);
+}
+
+/* ---------- Custom room 4 creator: rail | tool panel | picture ---------- */
+.sim-r4 {
+    grid-template-columns: 46px 250px minmax(0, 1fr);
+    gap: 0.75rem;
+}
+
+.sim-r4-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 5px;
+    border-radius: 12px;
+    background: #f1f5f9;
+    position: sticky;
+    top: 0;
+}
+
+.sim-r4-rail-group {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sim-r4-rail-group + .sim-r4-rail-group {
+    padding-top: 6px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.sim-r4-rail-tool {
+    width: 36px;
+    height: 34px;
+    border: 0;
+    border-radius: 8px;
+    background: transparent;
+    color: #475569;
+    font-size: 0.95rem;
+}
+
+.sim-r4-rail-tool:hover { background: rgba(255, 255, 255, 0.8); color: #1d4ed8; }
+.sim-r4-rail-tool:focus { outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.35); }
+
+.sim-r4-rail-tool.active {
+    background: #fff;
+    color: #1d4ed8;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.18);
+}
+
+.sim-r4-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    min-width: 0;
+}
+
+.sim-r4-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.sim-r4-panel-title {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: #1e293b;
+}
+
+.sim-r4-key {
+    padding: 0.05rem 0.4rem;
+    border-radius: 5px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 0.7rem;
+    box-shadow: inset 0 -1px 0 #cbd5e1;
+}
+
+.sim-r4-panel .sim-r4-option-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem 0.6rem;
+}
+
+.sim-r4-aids {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.sim-r4-hint {
+    display: flex;
+    gap: 0.4rem;
+    font-size: 0.72rem;
+    line-height: 1.45;
+    color: #94a3b8;
+}
+
+.sim-r4-hint i { margin-top: 0.15rem; }
+
+.sim-r4-note {
+    font-size: 0.72rem;
+    color: #94a3b8;
+}
+
+.sim-r4-more {
+    border-top: 1px dashed #e2e8f0;
+    padding-top: 0.4rem;
+}
+
+.sim-r4-more summary {
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #475569;
+    list-style: none;
+}
+
+.sim-r4-more summary::-webkit-details-marker { display: none; }
+.sim-r4-more summary::after { content: ' ▸'; color: #94a3b8; }
+.sim-r4-more[open] summary::after { content: ' ▾'; }
+
+.sim-r4-more[open] {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+}
+
+.sim-r4-panel .sim-r4-stamp-group-label {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.sim-r4-panel .sim-r4-stamps {
+    gap: 0.45rem;
+}
+
+/* top bar over the picture */
+.sim-r4-topbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.sim-r4-topbar-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.sim-r4-topbar .sim-r4-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.sim-r4-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 999px;
+    background: #fff;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.sim-r4-chip i { opacity: 0.4; }
+.sim-r4-chip.on { color: #334155; border-color: #cbd5e1; background: #f8fafc; }
+.sim-r4-chip.on i { opacity: 1; }
+
+/* status line under the picture */
+.sim-r4-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem 0.75rem;
+    width: 100%;
+    font-size: 0.76rem;
+    color: #475569;
+}
+
+.sim-r4-status-note { color: #94a3b8; }
+.sim-r4-status-note i { margin-right: 0.25rem; }
+
+.sim-r4-status-legend {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-left: auto;
+    color: #94a3b8;
+}
+
+.sim-r4-status-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.sim-r4-main canvas.r4-main {
+    max-height: calc(100vh - 250px);
+}
+
+@media (max-width: 991.98px) {
+    .sim-r4 {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sim-r4-rail {
+        flex-direction: row;
+        flex-wrap: wrap;
+        position: static;
+    }
+
+    .sim-r4-rail-group {
+        flex-direction: row;
+    }
+
+    .sim-r4-rail-group + .sim-r4-rail-group {
+        padding-top: 0;
+        padding-left: 6px;
+        border-top: 0;
+        border-left: 1px solid #e2e8f0;
+    }
+}
+
+/* Stamp palette in the tool panel: three to a row, so the letter victims share one line */
+.sim-r4 {
+    grid-template-columns: 46px 264px minmax(0, 1fr);
+}
+
+.sim-r4-panel .sim-r4-stamp-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+}
+
+.sim-r4-panel .sim-r4-stamp-row-label {
+    grid-column: 1 / -1;
+    min-width: 0;
+    margin-top: 2px;
+}
+
+.sim-r4-panel .sim-r4-stamp {
+    justify-content: flex-start;
+    min-width: 0;
+    padding: 0.15rem 0.35rem 0.15rem 0.2rem;
+    font-size: 0.72rem;
+}
+
+.sim-r4-panel .sim-r4-stamp-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* longer names (cognitive targets, hazmat signs) two to a row */
+.sim-r4-panel .sim-r4-stamp-row.cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* leave room for the top bar, the status line and the dialog footer */
+.sim-r4-main canvas.r4-main {
+    max-height: calc(100vh - 290px);
+}
+
+/* "random" is not one of the groups above: set apart, with its note */
+.sim-r4-panel .sim-r4-stamp-group.random {
+    padding-top: 0.45rem;
+    border-top: 1px dashed #e2e8f0;
+}
+
+.sim-r4-panel .sim-r4-stamp-row.cols-1 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.sim-r4-panel .sim-r4-stamp-row.cols-1 .sim-r4-stamp {
+    flex: none;
+}
+
+/* Custom room 4 creator: zoomable, scrolling view of the picture */
+.sim-r4-viewport {
+    display: flex;
+    width: 100%;
+    height: calc(100vh - 290px);
+    min-height: 240px;
+    overflow: auto;
+    border-radius: 8px;
+    background: #f1f5f9;
+}
+
+.sim-r4-viewport .sim-r4-stage {
+    flex: none;
+    margin: auto;
+    max-width: none;
+    align-self: auto;
+}
+
+.sim-r4-viewport .sim-r4-stage canvas.r4-main {
+    max-width: none !important;
+    max-height: none !important;
+}
+
+.sim-r4-viewport .sim-r4-stage.pan-ready canvas.r4-over,
+.sim-r4-viewport.panning canvas.r4-over {
+    cursor: grab;
+}
+
+.sim-r4-viewport.panning canvas.r4-over {
+    cursor: grabbing;
+}
+
+.sim-r4-zoom-pct {
+    min-width: 3.6em;
+    height: 34px;
+    border: 1px solid #e2e8f0;
+    border-radius: 9px;
+    background: #fff;
+    color: #334155;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.sim-r4-zoom-pct:hover { border-color: #93c5fd; color: #1d4ed8; }

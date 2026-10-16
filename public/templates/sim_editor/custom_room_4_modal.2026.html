@@ -2,32 +2,235 @@
   <h3 class="modal-title"><i class="fas fa-paint-brush"></i>{{"admin.simMapEditor.room4Creator.title" | translate}}</h3>
 </div>
 <div class="modal-body sim-modal-body">
-  <div class="sim-room4-creator">
-    <div id="test"></div>
-
-    <div class="sim-room4-toolbar">
-      <!-- The canvas code keeps these three checkboxes mutually exclusive -->
-      <div class="sim-room4-tools">
-        <label class="sim-room4-tool tool-wall"><input type="checkbox" id="drawWall" checked /><i class="fas fa-pen"></i>{{"admin.simMapEditor.room4Creator.drawWalls" | translate}}</label>
-        <label class="sim-room4-tool tool-victim"><input type="checkbox" id="drawVic" /><i class="fas fa-user-injured"></i>{{"admin.simMapEditor.room4Creator.drawVictims" | translate}}</label>
-        <label class="sim-room4-tool tool-erase"><input type="checkbox" id="erase" /><i class="fas fa-eraser"></i>{{"admin.simMapEditor.room4Creator.erase" | translate}}</label>
+  <div class="sim-r4">
+    <!-- Tool rail: icons only, grouped; the name and key are in the tooltip -->
+    <nav class="sim-r4-rail" role="toolbar">
+      <div class="sim-r4-rail-group" ng-repeat="group in toolGroups">
+        <button type="button" class="sim-r4-rail-tool" ng-repeat="t in group" ng-class="{'active': r4.tool === t.id}" ng-click="setTool(t.id)" title="{{('admin.simMapEditor.room4Creator.tools.' + t.id) | translate}} ({{t.key}})">
+          <i ng-class="t.icon"></i>
+        </button>
       </div>
-      <button class="btn btn-sm btn-outline-secondary rounded-pill" type="button" ng-click="clearCanvas()">
-        <i class="fas fa-trash-alt mr-1"></i>{{"admin.simMapEditor.room4Creator.clear" | translate}}
-      </button>
-    </div>
+    </nav>
 
-    <canvas id="room4Canvas" drawing></canvas>
+    <!-- Options of the chosen tool only -->
+    <aside class="sim-r4-panel">
+      <div class="sim-r4-panel-head">
+        <span class="sim-r4-panel-title">{{("admin.simMapEditor.room4Creator.tools." + r4.tool) | translate}}</span>
+        <kbd class="sim-r4-key">{{toolKey(r4.tool)}}</kbd>
+      </div>
 
-    <div class="sim-room4-toolbar">
-      <label class="btn btn-sm btn-outline-primary rounded-pill mb-0" for="importCanvas">
-        <i class="fas fa-file-image mr-1"></i>{{"admin.simMapEditor.room4Creator.import" | translate}}
-        <input type="file" id="importCanvas" accept="image/png, image/jpeg" onclick="this.value=null;" hidden />
-      </label>
-      <button class="btn btn-sm btn-outline-primary rounded-pill" type="button" ng-click="downloadCanvas()">
-        <i class="fas fa-download mr-1"></i>{{"admin.simMapEditor.room4Creator.download" | translate}}
-      </button>
-      <span class="sim-room4-note">{{"admin.simMapEditor.room4Creator.hint" | translate}}</span>
+      <!-- Victim stamps -->
+      <div class="sim-r4-stamps" ng-if="r4.tool === 'stamp'">
+        <div class="sim-r4-stamp-group" ng-repeat="g in stampGroups">
+          <span class="sim-r4-stamp-group-label">{{("admin.simMapEditor.room4Creator.groups." + g.kind) | translate}}</span>
+          <div class="sim-r4-stamp-row" ng-repeat="row in g.rows" ng-class="g.kind === 'victim' ? 'cols-3' : 'cols-2'">
+            <span class="sim-r4-stamp-row-label" ng-if="row.label">{{("admin.simMapEditor.room4Creator.rows." + row.label) | translate}}</span>
+            <button type="button" class="sim-r4-stamp" ng-repeat="t in row.types" ng-class="['kind-' + t.kind, {'active': r4.stamp === t.idx}]" ng-click="setStamp(t.idx)" title="{{t.name | translate}}" ng-style="{'--stamp-color': t.color}">
+              <span class="sim-r4-stamp-badge">{{t.symbol}}</span><span class="sim-r4-stamp-name">{{t.name | translate}}</span>
+            </button>
+          </div>
+        </div>
+        <!-- Not a kind of its own: the export picks any of the types above -->
+        <div class="sim-r4-stamp-group random">
+          <span class="sim-r4-stamp-group-label">{{"admin.simMapEditor.room4Creator.groups.random" | translate}}</span>
+          <div class="sim-r4-stamp-row cols-1">
+            <button type="button" class="sim-r4-stamp kind-random" ng-class="{'active': r4.stamp === -1}" ng-click="setStamp(-1)" title="{{'admin.simMapEditor.room4Creator.randomNote' | translate}}">
+              <span class="sim-r4-stamp-badge">?</span><span class="sim-r4-stamp-name">{{"admin.simMapEditor.room4Creator.random" | translate}}</span>
+            </button>
+            <span class="sim-r4-note">{{"admin.simMapEditor.room4Creator.randomNoteShort" | translate}}</span>
+          </div>
+        </div>
+        <!-- Place several stamps at once along walls the robot can reach -->
+        <details class="sim-r4-more">
+          <summary><i class="fas fa-dice mr-1"></i>{{"admin.simMapEditor.room4Creator.randomPlace" | translate}}</summary>
+          <div class="sim-r4-random-row">
+            <div class="sim-r4-seg">
+              <button type="button" ng-click="stepCount(-1)"><i class="fas fa-minus"></i></button>
+              <button type="button" disabled>{{r4.randomCount}}</button>
+              <button type="button" ng-click="stepCount(1)"><i class="fas fa-plus"></i></button>
+            </div>
+            <div class="sim-r4-seg">
+              <button type="button" ng-repeat="m in ['current', 'mixed']" ng-class="{'active': r4.randomMode === m}" ng-click="r4.randomMode = m">{{("admin.simMapEditor.room4Creator.randomModes." + m) | translate}}</button>
+            </div>
+          </div>
+          <button type="button" class="btn btn-sm btn-primary rounded-pill" ng-click="r4api.randomStamps(r4.randomCount, r4.randomMode)">{{"admin.simMapEditor.room4Creator.randomGo" | translate}}</button>
+          <div class="sim-r4-note">{{"admin.simMapEditor.room4Creator.randomNote2" | translate}}</div>
+        </details>
+      </div>
+
+      <!-- Selection: move, turn, flip, copy -->
+      <div class="sim-r4-sel-buttons" ng-if="r4.tool === 'select'">
+        <button type="button" class="sim-r4-icon" ng-click="r4api.selection('ccw')" ng-disabled="!r4.hasSelection" title="{{'admin.simMapEditor.room4Creator.sel.ccw' | translate}} ( [ )"><i class="fas fa-undo"></i></button>
+        <button type="button" class="sim-r4-icon" ng-click="r4api.selection('cw')" ng-disabled="!r4.hasSelection" title="{{'admin.simMapEditor.room4Creator.sel.cw' | translate}} ( ] )"><i class="fas fa-redo"></i></button>
+        <button type="button" class="sim-r4-icon" ng-click="r4api.selection('h')" ng-disabled="!r4.hasSelection" title="{{'admin.simMapEditor.room4Creator.sel.h' | translate}}"><i class="fas fa-arrows-alt-h"></i></button>
+        <button type="button" class="sim-r4-icon" ng-click="r4api.selection('v')" ng-disabled="!r4.hasSelection" title="{{'admin.simMapEditor.room4Creator.sel.v' | translate}}"><i class="fas fa-arrows-alt-v"></i></button>
+        <button type="button" class="sim-r4-icon" ng-click="r4api.selection('duplicate')" ng-disabled="!r4.hasSelection" title="{{'admin.simMapEditor.room4Creator.sel.duplicate' | translate}} (Ctrl+D)"><i class="far fa-clone"></i></button>
+        <button type="button" class="sim-r4-icon" ng-click="r4api.selection('copy')" ng-disabled="!r4.hasSelection" title="{{'admin.simMapEditor.room4Creator.sel.copy' | translate}} (Ctrl+C)"><i class="far fa-copy"></i></button>
+        <button type="button" class="sim-r4-icon" ng-click="r4api.selection('paste')" ng-disabled="!r4.hasClip" title="{{'admin.simMapEditor.room4Creator.sel.paste' | translate}} (Ctrl+V)"><i class="fas fa-paste"></i></button>
+        <button type="button" class="sim-r4-icon danger" ng-click="r4api.selection('delete')" ng-disabled="!r4.hasSelection" title="{{'admin.simMapEditor.room4Creator.sel.delete' | translate}} (Delete)"><i class="fas fa-trash-alt"></i></button>
+        <button type="button" class="sim-r4-icon" ng-click="r4api.selection('drop')" ng-disabled="!r4.hasSelection" title="{{'admin.simMapEditor.room4Creator.sel.drop' | translate}} (Enter)"><i class="fas fa-check"></i></button>
+      </div>
+
+      <!-- Templates -->
+      <div class="sim-r4-templates" ng-if="r4.tool === 'template'">
+        <div class="sim-r4-template-grid">
+          <button type="button" class="sim-r4-template" ng-repeat="t in templates" ng-class="{'active': r4.template === t.id}" ng-click="r4.template = t.id" title="{{('admin.simMapEditor.room4Creator.templateHints.' + t.id) | translate}}">
+            <i ng-class="t.icon"></i>
+            <span class="sim-r4-template-name">{{("admin.simMapEditor.room4Creator.templates." + t.id) | translate}}</span>
+          </button>
+        </div>
+        <label class="sim-r4-switch">
+          <input type="checkbox" ng-model="r4.templateClear">
+          <span class="sim-r4-switch-track"></span>
+          {{"admin.simMapEditor.room4Creator.templateClear" | translate}}
+        </label>
+        <button type="button" class="btn btn-sm btn-primary rounded-pill" ng-click="r4api.applyTemplate(r4.template, r4.templateClear)"><i class="fas fa-magic mr-1"></i>{{"admin.simMapEditor.room4Creator.templateApply" | translate}}</button>
+      </div>
+
+      <!-- Shape tool: a Font Awesome icon or a picture, drawn as walls -->
+      <div class="sim-r4-shape" ng-if="r4.tool === 'shape'">
+        <div class="sim-r4-seg sim-r4-seg-full">
+          <button type="button" ng-class="{'active': r4.shapeSource === 'icon'}" ng-click="r4.shapeSource = 'icon'"><i class="fas fa-icons mr-1"></i>{{"admin.simMapEditor.room4Creator.shapeIcon" | translate}}</button>
+          <button type="button" ng-class="{'active': r4.shapeSource === 'picture'}" ng-click="r4.shapeSource = 'picture'"><i class="far fa-image mr-1"></i>{{"admin.simMapEditor.room4Creator.shapePicture" | translate}}</button>
+        </div>
+        <div class="sim-r4-shape-icons" ng-if="r4.shapeSource === 'icon'">
+          <input type="search" class="form-control form-control-sm" ng-model="r4.iconQuery" placeholder="{{'admin.simMapEditor.room4Creator.iconSearch' | translate}}">
+          <select class="custom-select custom-select-sm" ng-model="r4.iconCategory">
+            <option value="">{{"admin.simMapEditor.room4Creator.iconAll" | translate}}</option>
+            <option ng-repeat="c in icons.categories" value="{{c.id}}">{{c.label}}</option>
+          </select>
+          <div class="sim-r4-icon-grid" ng-if="icons.loaded">
+            <button type="button" ng-repeat="i in iconResults()" ng-class="{'active': r4.shapeName === i.name}" ng-click="pickIcon(i)" title="{{i.label}}"><i ng-class="iconClass(i)"></i></button>
+          </div>
+          <div class="sim-r4-note" ng-if="icons.loading"><i class="fas fa-spinner fa-spin mr-1"></i>{{"admin.simMapEditor.room4Creator.iconLoading" | translate}}</div>
+          <div class="sim-r4-note" ng-if="icons.failed">{{"admin.simMapEditor.room4Creator.iconUnavailable" | translate}}</div>
+          <div class="sim-r4-note" ng-if="icons.loaded && !iconResults().length">{{"admin.simMapEditor.room4Creator.iconNone" | translate}}</div>
+        </div>
+        <div class="sim-r4-shape-picture" ng-if="r4.shapeSource === 'picture'">
+          <label class="btn btn-sm btn-outline-primary rounded-pill mb-0" title="{{'admin.simMapEditor.room4Creator.pictureNote' | translate}}">
+            <i class="far fa-image mr-1"></i>{{"admin.simMapEditor.room4Creator.pictureChoose" | translate}}
+            <input type="file" accept="image/png, image/svg+xml, image/jpeg, image/gif, image/webp" sim-room4-shape-file hidden />
+          </label>
+        </div>
+        <div class="sim-r4-option-row">
+          <div class="sim-r4-shape-current" ng-if="r4.shapePreview">
+            <img ng-src="{{r4.shapePreview}}" alt="" ng-style="{'transform': 'rotate(' + r4.shapeRot + 'deg)'}">
+          </div>
+          <div class="sim-r4-seg">
+            <button type="button" ng-repeat="m in ['fill', 'outline']" ng-class="{'active': r4.shapeStyle === m}" ng-click="r4.shapeStyle = m">{{("admin.simMapEditor.room4Creator.shapeStyles." + m) | translate}}</button>
+          </div>
+          <div class="sim-r4-seg">
+            <button type="button" ng-click="rotateShape(-90)" title="-90°"><i class="fas fa-undo"></i></button>
+            <button type="button" disabled>{{r4.shapeRot}}°</button>
+            <button type="button" ng-click="rotateShape(90)" title="+90°"><i class="fas fa-redo"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sim-r4-option-row" ng-if="r4.tool === 'curve'">
+        <div class="sim-r4-seg">
+          <button type="button" ng-class="{'active': r4.smooth}" ng-click="r4.smooth = true">{{"admin.simMapEditor.room4Creator.curveSmooth" | translate}}</button>
+          <button type="button" ng-class="{'active': !r4.smooth}" ng-click="r4.smooth = false">{{"admin.simMapEditor.room4Creator.curveStraight" | translate}}</button>
+        </div>
+      </div>
+      <div class="sim-r4-option-row" ng-if="r4.tool === 'polygon'">
+        <span class="sim-r4-option-label">{{"admin.simMapEditor.room4Creator.sides" | translate}}</span>
+        <div class="sim-r4-seg">
+          <button type="button" ng-repeat="n in [3, 4, 5, 6, 8, 12]" ng-class="{'active': r4.sides === n}" ng-click="r4.sides = n">{{n}}</button>
+        </div>
+      </div>
+      <div class="sim-r4-option-row" ng-if="r4.tool === 'erase'">
+        <div class="sim-r4-seg">
+          <button type="button" ng-repeat="m in ['all', 'tokens']" ng-class="{'active': r4.eraseTarget === m}" ng-click="r4.eraseTarget = m">{{("admin.simMapEditor.room4Creator.eraseTargets." + m) | translate}}</button>
+        </div>
+        <div class="sim-r4-seg">
+          <button type="button" ng-repeat="s in ['s', 'm', 'l']" ng-class="{'active': r4.eraser === s}" ng-click="r4.eraser = s" title="{{'admin.simMapEditor.room4Creator.eraserSize' | translate}}">{{("admin.simMapEditor.room4Creator.size." + s) | translate}}</button>
+        </div>
+      </div>
+
+      <!-- Drawing aids for the wall tools -->
+      <div class="sim-r4-aids" ng-if="drawsWalls() || r4.tool === 'select'">
+        <label class="sim-r4-switch">
+          <input type="checkbox" ng-model="r4.snap">
+          <span class="sim-r4-switch-track"></span>
+          {{"admin.simMapEditor.room4Creator.snap" | translate}}
+        </label>
+        <div class="sim-r4-option-row" ng-if="drawsWalls()">
+          <span class="sim-r4-option-label">{{"admin.simMapEditor.room4Creator.mirror" | translate}}</span>
+          <div class="sim-r4-seg">
+            <button type="button" ng-repeat="m in ['none', 'x', 'y', 'xy']" ng-class="{'active': r4.mirror === m}" ng-click="r4.mirror = m" title="{{('admin.simMapEditor.room4Creator.mirrors.' + m) | translate}}">
+              <i ng-class="{'none': 'fas fa-ban', 'x': 'fas fa-arrows-alt-h', 'y': 'fas fa-arrows-alt-v', 'xy': 'fas fa-arrows-alt'}[m]"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="sim-r4-hint">
+        <i class="fas fa-info-circle"></i>
+        <span>{{("admin.simMapEditor.room4Creator.hints." + (r4.tool === 'erase' && r4.eraseTarget === 'tokens' ? 'eraseTokens' : r4.tool)) | translate}}</span>
+      </div>
+    </aside>
+
+    <div class="sim-r4-main">
+      <!-- History, what to show, and the picture file -->
+      <div class="sim-r4-topbar">
+        <div class="sim-r4-topbar-group">
+          <button type="button" class="sim-r4-icon" ng-click="r4api.undo()" ng-disabled="!r4.canUndo" title="{{'admin.simMapEditor.room4Creator.undo' | translate}} (Ctrl+Z)"><i class="fas fa-undo"></i></button>
+          <button type="button" class="sim-r4-icon" ng-click="r4api.redo()" ng-disabled="!r4.canRedo" title="{{'admin.simMapEditor.room4Creator.redo' | translate}} (Ctrl+Shift+Z)"><i class="fas fa-redo"></i></button>
+          <button type="button" class="sim-r4-icon danger" ng-click="r4api.clear()" title="{{'admin.simMapEditor.room4Creator.clear' | translate}}"><i class="fas fa-trash-alt"></i></button>
+        </div>
+        <div class="sim-r4-topbar-group">
+          <button type="button" class="sim-r4-chip" ng-class="{'on': r4.showReach}" ng-click="r4.showReach = !r4.showReach" title="{{'admin.simMapEditor.room4Creator.showReach' | translate}}">
+            <i class="sim-r4-legend-reach"></i>{{"admin.simMapEditor.room4Creator.viewReach" | translate}}
+          </button>
+          <button type="button" class="sim-r4-chip" ng-class="{'on': r4.showGuides}" ng-click="r4.showGuides = !r4.showGuides" title="{{'admin.simMapEditor.room4Creator.showGuides' | translate}}">
+            <i class="sim-r4-legend-entrance"></i>{{"admin.simMapEditor.room4Creator.viewGuides" | translate}}
+          </button>
+        </div>
+        <div class="sim-r4-topbar-group sim-r4-zoom">
+          <button type="button" class="sim-r4-icon" ng-click="r4api.zoom(-1)" ng-disabled="r4.zoom <= 1" title="{{'admin.simMapEditor.room4Creator.zoomOut' | translate}} (Ctrl+-)"><i class="fas fa-search-minus"></i></button>
+          <button type="button" class="sim-r4-zoom-pct" ng-click="r4api.zoom(0)" title="{{'admin.simMapEditor.room4Creator.zoomFit' | translate}} (Ctrl+0)">{{r4.zoomPct}}%</button>
+          <button type="button" class="sim-r4-icon" ng-click="r4api.zoom(1)" ng-disabled="r4.zoom >= 8" title="{{'admin.simMapEditor.room4Creator.zoomIn' | translate}} (Ctrl++)"><i class="fas fa-search-plus"></i></button>
+          <button type="button" class="sim-r4-icon" ng-click="r4api.zoom(0)" title="{{'admin.simMapEditor.room4Creator.zoomFit' | translate}} (Ctrl+0)"><i class="fas fa-expand"></i></button>
+        </div>
+        <div class="sim-r4-topbar-group">
+          <label class="sim-r4-icon mb-0" title="{{'admin.simMapEditor.room4Creator.import' | translate}} — {{'admin.simMapEditor.room4Creator.hint' | translate}}">
+            <i class="fas fa-file-import"></i>
+            <input type="file" accept="image/png, image/jpeg" sim-room4-file hidden />
+          </label>
+          <button type="button" class="sim-r4-icon" ng-click="r4api.download()" title="{{'admin.simMapEditor.room4Creator.download' | translate}}"><i class="fas fa-download"></i></button>
+        </div>
+      </div>
+
+      <!-- Scrolling view: the picture is sized by the zoom -->
+      <div class="sim-r4-viewport" ng-class="{'panning': r4.panning}">
+        <div class="sim-r4-stage" sim-room4-canvas ng-class="'tool-' + r4.tool">
+          <canvas class="r4-main"></canvas>
+          <canvas class="r4-over"></canvas>
+        </div>
+      </div>
+
+      <div class="sim-r4-message" ng-if="r4.message">
+        <i class="fas fa-info-circle"></i>{{("admin.simMapEditor.room4Creator.messages." + r4.message) | translate:r4.messageParams}}
+      </div>
+
+      <!-- One status line: tokens, warnings, notes about the views -->
+      <div class="sim-r4-status">
+        <span class="sim-r4-summary-title"><i class="fas fa-stamp"></i>{{"admin.simMapEditor.room4Creator.tokens" | translate:{count: r4.tokenCount} }}</span>
+        <span class="sim-r4-summary-chip" ng-repeat="s in r4.summary" ng-class="stampType(s.idx) ? 'kind-' + stampType(s.idx).kind : 'kind-random'" ng-style="{'--stamp-color': stampType(s.idx).color}">
+          <span class="sim-r4-stamp-badge">{{stampType(s.idx) ? stampType(s.idx).symbol : '?'}}</span>× {{s.count}}
+        </span>
+        <span class="sim-r4-summary-warn" ng-if="r4.unreachCount" title="{{'admin.simMapEditor.room4Creator.unreachable' | translate:{count: r4.unreachCount} }}"><i class="fas fa-exclamation-circle"></i>{{"admin.simMapEditor.room4Creator.unreachableShort" | translate:{count: r4.unreachCount} }}</span>
+        <span class="sim-r4-summary-warn" ng-if="r4.farCount" title="{{'admin.simMapEditor.room4Creator.farFromWall' | translate:{count: r4.farCount} }}"><i class="fas fa-exclamation-circle"></i>{{"admin.simMapEditor.room4Creator.farShort" | translate:{count: r4.farCount} }}</span>
+        <span class="sim-r4-summary-warn" ng-if="r4.showGuides && r4.missingCheckpoints" title="{{'admin.simMapEditor.room4Creator.missingCheckpoints' | translate:{count: r4.missingCheckpoints} }}"><i class="fas fa-flag-checkered"></i>{{"admin.simMapEditor.room4Creator.missingShort" | translate:{count: r4.missingCheckpoints} }}</span>
+        <span class="sim-r4-summary-warn" ng-if="r4.showGuides && !r4.entranceCount" title="{{'admin.simMapEditor.room4Creator.noEntrance' | translate}}"><i class="fas fa-door-closed"></i>{{"admin.simMapEditor.room4Creator.noEntranceShort" | translate}}</span>
+        <span class="sim-r4-status-note" ng-if="r4.showReach && (r4.reachState === 'noStart' || r4.reachState === 'noSeed' || r4.reachState === 'unavailable')" title="{{('admin.simMapEditor.room4Creator.reach.' + r4.reachState) | translate}}"><i class="fas fa-info-circle"></i>{{"admin.simMapEditor.room4Creator.reachOff" | translate}}</span>
+        <span class="sim-r4-status-legend">
+          <span ng-if="r4.showReach"><i class="sim-r4-legend-reach"></i>{{"admin.simMapEditor.room4Creator.legendReach" | translate}}</span>
+          <span><i class="sim-r4-legend-wall"></i>{{"admin.simMapEditor.room4Creator.legendMapWallShort" | translate}}</span>
+          <span ng-if="r4.showGuides"><i class="sim-r4-legend-cp"></i>{{"admin.simMapEditor.room4Creator.legendCheckpointShort" | translate}}</span>
+        </span>
+      </div>
     </div>
   </div>
 </div>
