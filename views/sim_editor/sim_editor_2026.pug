@@ -5,7 +5,17 @@ append vars
   - var simYear = '2026'
 
 block editor_script
+  //- World export and room checks, shared with the new editor (beta)
+  script(src="/javascripts/sim_editor/sim_world_2026.js")
+  script(src="/javascripts/sim_editor/sim_room4_world_2026.js")
   script(src="/javascripts/sim_editor/sim_editor.2026.js")
+  script(src="/javascripts/sim_editor/rotation_dial.js")
+
+block editor_notice
+  a.sim-beta-link(href='/service/editor/simulation/2026')
+    span.sim-beta-link-badge β
+    span {{"admin.simBeta.tryIt" | translate}}
+    i.fas.fa-arrow-right
 
 block room_tools_extra
   button.btn.btn-sm.btn-outline-secondary.rounded-pill.ml-auto(type='button', ng-click='activateExteriorWalls()')

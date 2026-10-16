@@ -7,7 +7,7 @@
     <nav class="sim-r4-rail" role="toolbar">
       <div class="sim-r4-rail-group" ng-repeat="group in toolGroups">
         <button type="button" class="sim-r4-rail-tool" ng-repeat="t in group" ng-class="{'active': r4.tool === t.id}" ng-click="setTool(t.id)" title="{{('admin.simMapEditor.room4Creator.tools.' + t.id) | translate}} ({{t.key}})">
-          <i ng-class="t.icon"></i>
+          <i ng-class="t.icon"></i><span class="sim-r4-rail-key">{{t.key}}</span>
         </button>
       </div>
     </nav>
@@ -216,7 +216,7 @@
 
       <!-- One status line: tokens, warnings, notes about the views -->
       <div class="sim-r4-status">
-        <span class="sim-r4-summary-title"><i class="fas fa-stamp"></i>{{"admin.simMapEditor.room4Creator.tokens" | translate:{count: r4.tokenCount} }}</span>
+        <span class="sim-r4-summary-title"><i class="fas fa-user-injured"></i>{{"admin.simMapEditor.room4Creator.tokens" | translate:{count: r4.tokenCount} }}</span>
         <span class="sim-r4-summary-chip" ng-repeat="s in r4.summary" ng-class="stampType(s.idx) ? 'kind-' + stampType(s.idx).kind : 'kind-random'" ng-style="{'--stamp-color': stampType(s.idx).color}">
           <span class="sim-r4-stamp-badge">{{stampType(s.idx) ? stampType(s.idx).symbol : '?'}}</span>× {{s.count}}
         </span>

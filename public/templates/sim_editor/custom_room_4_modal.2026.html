@@ -1,5 +1,7 @@
 <div class="modal-header sim-modal-header">
   <h3 class="modal-title"><i class="fas fa-paint-brush"></i>{{"admin.simMapEditor.room4Creator.title" | translate}}</h3>
+  <!-- in the whole window (from the new editor) OK sits up here and the footer goes -->
+  <button class="btn btn-primary sim-r4-head-ok" type="button" ng-click="closeRoom4()"><i class="fas fa-check mr-1"></i>OK</button>
 </div>
 <div class="modal-body sim-modal-body">
   <div class="sim-r4">
@@ -7,7 +9,7 @@
     <nav class="sim-r4-rail" role="toolbar">
       <div class="sim-r4-rail-group" ng-repeat="group in toolGroups">
         <button type="button" class="sim-r4-rail-tool" ng-repeat="t in group" ng-class="{'active': r4.tool === t.id}" ng-click="setTool(t.id)" title="{{('admin.simMapEditor.room4Creator.tools.' + t.id) | translate}} ({{t.key}})">
-          <i ng-class="t.icon"></i>
+          <i ng-class="t.icon"></i><span class="sim-r4-rail-key">{{t.key}}</span>
         </button>
       </div>
     </nav>
@@ -40,6 +42,84 @@
             <span class="sim-r4-note">{{"admin.simMapEditor.room4Creator.randomNoteShort" | translate}}</span>
           </div>
         </div>
+        <!-- How the next stamp is placed, as the victims of the map editor: rings of a cognitive target, or the turn -->
+        <div class="sim-r4-place" ng-if="!r4.sel && r4.stamp !== -1">
+          <div ng-if="ctLetterOf(r4.stamp)">
+          <div class="sbx-ct">
+            <div class="sbx-ct-top">
+              <svg class="sbx-ct-target" viewBox="0 0 100 100" role="img" aria-label="{{'admin.simBeta.ctRings' | translate}}">
+                <circle ng-repeat="r in [0, 1, 2, 3, 4]" cx="50" cy="50" ng-attr-r="{{48 - 9 * r}}" ng-attr-fill="{{ringColor(r4.rings, r)}}" ng-click="r4.ring = r" stroke="#fff" stroke-width="1"></circle>
+                <circle class="sbx-ct-sel" cx="50" cy="50" ng-attr-r="{{43.5 - 9 * r4.ring}}" fill="none"></circle>
+              </svg>
+              <div class="sbx-ct-info">
+                <span class="sbx-ct-type" ng-class="'t-' + ringLetter(r4.rings)">{{ringLetter(r4.rings) === 'X' ? ('admin.simBeta.ctFake' | translate) : ringLetter(r4.rings)}}</span>
+                <div class="sbx-ct-sum">{{'admin.simBeta.ctSum' | translate}} {{ringSum(r4.rings) > 0 ? '+' : ''}}{{ringSum(r4.rings)}}</div>
+                <div class="sbx-ct-code"><span ng-repeat="c in r4.rings track by $index" ng-class="{sel: r4.ring === $index}" ng-click="r4.ring = $index">{{c}}</span></div>
+              </div>
+            </div>
+            <div class="sbx-ct-hint">{{'admin.simBeta.ctHint' | translate:{ n: r4.ring + 1 } }}</div>
+            <div class="sbx-ct-palette">
+              <button type="button" class="sbx-ct-swatch" ng-repeat="c in ringColors" ng-click="pickColor(c.id)" ng-class="{active: r4.rings[r4.ring] === c.id}" title="{{c.id}}">
+                <span class="sbx-ct-dot" ng-style="{background: c.color}"></span><span class="sbx-ct-val">{{c.value > 0 ? '+' : ''}}{{c.value}}</span>
+              </button>
+            </div>
+          </div>
+          </div>
+          <div ng-if="isLetterVictim(r4.stamp)">
+            <div class="sbx-label">{{'admin.simBeta.rot' | translate}}</div>
+            <div class="sbx-seg">
+              <button type="button" ng-class="{active: !r4.randomRot}" ng-click="r4.randomRot = false"><i class="fas fa-compass mr-1"></i>{{'admin.simBeta.rotFixed' | translate}}</button>
+              <button type="button" ng-class="{active: r4.randomRot}" ng-click="r4.randomRot = true"><i class="fas fa-dice mr-1"></i>{{'admin.simBeta.rotRandom' | translate}}</button>
+            </div>
+            <p class="sbx-rot-note" ng-if="r4.randomRot">{{'admin.simBeta.rotRandomNote' | translate}}</p>
+            <sim-rotation-dial class="sbx-dial" ng-if="!r4.randomRot" ng-model="r4.rot" symbol="stampType(r4.stamp).symbol"></sim-rotation-dial>
+          </div>
+        </div>
+
+        <!-- The stamp clicked on: its rings or its turn -->
+        <div class="sim-r4-selected" ng-if="r4.sel">
+          <div class="sim-r4-selected-head">
+            <span><i class="fas fa-mouse-pointer mr-1"></i>{{'admin.simMapEditor.room4Creator.selectedStamp' | translate}}</span>
+            <button type="button" class="btn btn-sm btn-link p-0" ng-click="r4.sel = null">{{'admin.simMapEditor.room4Creator.selectDone' | translate}}</button>
+          </div>
+          <div class="sbx-sel-head mt-2">
+            <span class="sbx-sel-symbol target" ng-if="ctLetterOf(r4.sel.idx)" ng-style="targetStyle(r4.sel.code, r4.sel.idx)"></span>
+            <span class="sbx-sel-symbol" ng-if="!ctLetterOf(r4.sel.idx)" ng-style="{background: stampType(r4.sel.idx).color}">{{stampType(r4.sel.idx).symbol}}</span>
+            <span>{{stampType(r4.sel.idx).name | translate}}</span>
+          </div>
+          <div ng-if="ctLetterOf(r4.sel.idx)">
+          <div class="sbx-ct">
+            <div class="sbx-ct-top">
+              <svg class="sbx-ct-target" viewBox="0 0 100 100" role="img" aria-label="{{'admin.simBeta.ctRings' | translate}}">
+                <circle ng-repeat="r in [0, 1, 2, 3, 4]" cx="50" cy="50" ng-attr-r="{{48 - 9 * r}}" ng-attr-fill="{{ringColor(r4.sel.code.split(''), r)}}" ng-click="r4.ring = r" stroke="#fff" stroke-width="1"></circle>
+                <circle class="sbx-ct-sel" cx="50" cy="50" ng-attr-r="{{43.5 - 9 * r4.ring}}" fill="none"></circle>
+              </svg>
+              <div class="sbx-ct-info">
+                <span class="sbx-ct-type" ng-class="'t-' + ringLetter(r4.sel.code.split(''))">{{ringLetter(r4.sel.code.split('')) === 'X' ? ('admin.simBeta.ctFake' | translate) : ringLetter(r4.sel.code.split(''))}}</span>
+                <div class="sbx-ct-sum">{{'admin.simBeta.ctSum' | translate}} {{ringSum(r4.sel.code.split('')) > 0 ? '+' : ''}}{{ringSum(r4.sel.code.split(''))}}</div>
+                <div class="sbx-ct-code"><span ng-repeat="c in r4.sel.code.split('') track by $index" ng-class="{sel: r4.ring === $index}" ng-click="r4.ring = $index">{{c}}</span></div>
+              </div>
+            </div>
+            <div class="sbx-ct-hint">{{'admin.simBeta.ctHint' | translate:{ n: r4.ring + 1 } }}</div>
+            <div class="sbx-ct-palette">
+              <button type="button" class="sbx-ct-swatch" ng-repeat="c in ringColors" ng-click="pickColor(c.id)" ng-class="{active: r4.sel.code.split('')[r4.ring] === c.id}" title="{{c.id}}">
+                <span class="sbx-ct-dot" ng-style="{background: c.color}"></span><span class="sbx-ct-val">{{c.value > 0 ? '+' : ''}}{{c.value}}</span>
+              </button>
+            </div>
+          </div>
+          </div>
+          <div ng-if="isLetterVictim(r4.sel.idx)">
+            <div class="sbx-label">{{'admin.simBeta.rot' | translate}}</div>
+            <div class="sbx-seg">
+              <button type="button" ng-class="{active: r4.sel.rot !== null}" ng-click="r4.sel.rot === null && setSelRandomRot(false)"><i class="fas fa-compass mr-1"></i>{{'admin.simBeta.rotFixed' | translate}}</button>
+              <button type="button" ng-class="{active: r4.sel.rot === null}" ng-click="setSelRandomRot(true)"><i class="fas fa-dice mr-1"></i>{{'admin.simBeta.rotRandom' | translate}}</button>
+            </div>
+            <p class="sbx-rot-note" ng-if="r4.sel.rot === null">{{'admin.simBeta.rotRandomNote' | translate}}</p>
+            <sim-rotation-dial class="sbx-dial" ng-if="r4.sel.rot !== null" ng-model="r4.sel.rot" ng-change="setSelRot(r4.sel.rot)" symbol="stampType(r4.sel.idx).symbol"></sim-rotation-dial>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-danger btn-block mt-3" ng-click="removeSel()"><i class="fas fa-trash-alt mr-1"></i>{{'admin.simBeta.remove' | translate}}</button>
+        </div>
+
         <!-- Place several stamps at once along walls the robot can reach -->
         <details class="sim-r4-more">
           <summary><i class="fas fa-dice mr-1"></i>{{"admin.simMapEditor.room4Creator.randomPlace" | translate}}</summary>
@@ -216,7 +296,7 @@
 
       <!-- One status line: tokens, warnings, notes about the views -->
       <div class="sim-r4-status">
-        <span class="sim-r4-summary-title"><i class="fas fa-stamp"></i>{{"admin.simMapEditor.room4Creator.tokens" | translate:{count: r4.tokenCount} }}</span>
+        <span class="sim-r4-summary-title"><i class="fas fa-user-injured"></i>{{"admin.simMapEditor.room4Creator.tokens" | translate:{count: r4.tokenCount} }}</span>
         <span class="sim-r4-summary-chip" ng-repeat="s in r4.summary" ng-class="stampType(s.idx) ? 'kind-' + stampType(s.idx).kind : 'kind-random'" ng-style="{'--stamp-color': stampType(s.idx).color}">
           <span class="sim-r4-stamp-badge">{{stampType(s.idx) ? stampType(s.idx).symbol : '?'}}</span>× {{s.count}}
         </span>

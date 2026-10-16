@@ -13,6 +13,7 @@ const PAGES = [
   '/service/editor/maze/2026E',
   '/service/editor/simulation/2025',
   '/service/editor/simulation/2026',
+  '/service/editor/simulation/2026/classic',
 ];
 
 test('public service pages render', async (t) => {
@@ -35,4 +36,8 @@ test('public service pages render', async (t) => {
   for (const page of ['/service/editor/simulation/2025', '/service/editor/simulation/2026']) {
     assert.ok(home.includes(page), `${page} is linked from /service`);
   }
+  // Erebus Editor 2026 is the default 2026 editor; the classic one is linked from it
+  const editor = await (await fetch(`${base}/service/editor/simulation/2026`)).text();
+  assert.ok(editor.includes('sim_editor_beta/beta.2026.js'), 'the 2026 editor is Erebus Editor 2026');
+  assert.ok(editor.includes('/service/editor/simulation/2026/classic'), 'it links to the classic editor');
 });

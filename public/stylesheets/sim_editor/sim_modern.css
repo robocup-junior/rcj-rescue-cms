@@ -2571,11 +2571,6 @@ img.sim-fake-victim-mixed {
     font-size: 0.75rem;
 }
 
-.kind-fake .sim-r4-stamp-badge {
-    background: #fff;
-    color: #f97316;
-    box-shadow: inset 0 0 0 1.5px #f97316;
-}
 
 .kind-random { --stamp-color: #94a3b8; }
 
@@ -2801,7 +2796,7 @@ img.sim-fake-victim-mixed {
     width: 14px;
     height: 14px;
     border-radius: 3px;
-    background: rgba(239, 68, 68, 0.3);
+    background: repeating-linear-gradient(-45deg, rgba(220, 38, 38, 0.55) 0 1px, rgba(254, 202, 202, 0.75) 1px 4px);
 }
 
 .sim-r4-legend-wall {
@@ -3330,3 +3325,323 @@ img.sim-fake-victim-mixed {
 }
 
 .sim-r4-zoom-pct:hover { border-color: #93c5fd; color: #1d4ed8; }
+
+/* Link to the new editor (beta) */
+.sim-beta-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+    padding: 0.35rem 0.9rem;
+    border: 1.5px solid #f59e0b;
+    border-radius: 999px;
+    background: #fffbeb;
+    color: #92400e;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.sim-beta-link:hover {
+    background: #fef3c7;
+    color: #78350f;
+    text-decoration: none;
+}
+
+.sim-beta-link-badge {
+    padding: 0 0.45rem;
+    border-radius: 999px;
+    background: #f59e0b;
+    color: #fff;
+    font-size: 0.8rem;
+}
+
+/* ---------- One look for the map editor (beta) and the custom room 4 creator ----------
+   Same tool buttons (rail with shortcut keys), toolbar buttons and victim / cognitive target icons. */
+.sim-r4-rail {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+}
+
+.sim-r4-rail-tool {
+    position: relative;
+    width: 38px;
+    height: 38px;
+    border: 1.5px solid transparent;
+    font-size: 1rem;
+}
+
+.sim-r4-rail-tool:hover { background: #e2e8f0; color: #475569; }
+
+.sim-r4-rail-tool.active {
+    background: #dbeafe;
+    border-color: #2563eb;
+    color: #1d4ed8;
+    box-shadow: none;
+}
+
+.sim-r4-rail-key {
+    position: absolute;
+    right: 2px;
+    bottom: 0;
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: #94a3b8;
+}
+
+.sim-r4-icon,
+.sim-r4-zoom-pct {
+    height: 32px;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: transparent;
+    color: #334155;
+}
+
+.sim-r4-icon { width: 32px; }
+
+.sim-r4-icon:hover:not(:disabled),
+.sim-r4-zoom-pct:hover {
+    background: #e2e8f0;
+    border-color: transparent;
+    color: #334155;
+}
+
+.sim-r4-icon.danger:hover:not(:disabled) { background: #fee2e2; border-color: transparent; color: #dc2626; }
+
+.sim-r4-zoom-pct { font-weight: 400; color: #64748b; font-variant-numeric: tabular-nums; }
+
+/* cognitive targets show as targets in the type colour, their names beside them */
+.kind-ct .sim-r4-stamp-badge,
+.kind-fakect .sim-r4-stamp-badge {
+    width: 20px;
+    min-width: 20px;
+    padding: 0;
+    color: transparent;
+    background: radial-gradient(circle closest-side, var(--stamp-color) 0 18%, #fff 19% 35%, var(--stamp-color) 36% 53%, #fff 54% 70%, var(--stamp-color) 71%);
+}
+
+/* in the status line a cognitive target shows as on the map: the type letter on its colour */
+.sim-r4-status .kind-ct .sim-r4-stamp-badge,
+.sim-r4-status .kind-fakect .sim-r4-stamp-badge {
+    color: #fff;
+    background: var(--stamp-color);
+    box-shadow: inset 0 0 0 2px var(--stamp-color), inset 0 0 0 3px rgba(255, 255, 255, 0.75);
+}
+
+/* opened from the new editor: the whole window, as the editor itself (over modern_modal.css) */
+.modal.sbx-r4-full,
+.modal.show.sbx-r4-full,
+.modal.in.sbx-r4-full {
+    padding: 0 !important;
+}
+
+.modal.sbx-r4-full .modal-dialog {
+    width: 100vw;
+    max-width: 100vw;
+    height: 100vh;
+    margin: 0 !important;
+    align-items: stretch;
+}
+
+.modal.sbx-r4-full .modal-content {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    border-radius: 0 !important;
+}
+
+.sbx-r4-full .modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+}
+
+/* the whole window: a slim title bar holding OK, no footer, and the picture takes all the height
+   left (the panel scrolls on its own) */
+.sim-r4-head-ok { display: none; }
+
+.sbx-r4-full .sim-modal-header {
+    display: flex;
+    align-items: center;
+    padding: 0.4rem 0.75rem 0.4rem 1rem;
+}
+
+.sbx-r4-full .sim-modal-header .modal-title {
+    flex: 1 1 auto;
+    font-size: 1rem;
+}
+
+.sbx-r4-full .sim-r4-head-ok {
+    display: inline-flex;
+    align-items: center;
+    height: 34px;
+    padding: 0 1.1rem;
+    border-radius: 9px;
+    font-weight: 600;
+}
+
+.sbx-r4-full .sim-modal-footer { display: none; }
+
+.sbx-r4-full .modal-body.sim-modal-body {
+    display: flex;
+    padding: 0.6rem 0.75rem 0.5rem;
+    overflow: hidden;
+}
+
+.sbx-r4-full .sim-r4 {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+    align-items: stretch;
+}
+
+.sbx-r4-full .sim-r4-rail,
+.sbx-r4-full .sim-r4-panel {
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+.sbx-r4-full .sim-r4-main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.sbx-r4-full .sim-r4-viewport {
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+}
+
+.sbx-r4-full .sim-r4-main canvas.r4-main { max-height: none; }
+
+/* the tool bar (history, views, zoom, picture file) goes up into the title bar, between the title
+   and OK, so the picture gets that row too; on a narrow window it stays above the picture */
+@media (min-width: 1100px) {
+    .sbx-r4-full .modal-content { position: relative; }
+    .sbx-r4-full .modal-body.sim-modal-body { position: static; }
+    .sbx-r4-full .sim-modal-header { min-height: 50px; }
+    .sbx-r4-full .sim-r4-topbar {
+        position: absolute;
+        top: 0;
+        /* starts where the picture starts: body padding 12 + rail 46 + panel 264 and their gaps */
+        left: 346px;
+        right: 110px;
+        width: auto;
+        height: 50px;
+        flex-wrap: nowrap;
+        margin: 0;
+        padding: 0 0.5rem 0 0;
+        border: none;
+        background: transparent;
+        z-index: 2;
+    }
+}
+
+/* the degree sign sits inside the value box, so the turn buttons either side stay symmetric */
+.sim-rot-input {
+    position: relative;
+    display: inline-flex;
+}
+
+.sim-rot-input input[type="number"] {
+    padding-right: 16px;
+    padding-left: 16px;
+    -moz-appearance: textfield;
+}
+
+.sim-rot-input input[type="number"]::-webkit-outer-spin-button,
+.sim-rot-input input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.sim-rot-input .sim-rot-unit {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 0;
+    color: #94a3b8;
+    pointer-events: none;
+}
+
+/* ---------- Victim panel pieces shared by the map editor (beta) and the room 4 creator ---------- */
+/* cognitive target: the target (click a ring), its type and code, then the colours */
+.sbx-ct { margin-top: 0.6rem; padding: 0.6rem; border-radius: 10px; background: #f8fafc; border: 1px solid #e2e8f0; }
+.sbx-ct-top { display: flex; align-items: center; gap: 0.7rem; }
+.sbx-ct-target { width: 92px; height: 92px; flex: none; cursor: pointer; }
+.sbx-ct-sel { stroke: #fff; stroke-width: 2.5; stroke-dasharray: 4 3; pointer-events: none; filter: drop-shadow(0 0 1.5px rgba(15, 23, 42, 0.9)); }
+.sbx-ct-info { display: flex; flex-direction: column; align-items: flex-start; gap: 0.3rem; }
+.sbx-ct-type, .sbx-sel-symbol { display: inline-flex; align-items: center; justify-content: center; background: #6c757d; color: #fff; font-weight: 700; }
+.sbx-ct-type { min-width: 2.4rem; height: 1.9rem; padding: 0 0.5rem; border-radius: 999px; font-size: 1.05rem; }
+.sbx-ct-type.t-F, .sbx-sel-symbol.t-F { background: #d32f2f; }
+.sbx-ct-type.t-P, .sbx-sel-symbol.t-P { background: #6a1b9a; }
+.sbx-ct-type.t-C, .sbx-sel-symbol.t-C { background: #1565c0; }
+.sbx-ct-type.t-O, .sbx-sel-symbol.t-O { background: #e65100; }
+.sbx-sel-symbol.t-X { background: #6c757d; }
+.sbx-ct-sum { font-size: 0.78rem; color: #64748b; }
+.sbx-ct-code { display: flex; gap: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.8rem; }
+.sbx-ct-code span { padding: 0 3px; border-radius: 3px; cursor: pointer; }
+.sbx-ct-code span.sel { background: #1e293b; color: #fff; }
+.sbx-ct-hint { margin: 0.45rem 0 0.3rem; font-size: 0.75rem; color: #64748b; }
+.sbx-ct-palette, .sbx-ct-random { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.25rem; }
+.sbx-ct-swatch { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; padding: 0.3rem 0; border: 1.5px solid #e2e8f0; border-radius: 8px; background: #fff; cursor: pointer; }
+.sbx-ct-swatch:hover { border-color: #93c5fd; }
+.sbx-ct-swatch.active { border-color: #1e293b; }
+.sbx-ct-dot { width: 20px; height: 20px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.2); }
+.sbx-ct-val { font-size: 0.7rem; font-weight: 700; color: #475569; font-variant-numeric: tabular-nums; }
+.sbx-ct-random button { height: 28px; border: none; border-radius: 7px; background: #6c757d; color: #fff; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+.sbx-ct-random button.t-F { background: #d32f2f; }
+.sbx-ct-random button.t-P { background: #6a1b9a; }
+.sbx-ct-random button.t-C { background: #1565c0; }
+.sbx-ct-random button.t-O { background: #e65100; }
+.sbx-ct-random button:hover { filter: brightness(1.1); }
+
+/* the rotation dial, laid out for the narrow panel: dial, value, presets - each one row, centred */
+.sbx-dial { display: block; margin-top: 0.7rem; }
+.sbx-dial .sim-rot { flex-direction: column; align-items: center; gap: 0.7rem; }
+.sbx-dial .sim-rot-controls { width: 100%; max-width: none; min-width: 0; align-items: center; gap: 0.5rem; }
+.sbx-dial .sim-rot-value { justify-content: center; }
+.sbx-dial .sim-rot-presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: 100%; }
+.sbx-dial .sim-rot-presets button { min-width: 0; padding: 0; }
+.sbx-dial .sim-rot-help { display: none; }
+
+/* a two-way switch (fixed / random turn) */
+.sbx-seg { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; border-radius: 9px; background: #f1f5f9; }
+.sbx-seg button { height: 30px; border: none; border-radius: 7px; background: transparent; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+.sbx-seg button.active { background: #fff; color: #1d4ed8; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15); }
+.sbx-rot-note { margin: 0.5rem 0 0; font-size: 0.78rem; color: #64748b; text-align: center; }
+
+/* the victim stamps (the room 4 creator's) in the tool panel: names in full */
+.sbx-stamps { gap: 0; }
+.sbx-stamps .sim-r4-stamp-name { white-space: normal; text-overflow: clip; line-height: 1.2; }
+
+
+.sbx-label {
+    margin: 0.8rem 0 0.3rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.sbx-sel-head { display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; }
+.sbx-sel-symbol { width: 2rem; height: 2rem; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: #2563eb; color: #fff; font-weight: 700; }
+.sbx-sel-symbol.fake { background: #94a3b8; }
+.sbx-sel-symbol.target { box-shadow: 0 0 0 2px #fff, 0 0 0 3px #e2e8f0; }
+
+/* the room 4 creator's stamp panel: how the stamp is placed, and the stamp clicked on */
+.sim-r4-place,
+.sim-r4-selected {
+    padding-top: 0.5rem;
+    border-top: 1px solid #f1f5f9;
+}
+
+.sim-r4-selected-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #b45309;
+}

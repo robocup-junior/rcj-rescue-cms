@@ -19,7 +19,13 @@ router.get('/editor/simulation/2025', async function (req, res, next) {
   res.render('sim_editor/sim_editor_2025', { user: req.user, pubService: true });
 });
 
+// Erebus Editor 2026 (the canvas editor, still beta) is the default; the classic editor stays
+// beside it
 router.get('/editor/simulation/2026', async function (req, res, next) {
+  res.render('sim_editor/sim_editor_beta_2026', { user: req.user, pubService: true });
+});
+
+router.get('/editor/simulation/2026/classic', async function (req, res, next) {
   res.render('sim_editor/sim_editor_2026', { user: req.user, pubService: true });
 });
 

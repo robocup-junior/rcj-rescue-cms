@@ -20,6 +20,7 @@ append scripts
   script(src="/javascripts/opencv.js")
   block editor_script
   //- Needs `app` from the year's editor script
+  script(src="/javascripts/sim_editor/sim_icons.js")
   script(src="/javascripts/sim_editor/room4_creator.js")
 
 block page_css
@@ -61,6 +62,7 @@ block hero_actions
       | .wbt
 
 block main_content
+  block editor_notice
   p.sim-editor-desc
     i.fas.fa-info-circle.mr-2
     | {{"admin.simMapEditor.desc" | translate}}

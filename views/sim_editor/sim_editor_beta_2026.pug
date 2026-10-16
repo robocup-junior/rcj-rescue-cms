@@ -1,0 +1,356 @@
+//- -*- tab-width: 2 -*-
+//- Erebus Editor 2026 (beta), the default Simulation 2026 world editor: the map drawn on a canvas,
+//- with tools that follow the rules of the room under the pointer. The classic editor stays at
+//- /service/editor/simulation/2026/classic.
+//- One editor frame: top bar (map, file, undo, zoom, export) | tool rail | tool options | map | checks
+//- and map settings | status line.
+extends ../includes/modern_layout
+
+block vars
+  - var ngAppDef = 'SimBeta'
+  - var contentContainerStyle = "max-width: 1920px;"
+  - var contentContainerClass = "mt-n4"
+  - var hideLogin = pubService
+
+append scripts
+  script(src="/javascripts/opencv.js")
+  script(src="/javascripts/sim_editor/sim_world_2026.js")
+  script(src="/javascripts/sim_editor/sim_room4_world_2026.js")
+  script(src="/javascripts/sim_editor/sim_icons.js")
+  script(src="/javascripts/sim_editor_beta/lattice.js")
+  script(src="/javascripts/sim_editor_beta/model.js")
+  script(src="/javascripts/sim_editor_beta/view.js")
+  script(src="/javascripts/sim_editor_beta/beta.2026.js")
+  //- The custom room 4 creator of the classic editor (needs `app` above)
+  script(src="/javascripts/sim_editor/room4_creator.js")
+  script(src="/javascripts/sim_editor/rotation_dial.js")
+
+block page_css
+  link(href="/stylesheets/sim_editor/sim_modern.css" rel="stylesheet")
+  link(href="/stylesheets/sim_editor/sim_beta.css" rel="stylesheet")
+
+//- The editor takes the whole window: no navbar, hero or footer (Home and the language are in its top bar)
+block navbar
+
+block footer
+
+block content
+  input#simBetaFile(type='file', accept='.json,application/json', onclick='this.value=null', style="display:none;")
+
+  .sbx(ng-class='{"no-map": !map}')
+    //- ---- top bar ----
+    header.sbx-top
+      a.sbx-btn.icon(href='/service', title='Public services')
+        i.fas.fa-home
+      span.sbx-title
+        | {{"admin.simBeta.title" | translate}}
+        //- the editor's version: what β means, and the way back to the classic editor
+        span.sbx-beta-wrap
+          button.sim-beta-badge.sbx-beta-btn(type='button', ng-click='ui.betaMenu = !ui.betaMenu', ng-class='{open: ui.betaMenu}', title='{{"admin.simBeta.betaMenu" | translate}}', aria-haspopup='true', aria-expanded='{{!!ui.betaMenu}}')
+            | β
+            i.fas.fa-caret-down
+          .sbx-beta-back(ng-if='ui.betaMenu', ng-click='ui.betaMenu = false')
+          .sbx-beta-menu(ng-if='ui.betaMenu', role='menu')
+            p.sbx-beta-menu-lead {{"admin.simBeta.betaLead" | translate}}
+            a.sbx-beta-menu-item(href='/service/editor/simulation/2026/classic', role='menuitem')
+              i.fas.fa-external-link-alt.fa-fw
+              span
+                strong {{"admin.simBeta.backToClassic" | translate}}
+                small {{"admin.simBeta.backToClassicNote" | translate}}
+      .sbx-name
+        i.fas.fa-map.sbx-name-icon
+        input.sbx-name-input(ng-if='map', type='text', ng-model='map.name', ng-change='renamed()', placeholder='{{"admin.simMapEditor.name" | translate}}', aria-label='{{"admin.simMapEditor.name" | translate}}')
+        span.sbx-name-empty(ng-if='!map') {{"admin.simBeta.noMap" | translate}}
+
+      .sbx-group
+        button.sbx-btn(type='button', ng-click='newMap()', title='{{"admin.simBeta.new" | translate}}')
+          i.fas.fa-file
+          span.sbx-btn-label {{"admin.simBeta.newShort" | translate}}
+        button.sbx-btn(type='button', onclick="document.getElementById('simBetaFile').click()", title='{{"admin.simBeta.open" | translate}}')
+          i.fas.fa-folder-open
+          span.sbx-btn-label {{"admin.simBeta.openShort" | translate}}
+        button.sbx-btn(type='button', ng-click='saveJson()', ng-disabled='!map', title='{{"admin.simBeta.save" | translate}}')
+          i.fas.fa-save
+          span.sbx-btn-label {{"admin.simBeta.saveShort" | translate}}
+
+      .sbx-group(ng-if='map')
+        button.sbx-btn.icon(type='button', ng-click='undo()', ng-disabled='!canUndo', title='{{"admin.simBeta.undo" | translate}} (Ctrl+Z)')
+          i.fas.fa-undo
+        button.sbx-btn.icon(type='button', ng-click='redo()', ng-disabled='!canRedo', title='{{"admin.simBeta.redo" | translate}} (Ctrl+Shift+Z)')
+          i.fas.fa-redo
+
+      .sbx-spacer
+
+      .sbx-group(ng-if='map')
+        button.sbx-btn.sbx-toggle(type='button', ng-click='toggleLinear()', ng-class='{on: ui.showLinear}', title='{{"admin.simBeta.linearTitle" | translate}}')
+          i.fas.fa-route
+          span.sbx-btn-label {{"admin.simBeta.linear" | translate}}
+
+      .sbx-group(ng-if='map')
+        button.sbx-btn.icon(type='button', ng-click='zoomOut()', title='{{"admin.simBeta.zoomOut" | translate}}')
+          i.fas.fa-search-minus
+        span.sbx-zoom {{zoom | number:1}} px/cm
+        button.sbx-btn.icon(type='button', ng-click='zoomIn()', title='{{"admin.simBeta.zoomIn" | translate}}')
+          i.fas.fa-search-plus
+        button.sbx-btn.icon(type='button', ng-click='fit()', title='{{"admin.simBeta.fit" | translate}}')
+          i.fas.fa-expand
+
+      button.sbx-export(type='button', ng-click='exportWorld()', ng-disabled='!map', ng-class='{blocked: blocking}', title='{{blocking ? ("admin.simBeta.exportBlocked" | translate) : ("admin.simMapEditor.exportW" | translate)}}')
+        i.fas.fa-globe
+        | .wbt
+      button.sbx-btn.sbx-lang(type='button', ng-click='switchLang()', title='Language')
+        i.fas.fa-globe-asia
+        | {{lang === 'ja' ? 'EN' : '日本語'}}
+
+    .sbx-body
+      //- ---- tools ----
+      nav.sbx-rail(aria-label='{{"admin.simBeta.toolsTitle" | translate}}')
+        div(ng-repeat='g in toolGroups')
+          .sbx-rail-sep(ng-if='!$first')
+          button.sbx-tool(type='button', ng-repeat='t in g', ng-class='{active: ui.tool === t.id}', ng-click='setTool(t.id)', ng-disabled='!map',
+            title='{{("admin.simBeta.tools." + t.id) | translate}} ({{t.key}})', aria-label='{{("admin.simBeta.tools." + t.id) | translate}}')
+            i(ng-class='t.icon')
+            span.sbx-tool-key {{t.key}}
+
+      //- ---- options of the tool ----
+      aside.sbx-tool-panel(ng-if='map')
+        .sbx-tool-head
+          span {{("admin.simBeta.tools." + ui.tool) | translate}}
+          kbd {{toolKey(ui.tool)}}
+        p.sbx-help {{("admin.simBeta.help." + ui.tool) | translate}}
+
+        div(ng-if='ui.tool === "select"')
+          p.sbx-muted(ng-if='!region') {{"admin.simBeta.regionNone" | translate}}
+          div(ng-if='region')
+            .sbx-region-size
+              i.far.fa-object-group.mr-1
+              | {{"admin.simBeta.regionSize" | translate:{ size: regionSize() } }}
+            .sbx-region-actions
+              button.sbx-choice(type='button', ng-click='copyRegion()', title='Ctrl+C')
+                i.far.fa-copy.fa-fw
+                | {{"admin.simBeta.copy" | translate}}
+              button.sbx-choice(type='button', ng-click='cutRegion()', title='Ctrl+X')
+                i.fas.fa-cut.fa-fw
+                | {{"admin.simBeta.cut" | translate}}
+              button.sbx-choice(type='button', ng-click='duplicateRegion()', title='Ctrl+D')
+                i.far.fa-clone.fa-fw
+                | {{"admin.simBeta.duplicate" | translate}}
+              button.sbx-choice.danger(type='button', ng-click='clearRegion()', title='Delete')
+                i.fas.fa-trash-alt.fa-fw
+                | {{"admin.simBeta.clearRegion" | translate}}
+            p.sbx-muted.mt-2 {{"admin.simBeta.regionHelp" | translate}}
+          button.sbx-choice.mt-2(type='button', ng-click='pasteRegion()', ng-disabled='!hasClip', title='Ctrl+V')
+            i.fas.fa-paste.fa-fw
+            | {{"admin.simBeta.paste" | translate}}
+
+        div(ng-if='ui.tool === "shape"')
+          .sbx-size-box(ng-class='{fresh: ui.freshMap}')
+            .sbx-label {{"admin.simBeta.mapSize" | translate}}
+              .sbx-size
+                span {{"admin.simBeta.width" | translate}}
+                .sbx-stepper
+                  button(type='button', ng-click='resize(-1, 0)', ng-disabled='map.width <= 1', aria-label='−')
+                    i.fas.fa-minus
+                  span {{map.width}}
+                  button(type='button', ng-click='resize(1, 0)', ng-disabled='map.width >= 40', aria-label='+')
+                    i.fas.fa-plus
+              .sbx-size
+                span {{"admin.simBeta.length" | translate}}
+                .sbx-stepper
+                  button(type='button', ng-click='resize(0, -1)', ng-disabled='map.length <= 1', aria-label='−')
+                    i.fas.fa-minus
+                  span {{map.length}}
+                  button(type='button', ng-click='resize(0, 1)', ng-disabled='map.length >= 40', aria-label='+')
+                    i.fas.fa-plus
+            p.sbx-muted.mt-2 {{"admin.simBeta.mapSizeNote" | translate}}
+          .sbx-choices.column.mt-3
+            button.sbx-choice(type='button', ng-repeat='m in shapeModes', ng-class='{active: ui.shapeMode === m.id}', ng-click='ui.shapeMode = m.id')
+              i.fas.fa-fw(ng-class='m.icon')
+              | {{("admin.simBeta.shapeModes." + m.id) | translate}}
+
+        .sbx-choices.column(ng-if='ui.tool === "room"')
+          button.sbx-choice(type='button', ng-repeat='r in roomChoices', ng-class='{active: ui.room === r}', ng-click='ui.room = r')
+            i.sbx-room(class='room{{r}}')
+            | {{"admin.simBeta.room" | translate:{ n: r } }}
+            span.sbx-choice-note {{("admin.simBeta.roomNote" + r) | translate}}
+
+        div(ng-if='ui.tool === "room"')
+            .sbx-label {{"admin.simBeta.room4" | translate}}
+            .sbx-room4(ng-switch='room4State()')
+              p.sbx-muted(ng-switch-when='none') {{"admin.simBeta.room4Hint" | translate}}
+              div(ng-switch-when='empty')
+                p.sbx-room4-state.todo
+                  i.fas.fa-exclamation-circle
+                  | {{"admin.simBeta.room4NotDrawn" | translate}}
+              div(ng-switch-when='drawn')
+                p.sbx-room4-state.done
+                  i.fas.fa-check-circle
+                  | {{"admin.simBeta.room4Drawn" | translate}}
+              div(ng-switch-when='preset')
+                p.sbx-room4-state.todo
+                  i.fas.fa-exclamation-triangle
+                  | {{"admin.simBeta.room4PresetBeta" | translate:{ name: map.area4Room.value } }}
+                button.btn.btn-sm.btn-outline-warning.btn-block(type='button', ng-click='toCustomRoom4()')
+                  i.fas.fa-exchange-alt.mr-1
+                  | {{"admin.simBeta.room4ToCustom" | translate}}
+            button.btn.btn-sm.btn-outline-primary.btn-block.mt-2(type='button', ng-if='room4State() === "empty" || room4State() === "drawn"', ng-click='openRoom4()')
+              i.fas.fa-paint-brush.mr-1
+              | {{"admin.simBeta.drawRoom4" | translate}}
+
+        .sbx-choices.column(ng-if='ui.tool === "floor"')
+          button.sbx-choice(type='button', ng-repeat='f in floorChoices', ng-class='{active: ui.floor === f.id}', ng-click='ui.floor = f.id')
+            i.fas.fa-fw(ng-class='f.icon')
+            | {{("admin.simBeta.floors." + f.id) | translate}}
+
+        div(ng-if='ui.tool === "victim"')
+          .sbx-selected(ng-if='selected')
+            .sbx-selected-head
+              span
+                i.fas.fa-mouse-pointer.mr-1
+                | {{"admin.simBeta.selectedVictim" | translate}}
+              button.btn.btn-sm.btn-link.p-0(type='button', ng-click='selectNone()') {{"admin.simBeta.selectDone" | translate}}
+            .sbx-sel-head
+              span.sbx-sel-symbol.target(ng-if='selected.victim.type === "CT"', ng-style='targetStyle(selected.victim.code)')
+              span.sbx-sel-symbol(ng-if='selected.victim.type !== "CT"', ng-class='{fake: selected.victim.fake}') {{ {H: "Φ", S: "Ψ", U: "Ω"}[selected.victim.type] }}
+              span(ng-if='selected.victim.type === "CT"') CT {{selected.victim.code}}
+              span(ng-if='selected.victim.type !== "CT" && selected.victim.fake') {{"admin.simBeta.fake" | translate}}
+            .sbx-label(ng-if='selected.victim.type !== "CT"') {{"admin.simBeta.kind" | translate}}
+            .sbx-choices(ng-if='selected.victim.type !== "CT"')
+              button.sbx-choice.letter(type='button', ng-repeat='v in victimChoices | limitTo:3', ng-class='{active: selected.victim.type === v.id}', ng-click='changeSelected({type: v.id})') {{v.symbol}}
+            label.sbx-check(ng-if='selected.victim.type !== "CT"')
+              input(type='checkbox', ng-checked='selected.victim.fake', ng-click='changeSelected({fake: !selected.victim.fake})')
+              | {{"admin.simBeta.fake" | translate}}
+            div(ng-if='selected.victim.type !== "CT"')
+              .sbx-label {{"admin.simBeta.rot" | translate}}
+              sim-rotation-dial.sbx-dial(ng-model='selected.rot', ng-change='changeSelected({rot: selected.rot})', symbol='{H: "Φ", S: "Ψ", U: "Ω"}[selected.victim.type]')
+            button.btn.btn-sm.btn-outline-danger.btn-block.mt-3(type='button', ng-click='removeSelected()')
+              i.fas.fa-trash-alt.mr-1
+              | {{"admin.simBeta.remove" | translate}}
+          .sim-r4-panel.sbx-stamps
+            .sim-r4-stamps
+              .sim-r4-stamp-group
+                span.sim-r4-stamp-group-label {{"admin.simMapEditor.room4Creator.groups.victim" | translate}}
+                .sim-r4-stamp-row.cols-3(ng-repeat='row in victimRows')
+                  span.sim-r4-stamp-row-label {{("admin.simMapEditor.room4Creator.rows." + row.label) | translate}}
+                  button.sim-r4-stamp(type='button', ng-repeat='v in row.types', ng-class='["kind-" + v.kind, {active: ui.victim === v.id && !!ui.fake === v.fake}]', ng-click='pickVictim(v)', ng-style='{"--stamp-color": v.color}', title='{{v.name | translate}}')
+                    span.sim-r4-stamp-badge {{v.symbol}}
+                    span.sim-r4-stamp-name {{v.name | translate}}
+              .sim-r4-stamp-group
+                span.sim-r4-stamp-group-label {{"admin.simMapEditor.room4Creator.groups.ct" | translate}}
+                .sim-r4-stamp-row.cols-2
+                  button.sim-r4-stamp(type='button', ng-repeat='t in ctStamps', ng-class='["kind-" + t.kind, {active: ui.victim === "CT" && ctLetter() === t.letter}]', ng-click='pickCt(t.letter)', ng-style='{"--stamp-color": t.color}', title='{{t.name | translate}}')
+                    span.sim-r4-stamp-badge {{t.symbol}}
+                    span.sim-r4-stamp-name {{t.name | translate}}
+          .sbx-ct(ng-if='selected ? selected.victim.type === "CT" : ui.victim === "CT"')
+            .sbx-ct-top
+              svg.sbx-ct-target(viewBox='0 0 100 100', role='img', aria-label='{{"admin.simBeta.ctRings" | translate}}')
+                circle(ng-repeat='r in [0, 1, 2, 3, 4]', cx='50', cy='50', ng-attr-r='{{48 - 9 * r}}', ng-attr-fill='{{ringColor(r)}}', ng-click='ui.ring = r', stroke='#fff', stroke-width='1')
+                circle.sbx-ct-sel(cx='50', cy='50', ng-attr-r='{{43.5 - 9 * ui.ring}}', fill='none')
+              .sbx-ct-info
+                span.sbx-ct-type(ng-class='"t-" + ctLetter()') {{ctLetter() === "X" ? ("admin.simBeta.ctFake" | translate) : ctLetter()}}
+                .sbx-ct-sum {{"admin.simBeta.ctSum" | translate}} {{ctSum() > 0 ? "+" : ""}}{{ctSum()}}
+                .sbx-ct-code
+                  span(ng-repeat='c in pickerRings() track by $index', ng-class='{sel: ui.ring === $index}', ng-click='ui.ring = $index') {{c}}
+            .sbx-ct-hint {{"admin.simBeta.ctHint" | translate:{ n: ui.ring + 1 } }}
+            .sbx-ct-palette
+              button.sbx-ct-swatch(type='button', ng-repeat='c in ringColors', ng-click='pickColor(c.id)', ng-class='{active: pickerRings()[ui.ring] === c.id}', title='{{c.id}}')
+                span.sbx-ct-dot(ng-style='{background: c.color}')
+                span.sbx-ct-val {{c.value > 0 ? "+" : ""}}{{c.value}}
+          div(ng-if='!selected && ui.victim !== "CT"')
+            .sbx-label {{"admin.simBeta.rot" | translate}}
+            .sbx-seg
+              button(type='button', ng-class='{active: !ui.randomRot}', ng-click='ui.randomRot = false')
+                i.fas.fa-compass.mr-1
+                | {{"admin.simBeta.rotFixed" | translate}}
+              button(type='button', ng-class='{active: ui.randomRot}', ng-click='ui.randomRot = true')
+                i.fas.fa-dice.mr-1
+                | {{"admin.simBeta.rotRandom" | translate}}
+            p.sbx-rot-note(ng-if='ui.randomRot') {{"admin.simBeta.rotRandomNote" | translate}}
+            sim-rotation-dial.sbx-dial(ng-if='!ui.randomRot', ng-model='ui.rot', symbol='victimSymbol()')
+
+      //- ---- the map ----
+      main#simBetaStage.sbx-stage(ng-class='"tool-" + ui.tool')
+        canvas#simBetaCanvas
+        section.sbx-checks(ng-if='map', ng-class='{folded: ui.checksFolded, ok: !problems.length, bad: blocking}')
+          header.sbx-checks-head(ng-click='ui.checksFolded = !ui.checksFolded', title='{{(ui.checksFolded ? "admin.simBeta.checksOpen" : "admin.simBeta.checksFold") | translate}}')
+            i.fas(ng-class='!problems.length ? "fa-check-circle ok" : blocking ? "fa-times-circle bad" : "fa-exclamation-triangle warn"')
+            span.sbx-checks-title {{"admin.simBeta.problemsTitle" | translate}}
+            span.sbx-count(ng-class='{ok: !problems.length, bad: blocking}') {{problems.length}}
+            i.fas.sbx-checks-chevron(ng-class='ui.checksFolded ? "fa-chevron-down" : "fa-chevron-up"')
+          .sbx-checks-body(ng-if='!ui.checksFolded')
+            p.sbx-ok(ng-if='!problems.length') {{"admin.simBeta.noProblems" | translate}}
+            button.sbx-fix-all(type='button', ng-if='canFixAll()', ng-click='fixAll()')
+              i.fas.fa-magic.mr-1
+              | {{"admin.simBeta.fixAll" | translate}}
+            ul.sbx-problems(ng-if='problems.length')
+              li(ng-repeat='p in problems', ng-class='{block: p.block, jump: p.at}', ng-click='showProblem(p)', ng-mouseenter='pointProblem(p)', ng-mouseleave='pointProblem(null)', title='{{p.at ? ("admin.simBeta.showWhere" | translate) : ""}}')
+                i.fas(ng-class='p.block ? "fa-times-circle" : "fa-exclamation-triangle"')
+                span.sbx-problem-text {{p.text}}
+                button.sbx-fix(type='button', ng-if='p.fix', ng-click='fixProblem(p, $event)', title='{{(p.fix === "draw" ? "admin.simBeta.fixDraw" : "admin.simBeta.fixThis") | translate}}')
+                  i.fas(ng-class='p.fix === "draw" ? "fa-paint-brush" : "fa-magic"')
+                  | {{(p.fix === "draw" ? "admin.simBeta.fixDrawShort" : "admin.simBeta.fixShort") | translate}}
+            label.sbx-check.sbx-checks-conn
+              input(type='checkbox', ng-checked='!map.connCheckOff', ng-click='toggleConnCheck()')
+              | {{"admin.simBeta.connCheck" | translate}}
+        .sbx-empty(ng-if='!map')
+          .sbx-empty-card
+            i.fas.fa-drafting-compass.sbx-empty-icon
+            h2 {{"admin.simBeta.emptyTitle" | translate}}
+            p {{"admin.simBeta.emptyLead" | translate}}
+            .sbx-empty-actions
+              button.btn.btn-primary(type='button', ng-click='newMap()')
+                i.fas.fa-file.mr-2
+                | {{"admin.simBeta.new" | translate}}
+              button.btn.btn-outline-secondary(type='button', onclick="document.getElementById('simBetaFile').click()")
+                i.fas.fa-folder-open.mr-2
+                | {{"admin.simBeta.openJson" | translate}}
+            button.btn.btn-outline-primary.btn-block.mt-2(type='button', ng-if='kept', ng-click='restoreKept()')
+              i.fas.fa-history.mr-2
+              | {{"admin.simBeta.restore" | translate:{ name: kept.name, time: (kept.time | date:'M/d HH:mm') } }}
+            .sbx-empty-drop {{"admin.simBeta.dropHere" | translate}}
+            .sbx-error(ng-if='error') {{error | translate}}
+
+      //- ---- checks and map settings ----
+    //- ---- dialog (the editor's own, in place of alert / confirm) ----
+    .sbx-dialog-back(ng-if='dialog', ng-click='closeDialog(null)')
+      .sbx-dialog(role='alertdialog', aria-modal='true', aria-labelledby='sbxDialogTitle', ng-class='"kind-" + dialog.kind', ng-click='$event.stopPropagation()')
+        .sbx-dialog-head
+          span.sbx-dialog-icon
+            i.fas(ng-class='{error: "fa-times", warn: "fa-exclamation", info: "fa-info"}[dialog.kind || "info"]')
+          h2#sbxDialogTitle {{dialog.title}}
+          button.sbx-dialog-x(type='button', ng-click='closeDialog(null)', aria-label='{{"admin.simBeta.close" | translate}}')
+            i.fas.fa-times
+        p.sbx-dialog-message(ng-if='dialog.message') {{dialog.message}}
+        ul.sbx-dialog-items(ng-if='dialog.items.length')
+          li(ng-repeat='p in dialog.items', ng-class='{jump: p.at}', ng-click='p.at && dialogItem(p)', title='{{p.at ? ("admin.simBeta.showWhere" | translate) : ""}}')
+            i.fas(ng-class='p.block ? "fa-times-circle" : "fa-exclamation-triangle"')
+            span {{p.text}}
+            i.fas.fa-crosshairs.sbx-jump(ng-if='p.at')
+        .sbx-dialog-actions
+          button.sbx-dialog-btn(type='button', ng-repeat='a in dialog.actions', ng-class='a.style', ng-click='closeDialog(a.value)')
+            i.fas.mr-1(ng-if='a.icon', ng-class='a.icon')
+            | {{a.label}}
+
+    //- ---- status line ----
+    footer.sbx-status
+      span.sbx-hint(ng-if='hint')
+        i.fas.fa-info-circle
+        | {{hint}}
+      span.sbx-howto(ng-if='!hint && !ui.showLinear') {{"admin.simBeta.howTo" | translate}}
+      span.sbx-legend(ng-if='!hint && ui.showLinear && !linearNoStart()')
+        span
+          i.sbx-key.linear
+          | {{"admin.simBeta.legendLinear" | translate}}
+        span
+          i.sbx-key.floating
+          | {{"admin.simBeta.legendFloating" | translate}}
+        span
+          i.sbx-key.floating-wall
+          | {{"admin.simBeta.legendFloatingWall" | translate}}
+        span(ng-if='linearUnreached()')
+          i.sbx-key.unreached
+          | {{"admin.simBeta.legendUnreached" | translate}}
+      span.sbx-hint(ng-if='!hint && ui.showLinear && linearNoStart()')
+        i.fas.fa-info-circle
+        | {{"admin.simBeta.linearNoStart" | translate}}
+

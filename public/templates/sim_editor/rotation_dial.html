@@ -18,8 +18,10 @@
       <button type="button" class="sim-rot-step" ng-click="step(-15)" ng-disabled="isDisabled" title="-15°">
         <i class="fas fa-undo-alt"></i>
       </button>
-      <input type="number" min="0" max="359" ng-model="angleInput" ng-change="typed()" ng-blur="angleInput = angle" ng-disabled="isDisabled">
-      <span class="sim-rot-unit">°</span>
+      <span class="sim-rot-input">
+        <input type="number" min="0" max="359" ng-model="angleInput" ng-change="typed()" ng-blur="angleInput = angle" ng-disabled="isDisabled">
+        <span class="sim-rot-unit">°</span>
+      </span>
       <button type="button" class="sim-rot-step" ng-click="step(15)" ng-disabled="isDisabled" title="+15°">
         <i class="fas fa-redo-alt"></i>
       </button>

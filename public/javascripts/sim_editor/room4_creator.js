@@ -43,6 +43,38 @@ var SimRoom4 = (function () {
         return majorityType(counts);
     }
 
+    // The face of the wall nearest to (cx, cy) within reach px, by isWallAt(x, y) of pixels, or
+    // null: where a token is shown standing - its badge is drawn against that face, not in the gap
+    // the stamp keeps. Out: { x, y } the face point (the edge of the nearest wall pixel towards the
+    // token), and thick, how thick the wall is behind it (px)
+    function wallAnchor(isWallAt, cx, cy, reach) {
+        let best = null, bestD = reach * reach;
+        for (let y = Math.floor(cy - reach); y <= Math.ceil(cy + reach); y++) {
+            for (let x = Math.floor(cx - reach); x <= Math.ceil(cx + reach); x++) {
+                const d = (x + 0.5 - cx) * (x + 0.5 - cx) + (y + 0.5 - cy) * (y + 0.5 - cy);
+                if (d < bestD && isWallAt(x, y)) { bestD = d; best = { x: x, y: y }; }
+            }
+        }
+        if (!best) return null;
+        const mx = best.x + 0.5, my = best.y + 0.5;
+        const l = Math.sqrt(bestD) || 1, ux = (cx - mx) / l, uy = (cy - my) / l;
+        let thick = 1;
+        while (thick < 4 * reach && isWallAt(Math.floor(mx - ux * thick), Math.floor(my - uy * thick))) thick++;
+        return { x: mx + ux * 0.5, y: my + uy * 0.5, thick: thick };
+    }
+
+    // Where a token's badge of radius r is drawn: against its wall's face (anchor), on the token's
+    // side, the badge reaching into the wall by at most most of its thickness (never through it, and
+    // never apart from it). wallThick overrides the anchor's thickness (same units as r)
+    function badgeOnWall(t, anchor, r, wallThick) {
+        if (!anchor) return { x: t.cx, y: t.cy };
+        const dx = t.cx - anchor.x, dy = t.cy - anchor.y, l = Math.hypot(dx, dy);
+        if (l < 1e-6) return { x: t.cx, y: t.cy };
+        const thick = wallThick !== undefined ? wallThick : anchor.thick || 1;
+        const off = r - Math.min(0.5 * r, 0.8 * thick);
+        return { x: anchor.x + dx / l * off, y: anchor.y + dy / l * off };
+    }
+
     // Tokens in canvas pixels: connected red blobs with their box, centre and type
     function findTokens(px, w, h) {
         const seen = new Uint8Array(w * h);
@@ -89,7 +121,9 @@ var SimRoom4 = (function () {
         stampRGB: stampRGB,
         stampColor: stampColor,
         contourType: contourType,
-        findTokens: findTokens
+        findTokens: findTokens,
+        wallAnchor: wallAnchor,
+        badgeOnWall: badgeOnWall
     };
 })();
 
@@ -135,6 +169,15 @@ app.controller('CustomRoom4ModalCtrl', ['$scope', '$uibModalInstance', '$transla
         farCount: 0,
         message: ''
     };
+    // How a stamp is placed, as the victims of the map editor: a turn (or random) for letter
+    // victims, the ring code for a cognitive target. Kept per stamp in editor.room4Tokens.
+    $scope.r4.rings = 'GYYKG'.split('');
+    $scope.r4.ring = 0;
+    $scope.r4.rot = 0;
+    $scope.r4.randomRot = true;
+    $scope.r4.sel = null;                       // the stamp clicked on: { cx, cy, idx, rot, code }
+    $scope.ringColors = typeof SimIcons !== 'undefined' ? SimIcons.RING_LIST : [];
+
     // Set by the canvas directive
     $scope.r4api = {};
     // Tips drawn on the canvas next to a token under the pointer
@@ -162,7 +205,7 @@ app.controller('CustomRoom4ModalCtrl', ['$scope', '$uibModalInstance', '$transla
     }).filter(function (g) { return g.rows.length; });
 
     $scope.tools = [
-        { id: 'select', icon: 'fas fa-vector-square', key: 'S' },
+        { id: 'select', icon: 'fas fa-mouse-pointer', key: 'S' },
         { id: 'pen', icon: 'fas fa-pen', key: 'P' },
         { id: 'line', icon: 'fas fa-slash', key: 'L' },
         { id: 'curve', icon: 'fas fa-bezier-curve', key: 'B' },
@@ -172,7 +215,7 @@ app.controller('CustomRoom4ModalCtrl', ['$scope', '$uibModalInstance', '$transla
         { id: 'ellipse', icon: 'far fa-dot-circle', key: 'O' },
         { id: 'polygon', icon: 'fas fa-draw-polygon', key: 'G' },
         { id: 'shape', icon: 'fas fa-icons', key: 'I' },
-        { id: 'stamp', icon: 'fas fa-stamp', key: 'V' },
+        { id: 'stamp', icon: 'fas fa-user-injured', key: 'V' },
         { id: 'erase', icon: 'fas fa-eraser', key: 'E' },
         { id: 'template', icon: 'fas fa-th-large', key: 'T' }
     ];
@@ -316,7 +359,56 @@ app.controller('CustomRoom4ModalCtrl', ['$scope', '$uibModalInstance', '$transla
     $scope.setStamp = function (idx) {
         $scope.r4.stamp = idx;
         $scope.setTool('stamp');
+        // a cognitive target type gives random rings of it, unless the rings are of it already
+        const letter = $scope.ctLetterOf(idx);
+        if (letter && SimIcons.typeOf($scope.r4.rings.join('')) !== letter) $scope.randomCode(letter);
     };
+
+    // The cognitive target type letter (F P C O, X fake) of a stamp type, or null for a letter victim
+    $scope.ctLetterOf = function (idx) {
+        const t = $scope.stampType(idx);
+        if (!t || (t.kind !== 'ct' && t.kind !== 'fakect')) return null;
+        return t.kind === 'fakect' ? 'X' : t.symbol;
+    };
+    $scope.ctIdxOf = function (letter) {
+        const t = $scope.stampTypes.find(function (s) {
+            return letter === 'X' ? s.kind === 'fakect' : s.kind === 'ct' && s.symbol === letter;
+        });
+        return t ? t.idx : null;
+    };
+    $scope.isLetterVictim = function (idx) {
+        const t = $scope.stampType(idx);
+        return !!t && (t.kind === 'victim' || t.kind === 'fake');
+    };
+    $scope.randomCode = function (letter) {
+        if (typeof SimWorld2026 === 'undefined') return;
+        $scope.r4.rings = SimWorld2026.randomCognitiveCode(letter).split('');
+    };
+    $scope.ringColor = function (rings, i) {
+        const c = $scope.ringColors.find(function (r) { return r.id === rings[i]; });
+        return c ? c.color : '#fff';
+    };
+    $scope.ringSum = function (rings) { return SimIcons.ringSum(rings); };
+    $scope.ringLetter = function (rings) { return SimIcons.typeOf(rings.join('')); };
+    $scope.targetStyle = function (code, idx) {
+        const t = $scope.stampType(idx);
+        return { background: SimIcons.targetBackground(code, t ? t.color : SimIcons.TYPE[SimIcons.typeOf(code)]) };
+    };
+
+    // the ring picked on the target takes the colour, and the next ring is picked; the stamp type
+    // follows the type of the rings
+    $scope.pickColor = function (c) {
+        const sel = $scope.r4.sel;
+        const rings = sel ? sel.code.split('') : $scope.r4.rings;
+        rings[$scope.r4.ring] = c;
+        $scope.r4.ring = ($scope.r4.ring + 1) % 5;
+        const idx = $scope.ctIdxOf(SimIcons.typeOf(rings.join('')));
+        if (sel) { $scope.r4api.changeSel({ code: rings.join(''), idx: idx }); return; }
+        if (idx !== null) $scope.r4.stamp = idx;
+    };
+    $scope.setSelRot = function (rot) { $scope.r4api.changeSel({ rot: rot }); };
+    $scope.setSelRandomRot = function (random) { $scope.r4api.changeSel({ rot: random ? null : 0 }); };
+    $scope.removeSel = function () { $scope.r4api.removeSel(); };
 
     $scope.stampType = function (idx) {
         return $scope.stampTypes.find(function (t) { return t.idx === idx; });
@@ -399,6 +491,9 @@ app.directive('simRoom4Canvas', function () {
 
             const wallWidth = Math.max(2, Math.round(block / 12));    // 1 cm
             const stampSize = Math.max(6, Math.round(block / 6));     // 2 cm, the size of a wall token
+            // the badge shown for a token: it reaches the wall face whatever gap (2-4 px) the token
+            // was put down with, so it does not look apart from its wall
+            function badgeRadius() { return Math.max(9 * k, stampSize / 2 + 5); }
             const eraserSizes = { s: block / 8, m: block / 4, l: block / 2 };
 
             // ---- the map around room 4: its walls, and where the robot can get to ---------------
@@ -598,7 +693,7 @@ app.directive('simRoom4Canvas', function () {
                     if (region.length < minCells) continue;
                     region.forEach(function (q) {
                         const o = q * 4;
-                        out.data[o] = 239; out.data[o + 1] = 68; out.data[o + 2] = 68; out.data[o + 3] = 70;
+                        out.data[o] = 239; out.data[o + 1] = 68; out.data[o + 2] = 68; out.data[o + 3] = 255;   // a mask: shown hatched
                     });
                     blocked += region.length;
                 }
@@ -607,6 +702,32 @@ app.directive('simRoom4Canvas', function () {
                 if (seed >= 0) reachInfo = { dist: Float32Array.from(rdist.data32F), gw: gw, gh: gh, need: need };
                 reachStats = { blocked: blocked, room: roomCells };
                 src.delete(); dist.delete(); rsrc.delete(); rdist.delete();
+            }
+
+            // The places out of reach in the map editor's look: a light red with red stripes (every
+            // 0.65 cm), cut to the reach mask; kept until the mask or the size changes
+            let hatchCache = null;
+            function hatchedReach() {
+                const w = Math.round(cols * block), h = Math.round(rows * block);
+                if (hatchCache && hatchCache.layer === reachLayer && hatchCache.w === w && hatchCache.h === h) return hatchCache.canvas;
+                const c = document.createElement('canvas');
+                c.width = w;
+                c.height = h;
+                const g = c.getContext('2d');
+                g.fillStyle = 'rgba(254, 202, 202, 0.55)';
+                g.fillRect(0, 0, w, h);
+                g.strokeStyle = 'rgba(220, 38, 38, 0.45)';
+                // the room 4 picture is shown larger than the map, so finer stripes look the same
+                g.lineWidth = Math.max(1, 0.15 * pxPerCm);
+                g.beginPath();
+                const step = 0.65 * pxPerCm;
+                for (let o = -h; o < w; o += step) { g.moveTo(o, h); g.lineTo(o + h, 0); }
+                g.stroke();
+                g.globalCompositeOperation = 'destination-in';
+                g.imageSmoothingEnabled = true;
+                g.drawImage(reachLayer, 0, 0, w, h);
+                hatchCache = { layer: reachLayer, w: w, h: h, canvas: c };
+                return c;
             }
 
             // Tiles of the bounding box that are not room 4. A light grey: the export reads only
@@ -651,6 +772,82 @@ app.directive('simRoom4Canvas', function () {
                 editor.room4CanvasSave = main.toDataURL('image/png');
                 editor.room4Img.src = editor.room4CanvasSave;
             }
+
+            // ---- what each stamp keeps besides its type: turn (degrees, or null = random) and the
+            // ring code of a cognitive target, in editor.room4Tokens as fractions of the picture ----
+            if (!Array.isArray(editor.room4Tokens)) editor.room4Tokens = [];
+            const metaReach = function () { return Math.max(W, H) / 40; };
+            function metaAt(cx, cy) {
+                let best = null, bestD = metaReach();
+                editor.room4Tokens.forEach(function (m) {
+                    const d = Math.hypot(m.fx * W - cx, m.fy * H - cy);
+                    if (d < bestD) { bestD = d; best = m; }
+                });
+                return best;
+            }
+            function setMetaAt(cx, cy, data) {
+                editor.room4Tokens = editor.room4Tokens.filter(function (m) { return Math.hypot(m.fx * W - cx, m.fy * H - cy) >= metaReach(); });
+                editor.room4Tokens.push({ fx: +(cx / W).toFixed(5), fy: +(cy / H).toFixed(5), rot: data.rot === undefined ? null : data.rot, code: data.code || null });
+            }
+            // only what still has its stamp
+            function pruneMeta() {
+                editor.room4Tokens = editor.room4Tokens.filter(function (m) {
+                    return tokens.some(function (t) { return Math.hypot(m.fx * W - t.cx, m.fy * H - t.cy) < metaReach(); });
+                });
+            }
+            function currentMeta() {
+                const letter = scope.ctLetterOf ? scope.ctLetterOf(r4.stamp) : null;
+                return { rot: letter || r4.randomRot ? null : r4.rot, code: letter ? r4.rings.join('') : null };
+            }
+            function selectToken(t) {
+                if (!t) { scope.$applyAsync(function () { r4.sel = null; }); drawOverlay(); return; }
+                const m = metaAt(t.cx, t.cy) || {};
+                const letter = scope.ctLetterOf(t.type);
+                scope.$applyAsync(function () {
+                    r4.sel = { cx: t.cx, cy: t.cy, idx: t.type, rot: m.rot === undefined ? null : m.rot,
+                        code: letter ? (m.code && SimIcons.typeOf(m.code) === letter ? m.code : '') : null };
+                    if (letter && !r4.sel.code) r4.sel.code = SimWorld2026.randomCognitiveCode(letter);
+                    r4.ring = 0;
+                });
+                drawOverlay();
+            }
+            // repaint the token at (cx, cy) as stamp type idx
+            function retype(t, idx) {
+                checkpoint();
+                const data = snapshot();
+                const rgb = SimRoom4.stampRGB(idx);
+                for (let y = t.minY; y <= t.maxY; y++) {
+                    for (let x = t.minX; x <= t.maxX; x++) {
+                        const i = (y * W + x) * 4;
+                        if (!SimRoom4.isToken(data.data[i], data.data[i + 1], data.data[i + 2])) continue;
+                        data.data[i] = rgb[0]; data.data[i + 1] = rgb[1]; data.data[i + 2] = rgb[2]; data.data[i + 3] = 255;
+                    }
+                }
+                ctx.putImageData(data, 0, 0);
+                commit();
+            }
+            scope.r4api.changeSel = function (change) {
+                const sel = r4.sel;
+                if (!sel) return;
+                const t = tokens.find(function (k) { return Math.hypot(k.cx - sel.cx, k.cy - sel.cy) < metaReach(); });
+                if (!t) { r4.sel = null; return; }
+                if (change.rot !== undefined) sel.rot = change.rot;
+                if (change.code !== undefined) sel.code = change.code;
+                setMetaAt(t.cx, t.cy, { rot: sel.rot, code: sel.code });
+                if (change.idx !== undefined && change.idx !== null && change.idx !== t.type) { retype(t, change.idx); sel.idx = change.idx; }
+                else save();
+                drawOverlay();
+            };
+            scope.r4api.removeSel = function () {
+                const sel = r4.sel;
+                if (!sel) return;
+                const t = tokens.find(function (k) { return Math.hypot(k.cx - sel.cx, k.cy - sel.cy) < metaReach(); });
+                r4.sel = null;
+                if (!t) return;
+                checkpoint();
+                removeTokens([t]);
+                commit();
+            };
 
             // The red of the tokens, covered on screen so only their badges show (the picture keeps it)
             let tokenCover = null;
@@ -697,6 +894,8 @@ app.directive('simRoom4Canvas', function () {
                         }
                     }
                 });
+                // the wall each one stands on, for drawing it there
+                tokens.forEach(function (t) { t.anchor = SimRoom4.wallAnchor(wallPx, t.cx, t.cy, 1.2 * stampSize + 8); });
                 // identification needs the robot's centre within half a tile of the token (rule 5.6.2)
                 tokens.forEach(function (t) {
                     t.unreachable = false;
@@ -721,7 +920,9 @@ app.directive('simRoom4Canvas', function () {
                     r4.summary = Object.keys(counts).map(Number).sort(function (a, b) { return order(a) - order(b); }).map(function (idx) { return { idx: idx, count: counts[idx] }; });
                     r4.canUndo = undo.length > 0;
                     r4.canRedo = redo.length > 0;
+                    if (r4.sel && !tokens.some(function (t) { return Math.hypot(t.cx - r4.sel.cx, t.cy - r4.sel.cy) < metaReach(); })) r4.sel = null;
                 });
+                pruneMeta();
                 drawOverlay();
             }
 
@@ -755,29 +956,23 @@ app.directive('simRoom4Canvas', function () {
 
             function drawBadge(t) {
                 const type = typeOf(t.type);
-                const r = Math.max(9 * k, stampSize * 0.6);
-                octx.save();
-                octx.beginPath();
-                octx.arc(t.cx, t.cy, r, 0, Math.PI * 2);
-                const fake = type && type.kind === 'fake';
-                octx.fillStyle = !type ? '#94a3b8' : (fake ? '#fff' : type.color);
-                octx.fill();
-                octx.lineWidth = 2 * k;
-                octx.strokeStyle = fake ? '#f97316' : '#fff';
-                octx.stroke();
-                octx.fillStyle = fake ? '#f97316' : '#fff';
-                octx.font = '700 ' + Math.round(r * 1.1) + 'px system-ui, sans-serif';
-                octx.textAlign = 'center';
-                octx.textBaseline = 'middle';
-                octx.fillText(type ? type.symbol : '?', t.cx, t.cy + 0.5);
+                const r = badgeRadius();
+                // on the face of its wall (SimRoom4.badgeOnWall), with the icons of the map editor
+                // (SimIcons): letter victims as discs, cognitive targets as on its map - a disc in the
+                // type colour with the type letter (× a fake one)
+                const at = SimRoom4.badgeOnWall(t, t.anchor, r);
+                if (typeof SimIcons !== 'undefined' && type && (type.kind === 'ct' || type.kind === 'fakect')) SimIcons.targetLetter(octx, at.x, at.y, r, null, type.color, 2 * k, type.symbol);
+                else if (typeof SimIcons !== 'undefined') SimIcons.victim(octx, at.x, at.y, r, type ? type.symbol : '?', type ? type.color : '#94a3b8', 2 * k);
                 if (!t.nearWall || t.unreachable) {
+                    octx.save();
                     octx.beginPath();
                     octx.setLineDash([4 * k, 3 * k]);
-                    octx.arc(t.cx, t.cy, r + 5 * k, 0, Math.PI * 2);
+                    octx.arc(at.x, at.y, r + 5 * k, 0, Math.PI * 2);
+                    octx.lineWidth = 2 * k;
                     octx.strokeStyle = '#dc2626';
                     octx.stroke();
+                    octx.restore();
                 }
-                octx.restore();
             }
 
             // ---- mirror drawing: walls are drawn again mirrored about the middle of the picture ----
@@ -1039,13 +1234,9 @@ app.directive('simRoom4Canvas', function () {
                 }
                 octx.restore();
 
-                // where the robot cannot get to (light red), and the walls of the map around room 4
-                if (reachLayer && r4.showReach) {
-                    octx.save();
-                    octx.imageSmoothingEnabled = true;
-                    octx.drawImage(reachLayer, 0, 0, cols * block, rows * block);
-                    octx.restore();
-                }
+                // where the robot cannot get to (hatched light red, as on the map), and the walls of the
+                // map around room 4
+                if (reachLayer && r4.showReach) octx.drawImage(hatchedReach(), 0, 0);
                 if (geo) {
                     octx.save();
                     octx.translate(-originCm.x * pxPerCm, -originCm.y * pxPerCm);
@@ -1060,6 +1251,17 @@ app.directive('simRoom4Canvas', function () {
                 if (r4.showGuides) drawGuides();
 
                 tokens.forEach(drawBadge);
+                if (r4.sel) {
+                    const st = tokens.find(function (t) { return Math.hypot(t.cx - r4.sel.cx, t.cy - r4.sel.cy) < metaReach(); });
+                    const sa = st ? SimRoom4.badgeOnWall(st, st.anchor, badgeRadius()) : { x: r4.sel.cx, y: r4.sel.cy };
+                    octx.save();
+                    octx.beginPath();
+                    octx.arc(sa.x, sa.y, badgeRadius() + 5 * k, 0, Math.PI * 2);
+                    octx.lineWidth = 3 * k;
+                    octx.strokeStyle = '#f59e0b';
+                    octx.stroke();
+                    octx.restore();
+                }
 
                 // shape being drawn
                 if (preview) {
@@ -1275,8 +1477,10 @@ app.directive('simRoom4Canvas', function () {
             function placeStamp(p) {
                 const hit = tokenAt(p);
                 if (hit) {
-                    // change the type of the stamp under the pointer
-                    if (hit.type === r4.stamp) return;
+                    // the stamp under the pointer: look at it (its turn / rings in the panel), or give it
+                    // the chosen type
+                    if (hit.type === r4.stamp) { selectToken(hit); return; }
+                    setMetaAt(hit.cx, hit.cy, currentMeta());
                     checkpoint();
                     const data = snapshot();
                     const rgb = SimRoom4.stampRGB(r4.stamp);
@@ -1289,6 +1493,7 @@ app.directive('simRoom4Canvas', function () {
                     }
                     ctx.putImageData(data, 0, 0);
                     commit();
+                    selectToken(null);
                     return;
                 }
                 const spot = stampSpot(p);
@@ -1299,7 +1504,9 @@ app.directive('simRoom4Canvas', function () {
                 checkpoint();
                 ctx.fillStyle = SimRoom4.stampColor(r4.stamp);
                 ctx.fillRect(spot.x, spot.y, stampSize, stampSize);
+                setMetaAt(spot.x + stampSize / 2, spot.y + stampSize / 2, currentMeta());
                 commit();
+                selectToken(null);
                 scope.$applyAsync(function () { r4.message = ''; });
             }
 
