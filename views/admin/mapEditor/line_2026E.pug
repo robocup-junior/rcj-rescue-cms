@@ -272,25 +272,25 @@ block main_content
             .ml-auto
               i.fas.fa-chevron-down
         
-        #outputCollapse.collapse.show
-          .modern-card-body.bg-light
-            .row
-              .col-md-6
-                label.section-title {{ 'admin.mazeMapAdmin.print.fileFormat' | translate }}
-                .premium-btn-group
-                  .btn(ng-class="{'active': pdfSettings.exportFormat === 'PDF'}" ng-click="pdfSettings.exportFormat = 'PDF'") PDF
-                  .btn(ng-class="{'active': pdfSettings.exportFormat === 'PNG'}" ng-click="pdfSettings.exportFormat = 'PNG'") PNG
+          #outputCollapse.collapse
+            .modern-card-body.bg-light
+              .row
+                .col-md-6
+                  label.section-title {{ 'admin.mazeMapAdmin.print.fileFormat' | translate }}
+                  .premium-btn-group
+                    .btn(ng-class="{'active': pdfSettings.exportFormat === 'PDF'}" ng-click="pdfSettings.exportFormat = 'PDF'") PDF
+                    .btn(ng-class="{'active': pdfSettings.exportFormat === 'PNG'}" ng-click="pdfSettings.exportFormat = 'PNG'") PNG
                   
-              .col-md-6(ng-show="pdfSettings.exportFormat === 'PDF'")
-                label.section-title {{ 'admin.mazeMapAdmin.print.paperSize' | translate }}
-                .premium-btn-group
-                  .btn(ng-class="{'active': pdfSettings.paperSize === 'A4'}" ng-click="pdfSettings.paperSize = 'A4'") A4
-                  .btn(ng-class="{'active': pdfSettings.paperSize === 'Letter'}" ng-click="pdfSettings.paperSize = 'Letter'") Letter
+                .col-md-6(ng-show="pdfSettings.exportFormat === 'PDF'")
+                  label.section-title {{ 'admin.mazeMapAdmin.print.paperSize' | translate }}
+                  .premium-btn-group
+                    .btn(ng-class="{'active': pdfSettings.paperSize === 'A4'}" ng-click="pdfSettings.paperSize = 'A4'") A4
+                    .btn(ng-class="{'active': pdfSettings.paperSize === 'Letter'}" ng-click="pdfSettings.paperSize = 'Letter'") Letter
             
 
             
-            .mt-4
-              button.btn.btn-print-action.w-100(ng-click="generateOutput()")
-                i.fas.fa-magic.mr-2
-                span(ng-if="pdfSettings.exportFormat === 'PNG'") {{ 'admin.mazeMapAdmin.print.generatePNG' | translate }}
-                span(ng-if="pdfSettings.exportFormat === 'PDF'") {{ 'admin.mazeMapAdmin.print.generatePDF' | translate }}
+              .mt-4
+                button.btn.btn-print-action.w-100(ng-click="generateOutput()")
+                  i.fas.fa-magic.mr-2
+                  span(ng-if="pdfSettings.exportFormat === 'PNG'") {{ 'admin.mazeMapAdmin.print.generatePNG' | translate }}
+                  span(ng-if="pdfSettings.exportFormat === 'PDF'") {{ 'admin.mazeMapAdmin.print.generatePDF' | translate }}
