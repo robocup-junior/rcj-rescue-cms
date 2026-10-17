@@ -5,6 +5,27 @@
 // here only draw on it. Victims are stamps: small squares in a red that the export already reads
 // as a token, with the token type carried in the blue value (see SimRoom4.stampColor). A red
 // drawn by hand, or a stamp left on "random", gets a random type as before.
+// Key names as the computer has them: on a Mac, Ctrl+ is shown as ⌘ (the editors take either) and
+// Alt as Option; elsewhere a "Ctrl (⌘)" loses its "(⌘)". SimKeys.text(s) turns a text over; the
+// pages use it as the simKeys filter.
+var SimKeys = (function () {
+    const nav = typeof navigator !== 'undefined' ? navigator : {};
+    const isMac = /Mac|iPhone|iPad|iPod/.test(nav.platform || '') || /Mac OS X/.test(nav.userAgent || '');
+    function text(s, mac) {
+        if (s === undefined || s === null) return s;
+        s = String(s);
+        if (!(mac === undefined ? isMac : mac)) return s.replace(/\s*[（(]⌘[）)]/g, '');
+        return s
+            .replace(/Ctrl\s*[（(]⌘[）)]\s*([＋+])/g, '⌘$1')
+            .replace(/Ctrl\s*[（(]⌘[）)]/g, '⌘')
+            .replace(/Ctrl\s*\+\s*Shift\s*\+\s*/g, '⇧⌘')
+            .replace(/Ctrl\s*\+\s*/g, '⌘')
+            .replace(/Ctrl/g, '⌘')
+            .replace(/\bAlt\b/g, 'Option');
+    }
+    return { isMac: isMac, text: text };
+})();
+
 var SimRoom4 = (function () {
     function isWall(r, g, b) { return r <= 50 && g <= 50 && b <= 50; }
     function isToken(r, g, b) { return r >= 100 && g <= 50 && b <= 50; }
@@ -417,6 +438,8 @@ app.controller('CustomRoom4ModalCtrl', ['$scope', '$uibModalInstance', '$transla
     $scope.closeRoom4 = function () {
         $uibModalInstance.close();
     };
+    // key names as this computer has them (the template has no filter for it: see there)
+    $scope.keyName = function (s) { return SimKeys.text(s); };
 }]);
 
 // The picture file input of the dialog
@@ -579,7 +602,7 @@ app.directive('simRoom4Canvas', function () {
                 let state = 'ok';
                 if (!reachBase || typeof cv === 'undefined' || !cv.Mat || !cv.distanceTransform) state = 'unavailable';
                 else if (!geo.start) state = 'noStart';
-                scope.$applyAsync(function () { r4.reachState = state; });
+                scope.$applyAsync(function () { r4.reachState = state; if (state !== 'ok') r4.reachBlocked = 0; });
                 if (state !== 'ok') return;
 
                 const gw = reachBase.gw, gh = reachBase.gh;
@@ -701,6 +724,8 @@ app.directive('simRoom4Canvas', function () {
                 reachLayer = blocked ? layer : null;
                 if (seed >= 0) reachInfo = { dist: Float32Array.from(rdist.data32F), gw: gw, gh: gh, need: need };
                 reachStats = { blocked: blocked, room: roomCells };
+                // how much is out of reach (cells), for the guide of the new editor
+                scope.$applyAsync(function () { r4.reachBlocked = blocked; r4.reachRoom = roomCells; });
                 src.delete(); dist.delete(); rsrc.delete(); rdist.delete();
             }
 
@@ -919,6 +944,7 @@ app.directive('simRoom4Canvas', function () {
                     };
                     r4.summary = Object.keys(counts).map(Number).sort(function (a, b) { return order(a) - order(b); }).map(function (idx) { return { idx: idx, count: counts[idx] }; });
                     r4.canUndo = undo.length > 0;
+                    r4.undoCount = undo.length;     // the guide of the new editor sees drawing by it
                     r4.canRedo = redo.length > 0;
                     if (r4.sel && !tokens.some(function (t) { return Math.hypot(t.cx - r4.sel.cx, t.cy - r4.sel.cy) < metaReach(); })) r4.sel = null;
                 });
@@ -929,6 +955,9 @@ app.directive('simRoom4Canvas', function () {
             function commit() {
                 mask();
                 save();
+                // every change put onto the picture, counted on (undo keeps only 40): the guide of the
+                // new editor sees by it that a tool was used
+                r4.drawCount = (r4.drawCount || 0) + 1;
                 analyse();
             }
 
@@ -1082,21 +1111,28 @@ app.directive('simRoom4Canvas', function () {
             }
 
             // A tip next to a token under the pointer: what clicking does
+            // A tip beside the box x0, y0 - x1, y1 (canvas pixels): a page element over everything, not
+            // on the canvas, so it is seen whole even where the picture is narrower than its text; at
+            // the window's edges it moves inwards
+            const tipEl = document.createElement('div');
+            tipEl.className = 'sim-r4-tip';
+            tipEl.style.display = 'none';
+            document.body.appendChild(tipEl);
+            scope.$on('$destroy', function () { if (tipEl.parentNode) tipEl.parentNode.removeChild(tipEl); });
+            let tipShown = false;
             function drawTip(x0, y0, x1, y1, text) {
-                octx.save();
-                octx.font = '600 ' + (12 * k) + 'px system-ui, sans-serif';
-                const w = octx.measureText(text).width + 12 * k, h = 20 * k;
-                let x = x1 + 10 * k, y = y0 - h - 4 * k;
-                if (x + w > W) x = x0 - 10 * k - w;
-                if (y < 2) y = y1 + 8 * k;
-                octx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-                octx.beginPath();
-                if (octx.roundRect) octx.roundRect(x, y, w, h, 5 * k); else octx.rect(x, y, w, h);
-                octx.fill();
-                octx.fillStyle = '#fff';
-                octx.textBaseline = 'middle';
-                octx.fillText(text, x + 6 * k, y + h / 2 + 0.5 * k);
-                octx.restore();
+                const r = over.getBoundingClientRect(), f = r.width / W;
+                const box = { left: r.left + x0 * f, top: r.top + y0 * f, right: r.left + x1 * f, bottom: r.top + y1 * f };
+                if (tipEl.textContent !== text) tipEl.textContent = text;
+                tipEl.style.display = 'block';
+                const w = tipEl.offsetWidth, h = tipEl.offsetHeight, E = 8;
+                let x = box.right + 10, y = box.top - h - 6;
+                if (x + w > window.innerWidth - E) x = box.left - 10 - w;
+                x = Math.max(E, Math.min(window.innerWidth - w - E, x));
+                if (y < E) y = box.bottom + 8;
+                tipEl.style.left = Math.round(x) + 'px';
+                tipEl.style.top = Math.round(y) + 'px';
+                tipShown = true;
             }
 
             function dot(p, color, r) {
@@ -1189,6 +1225,12 @@ app.directive('simRoom4Canvas', function () {
 
             function drawOverlay() {
                 updateScale();
+                tipShown = false;
+                drawOverlayParts();
+                if (!tipShown) tipEl.style.display = 'none';
+            }
+
+            function drawOverlayParts() {
                 octx.clearRect(0, 0, W, H);
                 if (tokenCover) octx.drawImage(tokenCover, 0, 0);
                 // grid: tiles, and quarter tiles while snapping
@@ -2320,6 +2362,70 @@ app.directive('simRoom4Canvas', function () {
             });
 
             // ---- actions for the dialog -------------------------------------------------------
+            // A pen stroke along pts ([x, y] fractions of the picture), as a drag with the pen would
+            // draw it (one undo step); without pts, a gentle wave across the upper middle (the guide
+            // of the new editor draws it for "do it for me")
+            scope.r4api.drawPen = function (pts) {
+                if (!pts) {
+                    pts = [];
+                    for (let i = 0; i <= 40; i++) {
+                        const t = i / 40;
+                        pts.push([0.3 + 0.4 * t, 0.36 + 0.07 * Math.min(1, W / H) * Math.sin(2 * Math.PI * t)]);
+                    }
+                }
+                checkpoint();
+                for (let i = 1; i < pts.length; i++) {
+                    stroke({ x: pts[i - 1][0] * W, y: pts[i - 1][1] * H }, { x: pts[i][0] * W, y: pts[i][1] * H }, false);
+                }
+                commit();
+            };
+            // What the guide of the new editor does for "do it for me", as the tools do it. Points are
+            // [x, y] fractions of the picture, sizes fractions of its width.
+            const atF = function (f) { return { x: f[0] * W, y: f[1] * H }; };
+            // spec: { type: line | rect | ellipse (a, b), circle (a, r), polygon (a, r, n, rot), arc (p0, c,
+            // p1), curve (pts, smooth, closed) } - drawn as that tool draws it (mirrored as set)
+            scope.r4api.drawShape = function (spec) {
+                const s = { type: spec.type };
+                if (spec.a) s.a = atF(spec.a);
+                if (spec.b) s.b = atF(spec.b);
+                if (spec.r) s.r = spec.r * W;
+                if (spec.type === 'polygon') { s.n = spec.n || 6; s.rot = spec.rot || 0; }
+                if (spec.type === 'arc') { s.p0 = atF(spec.p0); s.c = atF(spec.c); s.p1 = atF(spec.p1); }
+                if (spec.type === 'curve') { s.pts = spec.pts.map(atF); s.smooth = spec.smooth !== false; s.closed = !!spec.closed; }
+                drawShape(s);
+            };
+            // an icon (Font Awesome, by name) put into the box a-b, once it has loaded
+            scope.r4api.drawIcon = function (name, a, b) {
+                scope.pickIcon({ name: name, styles: ['solid'] });
+                const want = silhouetteId;
+                let tries = 0;
+                (function wait() {
+                    if (silhouette && silhouetteId !== want) { drawShape({ type: 'icon', a: atF(a), b: atF(b) }); return; }
+                    if (++tries < 40) setTimeout(wait, 100);
+                })();
+            };
+            // the select tool's box, from a to b
+            scope.r4api.selectBox = function (a, b) {
+                const p = atF(a), q = atF(b);
+                sel = { x: Math.round(Math.min(p.x, q.x)), y: Math.round(Math.min(p.y, q.y)), w: Math.round(Math.abs(q.x - p.x)), h: Math.round(Math.abs(q.y - p.y)), float: null };
+                syncSel();
+                drawOverlay();
+            };
+            // the eraser (on everything) along pts
+            scope.r4api.erasePen = function (pts) {
+                checkpoint();
+                for (let i = 1; i < pts.length; i++) stroke(atF(pts[i - 1]), atF(pts[i]), true);
+                commit();
+            };
+            // the eraser on victims only, on the i-th victim; and the victim tool's click on it
+            scope.r4api.eraseToken = function (i) {
+                const t = tokens[i || 0];
+                if (!t) return;
+                checkpoint();
+                eraseTokensAt({ x: t.cx, y: t.cy });
+                commit();
+            };
+            scope.r4api.selectToken = function (i) { selectToken(tokens[i || 0] || null); };
             scope.r4api.undo = function () {
                 if (sel) { sel = null; syncSel(); }
                 if (!undo.length) return;
@@ -2503,3 +2609,5 @@ app.directive('simRoom4Canvas', function () {
         }
     };
 });
+
+app.filter('simKeys', function () { return function (s) { return SimKeys.text(s); }; });

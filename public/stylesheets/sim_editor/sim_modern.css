@@ -2464,6 +2464,7 @@ img.sim-fake-victim-mixed {
 
 .sim-r4-seg button {
     padding: 0.15rem 0.7rem;
+    white-space: nowrap;
     border: 0;
     background: #fff;
     color: #475569;
@@ -3229,34 +3230,29 @@ img.sim-fake-victim-mixed {
     grid-template-columns: 46px 264px minmax(0, 1fr);
 }
 
+/* each stamp as wide as its name (never cut off: English names are longer), filling the row; one
+   that does not fit goes to the next row */
 .sim-r4-panel .sim-r4-stamp-row {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 4px;
 }
 
 .sim-r4-panel .sim-r4-stamp-row-label {
-    grid-column: 1 / -1;
+    flex-basis: 100%;
     min-width: 0;
     margin-top: 2px;
 }
 
 .sim-r4-panel .sim-r4-stamp {
+    flex: 1 1 auto;
     justify-content: flex-start;
-    min-width: 0;
-    padding: 0.15rem 0.35rem 0.15rem 0.2rem;
+    padding: 0.15rem 0.45rem 0.15rem 0.2rem;
     font-size: 0.72rem;
 }
 
 .sim-r4-panel .sim-r4-stamp-name {
-    overflow: hidden;
-    text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-/* longer names (cognitive targets, hazmat signs) two to a row */
-.sim-r4-panel .sim-r4-stamp-row.cols-2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 /* leave room for the top bar, the status line and the dialog footer */
@@ -3603,19 +3599,19 @@ img.sim-fake-victim-mixed {
 .sbx-dial .sim-rot { flex-direction: column; align-items: center; gap: 0.7rem; }
 .sbx-dial .sim-rot-controls { width: 100%; max-width: none; min-width: 0; align-items: center; gap: 0.5rem; }
 .sbx-dial .sim-rot-value { justify-content: center; }
-.sbx-dial .sim-rot-presets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; width: 100%; }
-.sbx-dial .sim-rot-presets button { min-width: 0; padding: 0; }
+/* the four turns share the width; the dice (random) after them takes only its own */
+.sbx-dial .sim-rot-presets { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)) 32px; gap: 4px; width: 100%; }
+.sbx-dial .sim-rot-presets button { min-width: 0; padding: 0; font-size: 0.78rem; white-space: nowrap; }
 .sbx-dial .sim-rot-help { display: none; }
 
 /* a two-way switch (fixed / random turn) */
 .sbx-seg { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; border-radius: 9px; background: #f1f5f9; }
-.sbx-seg button { height: 30px; border: none; border-radius: 7px; background: transparent; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+.sbx-seg button { height: 30px; white-space: nowrap; border: none; border-radius: 7px; background: transparent; color: #475569; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
 .sbx-seg button.active { background: #fff; color: #1d4ed8; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.15); }
 .sbx-rot-note { margin: 0.5rem 0 0; font-size: 0.78rem; color: #64748b; text-align: center; }
 
-/* the victim stamps (the room 4 creator's) in the tool panel: names in full */
+/* the victim stamps (the room 4 creator's) in the tool panel */
 .sbx-stamps { gap: 0; }
-.sbx-stamps .sim-r4-stamp-name { white-space: normal; text-overflow: clip; line-height: 1.2; }
 
 
 .sbx-label {
@@ -3644,4 +3640,23 @@ img.sim-fake-victim-mixed {
     font-size: 0.78rem;
     font-weight: 700;
     color: #b45309;
+}
+
+/* the room 4 creator from the new editor: the guide and the language at the right end of its status
+   line, the legend before them */
+.sbx-r4-full .sim-r4-status-tools { display: inline-flex; gap: 0.25rem; order: 99; flex: none; }
+.sbx-r4-full .sim-r4-status-legend { margin-left: auto; }
+
+/* the room 4 creator's tip by the pointer: over everything (the creator, the guide), whole */
+.sim-r4-tip {
+    position: fixed;
+    z-index: 1090;
+    max-width: calc(100vw - 16px);
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    background: rgba(15, 23, 42, 0.88);
+    color: #fff;
+    font: 600 12px/1.5 system-ui, sans-serif;
+    white-space: nowrap;
+    pointer-events: none;
 }

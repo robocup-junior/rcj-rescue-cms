@@ -7,9 +7,10 @@ const path = require('node:path');
 const vm = require('node:vm');
 
 const src = fs.readFileSync(path.join(__dirname, '../public/javascripts/sim_editor/room4_creator.js'), 'utf8');
-const ctx = { app: { controller() {}, directive() {}, factory() {} }, angular: {} };
-vm.runInNewContext(src + '\nthis.SimRoom4 = SimRoom4;', ctx);
+const ctx = { app: { controller() {}, directive() {}, factory() {}, filter() {} }, angular: {} };
+vm.runInNewContext(src + '\nthis.SimRoom4 = SimRoom4; this.SimKeys = SimKeys;', ctx);
 const R4 = ctx.SimRoom4;
+const K = ctx.SimKeys;
 
 // a vertical wall of `thick` px from x = 50, the token to its right
 const wallAt = (thick) => (x, y) => x >= 50 && x < 50 + thick && y >= 0 && y < 200;
@@ -43,4 +44,19 @@ test('the same gap gives the same place, whatever gap the stamp was put down wit
 test('without a wall in reach the badge stays where the token is', () => {
   const at = R4.badgeOnWall({ cx: 150, cy: 100 }, R4.wallAnchor(wallAt(10), 150, 100, 20), 10);
   assert.deepStrictEqual([at.x, at.y], [150, 100]);
+});
+
+test('key names on a Mac: Ctrl+ as ⌘ (Shift as ⇧), Alt as Option; elsewhere as they are', () => {
+  const cases = [
+    ['Ctrl+Z', '⌘Z'], ['Ctrl+Shift+Z', '⇧⌘Z'], ['Ctrl++', '⌘+'], ['Ctrl+-', '⌘-'],
+    ['Ctrl（⌘）＋ホイールで拡大', '⌘＋ホイールで拡大'], ['Ctrl (⌘) + wheel zooms', '⌘+ wheel zooms'],
+    ['Alt＋ドラッグでコピー', 'Option＋ドラッグでコピー'], ['with Alt held', 'with Option held'],
+    ['Ctrl+C／Ctrl+Xでコピー', '⌘C／⌘Xでコピー'], ['Wheel', 'Wheel'], ['Space + Drag', 'Space + Drag'],
+  ];
+  for (const [from, to] of cases) {
+    assert.strictEqual(K.text(from, true), to, from);
+    assert.strictEqual(K.text(from, false), from.replace(/\s*[（(]⌘[）)]/g, ''), from);
+  }
+  assert.strictEqual(K.text('Ctrl（⌘）＋ホイール', false), 'Ctrl＋ホイール');
+  assert.strictEqual(K.text(undefined, true), undefined);
 });
