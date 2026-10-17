@@ -1059,26 +1059,26 @@
             }
         }
         if (type >= 2) out.push({ key: 'presetNotSupported', block: true, at: regionAt, show: { tiles: tilesOf(4) } });
-        if (!map.connCheckOff) {
-            const conn = W.connectionStatus(map);
-            const centre = function (t) { return [12 * t[0] + 6, 12 * t[1] + 6]; };
-            const markTiles = function (test) {
-                return Object.keys(conn.marks).filter(function (m) { return test(conn.marks[m], m); }).map(function (m) { return m.split(',').map(Number); });
-            };
-            conn.rooms.forEach(function (r) {
-                if (r.reached) return;
-                const tiles = tilesOf(r.room);
-                out.push({ key: 'conn.notConnected', params: { room: r.room }, block: true, at: tiles.length ? centre(tiles[0]) : null, show: { tiles: tiles } });
-            });
-            conn.issues.forEach(function (i) {
-                // a passage tile in the wrong place, or the gaps between two rooms that are not passages
-                const tiles = i.key === 'unmarkedGap'
-                    ? markTiles(function (m) { return m.style && m.style['border-color'] === i.pass.color; })
-                    : markTiles(function (m, k) { const t = k.split(',').map(Number); const tile = tileOf(map, 2 * t[0] + 1, 2 * t[1] + 1); return m.cls === 'bad' && tile && tile.color === i.pass.color; });
-                out.push({ key: 'conn.' + i.key, params: { name: i.pass.name, from: i.pass.from, to: i.pass.to, room: i.room, count: i.count }, block: true,
-                    at: tiles.length ? centre(tiles[0]) : null, show: { tiles: tiles } });
-            });
-        }
+        // the rooms' connections are always checked here (the classic editor's switch, connCheckOff,
+        // is kept in the map as it is, for that editor)
+        const conn = W.connectionStatus(map);
+        const centre = function (t) { return [12 * t[0] + 6, 12 * t[1] + 6]; };
+        const markTiles = function (test) {
+            return Object.keys(conn.marks).filter(function (m) { return test(conn.marks[m], m); }).map(function (m) { return m.split(',').map(Number); });
+        };
+        conn.rooms.forEach(function (r) {
+            if (r.reached) return;
+            const tiles = tilesOf(r.room);
+            out.push({ key: 'conn.notConnected', params: { room: r.room }, block: true, at: tiles.length ? centre(tiles[0]) : null, show: { tiles: tiles } });
+        });
+        conn.issues.forEach(function (i) {
+            // a passage tile in the wrong place, or the gaps between two rooms that are not passages
+            const tiles = i.key === 'unmarkedGap'
+                ? markTiles(function (m) { return m.style && m.style['border-color'] === i.pass.color; })
+                : markTiles(function (m, k) { const t = k.split(',').map(Number); const tile = tileOf(map, 2 * t[0] + 1, 2 * t[1] + 1); return m.cls === 'bad' && tile && tile.color === i.pass.color; });
+            out.push({ key: 'conn.' + i.key, params: { name: i.pass.name, from: i.pass.from, to: i.pass.to, room: i.room, count: i.count }, block: true,
+                at: tiles.length ? centre(tiles[0]) : null, show: { tiles: tiles } });
+        });
         // victims whose wall has gone, and walls the rooms do not take
         const floating = [];
         for (let x = 1; x < 2 * map.width; x += 2) {

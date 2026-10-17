@@ -26,27 +26,52 @@
         return rooms;
     }
 
-    // The wall tokens (stamps) of a custom room 4 picture: where they are (fractions of the picture)
-    // and their type index (-1 = random), as the creator finds them (SimRoom4.findTokens)
-    function pictureTokens(img) {
-        if (typeof SimRoom4 === 'undefined') return [];
+    // A custom room 4 picture read for the map: the picture with the red of its wall tokens (stamps)
+    // painted white, so only their badges show (as in the creator), and the tokens - where they are
+    // (fractions of the picture) and their type index (-1 = random), as the creator finds them
+    // (SimRoom4.findTokens)
+    function readPicture(img) {
+        if (typeof SimRoom4 === 'undefined') return { picture: img, tokens: [] };
         const c = document.createElement('canvas');
         c.width = img.naturalWidth;
         c.height = img.naturalHeight;
         const g = c.getContext('2d');
         g.drawImage(img, 0, 0);
-        const px = g.getImageData(0, 0, c.width, c.height).data;
+        const data = g.getImageData(0, 0, c.width, c.height);
+        const px = data.data;
         const pw = c.width, ph = c.height;
         const wallAt = function (x, y) {
             if (x < 0 || y < 0 || x >= pw || y >= ph) return false;
             const i = (y * pw + x) * 4;
             return SimRoom4.isWall(px[i], px[i + 1], px[i + 2]);
         };
-        return SimRoom4.findTokens(px, pw, ph).map(function (t) {
+        const tokens = SimRoom4.findTokens(px, pw, ph).map(function (t) {
             // the wall of the picture it stands on (if it is not one of room 4's edges)
             const a = SimRoom4.wallAnchor(wallAt, t.cx, t.cy, 1.2 * Math.max(t.maxX - t.minX, t.maxY - t.minY) + 4);
             return { fx: t.cx / pw, fy: t.cy / ph, type: t.type, ax: a ? a.x / pw : null, ay: a ? a.y / ph : null, thick: a ? a.thick / pw : 0 };
         });
+        // the token red and its soft edge, one pixel wider so no rim shows when scaled down; never
+        // over a wall (marked first, then painted, so the painting does not spread)
+        const clear = new Uint8Array(pw * ph);
+        let any = false;
+        for (let i = 0; i < pw * ph; i++) {
+            const j = i * 4;
+            if (!(px[j] > px[j + 1] + 40 && px[j] > px[j + 2] + 40)) continue;
+            any = true;
+            const x = i % pw, y = (i - x) / pw;
+            for (let yy = Math.max(0, y - 1); yy <= Math.min(ph - 1, y + 1); yy++) {
+                for (let xx = Math.max(0, x - 1); xx <= Math.min(pw - 1, x + 1); xx++) {
+                    if (!wallAt(xx, yy)) clear[yy * pw + xx] = 1;
+                }
+            }
+        }
+        if (!any) return { picture: img, tokens: tokens };
+        for (let i = 0; i < pw * ph; i++) {
+            if (!clear[i]) continue;
+            px[i * 4] = px[i * 4 + 1] = px[i * 4 + 2] = px[i * 4 + 3] = 255;
+        }
+        g.putImageData(data, 0, 0);
+        return { picture: c, tokens: tokens };
     }
 
     function room4Box(rooms) {
@@ -93,7 +118,7 @@
             tokens = [];
             if (map.room4CanvasSave && map.area4Room && map.area4Room.type === 1) {
                 const img = new Image();
-                img.onload = function () { picture = img; tokens = pictureTokens(img); draw(); };
+                img.onload = function () { const r = readPicture(img); picture = r.picture; tokens = r.tokens; draw(); };
                 img.src = map.room4CanvasSave;
             }
             if (keepView) draw();
@@ -254,18 +279,6 @@
                 ctx.globalCompositeOperation = 'multiply';
                 ctx.drawImage(picture, x, y, w, h);
                 ctx.restore();
-                const types = typeof SimRoom4World2026 !== 'undefined' ? SimRoom4World2026.stampTypes : [];
-                tokens.forEach(function (t) {
-                    const type = types.find(function (s) { return s.idx === t.type; });
-                    const c = { cx: x + t.fx * w, cy: y + t.fy * h };
-                    // against the face of its wall: the picture's, or the edge of room 4 (1 cm) if that is nearer
-                    let a = t.ax === null ? null : { x: x + t.ax * w, y: y + t.ay * h, thick: t.thick * w };
-                    const edge = room4EdgeNear(c.cx, c.cy, 3);
-                    if (edge && (!a || Math.hypot(edge.x - c.cx, edge.y - c.cy) < Math.hypot(a.x - c.cx, a.y - c.cy))) a = { x: edge.x, y: edge.y, thick: 1 };
-                    const at = SimRoom4.badgeOnWall(c, a, 1.6);
-                    if (type && (type.kind === 'ct' || type.kind === 'fakect')) ctBadge(at.x, at.y, null, type.color, type.symbol);
-                    else badge(at.x, at.y, type ? type.symbol : '?', false, type ? type.color : SimIcons.FAKE);
-                });
                 return;
             }
             if (map.area4Room.type >= 2) {
@@ -275,6 +288,25 @@
                 ctx.textBaseline = 'middle';
                 ctx.fillText(map.area4Room.value, x + w / 2, y + h / 2);
             }
+        }
+
+        // The victims of a custom room 4 picture, drawn after the walls so they are always on top
+        function drawRoom4Victims() {
+            const box = room4Box(rooms);
+            if (!box || !map.area4Room || !picture) return;
+            const x = 6 * box.x0, y = 6 * box.y0, w = 6 * (box.x1 - box.x0), h = 6 * (box.y1 - box.y0);
+            const types = typeof SimRoom4World2026 !== 'undefined' ? SimRoom4World2026.stampTypes : [];
+            tokens.forEach(function (t) {
+                const type = types.find(function (s) { return s.idx === t.type; });
+                const c = { cx: x + t.fx * w, cy: y + t.fy * h };
+                // against the face of its wall: the picture's, or the edge of room 4 (1 cm) if that is nearer
+                let a = t.ax === null ? null : { x: x + t.ax * w, y: y + t.ay * h, thick: t.thick * w };
+                const edge = room4EdgeNear(c.cx, c.cy, 3);
+                if (edge && (!a || Math.hypot(edge.x - c.cx, edge.y - c.cy) < Math.hypot(a.x - c.cx, a.y - c.cy))) a = { x: edge.x, y: edge.y, thick: 1 };
+                const at = SimRoom4.badgeOnWall(c, a, 1.6);
+                if (type && (type.kind === 'ct' || type.kind === 'fakect')) ctBadge(at.x, at.y, null, type.color, type.symbol);
+                else badge(at.x, at.y, type ? type.symbol : '?', false, type ? type.color : SimIcons.FAKE);
+            });
         }
 
         function drawWalls() {
@@ -373,6 +405,7 @@
                 drawRoomEdges();
                 drawStart();
                 drawWalls();
+                drawRoom4Victims();
                 drawVictims();
                 if (options.overlay) options.overlay(ctx, { scale: view.scale, rooms: rooms });
             }
