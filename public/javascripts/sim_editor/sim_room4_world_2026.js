@@ -1,5 +1,5 @@
 // Custom room 4 in the world export of the Simulation 2026 editor: walls and wall tokens read from
-// the room 4 picture with OpenCV (browser only). Shared with the new editor (beta).
+// the room 4 picture with OpenCV (browser only).
 // SimRoom4World2026.create(map) gives { createArea4Solid, createArea4Victims, room4CorrectSize } for a
 // map as the editor holds it, with room4Img (an Image of room4CanvasSave, loaded) and canvasWidth /
 // canvasHeight; they go to SimWorld2026.createWorld as its hooks.
@@ -493,7 +493,7 @@ var SimRoom4World2026 = (function () {
     }
 
     // Wall token types a custom room 4 stamp can carry; idx is the scoring type of createArea4Victims.
-    // Colours as the victims of the new editor (beta): letter victims blue, fakes grey, CT by type.
+    // Colours of the stamps: letter victims blue, fakes grey, CT by type.
     const stampTypes = [
         { idx: 0,  kind: 'victim', symbol: 'Φ', color: '#2563eb', name: 'admin.simMapEditor.room4Creator.types.harmed' },
         { idx: 1,  kind: 'victim', symbol: 'Ψ', color: '#2563eb', name: 'admin.simMapEditor.room4Creator.types.stable' },

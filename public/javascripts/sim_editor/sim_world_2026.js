@@ -1,6 +1,6 @@
-// World export (.wbt) and room checks of the Simulation 2026 editor, shared with the new editor
-// (beta). Works on the map as the editor holds it: cells keyed "x,y,z" (tiles at odd x and y, the
-// edges between them at even ones), roomTiles, startTile, area4Room and the room 4 presets in area4.
+// World export (.wbt) and room checks of the Simulation 2026 editor. Works on the map as the editor
+// holds it: cells keyed "x,y,z" (tiles at odd x and y, the edges between them at even ones),
+// roomTiles, startTile, area4Room and the room 4 presets in area4.
 // Loads in the browser as window.SimWorld2026 and in Node through require (tests).
 (function (root) {
     // DISABLE_RANDOMNESS (set by the editor page, or by tests) makes the export the same every time

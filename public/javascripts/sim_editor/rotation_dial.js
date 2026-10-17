@@ -1,5 +1,5 @@
 // Rotation dial of a victim / cognitive target token (<sim-rotation-dial ng-model="..." symbol="...">),
-// shared by the Simulation 2026 editor and the new editor (beta). Needs `app` from the page's script.
+// of the Simulation 2026 editor and its room 4 creator. Needs `app` from the page's script.
 app.directive('simRotationDial', function () {
     function normalize(value) {
         const n = Math.round(Number(value) || 0);

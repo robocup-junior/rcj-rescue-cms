@@ -25,7 +25,7 @@ var app = angular.module('SimEditor', ['ngTouch','ngAnimate', 'ui.bootstrap', 'p
 // function referenced by the drop target
 app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$translate', function ($scope, $uibModal, $log, $http, $translate) {
 
-    // Shared with the new editor (sim_world_2026.js); the editor's map is its $scope
+    // World export and checks (sim_world_2026.js); the editor's map is its $scope
     const W = SimWorld2026;
     const PASSAGE_14 = W.PASSAGE_14;
     const PASSAGE_34 = W.PASSAGE_34;
@@ -130,7 +130,7 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
         $scope.cells[x +','+y+','+z] = {};
     }
 
-    // tag recalculate (shared with the new editor: sim_world_2026.js)
+    // tag recalculate (sim_world_2026.js)
     $scope.recalculateLinear = function () {
         $scope.virtualWall = [];
         return W.recalculate($scope);
@@ -768,7 +768,7 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
         return st.ok ? [] : st.issues;
     }
     
-    // tag custom room 4 (shared with the new editor: sim_room4_world_2026.js)
+    // tag custom room 4 (sim_room4_world_2026.js)
     const room4World = SimRoom4World2026.create($scope);
     const room4CorrectSize = room4World.room4CorrectSize;
     const createArea4Solid = room4World.createArea4Solid;
@@ -1614,6 +1614,6 @@ app.controller('SimRotationModalCtrl', ['$scope', '$uibModalInstance', 'angle', 
 
 // Rotation of a victim symbol on its wall, in degrees (0-359). Seen from the robot, a positive
 // angle turns the symbol clockwise, the same way the preview is drawn.
-// The rotation dial (simRotationDial) is in rotation_dial.js, shared with the new editor (beta).
+// The rotation dial (simRotationDial) is in rotation_dial.js.
 
 // The custom room 4 creator (CustomRoom4ModalCtrl) is in room4_creator.js, shared by both years.

@@ -1,5 +1,4 @@
-// Victim and cognitive target icons, shared by the Simulation editors (the new editor's map and the
-// custom room 4 creator), so both show the same marks.
+// Victim and cognitive target icons of the custom room 4 creator, drawn on its canvas.
 //   letter victims (Φ Ψ Ω): a filled disc with the letter (blue; fakes grey)
 //   cognitive targets: a target - its five rings in the colours of its code (outside in), with an
 //   outer rim in the colour of its type; a target without a code (a room 4 stamp of a type) shows

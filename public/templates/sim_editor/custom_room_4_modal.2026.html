@@ -3,15 +3,13 @@
      blank); key names go through keyName, if the page has it -->
 <div class="modal-header sim-modal-header">
   <h3 class="modal-title"><i class="fas fa-paint-brush"></i>{{"admin.simMapEditor.room4Creator.title" | translate}}</h3>
-  <!-- in the whole window (from the new editor) OK sits up here and the footer goes -->
-  <button class="btn btn-primary sim-r4-head-ok" type="button" ng-click="closeRoom4()"><i class="fas fa-check mr-1"></i>OK</button>
 </div>
 <div class="modal-body sim-modal-body">
   <div class="sim-r4">
     <!-- Tool rail: icons only, grouped; the name and key are in the tooltip -->
     <nav class="sim-r4-rail" role="toolbar">
       <div class="sim-r4-rail-group" ng-repeat="group in toolGroups">
-        <button type="button" class="sim-r4-rail-tool" ng-repeat="t in group" data-tool="{{t.id}}" ng-class="{'active': r4.tool === t.id}" ng-click="setTool(t.id)" title="{{('admin.simMapEditor.room4Creator.tools.' + t.id) | translate}} ({{t.key}})">
+        <button type="button" class="sim-r4-rail-tool" ng-repeat="t in group" ng-class="{'active': r4.tool === t.id}" ng-click="setTool(t.id)" title="{{('admin.simMapEditor.room4Creator.tools.' + t.id) | translate}} ({{t.key}})">
           <i ng-class="t.icon"></i><span class="sim-r4-rail-key">{{t.key}}</span>
         </button>
       </div>
@@ -50,17 +48,17 @@
           <div ng-if="ctLetterOf(r4.stamp)">
           <div class="sbx-ct">
             <div class="sbx-ct-top">
-              <svg class="sbx-ct-target" viewBox="0 0 100 100" role="img" aria-label="{{'admin.simBeta.ctRings' | translate}}">
+              <svg class="sbx-ct-target" viewBox="0 0 100 100" role="img" aria-label="{{'admin.simMapEditor.room4Creator.ctRings' | translate}}">
                 <circle ng-repeat="r in [0, 1, 2, 3, 4]" cx="50" cy="50" ng-attr-r="{{48 - 9 * r}}" ng-attr-fill="{{ringColor(r4.rings, r)}}" ng-click="r4.ring = r" stroke="#fff" stroke-width="1"></circle>
                 <circle class="sbx-ct-sel" cx="50" cy="50" ng-attr-r="{{43.5 - 9 * r4.ring}}" fill="none"></circle>
               </svg>
               <div class="sbx-ct-info">
-                <span class="sbx-ct-type" ng-class="'t-' + ringLetter(r4.rings)">{{ringLetter(r4.rings) === 'X' ? ('admin.simBeta.ctFake' | translate) : ringLetter(r4.rings)}}</span>
-                <div class="sbx-ct-sum">{{'admin.simBeta.ctSum' | translate}} {{ringSum(r4.rings) > 0 ? '+' : ''}}{{ringSum(r4.rings)}}</div>
+                <span class="sbx-ct-type" ng-class="'t-' + ringLetter(r4.rings)">{{ringLetter(r4.rings) === 'X' ? ('admin.simMapEditor.room4Creator.ctFake' | translate) : ringLetter(r4.rings)}}</span>
+                <div class="sbx-ct-sum">{{'admin.simMapEditor.room4Creator.ctSum' | translate}} {{ringSum(r4.rings) > 0 ? '+' : ''}}{{ringSum(r4.rings)}}</div>
                 <div class="sbx-ct-code"><span ng-repeat="c in r4.rings track by $index" ng-class="{sel: r4.ring === $index}" ng-click="r4.ring = $index">{{c}}</span></div>
               </div>
             </div>
-            <div class="sbx-ct-hint">{{'admin.simBeta.ctHint' | translate:{ n: r4.ring + 1 } }}</div>
+            <div class="sbx-ct-hint">{{'admin.simMapEditor.room4Creator.ctHint' | translate:{ n: r4.ring + 1 } }}</div>
             <div class="sbx-ct-palette">
               <button type="button" class="sbx-ct-swatch" ng-repeat="c in ringColors" ng-click="pickColor(c.id)" ng-class="{active: r4.rings[r4.ring] === c.id}" title="{{c.id}}">
                 <span class="sbx-ct-dot" ng-style="{background: c.color}"></span><span class="sbx-ct-val">{{c.value > 0 ? '+' : ''}}{{c.value}}</span>
@@ -69,12 +67,12 @@
           </div>
           </div>
           <div ng-if="isLetterVictim(r4.stamp)">
-            <div class="sbx-label">{{'admin.simBeta.rot' | translate}}</div>
+            <div class="sbx-label">{{'admin.simMapEditor.room4Creator.rot' | translate}}</div>
             <div class="sbx-seg">
-              <button type="button" ng-class="{active: !r4.randomRot}" ng-click="r4.randomRot = false"><i class="fas fa-compass mr-1"></i>{{'admin.simBeta.rotFixed' | translate}}</button>
-              <button type="button" ng-class="{active: r4.randomRot}" ng-click="r4.randomRot = true"><i class="fas fa-dice mr-1"></i>{{'admin.simBeta.rotRandom' | translate}}</button>
+              <button type="button" ng-class="{active: !r4.randomRot}" ng-click="r4.randomRot = false"><i class="fas fa-compass mr-1"></i>{{'admin.simMapEditor.room4Creator.rotFixed' | translate}}</button>
+              <button type="button" ng-class="{active: r4.randomRot}" ng-click="r4.randomRot = true"><i class="fas fa-dice mr-1"></i>{{'admin.simMapEditor.room4Creator.rotRandom' | translate}}</button>
             </div>
-            <p class="sbx-rot-note" ng-if="r4.randomRot">{{'admin.simBeta.rotRandomNote' | translate}}</p>
+            <p class="sbx-rot-note" ng-if="r4.randomRot">{{'admin.simMapEditor.room4Creator.rotRandomNote' | translate}}</p>
             <sim-rotation-dial class="sbx-dial" ng-if="!r4.randomRot" ng-model="r4.rot" symbol="stampType(r4.stamp).symbol"></sim-rotation-dial>
           </div>
         </div>
@@ -93,17 +91,17 @@
           <div ng-if="ctLetterOf(r4.sel.idx)">
           <div class="sbx-ct">
             <div class="sbx-ct-top">
-              <svg class="sbx-ct-target" viewBox="0 0 100 100" role="img" aria-label="{{'admin.simBeta.ctRings' | translate}}">
+              <svg class="sbx-ct-target" viewBox="0 0 100 100" role="img" aria-label="{{'admin.simMapEditor.room4Creator.ctRings' | translate}}">
                 <circle ng-repeat="r in [0, 1, 2, 3, 4]" cx="50" cy="50" ng-attr-r="{{48 - 9 * r}}" ng-attr-fill="{{ringColor(r4.sel.code.split(''), r)}}" ng-click="r4.ring = r" stroke="#fff" stroke-width="1"></circle>
                 <circle class="sbx-ct-sel" cx="50" cy="50" ng-attr-r="{{43.5 - 9 * r4.ring}}" fill="none"></circle>
               </svg>
               <div class="sbx-ct-info">
-                <span class="sbx-ct-type" ng-class="'t-' + ringLetter(r4.sel.code.split(''))">{{ringLetter(r4.sel.code.split('')) === 'X' ? ('admin.simBeta.ctFake' | translate) : ringLetter(r4.sel.code.split(''))}}</span>
-                <div class="sbx-ct-sum">{{'admin.simBeta.ctSum' | translate}} {{ringSum(r4.sel.code.split('')) > 0 ? '+' : ''}}{{ringSum(r4.sel.code.split(''))}}</div>
+                <span class="sbx-ct-type" ng-class="'t-' + ringLetter(r4.sel.code.split(''))">{{ringLetter(r4.sel.code.split('')) === 'X' ? ('admin.simMapEditor.room4Creator.ctFake' | translate) : ringLetter(r4.sel.code.split(''))}}</span>
+                <div class="sbx-ct-sum">{{'admin.simMapEditor.room4Creator.ctSum' | translate}} {{ringSum(r4.sel.code.split('')) > 0 ? '+' : ''}}{{ringSum(r4.sel.code.split(''))}}</div>
                 <div class="sbx-ct-code"><span ng-repeat="c in r4.sel.code.split('') track by $index" ng-class="{sel: r4.ring === $index}" ng-click="r4.ring = $index">{{c}}</span></div>
               </div>
             </div>
-            <div class="sbx-ct-hint">{{'admin.simBeta.ctHint' | translate:{ n: r4.ring + 1 } }}</div>
+            <div class="sbx-ct-hint">{{'admin.simMapEditor.room4Creator.ctHint' | translate:{ n: r4.ring + 1 } }}</div>
             <div class="sbx-ct-palette">
               <button type="button" class="sbx-ct-swatch" ng-repeat="c in ringColors" ng-click="pickColor(c.id)" ng-class="{active: r4.sel.code.split('')[r4.ring] === c.id}" title="{{c.id}}">
                 <span class="sbx-ct-dot" ng-style="{background: c.color}"></span><span class="sbx-ct-val">{{c.value > 0 ? '+' : ''}}{{c.value}}</span>
@@ -112,15 +110,15 @@
           </div>
           </div>
           <div ng-if="isLetterVictim(r4.sel.idx)">
-            <div class="sbx-label">{{'admin.simBeta.rot' | translate}}</div>
+            <div class="sbx-label">{{'admin.simMapEditor.room4Creator.rot' | translate}}</div>
             <div class="sbx-seg">
-              <button type="button" ng-class="{active: r4.sel.rot !== null}" ng-click="r4.sel.rot === null && setSelRandomRot(false)"><i class="fas fa-compass mr-1"></i>{{'admin.simBeta.rotFixed' | translate}}</button>
-              <button type="button" ng-class="{active: r4.sel.rot === null}" ng-click="setSelRandomRot(true)"><i class="fas fa-dice mr-1"></i>{{'admin.simBeta.rotRandom' | translate}}</button>
+              <button type="button" ng-class="{active: r4.sel.rot !== null}" ng-click="r4.sel.rot === null && setSelRandomRot(false)"><i class="fas fa-compass mr-1"></i>{{'admin.simMapEditor.room4Creator.rotFixed' | translate}}</button>
+              <button type="button" ng-class="{active: r4.sel.rot === null}" ng-click="setSelRandomRot(true)"><i class="fas fa-dice mr-1"></i>{{'admin.simMapEditor.room4Creator.rotRandom' | translate}}</button>
             </div>
-            <p class="sbx-rot-note" ng-if="r4.sel.rot === null">{{'admin.simBeta.rotRandomNote' | translate}}</p>
+            <p class="sbx-rot-note" ng-if="r4.sel.rot === null">{{'admin.simMapEditor.room4Creator.rotRandomNote' | translate}}</p>
             <sim-rotation-dial class="sbx-dial" ng-if="r4.sel.rot !== null" ng-model="r4.sel.rot" ng-change="setSelRot(r4.sel.rot)" symbol="stampType(r4.sel.idx).symbol"></sim-rotation-dial>
           </div>
-          <button type="button" class="btn btn-sm btn-outline-danger btn-block mt-3" ng-click="removeSel()"><i class="fas fa-trash-alt mr-1"></i>{{'admin.simBeta.remove' | translate}}</button>
+          <button type="button" class="btn btn-sm btn-outline-danger btn-block mt-3" ng-click="removeSel()"><i class="fas fa-trash-alt mr-1"></i>{{'admin.simMapEditor.room4Creator.remove' | translate}}</button>
         </div>
 
         <!-- Place several stamps at once along walls the robot can reach -->
@@ -308,12 +306,6 @@
         <span class="sim-r4-summary-warn" ng-if="r4.showGuides && r4.missingCheckpoints" title="{{'admin.simMapEditor.room4Creator.missingCheckpoints' | translate:{count: r4.missingCheckpoints} }}"><i class="fas fa-flag-checkered"></i>{{"admin.simMapEditor.room4Creator.missingShort" | translate:{count: r4.missingCheckpoints} }}</span>
         <span class="sim-r4-summary-warn" ng-if="r4.showGuides && !r4.entranceCount" title="{{'admin.simMapEditor.room4Creator.noEntrance' | translate}}"><i class="fas fa-door-closed"></i>{{"admin.simMapEditor.room4Creator.noEntranceShort" | translate}}</span>
         <span class="sim-r4-status-note" ng-if="r4.showReach && (r4.reachState === 'noStart' || r4.reachState === 'noSeed' || r4.reachState === 'unavailable')" title="{{('admin.simMapEditor.room4Creator.reach.' + r4.reachState) | translate}}"><i class="fas fa-info-circle"></i>{{"admin.simMapEditor.room4Creator.reachOff" | translate}}</span>
-        <!-- the guide and the language, at the right end as in the editor (only from the new editor,
-             which gives startRoom4Tour and switchLang) -->
-        <span class="sim-r4-status-tools" ng-if="startRoom4Tour">
-          <button type="button" class="sbx-status-btn sbx-tour-btn sim-r4-help" ng-click="startRoom4Tour()" title="{{'admin.simBeta.guideRoom4' | translate}}"><i class="far fa-question-circle"></i><span>{{"admin.simBeta.tourShort" | translate}}</span></button>
-          <button type="button" class="sbx-status-btn sbx-lang" ng-click="switchLang()" title="Language"><i class="fas fa-globe-asia"></i><span>{{lang === 'ja' ? 'English' : '日本語'}}</span></button>
-        </span>
         <span class="sim-r4-status-legend">
           <span ng-if="r4.showReach"><i class="sim-r4-legend-reach"></i>{{"admin.simMapEditor.room4Creator.legendReach" | translate}}</span>
           <span><i class="sim-r4-legend-wall"></i>{{"admin.simMapEditor.room4Creator.legendMapWallShort" | translate}}</span>
