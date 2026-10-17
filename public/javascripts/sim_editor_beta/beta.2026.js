@@ -125,6 +125,7 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
     $scope.map = null;
     $scope.problems = [];
     $scope.hint = '';
+    $scope.notice = null;
     $scope.canUndo = false;
     $scope.canRedo = false;
 
@@ -147,7 +148,7 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
             move: function (p, dragging) { $scope.$apply(function () { toolMove(p, dragging); }); },
             up: function (p) { $scope.$apply(function () { toolUp(p); }); },
             cancel: function () { $scope.$apply(cancelStroke); },
-            leave: function () { hover = null; view.redraw(); }
+            leave: function () { $scope.$apply(function () { hover = null; say(''); }); view.redraw(); }
         }
     });
 
@@ -174,7 +175,7 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         $scope.map = map;
         $scope.fileName = name || '';
         view.setMap(map);
-        changed();
+        changed(true);
         // fit again once the side panel is there
         $timeout(function () { view.fit(); });
     }
@@ -209,12 +210,14 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         if (!past.length) return;
         future.push(JSON.stringify(map));
         restore(past.pop());
+        notify('undone', null, 'ok');
     };
 
     $scope.redo = function () {
         if (!future.length) return;
         past.push(JSON.stringify(map));
         restore(future.pop());
+        notify('redone', null, 'ok');
     };
 
     // ---- linear / floating: which tiles a victim scores less on ----
@@ -349,7 +352,8 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
     $scope.linearNoStart = function () { return !!(linear && linear.noStart); };
     $scope.linearUnreached = function () { return !!(linear && linear.unreached); };
 
-    function changed() {
+    // opened: a map just opened, whose checks card starts closed when there is nothing to show
+    function changed(opened) {
         computeLinear();
         computePockets();
         // the problems are worked out again: one pointed out may be gone (its item with it)
@@ -361,7 +365,8 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         $scope.problems = map ? M.problems(map).map(problemText) : [];
         $scope.blocking = $scope.problems.some(function (p) { return p.block; });
         // the checks card folds by itself when the last problem goes, and opens again when one comes
-        if (had && !$scope.problems.length) $scope.ui.checksFolded = true;
+        if (opened) $scope.ui.checksFolded = !$scope.problems.length;
+        else if (had && !$scope.problems.length) $scope.ui.checksFolded = true;
         else if (!had && $scope.problems.length) $scope.ui.checksFolded = false;
         view.redraw();
     }
@@ -424,7 +429,7 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
             $scope.setTool('shape');
             $scope.ui.shapeMode = 'outline';
             $scope.ui.freshMap = true;     // its size box stands out until another tool is taken
-            say('newMapSize');
+            notify('newMapSize', null, 'info', 10000);
         });
     };
 
@@ -527,8 +532,10 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         return { w: block * w, h: block * h };
     }
 
+    let room4Open = false;          // the creator is open (a second double-click does not open another)
     $scope.openRoom4 = function () {
-        if (!map || !map.roomTiles[2].length) { say('room4NoTiles'); return; }
+        if (room4Open) return;
+        if (!map || !map.roomTiles[2].length) { notify('room4NoTiles', null, 'warn'); return; }
         if (!map.area4Room || map.area4Room.type !== 1) {
             begin();
             map.area4Room = W.area4Presets()[1];
@@ -557,7 +564,9 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
                 view.setMap(map, true);
             }
             host.$destroy();
+            room4Open = false;
         };
+        room4Open = true;
         $uibModal.open({
             animation: true,
             templateUrl: '/templates/sim_editor/custom_room_4_modal.2026.html',
@@ -584,14 +593,14 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         if (after) borders = after;
         pointed = null;
         commit();
-        say(problemsLeft(p.raw.key) ? 'fixPartly' : 'fixed');
+        if (problemsLeft(p.raw.key)) notify('fixPartly', null, 'warn'); else notify('fixed', null, 'ok');
     };
     $scope.fixAll = function () {
         begin();
         borders = M.fixAll(map, borders);
         pointed = null;
         commit();
-        say($scope.problems.length ? 'fixAllLeft' : 'fixed', { count: $scope.problems.length });
+        notify($scope.problems.length ? 'fixAllLeft' : 'fixed', { count: $scope.problems.length }, $scope.problems.length ? 'warn' : 'ok');
     };
     $scope.canFixAll = function () {
         return $scope.problems.some(function (p) { return p.fix === 'fix'; });
@@ -655,12 +664,6 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         return map.room4CanvasSave ? 'drawn' : 'empty';
     };
 
-    $scope.toggleConnCheck = function () {
-        begin();
-        map.connCheckOff = !map.connCheckOff;
-        commit();
-    };
-
     $scope.renamed = function () {
         dirty = true;
     };
@@ -714,9 +717,52 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         return Math.max(1.5, 8 / view.scale());
     }
 
-    function say(key, params) {
-        $scope.hint = key ? $translate.instant('admin.simBeta.hints.' + key, params) : '';
+    function hintText(key, params) {
+        return SimKeys.text($translate.instant('admin.simBeta.hints.' + key, params));
     }
+
+    // The status line: what the tool would do where the pointer is (say), over the tool's own
+    // how-to; and what has just happened (notify: kind 'ok', 'warn' or 'info'), kept for a few
+    // seconds over both, so the pointer moving on does not wipe it at once
+    function say(key, params) {
+        $scope.hint = key ? hintText(key, params) : '';
+    }
+
+    let noticeTimer = null;
+    function notify(key, params, kind, ms) {
+        $timeout.cancel(noticeTimer);
+        $scope.notice = { text: hintText(key, params), kind: kind || 'info' };
+        noticeTimer = $timeout(function () { $scope.notice = null; }, ms || 4000);
+    }
+
+    // The name of the victim the victim tool places (as in its panel)
+    function victimName() {
+        const ui = $scope.ui;
+        let t = null;
+        if (ui.victim === 'CT') {
+            const l = $scope.ctLetter();
+            t = $scope.ctStamps.find(function (c) { return c.letter === l; });
+        } else {
+            $scope.victimRows.forEach(function (row) {
+                row.types.forEach(function (v) { if (v.id === ui.victim && v.fake === !!ui.fake) t = v; });
+            });
+        }
+        return t ? $translate.instant(t.name) : '';
+    }
+
+    // What the tool does, while the pointer is on nothing it would change
+    $scope.toolHint = function () {
+        if (!map) return '';
+        const tool = $scope.ui.tool;
+        let key = tool, params = null;
+        if (tool === 'shape') key = 'shape_' + $scope.ui.shapeMode;
+        else if (tool === 'select' && $scope.region) { key = 'select_region'; params = { size: $scope.regionSize() }; }
+        else if (tool === 'victim' && $scope.selected) key = 'victim_selected';
+        else if (tool === 'victim') params = { name: victimName() };
+        else if (tool === 'room') params = { room: $scope.ui.room };
+        else if (tool === 'floor') params = { floor: $translate.instant('admin.simBeta.floors.' + $scope.ui.floor) };
+        return SimKeys.text($translate.instant('admin.simBeta.toolHints.' + key, params));
+    };
 
     function toolDown(p, e) {
         const tool = $scope.ui.tool;
@@ -764,8 +810,9 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         const tool = $scope.ui.tool;
         if (!stroke) return;
         if (tool === 'line' && stroke.plan) {
-            M.setWalls(map, stroke.plan.ok, true);
-            if (stroke.plan.bad.length) say('someRefused', { count: stroke.plan.bad.length });
+            const n = M.setWalls(map, stroke.plan.ok, true);
+            if (stroke.plan.bad.length) notify('someRefused', { count: stroke.plan.bad.length }, 'warn');
+            else if (n) notify('wallsDrawn', { cm: 6 * n }, 'ok');
         } else if (tool === 'passage') {
             const s = sideAt(p);
             const near = s && nearEdge(p, s);
@@ -774,11 +821,12 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
                 const at = M.passageSide(map, b, [s.tile.x, s.tile.y]);
                 const r = M.togglePassage(map, s.ex, s.ey, [s.tile.x, s.tile.y]);
                 borders = M.syncBorderWalls(map, borders);
-                say(at[0] !== s.tile.x || at[1] !== s.tile.y ? 'passageRoom4' : 'passage_' + r);
+                if (at[0] !== s.tile.x || at[1] !== s.tile.y) notify('passageRoom4', null, 'info', 7000);
+                else notify('passage_' + r, null, 'ok');
             } else if (s && M.clearPassage(map, s.tile.x, s.tile.y)) {
                 borders = M.syncBorderWalls(map, borders);
-                say('passage_closed');
-            } else say('noBorder');
+                notify('passage_closed', null, 'ok');
+            } else notify('noBorder', null, 'warn');
         } else if (tool === 'floor') {
             const t = tileAt(p);
             if (t) M.setFloor(map, t.x, t.y, $scope.ui.floor);
@@ -791,7 +839,7 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
             if (op) lineOp(op);
         } else if (tool === 'curve') {
             const c = M.arcChoice(map, p.x, p.y);
-            if (c && !c.rule.ok) say('curve_' + c.rule.reason);
+            if (c && !c.rule.ok) notify('curve_' + c.rule.reason, null, 'warn');
             else if (c) {
                 const cur = Number(M.tileOf(map, c.x, c.y).curve[c.q]);
                 M.setCurve(map, c.x, c.y, c.q, cur === c.v ? 0 : c.v);
@@ -843,7 +891,12 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         add(last.segs);
         stroke.plan = M.wallPlan(map, segs);
         stroke.end = last.end;
-        say(stroke.plan.bad.length ? 'refusedHere' : '');
+        strokeSay();
+    }
+
+    function strokeSay() {
+        if (stroke.plan.bad.length) say('refusedHere');
+        else say(stroke.straight ? 'lineDrawingStraight' : 'lineDrawing', { cm: 6 * stroke.plan.ok.length });
     }
 
     // The row / column the shape tool would add or take out at p: { axis, insert, index } (index: the
@@ -916,11 +969,12 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
             $scope.$apply(function () {
                 begin();
                 const done = op.insert ? M.insertLine(map, op.axis, op.index) : M.removeLine(map, op.axis, op.index);
-                if (!done) { before = null; say('lineLimit'); return; }
+                if (!done) { before = null; notify('lineLimit', null, 'warn'); return; }
                 if (pic) { map.room4CanvasSave = pic.picture; map.room4Tokens = pic.tokens; }
                 borders = M.resyncBorderWalls(map, borders);
                 $scope.region = null;
                 commit();
+                notify('lineDone_' + $scope.ui.shapeMode, null, 'ok');
                 view.setMap(map, true);
                 view.fitIfAuto();
             });
@@ -1034,7 +1088,7 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
 
     function regionUp() {
         if (stroke && stroke.move && (stroke.dx || stroke.dy)) moveRegion(stroke.dx, stroke.dy, stroke.copy);
-        say($scope.region ? 'regionTip' : '');
+        say('');
     }
 
     function moveRegion(dx, dy, copy) {
@@ -1061,7 +1115,7 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         if (!$scope.region) return;
         clip = M.copyRegion(map, $scope.region);
         $scope.hasClip = true;
-        say('regionCopied');
+        notify('regionCopied', null, 'ok');
     };
     $scope.cutRegion = function () {
         if (!$scope.region) return;
@@ -1086,7 +1140,7 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         if (!r) return;
         const w = r.x1 - r.x0 + 1, h = r.y1 - r.y0 + 1;
         const dx = r.x1 + w < map.width ? w : 0, dy = dx ? 0 : (r.y1 + h < map.length ? h : 0);
-        if (!dx && !dy) { say('regionNoRoom'); return; }
+        if (!dx && !dy) { notify('regionNoRoom', null, 'warn'); return; }
         regionAction(function () { moveRegion(dx, dy, true); });
     };
     $scope.nudgeRegion = function (dx, dy) {
@@ -1149,7 +1203,7 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
             const cur = M.slotVictim(map, sl.x, sl.y, sl.i);
             if (sameVictim(cur)) { selectWhere(where); return; }
             const rule = M.slotRule(map, sl.x, sl.y, sl.i);
-            if (!rule.ok) { say('victim_' + rule.reason); return; }
+            if (!rule.ok) { notify('victim_' + rule.reason, null, 'warn'); return; }
             M.setSlotVictim(map, sl.x, sl.y, sl.i, $scope.ui.victim, $scope.ui.fake, victimOpts());
             selectWhere(null);
             return;
@@ -1160,26 +1214,46 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         const v = M.edgeVictim(map, s.tile.x, s.tile.y);
         if (v && v.dir === s.dir && sameVictim(v)) { selectWhere(where); return; }
         const rule = M.victimRule(map, s.tile.x, s.tile.y, s.dir);
-        if (!rule.ok) { say('victim_' + rule.reason); return; }
+        if (!rule.ok) { notify('victim_' + rule.reason, null, 'warn'); return; }
         M.setVictim(map, s.tile.x, s.tile.y, s.dir, $scope.ui.victim, $scope.ui.fake, victimOpts());
         selectWhere(null);
     }
 
+    // What a click of the victim tool does on a spot holding cur (moved: the tile's victim, on another
+    // side, goes to this one - a tile of room 1 has one victim)
+    function victimSay(cur, moved) {
+        const name = victimName();
+        if (cur && sameVictim(cur)) say('victim_select');
+        else if (cur) say('victim_replace', { name: name });
+        else say(moved ? 'victim_move' : 'victim_place', { name: name });
+    }
+
     // What the tool would do at p, for the preview
     function hoverAt(p) {
-        const tool = $scope.ui.tool;
         const ti = tileIndex(p, false);
         lastTile = ti[0] >= 0 && ti[1] >= 0 && ti[0] < map.width && ti[1] < map.length ? ti : lastTile;
+        // what the tool would do here, said in the status line; nothing said: the tool's how-to
+        say('');
+        return hoverOf(p);
+    }
+
+    function hoverOf(p) {
+        const tool = $scope.ui.tool;
         if (tool === 'shape' && $scope.ui.shapeMode !== 'outline') {
             const op = lineAt(p);
             if (op) say('line_' + $scope.ui.shapeMode);
             return op ? { kind: 'line', op: op } : null;
         }
         if (tool === 'line') {
-            if (stroke) return null;
+            if (stroke) { if (stroke.plan) strokeSay(); return null; }
+            const t = tileAt(p);
+            const room = t ? M.roomOf(map, t.x, t.y) : 0;
+            if (room === 4) say('line_room4');
+            else if (room) say(room === 2 || room === 3 ? 'line_fine' : 'line_tile', { room: room });
             const step = stepAt(p);
             return { kind: 'point', at: L.snap(p.x, p.y, step, map.width, map.length), step: step };
         }
+        if (tool === 'hand') { say('hand'); return null; }
         if (tool === 'shape') {
             const t = tileAt(p);
             if (!t) return null;
@@ -1187,9 +1261,28 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
             say(out ? 'shapeIn' : 'shapeOut');
             return { kind: 'tile', tile: t, color: out ? '#16a34a' : '#dc2626' };
         }
-        if (tool === 'room' || tool === 'floor') {
+        if (tool === 'room') {
             const t = tileAt(p);
-            return t ? { kind: 'tile', tile: t } : null;
+            if (!t) return null;
+            const cur = M.roomOf(map, t.x, t.y);
+            if (M.isOutside(map, t.x, t.y)) say('room_outside');
+            else if (cur === $scope.ui.room && cur === 4) say('room_room4');
+            else if (cur === $scope.ui.room) say('room_same', { room: cur });
+            else say('room_paint', { room: $scope.ui.room, cur: cur });
+            return { kind: 'tile', tile: t };
+        }
+        if (tool === 'floor') {
+            const t = tileAt(p);
+            if (!t) return null;
+            const kind = $scope.ui.floor, tile = M.tileOf(map, t.x, t.y);
+            const st = map.startTile;
+            const name = $translate.instant('admin.simBeta.floors.' + kind);
+            if (M.isOutside(map, t.x, t.y)) say('floor_outside');
+            else if (kind === 'start') say(st && st.x === t.x && st.y === t.y ? 'floor_isStart' : 'floor_start');
+            else if (kind === 'clear') say('floor_clear');
+            else if (tile && tile[kind]) say('floor_off', { floor: name });
+            else say('floor_on', { floor: name });
+            return { kind: 'tile', tile: t };
         }
         if (tool === 'select') {
             const t = tileIndex(p, false);
@@ -1199,23 +1292,26 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         if (tool === 'curve') {
             const c = M.arcChoice(map, p.x, p.y);
             if (!c) return null;
-            say(c.rule.ok ? '' : 'curve_' + c.rule.reason);
+            if (!c.rule.ok) say('curve_' + c.rule.reason);
+            else say(Number(M.tileOf(map, c.x, c.y).curve[c.q]) === c.v ? 'curve_off' : 'curve_on');
             return { kind: 'curve', choice: c };
         }
         if (tool === 'eraser') {
             const v = victimNear(p);
-            if (v) return { kind: 'victim', tile: v.tile, dir: v.victim.dir };
+            if (v) { say('erase_victim'); return { kind: 'victim', tile: v.tile, dir: v.victim.dir }; }
             const sl = slotNear(p);
-            if (sl) return { kind: 'spot', at: M.slotPos(sl.x, sl.y, sl.i, map), color: '#dc2626' };
+            if (sl) { say('erase_victim'); return { kind: 'spot', at: M.slotPos(sl.x, sl.y, sl.i, map), color: '#dc2626' }; }
             const a = M.arcNear(map, p.x, p.y, reach());
-            if (a) return { kind: 'arc', arc: a, color: '#dc2626' };
+            if (a) { say('erase_curve'); return { kind: 'arc', arc: a, color: '#dc2626' }; }
             const s = M.segNear(map, p.x, p.y, reach());
             if (!s) {
                 // while dragging over walls, floors are left alone
                 const f = !(stroke && !stroke.floors) && floorNear(p, !stroke);
+                if (f) say(f.kind === 'start' ? 'erase_start' : 'erase_floor');
                 return f ? { kind: 'tile', tile: f.tile, color: '#dc2626' } : null;
             }
             const rule = L.segRule(s, M.roomLookup(map));
+            say(rule.whole ? 'erase_wallWhole' : 'erase_wall');
             return { kind: 'segs', segs: rule.whole ? [s, L.otherHalf(s)] : [s], color: '#dc2626' };
         }
         if (tool === 'passage') {
@@ -1237,14 +1333,19 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         if (tool === 'victim' && quarterTile(p)) {
             const sl = M.slotAt(map, p.x, p.y);
             const rule = M.slotRule(map, sl.x, sl.y, sl.i);
-            say(rule.ok ? '' : 'victim_' + rule.reason);
+            if (!rule.ok) say('victim_' + rule.reason);
+            else victimSay(M.slotVictim(map, sl.x, sl.y, sl.i));
             return { kind: 'spot', at: M.slotPos(sl.x, sl.y, sl.i, map), color: rule.ok ? '#16a34a' : '#dc2626', small: true };
         }
         if (tool === 'victim') {
             const s = sideAt(p);
             if (!s) return null;
             const rule = M.victimRule(map, s.tile.x, s.tile.y, s.dir);
-            say(rule.ok ? '' : 'victim_' + rule.reason);
+            if (!rule.ok) say('victim_' + rule.reason);
+            else {
+                const v = M.edgeVictim(map, s.tile.x, s.tile.y);
+                victimSay(v && v.dir === s.dir ? v : null, v && v.dir !== s.dir);
+            }
             return { kind: 'victimSpot', side: s, ok: rule.ok };
         }
         return null;
@@ -1408,14 +1509,12 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
             ctx.strokeRect(12 * t[0] + 2 * px, 12 * t[1] + 2 * px, 12 - 4 * px, 12 - 4 * px);
             ctx.setLineDash([]);
         };
-        if (!map.connCheckOff) {
-            const marks = W.connectionStatus(map).marks;
-            Object.keys(marks).forEach(function (k) {
-                const m = marks[k];
-                const color = (m.style && m.style['border-color']) || '#dc2626';
-                tileBox(k, color, m.cls === 'hint');
-            });
-        }
+        const marks = W.connectionStatus(map).marks;
+        Object.keys(marks).forEach(function (k) {
+            const m = marks[k];
+            const color = (m.style && m.style['border-color']) || '#dc2626';
+            tileBox(k, color, m.cls === 'hint');
+        });
     }
 
     // Everything a problem is about: the rest of the map dimmed, its places outlined
@@ -1503,6 +1602,422 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         if (t && M.roomOf(map, t.x, t.y) === 4 && (!map.area4Room || map.area4Room.type <= 1)) $scope.$apply($scope.openRoom4);
     });
 
+    // ---- the guide (SimBetaTour): the tour of the screen, the lesson (a sample map built step by
+    // step) and the room 4 part on its own. The window is shaded but for the parts the step is about,
+    // with a card beside them. In the tour the editor waits; in the lesson it is used as usual.
+    const TOUR_SEEN = 'simBeta2026.tourSeen';
+    const T = SimBetaTour;
+    let tourKeep = null, tourTimer = null, tourTick = null;
+    $scope.tour = null;
+    $scope.tourSeen = (function () { try { return !!localStorage.getItem(TOUR_SEEN); } catch (e) { return true; } })();
+    $scope.ui.guidePick = false;
+    const GUIDE_ASKED = 'simBeta2026.guideAsked';
+
+    // which way through the guide: the lesson, the tour of the screen or the room 4 part
+    // what: 'main' (from the editor: everything) or 'room4' (from the room 4 creator: its two ways)
+    $scope.openGuidePick = function (what) {
+        if ($scope.dialog) return;
+        $scope.ui.betaMenu = false;
+        $scope.ui.guidePick = what || 'main';
+    };
+    $scope.closeGuidePick = function () {
+        $scope.ui.guidePick = false;
+        try { localStorage.setItem(GUIDE_ASKED, '1'); } catch (e) { /* storage off */ }
+    };
+    const ROOM4_KINDS = ['room4', 'room4tour'];
+    $scope.pickGuide = function (kind) {
+        $scope.closeGuidePick();
+        if (ROOM4_KINDS.indexOf(kind) >= 0) {
+            // within the tour of the screen or the lesson, the room 4 part comes in between: they go
+            // on where they were when it ends
+            const nest = !!$scope.tour && ROOM4_KINDS.indexOf($scope.tour.kind) < 0;
+            $scope.startRoom4Guide(kind, nest);
+        } else $scope.startTour(kind);
+    };
+    $scope.room4Ready = function () { return $scope.room4State() === 'empty' || $scope.room4State() === 'drawn'; };
+    // asked once by itself, on a first visit with nothing open
+    $timeout(function () {
+        let asked = true;
+        try { asked = !!localStorage.getItem(GUIDE_ASKED) || !!localStorage.getItem(TOUR_SEEN); } catch (e) { /* storage off: not asked */ }
+        if (!asked && !map && !$scope.tour && !$scope.dialog) $scope.openGuidePick();
+    }, 600);
+
+    // the sample map as the lesson's first and last cards draw it: tiles by room, passages, the start
+    $scope.tourPlan = (function () {
+        const S = T.SAMPLE, fill = { 1: '#ffffff', 2: '#dcebfb', 3: '#f7e3f7', 4: '#e6d9ff' }, tiles = [];
+        for (let x = 0; x < S.width; x++) {
+            for (let y = 0; y < S.length; y++) {
+                let room = 1;
+                [2, 3, 4].forEach(function (r) { const b = S.rooms[r]; if (x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3]) room = r; });
+                if (x === S.outside[0] && y === S.outside[1]) continue;
+                tiles.push({ x: 12 * x, y: 12 * y, fill: fill[room] });
+            }
+        }
+        const room = function (r) { const b = S.rooms[r]; return { x: 12 * b[0] + 6 * (b[2] - b[0] + 1), y: 12 * b[1] + 6 * (b[3] - b[1] + 1), n: r }; };
+        return {
+            w: 12 * S.width, h: 12 * S.length, tiles: tiles, labels: [room(2), room(3), room(4), { x: 18, y: 42, n: 1 }],
+            passages: [{ x: 24, y: 12, c: '#1a1ae6' }, { x: 48, y: 24, c: '#4d1a99' }, { x: 60, y: 48, c: '#e71a1a' }],
+            start: { x: 12 * S.start[0] + 6, y: 12 * S.start[1] + 6 },
+            walls: [S.wall1, S.wall2].map(function (l) { return l.map(function (p) { return p.join(','); }).join(' '); })
+        };
+    })();
+
+    // kind: 'tour' (the screen), 'lesson' (the sample map) or 'room4' (the room 4 creator's part)
+    $scope.startTour = function (kind) {
+        if ($scope.dialog) return;
+        $scope.ui.betaMenu = false;
+        $scope.ui.guidePick = false;
+        kind = kind || (map ? 'tour' : 'lesson');
+        if (kind === 'lesson' && map) {
+            // the lesson builds its own map: from a new one, once the open one may go
+            whenDiscarded(function () { newBlank(); beginTour('lesson'); });
+            return;
+        }
+        beginTour(kind);
+    };
+    // from the room 4 creator (its header has the button while this editor opened it); during the
+    // lesson it goes to the lesson's own room 4 part, so the lesson goes on after it
+    $scope.startRoom4Tour = function () {
+        const t = $scope.tour;
+        // the lesson at its own room 4 part (or just before it): on to that part
+        if (t && t.kind === 'lesson') {
+            const open = t.steps.findIndex(function (s) { return s.id === 'r4open'; });
+            const first = t.steps.findIndex(function (s) { return s.id === T.ROOM4[0].id; });
+            const last = t.steps.findIndex(function (s) { return s.id === T.ROOM4[T.ROOM4.length - 1].id; });
+            if (first >= 0 && t.i >= open && t.i <= last) { if (t.i < first) $scope.tourJump(first); return; }
+        }
+        // the room 4 guide already shown: nothing to choose
+        if (t && ROOM4_KINDS.indexOf(t.kind) >= 0) return;
+        $scope.openGuidePick('room4');
+    };
+    // from the tour of the screen (its room 4 step): the creator's own tour in between
+    $scope.tourRoom4Inside = function () { $scope.startRoom4Guide('room4tour', true); };
+    // from the guide menu: the room 4 creator opened, then its part
+    // the room 4 guide in the room 4 creator (opened for it if it is not, and closed again when the
+    // guide ends); nest: the guide shown now goes on after it
+    $scope.startRoom4Guide = function (kind, nest) {
+        const opened = !creatorScope();
+        if (opened) $scope.openRoom4();
+        $timeout(function () { beginTour(kind || 'room4', nest, opened); }, opened ? 450 : 0);
+    };
+    // the guide to look at only (the tour of the screen, or of the room 4 creator): the editor is kept
+    // still, the keys go through the steps, there are no tasks
+    $scope.tourLook = function () { return !!$scope.tour && ($scope.tour.kind === 'tour' || $scope.tour.kind === 'room4tour'); };
+
+    function newBlank() {
+        load(M.newMap(8, 6), '');
+        $scope.setTool('shape');
+        $scope.ui.shapeMode = 'outline';
+        $scope.ui.freshMap = true;
+    }
+
+    function beginTour(kind, nest, openedCreator) {
+        cancelStroke();
+        // a guide in between keeps the one shown now (and what it keeps of the editor) to go back to
+        const outer = nest && $scope.tour ? { tour: $scope.tour, keep: tourKeep } : null;
+        if (!outer) tourKeep = { tool: $scope.ui.tool, checksFolded: !!$scope.ui.checksFolded, shapeMode: $scope.ui.shapeMode, made: false };
+        const steps = kind === 'tour' ? T.STEPS : kind === 'room4' ? T.ROOM4 : kind === 'room4tour' ? T.ROOM4_TOUR : T.LESSON.filter(function (s) { return !(s.noMap && map); });
+        $scope.tour = { kind: kind, steps: steps, i: 0, st: {}, done: false, outer: outer, openedCreator: !!openedCreator,
+            chapterIds: kind === 'tour' ? T.CHAPTERS : ROOM4_KINDS.indexOf(kind) >= 0 ? ['room4'] : T.LESSON_CHAPTERS };
+        showTourStep();
+        $timeout.cancel(tourTick);
+        // the lesson's parts move while the map is used (zoom, panels, the room 4 creator): laid out again
+        if (kind !== 'tour') tourTick = $timeout(function tick() { if (!$scope.tour) return; layoutTour(true); tourTick = $timeout(tick, 400); }, 400);
+    }
+
+    $scope.tourStep = function () { return $scope.tour ? $scope.tour.steps[$scope.tour.i] : null; };
+    function tourKey(s) { return 'admin.simBeta.' + ($scope.tour.kind === 'tour' ? 'tour.' : 'lesson.') + s.id; }
+    $scope.tourText = function (part) {
+        const s = $scope.tourStep();
+        if (!s) return '';
+        if (part === 'task' && $scope.tourLook()) return '';
+        const k = tourKey(s) + '.' + part, v = $translate.instant(k);
+        return v === k ? '' : SimKeys.text(v);
+    };
+    // the step's paragraphs (kept while the text is the same: the page repeats over them)
+    let tourLinesOf = { text: null, lines: [] };
+    $scope.tourLines = function () {
+        const text = $scope.tourText('body');
+        if (text !== tourLinesOf.text) tourLinesOf = { text: text, lines: text.split('\n').filter(function (l) { return l.trim(); }) };
+        return tourLinesOf.lines;
+    };
+    // one bar per chapter: how many of its steps are passed (worked out once per step)
+    function tourChapters() {
+        const t = $scope.tour;
+        return t.chapterIds.map(function (c) {
+            const idx = t.steps.map(function (s, i) { return s.chapter === c ? i : -1; }).filter(function (i) { return i >= 0; });
+            return { id: c, first: idx[0], done: idx.filter(function (i) { return i < t.i; }).length, count: idx.length, on: idx.indexOf(t.i) >= 0 };
+        }).filter(function (c) { return c.count; });
+    }
+
+    // what a lesson step sees and does (SimBetaTour's env)
+    function creatorScope() {
+        const el = document.querySelector('.sbx-r4-full .sim-r4');
+        const s = el && angular.element(el).scope();
+        return s && s.r4 && s.r4api ? s : null;
+    }
+    function tourEnv() {
+        return {
+            M: M, W: W, L: L, map: map, ui: $scope.ui, selected: $scope.selected, region: $scope.region,
+            creator: creatorScope(), room4State: $scope.room4State(), problems: $scope.problems,
+            sync: function () { borders = M.resyncBorderWalls(map, borders); },
+            act: {
+                newMap: newBlank,
+                resize: function (w, l) { $scope.resize(w - map.width, l - map.length); },
+                openRoom4: function () { $scope.openRoom4(); },
+                fixAll: function () { $scope.fixAll(); },
+                toggleLinear: function () { $scope.toggleLinear(); },
+                select: function (where) { selectWhere(where); },
+                setRegion: function (r) { $scope.region = r; },
+                rename: function (name) { map.name = name; if ($scope.renamed) $scope.renamed(); }
+            }
+        };
+    }
+    // done? (looked at whenever the page is drawn again, so it ticks as soon as the map has it; the
+    // step is part of what is watched, so a step done already when it starts shows it too)
+    // What to do changes with the map: a step not done yet says what is left or what to put right
+    // (its state), in place of its usual task
+    $scope.$watch(function () {
+        const t = $scope.tour, s = t && t.steps[t.i];
+        if (!s || !s.goal) return '';
+        let done = false, state = null;
+        if (!((s.creator && !creatorScope() && !s.closes) || (!map && !s.noMap))) {
+            const env = tourEnv();
+            try { done = !!s.goal(env, t.st); } catch (e) { done = false; }
+            if (!done && s.state) { try { state = s.state(env, t.st); } catch (e) { state = null; } }
+        }
+        return JSON.stringify([t.i, done, state]);
+    }, function (v) {
+        const t = $scope.tour;
+        if (!t || !v) { if (t) { t.done = false; t.task = ''; } return; }
+        const w = JSON.parse(v);
+        t.done = w[1];
+        t.task = w[2] ? stateText(t.steps[w[0]], w[2]) : '';
+    });
+    function stateText(s, state) {
+        const params = Object.assign({}, state.params);
+        if (state.nameOf && params.name) params.name = $translate.instant(state.nameOf + params.name);
+        if (params.list) {
+            params.list = params.list.map(function (id) { return $translate.instant(params.listOf + id); }).join($scope.lang === 'ja' ? '・' : ', ');
+        }
+        // the step's own text, else the one the steps share (lessonState)
+        let k = 'admin.simBeta.lesson.' + s.id + '.tasks.' + state.key, v = $translate.instant(k, params);
+        if (v === k) { k = 'admin.simBeta.lessonState.' + state.key; v = $translate.instant(k, params); }
+        return v === k ? '' : SimKeys.text(v);
+    }
+    $scope.tourTask = function () { return ($scope.tour && !$scope.tour.done && $scope.tour.task) || $scope.tourText('task'); };
+    // a step in the room 4 creator while it is closed: it can be opened again from the card
+    $scope.tourCreatorClosed = function () {
+        const s = $scope.tourStep();
+        return !!s && !!s.creator && !s.closes && !creatorScope();
+    };
+    $scope.tourFold = function () {
+        const t = $scope.tour;
+        if (!t) return;
+        t.compact = !t.compact;
+        t.compactSet = true;
+        $timeout(function () { layoutTour(true); });
+    };
+    // a step on the editor while the room 4 creator covers it (opened by hand, or left open by a
+    // guide in between): it is closed to go on
+    $scope.tourCreatorOver = function () {
+        const s = $scope.tourStep();
+        return !!s && !s.creator && s.id !== 'r4open' && !!creatorScope();
+    };
+    $scope.tourCloseCreator = function () {
+        const cr = creatorScope();
+        if (cr) cr.closeRoom4();
+        $timeout(function () { if ($scope.tour) layoutTour(false); }, 450);
+    };
+    $scope.tourOpenCreator = function () { $scope.openRoom4(); $timeout(showTourStep, 500); };
+
+    $scope.tourDoIt = function () {
+        const t = $scope.tour, s = $scope.tourStep();
+        if (!s || !s.auto) return;
+        const env = tourEnv();
+        if ((s.creator && !s.closes && !env.creator) || (!map && !s.noMap)) return;
+        if (s.creator || !map) { s.auto(env, t.st); $timeout(function () { layoutTour(true); }, 300); return; }
+        begin();
+        s.auto(env, t.st);
+        commit();
+        changed();
+        view.setMap(map, true);
+        $timeout(function () { layoutTour(true); }, 100);
+    };
+    $scope.tourGo = function (d, skip) {
+        const t = $scope.tour, s = $scope.tourStep();
+        if (!t) return;
+        // in the lesson a step is done before the next (or passed over on purpose)
+        if (d > 0 && t.kind !== 'tour' && s.goal && !t.done && !skip) return;
+        const i = t.i + d;
+        if (i < 0) return;
+        if (i >= t.steps.length) { $scope.endTour(); return; }
+        t.i = i;
+        showTourStep();
+    };
+    $scope.tourJump = function (i) {
+        if (!$scope.tour || i === $scope.tour.i) return;
+        $scope.tour.i = i;
+        showTourStep();
+    };
+    $scope.endTour = function () {
+        const t = $scope.tour;
+        if (!t) return;
+        // a guide in between: back to the one it came from, at the step it was on (the creator closed
+        // again when it was opened for the guide)
+        if (t.outer) {
+            const cr = creatorScope();
+            if (t.openedCreator && cr) cr.closeRoom4();
+            $scope.tour = t.outer.tour;
+            tourKeep = t.outer.keep;
+            $scope.tour.ready = false;
+            $timeout.cancel(tourTimer);
+            $timeout(function () { if ($scope.tour === t.outer.tour) showTourStep(); }, t.openedCreator && cr ? 450 : 0);
+            $timeout.cancel(tourTick);
+            if ($scope.tour.kind !== 'tour') tourTick = $timeout(function tick() { if (!$scope.tour) return; layoutTour(true); tourTick = $timeout(tick, 400); }, 400);
+            return;
+        }
+        $scope.tour = null;
+        $timeout.cancel(tourTimer);
+        $timeout.cancel(tourTick);
+        try { localStorage.setItem(TOUR_SEEN, '1'); } catch (e) { /* storage off */ }
+        $scope.tourSeen = true;
+        // the tour of the screen leaves the editor as it was; the lesson leaves the map as it is
+        if (t.kind === 'tour' && map && tourKeep) {
+            $scope.setTool(tourKeep.made ? 'shape' : tourKeep.tool);
+            $scope.ui.shapeMode = tourKeep.made ? 'outline' : tourKeep.shapeMode;
+            $scope.ui.checksFolded = tourKeep.checksFolded;
+            if (tourKeep.made) notify('newMapSize', null, 'info', 10000);
+        }
+        tourKeep = null;
+    };
+
+    function showTourStep() {
+        const t = $scope.tour, s = $scope.tourStep();
+        // the step left puts back what it changed for itself
+        if (t.left && t.left !== s && t.left.leave) { try { t.left.leave(tourEnv()); } catch (e) { /* nothing to put back */ } }
+        t.left = s;
+        // the tour of the screen needs a map past its first card: a new blank one, if none is open
+        if (t.kind === 'tour' && !map && s.id !== 'welcome') {
+            newBlank();
+            tourKeep.made = true;
+        }
+        t.st = {};
+        if (map && s.tool) {
+            $scope.setTool(s.tool);
+            if (s.tool === 'shape') $scope.ui.shapeMode = s.mode || 'outline';
+        }
+        if (s.room) $scope.ui.room = s.room;
+        if (s.floor) $scope.ui.floor = s.floor;
+        if (s.victim) { $scope.ui.victim = s.victim; $scope.ui.fake = false; }
+        if (s.checks) $scope.ui.checksFolded = false;
+        const cr = creatorScope();
+        if (cr && s.r4tool && cr.setTool) cr.setTool(s.r4tool);
+        if (cr && s.showReach) cr.r4.showReach = true;
+        if (cr && s.r4tool === 'erase') cr.r4.eraseTarget = s.eraseTokens ? 'tokens' : 'all';
+        if (s.openMore) $timeout(function () { const d = document.querySelector('.sim-r4-more'); if (d) d.open = true; }, 60);
+        if (s.enter && (map || s.noMap) && (!s.creator || cr)) { try { s.enter(tourEnv(), t.st); } catch (e) { /* the step shows anyway */ } }
+        t.done = false;
+        t.task = '';
+        t.compact = false;
+        t.compactSet = false;
+        t.chapters = tourChapters();
+        t.ready = false;
+        // laid out once the panels for the step are drawn (and again when the window changes)
+        $timeout.cancel(tourTimer);
+        tourTimer = $timeout(function () { layoutTour(false); }, 120);
+    }
+
+    // The lit parts and the card, in window pixels. again: a relayout while the step is shown (only
+    // what moved changes)
+    function layoutTour(again) {
+        const t = $scope.tour;
+        if (!t) return;
+        const s = $scope.tourStep(), vw = window.innerWidth, vh = window.innerHeight;
+        // while the room 4 creator is open it covers the editor: only its own parts are lit
+        const modal = creatorScope() ? document.querySelector('.sbx-r4-full') : null;
+        const rectOf = function (sel) {
+            const el = sel && document.querySelector(sel);
+            if (!el || (modal && !modal.contains(el))) return null;
+            const r = el.getBoundingClientRect();
+            return r.width > 0 && r.height > 0 ? T.pad(r, 6, vw, vh) : null;
+        };
+        const main = rectOf(s.target);
+        const marks = (s.mark || []).map(rectOf).filter(Boolean);
+        // the lesson's places on the map (tiles), and the lines to draw along
+        const cv = document.getElementById('simBetaCanvas').getBoundingClientRect();
+        const toWin = function (x, y) { const q = view.toPx(x, y); return [cv.left + q[0], cv.top + q[1]]; };
+        const env = map ? tourEnv() : null;
+        const regions = env && s.region && !s.creator && !modal ? s.region(env).map(function (b) {
+            const a = toWin(12 * b[0], 12 * b[1]), z = toWin(12 * (b[2] + 1), 12 * (b[3] + 1));
+            return T.pad({ left: a[0], top: a[1], right: z[0], bottom: z[1] }, 3, vw, vh);
+        }) : [];
+        let guideLines = env && s.guide && !s.creator && !modal ? s.guide(env).map(function (line) {
+            return line.map(function (p) { return toWin(p[0], p[1]); });
+        }) : [];
+        // in the room 4 creator: its lines are fractions of the picture
+        const pic = modal && s.creator && s.r4guide ? modal.querySelector('canvas.r4-over') : null;
+        if (pic) {
+            const pr = pic.getBoundingClientRect();
+            guideLines = s.r4guide.map(function (line) {
+                return line.map(function (f) { return [pr.left + f[0] * pr.width, pr.top + f[1] * pr.height]; });
+            });
+        }
+        t.guides = guideLines.map(function (line) { return line.map(function (p) { return p.join(','); }).join(' '); });
+        // the card keeps clear of the lines too
+        const guideBoxes = guideLines.map(function (line) {
+            const xs = line.map(function (p) { return p[0]; }), ys = line.map(function (p) { return p[1]; });
+            return T.pad({ left: Math.min.apply(null, xs), top: Math.min.apply(null, ys), right: Math.max.apply(null, xs), bottom: Math.max.apply(null, ys) }, 12, vw, vh);
+        });
+        const box = function (q) { return { left: q.left + 'px', top: q.top + 'px', width: (q.right - q.left) + 'px', height: (q.bottom - q.top) + 'px' }; };
+        t.lit = (main ? [main] : []).concat(marks, regions);
+        t.hole = main ? box(main) : null;
+        t.marks = marks.map(box);
+        t.regions = regions.map(box);
+        const card = document.querySelector('.sbx-tour-card');
+        const cw = card ? card.offsetWidth : 380, ch = card ? card.offsetHeight : 260;
+        let at;
+        const inside = s.cardIn && rectOf(s.cardIn);
+        if (inside) {
+            at = { left: Math.max(12, inside.right - cw - 16), top: Math.max(12, inside.bottom - ch - 16) };
+        } else if (regions.length || t.guides.length) {
+            // a step on the map: the card in a corner of the map that keeps the places (and the
+            // panel) clear
+            const stageEl = modal && s.creator ? modal.querySelector('.sim-r4-viewport') : document.getElementById('simBetaStage');
+            const st = stageEl.getBoundingClientRect(), E = 14;
+            const corners = [
+                { left: st.right - cw - E, top: st.bottom - ch - E }, { left: st.left + E, top: st.bottom - ch - E },
+                { left: st.left + E, top: st.top + E }, { left: st.right - cw - E, top: st.top + E }
+            ];
+            // the corner covering least of them (none, when one is free)
+            const keep = regions.concat(guideBoxes, main && !(modal && s.creator) ? [main] : []);
+            const covered = function (q) {
+                return keep.reduce(function (sum, r) {
+                    const w = Math.min(q.left + cw, r.right) - Math.max(q.left, r.left), h = Math.min(q.top + ch, r.bottom) - Math.max(q.top, r.top);
+                    return sum + (w > 0 && h > 0 ? w * h : 0);
+                }, 0);
+            };
+            at = corners.reduce(function (best, q) { return covered(q) < covered(best) ? q : best; }, corners[0]);
+            // a small window: the card folds its text (title, what to do and the buttons stay) when it
+            // would still cover the places; unfolded again from its head
+            if (covered(at) > 0 && !t.compact && !t.compactSet) { t.compact = true; $timeout(function () { if ($scope.tour === t) layoutTour(true); }); }
+            at.left = Math.max(12, Math.min(vw - cw - 12, at.left));
+            at.top = Math.max(12, Math.min(vh - ch - 12, at.top));
+        } else {
+            at = T.place(main, cw, ch, vw, vh, s.place, marks);
+        }
+        const next = { left: Math.round(at.left) + 'px', top: Math.round(at.top) + 'px' };
+        if (!again || !t.card || t.card.left !== next.left || t.card.top !== next.top) t.card = next;
+        t.ready = true;
+        // the card's height is known only once its text is in: placed again after that
+        if (!again) $timeout(function () { if ($scope.tour === t) layoutTour(true); });
+    }
+    window.addEventListener('resize', function () {
+        if (!$scope.tour) return;
+        $timeout.cancel(tourTimer);
+        tourTimer = $timeout(function () { layoutTour(true); }, 150);
+    });
+
     const stage = document.getElementById('simBetaStage');
     stage.addEventListener('dragover', function (e) { e.preventDefault(); });
     stage.addEventListener('drop', function (e) {
@@ -1511,6 +2026,24 @@ app.controller('SimBetaController', ['$scope', '$timeout', '$translate', '$uibMo
         if (!file) return;
         $scope.$apply(function () { whenDiscarded(function () { readFile(file); }); });
     });
+
+    // The guide to look at only, and the guide's choice, take the keys before anything else (the
+    // room 4 creator, a modal, would close on Esc): arrows and Enter go through the guide, Esc ends
+    // it or closes the choice. The lesson leaves the keys to the editor, which is being used.
+    window.addEventListener('keydown', function (e) {
+        if ($scope.ui.guidePick) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (e.key === 'Escape') $scope.$apply($scope.closeGuidePick);
+            return;
+        }
+        if (!$scope.tourLook()) return;
+        e.preventDefault();
+        e.stopPropagation();
+        const go = { arrowright: 1, enter: 1, ' ': 1, arrowleft: -1 }[e.key.toLowerCase()];
+        if (go) $scope.$apply(function () { $scope.tourGo(go); });
+        else if (e.key === 'Escape') $scope.$apply($scope.endTour);
+    }, true);
 
     window.addEventListener('keydown', function (e) {
         // a dialog takes the keys: Esc closes it, Enter takes its main (blue) action

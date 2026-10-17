@@ -1132,7 +1132,6 @@
             "discard": "Going on drops the changes to this map (the copy kept in this browser stays).",
             "exportBlocked": "The world cannot be exported yet",
             "room4": "Room 4",
-            "connCheck": "Check how the rooms connect",
             "problemsTitle": "Checks",
             "noProblems": "No problems",
             "undo": "Undo",
@@ -1151,7 +1150,7 @@
             },
             "help": {
                 "hand": "Drag to move the map.",
-                "room": "Paint tiles into a room (room 1 takes them out again). Walls go up by themselves where rooms meet and round the map. Room 4 becomes a custom room 4; draw it with the button below.",
+                "room": "Paint tiles into a room (room 1 takes them out again). Walls go up by themselves where rooms meet and round the map. Room 4 is drawn as a picture with the button below.",
                 "passage": "Click near a room border: the tile on the side you click becomes the passage (click again to close it, on the other side to move it there). Click the middle of a passage tile to remove it. A passage that no longer fits its rooms goes by itself.",
                 "line": "Drag to draw walls. The line turns with the pointer, so one drag can draw a zigzag (go back the way you came to undo a turn). Start with Shift held for one straight line. Room 1 snaps to 12 cm (tile edges), rooms 2 and 3 to 6 cm. Not inside room 4.",
                 "eraser": "Click or drag over walls, curves and victims to remove them. Away from walls it takes a tile's floor off (hole, swamp, checkpoint); a click takes the start off. The outer walls stay.",
@@ -1174,7 +1173,7 @@
                 "victimUnreachable": "Some victims are where the robot cannot get ({{count}})",
                 "wallRule": "Some walls do not follow the rules of their room ({{count}})",
                 "room4Checkpoint": "The room 4 tile right behind a passage is not a checkpoint ({{count}}, rule 3.5.3). Placing a passage sets it by itself",
-                "customRoom4NoPicture": "The custom room 4 has not been drawn yet",
+                "customRoom4NoPicture": "Room 4 has not been drawn yet",
                 "presetNotSupported": "Room 4 presets are not available in this editor (switch to custom, or use the classic editor)"
             },
             "hints": {
@@ -1201,8 +1200,7 @@
                 "shapeIn": "Click or drag to put tiles back into the map",
                 "passageRoom4": "A passage into room 4 goes on the tile outside room 4 (as the room 4 creator and the checkpoint rule 3.5.3 expect)",
                 "regionPick": "Drag to select",
-                "regionDrag": "Drag to move, Alt+drag to copy",
-                "regionTip": "Ctrl+C copy / Ctrl+X cut / Ctrl+V paste / Delete clear",
+                "regionDrag": "Drag to move, Alt+drag to copy. Arrow keys move by a tile; Ctrl+C / X / V and Delete work too",
                 "regionCopied": "Copied. Ctrl+V pastes at the tile under the pointer",
                 "regionNoRoom": "No room beside or below for a copy",
                 "line_addRow": "Click to add a row at the green line",
@@ -1212,12 +1210,48 @@
                 "lineLimit": "The map stays 1 to 40 tiles",
                 "fixed": "Fixed (undo: Ctrl+Z)",
                 "fixPartly": "Fixed what could be fixed; the rest needs your hand",
-                "fixAllLeft": "Fixed what could be fixed; {{count}} left for your hand (undo: Ctrl+Z)"
+                "fixAllLeft": "Fixed what could be fixed; {{count}} left for your hand (undo: Ctrl+Z)",
+                "undone": "Undone (redo: Ctrl+Y)",
+                "redone": "Redone",
+                "wallsDrawn": "{{cm}} cm of wall drawn",
+                "lineDone_addRow": "Row added (undo: Ctrl+Z)",
+                "lineDone_addCol": "Column added (undo: Ctrl+Z)",
+                "lineDone_delRow": "Row removed (undo: Ctrl+Z)",
+                "lineDone_delCol": "Column removed (undo: Ctrl+Z)",
+                "lineDrawing": "{{cm}} cm of wall. Release to draw, Esc to cancel (going back takes a corner away)",
+                "lineDrawingStraight": "{{cm}} cm of straight wall. Release to draw, Esc to cancel",
+                "line_room4": "No walls inside room 4: double-click to draw it in the room 4 creator",
+                "line_fine": "Drag to draw walls (room {{room}}: 6 cm grid). Shift+drag for one straight line",
+                "line_tile": "Drag to draw walls (room 1: tile edges, 12 cm). Shift+drag for one straight line",
+                "hand": "Drag to move the view",
+                "room_outside": "Outside the map (the outline tool puts it back)",
+                "room_room4": "A room 4 tile: double-click to draw inside room 4",
+                "room_same": "Already room {{room}}. Pick the room to paint in the left panel",
+                "room_paint": "Click or drag to paint room {{room}} (now room {{cur}})",
+                "floor_outside": "Outside the map",
+                "floor_isStart": "This is the start tile (the eraser takes it off)",
+                "floor_start": "Click to move the start here (there is one start)",
+                "floor_clear": "Click to take the floor off (hole, swamp, checkpoint)",
+                "floor_off": "Click to take the {{floor}} off",
+                "floor_on": "Click to make it a {{floor}}",
+                "curve_on": "Click to put the blue curve here",
+                "curve_off": "Click to take this curve off",
+                "erase_victim": "Click to remove this victim",
+                "erase_curve": "Click to remove this curve (drag to go on)",
+                "erase_wall": "Click to remove this wall (6 cm; drag to go on)",
+                "erase_wallWhole": "Click to remove this wall (12 cm; drag to go on)",
+                "erase_floor": "Click to take this tile's floor off",
+                "erase_start": "Click to take the start tile off",
+                "victim_place": "Click to place \"{{name}}\"",
+                "victim_move": "Click to place \"{{name}}\" on this side (the tile's victim moves here: one per tile)",
+                "victim_replace": "Click to change it to \"{{name}}\"",
+                "victim_select": "Click to select it (turn, rings or remove in the left panel)"
             },
-            "drawRoom4": "Draw room 4 (or double-click its area)",
+            "drawRoom4": "Draw room 4",
+            "drawRoom4Note": "Double-clicking the room 4 area opens it too",
             "exportFailed": "The world export failed",
             "showWhere": "Click to see where",
-            "restore": "Open the last work: {{name}} ({{time}})",
+            "restore": "Open the last work",
             "ctRings": "Cognitive target",
             "ctFake": "Fake",
             "ctRandom": "Random colours of this type",
@@ -1234,15 +1268,15 @@
             "roomNote3": "6 cm walls, curves",
             "roomNote4": "drawn as a picture",
             "emptyTitle": "Start a map",
-            "emptyLead": "Make a new one, or open a JSON saved by the classic editor.",
+            "emptyLead": "Make a new one, or open a saved map (JSON).",
             "betaShort": "Beta: reads and writes the same JSON as the classic editor",
             "openJson": "Open JSON",
             "ctSum": "Sum",
             "ctHint": "Click a ring on the target, then a colour below (now ring {{n}} from the outside)",
-            "rotFixed": "Set the turn",
+            "rotFixed": "Fixed turn",
             "rotRandom": "Random",
             "rotRandomNote": "Each one gets a random turn",
-            "room4Hint": "Paint the room 4 area with the room brush to draw room 4 as a picture (this editor makes custom room 4 only).",
+            "room4Hint": "Paint the room 4 area with the room brush to draw its inside as a picture.",
             "room4NotDrawn": "Room 4 has not been drawn yet",
             "room4Drawn": "Room 4 is drawn",
             "room4PresetBeta": "This map uses a room 4 preset ({{name}}). This editor makes custom room 4 only.",
@@ -1289,7 +1323,510 @@
             "legendPocket": "Where the robot cannot get (gaps too narrow)",
             "betaMenu": "About this editor",
             "betaLead": "Erebus Editor 2026 (beta). It reads and writes the same JSON as the classic editor, so a saved map opens in either.",
-            "backToClassicNote": "Save the map you are working on (Save, JSON) first"
+            "backToClassicNote": "Save the map you are working on (Save, JSON) first",
+            "tourStart": "Guide (lesson, screen tour, making room 4)",
+            "tourShort": "Guide",
+            "tourEmpty": "New here? See how it works",
+            "tourEmptyNote": "Choose to learn by making a map, or to take the tour of the screen",
+            "tourEnd": "End",
+            "tourSkip": "End the tour",
+            "tourBack": "Back",
+            "tourNext": "Next",
+            "tourBegin": "Start",
+            "tourFinish": "Done",
+            "tourKeys": "← → to move   Esc to end",
+            "guideLesson": "Learn by making a sample map",
+            "guideTour": "Tour of the screen",
+            "guideRoom4": "Learn room 4 by making it",
+            "guideRoom4Need": "Paint room 4 with the room tool first.",
+            "lessonTodo": "To do:",
+            "lessonDone": "Done!",
+            "lessonSkip": "Skip this step",
+            "lessonDoIt": "Do it for me",
+            "lessonCreatorClosed": "The room 4 creator is closed.",
+            "lessonOpenCreator": "Open it",
+            "lessonTip": "The editor works as usual during the lesson",
+            "pickTitle": "How would you like to learn?",
+            "pickLead": "You can choose again at any time from Guide at the bottom right.",
+            "pickLessonTime": "About 15 minutes · hands on",
+            "pickLessonNote": "Make one sample map, using every feature in turn. Each step goes on when it is done, and Do it for me can do it for you.",
+            "pickLessonMap": "The open map is closed and a new one started (you are asked first if it has changes not saved).",
+            "pickTourTime": "About 3 minutes · just watching",
+            "pickTourNote": "Each part of the screen and each tool, lit up and explained one by one. The map is not changed.",
+            "pickRoom4Time": "About 5 minutes · hands on",
+            "pickRoom4Note": "In the room 4 creator, draw walls and put victims yourself, using every feature in turn.",
+            "pickLater": "Later",
+            "guideRoom4Tour": "Tour of the room 4 creator",
+            "pickRoom4Title": "How would you like to learn room 4?",
+            "pickRoom4TourTime": "About 2 minutes · just watching",
+            "pickRoom4TourNote": "Each part of the room 4 creator and each tool, lit up and explained one by one. The picture is not changed.",
+            "tourRoom4Inside": "See the tour of the room 4 creator too (then back here)",
+            "tourBackTo": "When it ends, “{{name}}” goes on from where it was",
+            "lessonCreatorOver": "The room 4 creator is open. Close it to go on.",
+            "lessonCloseCreator": "Close (OK)",
+            "lessonFold": "Fold the text",
+            "lessonUnfold": "Show the text",
+            "tour": {
+                "chapters": {
+                    "start": "Welcome",
+                    "screen": "The screen",
+                    "tools": "Tools",
+                    "shape": "Size and shape",
+                    "rooms": "Rooms",
+                    "passages": "Passages",
+                    "walls": "Walls",
+                    "floors": "Floors",
+                    "victims": "Victims",
+                    "room4": "Room 4",
+                    "finish": "Finish and export"
+                },
+                "welcome": {
+                    "title": "Welcome to Erebus Editor 2026",
+                    "body": "This editor makes worlds for the RoboCupJunior Rescue Simulation (Erebus) 2026 rules. You draw the map straight on the canvas, and walls and victims snap to the places the rules of the room under the pointer allow.\nThis tour goes through each part of the screen and each tool (about 3 minutes). The part being explained is lit up.\nPress → or Enter for the next step, ← to go back, and Esc to end at any time. To learn hands on, choose Learn by making a sample map from Guide at the bottom right."
+                },
+                "file": {
+                    "title": "File: new, open, save",
+                    "body": "New makes a blank map. If the open map has changes that are not saved, it asks first whether to throw them away.\nOpen reads a map's JSON, and Save writes the map to a JSON file. A JSON file dropped on the map opens too.\nChanges are also kept in the browser, but they are lost in another browser or when the browsing data is cleared. Keep the maps that matter as JSON with Save."
+                },
+                "name": {
+                    "title": "Map name",
+                    "body": "The map's name. Click it to change it.\nIt names the JSON you save and the world (.wbt) you export."
+                },
+                "history": {
+                    "title": "Undo and redo",
+                    "body": "Take changes back one at a time, or do them again (up to 100).\nAutomatic fixes, and moving or pasting a region, undo as one step each, so feel free to try things."
+                },
+                "view": {
+                    "title": "Seeing and moving the map",
+                    "body": "This is the map. Turn the mouse wheel to zoom, and drag with Space held (or with the wheel button) to move it. With the hand tool (H) a plain drag moves it.\nThe buttons in the top bar (dashed frame) zoom too, and the rightmost one fits the whole map in again. The number is the zoom (pixels per cm).\nThe map is made of 12 cm tiles. Each room has its own floor colour, and walls stand on the room borders and round the outside by themselves."
+                },
+                "rail": {
+                    "title": "Tools",
+                    "body": "The tools that change the map, in four groups from the top: looking (select, hand), map and rooms (shape, room, passage), walls (line, curve, eraser), and floors and victims (floor, victim).\nThe letter at the bottom right of each button is its key: one key press takes the tool.\nNext, the tools one by one, in the order a map is made."
+                },
+                "panel": {
+                    "title": "What the tool does, and its settings",
+                    "body": "The tool you have shows how it is used and its settings here. When in doubt, read this first.\nThe status line at the bottom (dashed frame) says what you can do where the pointer is, or why you cannot."
+                },
+                "shape": {
+                    "title": "Shape (X): the map's size and outline",
+                    "body": "A new map starts here with its size: the + and − of the tiles across and down (up to 40). What still fits stays when the size changes.\nWith Outline, click or drag over tiles to take them out of the map (no floor) or bring them back, for an L shape or any map that is not a rectangle. The outer walls follow the outline by themselves.\nAdd a row, Add a column, Remove a row and Remove a column put rows and columns into the middle of a map, or take them out."
+                },
+                "room": {
+                    "title": "Room (M): painting the rooms",
+                    "body": "Pick a room number and paint tiles with it. Painting room 1 takes a tile back.\nEach room has its rules: room 1 has 12 cm walls (on tile edges), room 2 has 6 cm walls, room 3 has 6 cm walls and curves, and room 4 is drawn freely as a picture.\nWalls stand on the room borders and round the outside by themselves. To join rooms, use the Passage tool next."
+                },
+                "passage": {
+                    "title": "Passage (P): joining the rooms",
+                    "body": "Click near a room border: the tile on the side you clicked becomes a passage, and the wall on the border opens.\nClick again to close it. Click the other side and the passage moves to that tile. Click the middle of a passage tile to remove it.\nA passage into room 4 is put on the tile outside room 4. Passages that no longer fit after the rooms are painted again are removed by themselves."
+                },
+                "line": {
+                    "title": "Line (L): drawing walls",
+                    "body": "Drag to draw walls. The wall follows the pointer, so a zigzag is drawn in one go; going back the way you came takes it back.\nHold Shift as you start for one straight line only.\nWalls snap to the grid of the room under the pointer: 12 cm (tile edges) in room 1, 6 cm (half tiles) in rooms 2 and 3. They cannot be drawn inside room 4 (room 4 is a picture)."
+                },
+                "curve": {
+                    "title": "Curve (A): curved walls",
+                    "body": "Room 3 only. Point at a quarter (6 cm square) of a room 3 tile and the four curves it can take show faintly.\nA click puts the nearest one (blue). Clicking the same one again removes it."
+                },
+                "eraser": {
+                    "title": "Eraser (E)",
+                    "body": "Click or drag over walls, curves and victims to remove them; what would go is shown red under the pointer.\nAway from walls it takes a tile's floor off (hole, swamp, checkpoint). The start goes on a click only.\nA drag that starts on a wall leaves floors alone, so floors do not go while you rub out walls. The outer walls stay."
+                },
+                "floor": {
+                    "title": "Floor (F): checkpoints, holes, swamps, the start",
+                    "body": "Pick a kind and click a tile to give it that floor. Clicking again with the same kind takes it back.\nStart is the tile the robot is put on: one on a map. None takes the floor off.\nThe rules need a checkpoint on each passage into room 4, so it is put there by itself."
+                },
+                "victim": {
+                    "title": "Victim (V): victims and cognitive targets",
+                    "body": "Pick a kind in the panel (letter victims Φ, Ψ, Ω and fake ones, cognitive targets F, P, C, O and a fake one) and click where there is a wall.\nThey go on tile edges in room 1 (one per tile side), on 16 places along the 6 cm walls in rooms 2 and 3, and on two places on a curve (inside and outside). Where one cannot go, the status line says why.\nTurn the dial (Set the turn) for its rotation, or choose Random for a new one each time. For a cognitive target, click a ring of the target and then a colour below; the sum of the rings gives its type.\nClick a victim with the same kind to select it, then change its turn or rings or remove it. Clicking it with another kind changes its kind."
+                },
+                "room4": {
+                    "title": "Drawing room 4",
+                    "body": "Painting room 4 with the room tool makes room 4. Its walls and victims are drawn as a picture.\nDraw room 4 (or a double-click on its area) opens the room 4 creator: draw walls freely with the pen, lines and shapes, and put victims against walls. Where the robot cannot get to is shown with red stripes.\nThe creator's Guide button shows how to make room 4 in detail. The picture is shown on the map and goes into the exported world as it is."
+                },
+                "select": {
+                    "title": "Select (S): moving and copying a region",
+                    "body": "Drag to select a region of tiles; its walls, rooms, floors and victims are taken together.\nDrag inside it to move it, or with Alt held to move a copy. The arrow keys move it a tile at a time.\nCtrl+C copies, Ctrl+X cuts, Ctrl+V pastes (the tile under the pointer is its top left), Ctrl+D duplicates and Delete clears it. Esc lets the region go."
+                },
+                "linear": {
+                    "title": "Linear",
+                    "body": "When on, each tile is coloured as linear (beside a wall joined to the start) or floating. Victims on floating tiles score more.\nIt needs the start tile. The world export decides linear tiles the same way."
+                },
+                "checks": {
+                    "title": "Checks",
+                    "body": "Every change is checked against the rules.\nA red ✕ is a problem the world cannot be exported with; a yellow ! is a warning worth a look, but the world can be exported.\nPoint at an item to see where it is on the map, and click it to go there. Click the heading to fold the card.\nWhere the robot (radius 3.7 cm) cannot get to is always shown on the map with red stripes, and a victim there gets a warning."
+                },
+                "fix": {
+                    "title": "Fixing automatically",
+                    "body": "An item with a Fix button is fixed with one click (putting the start, joining rooms with passages, removing walls the rules do not allow, and so on).\nFix all that can be fixed does them all at once. If you do not like the result, Ctrl+Z takes it back.\nUntick Check how the rooms connect to stop checking that every room is reached through passages, which is easier to read while the map is unfinished."
+                },
+                "export": {
+                    "title": "Exporting the world (.wbt)",
+                    "body": "Writes the world file (.wbt) that Erebus loads.\nWhile a red ✕ problem is left the button is grey, and pressing it lists what to fix; it can fix them for you from there.\nKeep the map for further editing with Save (JSON), not the .wbt: a .wbt does not turn back into a map you can edit."
+                },
+                "more": {
+                    "title": "Guide and language",
+                    "body": "Guide at the bottom right has the lesson that builds a sample map, this tour, and how to make room 4, at any time.\nEnglish / 日本語 switches the language."
+                },
+                "done": {
+                    "title": "That is the tour",
+                    "body": "This button takes the tour again at any time.\nA good order to work in: set the size with Shape → paint the rooms → join them with passages → draw walls → put floors and victims → look at the checks and export the .wbt.\nEnjoy making your maps!"
+                }
+            },
+            "lesson": {
+                "planLabel": "The sample map, finished",
+                "intro": {
+                    "title": "Learn by making a sample map",
+                    "body": "In this lesson you make the map above and use the editor's features one after another on the way (about 15 minutes).\nRoom 1 on the left, room 2 top middle, room 3 bottom middle, room 4 on the right. You join the rooms with passages, put walls, a curve, floors and victims, draw the inside of room 4, and end with a world ready to export.\nDo what each step asks and it turns to Done!, and Next goes on. If something does not work, Do it for me does it for you. The editor works as usual all along."
+                },
+                "new": {
+                    "title": "Make a new map",
+                    "body": "First, a blank map.\nThe map you work on is kept in the browser, so if the page is closed you can go on from where you were next time.",
+                    "task": "Press New map"
+                },
+                "size": {
+                    "title": "Set the map's size",
+                    "body": "A new map is 8 tiles across and 6 down (a tile is 12 cm square). Change the size with the + and − of the tiles across and down in the shape tool's panel (up to 40).\nWhat still fits (walls, rooms, the outline) stays when the size changes.",
+                    "task": "Press + of the tiles across to make it 9 (6 down stays)",
+                    "tasks": {
+                        "length": "It is {{l}} down. Set the tiles down back to 6",
+                        "more": "It is {{w}} across. Press − of the tiles across to make it 9",
+                        "less": "It is {{w}} across. Press + of the tiles across to make it 9"
+                    }
+                },
+                "outline": {
+                    "title": "Change the map's outline",
+                    "body": "With Outline (uneven), each click on a tile takes it out of the map (no floor) or brings it back; a drag does many at once.\nMaps need not be rectangles: an L shape works too. The outer walls follow the outline by themselves.",
+                    "task": "Click the top left corner tile (green frame) to take it out of the map",
+                    "tasks": {
+                        "extra": "{{n}} more tile(s) besides the top left corner are out of the map. Click them again to bring them back (only the corner goes out)"
+                    }
+                },
+                "addCol": {
+                    "title": "Put a column in",
+                    "body": "With Add a column, a click on a vertical line between tiles puts a new column there; everything right of it moves right. Add a row does the same with a horizontal line.\nUse it to make a map you are working on bigger.",
+                    "task": "With Add a column chosen, click the line left of the rightmost column (green frame); any line takes one",
+                    "tasks": {
+                        "removed": "A column went instead. Undo (Ctrl+Z), check that Add a column is chosen, then click a vertical line"
+                    }
+                },
+                "delCol": {
+                    "title": "Take a column out",
+                    "body": "With Remove a column, click a tile of the column to take out. What was in it goes, and the right side closes up. Remove a row does the same with a row.\nUndo (Ctrl+Z) takes back a mistake.",
+                    "task": "With Remove a column, click the rightmost column (green frame) to be back to 9 across; any column can go",
+                    "tasks": {
+                        "more": "It is still {{n}} column(s) more than 9 across. Remove {{n}} more with Remove a column",
+                        "less": "Too many went: it is {{n}} column(s) fewer than 9 across. Undo (Ctrl+Z) to bring them back"
+                    }
+                },
+                "room2": {
+                    "title": "Paint room 2",
+                    "body": "The room tool paints rooms. A new map is all room 1. Pick a room number and paint tiles with it (painting room 1 takes a tile back).\nEach room has its rules: room 1 has 12 cm walls (on tile edges), room 2 6 cm walls (half tiles), room 3 6 cm walls and curves.\nWalls stand on the room borders by themselves.",
+                    "task": "Pick Room 2 and paint the 3 × 3 tiles in the green frame",
+                    "tasks": {
+                        "extra": "{{n}} tile(s) outside the green frame are room {{room}} too. Pick Room 1 and paint them back",
+                        "wrong": "{{n}} tile(s) in the green frame are painted with another room. Pick Room {{room}} and paint them again",
+                        "left": "{{n}} to go: paint the rest of the green frame with room {{room}}"
+                    }
+                },
+                "room3": {
+                    "title": "Paint room 3",
+                    "body": "Now room 3. It has the 6 cm walls of room 2, and curved walls as well.",
+                    "task": "Pick Room 3 and paint the 3 × 3 tiles in the green frame",
+                    "tasks": {
+                        "extra": "{{n}} tile(s) outside the green frame are room {{room}} too. Pick Room 1 and paint them back",
+                        "wrong": "{{n}} tile(s) in the green frame are painted with another room. Pick Room {{room}} and paint them again",
+                        "left": "{{n}} to go: paint the rest of the green frame with room {{room}}"
+                    }
+                },
+                "room4": {
+                    "title": "Paint room 4",
+                    "body": "Room 4 is drawn freely as a picture: its walls and victims. Painted, it is a room 4 with nothing in it yet, and the checks say it is not drawn. Its inside comes in a later chapter.",
+                    "task": "Pick Room 4 and paint the green frame on the right (3 × 6 tiles)",
+                    "tasks": {
+                        "extra": "{{n}} tile(s) outside the green frame are room {{room}} too. Pick Room 1 and paint them back",
+                        "wrong": "{{n}} tile(s) in the green frame are painted with another room. Pick Room {{room}} and paint them again",
+                        "left": "{{n}} to go: paint the rest of the green frame with room {{room}}"
+                    }
+                },
+                "pass12": {
+                    "title": "Join rooms with a passage",
+                    "body": "A wall stands on each room border, so the robot cannot get into room 2 yet. With the passage tool, click near a border: the tile on the side you clicked becomes a passage, and the wall opens.\nClick again to close it; click the other side and the passage moves to that tile. Click the middle of a passage tile to remove it.",
+                    "task": "Click near the border of rooms 1 and 2, on the room 1 side (the left tile in the green frame)"
+                },
+                "pass34": {
+                    "title": "Join the other rooms",
+                    "body": "In the same way, put passages on the borders of rooms 2 and 3, and of rooms 3 and 4.\nA passage into room 4 goes on the tile outside room 4. The rules need a checkpoint where the robot goes into room 4, so it is put there by itself.",
+                    "task": "Click the two borders in the green frames, so that rooms 3 and 4 are reached",
+                    "tasks": {
+                        "need4": "Room 3 is reached. Now click the border of rooms 3 and 4 (the green frame on the right)",
+                        "need3": "Room 4 is reached, but not room 3 yet. Click the border of rooms 2 and 3 (the green frame above)"
+                    }
+                },
+                "wall1": {
+                    "title": "Draw a wall in room 1",
+                    "body": "Drag with the line tool to draw walls. They snap to the grid of the room under the pointer: along tile edges (12 cm) in room 1.\nHold Shift as you start for one straight line only.",
+                    "task": "Drag a wall along the dashed orange line in room 1",
+                    "tasks": {
+                        "left": "The wall is short. Draw it to the end of the dashed orange line"
+                    }
+                },
+                "wall2": {
+                    "title": "Draw a zigzag in room 2",
+                    "body": "The wall follows the pointer as you drag, so steps like a staircase go in one stroke. Going back the way you came takes it back.\nIn rooms 2 and 3 walls snap to half tiles (6 cm).",
+                    "task": "Draw the dashed orange staircase in room 2 in one stroke",
+                    "tasks": {
+                        "left": "Only part of the staircase. Draw it to the end of the dashed orange line in one stroke"
+                    }
+                },
+                "curve": {
+                    "title": "Put a curve in room 3",
+                    "body": "With the curve tool, point at a quarter (6 cm square) of a room 3 tile: the four curves it can take show faintly. A click puts the nearest one (blue).\nClicking the same one again removes it. Curves are for room 3 only.",
+                    "task": "Point at a quarter of the tile in the green frame and put a curve"
+                },
+                "start": {
+                    "title": "Put the start",
+                    "body": "The floor tool sets a tile's floor. Start is the tile the robot is put on: one on a map. Without it the world cannot be exported.",
+                    "task": "Pick Start and click the bottom left tile (green frame)",
+                    "tasks": {
+                        "room": "The start is outside room 1. Click a room 1 tile (green frame) to put it there"
+                    }
+                },
+                "floors": {
+                    "title": "Checkpoints, holes and swamps",
+                    "body": "Pick a kind and click a tile to give it that floor. Clicking again with the same kind takes it back; None takes the floor off.\nA checkpoint scores when the robot reaches it, and is where the robot is put back after a lack of progress (LoP). A hole is a tile the robot must keep out of, and a swamp slows it down.",
+                    "task": "Put one checkpoint, one hole and one swamp (the three green frames are good places)",
+                    "tasks": {
+                        "left": "Still to put: {{list}}. Pick a kind and click a tile"
+                    }
+                },
+                "erase": {
+                    "title": "Rub out, and undo",
+                    "body": "The eraser removes walls, curves and victims with a click or a drag. Away from walls it takes a tile's floor off (hole, swamp, checkpoint); the start goes on a click only. The outer walls stay.\nIf you rub out the wrong thing, undo (Ctrl+Z, or ↶ in the top bar) brings it back; redo (Ctrl+Shift+Z, or ↷) goes forward again.",
+                    "task": "Rub out the swamp (green frame), then bring it back with Ctrl+Z",
+                    "tasks": {
+                        "undo": "The swamp is gone. Now bring it back with Ctrl+Z (or ↶ in the top bar)"
+                    }
+                },
+                "victim": {
+                    "title": "Put a victim",
+                    "body": "With the victim tool, pick a kind and click where there is a wall. Victims go on tile edges in room 1 (one per tile), on 16 places along the 6 cm walls in rooms 2 and 3, and on two places on a curve (inside and outside). Where one cannot go, the status line says why.\nSet its turn with the dial (Set the turn), or choose Random for a new one each time.",
+                    "task": "Pick Harmed (Φ) and click the top side of the room 1 wall you drew (the bottom edge of the tile in the green frame)",
+                    "tasks": {
+                        "notReal": "That is a fake victim or a cognitive target. Pick Harmed (Φ) in the Real row and put it on the room 1 wall"
+                    }
+                },
+                "fake": {
+                    "title": "Put a fake victim",
+                    "body": "The Fake row gives fake victims, which the robot has to tell from real ones.\nVictims go on the outer walls too.",
+                    "task": "Pick a fake victim and put it on the outer wall at the top of room 2 (the tile in the green frame)",
+                    "tasks": {
+                        "notFake": "That is a real victim. Pick one from the Fake row (the eraser takes the other off)"
+                    }
+                },
+                "ct": {
+                    "title": "Put a cognitive target",
+                    "body": "A cognitive target (F, P, C, O) is a target of five rings. Picking a type gives its ring colours; click a ring of the target and then a colour below to change it.\nThe sum of the rings gives the type; one that matches no type is a fake target.",
+                    "task": "Pick a cognitive target and put it on the outer wall at the bottom of room 3 (the tile in the green frame)"
+                },
+                "pick": {
+                    "title": "Change a victim you put",
+                    "body": "Click a victim with the same kind picked to select it. In the panel, change its kind, whether it is fake, its turn (for a cognitive target, its rings), or remove it. Done ends the selection.\nClicking it with another kind picked changes its kind.",
+                    "task": "Click one of your victims with its kind picked, to select it"
+                },
+                "r4open": {
+                    "title": "Draw the inside of room 4",
+                    "body": "Room 4's walls and victims are drawn as a picture. Press Draw room 4 in the room tool's panel, or double-click room 4 on the map, to open the room 4 creator.",
+                    "task": "Press Draw room 4"
+                },
+                "r4intro": {
+                    "title": "The room 4 creator",
+                    "body": "This is the room 4 creator. Room 4 is shown large, with the map's walls around it (the outer walls and room borders).\nWhat you draw in black becomes walls and the marks you put against them become victims: the picture is room 4 in the world as it is.\nGuide at the bottom right of this screen shows this part again at any time; the language switch is there too."
+                },
+                "r4screen": {
+                    "title": "The creator's screen",
+                    "body": "On the left the tools, then their settings, and the picture in the middle. The top bar has undo, redo and clear, what to show, zoom, and opening and saving a picture. The bottom line counts the victims and gives warnings.\nCtrl (⌘) + wheel zooms, and Space + drag moves the view."
+                },
+                "r4pen": {
+                    "title": "Draw walls with the pen (P)",
+                    "body": "The pen draws a wall wherever you drag: for walls of any shape, by hand.\nLeave room for the robot (about a tile) to get through. Undo (Ctrl+Z) takes back a mistake.",
+                    "task": "Draw a wavy wall with the pen, about along the dashed orange line"
+                },
+                "r4line": {
+                    "title": "Line (L)",
+                    "body": "The line draws a straight wall from where the drag starts to where it ends. With Shift held it keeps to 45° steps.\nWith Snap to grid (1/4 tile) on in the settings, its ends snap to quarter tiles.",
+                    "task": "Draw a line along the dashed orange line"
+                },
+                "r4curve": {
+                    "title": "Curve (B)",
+                    "body": "The curve takes a point per click and goes through them. A double-click, Enter or right-click ends it; clicking the first point closes it. Backspace takes a point back and Esc cancels.\nLine in the settings chooses a smooth curve or straight pieces.",
+                    "task": "With the curve, click the dashed line's four points in turn and end with a double-click"
+                },
+                "r4arc": {
+                    "title": "Arc (A)",
+                    "body": "The arc first takes its two ends with a drag. Then moving the mouse bends it, and a click puts it down.",
+                    "task": "With the arc, drag from one end of the dashed line to the other, bend it to the middle and click"
+                },
+                "r4rect": {
+                    "title": "Rectangle (R)",
+                    "body": "The rectangle draws walls round the box between the drag's two corners. With Shift held it is a square.",
+                    "task": "Drag the dashed rectangle with the rectangle tool"
+                },
+                "r4circle": {
+                    "title": "Circle (C)",
+                    "body": "The circle draws a round wall from its centre out to where you drag: handy for round obstacles like pillars.",
+                    "task": "With the circle, drag from the dashed circle's centre outwards"
+                },
+                "r4ellipse": {
+                    "title": "Ellipse (O)",
+                    "body": "The ellipse draws a wall inside the box you drag. With Shift held it is a circle.",
+                    "task": "With the ellipse, drag a box round the dashed ellipse"
+                },
+                "r4polygon": {
+                    "title": "Polygon (G)",
+                    "body": "The polygon draws a regular polygon from its centre out. Sides in the settings chooses 3 to 12 sides. It turns in 15° steps, or freely with Shift held.",
+                    "task": "With the polygon (6 sides), drag from the dashed shape's centre outwards"
+                },
+                "r4shape": {
+                    "title": "Shape (I): the shape of an icon or a picture",
+                    "body": "Shape makes walls from the shape of an icon or a picture. Choose an icon (search in English, e.g. star) or a picture in the settings, then drag the box to put it in.\nFilled or Outline, and its turn, can be chosen too.",
+                    "task": "With Shape, choose an icon (e.g. star) and drag it into the dashed box"
+                },
+                "r4select": {
+                    "title": "Select (S) a part",
+                    "body": "Select takes the part you drag round. A selected part moves with a drag.",
+                    "task": "With Select, drag round the dashed box (the rectangle from before)"
+                },
+                "r4transform": {
+                    "title": "Turn, flip, duplicate",
+                    "body": "The panel's buttons turn the selected part 90° either way ([ and ]), flip it either way, duplicate it (Ctrl+D), copy (Ctrl+C) and paste it (Ctrl+V), or delete it (Delete). Done (✓, Enter) puts it back into the picture.",
+                    "task": "Turn or flip the selected part, then press Done (✓ or Enter)",
+                    "tasks": {
+                        "noSelection": "Nothing is selected. With Select, drag round the dashed box"
+                    }
+                },
+                "r4erase": {
+                    "title": "Eraser (E)",
+                    "body": "The eraser rubs out walls and victims where you drag. Its size (S, M, L) is in the settings.\nClear (the bin) in the top bar takes the whole picture away.",
+                    "task": "With the eraser, rub out the top line (dashed orange)"
+                },
+                "r4template": {
+                    "title": "Template (T)",
+                    "body": "Pick a template (maze, pillars, diagonals, zigzag, rings, obstacles) and press Place: walls are laid over the whole of room 4, leaving as little as it can that the robot cannot get to.\nWith Clear the walls and victims first on, what is drawn goes before: a way to clear away the practice shapes too.",
+                    "task": "Pick a template (e.g. Pillars), turn on Clear the walls and victims first, and press Place",
+                    "tasks": {
+                        "clearOff": "Clear the walls and victims first is off. Turn it on, then press Place (it clears away the practice shapes)"
+                    }
+                },
+                "r4stamp": {
+                    "title": "Put victims",
+                    "body": "With the victim tool, pick a kind and click near a wall: the victim goes on the nearest wall. Not on a wall's end or a thin tip.\nClick a victim to select it and change its turn or ring colours; with another kind picked, it changes kind. Right-click removes it.\nRandom (under Undecided) leaves its kind to be decided when the world is exported.",
+                    "task": "Pick a kind and click near walls to put two victims",
+                    "tasks": {
+                        "left": "{{n}} more: click near a wall"
+                    }
+                },
+                "r4pick": {
+                    "title": "Change a victim you put",
+                    "body": "Click a victim with the same kind picked to select it. In the panel, change its turn (for a cognitive target, its ring colours) or remove it. Done ends the selection.\nClicking it with another kind picked changes its kind. A right-click removes it too.",
+                    "task": "Click one of your victims with its kind picked, to select it"
+                },
+                "r4eraseTokens": {
+                    "title": "Rub out victims only",
+                    "body": "With Victims only chosen for the eraser, a victim it touches goes as a whole, and the walls stay.",
+                    "task": "Choose Victims only for the eraser and rub over one victim",
+                    "tasks": {
+                        "target": "The eraser is on Everything. Switch it to Victims only"
+                    }
+                },
+                "r4random": {
+                    "title": "Place at random",
+                    "body": "In Place at random, choose how many and of what kind (the chosen type or mixed types) and press Place: victims go in all at once.\nThey go along walls the robot can get within half a tile of, at least half a tile apart.",
+                    "task": "Press Place in Place at random"
+                },
+                "r4reach": {
+                    "title": "Make a place out of reach, and see it",
+                    "body": "With Out of reach on, where the robot (radius 3.7 cm) cannot get to is shown with red stripes: a place closed in by walls, or a gap narrower than the robot.\nA place out of reach is fine in itself (the inside of an obstacle is meant to be). But the robot cannot find a victim put there, so use the stripes when putting victims. Victims the robot cannot get near, or that are off their wall, get a dashed red ring, and the bottom line counts them.\nEntrances / CP shows the entrances and checkpoints. Try making a place out of reach.",
+                    "task": "With the rectangle tool, draw a small square away from the walls and see its inside turn to red stripes (Do it for me draws a small square with the pen)",
+                    "tasks": {
+                        "off": "There is no start, so where the robot cannot get to cannot be worked out. Put the start on the map first (this step can be skipped)",
+                        "allBlocked": "The robot cannot get into almost any of room 4: something closes off its entrance. Rub out the wall in front of it, or put a template again with Clear first on"
+                    }
+                },
+                "r4file": {
+                    "title": "Save and open as a picture",
+                    "body": "The buttons at the right of the top bar save the picture as a PNG, and open a PNG or JPEG.\nThe victims' kinds are kept in the picture, so a saved picture opens as it was: handy for the same room 4 in another map."
+                },
+                "r4ok": {
+                    "title": "Back to the map",
+                    "body": "When it is drawn, press OK: the picture shows as room 4 on the map and goes into the exported world.\nTo draw it again later, press Draw room 4 again or double-click room 4.",
+                    "task": "Press OK to go back to the map"
+                },
+                "select": {
+                    "title": "Select, move and copy a region",
+                    "body": "Drag with the select tool to select a region of tiles; its walls, rooms, floors and victims are taken together.\nDrag inside it to move it, or with Alt held to move a copy. The arrow keys move it a tile at a time. Ctrl+C / Ctrl+X copy / cut, Ctrl+V pastes (the tile under the pointer is its top left), Ctrl+D duplicates and Delete clears it. Esc lets it go.\nJust select it here; if it moves, Ctrl+Z takes it back.",
+                    "task": "Drag to select room 1 (green frame)"
+                },
+                "view": {
+                    "title": "Move the view",
+                    "body": "The mouse wheel zooms, and a drag with Space held (or with the wheel button) moves the view. With the hand tool (H) a plain drag moves it.\nThe magnifier buttons in the top bar zoom too, and the rightmost one fits the whole map in again."
+                },
+                "linear": {
+                    "title": "Linear",
+                    "body": "Linear colours each tile as linear (beside a wall joined to the start) or floating. Victims on floating tiles score more.\nPress it again for the usual view.",
+                    "task": "Press Linear"
+                },
+                "checks": {
+                    "title": "Look at the checks",
+                    "body": "Every change is checked against the rules, in the card at the top right. A red ✕ is a problem the world cannot be exported with; a yellow ! is a warning worth a look.\nPoint at an item to see where it is, and click it to go there. Fix fixes one; Fix all that can be fixed does them all.\nWhere the robot cannot get to is shown on the map with red stripes. Untick Check how the rooms connect to stop checking the passages.",
+                    "task": "Have no red ✕ problem left (if you followed every step, there is none)",
+                    "tasks": {
+                        "left": "{{n}} red ✕ problem(s) left. Press Fix all that can be fixed, or click an item to see where it is"
+                    }
+                },
+                "name": {
+                    "title": "Name the map",
+                    "body": "The map's name names the JSON you save and the .wbt you export.",
+                    "task": "Click the map name in the top bar and change it"
+                },
+                "save": {
+                    "title": "Save",
+                    "body": "Save writes the map to a JSON file. To go on editing it, Open reads the JSON (dropping it on the map works too).\nThe map you work on is also kept in the browser, and next time Open the last work goes on from there. It is lost in another browser or when the browsing data is cleared, so keep maps that matter as JSON."
+                },
+                "export": {
+                    "title": "Export the world",
+                    "body": "The .wbt button writes the world file Erebus loads. With a red ✕ problem left it cannot, and lists what to fix.\nA .wbt does not turn back into a map you can edit, so keep the map as JSON too."
+                },
+                "more": {
+                    "title": "Guide and language",
+                    "body": "Guide at the bottom right has this lesson, the tour of the screen and how to make room 4, at any time. The room 4 creator's Guide button shows the room 4 part on its own.\nEnglish / 日本語 switches the language."
+                },
+                "done": {
+                    "title": "Finished!",
+                    "body": "Well done: the sample map is made.\nSave it, or export the .wbt and run it in Erebus. For a new map, start from New.\nA good order to work in: size and outline → paint the rooms → join them with passages → draw walls → floors and victims → draw room 4 → look at the checks and export."
+                }
+            },
+            "toolHints": {
+                "select": "Drag to select tiles (walls, rooms, floors and victims move or copy together)",
+                "select_region": "{{size}} tiles selected: drag inside to move, Ctrl+C / X / V, Delete, Esc to drop it",
+                "hand": "Drag to move the view",
+                "shape_outline": "Click or drag tiles to take them out of the map or back. The size is in the left panel",
+                "shape_addRow": "Point at the border where the row goes and click",
+                "shape_addCol": "Point at the border where the column goes and click",
+                "shape_delRow": "Point at the row to remove and click",
+                "shape_delCol": "Point at the column to remove and click",
+                "room": "Drag over tiles to paint room {{room}}. Walls on borders and the outside come by themselves",
+                "passage": "Click near a room border (dotted) to put a passage",
+                "line": "Drag to draw walls, round corners as you go; Shift for one straight line",
+                "curve": "Point at a quarter tile in room 3 and click the blue curve",
+                "eraser": "Point at a wall, curve, victim or floor and click (drag to go on)",
+                "floor": "Click a tile to make it a {{floor}} (again to take it off)",
+                "victim": "Click a side with a wall to place \"{{name}}\". Pick the kind in the left panel",
+                "victim_selected": "The selected victim: change its turn or rings, or remove it, in the left panel"
+            },
+            "lessonState": {
+                "tool": "Choose the {{name}} tool (in the tool column on the left)"
+            }
         },
         "simMapEditor": {
             "title": "Rescue Simulation World Editor",

@@ -34,6 +34,9 @@
 }
 
 .sbx-title {
+    /* the β badge centred on the title, not sat on its baseline */
+    display: inline-flex;
+    align-items: center;
     font-weight: 700;
     white-space: nowrap;
     padding-right: 0.4rem;
@@ -43,9 +46,6 @@
     font-size: 0.7rem;
 }
 
-.sbx-lang {
-    font-size: 0.8rem;
-}
 
 /* ---- top bar ---- */
 .sbx-top {
@@ -55,15 +55,22 @@
     padding: 0.45rem 0.6rem;
     border-bottom: 1px solid var(--sbx-line);
     background: #f8fafc;
-    flex-wrap: wrap;
+    /* one row: the map name gives way first, then the button labels go (below 1440 px) */
+    flex-wrap: nowrap;
+    white-space: nowrap;
 }
 
 .sbx-name {
     display: flex;
     align-items: center;
     gap: 0.45rem;
-    min-width: 12rem;
+    min-width: 6rem;
     flex: 0 1 18rem;
+}
+
+.sbx-name-empty {
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .sbx-name-icon {
@@ -311,6 +318,7 @@
 }
 
 .sbx-choice {
+    white-space: nowrap;
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
@@ -347,6 +355,10 @@
 
 .sbx-choice-note {
     margin-left: auto;
+    min-width: 0;
+    /* the room's name stays on one line; only its note wraps when the panel is narrow */
+    white-space: normal;
+    text-align: right;
     font-size: 0.72rem;
     font-weight: 400;
     color: var(--sbx-muted);
@@ -636,12 +648,48 @@
     min-height: 32px;
 }
 
-.sbx-hint {
+/* the tour and the language, at the right end of the status line */
+.sbx-status-tools { display: inline-flex; gap: 0.25rem; margin-left: auto; flex: none; }
+.sbx-status-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    height: 24px;
+    padding: 0 0.55rem;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--sbx-text);
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+.sbx-status-btn:hover { background: #e2e8f0; }
+.sbx-status-btn.sbx-tour-btn { border-color: #cbd5e1; background: #fff; font-weight: 600; }
+.sbx-status-btn.sbx-tour-btn:hover { background: #f1f5f9; }
+
+.sbx-hint,
+.sbx-tool-hint {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    min-width: 0;
     color: #1d4ed8;
     font-weight: 600;
+}
+/* the tool's how-to: quieter than what the pointer is on */
+.sbx-tool-hint { color: var(--sbx-text); font-weight: 500; }
+.sbx-tool-hint .fas { color: #d97706; }
+/* what has just happened */
+.sbx-notice.ok { color: #15803d; }
+.sbx-notice.warn { color: #b45309; }
+/* the view keys, after the message: they give way first */
+.sbx-howto {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: #94a3b8;
 }
 
 .sbx-beta-note .sim-beta-badge {
@@ -650,8 +698,11 @@
 }
 
 /* narrower screens: the side panel goes under the map, labels give way to icons */
-@media (max-width: 1280px) {
+@media (max-width: 1440px) {
     .sbx-btn-label { display: none; }
+}
+
+@media (max-width: 1280px) {
     .sbx-body { grid-template-columns: 52px 240px minmax(0, 1fr); }
 }
 
@@ -725,14 +776,6 @@
     padding: 0 0.75rem 0.6rem;
     overflow-y: auto;
     min-height: 0;
-}
-
-.sbx-checks-conn {
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    border-top: 1px solid #f1f5f9;
-    font-size: 0.78rem;
-    color: #64748b;
 }
 
 /* select tool: the region and what can be done with it */
@@ -933,7 +976,7 @@
 
 /* the β badge opens a small menu: what β means and the way back to the classic editor */
 .sbx-beta-wrap { position: relative; display: inline-flex; margin-left: 0.4rem; }
-.sbx-beta-btn { display: inline-flex; align-items: center; gap: 0.25rem; border: none; cursor: pointer; }
+.sbx-beta-btn { display: inline-flex; align-items: center; gap: 0.25rem; margin-left: 0; border: none; line-height: 1.5; cursor: pointer; }
 .sbx-beta-btn .fa-caret-down { font-size: 0.7em; opacity: 0.8; }
 .sbx-beta-btn:hover, .sbx-beta-btn.open { filter: brightness(0.95); box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25); }
 .sbx-beta-back { position: fixed; inset: 0; z-index: 1040; }
@@ -957,3 +1000,331 @@
 .sbx-beta-menu-item span { display: flex; flex-direction: column; gap: 0.1rem; }
 .sbx-beta-menu-item strong { font-size: 0.86rem; }
 .sbx-beta-menu-item small { font-size: 0.74rem; color: #64748b; white-space: normal; }
+
+/* ---- the guided tour ---- */
+.sbx-tour-btn { position: relative; }
+.sbx-tour-dot {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #f59e0b;
+    box-shadow: 0 0 0 2px #fff;
+    animation: sbx-tour-pulse 1.8s ease-out infinite;
+}
+/* without its pulse while it goes (ngAnimate would wait for the endless animation to end) */
+.sbx-tour-dot.ng-leave { animation: none; }
+@keyframes sbx-tour-pulse {
+    0% { box-shadow: 0 0 0 2px #fff, 0 0 0 2px rgba(245, 158, 11, 0.6); }
+    70% { box-shadow: 0 0 0 2px #fff, 0 0 0 9px rgba(245, 158, 11, 0); }
+    100% { box-shadow: 0 0 0 2px #fff, 0 0 0 9px rgba(245, 158, 11, 0); }
+}
+
+/* on the empty screen: the way in for someone new */
+.sbx-empty-tour {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid #fde68a;
+    border-radius: 11px;
+    background: #fffbeb;
+    color: #92400e;
+    text-align: left;
+    cursor: pointer;
+}
+.sbx-empty-tour:hover { background: #fef3c7; }
+.sbx-empty-tour > .fa-route { font-size: 1.15rem; color: #d97706; }
+.sbx-empty-tour span { display: flex; flex-direction: column; flex: 1 1 auto; gap: 0.1rem; }
+.sbx-empty-tour strong { font-size: 0.88rem; }
+.sbx-empty-tour small { font-size: 0.75rem; color: #a16207; }
+.sbx-empty-tour > .fa-chevron-right { font-size: 0.75rem; opacity: 0.7; }
+
+/* over the room 4 creator too (a modal at 1050); only the card (and in the tour of the screen the
+   blocking layer) takes the pointer, so the editor can be used during the lesson */
+.sbx-tour { position: fixed; inset: 0; z-index: 1070; pointer-events: none; }
+.sbx-tour-block { position: absolute; inset: 0; pointer-events: auto; }
+.sbx-tour-card { pointer-events: auto; }
+.sbx-tour-shade { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.sbx-tour-dim { fill: rgba(15, 23, 42, 0.58); }
+.sbx-tour.kind-lesson .sbx-tour-dim,
+.sbx-tour.kind-room4 .sbx-tour-dim { fill: rgba(15, 23, 42, 0.32); }
+/* where to draw: a dashed orange line */
+.sbx-tour-guide { fill: none; stroke: #f97316; stroke-width: 4; stroke-dasharray: 8 6; stroke-linecap: round; stroke-linejoin: round; opacity: 0.9; animation: sbx-tour-dash 1.2s linear infinite; }
+@keyframes sbx-tour-dash { to { stroke-dashoffset: -28; } }
+.sbx-tour-ring {
+    position: absolute;
+    border: 2px solid #60a5fa;
+    border-radius: 10px;
+    box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.25);
+    pointer-events: none;
+    transition: left 0.25s ease, top 0.25s ease, width 0.25s ease, height 0.25s ease;
+}
+.sbx-tour-ring.extra { border: 2px dashed #fbbf24; box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.2); }
+/* the places on the map the step is about */
+.sbx-tour-ring.place { border: 3px dashed #16a34a; border-radius: 4px; box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.2); }
+
+.sbx-tour-card {
+    position: absolute;
+    width: min(380px, calc(100vw - 24px));
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+    padding: 0.95rem 1.1rem 0.75rem;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.3);
+    color: var(--sbx-text);
+    opacity: 0;
+    transition: left 0.25s ease, top 0.25s ease, opacity 0.15s ease;
+}
+.sbx-tour.ready .sbx-tour-card { opacity: 1; }
+.sbx-tour-card.welcome { width: min(440px, calc(100vw - 24px)); text-align: center; }
+
+.sbx-tour-head { display: flex; align-items: center; gap: 0.5rem; font-size: 0.74rem; }
+.sbx-tour-chapter {
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    background: var(--sbx-accent-bg);
+    color: #1d4ed8;
+    font-weight: 700;
+}
+.sbx-tour-count { color: var(--sbx-muted); font-variant-numeric: tabular-nums; }
+.sbx-tour-x {
+    margin-left: auto;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--sbx-muted);
+    cursor: pointer;
+}
+.sbx-tour-x:hover { background: #f1f5f9; color: var(--sbx-text); }
+.sbx-tour-fold {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-left: auto;
+    padding: 0.15rem 0.45rem;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--sbx-muted);
+    font-size: 0.72rem;
+    cursor: pointer;
+}
+.sbx-tour-fold:hover { background: #f1f5f9; color: var(--sbx-text); }
+.sbx-tour-fold + .sbx-tour-x { margin-left: 0; }
+/* folded: the title, what to do and the buttons */
+.sbx-tour-card.compact .sbx-tour-body,
+.sbx-tour-card.compact .sbx-tour-keys,
+.sbx-tour-card.compact .sbx-tour-plan,
+.sbx-tour-card.compact .sbx-tour-progress { display: none; }
+.sbx-tour-card.compact h2 { margin-top: 0.4rem; }
+
+/* one bar per chapter, filled as its steps are passed; a click goes to its start */
+.sbx-tour-progress { display: flex; gap: 4px; margin: 0.55rem 0 0.75rem; }
+.sbx-tour-progress button {
+    position: relative;
+    height: 5px;
+    padding: 0;
+    border: none;
+    border-radius: 3px;
+    background: #e2e8f0;
+    overflow: hidden;
+    cursor: pointer;
+}
+.sbx-tour-progress button.on { background: #bfdbfe; }
+.sbx-tour-progress span { position: absolute; inset: 0 auto 0 0; background: var(--sbx-accent); transition: width 0.25s ease; }
+
+.sbx-tour-icon { font-size: 2.2rem; color: var(--sbx-accent); margin: 0.2rem 0 0.4rem; }
+.sbx-tour-card h2 { margin: 0 0 0.45rem; font-size: 1.05rem; font-weight: 700; color: #0f172a; }
+.sbx-tour-body p { margin: 0 0 0.5rem; font-size: 0.86rem; line-height: 1.65; }
+.sbx-tour-card.welcome .sbx-tour-body p { text-align: left; }
+.sbx-tour-keys { display: flex; flex-wrap: wrap; gap: 0.3rem; margin: 0.15rem 0 0.5rem; }
+.sbx-tour-keys kbd {
+    padding: 0.08rem 0.45rem;
+    border: 1px solid #cbd5e1;
+    border-bottom-width: 2px;
+    border-radius: 5px;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 0.74rem;
+    font-family: inherit;
+}
+
+.sbx-tour-actions { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.6rem; }
+.sbx-tour-skip {
+    padding: 0.3rem 0.2rem;
+    border: none;
+    background: none;
+    color: var(--sbx-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+.sbx-tour-skip:hover { color: var(--sbx-text); text-decoration: underline; }
+.sbx-tour-nav {
+    height: 34px;
+    white-space: nowrap;
+    padding: 0 0.85rem;
+    border: 1px solid var(--sbx-line);
+    border-radius: 8px;
+    background: #fff;
+    color: var(--sbx-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.sbx-tour-nav:hover { background: #f1f5f9; }
+.sbx-tour-nav.primary { border-color: var(--sbx-accent); background: var(--sbx-accent); color: #fff; }
+.sbx-tour-nav.primary:hover { background: #1d4ed8; }
+.sbx-tour-tip { margin-top: 0.55rem; font-size: 0.7rem; color: #94a3b8; text-align: right; }
+.sbx-tour-foot { display: flex; align-items: baseline; gap: 0.6rem; margin-top: 0.4rem; }
+.sbx-tour-foot .sbx-tour-skip { padding: 0; font-size: 0.76rem; }
+.sbx-tour-foot .sbx-tour-tip { margin: 0 0 0 auto; }
+/* the lesson's cards say more: a little wider */
+.sbx-tour.kind-lesson .sbx-tour-card,
+.sbx-tour.kind-room4 .sbx-tour-card { width: min(410px, calc(100vw - 24px)); }
+
+/* the lesson: what to do, done or not */
+.sbx-tour-task {
+    display: flex;
+    gap: 0.55rem;
+    align-items: flex-start;
+    margin: 0.2rem 0 0.4rem;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid #fed7aa;
+    border-radius: 10px;
+    background: #fff7ed;
+    color: #9a3412;
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+.sbx-tour-task > .fas { margin-top: 0.2rem; color: #ea580c; }
+.sbx-tour-task strong { margin-right: 0.35rem; }
+.sbx-tour-task.done { border-color: #bbf7d0; background: #f0fdf4; color: #166534; }
+/* the task as the map now asks it (too much done, something else, part left) */
+.sbx-tour-task.changed { border-color: #fcd34d; background: #fffbeb; color: #92400e; animation: sbx-rise 0.2s ease-out; }
+.sbx-tour-task.changed > .fas { color: #d97706; }
+.sbx-tour-task.done > .fas { color: #16a34a; animation: sbx-rise 0.2s ease-out; }
+.sbx-tour-closed {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.5rem;
+    align-items: center;
+    margin: 0.2rem 0 0.4rem;
+    padding: 0.5rem 0.65rem;
+    border-radius: 10px;
+    background: #eff6ff;
+    color: #1e40af;
+    font-size: 0.8rem;
+}
+.sbx-tour-closed span { flex: 1 1 12rem; }
+.sbx-tour-nav.auto { border-color: #c7d2fe; background: #eef2ff; color: #4338ca; }
+/* the tour of the screen's way into the room 4 creator's tour */
+.sbx-tour-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin: 0.2rem 0 0.4rem;
+    padding: 0.5rem 0.7rem;
+    border: 1px solid #ddd6fe;
+    border-radius: 10px;
+    background: #f5f3ff;
+    color: #5b21b6;
+    font-size: 0.84rem;
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+}
+.sbx-tour-inner:hover { background: #ede9fe; }
+.sbx-tour-inner span { flex: 1 1 auto; }
+.sbx-tour-inner .fa-chevron-right { font-size: 0.7rem; opacity: 0.7; }
+/* a guide in between: where it goes back to */
+.sbx-tour-back { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.5rem; padding: 0.35rem 0.55rem; border-radius: 8px; background: #f1f5f9; color: #475569; font-size: 0.74rem; }
+.sbx-tour-nav.auto:hover { background: #e0e7ff; }
+.sbx-tour-nav:disabled { opacity: 0.45; cursor: default; }
+.sbx-tour-nav.primary:disabled { background: var(--sbx-accent); }
+.sbx-tour-card.done .sbx-tour-nav.primary { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.25); }
+
+/* the sample map on the lesson's first and last cards */
+.sbx-tour-plan { display: block; width: 100%; height: 170px; margin: 0.1rem 0 0.7rem; }
+
+
+/* which way through the guide */
+.sbx-pick-back {
+    position: fixed;
+    inset: 0;
+    /* over the guide's card too (1070): it is asked during a guide as well */
+    z-index: 1080;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(15, 23, 42, 0.45);
+    animation: sbx-fade 0.15s ease-out;
+}
+.sbx-pick {
+    width: min(560px, 100%);
+    max-height: calc(100vh - 32px);
+    overflow-y: auto;
+    padding: 1.1rem 1.2rem 0.9rem;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.3);
+    color: var(--sbx-text);
+    animation: sbx-rise 0.18s ease-out;
+}
+.sbx-pick-head { display: flex; align-items: center; gap: 0.5rem; }
+.sbx-pick-head h2 { flex: 1 1 auto; margin: 0; font-size: 1.1rem; font-weight: 700; color: #0f172a; }
+.sbx-pick-lead { margin: 0.35rem 0 0.9rem; font-size: 0.86rem; color: var(--sbx-muted); }
+.sbx-pick-options { display: flex; flex-direction: column; gap: 0.55rem; }
+.sbx-pick-option {
+    display: flex;
+    gap: 0.85rem;
+    align-items: flex-start;
+    width: 100%;
+    padding: 0.85rem 0.9rem;
+    border: 1px solid var(--sbx-line);
+    border-radius: 12px;
+    background: #fff;
+    text-align: left;
+    color: var(--sbx-text);
+    cursor: pointer;
+    transition: border-color 0.12s, box-shadow 0.12s, background 0.12s;
+}
+.sbx-pick-option:hover:not(:disabled) { border-color: #93c5fd; background: #f8fbff; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12); }
+.sbx-pick-option:focus-visible { outline: none; border-color: var(--sbx-accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25); }
+.sbx-pick-option:disabled { opacity: 0.5; cursor: default; }
+.sbx-pick-icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    font-size: 1.05rem;
+}
+.sbx-pick-icon.lesson { background: #dcfce7; color: #15803d; }
+.sbx-pick-icon.tour { background: var(--sbx-accent-bg); color: #1d4ed8; }
+.sbx-pick-icon.room4 { background: #ede9fe; color: #6d28d9; }
+.sbx-pick-icon.room4look { background: #f5f3ff; color: #7c3aed; }
+.sbx-pick-text { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.sbx-pick-text strong { font-size: 0.95rem; color: #0f172a; }
+.sbx-pick-time { font-size: 0.74rem; font-weight: 600; color: var(--sbx-accent); }
+.sbx-pick-text small { font-size: 0.8rem; line-height: 1.5; color: #475569; }
+.sbx-pick-text small.sbx-pick-warn { color: #b45309; }
+.sbx-pick-foot { display: flex; justify-content: flex-end; margin-top: 0.7rem; }
+
+/* under the button that opens the room 4 creator */
+.sbx-room4-dbl { margin: 0.35rem 0 0; font-size: 0.75rem; text-align: center; }
+
+/* the last work kept in this browser: what it is under the button's label */
+.sbx-restore { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.sbx-restore-what { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: 0.8; }
