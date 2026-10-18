@@ -12,11 +12,17 @@
     document.documentElement.lang = lang;
 })();
 
+// Reuse the ?v= this script was loaded with so the lang files are not served stale from cache.
+var langVersionQuery = (function () {
+    var m = document.currentScript && /[?&]v=([^&#]+)/.exec(document.currentScript.src);
+    return m ? '?v=' + m[1] : '';
+})();
+
 app.config(['$translateProvider', function ($translateProvider) {
     $translateProvider
         .useStaticFilesLoader({
             prefix: '/lang/',
-            suffix: '.json'
+            suffix: '.json' + langVersionQuery
         })
 
         .registerAvailableLanguageKeys(['en', 'ja'], {
