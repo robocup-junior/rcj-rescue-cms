@@ -2,8 +2,7 @@ const PDFDocument = require('pdfkit');
 const pdf = require('../scoreSheetPDFUtil');
 const qr = require('qr-image');
 const fs = require('fs');
-const { guessLanguage } = require('guesslanguage/lib/guessLanguage');
-const glob = require('glob');
+const { applyFont } = require('../pdfFont');
 
 /**
  * Defines some important numbers for the placement of different objects in the scoresheet.
@@ -19,22 +18,6 @@ function isExistFile(file) {
   } catch (err) {
     if (err.code === 'ENOENT') return false;
   }
-}
-
-function guessLanguagePromise(text) {
-  return new Promise((resolve) => {
-    guessLanguage.name(text, (name) => {
-      return resolve(name);
-    });
-  });
-}
-
-function getFontPath(lang) {
-  const list = glob.sync(`${__dirname}/../fonts/${lang}*`);
-  if (list.length > 0) {
-    return list[0];
-  }
-  return null;
 }
 
 function Range(first, last) {
@@ -526,17 +509,14 @@ function drawRun(doc, config, scoringRun) {
 }
 
 module.exports.generateScoreSheet = async function (res, rounds) {
-  let font = null;
-  if (rounds.length > 0) {
-    const tmp = await guessLanguagePromise(rounds[0].competition.name);
-    font = getFontPath(tmp);
-  }
-
   const doc = new PDFDocument({ autoFirstPage: false });
 
   doc.pipe(res);
 
-  if (font) doc.font(font);
+  applyFont(
+    doc,
+    ...rounds.flatMap((r) => [r.competition?.name, r.team?.name, r.round?.name, r.field?.name])
+  );
 
   for (let i = 0; i < rounds.length; i++) {
     doc.addPage({

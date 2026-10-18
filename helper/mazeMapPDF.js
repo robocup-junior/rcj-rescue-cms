@@ -1,4 +1,5 @@
 const PDFDocument = require('pdfkit');
+const { applyFont } = require('./pdfFont');
 const fs = require('fs');
 const path = require('path');
 const mazeSSR = require('./mazeSSR');
@@ -41,24 +42,6 @@ function isExistFile(file) {
   } catch (err) {
     if (err.code === 'ENOENT') return false;
   }
-}
-
-/**
- * Find a suitable font for international characters (bundled in the project)
- */
-function getPDFFont() {
-  const projectFonts = [
-    path.join(__dirname, '../fonts/noto-sans-cjk.ttc'),
-    path.join(__dirname, '../fonts/noto-sans.ttf'),
-    path.join(__dirname, '../fonts/ja.ttf'),
-    path.join(__dirname, '../fonts/ja.otf'),
-  ];
-  
-  for (const f of projectFonts) {
-    if (isExistFile(f)) return f;
-  }
-  
-  return null;
 }
 
 /**
@@ -304,10 +287,7 @@ function generateCompetitionTargetsPDF(map, outputPath = null, includeLetterVict
     margin: 0
   });
 
-  const jaFont = getPDFFont();
-  if (jaFont) {
-    doc.font(jaFont);
-  }
+  applyFont(doc, map.name);
 
   if (outputPath) {
     doc.pipe(fs.createWriteStream(outputPath));
@@ -387,10 +367,7 @@ function generateAndSendPDF(res, map, paperSize = 'A4', includeLetterVictims = f
     margin: 0
   });
 
-  const jaFont = getPDFFont();
-  if (jaFont) {
-    doc.font(jaFont);
-  }
+  applyFont(doc, map.name);
 
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `inline; filename="targets.pdf"; filename*=UTF-8''${encodeURIComponent(`targets-${map.name}.pdf`)}`);
@@ -462,10 +439,7 @@ function generateAndSendBulkPDF(res, maps, competitionName, leagueName, paperSiz
     margin: 0
   });
 
-  const jaFont = getPDFFont();
-  if (jaFont) {
-    doc.font(jaFont);
-  }
+  applyFont(doc, competitionName, leagueName, ...maps.map((m) => m.name));
 
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `inline; filename="bulk-targets.pdf"; filename*=UTF-8''${encodeURIComponent(`targets-${competitionName}-${leagueName}.pdf`)}`);
@@ -548,10 +522,7 @@ async function generateAndSendBulkMapImagesPDF(res, maps, competitionName, leagu
     margin: 0
   });
 
-  const jaFont = getPDFFont();
-  if (jaFont) {
-    doc.font(jaFont);
-  }
+  applyFont(doc, competitionName, leagueName, ...maps.map((m) => m.name));
 
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `inline; filename="bulk-maps.pdf"; filename*=UTF-8''${encodeURIComponent(`maps-${competitionName}-${leagueName}.pdf`)}`);

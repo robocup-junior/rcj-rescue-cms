@@ -1,35 +1,11 @@
 const PDFDocument = require('pdfkit');
-const fs = require('fs');
-const path = require('path');
+const { applyFont } = require('./pdfFont');
 const lineSSR = require('./lineSSR');
 
 const PAPER_SIZES = {
   A4: { width: 595.28, height: 841.89 },
   Letter: { width: 612, height: 792 }
 };
-
-function isExistFile(file) {
-  try {
-    fs.statSync(file);
-    return true;
-  } catch (err) {
-    if (err.code === 'ENOENT') return false;
-  }
-}
-
-function getPDFFont() {
-  const projectFonts = [
-    path.join(__dirname, '../fonts/noto-sans-cjk.ttc'),
-    path.join(__dirname, '../fonts/noto-sans.ttf'),
-    path.join(__dirname, '../fonts/ja.ttf'),
-    path.join(__dirname, '../fonts/ja.otf'),
-  ];
-  
-  for (const f of projectFonts) {
-    if (isExistFile(f)) return f;
-  }
-  return null;
-}
 
 async function generateAndSendBulkMapImagesPDF(res, maps, competitionName, leagueName, paperSize = 'A4') {
   const validPaperSize = PAPER_SIZES[paperSize] ? paperSize : 'A4';
@@ -43,10 +19,7 @@ async function generateAndSendBulkMapImagesPDF(res, maps, competitionName, leagu
     margin: 0
   });
 
-  const jaFont = getPDFFont();
-  if (jaFont) {
-    doc.font(jaFont);
-  }
+  applyFont(doc, competitionName, leagueName, ...maps.map((m) => m.name));
 
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `inline; filename="bulk-maps.pdf"; filename*=UTF-8''${encodeURIComponent(`maps-${competitionName}-${leagueName}.pdf`)}`);
