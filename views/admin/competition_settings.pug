@@ -7,10 +7,10 @@ block vars
 append scripts
   script.
     var competitionId = "#{competition_id}"
-  script(src='/javascripts/admin/competition_settings.js')
-  link(rel='stylesheet', href='/components/angular-color-picker/dist/angularjs-color-picker.min.css')
-  script(src='/components/tinycolor/dist/tinycolor-min.js')
-  script(src='/components/angular-color-picker/dist/angularjs-color-picker.min.js')
+  script(src='/javascripts/admin/competition_settings.js?v=' + assetVersion)
+  link(rel='stylesheet', href='/components/angular-color-picker/dist/angularjs-color-picker.min.css?v=' + assetVersion)
+  script(src='/components/tinycolor/dist/tinycolor-min.js?v=' + assetVersion)
+  script(src='/components/angular-color-picker/dist/angularjs-color-picker.min.js?v=' + assetVersion)
 
 block hero_breadcrumb
   a.breadcrumb-item(ng-click="go('/home')")

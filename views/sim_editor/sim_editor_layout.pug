@@ -15,18 +15,18 @@ append scripts
     var competitionId = "#{compid}"
     var pubService = "#{pubService}"
 
-  script(src="/javascripts/lvl-uuid.js")
-  script(src="/components/html2canvas/index.js")
-  script(src="/javascripts/opencv.js")
+  script(src="/javascripts/lvl-uuid.js?v=" + assetVersion)
+  script(src="/components/html2canvas/index.js?v=" + assetVersion)
+  script(src="/javascripts/opencv.js?v=" + assetVersion)
   block editor_script
   //- Needs `app` from the year's editor script
-  script(src="/javascripts/sim_editor/sim_icons.js")
-  script(src="/javascripts/sim_editor/room4_creator.js")
+  script(src="/javascripts/sim_editor/sim_icons.js?v=" + assetVersion)
+  script(src="/javascripts/sim_editor/room4_creator.js?v=" + assetVersion)
 
 block page_css
-  link(href="/stylesheets/admin/mapEditor/maze_edit.css" rel="stylesheet")
-  link(href="/stylesheets/admin/mapEditor/maze_modern.css" rel="stylesheet")
-  link(href="/stylesheets/sim_editor/sim_modern.css" rel="stylesheet")
+  link(href="/stylesheets/admin/mapEditor/maze_edit.css?v=" + assetVersion rel="stylesheet")
+  link(href="/stylesheets/admin/mapEditor/maze_modern.css?v=" + assetVersion rel="stylesheet")
+  link(href="/stylesheets/sim_editor/sim_modern.css?v=" + assetVersion rel="stylesheet")
 
 block hero_breadcrumb
   a.breadcrumb-item(ng-click="go('/home')")

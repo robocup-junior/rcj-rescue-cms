@@ -12,7 +12,7 @@ append scripts
     var token = "#{token}"
     var deadline = "#{deadline}"
     var editable = #{editable}
-  script(src="/components/quill/index.js")
+  script(src="/components/quill/index.js?v=" + assetVersion)
   script.
     // Register custom Image blot to support style and width persistence
     if (window.Quill) {
@@ -40,16 +40,16 @@ append scripts
       }
       Quill.register(CustomImage, true);
     }
-  script(src="/javascripts/document/form.js")
-  script(src='/components/ngQuill/src/ng-quill.js')
-  script(src='/components/quill-image-resize-module/image-resize.min.js')
-  script(src='/components/quill-image-drop-and-paste/dist/quill-image-drop-and-paste.min.js')
-  script(src='/components/mutation_events.min/index.js')
-  script(src="/components/bootstrap-fileinput/js/fileinput.min.js")
-  script(src="/components/bootstrap-fileinput/themes/fa5/theme.min.js")
-  script(src="/components/bootstrap-fileinput/js/locales/ja.js")
-  script(src="/components/ng-file-upload/ng-file-upload.min.js")
-  script(src='/components/lightbox2/dist/js/lightbox.min.js')
+  script(src="/javascripts/document/form.js?v=" + assetVersion)
+  script(src='/components/ngQuill/src/ng-quill.js?v=' + assetVersion)
+  script(src='/components/quill-image-resize-module/image-resize.min.js?v=' + assetVersion)
+  script(src='/components/quill-image-drop-and-paste/dist/quill-image-drop-and-paste.min.js?v=' + assetVersion)
+  script(src='/components/mutation_events.min/index.js?v=' + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/fileinput.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/themes/fa5/theme.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/locales/ja.js?v=" + assetVersion)
+  script(src="/components/ng-file-upload/ng-file-upload.min.js?v=" + assetVersion)
+  script(src='/components/lightbox2/dist/js/lightbox.min.js?v=' + assetVersion)
 
 append css
   style.
@@ -609,11 +609,11 @@ append css
         border-radius: 0.75rem !important;
       }
     }
-  link(rel='stylesheet', href='/components/quill.snow/index.css')
-  link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
-  link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css')
-  link(rel="stylesheet", href="/components/driver.css/index.css")
-  script(src="/components/driver.js/index.js")
+  link(rel='stylesheet', href='/components/quill.snow/index.css?v=' + assetVersion)
+  link(href="/components/bootstrap-fileinput/css/fileinput.min.css?v=" + assetVersion rel="stylesheet")
+  link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css?v=' + assetVersion)
+  link(rel="stylesheet", href="/components/driver.css/index.css?v=" + assetVersion)
+  script(src="/components/driver.js/index.js?v=" + assetVersion)
 
 block hero_title
   | {{competition.name}}

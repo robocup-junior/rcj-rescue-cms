@@ -12,12 +12,12 @@ append scripts
     var leagueId = "#{leagueId}"
   script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js')
   script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js')
-  script(src='/javascripts/admin/games.js')
-  script(src='/components/ng-file-upload/ng-file-upload-all.min.js')
-  script(src='/components/exceljs/index.js')
+  script(src='/javascripts/admin/games.js?v=' + assetVersion)
+  script(src='/components/ng-file-upload/ng-file-upload-all.min.js?v=' + assetVersion)
+  script(src='/components/exceljs/index.js?v=' + assetVersion)
 
 append css
-  link(rel='stylesheet' href='/components/angular-bootstrap-datetimepicker/src/css/datetimepicker.css')
+  link(rel='stylesheet' href='/components/angular-bootstrap-datetimepicker/src/css/datetimepicker.css?v=' + assetVersion)
   style(type='text/css').
     /* Premium DateTime Picker Overhaul */
     .premium-datetime-group {

@@ -5,12 +5,12 @@ block vars
   - var ngAppDef = 'MyPage'
 
 append css
-  link(href="/stylesheets/fonts.css" rel="stylesheet")
-  link(rel='stylesheet', href='/stylesheets/home_premium.css')
-  link(rel='stylesheet', href='/stylesheets/mypage_premium.css')
+  link(href="/stylesheets/fonts.css?v=" + assetVersion rel="stylesheet")
+  link(rel='stylesheet', href='/stylesheets/home_premium.css?v=' + assetVersion)
+  link(rel='stylesheet', href='/stylesheets/mypage_premium.css?v=' + assetVersion)
 
 append scripts
-  script(src='/javascripts/mypage.js')
+  script(src='/javascripts/mypage.js?v=' + assetVersion)
 
 block bread
   // Breadcrumbs removed as requested

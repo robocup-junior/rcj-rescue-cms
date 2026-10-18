@@ -8,7 +8,7 @@ append scripts
   script.
     var competitionId = "#{id}"
     var mailEnable = #{!!mailEnable}
-  script(src='/javascripts/admin/competition.js')
+  script(src='/javascripts/admin/competition.js?v=' + assetVersion)
 
 block hero_breadcrumb
   li.breadcrumb-item

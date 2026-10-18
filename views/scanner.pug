@@ -8,10 +8,10 @@ block vars
 append scripts
   script.
     var mode = "#{mode}"
-  script(src='/javascripts/scanner.js')
+  script(src='/javascripts/scanner.js?v=' + assetVersion)
 
 block page_css
-  link(href='/stylesheets/scanner_modern.css', rel='stylesheet')
+  link(href='/stylesheets/scanner_modern.css?v=' + assetVersion, rel='stylesheet')
   style.
     html { scroll-behavior: auto !important; }
     .maps-hero.ng-hide { display: none !important; }

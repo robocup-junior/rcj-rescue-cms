@@ -11,8 +11,8 @@ append scripts
     var leagueId = "#{leagueId}"
     var authId = "#{authId}"
     var token = "#{token}"
-  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js')
-  script(src='/javascripts/registration/form.js')
+  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js?v=' + assetVersion)
+  script(src='/javascripts/registration/form.js?v=' + assetVersion)
 
 block hero_breadcrumb
   a.breadcrumb-item(ng-click="go('/home')")

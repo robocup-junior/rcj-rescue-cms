@@ -7,14 +7,14 @@ block vars
 append scripts
   script.
     var competitionId = "#{id}"
-  script(src='/javascripts/competition_home.js')
-  script(src='/components/cheet.js/cheet.min.js')
+  script(src='/javascripts/competition_home.js?v=' + assetVersion)
+  script(src='/components/cheet.js/cheet.min.js?v=' + assetVersion)
 
 append css
-  link(href="/stylesheets/fonts.css" rel="stylesheet")
-  link(rel='stylesheet', href='/stylesheets/common/modern_layout.css')
-  link(rel='stylesheet', href='/stylesheets/home_premium.css')
-  link(rel='stylesheet', href='/stylesheets/competition_premium.css')
+  link(href="/stylesheets/fonts.css?v=" + assetVersion rel="stylesheet")
+  link(rel='stylesheet', href='/stylesheets/common/modern_layout.css?v=' + assetVersion)
+  link(rel='stylesheet', href='/stylesheets/home_premium.css?v=' + assetVersion)
+  link(rel='stylesheet', href='/stylesheets/competition_premium.css?v=' + assetVersion)
 
 block bread
   // Breadcrumbs removed for premium minimal look

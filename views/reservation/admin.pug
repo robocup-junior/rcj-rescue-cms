@@ -8,14 +8,14 @@ append scripts
   script.
     var competitionId = "#{id}"
     var resvId = "#{resvId}"
-  script(src='/javascripts/reservation/admin.js')
-  script(src='/components/quill/index.js')
-  script(src='/components/ngQuill/src/ng-quill.js')
-  script(src='/components/quill-image-resize-module/image-resize.min.js')
-  script(src='/components/quill-image-drop-and-paste/dist/quill-image-drop-and-paste.min.js')
+  script(src='/javascripts/reservation/admin.js?v=' + assetVersion)
+  script(src='/components/quill/index.js?v=' + assetVersion)
+  script(src='/components/ngQuill/src/ng-quill.js?v=' + assetVersion)
+  script(src='/components/quill-image-resize-module/image-resize.min.js?v=' + assetVersion)
+  script(src='/components/quill-image-drop-and-paste/dist/quill-image-drop-and-paste.min.js?v=' + assetVersion)
 
 append css 
-  link(rel='stylesheet', href='/components/quill.snow/index.css')
+  link(rel='stylesheet', href='/components/quill.snow/index.css?v=' + assetVersion)
   style.
     .ui-select-bootstrap .dropdown-menu {
       display: initial;

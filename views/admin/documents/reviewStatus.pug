@@ -9,7 +9,7 @@ block vars
 append scripts
   script.
     var competitionId = "#{id}"
-  script(src='/javascripts/admin/documents/reviewStatus.js')
+  script(src='/javascripts/admin/documents/reviewStatus.js?v=' + assetVersion)
 
 block hero_breadcrumb
   a.breadcrumb-item(ng-click="go('/home')")

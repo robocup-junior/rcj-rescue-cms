@@ -14,22 +14,22 @@ append scripts
     var pubService = !{pubService || false}
     var leagueId = "#{leagueId}"
 
-  script(src="/javascripts/lvl-uuid.js")
-  script(src="/javascripts/pathFinder.js")
-  //script(src="/components/bootstrap-fileinput/js/plugins/piexif.min.js")
-  //script(src="/components/bootstrap-fileinput/js/plugins/sortable.min.js")
-  //script(src="/components/bootstrap-fileinput/js/plugins/purify.min.js")
-  script(src="/components/bootstrap-fileinput/js/fileinput.min.js")
-  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js")
-  script(src="/components/bootstrap-fileinput/js/locales/ja.js")
-  script(src="/components/html2canvas/index.js")
-  script(src="/javascripts/admin/mapEditor/line_2026E.js")
+  script(src="/javascripts/lvl-uuid.js?v=" + assetVersion)
+  script(src="/javascripts/pathFinder.js?v=" + assetVersion)
+  //script(src="/components/bootstrap-fileinput/js/plugins/piexif.min.js?v=" + assetVersion)
+  //script(src="/components/bootstrap-fileinput/js/plugins/sortable.min.js?v=" + assetVersion)
+  //script(src="/components/bootstrap-fileinput/js/plugins/purify.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/fileinput.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/locales/ja.js?v=" + assetVersion)
+  script(src="/components/html2canvas/index.js?v=" + assetVersion)
+  script(src="/javascripts/admin/mapEditor/line_2026E.js?v=" + assetVersion)
 
 block page_css
-  link(href="/stylesheets/fredrik.css" rel="stylesheet")
-  link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
-  link(href="/stylesheets/admin/mapEditor/maze_modern.css" rel="stylesheet")
-  link(href="/stylesheets/admin/mapEditor/line_modern.css" rel="stylesheet")
+  link(href="/stylesheets/fredrik.css?v=" + assetVersion rel="stylesheet")
+  link(href="/components/bootstrap-fileinput/css/fileinput.min.css?v=" + assetVersion rel="stylesheet")
+  link(href="/stylesheets/admin/mapEditor/maze_modern.css?v=" + assetVersion rel="stylesheet")
+  link(href="/stylesheets/admin/mapEditor/line_modern.css?v=" + assetVersion rel="stylesheet")
 
 block hero_breadcrumb
   a.breadcrumb-item(ng-click="go('/home')")

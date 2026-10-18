@@ -7,11 +7,11 @@ html(ng-app="ddApp")
       var iframe = "#{iframe}"
 
     include ../includes/common_component
-    script(src="/javascripts/sign/line_2026E.js")
+    script(src="/javascripts/sign/line_2026E.js?v=" + assetVersion)
 
-    script(src="/javascripts/translate_config.js")
-    script(src='/components/jSignature/libs/jSignature.min.js')
-    link(href="/stylesheets/fredrik.css" rel="stylesheet")
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
+    script(src='/components/jSignature/libs/jSignature.min.js?v=' + assetVersion)
+    link(href="/stylesheets/fredrik.css?v=" + assetVersion rel="stylesheet")
     meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
 
   body(ng-controller="ddController")

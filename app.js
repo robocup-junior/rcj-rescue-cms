@@ -121,6 +121,8 @@ async function bootstrap(){
     /** Setting up the correct view engine - we are using pug */
     app.set('views', path.join(__dirname, 'views'))
     app.set('view engine', 'pug')
+    // Appended to JS/CSS URLs in views so browsers fetch fresh copies after every update/restart
+    app.locals.assetVersion = `${require('./package.json').version}-${Date.now().toString(36)}`
 
     app.use(bodyParser.json({limit: '50mb'}));
     app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));

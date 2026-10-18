@@ -10,8 +10,8 @@ append scripts
   script.
     var competitionId = "#{id}"
     var leagueId = "#{lid}"
-  script(src='/javascripts/document/result.js')
-  script(src='/components/exceljs/index.js')
+  script(src='/javascripts/document/result.js?v=' + assetVersion)
+  script(src='/components/exceljs/index.js?v=' + assetVersion)
 
 
 block hero_breadcrumb

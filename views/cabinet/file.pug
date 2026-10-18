@@ -13,8 +13,8 @@ append scripts
     var leagueTeam = "#{leagueTeam}"
     var isTeam = #{isTeam}
     var isMyPage = #{isMyPage}
-  script(src='/javascripts/cabinet/file.js')
-  script(src="/components/ng-file-upload/ng-file-upload.min.js")
+  script(src='/javascripts/cabinet/file.js?v=' + assetVersion)
+  script(src="/components/ng-file-upload/ng-file-upload.min.js?v=" + assetVersion)
 
 append css
   style.

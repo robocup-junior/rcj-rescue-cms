@@ -11,9 +11,9 @@ append scripts
     var token = "#{token}"
     var userId = "#{user._id}"
     var userName = "#{user.username}"
-  script(src="/javascripts/document/reviewed.js")
-  script(src="/components/jquery-ui/jquery-ui.min.js")
-  script(src='/components/lightbox2/dist/js/lightbox.min.js')
+  script(src="/javascripts/document/reviewed.js?v=" + assetVersion)
+  script(src="/components/jquery-ui/jquery-ui.min.js?v=" + assetVersion)
+  script(src='/components/lightbox2/dist/js/lightbox.min.js?v=' + assetVersion)
 
 
 
@@ -57,9 +57,9 @@ append css
         img {
             max-width: 100%;
         }
-    link(rel='stylesheet', href='/components/quill.snow/index.css')
-    link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
-    link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css')
+    link(rel='stylesheet', href='/components/quill.snow/index.css?v=' + assetVersion)
+    link(href="/components/bootstrap-fileinput/css/fileinput.min.css?v=" + assetVersion rel="stylesheet")
+    link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css?v=' + assetVersion)
 
 block navbar
     nav.navbar(style='background-color: #283655; color: #fff; position: fixed; top: 0; z-index:10 ;  width: 100%')

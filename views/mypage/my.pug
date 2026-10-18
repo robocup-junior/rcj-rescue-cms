@@ -11,14 +11,14 @@ append scripts
     var teamId = "#{team}"
     var token = "#{token}"
     var teamDocDeadline = "#{documentDeadline}"
-  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js')
-  script(src='/javascripts/mypage/my.js')
+  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js?v=' + assetVersion)
+  script(src='/javascripts/mypage/my.js?v=' + assetVersion)
 
 append css
-  link(rel='stylesheet', href='/components/angular-toastr/dist/angular-toastr.css')
-  link(href="/stylesheets/fonts.css" rel="stylesheet")
-  link(rel='stylesheet', href='/stylesheets/home_premium.css')
-  link(rel='stylesheet', href='/stylesheets/my_premium.css')
+  link(rel='stylesheet', href='/components/angular-toastr/dist/angular-toastr.css?v=' + assetVersion)
+  link(href="/stylesheets/fonts.css?v=" + assetVersion rel="stylesheet")
+  link(rel='stylesheet', href='/stylesheets/home_premium.css?v=' + assetVersion)
+  link(rel='stylesheet', href='/stylesheets/my_premium.css?v=' + assetVersion)
   style.
     /* Custom icon backgrounds to restore theme colors while staying premium */
     .bg-survey { background: rgba(5, 196, 107, 0.1); color: #05c46b; }

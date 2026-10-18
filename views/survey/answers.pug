@@ -10,8 +10,8 @@ append scripts
   script.
     var competitionId = "#{id}"
     var survId = "#{survId}"
-  script(src='/javascripts/survey/answers.js')
-  script(src='/components/exceljs/index.js')
+  script(src='/javascripts/survey/answers.js?v=' + assetVersion)
+  script(src='/components/exceljs/index.js?v=' + assetVersion)
 
 block hero_breadcrumb
   a.breadcrumb-item(ng-click="go('/home')")

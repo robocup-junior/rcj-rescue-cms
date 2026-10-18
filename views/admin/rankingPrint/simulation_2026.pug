@@ -9,14 +9,14 @@ html(ng-app="SimulationScore")
       var competitionId = "#{competitionId}"
       var leagueId = "#{leagueId}"
 
-    script(src='/javascripts/ranking/simulation_2026.js')
-    link(rel='stylesheet', href='/stylesheets/admin/final_ranking.css')
+    script(src='/javascripts/ranking/simulation_2026.js?v=' + assetVersion)
+    link(rel='stylesheet', href='/stylesheets/admin/final_ranking.css?v=' + assetVersion)
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js')
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js')
     script(src = '/components/datatables/media/js/jquery.dataTables.min.js')
     script(src = '/components/angular-datatables/demo/src/archives/dist/angular-datatables.min.js')
-    script(src='/components/ng-file-upload/ng-file-upload-all.min.js')
-    script(src="/javascripts/translate_config.js")
+    script(src='/components/ng-file-upload/ng-file-upload-all.min.js?v=' + assetVersion)
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
     style(type='text/css').
       .uib-time input {
         padding-left: 0;

@@ -6,7 +6,7 @@ html(ng-app="ddApp")
       var timeIncrement = true;
 
     include ../includes/common_component
-    script(src="/javascripts/sign/maze_2026.js")
+    script(src="/javascripts/sign/maze_2026.js?v=" + assetVersion)
     script.
       document.cookie = 'sRotate=0';
       function tile_size() {
@@ -35,10 +35,10 @@ html(ng-app="ddApp")
             }
         });
       }
-    script(src="/javascripts/translate_config.js")
-    link(href="/stylesheets/fredrik.css" rel="stylesheet")
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
+    link(href="/stylesheets/fredrik.css?v=" + assetVersion rel="stylesheet")
 
-    link(href="/stylesheets/maze.css" rel="stylesheet")
+    link(href="/stylesheets/maze.css?v=" + assetVersion rel="stylesheet")
 
     meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
 

@@ -8,11 +8,11 @@ append scripts
   script.
     var app = angular.module('ErrorPage', ['ngTouch', 'pascalprecht.translate', 'ngCookies', 'ngSanitize']);
     app.controller("ErrorPageController", ['$scope', function ($scope) {}]);
-  script(src='/javascripts/translate_config.js')
+  script(src='/javascripts/translate_config.js?v=' + assetVersion)
 
 append css
-  link(href="/stylesheets/fonts.css" rel="stylesheet")
-  link(rel='stylesheet', href='/stylesheets/error_premium.css')
+  link(href="/stylesheets/fonts.css?v=" + assetVersion rel="stylesheet")
+  link(rel='stylesheet', href='/stylesheets/error_premium.css?v=' + assetVersion)
 
 block bread
   // Breadcrumbs removed as requested

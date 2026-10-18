@@ -7,11 +7,11 @@ block vars
 append scripts
   script.
     var competitionId = "#{competition_id}"
-  script(src='/javascripts/admin_restore.js')
-  script(src="/components/bootstrap-fileinput/js/fileinput.min.js")
-  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js")
-  script(src="/components/bootstrap-fileinput/js/locales/ja.js")
-  script(src="/components/ng-file-upload/ng-file-upload.min.js")
+  script(src='/javascripts/admin_restore.js?v=' + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/fileinput.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/locales/ja.js?v=" + assetVersion)
+  script(src="/components/ng-file-upload/ng-file-upload.min.js?v=" + assetVersion)
 
 block hero_breadcrumb
   a.breadcrumb-item(ng-click="go('/home')")

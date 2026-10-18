@@ -8,7 +8,7 @@ append scripts
   script.
     var competitionId = "#{id}"
     var leagueId = "#{leagueId}"
-  script(src='/javascripts/admin/maps.js')
+  script(src='/javascripts/admin/maps.js?v=' + assetVersion)
 
 block hero_breadcrumb
   a.breadcrumb-item(ng-click="go('/home')")

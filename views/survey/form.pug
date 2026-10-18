@@ -13,10 +13,10 @@ append scripts
     var leagueId = "#{league}"
     var survId = "#{survId}"
     var editable = #{editable}
-  script(src="/javascripts/survey/form.js")
-  script(src='/components/quill/index.js')
-  script(src='/components/ngQuill/src/ng-quill.js')
-  script(src="/components/ng-file-upload/ng-file-upload.min.js")
+  script(src="/javascripts/survey/form.js?v=" + assetVersion)
+  script(src='/components/quill/index.js?v=' + assetVersion)
+  script(src='/components/ngQuill/src/ng-quill.js?v=' + assetVersion)
+  script(src="/components/ng-file-upload/ng-file-upload.min.js?v=" + assetVersion)
 
 append css
   style.
@@ -239,7 +239,7 @@ append css
         background: rgba(255, 255, 255, 0.95);
       }
     }
-  link(rel='stylesheet', href='/components/quill.snow/index.css')
+  link(rel='stylesheet', href='/components/quill.snow/index.css?v=' + assetVersion)
 
 block hero_breadcrumb
 

@@ -7,11 +7,11 @@ block vars
 append scripts
   script.
     var competitionId = "#{id}"
-  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js')
-  script(src='/javascripts/registration/settings.js')
+  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js?v=' + assetVersion)
+  script(src='/javascripts/registration/settings.js?v=' + assetVersion)
 
 append css
-  link(rel='stylesheet', href='/components/angular-toastr/dist/angular-toastr.css')
+  link(rel='stylesheet', href='/components/angular-toastr/dist/angular-toastr.css?v=' + assetVersion)
 
 block hero_breadcrumb
   a.breadcrumb-item(ng-click="go('/home')")

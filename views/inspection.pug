@@ -8,14 +8,14 @@ append scripts
   script.
     var competitionId = "#{competition}"
     var teamId = "#{team}"
-  script(src='/javascripts/inspection.js')
-  script(src='/components/ng-file-upload/ng-file-upload-all.min.js')
-  script(src='/components/lightbox2/dist/js/lightbox.min.js')
-  script(src='/javascripts/jquery.slideToUnlock.js')
+  script(src='/javascripts/inspection.js?v=' + assetVersion)
+  script(src='/components/ng-file-upload/ng-file-upload-all.min.js?v=' + assetVersion)
+  script(src='/components/lightbox2/dist/js/lightbox.min.js?v=' + assetVersion)
+  script(src='/javascripts/jquery.slideToUnlock.js?v=' + assetVersion)
   
 append css
-    link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css')
-    link(rel='stylesheet',href='/stylesheets/slideToUnlock.css')
+    link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css?v=' + assetVersion)
+    link(rel='stylesheet',href='/stylesheets/slideToUnlock.css?v=' + assetVersion)
 
 block location
     a.breadcrumb-item(onclick="location.href='/home'") Home

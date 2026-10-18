@@ -6,7 +6,7 @@ block vars
   - var hideLogin = true
 
 append scripts
-  script(src='/javascripts/home.js')
+  script(src='/javascripts/home.js?v=' + assetVersion)
   script.
     navigator.serviceWorker.getRegistrations().then(function(registrations) {
       for(let registration of registrations) {
@@ -15,9 +15,9 @@ append scripts
     })
 
 append css
-  link(href="/stylesheets/fonts.css" rel="stylesheet")
-  link(rel='stylesheet', href='/stylesheets/home_premium.css')
-  link(rel='stylesheet', href='/stylesheets/competition_premium.css')
+  link(href="/stylesheets/fonts.css?v=" + assetVersion rel="stylesheet")
+  link(rel='stylesheet', href='/stylesheets/home_premium.css?v=' + assetVersion)
+  link(rel='stylesheet', href='/stylesheets/competition_premium.css?v=' + assetVersion)
 
 block bread
   // Breadcrumbs removed to match home page style

@@ -5,16 +5,16 @@ html(ng-app="ddApp")
       var runId = "#{id}"
 
     include ../../includes/common_component
-    script(src="/javascripts/manual/maze_2026.js")
+    script(src="/javascripts/manual/maze_2026.js?v=" + assetVersion)
 
-    script(src="/javascripts/translate_config.js")
-    script(src='/components/lightbox2/dist/js/lightbox.min.js')
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
+    script(src='/components/lightbox2/dist/js/lightbox.min.js?v=' + assetVersion)
 
-    link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css')
+    link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css?v=' + assetVersion)
     
     meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
     
-    link(href="/stylesheets/fonts.css" rel="stylesheet")
+    link(href="/stylesheets/fonts.css?v=" + assetVersion rel="stylesheet")
 
     style.
         :root {

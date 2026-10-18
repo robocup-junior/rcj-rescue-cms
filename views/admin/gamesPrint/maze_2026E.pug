@@ -8,13 +8,13 @@ html(ng-app="RunAdmin")
 
     include ../../includes/common_component
 
-    script(src='/javascripts/admin/gamesPrint/maze_2026E.js')
-    link(rel='stylesheet', href='/stylesheets/admin/live_ranking.css')
+    script(src='/javascripts/admin/gamesPrint/maze_2026E.js?v=' + assetVersion)
+    link(rel='stylesheet', href='/stylesheets/admin/live_ranking.css?v=' + assetVersion)
 
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js')
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js')
-    script(src='/components/ng-file-upload/ng-file-upload-all.min.js')
-    script(src="/javascripts/translate_config.js")
+    script(src='/components/ng-file-upload/ng-file-upload-all.min.js?v=' + assetVersion)
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
     style(type='text/css').
       .uib-time input {
         padding-left: 0;

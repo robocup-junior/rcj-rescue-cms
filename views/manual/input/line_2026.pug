@@ -5,13 +5,13 @@ html(ng-app="ddApp")
       var runId = "#{id}"
 
     include ../../includes/common_component
-    script(src="/javascripts/manual/line_2026.js")
+    script(src="/javascripts/manual/line_2026.js?v=" + assetVersion)
 
-    script(src="/javascripts/translate_config.js")
-    script(src='/components/lightbox2/dist/js/lightbox.min.js')
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
+    script(src='/components/lightbox2/dist/js/lightbox.min.js?v=' + assetVersion)
 
-    link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css')
-    link(href="/stylesheets/fredrik.css" rel="stylesheet")
+    link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css?v=' + assetVersion)
+    link(href="/stylesheets/fredrik.css?v=" + assetVersion rel="stylesheet")
 
     style.
         :root {
