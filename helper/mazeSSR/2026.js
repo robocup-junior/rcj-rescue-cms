@@ -3,6 +3,7 @@
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const path = require('path');
 const fs = require('fs');
+const { boldFont } = require('../ssrFont');
 
 const COLORS = {
   wall: 'navy',
@@ -407,7 +408,7 @@ async function drawMazeCanvas(map) {
     }
 
     // 3. Draw Numbering Overlays
-    ctx.font = 'bold 10px sans-serif';
+    ctx.font = boldFont(10);
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
@@ -431,7 +432,7 @@ async function drawMazeCanvas(map) {
           ctx.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
         }
         ctx.fillStyle = textColor;
-        ctx.font = 'bold 9px sans-serif';
+        ctx.font = boldFont(9);
         ctx.fillText(num, cx, cy);
         ctx.restore();
       };
@@ -453,7 +454,7 @@ async function drawMazeCanvas(map) {
         ctx.arc(tx + tw / 2, ty + th / 2, 7.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.fillStyle = COLORS.blue1;
-        ctx.font = 'bold 9px sans-serif';
+        ctx.font = boldFont(9);
         ctx.fillText(num, tx + tw / 2, ty + th / 2);
         ctx.restore();
       }

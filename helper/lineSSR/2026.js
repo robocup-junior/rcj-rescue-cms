@@ -3,6 +3,7 @@
 const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const path = require('path');
 const fs = require('fs');
+const { boldFont } = require('../ssrFont');
 
 const TILE_SIZE = 60;
 const SCALE_FACTOR = 3;
@@ -207,6 +208,13 @@ async function drawLineCanvas(map) {
         }
       }
 
+      // 1.2 Tile separator
+      ctx.save();
+      ctx.strokeStyle = '#cccccc';
+      ctx.lineWidth = 0.5;
+      ctx.strokeRect(-TILE_SIZE / 2, -TILE_SIZE / 2, TILE_SIZE, TILE_SIZE);
+      ctx.restore();
+
       // 1.5 Orange Border for Checkpoints/Start
       const isStartTile = (map.startTile && tile.x === map.startTile.x && tile.y === map.startTile.y && tile.z === map.startTile.z);
       if (tile.checkPoint || isStartTile) {
@@ -274,7 +282,7 @@ async function drawLineCanvas(map) {
         if (indexText) {
           ctx.save();
           ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-          ctx.font = 'bold 12px sans-serif';
+          ctx.font = boldFont(12);
           const textWidth = ctx.measureText(indexText).width;
           ctx.fillRect(TILE_SIZE / 2 - textWidth - 4, -TILE_SIZE / 2 + 1, textWidth + 2, 14);
           ctx.fillStyle = (tile.checkPoint || isStartTile) ? 'orange' : '#0abde3';
