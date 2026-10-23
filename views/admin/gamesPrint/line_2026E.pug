@@ -9,6 +9,7 @@ html(ng-app="RunAdmin")
       var leagueId = "#{leagueId}"
     script(src='/javascripts/admin/gamesPrint/line_2026E.js?v=' + assetVersion)
     link(rel='stylesheet', href='/stylesheets/admin/live_ranking.css?v=' + assetVersion)
+    link(rel='stylesheet', href='/stylesheets/admin/games_print.css?v=' + assetVersion)
 
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js')
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js')
@@ -27,39 +28,12 @@ html(ng-app="RunAdmin")
         padding-right: 6px;
       }
 
-      @media print {
-        .no_print {
-          display: none;
-        }
-
-        @page {
-          margin: 10mm;
-        }
-
-        body{
-          overflow-y: visible;
-          overflow-x: visible;
-        }
-
-        thead {
-          display: table-header-group;
-          break-inside: avoid;
-        }
-      }
-
   body(ng-controller="RunAdminController")
-    // Removed for Ranking in favor of styled table header for better print layout
-    #ranking-export(ng-if="displayMode == DisplayMode.LIST")
-      .row
-        .col-10(style="text-align:center;")
-          h1 {{list.comment}}
-        .col-2(style="text-align:right;")
-          img(ng-src="{{competition.logo}}" style="max-width:100%;max-height:50px;")
-    .row
-      .col-12
+    .container-fluid.print-page
+      div
         .refine.no_print
           .card.border-dark.mb-3(style='width:100%;')
-            .card-header.bg-transparent.border-dark.fa-2x
+            .card-header.bg-transparent.border-dark
               .row 
                 .col-md-6
                   i.fas.fa-cog(aria-hidden='true') Config
@@ -128,7 +102,7 @@ html(ng-app="RunAdmin")
                 label.checkbox(for='tableShowRuns') Number of Runs
 
                 hr
-                h6.card-title Comment
+                h6.card-title Title
                 .input-group
                   .input-group-prepend
                     span.input-group-text
@@ -178,19 +152,28 @@ html(ng-app="RunAdmin")
 
                 hr
 
-                h6.card-title Comment
-                  .input-group
-                    .input-group-prepend
-                      span.input-group-text
-                        i.fas.fa-pen(aria-hidden='true')
-                    input.form-control(type='text', placeholder='', aria-label='Username', aria-describedby='basic-addon1' ng-model='list.comment')
+                h6.card-title Title
+                .input-group
+                  .input-group-prepend
+                    span.input-group-text
+                      i.fas.fa-pen(aria-hidden='true')
+                  input.form-control(type='text', placeholder='', aria-label='Username', aria-describedby='basic-addon1' ng-model='list.comment')
               
 
 
-        center
-          .loader
-            img(src="/images/loader2.gif")
-            p Now Loading...
+        .ranking-header
+          .ranking-title
+            h3 {{competition.name}}
+            h2(ng-if="displayMode == DisplayMode.LIST") {{list.comment}}
+            h2(ng-if="displayMode == DisplayMode.RANKING") {{ranking.comment}}
+          img.competition-logo(
+            ng-if="competition.logo"
+            ng-src="{{competition.logo}}"
+            alt="Competition Logo"
+          )
+        .loader.no_print
+          img(src="/images/loader2.gif")
+          p Now Loading...
         table(class="custom" style="margin-bottom:10px;" ng-if="displayMode == DisplayMode.LIST")
           thead
             tr
@@ -242,51 +225,40 @@ html(ng-app="RunAdmin")
                 i(class="fas fa-check" aria-hidden="true" style="color:#2ecc71;" ng-if="run.exitBonus")
                 i(class="fas fa-times" aria-hidden="true" style="color:#e74c3c;" ng-if="!run.exitBonus")
 
-    #ranking-export
-      .ranking-header
-        .ranking-title
-          h3 {{competition.name}}
-          h2 {{ranking.comment}}
-
-        img.competition-logo(
-          ng-if="competition.logo"
-          ng-src="{{competition.logo}}"
-          alt="Competition Logo"
-        )
-      table(class="custom" style="margin-bottom:10px;" ng-if="displayMode == DisplayMode.RANKING")
-        thead
-          tr
-            th(rowspan='2') Rank
-            th(rowspan='2' ng-if='tableOptions.showTeamCode') Team Code
-            th(rowspan='2' ng-if='tableOptions.showTeamName') Team
-            th(rowspan='1' colspan='{{getRoundColspan()}}' ng-if='tableOptions.showRaw || tableOptions.showNorm') Round Scores
-            th(rowspan='2' ng-if='tableOptions.showRaw && !tableOptions.showNorm') TOTAL
-            th(rowspan='2' ng-if='tableOptions.showNorm') Mean of
-              br
-              | Normalized
-              br
-              | TOTAL
-            th(rowspan='2' ng-if='tableOptions.showTime') Total Time
-            th(rowspan='2' ng-if='tableOptions.showRuns') Runs
-          tr
-            th(ng-repeat-start='group in selectedRankingGroups' ng-if='tableOptions.showRaw') Round {{group}}
-            th(ng-if='tableOptions.showNorm') Normalized
-              br
-              | Round {{group}}
-            th(ng-repeat-end style='display:none')
-        tbody
-          tr(ng-repeat='team in rankingTable')
-            td {{$index + 1}}
-            td(ng-if='tableOptions.showTeamCode') {{team.teamCode}}
-            td(ng-if='tableOptions.showTeamName') {{team.name}}
-            td(ng-repeat-start='group in selectedRankingGroups' ng-if='tableOptions.showRaw')
-              span(ng-if='team.groupScores[group]') {{team.groupScores[group].rawScore}}
-              span(ng-if='!team.groupScores[group]') -
-            td(ng-if='tableOptions.showNorm')
-              span(ng-if='team.groupScores[group]') {{team.groupScores[group].formattedNormalizedScore}}
-              span(ng-if='!team.groupScores[group]') -
-            td(ng-repeat-end style='display:none')
-            td(ng-if='tableOptions.showRaw && !tableOptions.showNorm') {{team.totalRawScore}}
-            td(ng-if='tableOptions.showNorm') {{team.meanNormalizedScore | number:3}}
-            td(ng-if='tableOptions.showTime') {{team.totalTime || '-'}}
-            td(ng-if='tableOptions.showRuns') {{team.runCount}}
+        table(class="custom" style="margin-bottom:10px;" ng-if="displayMode == DisplayMode.RANKING")
+          thead
+            tr
+              th(rowspan='2') Rank
+              th(rowspan='2' ng-if='tableOptions.showTeamCode') Team Code
+              th(rowspan='2' ng-if='tableOptions.showTeamName') Team
+              th(rowspan='1' colspan='{{getRoundColspan()}}' ng-if='tableOptions.showRaw || tableOptions.showNorm') Round Scores
+              th(rowspan='2' ng-if='tableOptions.showRaw && !tableOptions.showNorm') TOTAL
+              th(rowspan='2' ng-if='tableOptions.showNorm') Mean of
+                br
+                | Normalized
+                br
+                | TOTAL
+              th(rowspan='2' ng-if='tableOptions.showTime') Total Time
+              th(rowspan='2' ng-if='tableOptions.showRuns') Runs
+            tr
+              th(ng-repeat-start='group in selectedRankingGroups' ng-if='tableOptions.showRaw') Round {{group}}
+              th(ng-if='tableOptions.showNorm') Normalized
+                br
+                | Round {{group}}
+              th(ng-repeat-end style='display:none')
+          tbody
+            tr(ng-repeat='team in rankingTable')
+              td {{$index + 1}}
+              td(ng-if='tableOptions.showTeamCode') {{team.teamCode}}
+              td(ng-if='tableOptions.showTeamName') {{team.name}}
+              td(ng-repeat-start='group in selectedRankingGroups' ng-if='tableOptions.showRaw')
+                span(ng-if='team.groupScores[group]') {{team.groupScores[group].rawScore}}
+                span(ng-if='!team.groupScores[group]') -
+              td(ng-if='tableOptions.showNorm')
+                span(ng-if='team.groupScores[group]') {{team.groupScores[group].formattedNormalizedScore}}
+                span(ng-if='!team.groupScores[group]') -
+              td(ng-repeat-end style='display:none')
+              td(ng-if='tableOptions.showRaw && !tableOptions.showNorm') {{team.totalRawScore}}
+              td(ng-if='tableOptions.showNorm') {{team.meanNormalizedScore | number:3}}
+              td(ng-if='tableOptions.showTime') {{team.totalTime || '-'}}
+              td(ng-if='tableOptions.showRuns') {{team.runCount}}

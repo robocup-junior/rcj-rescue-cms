@@ -1,0 +1,109 @@
+/* Games print page: config panel on screen, then the sheet that gets printed (header + table) */
+
+/* navbar_premium.css reserves room for a navbar this page doesn't have */
+body {
+  padding-top: 0;
+}
+
+.print-page {
+  padding-top: 15px;
+  padding-bottom: 30px;
+}
+
+.refine .card-header {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+/* Header of the printed sheet */
+.ranking-header {
+  border-bottom: 3px solid #1f4e79;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.ranking-header h2 {
+  font-size: 2.2em;
+}
+
+.ranking-header .competition-logo {
+  max-height: 70px;
+}
+
+.loader {
+  text-align: center;
+  padding: 40px 0;
+}
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
+  .no_print {
+    display: none !important;
+  }
+
+  body {
+    overflow: visible;
+  }
+
+  .print-page {
+    padding: 0;
+  }
+
+  .ranking-header {
+    break-after: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .ranking-header h2 {
+    font-size: 20pt;
+  }
+
+  .ranking-header h3 {
+    font-size: 12pt;
+  }
+
+  .ranking-header .competition-logo {
+    max-height: 50px;
+  }
+
+  /* Repeat the column headers on every page and never split a row */
+  table.custom thead {
+    display: table-header-group;
+  }
+
+  table.custom tr {
+    break-inside: avoid;
+  }
+
+  table.custom {
+    font-size: 10pt;
+  }
+
+  table.custom thead th {
+    padding: 4px 6px;
+  }
+
+  table.custom tbody td {
+    padding: 3px 6px;
+  }
+
+  /* Don't print the hover highlight of the row under the mouse */
+  table.custom tbody tr:hover {
+    background: #ffffff;
+  }
+
+  table.custom tbody tr:nth-child(even):hover {
+    background: #f7fbff;
+  }
+
+  table.custom tbody tr,
+  table.custom .img-thumbnail {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

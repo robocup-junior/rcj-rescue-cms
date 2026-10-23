@@ -57,7 +57,7 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
             $scope.league = response.data.leagues.find((l) => l.league == leagueId);
             launchSocketIo();
             updateRunList();
-            $scope.list = { comment: `${$scope.competition.name} - ${$scope.league.name}` };
+            $scope.list = { comment: `${$scope.league.name} - Run List` };
             $scope.ranking = { comment: `${$scope.league.name} - Round Scores` };
         })
 
