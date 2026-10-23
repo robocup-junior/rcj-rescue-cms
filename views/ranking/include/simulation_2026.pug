@@ -46,9 +46,9 @@ div(ng-if="ranking!=null")
             td.text-center.team-name(ng-if="showTeam", ng-bind='team.team.name', ng-style="{'min-width': teamWidth + 'px'}")
             td.text-center.final-score-cell {{formatNumber(team.finalScore, finalScoreDecimals)}}
             td.text-center(ng-show="showTime") {{("00"+team.gameSum.time.minutes).slice(-2)}}:{{("00"+team.gameSum.time.seconds).slice(-2)}}
-            td.text-center(ng-show="showMode.nonNormalized", ng-repeat="grp in runGroups" ng-bind="team.games[grp].score" ng-click="openRunDetails(team.games[grp]._id)" ng-style="{backgroundColor: team.games[grp].used ? '':'#ccc'}")
+            td.text-center(ng-show="showMode.nonNormalized", ng-repeat="grp in runGroups" ng-bind="team.games[grp].score" ng-click="openRunDetails(team.games[grp]._id)" ng-class="{unused: !team.games[grp].used}")
             td.text-center(ng-show="showMode.nonNormalized", ng-bind='team.gameSum.score')
-            td.text-center(ng-show="showMode.normalized", ng-repeat="grp in runGroups" ng-click="openRunDetails(team.games[grp]._id)" ng-style="{backgroundColor: team.games[grp].used ? '':'#ccc'}") {{formatNumber(team.games[grp].normalizedScore, normalScoreDecimals)}}
+            td.text-center(ng-show="showMode.normalized", ng-repeat="grp in runGroups" ng-click="openRunDetails(team.games[grp]._id)" ng-class="{unused: !team.games[grp].used}") {{formatNumber(team.games[grp].normalizedScore, normalScoreDecimals)}}
             td.text-center(ng-show="showMode.normalized") {{formatNumber(team.gameSum.normalizedScoreMean, normalScoreDecimals)}}
 
             td.text-center(ng-show="showMode.document", ng-repeat="block in team.document.details") {{formatNumber(block.normalizedScore, normalScoreDecimals)}}

@@ -1,0 +1,163 @@
+/* Public ranking pages: header card, then the ranking table in a scrollable card */
+
+.public-ranking {
+  max-width: 1600px;
+  margin: 0 auto 40px;
+}
+
+.public-ranking .ranking-back {
+  margin-bottom: 14px;
+}
+
+/* Header card: competition, title and logo */
+.public-ranking .ranking-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 18px 22px;
+  background: #fff;
+  border: 1px solid #e3e8ef;
+  border-left: 5px solid #1f4e79;
+  border-radius: 12px;
+}
+
+.public-ranking .ranking-title h3 {
+  margin: 0 0 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.public-ranking .ranking-title h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.public-ranking .competition-logo {
+  max-width: 200px;
+  max-height: 64px;
+  object-fit: contain;
+}
+
+/* Wide tables scroll inside the card instead of the page */
+.public-ranking #rank > div {
+  overflow-x: auto;
+}
+
+.public-ranking table.custom {
+  border: 1px solid #e3e8ef;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  font-size: 14px;
+}
+
+.public-ranking table.custom th,
+.public-ranking table.custom td {
+  padding: 9px 12px;
+  border: 0;
+  border-bottom: 1px solid #eef1f5;
+  border-left: 1px solid #eef1f5;
+  white-space: nowrap;
+}
+
+.public-ranking table.custom thead th {
+  color: #fff;
+  font-weight: 600;
+  background: #1f4e79;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.public-ranking table.custom thead tr:nth-child(2) th {
+  background: #2f75b5;
+}
+
+.public-ranking table.custom thead tr:nth-child(3) th {
+  background: #5b9bd5;
+}
+
+.public-ranking table.custom tbody tr:nth-child(odd) {
+  background: #fff;
+}
+
+.public-ranking table.custom tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.public-ranking table.custom tbody tr:hover {
+  background: #eef6ff;
+}
+
+.public-ranking table.custom td.team-name {
+  font-weight: 600;
+  white-space: normal;
+}
+
+/* Rank: gold, silver and bronze for the top three */
+.public-ranking table.custom tbody td:first-child {
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.public-ranking table.custom tbody tr:nth-child(1) td:first-child {
+  color: #fff;
+  background: #d4af37;
+}
+
+.public-ranking table.custom tbody tr:nth-child(2) td:first-child {
+  color: #fff;
+  background: #a8a9ad;
+}
+
+.public-ranking table.custom tbody tr:nth-child(3) td:first-child {
+  color: #fff;
+  background: #cd7f32;
+}
+
+.public-ranking table.custom .final-score-cell {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0d3b66;
+  background: #eef6ff;
+}
+
+/* Run scores open the run details */
+.public-ranking table.custom td[ng-click] {
+  cursor: pointer;
+}
+
+.public-ranking table.custom td[ng-click]:hover {
+  text-decoration: underline;
+}
+
+/* Runs that don't count towards the ranking */
+.public-ranking table.custom td.unused {
+  color: #9ca3af;
+  background: #f3f4f6;
+}
+
+.public-ranking .img-thumbnail {
+  border: none;
+  border-radius: 16px;
+}
+
+@media (max-width: 575px) {
+  .public-ranking .ranking-header {
+    padding: 14px 16px;
+  }
+
+  .public-ranking .ranking-title h2 {
+    font-size: 1.35rem;
+  }
+
+  .public-ranking .competition-logo {
+    max-height: 44px;
+  }
+}

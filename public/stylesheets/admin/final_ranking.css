@@ -162,3 +162,9 @@ h3 {
     print-color-adjust: exact;
   }
 }
+
+/* Runs that don't count towards the ranking */
+table.custom tbody td.unused {
+  color: #6b7280;
+  background: #d1d5db;
+}

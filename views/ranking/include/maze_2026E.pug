@@ -54,9 +54,9 @@ div(ng-if="ranking!=null")
                 i.fas.fa-bullseye(style="font-size:18px;vertical-align:middle;margin-left:2px;margin-right:2px;", ng-if="victim.type.startsWith('Cognitive')")
                 span(style="font-size:15px; color:black;") ×{{victim.count}}
             td.text-center(ng-bind='team.gameSum.lops' ng-show="showLops")
-            td.text-center(ng-show="showMode.nonNormalized", ng-repeat="grp in runGroups" ng-bind="team.games[grp].score" ng-click="openRunDetails(team.games[grp]._id)" ng-style="{backgroundColor: team.games[grp].used ? '':'#ccc'}")
+            td.text-center(ng-show="showMode.nonNormalized", ng-repeat="grp in runGroups" ng-bind="team.games[grp].score" ng-click="openRunDetails(team.games[grp]._id)" ng-class="{unused: !team.games[grp].used}")
             td.text-center(ng-show="showMode.nonNormalized", ng-bind='team.gameSum.score')
-            td.text-center(ng-show="showMode.normalized", ng-repeat="grp in runGroups" ng-click="openRunDetails(team.games[grp]._id)" ng-style="{backgroundColor: team.games[grp].used ? '':'#ccc'}") {{formatNumber(team.games[grp].normalizedScore, normalScoreDecimals)}}
+            td.text-center(ng-show="showMode.normalized", ng-repeat="grp in runGroups" ng-click="openRunDetails(team.games[grp]._id)" ng-class="{unused: !team.games[grp].used}") {{formatNumber(team.games[grp].normalizedScore, normalScoreDecimals)}}
             td.text-center(ng-show="showMode.normalized") {{formatNumber(team.gameSum.normalizedScoreMean, normalScoreDecimals)}}
 
             td.text-center(ng-show="showMode.document", ng-repeat="block in team.document.details") {{formatNumber(block.normalizedScore, normalScoreDecimals)}}

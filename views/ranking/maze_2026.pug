@@ -9,6 +9,7 @@ append scripts
     var competitionId = "#{competitionId}"
     var leagueId = "#{leagueId}"
 
+  link(rel='stylesheet', href='/stylesheets/ranking.css?v=' + assetVersion)
   script(src='/javascripts/ranking/maze_2026.js?v=' + assetVersion)
   script(src = '/components/datatables/media/js/jquery.dataTables.min.js')
   script(src = '/components/angular-datatables/demo/src/archives/dist/angular-datatables.min.js')
@@ -17,16 +18,16 @@ block location
     a.breadcrumb-item(ng-click="go('/home')") Home
     a.breadcrumb-item(ng-click='go("/home/"+ competitionId )') {{competition.name}}
     a.breadcrumb-item(ng-click="go('/maze/'+ competitionId + '/' + league.league)") {{league.name}}
-    span.breadcrumb-item.active Ranking
+    span.breadcrumb-item.active {{'common.rank' | translate}}
 
 block content
-  .row
-  .col-md12
-    button.btn.btn-secondary(style='margin:0 10px 10px 0;', type='button', ng-click="go('/maze/' + competitionId + '/' + league.league)")
-      i.fa.fa-undo(aria-hidden='true') {{'common.back' | translate}}
-  br
+  .public-ranking
+    button.btn.btn-light.btn-sm.ranking-back(type='button', ng-click="go('/maze/' + competitionId + '/' + league.league)")
+      i.fas.fa-arrow-left(aria-hidden='true')
+      |  {{'common.back' | translate}}
 
-  .alert.alert-success(role='alert' ng-if="competition.message")
-    h4.alert-heading {{'common.message' | translate}}
-    p(ng-bind-html="competition.message")
-  include include/maze_2026
+    .alert.alert-success(role='alert' ng-if="competition.message")
+      h4.alert-heading {{'common.message' | translate}}
+      p(ng-bind-html="competition.message")
+
+    include include/maze_2026
