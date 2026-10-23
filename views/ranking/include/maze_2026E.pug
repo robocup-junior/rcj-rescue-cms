@@ -5,18 +5,21 @@ center
 div(ng-if="ranking!=null")
   .row#rank
     .col-lg-12
-      .ranking-header
-        .ranking-title
-          h3 {{competition.name}}
-          h2 [{{'maze.score.rank' | translate}}] {{league.name}}
+      unless printSheet
+        .ranking-header
+          .ranking-title
+            h3 {{competition.name}}
+            h2 [{{'maze.score.rank' | translate}}] {{league.name}}
 
-        img.competition-logo(
-          ng-if="competition.logo"
-          ng-src="{{competition.logo}}"
-          alt="Competition Logo"
-        )
+          img.competition-logo(
+            ng-if="competition.logo"
+            ng-src="{{competition.logo}}"
+            alt="Competition Logo"
+          )
       table.custom(style="overflow: scroll;")
         thead
+          if printSheet
+            +sheetHeader('comment.top')
           tr
             th.text-center(rowspan="3") {{'common.rank' | translate}}
             th.text-center(rowspan="3" ng-if="showMode.teamCode && showCode") {{'common.teamCode' | translate}}
@@ -47,7 +50,7 @@ div(ng-if="ranking!=null")
             td.text-center(ng-show="showTime") {{("00"+team.gameSum.time.minutes).slice(-2)}}:{{("00"+team.gameSum.time.seconds).slice(-2)}}
             td.text-center(ng-show="showVictims")
               .img-thumbnail(style="padding:0;display: inline-block;margin-right:5px;" ng-repeat="victim in team.gameSum.victims | orderBy:victimOrder" ng-style="{'background-color': (victim.type.endsWith(':H') || victim.type=='PHI' || victim.type=='H')?'#f8d7da':((victim.type.endsWith(':S') || victim.type=='PSI' || victim.type=='S')?'#fff3cd':((victim.type.endsWith(':U') || victim.type=='OMEGA' || victim.type=='U')?'#d4edda':'transparent'))}")
-                img(ng-src="/images/{{victim.type}}.png", style="height:20px;", ng-if="!victim.type.startsWith('Cognitive')")
+                img(ng-src="/images/{{victim.type}}.png", alt="{{victim.type}}", style="height:20px;", ng-if="!victim.type.startsWith('Cognitive')")
                 i.fas.fa-bullseye(style="font-size:18px;vertical-align:middle;margin-left:2px;margin-right:2px;", ng-if="victim.type.startsWith('Cognitive')")
                 span(style="font-size:15px; color:black;") ×{{victim.count}}
             td.text-center(ng-bind='team.gameSum.lops' ng-show="showLops")

@@ -9,9 +9,9 @@ html(ng-app="RunAdmin")
       var leagueId = "#{leagueId}"
     script(src='/javascripts/admin/gamesPrint/line_2026.js?v=' + assetVersion)
     script(src='/components/exceljs/index.js?v=' + assetVersion)
-    script(src='/javascripts/admin/gamesPrint/xlsx_export.js?v=' + assetVersion)
+    script(src='/javascripts/admin/xlsx_export.js?v=' + assetVersion)
     link(rel='stylesheet', href='/stylesheets/admin/live_ranking.css?v=' + assetVersion)
-    link(rel='stylesheet', href='/stylesheets/admin/games_print.css?v=' + assetVersion)
+    link(rel='stylesheet', href='/stylesheets/admin/print_page.css?v=' + assetVersion)
 
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js')
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js')
@@ -37,8 +37,8 @@ html(ng-app="RunAdmin")
           {model: 'showCode', label: "{{'common.teamCode' | translate}}"},
           {model: 'showTeam', label: "{{'common.team' | translate}}"},
           {model: 'showField', label: "{{'common.field' | translate}}"},
-          {model: 'showOriginalScore', label: "{{'admin.gamesPrint.originalScore' | translate}}"},
-          {model: 'showAdjustment', label: "{{'admin.gamesPrint.adjustment' | translate}}"},
+          {model: 'showOriginalScore', label: "{{'admin.print.originalScore' | translate}}"},
+          {model: 'showAdjustment', label: "{{'admin.print.adjustment' | translate}}"},
           {model: 'showScore', label: "{{'common.score' | translate}}"},
           {model: 'showNormalizedScore', label: "{{'common.normalizedScore' | translate}}"},
           {model: 'showTime', label: "{{'common.time' | translate}}"},
@@ -51,15 +51,15 @@ html(ng-app="RunAdmin")
 
       table#run-table.custom
         thead
-          +sheetHeader
+          +sheetHeader('list.comment')
           tr
             th {{"common.starttime" | translate}}
             th {{"common.round" | translate}}
             th(ng-if="showCode") {{'common.teamCode' | translate}}
             th(ng-if="showTeam") {{"common.team" | translate}}
             th(ng-if="showField") {{"common.field" | translate}}
-            th(ng-if="showOriginalScore") {{'admin.gamesPrint.originalScore' | translate}}
-            th(ng-if="showAdjustment") {{'admin.gamesPrint.adjustment' | translate}}
+            th(ng-if="showOriginalScore") {{'admin.print.originalScore' | translate}}
+            th(ng-if="showAdjustment") {{'admin.print.adjustment' | translate}}
             th(ng-if="showScore") {{"common.score" | translate}}
             th(ng-if="showNormalizedScore") {{"common.normalizedScore" | translate}}
             th(ng-if="showTime") {{"common.time" | translate}}

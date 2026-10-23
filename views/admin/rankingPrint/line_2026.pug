@@ -1,5 +1,4 @@
 //- -*- tab-width: 2 -*-
-//- -*- tab-width: 2 -*-
 html(ng-app="LineScore")
   head
     title Rescue Line Score Print
@@ -8,257 +7,61 @@ html(ng-app="LineScore")
     script.
       var competitionId = "#{competitionId}"
       var leagueId = "#{leagueId}"
-    
-    script(src='/javascripts/ranking/line_2026.js?v=' + assetVersion)
 
+    script(src='/javascripts/ranking/line_2026.js?v=' + assetVersion)
+    script(src='/components/exceljs/index.js?v=' + assetVersion)
+    script(src='/javascripts/admin/xlsx_export.js?v=' + assetVersion)
+    link(rel='stylesheet', href='/stylesheets/admin/final_ranking.css?v=' + assetVersion)
+    link(rel='stylesheet', href='/stylesheets/admin/print_page.css?v=' + assetVersion)
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js')
     script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js')
     script(src = '/components/datatables/media/js/jquery.dataTables.min.js')
     script(src = '/components/angular-datatables/demo/src/archives/dist/angular-datatables.min.js')
     script(src='/components/ng-file-upload/ng-file-upload-all.min.js?v=' + assetVersion)
     script(src="/javascripts/translate_config.js?v=" + assetVersion)
-    style(type='text/css').
-      .ranking-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        margin-bottom: 5px;
-        width: 100%;
-      }
-
-      .ranking-title {
-        flex: 1;
-        text-align: left;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-      }
-
-      .competition-logo {
-        max-height: 110px; /* was 90px */
-        max-width: 250px;
-        object-fit: contain;
-        margin-right: 10px;
-        flex-shrink: 0;
-        align-self: flex-end;
-      }
-
-      @media print {
-        .competition-logo {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-      }
-      .uib-time input {
-        padding-left: 0;
-        padding-right: 0;
-        width: 2.5em;
-        margin-right: 0;
-      }
-
-      .uib-timepicker .btn {
-        padding-left: 6px;
-        padding-right: 6px;
-      }
-
-      @media print {
-        .no_print {
-          display: none;
-        }
-
-        @page {
-          margin: 10mm;
-        }
-
-        body{
-          overflow-y: visible;
-          overflow-x: visible;
-        }
-
-        thead {
-          display: table-header-group;
-          break-inside: avoid;
-        }
-      }
-
-      /* Final ranking styling */
-      table.custom {
-        width: 100%;
-        border-collapse: collapse;
-        background: #fff;
-        font-size: 16px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      }
-
-      table.custom thead th {
-        background: #1f4e79;
-        color: #fff;
-        border: 1px solid #d0d7de;
-        padding: 8px;
-        font-weight: 600;
-        text-align: center;
-      }
-
-      table.custom thead tr:nth-child(2) th {
-        background: #2f75b5;
-      }
-
-      table.custom thead tr:nth-child(3) th {
-        background: #5b9bd5;
-      }
-
-      table.custom tbody td {
-        border: 1px solid #d0d7de;
-        padding: 8px 10px;
-        vertical-align: middle;
-      }
-
-      table.custom tbody tr:nth-child(even) {
-        background: #f7fbff;
-      }
-
-      table.custom tbody tr:nth-child(odd):not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)) {
-        background: #ffffff;
-      }
-
-      table.custom tbody tr:hover {
-        background: #dcecff;
-      }
-
-      table.custom tbody tr:nth-child(1) {
-        background: linear-gradient(90deg, #fff4b3 0%, #ffe082 100%);
-        font-weight: 700;
-        font-size: 1.08em;
-        box-shadow: inset 10px 0 #d4af37;
-      }
-
-      table.custom tbody tr:nth-child(2) {
-        background: linear-gradient(90deg, #f3f4f6 0%, #cfd5dd 100%);
-        font-weight: 700;
-        box-shadow: inset 10px 0 #a8a9ad;
-      }
-
-      table.custom tbody tr:nth-child(3) {
-        background: linear-gradient(90deg, #f7e2d2 0%, #e7b48a 100%);
-        font-weight: 700;
-        box-shadow: inset 10px 0 #cd7f32;
-      }
-
-      table.custom tbody td:first-child {
-        font-size: 1.2em;
-        font-weight: 700;
-        text-align: center;
-      }
-
-      .final-score-cell {
-        font-weight: 800;
-        font-size: 1.2em;
-      }
-
-      table.custom tbody tr:not(:nth-child(1)):not(:nth-child(2)):not(:nth-child(3)) .final-score-cell {
-        font-weight: 800;
-        font-size: 1.15em;
-        color: #0d3b66;
-        background: #eef6ff;
-      }
-
-      table.custom tbody tr:nth-child(1) td:first-child {
-        font-size: 2em;
-      }
-
-      table.custom tbody tr:nth-child(2) td:first-child,
-      table.custom tbody tr:nth-child(3) td:first-child {
-        font-size: 1.7em;
-      }
-
-      .team-name {
-        white-space: normal;
-        word-break: break-word;
-      }
-
-      h2 {
-        padding-left: 10px;
-        text-align: left;
-        margin-top: 0;
-        margin-bottom: 0;
-        font-weight: 800;
-        font-size: 2.8em;
-        line-height: 1;
-      }
-
-      h3 {
-        padding-left: 10px;
-        text-align: left;
-        color: #666;
-        font-size: 1.5em;
-        font-weight: 600;
-        margin-top: 0;
-        margin-bottom: 2px;
-        line-height: 1;
-      }
-
-      .img-thumbnail {
-        border: none;
-        border-radius: 16px;
-        padding: 2px 6px !important;
-      }
-
-      @media print {
-        table.custom {
-          box-shadow: none;
-        }
-
-        table.custom thead th {
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-      }
 
   body(ng-controller="LineScoreController")
-    .row
-      .col-12
-        .refine.no_print
-          .card.border-dark.mb-3(style='width:100%;')
-            .card-header.bg-transparent.border-dark.fa-2x
-              .row 
-                .col-md-6
-                  i.fas.fa-cog(aria-hidden='true') Config
-                .col-md-6(style="text-align:right;")
-                  button(onclick="window.print();" class='btn btn-info')
-                    i.fas.fa-print &nbsp;{{"common.print" | translate}}
-            .card-body.text-dark
-              h6.card-title Display items
-                br
-                br
-                input(type='checkbox' ng-model='showCode' id="showCode")
-                label.checkbox(for="showCode" ng-show="showMode.teamCode") Code
-                input(type='checkbox' ng-model='showTeam' id="showTeam")
-                label.checkbox(for="showTeam") Team
-                input(type='checkbox' ng-model='showTime' id="showTime" ng-change="updateGameRowSpan()")
-                label.checkbox(for="showTime") Time
-                input(type='checkbox' ng-model='showVictims' id="showVictims" ng-change="updateGameRowSpan()")
-                label.checkbox(for="showVictims") Rescued
-                input(type='checkbox' ng-model='showLops' id="showLops" ng-change="updateGameRowSpan()")
-                label.checkbox(for="showLops") LoPs
-                br
-                br
-                label(for="finalScoreDecimals") Final Score Decimals
-                input.form-control(type="number" min="0" max="10" ng-model="finalScoreDecimals" id="finalScoreDecimals" style="width:100px;display:inline-block;margin-left:10px;")
-                br
-                br
-                label(for="normalScoreDecimals") Normal Score Decimals
-                input.form-control(type="number" min="0" max="10" ng-model="normalScoreDecimals" id="normalScoreDecimals" style="width:100px;display:inline-block;margin-left:10px;")
-                br
-                br
-                label(for="teamWidth") Team Width (px)
-                input.form-control(type="number" min="50" max="1000" ng-model="teamWidth" id="teamWidth" style="width:100px;display:inline-block;margin-left:10px;")
-              hr
-              h6.card-title Comment
-              p Top
-              input(ng-model="comment.top" style="width:100%")
-              p Bottom
-              input(ng-model="comment.bottom" style="width:100%")
-        include ../../ranking/include/line_2026
-        
-        h6(style="text-align:center;margin-top:10px;", ng-if="comment.bottom")
-          i.fas.fa-info-circle &nbsp;{{comment.bottom}}
+    include ../../includes/print_page
+    .container-fluid.print-page
+      +printToolbar(`/admin/${competitionId}/${leagueId}/games`, 'ranking.length', 'admin.print.teams', '#rank table.custom')
+
+      .config-panel.no_print
+        section.config-section
+          h2.config-section-title
+            i.fas.fa-columns
+            |  {{'admin.print.columns' | translate}}
+          .config-field
+            .chips
+              +chip('showCode', "{{'common.teamCode' | translate}}")(ng-show='showMode.teamCode')
+              +chip('showTeam', "{{'common.team' | translate}}")
+              +chip('showTime', "{{'common.time' | translate}}", 'updateGameRowSpan()')
+              +chip('showVictims', "{{'common.rescued' | translate}}", 'updateGameRowSpan()')
+              +chip('showLops', "{{'common.lops' | translate}}", 'updateGameRowSpan()')
+          .config-field
+            .config-label {{'admin.print.sheetTitle' | translate}}
+            input.form-control.form-control-sm(type='text' aria-label="{{'admin.print.sheetTitle' | translate}}" ng-model='comment.top')
+
+        section.config-section
+          h2.config-section-title
+            i.fas.fa-sliders-h
+            |  {{'admin.print.format' | translate}}
+          .config-field.format-grid
+            label
+              span.config-label {{'admin.print.decimalsFinal' | translate}}
+              input.form-control.form-control-sm(type="number" min="0" max="10" ng-model="finalScoreDecimals")
+            label
+              span.config-label {{'admin.print.decimalsNormalized' | translate}}
+              input.form-control.form-control-sm(type="number" min="0" max="10" ng-model="normalScoreDecimals")
+            label
+              span.config-label {{'admin.print.teamWidth' | translate}}
+              input.form-control.form-control-sm(type="number" min="50" max="1000" ng-model="teamWidth")
+          .config-field
+            .config-label {{'admin.print.note' | translate}}
+            input.form-control.form-control-sm(type='text' aria-label="{{'admin.print.note' | translate}}" ng-model='comment.bottom')
+
+      - var printSheet = true
+      include ../../ranking/include/line_2026
+
+      p.sheet-note(ng-if="ranking != null && comment.bottom")
+        i.fas.fa-info-circle
+        |  {{comment.bottom}}

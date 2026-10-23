@@ -5,18 +5,21 @@ center
 div(ng-if="ranking!=null")
   .row#rank
     .col-lg-12
-      .ranking-header
-        .ranking-title
-          h3 {{competition.name}}
-          h2 [{{'maze.score.rank' | translate}}] {{league.name}}
+      unless printSheet
+        .ranking-header
+          .ranking-title
+            h3 {{competition.name}}
+            h2 [{{'maze.score.rank' | translate}}] {{league.name}}
 
-        img.competition-logo(
-          ng-if="competition.logo"
-          ng-src="{{competition.logo}}"
-          alt="Competition Logo"
-        )
+          img.competition-logo(
+            ng-if="competition.logo"
+            ng-src="{{competition.logo}}"
+            alt="Competition Logo"
+          )
       table.custom(style="overflow: scroll;")
         thead
+          if printSheet
+            +sheetHeader('comment.top')
           tr
             th.text-center(rowspan="3") {{'common.rank' | translate}}
             th.text-center(rowspan="3" ng-if="showMode.teamCode && showCode") {{'common.teamCode' | translate}}

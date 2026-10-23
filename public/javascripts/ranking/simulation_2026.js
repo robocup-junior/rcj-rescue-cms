@@ -29,7 +29,8 @@ app.controller("SimulationScoreController", ['$scope', '$http', '$sce', '$transl
     getRankInfo()
 
     $scope.comment = [];
-    $scope.comment.bottom = "The scores are based on the sum of all the run (the minimum score is not subtracted yet).";
+    $scope.comment.bottom = "";
+    $translate('admin.print.rankingNote').then((note) => { $scope.comment.bottom = note; });
 
     const currentLang = $translate.proposedLanguage() || $translate.use();
     $scope.displayLang = currentLang;
@@ -38,6 +39,7 @@ app.controller("SimulationScoreController", ['$scope', '$http', '$sce', '$transl
         $scope.competition = response.data;
         $scope.league = response.data.leagues.find((l) => l.league == leagueId);
         $scope.comment.top = $scope.league.name;
+        $translate('maze.score.rank').then((rank) => { $scope.comment.top = `[${rank}] ${$scope.league.name}`; });
     })
 
     function updateTime(){

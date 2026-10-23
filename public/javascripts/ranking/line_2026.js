@@ -33,7 +33,8 @@ app.controller("LineScoreController", ['$scope', '$http', '$sce', '$translate', 
     getRankInfo()
 
     $scope.comment = [];
-    $scope.comment.bottom = "The scores are based on the sum of all the run (the minimum score is not subtracted yet).";
+    $scope.comment.bottom = "";
+    $translate('admin.print.rankingNote').then((note) => { $scope.comment.bottom = note; });
 
     const currentLang = $translate.proposedLanguage() || $translate.use();
     $scope.displayLang = currentLang;
@@ -42,6 +43,7 @@ app.controller("LineScoreController", ['$scope', '$http', '$sce', '$translate', 
         $scope.competition = response.data;
         $scope.league = response.data.leagues.find((l) => l.league == leagueId);
         $scope.comment.top = $scope.league.name;
+        $translate('line.score.rank').then((rank) => { $scope.comment.top = `[${rank}] ${$scope.league.name}`; });
     })
 
     function updateTime(){

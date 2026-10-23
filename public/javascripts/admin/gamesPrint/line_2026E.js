@@ -10,7 +10,7 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', '$
             launchSocketIo();
             updateRunList();
             const setTitle = (runList) => { $scope.list = { comment: `${$scope.league.name} - ${runList}` }; };
-            $translate('admin.gamesPrint.runList').then(setTitle, setTitle);
+            $translate('admin.print.runList').then(setTitle, setTitle);
         })
 
         var runListTimer = null;
@@ -115,10 +115,6 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', '$
 
         $scope.clearSelection = function (selection) {
             for (const key in selection) selection[key] = false;
-        };
-
-        $scope.exportXlsx = function () {
-            exportRunTableXlsx(document.getElementById('run-table'), $scope.competition.name, $scope.list.comment);
         };
 
         // Plain-text victims for the Excel export

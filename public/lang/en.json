@@ -713,7 +713,7 @@
             "title": "Map",
             "create": "Create a new map"
         },
-        "gamesPrint": {
+        "print": {
             "back": "Back to runs",
             "filter": "Filter",
             "columns": "Columns",
@@ -725,7 +725,14 @@
             "chromeHint": "Please use Google Chrome to print this page.",
             "runList": "Run List",
             "originalScore": "Original score",
-            "adjustment": "Adjustment"
+            "adjustment": "Adjustment",
+            "teams": "teams",
+            "format": "Format",
+            "decimalsFinal": "Final score decimals",
+            "decimalsNormalized": "Normalized score decimals",
+            "teamWidth": "Team column width (px)",
+            "note": "Note below the table",
+            "rankingNote": "The scores are based on the sum of all the run (the minimum score is not subtracted yet)."
         },
         "lineRun": {
             "title": "Games",

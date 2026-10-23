@@ -713,7 +713,7 @@
             "title": "マップ管理",
             "create": "新しいマップを作る"
         },
-        "gamesPrint": {
+        "print": {
             "back": "競技一覧に戻る",
             "filter": "絞り込み",
             "columns": "表示項目",
@@ -725,7 +725,14 @@
             "chromeHint": "印刷には Google Chrome をご利用ください。",
             "runList": "競技一覧",
             "originalScore": "元の得点",
-            "adjustment": "調整"
+            "adjustment": "調整",
+            "teams": "チーム",
+            "format": "表示形式",
+            "decimalsFinal": "最終得点の小数桁数",
+            "decimalsNormalized": "正規化スコアの小数桁数",
+            "teamWidth": "チーム名列の幅 (px)",
+            "note": "表の下の注記",
+            "rankingNote": "得点はすべての競技の合計です（最低点はまだ差し引かれていません）。"
         },
         "lineRun": {
             "title": "競技管理",

@@ -160,6 +160,27 @@ body {
   max-width: 320px;
 }
 
+.format-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.format-grid label {
+  margin: 0;
+}
+
+.format-grid .config-label {
+  display: block;
+}
+
+/* Note printed under the ranking table */
+.sheet-note {
+  margin-top: 10px;
+  text-align: center;
+  color: #4b5563;
+}
+
 /* Header of the printed sheet: a thead row, so it is not styled as a column header */
 table.custom thead tr.sheet-header-row th {
   padding: 0 0 10px;
@@ -168,6 +189,19 @@ table.custom thead tr.sheet-header-row th {
   text-align: left;
   background: #f4f6f9;
   border: none;
+}
+
+/* Column header rows keep their dark-to-light shades below the sheet header row */
+table.custom thead tr.sheet-header-row + tr th {
+  background: #1f4e79;
+}
+
+table.custom thead tr.sheet-header-row + tr + tr th {
+  background: #2f75b5;
+}
+
+table.custom thead tr.sheet-header-row + tr + tr + tr th {
+  background: #5b9bd5;
 }
 
 /* The table now includes the header row, so drop its card shadow and outer border */
