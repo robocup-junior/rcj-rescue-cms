@@ -845,19 +845,19 @@ adminRouter.delete('/:competitionid', function (req, res, next) {
           msg: 'Competition has been removed!',
         });
         
-        fs.rmdir(`${__dirname}/../../documents/${id}`, { recursive: true }, (err) => {
+        fs.rm(`${__dirname}/../../documents/${id}`, { recursive: true, force: true }, (err) => {
           if (err) {
             logger.error(err.message);
           }
         });
 
-        fs.rmdir(`${__dirname}/../../cabinet/${id}`, { recursive: true }, (err) => {
+        fs.rm(`${__dirname}/../../cabinet/${id}`, { recursive: true, force: true }, (err) => {
           if (err) {
             logger.error(err.message);
           }
         });
 
-        fs.rmdir(`${__dirname}/../../survey/${id}`, { recursive: true }, (err) => {
+        fs.rm(`${__dirname}/../../survey/${id}`, { recursive: true, force: true }, (err) => {
           if (err) {
             logger.error(err.message);
           }

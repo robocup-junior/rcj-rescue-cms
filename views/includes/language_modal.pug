@@ -1,0 +1,35 @@
+#languageModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='languageModalLabel' aria-hidden='true')
+    .modal-dialog.modal-dialog-centered(role='document')
+        .modal-content.premium-modal-content
+            .modal-header.border-0
+                button.close(type='button' data-dismiss='modal' aria-label='Close')
+                    span(aria-hidden='true') &times;
+            .modal-body.px-5.pb-5
+                .text-center.mb-5
+                    i.fas.fa-language.fa-4x.mb-3(style="color: var(--primary-color);")
+                    h2.modal-title.font-weight-bold {{"select_lang" | translate}}
+                
+                .row.no-gutters.gap-3
+                    .col-6.pr-2
+                        .language-card(onclick="changeLanguage('en')")
+                            .lang-circle.bg-primary EN
+                            h4 English
+                    .col-6.pl-2
+                        .language-card(onclick="changeLanguage('ja')")
+                            .lang-circle.bg-danger JA
+                            h4 日本語
+
+script.
+    function changeLanguage(langKey) {
+        try {
+            const injector = angular.element(document.body).injector();
+            const $translate = injector.get('$translate');
+            $translate.use(langKey).then(function() {
+                window.location.reload();
+            });
+        } catch (e) {
+            // Fallback for non-angular pages or if injection fails
+            console.error("Language switch failed, reloading anyway...", e);
+            window.location.reload();
+        }
+    }

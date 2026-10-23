@@ -1,18 +1,18 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'TilesetAdmin'
 
 append scripts
-  script(src="/javascripts/lvl-uuid.js")
-  script(src="/components/bootstrap-fileinput/js/fileinput.min.js")
-  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js")
-  script(src="/components/bootstrap-fileinput/js/locales/ja.js")
-  script(src='/javascripts/tileset_admin.js')
+  script(src="/javascripts/lvl-uuid.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/fileinput.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/locales/ja.js?v=" + assetVersion)
+  script(src='/javascripts/tileset_admin.js?v=' + assetVersion)
 
 append css
-  link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
+  link(href="/components/bootstrap-fileinput/css/fileinput.min.css?v=" + assetVersion rel="stylesheet")
   style(type='text/css').
     .tile {
       width: 40px;
@@ -27,49 +27,75 @@ append css
       margin: 5px;
     }
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    span.breadcrumb-item.active Line tilesets
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  span.breadcrumb-item.active Line tilesets
 
-block content
-    .row
-      .col-md-12
-        .input-group
-          input.form-control(type='text', placeholder="{{'admin.line_tSet.new_tSet' | translate}}", aria-label="Recipient's username with two button addons", aria-describedby='button-addon4',ng-model='newTileSetName')
-          #button-addon4.input-group-append
-            button.btn.btn-outline-success(type='button',ng-click='createNewTileSet()') {{"common.create" | translate}}
-            button.btn.btn-outline-warning(type='button',ng-click='duplicateTileSet()') {{"common.duplicate" | translate}}
-    hr
-    .row
-      .col-md-6
-        button.btn.btn-dark(type='button', ng-click='export()') {{"admin.line_tSet.export" | translate}}
-      .col-md-6
-        input#select(type='file', name='select')
-    hr
-    .row
-      .col-md-6
-        .input-group.mb-3
-          .input-group-prepend
-            label.input-group-text(for='inputGroupSelect01') {{"admin.line_tSet.tSet" | translate}}
-          select#inputGroupSelect01.custom-select(ng-model='tileSet' ng-options='set as set.name for set in tileSets')
-          .input-group-append
-            button.btn.btn-outline-danger(type='button',ng-click='delete()') {{"common.delete" | translate}}
-            button.btn.btn-outline-info(type='button',ng-click='save()') {{"common.overwrite" | translate}}
+block hero_title
+  | Line tilesets
 
-    hr
-    .row
-      .col-md-6
-        h2 {{"admin.line_tSet.available" | translate}}
-        span.tile-container(ng-repeat='tileType in tileTypes')
-          div(style="width:50px;height:65px;")
-            img.tile(ng-src='/images/tiles/{{tileType.image}}' ng-click='addTile(tileType)')
-        button.btn.btn-success.btn-block(ng-click='addAll()')
-          i.fas.fa-plus-circle &nbsp;{{"admin.line_tSet.addAll" | translate}}
-        br
-      .col-md-6
-        h2 {{ 'admin.line_tSet.tIn' | translate:translationData }}
-        span.tile-container(ng-repeat='tile in tileSet.tiles track by tile.tileType._id')
-          div(style="width:50px;text-align:center;")
-            img.tile(ng-src='/images/tiles/{{tile.tileType.image}}' ng-click='removeTile(tile)')
-            input(type="number" ng-model="tile.count" style="width:50px;")
+block hero_subtitle
+  | Admin
+
+block hero_actions
+  button.btn-action-icon(type='button' ng-click='export()' uib-tooltip='{{"admin.line_tSet.export" | translate}}' tooltip-placement="bottom")
+    i.fas.fa-file-export
+
+block main_content
+  .row
+    .col-lg-6
+      .modern-card.mb-4
+        .modern-card-header
+          i.fas.fa-plus-circle.mr-2
+          | {{"admin.line_tSet.new_tSet" | translate}}
+        .modern-card-body
+          .input-group
+            input.form-control(type='text' placeholder="{{'admin.line_tSet.new_tSet' | translate}}" ng-model='newTileSetName')
+            .input-group-append
+              button.btn.btn-outline-success(type='button' ng-click='createNewTileSet()') {{"common.create" | translate}}
+              button.btn.btn-outline-warning(type='button' ng-click='duplicateTileSet()') {{"common.duplicate" | translate}}
+    .col-lg-6
+      .modern-card.mb-4
+        .modern-card-header
+          i.fas.fa-file-import.mr-2
+          | Import
+        .modern-card-body
+          input#select(type='file' name='select')
+
+  .modern-card.mb-4
+    .modern-card-header
+      i.fas.fa-th.mr-2
+      | {{"admin.line_tSet.tSet" | translate}}
+    .modern-card-body
+      .input-group
+        select#inputGroupSelect01.custom-select(ng-model='tileSet' ng-options='set as set.name for set in tileSets')
+        .input-group-append
+          button.btn.btn-outline-danger(type='button' ng-click='delete()') {{"common.delete" | translate}}
+          button.btn.btn-outline-info(type='button' ng-click='save()') {{"common.overwrite" | translate}}
+
+  .row
+    .col-lg-6
+      .modern-card.mb-4
+        .modern-card-header
+          i.fas.fa-border-all.mr-2
+          | {{"admin.line_tSet.available" | translate}}
+        .modern-card-body
+          span.tile-container(ng-repeat='tileType in tileTypes')
+            div(style="width:50px;height:65px;")
+              img.tile(ng-src='/images/tiles/{{tileType.image}}' ng-click='addTile(tileType)')
+          button.btn.btn-premium-primary.btn-block.mt-3(ng-click='addAll()')
+            i.fas.fa-plus-circle.mr-2
+            | {{"admin.line_tSet.addAll" | translate}}
+    .col-lg-6
+      .modern-card.mb-4
+        .modern-card-header
+          i.fas.fa-layer-group.mr-2
+          | {{ 'admin.line_tSet.tIn' | translate:translationData }}
+        .modern-card-body
+          span.tile-container(ng-repeat='tile in tileSet.tiles track by tile.tileType._id')
+            div(style="width:50px;text-align:center;")
+              img.tile(ng-src='/images/tiles/{{tile.tileType.image}}' ng-click='removeTile(tile)')
+              input.form-control.form-control-sm.px-1(type="number" ng-model="tile.count" style="width:50px;")

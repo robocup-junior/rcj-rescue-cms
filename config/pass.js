@@ -22,7 +22,7 @@ passport.serializeUser(function (user, done) {
 
 // Check the cookie
 passport.deserializeUser(function (id, done) {
-  userdb.user.findById(id, function (err, user) {
+  userdb.user.findById(id).select('+email').exec(function (err, user) {
     done(err, user);
   });
 });

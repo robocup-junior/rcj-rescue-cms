@@ -1,0 +1,46 @@
+//- -*- tab-width: 2 -*-
+extends ../includes/modern_layout
+
+block vars
+  - var ngAppDef = 'LineScore'
+  - var contentContainerStyle = 'max-width: 100%;'
+
+append scripts
+  script.
+    var competitionId = "#{competitionId}"
+    var leagueId = "#{leagueId}"
+
+  script(src='/javascripts/ranking/line_2026E.js?v=' + assetVersion)
+  script(src = '/components/datatables/media/js/jquery.dataTables.min.js')
+  script(src = '/components/angular-datatables/demo/src/archives/dist/angular-datatables.min.js')
+
+block page_css
+  link(rel='stylesheet', href='/stylesheets/ranking.css?v=' + assetVersion)
+
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/home/' + competitionId)") {{competition.name}}
+  a.breadcrumb-item(ng-click="go('/line/' + competitionId + '/' + league.league)") {{league.name}}
+  span.breadcrumb-item.active {{'common.rank' | translate}}
+
+block hero_title
+  | {{competition.name}}
+
+block hero_subtitle
+  | [{{league.name}}] {{'common.rank' | translate}}
+
+block main_content
+  .message-box-modern(ng-if="competition.message")
+    h4
+      i.fas.fa-bullhorn.mr-2
+      | {{'common.message' | translate}}
+    p(ng-bind-html="competition.message" style="margin:0;")
+
+  .modern-card.public-ranking
+    .modern-card-header
+      i.fas.fa-trophy
+      | [{{league.name}}] {{'common.rank' | translate}}
+    .modern-card-body
+      include include/line_2026E

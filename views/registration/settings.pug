@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'RegistrationSettings'
@@ -7,61 +7,68 @@ block vars
 append scripts
   script.
     var competitionId = "#{id}"
-  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js')
-  script(src='/javascripts/registration/settings.js')
+  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js?v=' + assetVersion)
+  script(src='/javascripts/registration/settings.js?v=' + assetVersion)
 
 append css
-  link(rel='stylesheet', href='/components/angular-toastr/dist/angular-toastr.css')
-  
+  link(rel='stylesheet', href='/components/angular-toastr/dist/angular-toastr.css?v=' + assetVersion)
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
-    span.breadcrumb-item.active Registration settings
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
+  span.breadcrumb-item.active Registration settings
 
+block hero_title
+  | {{competition.name}}
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{"registration.title" | translate}} - {{competition.name}}
-      p {{"registration.description" | translate}}
-      hr
+block hero_subtitle
+  | {{"registration.title" | translate}}
 
-      h3 {{"registration.common" | translate}}
-      h5 {{"registration.consentURL" | translate}}
-      .row
-        .col-md-8 
-          input.form-control(type='text', ng-model='competition.consentForm')
-        .col-md-4 
-          button.btn.btn-success(type='button', ng-click='set()')
-            i.fas.fa-save &nbsp;{{"admin.settings.set" | translate}}
+block hero_actions
+  button.btn-hero-action(type='button' ng-click='set()')
+    i.fas.fa-save
+    | {{"admin.settings.set" | translate}}
 
-      hr
-      h3 {{"registration.league" | translate}}
-      table.custom(style="margin-bottom:20px;")
-        thead
+block main_content
+  p.text-muted {{"registration.description" | translate}}
+
+  .modern-card.mb-4
+    .modern-card-header
+      i.fas.fa-file-signature.mr-2
+      | {{"registration.common" | translate}}
+    .modern-card-body
+      label.small.text-muted {{"registration.consentURL" | translate}}
+      input.form-control(type='text' ng-model='competition.consentForm')
+
+  .modern-card
+    .modern-card-header
+      i.fas.fa-trophy.mr-2
+      | {{"registration.league" | translate}}
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
+          thead
             tr
               th {{"common.league" | translate}}
               th {{"registration.open" | translate}}
               th {{"registration.deadline" | translate}}
               th {{"registration.passCode" | translate}}
-              th {{"common.operation" | translate}}
-              
-        tbody
+              th(style="width: 90px;") URL
+          tbody
             tr(ng-repeat='league in competition.registration')
-              td(ng-bind='getLeagueName(league.league)')
-              td 
-                select.custom-select(ng-model='league.enable', ng-style="{backgroundColor: league.enable ? '#bcffbc':'#ffcccc'}")
+              td.font-weight-bold(ng-bind='getLeagueName(league.league)')
+              td
+                select.custom-select.custom-select-sm(ng-model='league.enable' ng-style="{backgroundColor: league.enable ? '#bcffbc':'#ffcccc'}")
                   option(ng-value='true') {{"common.enable" | translate}}
                   option(ng-value='false') {{"common.disable" | translate}}
-              td 
-                input.form-control(type='datetime-local', step=1, ng-model='league.deadlineW', ng-style="{backgroundColor: deadlineColour(league.deadlineW)}")
-              td 
-                input.form-control(type='text', ng-model='league.passCode')              
-              td 
-                button.btn.btn-dark(type='button', ng-click='copy(league.league)', style="margin-right:5px;")
-                  i.fas.fa-clipboard &nbsp;URL
-                button.btn.btn-success(type='button', ng-click='set()')
-                  i.fas.fa-save &nbsp;{{"admin.settings.set" | translate}}
+              td
+                input.form-control.form-control-sm(type='datetime-local' step=1 ng-model='league.deadlineW' ng-style="{backgroundColor: deadlineColour(league.deadlineW)}")
+              td
+                input.form-control.form-control-sm(type='text' ng-model='league.passCode')
+              td
+                .btn-table-group
+                  .btn-table-action(ng-click='copy(league.league)' uib-tooltip='Copy URL')
+                    i.fas.fa-clipboard

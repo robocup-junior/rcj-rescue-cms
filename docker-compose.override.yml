@@ -1,0 +1,13 @@
+services:
+  app:
+    command: npx nodemon server.js --ignore node_modules --ignore public/components
+    volumes:
+      - .:/opt/rcj-cms
+      - app_node_modules:/opt/rcj-cms/node_modules
+      - app_components:/opt/rcj-cms/public/components
+    environment:
+      NODE_ENV: development
+
+volumes:
+  app_node_modules:
+  app_components:

@@ -126,7 +126,7 @@ publicRouter.get('/competition/:competitionId', function (req, res, next) {
 
         // Apply score adjustment
         if (run.adjustment != null) {
-          run.score = new Decimal(run.score).times((run.adjustment + 100) / 100);
+          run.score = new Decimal(run.score).times((run.adjustment + 100) / 100).toNumber();
         }
 
         if (run.foundVictims) run.foundVictims = run.foundVictims.sort((a,b) => VICTIMS.indexOf(a.type) - VICTIMS.indexOf(b.type));
@@ -315,7 +315,11 @@ publicRouter.get('/:runid', function (req, res, next) {
         err: err.message,
       });
     }
-    // Hide map and field from public
+    if (!dbRun) {
+      return res.status(404).send({
+        msg: 'Run not found',
+      });
+    }
     // Hide map and field from public
     const authResult = auth.authViewRun(req.user, dbRun, ACCESSLEVELS.VIEW, dbRun.competition.preparation);
     if (authResult == 0) {
@@ -699,7 +703,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
     },
   ]);
 
-  query.lean().exec(function (err, dbRuns) {
+  query.lean().exec(async function (err, dbRuns) {
     if (err) {
       logger.error(err);
       res.status(400).send({
@@ -718,7 +722,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
           dbRuns[i].diceNumber = randomMapIndex + 1;
         }
       }
-      scoreSheetPDF2.generateScoreSheet(res, dbRuns);
+      await scoreSheetPDF2.generateScoreSheet(res, dbRuns);
       for (let i = 0; i < dbRuns.length; i++) {
         mazeRun.findById(dbRuns[i]._id, (err, run) => {
           if (err) {
@@ -826,7 +830,7 @@ privateRouter.put('/map/:runid', function (req, res, next) {
  *
  * @apiError (400) {String} err The error message
  */
-adminRouter.delete('/:runids', function (req, res) {
+adminRouter.delete('/:runids', function (req, res, next) {
   const ids = req.params.runids.split(',');
   if (!ObjectId.isValid(ids[0])) {
     return next();
@@ -837,7 +841,7 @@ adminRouter.delete('/:runids', function (req, res) {
     .exec(function (err, dbRun) {
       if (err) {
         logger.error(err);
-        res.status(400).send({
+        return res.status(400).send({
           msg: 'Could not get run',
           err: err.message,
         });
@@ -849,6 +853,10 @@ adminRouter.delete('/:runids', function (req, res) {
             msg: 'You have no authority to access this api',
           });
         }
+      } else {
+        return res.status(404).send({
+          msg: 'Run not found',
+        });
       }
       mazeRun.deleteMany(
         {

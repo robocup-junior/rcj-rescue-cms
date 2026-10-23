@@ -1,0 +1,54 @@
+center
+  .loader(ng-if="ranking==null")
+    img(src="/images/loader2.gif")
+    p {{'common.loading' | translate}}
+div(ng-if="ranking!=null")
+  .row#rank
+    .col-lg-12
+      table.custom(style="overflow: scroll;")
+        thead
+          if printSheet
+            +sheetHeader('comment.top')
+          tr
+            th.text-center(rowspan="3") {{'common.rank' | translate}}
+            th.text-center(rowspan="3" ng-if="showMode.teamCode && showCode") {{'common.teamCode' | translate}}
+            th.text-center.team-name(rowspan="3" ng-if="showTeam" ng-style="{'min-width': teamWidth + 'px'}") {{'common.team' | translate}}
+            th.text-center(rowspan="3") {{'line.score.finalScore' | translate}}
+            th.text-center(colspan="{{gameRowSpan}}") {{'line.score.game' | translate}}
+            th.text-center(colspan="{{documentBlock.length + 1}}" ng-show="showMode.document") {{'line.score.document' | translate}}
+            th.text-center(colspan="1" ng-show="showMode.technicalChallenge") {{'technicalChallenge.technicalChallenge' | translate}}
+          tr
+            th.text-center(rowspan="2" ng-show="showTime") {{'common.time' | translate}}
+            th.text-center(rowspan="2" ng-show="showVictims") {{'common.rescued' | translate}}
+            th.text-center(rowspan="2" ng-show="showLops") {{'common.lops' | translate}}
+            th.text-center(ng-show="showMode.nonNormalized", colspan="{{maxGameNum}}") {{'common.gamesScore' | translate}}
+            th.text-center(rowspan="2" ng-show="showMode.nonNormalized") {{'common.sum' | translate}}
+            th.text-center(ng-show="showMode.normalized", colspan="{{maxGameNum}}") {{'common.normalizedScore' | translate}}
+            th.text-center(rowspan="2" ng-show="showMode.normalized") {{'common.mean' | translate}}
+            th.text-center(rowspan="2" ng-show="showMode.document", ng-repeat="block in documentBlock") {{langContent(block.i18n, 'title')}}
+            th.text-center(rowspan="2" ng-show="showMode.document") {{'common.weightedSum' | translate}}
+            th.text-center(ng-show="showMode.technicalChallenge", rowspan="2", colspan="1") {{'common.normalizedScore' | translate}}
+          tr
+            th.text-center(ng-repeat="grp in runGroups") {{grp}}
+        tbody
+          tr(ng-repeat='team in ranking track by $index')
+            td.text-center(ng-bind='$index + 1')
+            td.text-center(ng-if="showCode", ng-bind='team.team.teamCode')
+            td.text-center.team-name(ng-if="showTeam", ng-bind='team.team.name', ng-style="{'min-width': teamWidth + 'px'}")
+            td.text-center.final-score-cell {{formatNumber(team.finalScore, finalScoreDecimals)}}
+            td.text-center(ng-show="showTime") {{("00"+team.gameSum.time.minutes).slice(-2)}}:{{("00"+team.gameSum.time.seconds).slice(-2)}}
+            td.text-center(ng-show="showVictims")
+              .img-thumbnail(style="padding:0;display: inline-block;margin-right:5px;" ng-repeat="victim in team.gameSum.victims | orderBy:victimOrder" ng-style="{'background-color': (victim.type.endsWith(':H') || victim.type=='PHI' || victim.type=='H')?'#f8d7da':((victim.type.endsWith(':S') || victim.type=='PSI' || victim.type=='S')?'#fff3cd':((victim.type.endsWith(':U') || victim.type=='OMEGA' || victim.type=='U')?'#d4edda':'transparent'))}")
+                img(ng-src="/images/{{victim.type.toLowerCase()}}.png", alt="{{victim.type}}", style="height:20px;", ng-if="!victim.type.startsWith('Cognitive')")
+                i.fas.fa-bullseye(style="font-size:18px;vertical-align:middle;margin-left:2px;margin-right:2px;", ng-if="victim.type.startsWith('Cognitive')")
+                span(style="font-size:15px; color:black;") ×{{victim.count}}
+            td.text-center(ng-bind='team.gameSum.lops' ng-show="showLops")
+            td.text-center(ng-show="showMode.nonNormalized", ng-repeat="grp in runGroups" ng-bind="team.games[grp].score" ng-click="openRunDetails(team.games[grp]._id)" ng-class="{unused: !team.games[grp].used}")
+            td.text-center(ng-show="showMode.nonNormalized", ng-bind='team.gameSum.score')
+            td.text-center(ng-show="showMode.normalized", ng-repeat="grp in runGroups" ng-click="openRunDetails(team.games[grp]._id)" ng-class="{unused: !team.games[grp].used}") {{formatNumber(team.games[grp].normalizedScore, normalScoreDecimals)}}
+            td.text-center(ng-show="showMode.normalized") {{formatNumber(team.gameSum.normalizedScoreMean, normalScoreDecimals)}}
+
+            td.text-center(ng-show="showMode.document", ng-repeat="block in team.document.details") {{formatNumber(block.normalizedScore, normalScoreDecimals)}}
+            td.text-center(ng-show="showMode.document") {{formatNumber(team.document.score, normalScoreDecimals)}}
+
+            td.text-center(ng-show="showMode.technicalChallenge") {{formatNumber(team.technicalChallenge, normalScoreDecimals)}}

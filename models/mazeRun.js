@@ -45,6 +45,7 @@ const mazeRunSchema = new Schema({
       checkpoint: {type: Boolean, default: false},
       ramp  : {type: Boolean, default: false},
       steps     : {type: Boolean, default: false},
+      blue      : {type: Number, integer: true, min: 0, default: 0},
       victims   : {
         top   : {type: Boolean, default: false},
         right : {type: Boolean, default: false},
@@ -66,7 +67,8 @@ const mazeRunSchema = new Schema({
   foundVictims: [
     {
       type: {type: String},
-      count: {type: Number, min: 0, default: 0}
+      count: {type: Number, min: 0, default: 0},
+      kits: {type: Number, min: 0, default: 0}
     }
   ],
   distKits: {type: Number, min:0, default: 0},
@@ -91,11 +93,13 @@ const mazeRunSchema = new Schema({
 mazeRunSchema.pre('save', function (next) {
   const self = this
 
-  self.populate('map', "name finished", function (err, populatedRun) {
+  mazeMapdb.mazeMap.findById(self.map, "name finished", function (err, dbMap) {
     if (err) {
       return next(err)
-    } else if (!populatedRun.map.finished) {
-      err = new Error('Map "' + populatedRun.map.name + '" is not finished!')
+    } else if (!dbMap) {
+      return next(new Error('No map with that id!'))
+    } else if (!dbMap.finished) {
+      err = new Error('Map "' + dbMap.name + '" is not finished!')
       return next(err)
     } else {
 

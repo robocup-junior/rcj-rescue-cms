@@ -272,7 +272,7 @@ publicRouter.get('/:competitionId/:leagueId', async function (req, res, next) {
   // Apply score adjustment
   allRunsLeague.map(run => {
     if (run.adjustment != null) {
-      run.score = new Decimal(run.score).times((run.adjustment + 100) / 100);
+      run.score = new Decimal(run.score).times((run.adjustment + 100) / 100).toNumber();
     }
   });
 
@@ -326,7 +326,7 @@ publicRouter.get('/:competitionId/:leagueId', async function (req, res, next) {
     teamRuns[e].gameSum.victims = bestRuns.flatMap(run => run.foundVictims).reduce(function (result, current) {
       var element = result.find(p => p.type == current.type);
       if (element) {
-        element.count ++;
+        element.count += current.count;
       } else {
         result.push({
           type: current.type,
@@ -474,7 +474,7 @@ publicRouter.get('/:competitionId/:leagueId', async function (req, res, next) {
   // Apply score adjustment
   allRunsLeague.map(run => {
     if (run.adjustment != null) {
-      run.score = new Decimal(run.score).times((run.adjustment + 100) / 100);
+      run.score = new Decimal(run.score).times((run.adjustment + 100) / 100).toNumber();
     }
   });
 

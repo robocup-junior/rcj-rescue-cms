@@ -134,7 +134,7 @@ publicRouter.get('/competition/:competitionId', function (req, res, next) {
 
         // Apply score adjustment
         if (run.adjustment != null) {
-          run.score = new Decimal(run.score).times((run.adjustment + 100) / 100);
+          run.score = new Decimal(run.score).times((run.adjustment + 100) / 100).toNumber();
         }
       })
 
@@ -333,15 +333,15 @@ publicRouter.get('/:runid', async function (req, res, next) {
         dbRun.tiles = initDbRun.tiles;
         dbRun.LoPs = initDbRun.LoPs;
         dbRun.nl = initDbRun.nl;
-        await dbRun.save(function (err) {
-          if (err) {
-            logger.error(err);
-            return res.status(400).send({
-              err: err.message,
-              msg: 'Could not get run',
-            });
-          }
-        });
+        try {
+          await dbRun.save();
+        } catch (err) {
+          logger.error(err);
+          return res.status(400).send({
+            err: err.message,
+            msg: 'Could not get run',
+          });
+        }
       }
       
       dbRun = dbRun.toObject();
@@ -380,6 +380,9 @@ publicRouter.get('/:runid', async function (req, res, next) {
       }
       return res.status(200).send(dbRun);
     }
+    return res.status(404).send({
+      msg: 'Run not found',
+    });
   });
 });
 
@@ -729,7 +732,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
     },
   ]);
 
-  query.lean().exec(function (err, dbRuns) {
+  query.lean().exec(async function (err, dbRuns) {
     if (err) {
       logger.error(err);
       res.status(400).send({
@@ -739,7 +742,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
       dbRuns.map(run => {
         run.startTime += parseInt(offset)*60*1000;
       })
-      scoreSheetLinePDF2.generateScoreSheet(res, dbRuns);
+      await scoreSheetLinePDF2.generateScoreSheet(res, dbRuns);
     }
   });
 });
@@ -768,7 +771,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
  *
  * @apiError (400) {String} err The error message
  */
-adminRouter.delete('/:runids', function (req, res) {
+adminRouter.delete('/:runids', function (req, res, next) {
   const ids = req.params.runids.split(',');
   if (!ObjectId.isValid(ids[0])) {
     return next();
@@ -779,7 +782,7 @@ adminRouter.delete('/:runids', function (req, res) {
     .exec(function (err, dbRun) {
       if (err) {
         logger.error(err);
-        res.status(400).send({
+        return res.status(400).send({
           msg: 'Could not get run',
           err: err.message,
         });
@@ -791,6 +794,10 @@ adminRouter.delete('/:runids', function (req, res) {
             msg: 'You have no authority to access this api',
           });
         }
+      } else {
+        return res.status(404).send({
+          msg: 'Run not found',
+        });
       }
       lineRun.deleteMany(
         {
@@ -834,6 +841,12 @@ adminRouter.delete('/:runids', function (req, res) {
  */
 adminRouter.post('/', function (req, res) {
   const run = req.body;
+
+  if (!auth.authCompetition(req.user, run.competition, ACCESSLEVELS.ADMIN)) {
+    return res.status(401).send({
+      msg: 'You have no authority to access this api',
+    });
+  }
 
   new lineRun({
     competition: run.competition,

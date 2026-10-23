@@ -1,61 +1,64 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'SignageFile'
 
 append scripts
-  script(src='/javascripts/signage/files.js')
-  script(src="/components/bootstrap-fileinput/js/fileinput.min.js")
-  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js")
-  script(src="/components/bootstrap-fileinput/js/locales/ja.js")
-  script(src="/components/ng-file-upload/ng-file-upload.min.js")
+  script(src='/javascripts/signage/files.js?v=' + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/fileinput.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/locales/ja.js?v=" + assetVersion)
+  script(src="/components/ng-file-upload/ng-file-upload.min.js?v=" + assetVersion)
 
 append css
-    link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
+    link(href="/components/bootstrap-fileinput/css/fileinput.min.css?v=" + assetVersion rel="stylesheet")
 
-block location
-  a.breadcrumb-item(ng-click="go('/home')") Home
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
   a.breadcrumb-item(ng-click="go('/admin')") Admin
   a.breadcrumb-item(ng-click="go('/signage/setting')") Signage
   span.breadcrumb-item.active Files
 
+block hero_title
+  | Signage Files
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h4 Signage Files
-      p Here you can upload images and videos you wish to display on your signage. These files are publicly available and there is no access control.
-      hr
-      table.custom
-        thead
+block hero_subtitle
+  | Here you can upload images and videos you wish to display on your signage. These files are publicly available and there is no access control.
+
+block main_content
+  .modern-card.mb-4
+    .modern-card-header
+      i.fas.fa-file-upload.mr-2
+      | {{'cabinet.upload' | translate}}
+    .modern-card-body
+      button.btn.btn-premium-primary.btn-block.py-4(type='file' ngf-select='upload($file, $invalidFiles)' accept='*' ngf-max-size='500MB')
+        i.fas.fa-2x.fa-file-upload
+        div.mt-2 {{'cabinet.upload' | translate}}
+      .text-danger.mt-2(ng-if="errFile.$error") ERROR: {{errFile.$error}}
+      .progress.mt-3(ng-show="f.progress > 0")
+        .progress-bar(role='progressbar' style='width: {{f.progress}}%;' aria-valuenow='{{f.progress}}' aria-valuemin='0' aria-valuemax='100') {{f.progress}}%
+      .text-danger.mt-2(ng-if="errorMsg") {{errorMsg}}
+
+  .modern-card
+    .modern-card-header
+      i.fas.fa-folder-open.mr-2
+      | Files
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
+          thead
             tr
               th {{"common.name" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
+              th(style="width: 120px;") {{"common.operation" | translate}}
+          tbody
             tr(ng-repeat='file in files')
               td
-                i.fas(ng-class="fileIcon(file.type)") &nbsp;
+                i.fas.mr-2.text-muted(ng-class="fileIcon(file.type)")
                 a(ng-bind='file.name' ng-href="{{file.path}}")
               td
-                button.btn.btn-danger(type='button', ng-click='delete(file)') {{"common.delete" | translate}}
-                
-      .row 
-        .col-md-12(style="margin-top:60px;")
-          button(class='btn btn-success btn-lg btn-block' style="height:100%;" type='file' ngf-select='upload($file, $invalidFiles)' accept='*' ngf-max-size='500MB')
-            i.fas.fa-2x.fa-file-upload
-            br
-            span {{'cabinet.upload' | translate}}
-            div(style="color:#e74c3c;margin-left:10px;", ng-if="errFile.$error")
-                span ERROR: {{errFile.$error}}
-            .flex-fill(style="margin:10px 0px 0px 10px;", ng-show="f.progress > 0")
-                .progress
-                    .progress-bar(role='progressbar' style='width: {{f.progress}}%;' aria-valuenow='{{f.progress}}' aria-valuemin='0' aria-valuemax='100') {{f.progress}}%
-            div(style="color:#e74c3c;margin-top:10px;", ng-if="errorMsg")
-                span {{errorMsg}}
-  br
-  br
-  br
-
-      
+                .btn-table-group
+                  .btn-table-action.danger(ng-click='delete(file)' uib-tooltip='{{"common.delete" | translate}}')
+                    i.fas.fa-trash-alt

@@ -68,9 +68,9 @@ html(ng-app="Clock")
 
 
     include ../includes/common_component
-    script(src='/javascripts/signage/clock.js')
-    script(src="/javascripts/translate_config.js")
-    link(href="/stylesheets/fredrik.css" rel="stylesheet")
+    script(src='/javascripts/signage/clock.js?v=' + assetVersion)
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
+    link(href="/stylesheets/fredrik.css?v=" + assetVersion rel="stylesheet")
 
 
     meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")

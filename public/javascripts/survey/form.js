@@ -92,6 +92,7 @@ app.controller('SurveyFormController', ['$scope', '$uibModal', '$log', '$http', 
 
     $scope.currentLang = currentLang;
     $scope.displayLang = currentLang;
+    $scope.editable = editable;
 
     $scope.rangeS =  (start, end) => [...Array((end - start) + 1)].map((_, i) => start + i);
     
@@ -141,6 +142,10 @@ app.controller('SurveyFormController', ['$scope', '$uibModal', '$log', '$http', 
         })
     })
 
+
+    $scope.int = function(n){
+        return parseInt(n);
+    }
 
     $scope.submit = async function () {
         let sendAns = [];
@@ -198,6 +203,15 @@ app.controller('SurveyFormController', ['$scope', '$uibModal', '$log', '$http', 
         let options = { weekday: "short", year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric",timeZoneName:"long" };
         return(new Intl.DateTimeFormat(navigator.language, options).format(d));
     }
+
+    $scope.isPastDeadline = function () {
+        if (!$scope.survey || !$scope.survey.deadline) {
+            return false;
+        }
+        const deadline = new Date($scope.survey.deadline);
+        const now = new Date();
+        return now > deadline;
+    };
 
     $scope.langContent = function(data, target){
         if(!data) return;

@@ -154,7 +154,7 @@ router.get('/:competitionid/documents', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('documents_admin', { id, user: req.user });
+    res.render('document/admin', { id, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 
@@ -166,7 +166,7 @@ router.get('/:competitionid/documents/teams', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('documents_team_admin', { id, user: req.user });
+    res.render('document/team_admin', { id, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 
@@ -199,7 +199,7 @@ router.get('/:competitionid/documents/:lid/results', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('documents_result', { id, lid, user: req.user });
+    res.render('document/result', { id, lid, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 
@@ -220,7 +220,7 @@ router.get('/:competitionid/documents/:lid/form', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('documents_form_editor', { id, lid, user: req.user });
+    res.render('document/form_editor', { id, lid, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 
@@ -241,7 +241,7 @@ router.get('/:competitionid/documents/:lid/review', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('documents_review_editor', { id, lid, user: req.user });
+    res.render('document/review_editor', { id, lid, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 
@@ -262,7 +262,7 @@ router.get('/:competitionid/documents/:lid/preview', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('documents_form_preview', { id, lid, user: req.user });
+    res.render('document/form_preview', { id, lid, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 

@@ -5,7 +5,7 @@ html(ng-app="ddApp")
       var competitionId = "#{id}"
       var sigId = "#{sigId}"
       var grpId = "#{grpId}"
-      
+    - var noNavbar = true
     style.
         body::-webkit-scrollbar{
          display:none;
@@ -13,9 +13,9 @@ html(ng-app="ddApp")
 
 
     include ../includes/common_component
-    script(src="/javascripts/signage/game_monitor.js")
-    script(src="/javascripts/translate_config.js")
-    link(href="/stylesheets/fredrik.css" rel="stylesheet")
+    script(src="/javascripts/signage/game_monitor.js?v=" + assetVersion)
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
+    link(href="/stylesheets/fredrik.css?v=" + assetVersion rel="stylesheet")
 
 
     meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")

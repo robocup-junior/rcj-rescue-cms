@@ -1,0 +1,30 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    # MongoDB 6.0 (used by the integration tests) has no Ubuntu 24.04 build
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      # Install scripts are skipped: none are needed for the tests, and the
+      # image optimisers used by grunt download binaries during install.
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+      # MongoDB binary used by mongodb-memory-server for the integration tests
+      - name: Cache MongoDB binary
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}-6.0.14
+      - name: Run tests
+        run: npm test

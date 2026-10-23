@@ -4,19 +4,34 @@
     "home": {
         "login": "ログイン",
         "logout": "ログアウト",
-        "about": "RoboCupJunior Competition Management System は，ロボカップジュニア レスキューライン/メイズ の審判の補助を目的に制作されました．このシステムでは，コースマップの作成からスコアの計算やランク付けまで，ロボカップジュニアの大会におけるレスキュー競技の運営に関連するすべての作業を非常に簡単に実行できます．あなたが，このシステムを採用する大会の審判である場合は，下のボタンからログインしてください．ログインに必要なIDとパスワードは，大会のOC（運営委員）が知っています．あなたが，このシステムを採用する大会に参加した選手であるならば、以下のリストからあなたが参加した大会を選ぶことによって，競技の詳細な結果と順位を確認することができます．",
+        "about": "ロボカップジュニア・レスキュー競技のための包括的な運営・採点システムです。マップ作成からスコア計算、順位付けまでをサポートします。審判の方はログインして採点ツールを利用でき、選手の方は以下のリストから大会結果を確認できます。",
         "management": "各種設定・大会管理",
         "access_level": "ログイン中のアカウント， {{account}} は，「大会管理」にアクセスする権限がありません.",
-        "goScanner": "スコアシートのマニュアル入力"
+        "goScanner": "スコアシートのマニュアル入力",
+        "staffWorkspace": "スタッフ用ワークスペース",
+        "adminCommand": "管理者用コマンドセンター",
+        "enterLeague": "リーグページへ",
+        "manageTeamsDesc": "チーム・登録情報の管理",
+        "scannerDesc": "QRコードでスコアシートをスキャン",
+        "reviewsDesc": "提出書類の審査・採点",
+        "runsMonitor": "ラン・モニター",
+        "runsMonitorDesc": "競技の進行状況をリアルタイム監視",
+        "signageOnly": "サイネージ専用",
+        "signageDesc": "サイネージ画面のみを表示",
+        "dualView": "サイネージ + モニター",
+        "dualViewDesc": "サイネージと進行状況の同時表示"
     },
-    "team_home":{
+    "team_home": {
         "title": "チーム一覧",
         "document": "ドキュメント",
         "review": "レビュー実施",
         "result": "レビューリスト"
     },
     "service_home": {
-        "about": "RCJ Scoring Systemは，ロボカップジュニア レスキューライン/メイズ の審判の補助を目的に制作されました．このシステムでは，コースマップの作成からスコアの計算やランク付けまで，ロボカップジュニアの大会におけるレスキュー競技の運営に関連するすべての作業を非常に簡単に実行できます．このページからはシステムにログインすることなく，ライン/メイズ競技のフィールドマップを作成して画像としてダウンロードできます．また，Erebusプラットフォーム（シミュレーション）向けのワールドファイルも作成できます．"
+        "about": "ロボカップジュニア レスキューライン/メイズのマップ作成・画像出力・スコアシート生成、およびErebusシミュレーション向けのワールド作成が可能です。",
+        "line_editor_desc": "2026ルールに対応した、レスキューラインの競技用マップを作成・シミュレーションします。",
+        "maze_editor_desc": "複雑なレスキューメイズのフィールドを作成。被災者の動的配置や複数階層にも対応しています。",
+        "sim_editor_desc": "Erebusシミュレーションプラットフォーム向けの高精度なワールドを作成・書き出しします。"
     },
     "scanner": {
         "description": "スコアシートに印刷されているバーコード/QRコードを読み取ってください",
@@ -26,44 +41,44 @@
         "check": "確認 / レビュー"
     },
     "login": {
-        "title" : "Staff Login",
+        "title": "Staff Login",
         "description": "OC/TC から通知された，ユーザー名とパスワードを入力してログインしてください．",
-        "login" : "ログイン",
-        "failed" : "ユーザー名，パスワードが一致しません．もう一度ご確認ください．",
-        "return" : "ログインに成功すると，元のアクセスページに戻ります．"
+        "login": "ログイン",
+        "failed": "ユーザー名，パスワードが一致しません．もう一度ご確認ください．",
+        "return": "ログインに成功すると，元のアクセスページに戻ります．"
     },
     "signage": {
-      "create": "新規作成",
-      "editor": {
-          "title": "サイネージ エディター",
-          "name": "パターン名",
-          "save": "保存",
-          "saveAs": "別名で保存",
-          "content": "表示内容",
-          "duration": "継続時間",
-          "type": "タイプ",
-          "iframe": "WEBコンテンツ",
-          "image": "画像",
-          "movie": "動画",
-          "group": "表示対象グループID",
-          "all": "共通",
-          "use": "使用",
-          "news": "ニュース設定",
-          "enable": "有効",
-          "disable": "無効",
-          "refresh": "稼働中のサイネージを強制更新する",
-          "add_blank": "空の項目を追加",
-          "score": "競技結果（ランキング）",
-          "alert": {
-              "update": "更新",
-              "update_mes": "既存のサイネージパターンを更新しました",
-              "create": "新規作成",
-              "create_mes": "新しいサイネージパターンを作成しました",
-              "sameName": "同じ名前",
-              "sameName_mes": "元の名前と同じです．違う名前にしてください．"
-          },
-          "select": "参照"
-      }
+        "create": "新規作成",
+        "editor": {
+            "title": "サイネージ エディター",
+            "name": "パターン名",
+            "save": "保存",
+            "saveAs": "別名で保存",
+            "content": "表示内容",
+            "duration": "継続時間",
+            "type": "タイプ",
+            "iframe": "WEBコンテンツ",
+            "image": "画像",
+            "movie": "動画",
+            "group": "表示対象グループID",
+            "all": "共通",
+            "use": "使用",
+            "news": "ニュース設定",
+            "enable": "有効",
+            "disable": "無効",
+            "refresh": "稼働中のサイネージを強制更新する",
+            "add_blank": "空の項目を追加",
+            "score": "競技結果（ランキング）",
+            "alert": {
+                "update": "更新",
+                "update_mes": "既存のサイネージパターンを更新しました",
+                "create": "新規作成",
+                "create_mes": "新しいサイネージパターンを作成しました",
+                "sameName": "同じ名前",
+                "sameName_mes": "元の名前と同じです．違う名前にしてください．"
+            },
+            "select": "参照"
+        }
     },
     "common": {
         "back": "戻る",
@@ -138,22 +153,29 @@
         "totalScore": "合計得点",
         "sort": "ソート",
         "deleted": "正常に削除しました",
-        "mypage": "マイページ"
+        "mypage": "マイページ",
+        "backHome": "ホームに戻る",
+        "from": "開始",
+        "to": "終了"
+    },
+    "error": {
+        "title": "エラーが発生しました",
+        "description": "ロボットがバグにつまずいてしまいました..."
     },
     "technicalChallenge": {
         "technicalChallenge": "テクニカルチャレンジ"
     },
-    "accessDenied":{
-        "title" : "アクセス拒絶",
-        "description1" : "このページにアクセスする権限がありません．権限のあるアカウントでログインしてください．",
-        "description2" : "この画面が不具合によって表示されていると疑われる場合は，システム管理者にお問い合わせください．"
+    "accessDenied": {
+        "title": "アクセス拒絶",
+        "description1": "このページにアクセスする権限がありません．権限のあるアカウントでログインしてください．",
+        "description2": "この画面が不具合によって表示されていると疑われる場合は，システム管理者にお問い合わせください．"
     },
-    "shortURL404":{
-        "title" : "指定のページが存在しません",
-        "description1" : "指定の短縮リンクに該当するページが見つかりませんでした．",
-        "description2" : "リンクの有効期間外である可能性があります．"
+    "shortURL404": {
+        "title": "指定のページが存在しません",
+        "description1": "指定の短縮リンクに該当するページが見つかりませんでした．",
+        "description2": "リンクの有効期間外である可能性があります．"
     },
-    "registration":{
+    "registration": {
         "title": "参加登録",
         "description": "このページでは，チーム自身による参加登録の受付可否について設定します．",
         "error": "認証エラー",
@@ -183,7 +205,7 @@
         "authButton": "認証",
         "authSent": "認証メールを送信しました．メール内のリンクから登録作業を続けてください．メールが届かない場合，迷惑メールボックスをご確認ください．それでも見つからない場合は，別のメールアドレスでお試しください．hotmailや一部の機関のメールアドレスには，メールを配信できないことが報告されています．"
     },
-    "reservation":{
+    "reservation": {
         "title": "予約",
         "start": "開始時間",
         "duration": "長さ（分）",
@@ -209,7 +231,7 @@
         "open": "オープン",
         "noResv": "予約なし",
         "noResvDesc": "あなたの予約記録はありません．",
-        "js":{
+        "js": {
             "booked": "予約完了!",
             "bookedMes": "予約に成功しました",
             "cancel": "予約キャンセル?",
@@ -220,7 +242,7 @@
             "cancelKeep": "この予約をそのままにする"
         }
     },
-    "survey":{
+    "survey": {
         "title": "アンケート",
         "new": "アンケート新規作成",
         "editor": "アンケートエディター",
@@ -240,7 +262,7 @@
         "onlyOnce": "このフォームは，この期限までに1回だけ提出可能です．提出後の回答内容の変更はできません．",
         "submit": "提出",
         "readOnly": "提出内容を読み込み専用で表示します．",
-        "js":{
+        "js": {
             "multiple": "回答内容を提出しますか？提出後も期限まで回答内容を修正することができます．",
             "onlyOnce": "このフォームは１度しか提出できません．提出後の内容の修正はできません．提出してよいですか？",
             "submit": "提出",
@@ -249,7 +271,7 @@
             "complete": "提出完了"
         }
     },
-    "cabinet":{
+    "cabinet": {
         "title": "キャビネット",
         "description": "チームに各種資料等を配布することができます．",
         "description2": "このページには，オーガナイザーから配布されたファイルが格納されます．",
@@ -258,7 +280,7 @@
         "empty": "ファイルがまだ何も格納されていないようです...",
         "delete": "削除",
         "upload": "アップロード",
-        "js":{
+        "js": {
             "delAsk": "ファイル削除?",
             "delConfirm": "本当にこのファイルを削除しますか？この操作は取り消せません．",
             "delComplete": "削除完了",
@@ -267,12 +289,23 @@
             "delCancelButton": "残す"
         }
     },
-    "mypage":{
+    "mypage": {
+        "locked": "受付終了",
         "message": "メッセージ",
         "document": "ドキュメントや，各種ファイルを提出します．",
-        "cabinet": "オーガナイザーから配布されたファイルが格納されます．"
+        "cabinet": "オーガナイザーから配布されたファイルが格納されます．",
+        "profile": "プロフィール",
+        "changePassword": "パスワード変更",
+        "currentPassword": "現在のパスワード",
+        "newPassword": "新しいパスワード",
+        "confirmPassword": "新しいパスワード（確認）",
+        "passwordRule": "8文字以上かつ，英大文字・英小文字・数字・記号のうち2種類以上を使用してください．",
+        "passwordChanged": "パスワードを変更しました．",
+        "passwordError": "パスワードの変更に失敗しました．現在のパスワードが正しいか確認してください．",
+        "passwordMismatch": "新しいパスワードが一致しません．",
+        "passwordInvalid": "パスワードがルールに適合していません．"
     },
-    "interview":{
+    "interview": {
         "runs": "競技一覧",
         "ad_pic": "追加写真",
         "me_pic": "メンバーの写真",
@@ -304,7 +337,7 @@
                 "filter": "競技絞り込み",
                 "round": "ラウンド",
                 "field": "フィールド",
-                "team" : "チーム名"
+                "team": "チーム名"
             },
             "endedrun": "終了した競技を表示",
             "js": {
@@ -323,6 +356,7 @@
         },
         "view": {
             "info": "基本情報",
+            "to": "まで",
             "start": "スタート",
             "goal": "ゴール",
             "evacuation": "避難ゾーン",
@@ -348,6 +382,7 @@
         "judge": {
             "before": "次の画面に進む前に，以下の情報を『主審と一緒に』もう一度確認してください．",
             "info": "@:line.view.info",
+            "to": "@:line.view.to",
             "tap_red": "それぞれの項目が正しいか確認したら，赤い部分をタップしてください",
             "confirm": "確認しました",
             "run_start": "記録【開始】",
@@ -383,7 +418,7 @@
             "networkErrorDescription": "競技データをサーバに保存できませんでした．ネットワーク接続を確認してください．競技記録はこのまま続行できますが，サーバには保存されません．システム管理者を呼んでください！",
             "reSend": "再送信",
             "rescuedVictims": "@:line.view.rescuedVictims",
-            "rescuedVictimsMes" : "救助済みの被災者を削除するには，ダブルクリック（PC）か左にスワイプ（モバイル）します．",
+            "rescuedVictimsMes": "救助済みの被災者を削除するには，ダブルクリック（PC）か左にスワイプ（モバイル）します．",
             "noShow": "チームが来なかった場合に時間計測を開始する",
             "search": "レベル2",
             "noSearch": "レベル1",
@@ -438,7 +473,7 @@
             "calc": "得点計算",
             "item": "項目得点",
             "rescuedVictims": "@:line.view.rescuedVictims",
-            "rescuedVictimsMes" : "@:line.judge.rescuedVictimsMes",
+            "rescuedVictimsMes": "@:line.judge.rescuedVictimsMes",
             "kit": "レスキューキット",
             "write": "署名する",
             "clear": "書き直す",
@@ -487,6 +522,9 @@
             "m_flash": "被災者から15cm以内でランプを点滅",
             "m_identified": "被災者のタイプの識別に成功",
             "m_kit": "レスキューキットを配布",
+            "m_found": "発見",
+            "m_victim": "被災者・ターゲット",
+            "m_required": "必要数",
             "misidentification": "誤発見"
         },
         "judge": {
@@ -512,9 +550,16 @@
             "m_bump": "@:maze.view.m_bump",
             "m_ramp": "@:maze.view.m_ramp",
             "m_steps": "@:maze.view.m_steps",
+            "blue": "青いタイル",
+            "m_blue_tile": "青いタイル",
+            "m_blue_visits": "この青いタイルへの訪問回数：",
             "m_flash": "@:maze.view.m_flash",
             "m_identified": "@:maze.view.m_identified",
             "m_kit": "@:maze.view.m_kit",
+            "m_found": "@:maze.view.m_found",
+            "m_victim": "@:maze.view.m_victim",
+            "m_required": "@:maze.view.m_required",
+            "m_identified": "@:maze.view.m_identified",
             "pat": "@:admin.mazeMapEditor.pattern",
             "random": "ランダム抽選（乱数）",
             "networkError": "@:line.judge.networkError",
@@ -527,7 +572,6 @@
                     "title": "@:line.judge.js.timeup.title",
                     "content": "@:line.judge.js.timeup.content"
                 }
-
             }
         },
         "sign": {
@@ -553,7 +597,11 @@
             "misidentification": "@:maze.view.misidentification",
             "write": "@:line.sign.write",
             "clear": "@:line.sign.clear",
-            "comp": "@:line.sign.comp"
+            "comp": "@:line.sign.comp",
+            "blue": "訪問した青いタイル",
+            "exit": "脱出ボーナス",
+            "stairs": "階段の走破",
+            "ramp": "スロープの走破"
         }
     },
     "admin": {
@@ -562,9 +610,14 @@
         },
         "home": {
             "competitions": "大会",
+            "description": "競技会の管理やシステム設定をこのダッシュボードから行えます。",
             "c_item": "ツール・設定",
             "line_tSet": "ライン タイルセット",
             "add_c": "大会を追加",
+            "add_c_placeholder": "大会名を入力してください...",
+            "remove_c": "大会を削除",
+            "remove_c_msg": "本当に以下の大会を削除しますか？",
+            "remove_c_confirm": "確認のため，下に「DELETE」と入力してください:",
             "user": "ユーザー管理",
             "access_level": "ログイン中のアカウント， {{account}} は，「ユーザー管理」「短縮URL設定」にアクセスする権限がありません.",
             "signage": "デジタルサイネージ表示項目設定",
@@ -599,7 +652,7 @@
             "import": "タイルセットをファイルからインポート",
             "addAll": "一度に全種類を追加する"
         },
-        "users":{
+        "users": {
             "title": "ユーザー管理",
             "name": "ユーザー名",
             "super": "特権管理権限",
@@ -626,7 +679,21 @@
             "maps": "マップ管理",
             "runs": "競技管理",
             "backup": "バックアップ",
-            "tools": "ツール"
+            "tools": "ツール",
+            "leagues": "リーグ",
+            "teams_desc": "参加チームの登録・編集、メンバー情報の管理",
+            "rounds_desc": "競技ラウンドの作成、グループ分け、スケジュールの設定",
+            "fields_desc": "競技を行うフィールド（アリーナ）の追加と設定",
+            "settings_desc": "大会名、ロゴ、ルール、ランキング計算等の基本設定",
+            "backup_desc": "大会データのバックアップ作成と復元（リストア）",
+            "maps_short": "マップ",
+            "runs_short": "競技",
+            "tools_doc_desc": "提出された技術資料の確認と審査・採点",
+            "tools_mail_desc": "参加チームへのメール連絡・一括送信",
+            "tools_reg_desc": "チーム自身による参加登録の受付・修正設定",
+            "tools_res_desc": "インタビューや練習時間の予約枠管理",
+            "tools_cab_desc": "参加チームへの資料配布・ファイル共有",
+            "tools_sur_desc": "参加者向けアンケートの作成と回答確認"
         },
         "teams": {
             "title": "チーム管理",
@@ -646,6 +713,27 @@
             "title": "マップ管理",
             "create": "新しいマップを作る"
         },
+        "print": {
+            "back": "競技一覧に戻る",
+            "filter": "絞り込み",
+            "columns": "表示項目",
+            "all": "すべて",
+            "none": "なし",
+            "sheetTitle": "シートのタイトル",
+            "runs": "件",
+            "excel": "Excel",
+            "chromeHint": "印刷には Google Chrome をご利用ください。",
+            "runList": "競技一覧",
+            "originalScore": "元の得点",
+            "adjustment": "調整",
+            "teams": "チーム",
+            "format": "表示形式",
+            "decimalsFinal": "最終得点の小数桁数",
+            "decimalsNormalized": "正規化スコアの小数桁数",
+            "teamWidth": "チーム名列の幅 (px)",
+            "note": "表の下の注記",
+            "rankingNote": "得点はすべての競技の合計です（最低点はまだ差し引かれていません）。"
+        },
         "lineRun": {
             "title": "競技管理",
             "add": "競技を追加",
@@ -663,7 +751,8 @@
             "delS": "選択した競技を削除",
             "statusReset": "ステータス リセット",
             "printRuns": "競技結果を印刷",
-            "printRanking": "ランキングを印刷"
+            "printRanking": "ランキングを印刷",
+            "scoresheetTitle": "スコアシート一括出力"
         },
         "lineRunBulk": {
             "title": "競技一括登録",
@@ -676,16 +765,53 @@
             "s2D4": "マップ名は，次の中から一つ選んで記入してください : ",
             "s2D5": "フィールド名は，次の中から一つ選んで記入してください : ",
             "s2D6": "スタート時間は，次のフォーマットに従って入力してください ",
+            "clickToCopy": "名前をクリックするとクリップボードにコピーされます",
+            "copied": "コピーしました",
             "s3T": "STEP3 ファイルをアップロード",
             "s3D": "ファイルを選択したら，下に表示される登録内容が正しいかを確認して，よろしければ，『実行』ボタンを押してください．",
             "exe": "実行",
             "inpro": "処理中...",
+            "generatorTitle": "スケジュール生成",
+            "generatorInfoTitle": "情報",
+            "generatorInfo1": "この生成機能は，CSVを使わずに初期の競技スケジュールと一括登録データを作成するためのものです．",
+            "generatorInfo2": "スケジュール生成には2つの方式があります：",
+            "generatorInfo3": "1. チームを正規化グループ（マップ）間でローテーションさせ，選択した各マップを各チームが1回ずつ走行するようにします．各フィールドには異なるマップが割り当てられます．",
+            "generatorInfo4": "2. 各ラウンドでは，すべてのフィールドが同じマップと正規化グループを使用します．すべてのチームがそのラウンドでは同じマップで競技し，フィールドは並行実施のためだけに使われます．",
+            "generatorInfo5": "選択したラウンド数は，選択したマップ数と一致している必要があります．",
+            "generatorInfo6": "マップは正規化グループを定義します．",
+            "generatorInfo7": "フィールドは物理的な場所であるため，同時に実施できる競技数だけを定義します．",
+            "generatorInfo8": "チーム，ラウンド，フィールド，マップは自動的に事前選択され，生成前に調整できます．",
+            "generatorInfo9": "生成されたスケジュールは，大会にインポートする前に必ず確認してください！",
+            "generatorExampleTitle": "例：",
+            "generatorExampleText": "8ラウンド + 8マップ = 8つの正規化グループ．フィールド数は処理能力とスケジュールの所要時間にのみ影響します．",
+            "generatorTeams": "チーム",
+            "generatorRounds": "ラウンド",
+            "generatorFields": "フィールド",
+            "generatorMaps": "マップ",
+            "generatorSearchTeams": "チームを検索して選択...",
+            "generatorSearchRounds": "ラウンドを検索して選択...",
+            "generatorSearchFields": "フィールドを検索して選択...",
+            "generatorSearchMaps": "マップを検索して選択...",
+            "generatorDays": "日数",
+            "generatorSlotMinutes": "枠の長さ（分）",
+            "generatorSmallBreakMultiplier": "小休憩倍率",
+            "generatorLunchMinutes": "昼休憩（分）",
+            "generatorStartTime": "開始時間",
+            "generatorScheduleMode": "スケジュール方式",
+            "generatorModeScrambled": "スクランブル / 正規化グループのローテーション",
+            "generatorModeFixed": "固定マップ / 固定正規化グループ",
+            "generatorModeFixedDesc1": "固定マップモード：各ラウンドは，ちょうど1つのマップと正規化グループに対応します．チームはラウンド中ずっと同じ課題に取り組み，フィールドは並行実施の場所としてのみ使われます．",
+            "generatorModeFixedDesc2": "フィールドは各ラウンド後に物理的に組み替える必要があります．",
+            "generatorModeScrambledDesc": "スクランブルモード：マップは各フィールド上の正規化グループに割り当てられます．チームはラウンドを通じてフィールドと正規化グループの間をローテーションし，選択した各マップをちょうど1回ずつ走行します．",
+            "generatorButton": "スケジュールを生成",
+            "generatorDisclaimerTitle": "注意：",
+            "generatorDisclaimerText": "生成されたスケジュールは，選択された設定と参加可能なチームに基づいています．競技へインポートする前に，最終的なスケジュール，マップ割り当て，フィールド割り当て，時刻，正規化グループを確認する責任は運営者にあります．",
             "complete": "件登録完了"
         },
         "lineMapEditor": {
             "title": "マップエディター",
             "desc": "タイルを左のタイルセットエリアから右のマップエリア上にドラッグアンドドロップします．マップエリア上のタイルの上で右クリックをすると，ギャップや障害物などのスコアアイテムや坂を設定できます．",
-            "save": "マップを（上書き）保存",
+            "save": "保存",
             "saveAs": "マップを別名で保存",
             "name": "デザイン名：",
             "height": "最大高さ：",
@@ -693,6 +819,7 @@
             "length": "最大長さ（縦）：",
             "check": "チェックポイントマーカーの数：",
             "finished": "マップが完成した（競技で使用する準備が整った）",
+            "finishedTooltip": "作成完了・使用準備完了を示します。マップの作成が終わったらチェックしてください。",
             "tileset": "タイルセットを選択",
             "item": "各種項目",
             "bump": "スピードバンプ：",
@@ -710,12 +837,21 @@
             "export": "このマップをJsonファイルにエクスポート",
             "import": "マップをJsonファイルからインポート",
             "liveVictim": "生きている被災者の数",
-            "deadVictim" : "死んでいる被災者の数",
+            "deadVictim": "死んでいる被災者の数",
             "rampPoint": "坂得点",
             "setCheckpoint": "このタイルをチェックポイントに指定する",
             "cantset": "このタイルに得点項目は設定できません．",
             "generateImage": "マップの画像を生成する",
-            "prepareScoresheets": "スコアシート生成の準備を実行"
+            "prepareScoresheets": "スコアシート生成の準備を実行",
+            "properties": "設定",
+            "checkpoint": "チェックポイント",
+            "courseStart": "スタート",
+            "evacRestart": "再スタート",
+            "simulator3d": "フロアチェンジ設定",
+            "clickToCycle": "クリックで切替",
+            "ascend": "上昇",
+            "descend": "下降",
+            "duration": "期間"
         },
         "teamBulk": {
             "title": "チーム一括登録",
@@ -733,11 +869,50 @@
         },
         "mazeMapAdmin": {
             "title": "マップ管理",
-            "create": "@:admin.lineMapAdmin.create"
+            "create": "@:admin.lineMapAdmin.create",
+            "selectAll": "すべて選択",
+            "unselectAll": "選択解除",
+            "printSelected": "選択したマップを印刷",
+            "print": {
+                "title": "印刷設定",
+                "outputContent": "出力内容",
+                "victimsTargets": "被災者 / ターゲット",
+                "scoreSheets": "スコアシート",
+                "mapImages": "マップ画像",
+                "fileFormat": "ファイル形式",
+                "paperSize": "用紙サイズ",
+                "targetTypes": "ターゲットの種類",
+                "cognitiveTargets": "認知的ターゲット",
+                "letterVictims": "被災者（文字）",
+                "scoreSheetInfo": "選択した各マップに対して、大会情報が記載された白紙のスコアシートを生成します。",
+                "generatePDF": "PDFを生成",
+                "generatePNG": "PNGをダウンロード"
+            }
         },
         "mazeMapEditor": {
+            "dimensions": "マップサイズ",
+            "time": "制限時間",
+            "finishedTooltip": "作成完了・使用準備完了を示します。マップの作成が終わったらチェックしてください。",
+            "mapName": "マップ名",
+            "advancedTools": "高度なツールと出力",
+            "scoreSheetPreparation": "スコアシート準備",
+            "scoreSheetPreparationDesc": "スコアシートを生成するための準備（画像の生成など）を行います。",
+            "downloadImage": "画像ダウンロード",
+            "prepareSheets": "スコアシートを生成",
+            "printPDF": "PDF印刷",
+            "includeLetterVictims": "文字被災者を含める",
+            "targetsPDF": "ターゲット印刷",
+            "cognitiveTargets": "認知的ターゲット",
+            "letterVictims": "文字被災者",
+            "back": "戻る",
+            "map": "マップエディター",
             "title": "マップエディター",
             "desc": "壁の部分をクリックして，迷路を作成します．迷路の床部分をクリックすると，被災者やチェックポイント，バンプなどの項目が設定できます．",
+            "tour": {
+                "teamInfo": "自分のチーム情報が正しいか確認してください．",
+                "save": "保存ボタンは定期的に押してください．保存しても，提出期限内であれば何度でも再編集可能です．",
+                "charLimit": "文字数制限がある場合，ここで現在の文字数を確認できます．"
+            },
             "save": "@:admin.lineMapEditor.save",
             "saveAs": "@:admin.lineMapEditor.saveAs",
             "name": "@:admin.lineMapEditor.name",
@@ -749,8 +924,8 @@
             "bump": "スピードバンプ",
             "step": "ステップ",
             "ramp": "坂",
-            "cp" : "チェックポイント",
-            "black" : "黒タイル",
+            "cp": "チェックポイント",
+            "black": "黒タイル",
             "blue": "青タイル",
             "red": "赤タイル",
             "down": "坂の下の水平なタイル",
@@ -762,21 +937,70 @@
             "floor": "床",
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
-            "placement" : "被災者の配置:",
+            "placement": "被災者の配置:",
+            "victimRestricted": "タイルに要素が設定されている間は被災者を配置できません。",
+            "propertyRestricted": "被災者が配置されている間はタイルの要素を変更できません。",
             "changeF": "次の階層に移動: ",
-            "noEle": "（エレベーターがありません）",
+            "noEle": "階層変更なし",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "parent": "このマップは，親のサイコロパターンのうちの１つです",
             "backToParent": "親の編集に戻る",
-            "pattern" : "マップパターン設定",
-            "patSave" : "パターンを設定するためには，マップを一度，保存してください．",
+            "pattern": "マップパターン設定",
+            "patSave": "パターンを設定するためには，マップを一度，保存してください．",
+            "saveAsModal": {
+                "newName": "新しいマップ名",
+                "targetCompetition": "コピー先の大会",
+                "createCopy": "コピーを作成",
+                "successTitle": "マップを作成しました",
+                "successText": "新しいマップが正常に作成されました。新しいマップのエディタに移動しますか？それともこのページに留まりますか？",
+                "goToNew": "新しいマップへ移動",
+                "stayHere": "このまま編集を続ける"
+            },
             "create": "新規作成",
             "edit": "編集",
             "patYet": "サイコロパターン設定が行われていないため，迷路作成を完了できません.",
             "entryLeague": "エントリー",
             "standardLeague": "国際標準",
-            "leagueType": "リーグタイプ"
+            "leagueType": "リーグタイプ",
+            "cognitiveTarget": "認知的ターゲット",
+            "cognitive": "認知的",
+            "cognitiveAbbr": "C",
+            "settings": "設定",
+            "none": "なし",
+            "cognitiveTargetSettings": "認知的ターゲット設定",
+            "ring": "リング",
+            "diameter": "直径",
+            "color": "色",
+            "yellow": "黄色",
+            "green": "緑色",
+            "cyan": "青色",
+            "cBlack": "黒色",
+            "cRed": "赤色",
+            "totalValue": "合計値",
+            "victimStatus": "被災者状態",
+            "harmedVictim": "負傷した被災者",
+            "stableVictim": "安定した被災者",
+            "unharmedVictim": "無傷な被災者",
+            "dummyVictim": "ダミーの被災者",
+            "tileProperties": "タイル設定",
+            "ringConfiguration": "リング設定",
+            "calculation": "計算",
+            "cognitiveTargetsPDF": "Cognitive Target印刷",
+            "cognitiveTargetsPDFDesc": "競技用ターゲットの印刷",
+            "includeLetterVictims": "Letter Victimを含める",
+            "targetsPDF": "ターゲット印刷",
+            "cognitiveTargets": "Cognitive Target",
+            "letterVictims": "文字被災者",
+            "printCognitiveTargets": "印刷",
+            "paperSize": "用紙サイズ",
+            "a4Description": "国際標準サイズ",
+            "letterDescription": "北米標準サイズ",
+            "autoConfigure": "自動設定",
+            "stableAbbr": "安定",
+            "harmedAbbr": "負傷",
+            "unharmedAbbr": "無傷",
+            "dummyAbbr": "ダミー"
         },
         "mazeRun": {
             "title": "競技管理",
@@ -879,7 +1103,7 @@
             "exe": "バックアップを実行",
             "time": "バックアップ時刻",
             "queue": "バックアップキュー",
-            "js":{
+            "js": {
                 "complete": "バックアップジョブが完了しました．下のリストからダウンロードできます．"
             }
         },
@@ -901,6 +1125,7 @@
             "unset": "削除"
         },
         "simMapEditor": {
+            "newEditor": "Erebus Editor 2026 に切り替える：キャンバスに直接描けます",
             "title": "Rescue Simulation ワールドエディター",
             "desc": "壁の部分をクリックして迷路を作成します．床の部分をクリックして，被災者やチェックポイント，沼地などを設定します．",
             "save": "@:admin.lineMapEditor.save",
@@ -912,16 +1137,319 @@
             "finished": "Finished for using in runs",
             "item": "@:admin.lineMapEditor.item",
             "swamp": "沼地",
-            "cp" : "チェックポイント",
-            "black" : "落とし穴",
-            "curve" : "カーブした壁",
+            "cp": "チェックポイント",
+            "black": "落とし穴",
+            "curve": "カーブした壁",
             "top": "@:admin.lineMapEditor.top",
             "right": "@:admin.lineMapEditor.right",
             "left": "@:admin.lineMapEditor.left",
             "bottom": "@:admin.lineMapEditor.bottom",
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
-            "placement" : "被災者の配置：",
+            "placement": "被災者の配置：",
+            "victimIsFake": "偽の被災者：",
+            "cognitives": "認知的ターゲット",
+            "rotDialHint": "ドラッグで回転（Shiftを押しながらで1°単位）。矢印キーでも調整できます。",
+            "rotRandom": "ランダムな角度",
+            "rotHelp": "ロボットから見て時計回りに回転します。0°が正立です。ダイヤルをドラッグするか、ボタンで指定します。",
+            "fakeHint": "0点のダミーとして書き出されます",
+            "area4Check": {
+                "title": "プリセットの配置チェック",
+                "ok": "部屋4の領域に配置できます",
+                "needSize": "{{size}} の部屋4領域で使えます",
+                "now": "（現在：{{now}}）",
+                "current": "現在",
+                "none": "未指定",
+                "check": "通路の位置を確認してください",
+                "mapHint": "マップ上の点線の枠がプリセットの入る範囲、緑・赤の枠が通路を置く位置です。A・Bは組み合わせの候補で、「緑Aと赤A」または「緑Bと赤B」のどちらかにします。",
+                "mapHintOk": "マップ上の斜線の範囲にプリセットが置かれます。",
+                "noRegion": "部屋4の領域が選ばれていません。",
+                "notRect": "部屋4の領域が長方形になっていません。",
+                "wrongSize": "部屋4の領域の大きさがこのプリセットと違います。",
+                "noRoomForPassages": "通路を置ける場所がマップ内にありません。部屋4の領域をマップの端から離してください。",
+                "noGreen": "部屋1 ⇄ 部屋4（緑）の通路がありません。",
+                "manyGreen": "部屋1 ⇄ 部屋4（緑）の通路が複数あります。",
+                "noRed": "部屋3 ⇄ 部屋4（赤）の通路がありません。",
+                "manyRed": "部屋3 ⇄ 部屋4（赤）の通路が複数あります。",
+                "passageMismatch": "通路がプリセットの入口の位置にありません。マップ上の枠の位置に置いてください。",
+                "exportTitle": "部屋4のプリセットを配置できません"
+            },
+            "connCheck": {
+                "offNote": "チェックしていません。通路タイルの選択も制限せず、Erebusワールドもそのまま書き出せます。",
+                "switchHint": "部屋のつながりチェックのオン／オフ（マップと一緒に保存されます）",
+                "off": "オフ",
+                "on": "オン",
+                "title": "部屋のつながりチェック",
+                "ok": "すべての部屋が通路で部屋1までつながっています",
+                "room": "部屋{{room}}",
+                "linked": "つながっている通路",
+                "notLinked": "まだ通路でつながっていません。次のどれかの通路タイル（床の色）を部屋の境に置いてください：",
+                "notReached": "部屋1までつながっていません。次のどれかの通路タイルも置いてください：",
+                "isolated": "ほかの部屋と接していません。部屋の範囲を見直してください。",
+                "option": "部屋{{from}} ⇄ 部屋{{to}}（{{name}}）",
+                "presetNote": "部屋4の通路の位置は、プリセットの配置チェックの枠に合わせます。",
+                "passageNoRoom": "{{name}}の通路（部屋{{from}} ⇄ 部屋{{to}}）がありますが、部屋{{room}}がありません。",
+                "passageMisplaced": "{{name}}の通路（部屋{{from}} ⇄ 部屋{{to}}）が、部屋{{from}}と部屋{{to}}の両方へ通り抜けられる位置にありません。通路タイルは片方の部屋に置き、両方の部屋の側を壁でふさがないようにします。",
+                "mapHint": "マップ上の色付きの点線の枠は通路タイルを置ける位置です。「!」の付いた枠は通路タイルのない通り道（どちらかを通路タイルにするか、間を壁でふさぐ）、「×」は位置が正しくない通路タイルです。通り道は、ロボット（直径7.4 cm）が壁・半壁・曲がった壁の間を通れるかで判定しています（半タイル分の隙間は通れません）。",
+                "unmarkedGap": "部屋{{from}}と部屋{{to}}の間に、{{name}}の通路タイルがない通り道が{{count}}か所あります。ロボットが通れる隙間はすべて{{name}}の通路タイルにするか、壁でふさいでください。",
+                "notConnected": "部屋{{room}}が通路で部屋1までつながっていません。",
+                "exportTitle": "部屋のつながりに問題があるため書き出せません",
+                "exportNote": "このままではErebusワールドを書き出せません（このチェックはオフにできます）。"
+            },
+            "noWall": "壁なし",
+            "passageCtx": {
+                "ownClosed": "部屋{{room}}の側がふさがっているため、通路にはできません",
+                "here": "このタイル：部屋{{room}}",
+                "borders": "通り抜けられる隣の部屋",
+                "noBorder": "壁や穴でほかの部屋へ通り抜けられないため、通路にはできません",
+                "only": "部屋{{from}}と部屋{{to}}の間の通り道で使えます"
+            },
+            "victimsGroup": "被災者",
+            "hazmatGroup": "危険物標識",
+            "tokenSettings": "壁トークンの設定",
+            "noTokenPlaced": "被災者か危険物標識を配置すると、回転を設定できます。",
+            "insertColumn": "ここに列を挿入",
+            "removeColumn": "この列を削除",
+            "insertRow": "ここに行を挿入",
+            "removeRow": "この行を削除",
+            "room4Creator": {
+                "ctRings": "認知的ターゲットの的",
+                "ctFake": "偽",
+                "ctSum": "合計",
+                "ctHint": "的のリングをクリックで選び、下の色を押します（今：外側から{{n}}番目）",
+                "rot": "向き（度）",
+                "rotFixed": "向きを決める",
+                "rotRandom": "ランダム",
+                "rotRandomNote": "置くたびに向きをランダムに決めます",
+                "remove": "消す",
+                "zoomIn": "拡大",
+                "zoomOut": "縮小",
+                "zoomFit": "全体を表示",
+                "zoomHint": "Ctrl（⌘）＋ホイールで拡大・縮小、スペース＋ドラッグで移動",
+                "randomNoteShort": "書き出すときに全種類から決まります",
+                "viewReach": "入れない場所",
+                "viewGuides": "入口・CP",
+                "unreachableShort": "近づけない {{count}}",
+                "farShort": "壁から離れた {{count}}",
+                "missingShort": "CP不足 {{count}}",
+                "noEntranceShort": "入口なし",
+                "reachOff": "入れない場所は計算できません",
+                "legendMapWallShort": "マップの壁",
+                "legendCheckpointShort": "チェックポイント",
+                "sel": {
+                    "ccw": "左に90°回転",
+                    "cw": "右に90°回転",
+                    "h": "左右反転",
+                    "v": "上下反転",
+                    "duplicate": "複製",
+                    "copy": "コピー",
+                    "paste": "貼り付け",
+                    "delete": "削除",
+                    "drop": "確定"
+                },
+                "randomPlace": "ランダムに配置",
+                "randomModes": {
+                    "current": "選んだ種類",
+                    "mixed": "いろいろな種類"
+                },
+                "randomGo": "配置する",
+                "randomNote2": "ロボットが半タイル以内に近づける壁沿いに、半タイル以上離して置きます。",
+                "templates": {
+                    "maze": "迷路",
+                    "pillars": "柱",
+                    "diagonal": "斜めの壁",
+                    "zigzag": "ジグザグ",
+                    "rings": "同心円",
+                    "obstacles": "障害物"
+                },
+                "templateHints": {
+                    "maze": "1タイル幅の通路の迷路です（ところどころ抜け道あり）。",
+                    "pillars": "タイルの角に丸い柱を立てます。",
+                    "diagonal": "タイルの中に短い斜めの壁を置きます。",
+                    "zigzag": "端で折り返す1本道です。",
+                    "rings": "中心のまわりに、すき間のある輪を重ねます。",
+                    "obstacles": "丸・四角・三角の障害物を散らします。"
+                },
+                "templateClear": "今の壁と被災者を消してから置く",
+                "templateApply": "置く",
+                "showGuides": "入口とチェックポイントを表示",
+                "legendEntrance": "入口（通路の色、{{count}}か所）",
+                "legendCheckpoint": "チェックポイント（本体のエディタで設定）",
+                "missingCheckpoints": "通路の内側のタイル{{count}}か所がチェックポイントになっていません（ルール3.5.3）。本体のエディタで設定してください（点線の「CP?」）。",
+                "noEntrance": "部屋4に入口がありません。本体のエディタで、外の通路に面した壁を開けてください。",
+                "rows": {
+                    "real": "本物",
+                    "fake": "偽（立体）"
+                },
+                "curveMode": "線の種類",
+                "curveSmooth": "なめらか",
+                "curveStraight": "折れ線",
+                "sides": "辺の数",
+                "shapeIcon": "アイコン",
+                "shapePicture": "画像",
+                "iconSearch": "英語で検索（例：star, car, tree）",
+                "iconAll": "おすすめ（カテゴリを選ぶと絞り込み）",
+                "iconLoading": "アイコンを読み込んでいます…",
+                "iconUnavailable": "アイコンの一覧を読み込めませんでした。",
+                "iconNone": "見つかりませんでした。",
+                "pictureChoose": "画像を選ぶ",
+                "pictureNote": "透明な部分のあるPNG・SVGは不透明な部分が、それ以外の画像は暗い部分が形になります。",
+                "shapeStyle": "描き方",
+                "shapeStyles": {
+                    "fill": "塗りつぶし",
+                    "outline": "輪郭だけ"
+                },
+                "shapeRotate": "回転",
+                "mirror": "対称に描く",
+                "mirrors": {
+                    "none": "なし",
+                    "x": "左右対称",
+                    "y": "上下対称",
+                    "xy": "上下左右対称"
+                },
+                "tipCurve": "クリック：点を追加　ダブルクリック/Enter：完成",
+                "tipArc": "動かして曲げる　クリック：確定",
+                "unreachable": "ロボットが半タイル以内に近づけないものが{{count}}個あります（識別できません）",
+                "showReach": "ロボットが入れない場所を表示",
+                "legendReach": "ロボットが入れない場所",
+                "legendMapWall": "マップの壁（本体のエディタで設定）",
+                "reach": {
+                    "noSeed": "スタートタイルからロボットが動けないため、入れない場所は計算できません（スタートタイルの位置や周りの壁を確認してください）。",
+                    "noStart": "スタートタイルがないため、入れない場所は計算できません。",
+                    "unavailable": "入れない場所を計算できませんでした。"
+                },
+                "eraseTarget": "消す対象",
+                "eraseTargets": {
+                    "all": "すべて",
+                    "tokens": "被災者だけ"
+                },
+                "tipStamp": "クリック：選択（向き・リング）／種類を変更　右クリック：削除",
+                "tipOther": "右クリック：削除",
+                "title": "カスタム部屋4の作成",
+                "open": "カスタム部屋4を作成",
+                "tools": {
+                    "pen": "ペン",
+                    "line": "直線",
+                    "rect": "四角",
+                    "circle": "円",
+                    "stamp": "被災者",
+                    "erase": "消しゴム",
+                    "curve": "曲線",
+                    "arc": "円弧",
+                    "ellipse": "楕円",
+                    "polygon": "多角形",
+                    "shape": "図形",
+                    "select": "選択",
+                    "template": "ひな形"
+                },
+                "undo": "元に戻す",
+                "redo": "やり直す",
+                "clear": "すべて消す",
+                "groups": {
+                    "victim": "文字の被災者",
+                    "ct": "認知的ターゲット",
+                    "hazmat": "危険物標識",
+                    "fake": "偽の被災者",
+                    "random": "決めない"
+                },
+                "types": {
+                    "harmed": "負傷",
+                    "stable": "安定",
+                    "unharmed": "無傷",
+                    "fakeHarmed": "負傷",
+                    "fakeStable": "安定",
+                    "fakeUnharmed": "無傷"
+                },
+                "random": "ランダム",
+                "randomNote": "書き出すときに、上のすべての種類からランダムに決まります",
+                "eraserSize": "太さ",
+                "size": {
+                    "s": "細",
+                    "m": "中",
+                    "l": "太"
+                },
+                "snap": "グリッドに合わせる（1/4タイル）",
+                "hints": {
+                    "pen": "ドラッグして自由に壁を描きます。",
+                    "line": "ドラッグして直線の壁を描きます。Shiftで45°ごと。",
+                    "rect": "ドラッグして四角の壁を描きます。Shiftで正方形。",
+                    "circle": "中心からドラッグして円の壁を描きます。",
+                    "stamp": "壁の近くをクリックすると、いちばん近い壁に被災者が付きます。置いた被災者をクリックすると向きやリングの色を変えられます（違う種類を選んでいるときは種類が変わります）。右クリックで削除します。",
+                    "erase": "ドラッグして壁や被災者を消します。被災者は、どのツールでも右クリックで消せます。",
+                    "eraseTokens": "触れた被災者をまるごと消します。壁は消えません。",
+                    "curve": "クリックで点を打つと、その点を通る曲線になります。ダブルクリック・Enter・右クリックで終わり、最初の点をクリックすると閉じます。Backspaceで1点戻し、Escで取り消し。",
+                    "arc": "ドラッグで両端を決めてから、マウスを動かして曲がり具合を決め、クリックで確定します。",
+                    "ellipse": "ドラッグした四角に入る楕円を描きます。Shiftで正円。",
+                    "polygon": "中心からドラッグして正多角形を描きます。向きは15°ごと（Shiftで自由）。",
+                    "shape": "アイコンか画像を選んでから、キャンバスをドラッグして大きさを決めます（縦横比は保たれます。Shiftで自由）。",
+                    "select": "ドラッグで範囲を選び、中をドラッグして移動します（Altを押しながらでコピー）。矢印キーで少しずつ動かし、[ ] で回転、Enterで確定、Deleteで削除。",
+                    "template": "ひな形を選んで「置く」を押します。ロボットが部屋に入れなくなる配置は自動で作り直します。"
+                },
+                "messages": {
+                    "outside": "部屋4の外には置けません。",
+                    "needWall": "被災者は壁にしか置けません。壁の近くをクリックしてください。",
+                    "noSpace": "壁の近くに置ける空きがありません。少し離れた場所で試してください。",
+                    "pickShape": "先にアイコンか画像を選んでください。",
+                    "iconFailed": "アイコンを読み込めませんでした。",
+                    "imageFailed": "画像を読み込めませんでした。",
+                    "randomDone": "{{placed}}個置きました。",
+                    "randomShort": "{{asked}}個のうち{{placed}}個しか置けませんでした（置ける壁が足りません）。",
+                    "templateBlocked": "ロボットが入れない部分が残る配置しか作れませんでした。薄い赤の部分を確認してください。",
+                    "wallEnd": "壁の端や細い先には置けません。被災者の幅（2 cm）以上ある壁の面をクリックしてください。"
+                },
+                "tokens": "壁トークン：{{count}}",
+                "farFromWall": "壁から離れたものが{{count}}個あります（赤い点線の丸）",
+                "import": "画像を読み込む",
+                "download": "画像として保存",
+                "hint": "PNG・JPEG画像を読み込むか、ここで描きます。被災者の種類は画像に記録されるので、保存した画像を読み込むと元に戻ります。",
+                "selectedStamp": "選択中の被災者",
+                "selectDone": "選択をやめる"
+            },
+            "maxScore": {
+                "tokens": "壁トークン",
+                "checkpoints": "チェックポイント",
+                "exitBonus": "脱出ボーナス",
+                "mapBonus": "マッピングボーナス（最大）",
+                "total": "最大得点",
+                "note": "すべての壁トークンとチェックポイントを取得して脱出し、マッピングボーナスが最大だった場合の得点です。"
+            },
+            "room4Hint": "部屋4として選んだタイルの中身を選びます",
+            "room4None": "なし",
+            "room4NoneHint": "部屋4を使わない",
+            "room4Custom": "カスタム",
+            "room4CustomHint": "描画または画像から作成",
+            "room4Preset": "プリセット",
+            "room4CustomSteps": "先に部屋4のタイルを選んでから、作成画面を開いてください。",
+            "passageTitle": "部屋の間の通路（床の色）",
+            "passageHint": "2つの部屋をつなぐ1タイルの通路に色を付けます",
+            "passageNone": "なし",
+            "areaShort": "部屋",
+            "passageBlue": "青",
+            "passageYellow": "黄",
+            "passageGreen": "緑",
+            "passagePurple": "紫",
+            "passageOrange": "オレンジ",
+            "passageRed": "赤",
+            "ctGroup": "認知的ターゲット",
+            "ctGroupHint": "リングの色で種類が決まります",
+            "ctSum": "合計",
+            "letterVictims": "文字の被災者",
+            "letterOnlyHint": "回転・偽を設定できます",
+            "letterSettings": "文字の被災者の設定",
+            "noLetterVictim": "Φ・Ψ・Ωを配置すると、回転と偽を設定できます。",
+            "ctNoLetterSettings": "認知的ターゲットには回転・偽の設定はありません。リングの合計が0〜3以外だと偽になります。",
+            "fakeLegend": "偽の被災者",
+            "fakeLegendMixed": "同じ辺に同じ記号の本物と偽物が混在（詳細はタイルのダイアログで確認）",
+            "ctType": "ターゲットの種類",
+            "ctF": "F: 引火性ガス",
+            "ctP": "P: 毒物",
+            "ctC": "C: 腐食性物質",
+            "ctO": "O: 有機過酸化物",
+            "ctFake": "偽のターゲット",
+            "ctFakeAbbr": "偽",
+            "ctRemove": "削除",
+            "ctRule": "リング1が中心、リング5が外側です。種類はリングの値の合計で決まります（黒 -2、赤 -1、黄 0、緑 +1、青 +2）。0 = F、1 = P、2 = C、3 = O、それ以外は偽のターゲットです。",
+            "extWalls": "外壁を作成する",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "exportW": "このマップをErebus用ワールドファイルにエクスポート",
@@ -933,9 +1461,34 @@
             "select3": "部屋3のタイルを選ぶ (カーブした壁)",
             "select4": "部屋4のタイルを選ぶ",
             "pick4": "部屋4のタイルの設定",
+            "rooms": "部屋",
             "innerTile": "タイルの中の壁",
+            "inner": {
+                "armTitle": "半分の壁",
+                "armHint": "図の中の点線（中心から辺の真ん中まで、6 cm）をクリックすると壁を置けます。もう一度クリックすると外れます。下のボタンでも切り替えられます。",
+                "armAdd": "クリックで半分の壁を置く",
+                "armRemove": "クリックで半分の壁を外す",
+                "curveTitle": "カーブ壁",
+                "curveHint": "図の1/4タイルをクリックするたびに カーブなし → 右上 → 右下 → 左下 → 左上 の順に切り替わります。下のボタンで直接選ぶこともできます。",
+                "curveCycle": "クリックでカーブ壁を切り替える",
+                "curveNone": "カーブ壁なし",
+                "curve1": "右上にふくらむカーブ",
+                "curve2": "右下にふくらむカーブ",
+                "curve3": "左下にふくらむカーブ",
+                "curve4": "左上にふくらむカーブ",
+                "curveRoom2": "部屋2のタイルにはカーブ壁を置けません（カーブ壁は部屋3で使います）。",
+                "curveRoom2Found": "このタイルにはカーブ壁が残っています。",
+                "curveRemove": "カーブ壁を外す",
+                "nw": "左上",
+                "ne": "右上",
+                "sw": "左下",
+                "se": "右下",
+                "keyOuter": "まわりの壁（マップで編集）",
+                "keyArm": "クリックで半分の壁",
+                "keySlot": "被災者の位置（下の表の番号）"
+            },
             "victimRotation": "符号回転",
-            "js":{
+            "js": {
                 "startTileError": "スタートタイルを設定してください．"
             }
         },
@@ -957,7 +1510,7 @@
         "deadline": "提出期限",
         "saved": "正常に保存しました",
         "uploaded": "正常にアップロードに成功しました",
-        "admin":{
+        "admin": {
             "title": "ドキュメント提出",
             "overall": "全般設定",
             "access": "アクセス有効化",
@@ -966,7 +1519,7 @@
             "review": "レビュー設定",
             "result": "評価結果"
         },
-        "teamAdmin":{
+        "teamAdmin": {
             "title": "チーム個別設定",
             "access": "アクセス可否",
             "log": "ログ",
@@ -1031,11 +1584,24 @@
             "assignedTeams": "割り当てられたチーム",
             "emptyAssignment": "割り当て情報が登録されていないため、次のユーザーが評価可能です："
         },
-        "form":{
+        "form": {
             "languageError": "このフォームは，お使いの言語に対応していませんので，代替言語で表示します．",
             "editDeadline": "このフォームは，上の提出期限まで何度でも編集可能です．",
             "basicInformation": "チーム基本情報",
             "teamName": "チームコード・チーム名",
+            "editable": "編集可能",
+            "tour": {
+                "help": "使い方ガイド",
+                "deadline": "提出期限はここに表示されます．期限を過ぎると編集できなくなるので注意してください．",
+                "notification": "運営からのお知らせがある場合は，ここに表示されます．重要な情報ですので，必ず最初に読んでください．",
+                "teamInfo": "自分のチーム情報が正しいか確認してください．",
+                "questions": "各セクションの設問に回答してください．保存ボタンを押すまでデータは反映されません．",
+                "save": "保存ボタンは定期的に押してください．保存しても，提出期限内であれば何度でも再編集可能です．なお，特定の『提出』ボタンはなく，期限時点の最新データが最終提出物として扱われます．",
+                "charLimit": "文字数制限がある場合，ここで現在の文字数を確認できます．制限文字数を超過すると、保存できませんのでご注意ください．",
+                "next": "次へ",
+                "prev": "戻る",
+                "done": "わかった！"
+            },
             "required": "@:document.editor.required",
             "optional": "@:document.editor.optional",
             "max5": "最大サイズは5MBです．",
@@ -1058,7 +1624,7 @@
             "currentLength": "現在の入力済み文字数",
             "lengthLimitExceed": "文字数制限を超過しています。"
         },
-        "review":{
+        "review": {
             "reviewer": "ログインしているレビュアー：",
             "comments": "レビューコメント",
             "user": "レビュアー",
@@ -1071,7 +1637,7 @@
             "deletePartMes": "このレビューを部分削除します．この操作は取り消しできません．",
             "deleteWholeMes": "このレビューを全体削除します．この操作は取り消しできません．"
         },
-        "inspection":{
+        "inspection": {
             "do": "検査実施",
             "cancel": "検査キャンセル"
         }
@@ -1084,7 +1650,7 @@
             "1": "開封済",
             "2": "クリック"
         },
-        "home":{
+        "home": {
             "title": "メール配信",
             "error": "この機能を使用するには，設定ファイルにメールの設定を追加してください．",
             "newMailBulk": "選択した宛先にメールを新規作成",
@@ -1112,7 +1678,7 @@
                 "completeMes": "メールを配信キューに登録しました"
             }
         },
-        "sent":{
+        "sent": {
             "title": "メール配信状況",
             "time": "時刻",
             "subject": "@:mail.home.subject",

@@ -47,7 +47,10 @@ app.controller("AdminUserController", ['$scope', '$http', function ($scope, $htt
 
     function updateUserList() {
         $http.get("/api/users").then(function (response) {
-            $scope.users = response.data
+            $scope.users = response.data.map(function (user) {
+                user.displayEmail = user.email ? user.email : "N/A";
+                return user;
+            })
         })
         $scope.userAuthAdmin= false
         $scope.userAuthSuper= false

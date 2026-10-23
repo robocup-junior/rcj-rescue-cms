@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'SurveyEditor'
@@ -8,14 +8,14 @@ append scripts
   script.
     var competitionId = "#{id}"
     var survId = "#{survId}"
-  script(src="/javascripts/survey/edit.js")
-  script(src='/components/quill/index.js')
-  script(src='/components/ngQuill/src/ng-quill.js')
-  script(src='/components/quill-image-resize-module/image-resize.min.js')
-  script(src='/components/quill-image-drop-and-paste/dist/quill-image-drop-and-paste.min.js')
-  script(src="/components/bootstrap-fileinput/js/fileinput.min.js")
-  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js")
-  script(src="/components/bootstrap-fileinput/js/locales/ja.js")
+  script(src="/javascripts/survey/edit.js?v=" + assetVersion)
+  script(src='/components/quill/index.js?v=' + assetVersion)
+  script(src='/components/ngQuill/src/ng-quill.js?v=' + assetVersion)
+  script(src='/components/quill-image-resize-module/image-resize.min.js?v=' + assetVersion)
+  script(src='/components/quill-image-drop-and-paste/dist/quill-image-drop-and-paste.min.js?v=' + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/fileinput.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/locales/ja.js?v=" + assetVersion)
 
 
 append css
@@ -38,7 +38,7 @@ append css
             margin-right: .1rem;
         }
 
-        .dropdown-menu {
+        .ui-select-bootstrap .dropdown-menu {
             display: initial;
         }
         .btn-default {
@@ -52,192 +52,198 @@ append css
             outline: 0;
             background-color: initial;
         }
-    link(rel='stylesheet', href='/components/quill.snow/index.css')
-    link(href="/components/bootstrap-fileinput/css/fileinput.min.css" rel="stylesheet")
+    link(rel='stylesheet', href='/components/quill.snow/index.css?v=' + assetVersion)
+    link(href="/components/bootstrap-fileinput/css/fileinput.min.css?v=" + assetVersion rel="stylesheet")
 
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/' + competition._id)") {{competition.name}}
+  a.breadcrumb-item(ng-click="go('/admin/' + competition._id + '/survey')") Survey
+  span.breadcrumb-item.active Editor
 
-  
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/' + competition._id)") {{competition.name}}
-    a.breadcrumb-item(ng-click="go('/admin/' + competition._id + '/survey')") Survey
-    span.breadcrumb-item.active Editor
+block hero_title
+  | {{competition.name}}
 
+block hero_subtitle
+  | {{"survey.editor" | translate}}
 
-block content
+block hero_actions
+  button.btn-action-icon(type='button' ng-click='export()' uib-tooltip='{{"document.editor.export" | translate}}' tooltip-placement="bottom")
+    i.fas.fa-file-export
+  button.btn-hero-action(type='button' ng-click='save()')
+    i.fas.fa-save
+    | {{"common.save" | translate}}
+
+block main_content
+  .modern-card.mb-4
+    .modern-card-header
+      i.fas.fa-file-import.mr-2
+      | Import
+    .modern-card-body
+      input#select(type='file' name='select')
+
+  //- Survey settings
+  .modern-card.mb-4
+    .modern-card-header
+      i.fas.fa-globe.mr-2
+      | {{"survey.settings" | translate}}
+    .modern-card-body
+      ul.nav.nav-tabs.mb-3(role='tablist')
+        li.nav-item(ng-repeat="i18n in surv.i18n track by $index" style="margin-right:5px;")
+          a.nav-link(ng-class="{active:$first}" ng-attr-id="{{'common_lang'+ $index + '_tab'}}" data-toggle='pill' ng-href="{{'#common_lang'+ $index}}" role='tab' aria-controls="{{'common_lang'+ $index}}" aria-selected='true') {{"language." + i18n.language | translate}}
+      .tab-content
+        .tab-pane.fade.show(ng-class="{active:$first}" ng-attr-id="{{'common_lang'+ $index}}" role='tabpanel' aria-labelledby="'common_lang'+ $index + '_tab'" ng-repeat="i18n in surv.i18n track by $index")
+          .form-group
+            label.small.text-muted {{"survey.name" | translate}}
+            input.form-control(type='text' ng-model='i18n.name')
+          .form-group
+            label.small.text-muted {{"survey.description" | translate}}
+            ng-quill-editor(ng-model="i18n.topDescription")
+          .form-group.mb-0
+            label.small.text-muted {{"survey.myDescription" | translate}}
+            input.form-control(type='text' ng-model='i18n.myDescription')
+
   .row
-    .col-md-1 
-    .col-md-10
-      .row
-        .col-md-8
-            h1 {{"survey.editor" | translate}}
-            h3(style="margin-left:40px;") {{competition.name}}
-        .col-md-4(style="text-align:right;")
-            button.btn.btn-lg.btn-outline-success(type='button', ng-click='save()')
-                i.fas.fa-save &nbsp;
-                | {{"common.save" | translate}}
-      .row
-        .col-md-6
-            button.btn.btn-dark(type='button', ng-click='export()')
-                i.fas.fa-file-export &nbsp;
-                | {{"document.editor.export" | translate}}
-        .col-md-6
-            input#select(type='file', name='select')
+    .col-lg-6
+      .modern-card.mb-4
+        .modern-card-header
+          i.fas.fa-sliders-h.mr-2
+          | {{"survey.settings" | translate}}
+        .modern-card-body
+          .row
+            .col-md-6
+              .form-group
+                label.small.text-muted {{"survey.openDate" | translate}}
+                input.form-control(type='datetime-local' step=1 ng-model='surv.open')
+            .col-md-6
+              .form-group
+                label.small.text-muted {{"survey.deadline" | translate}}
+                input.form-control(type='datetime-local' step=1 ng-model='surv.deadline' ng-style="{backgroundColor: deadlineColour(surv.deadline)}")
+          .form-group
+            label.small.text-muted {{"survey.open" | translate}}
+            select.custom-select(ng-model='surv.enable' ng-style="{backgroundColor: surv.enable ? '#bcffbc':'#ffcccc'}")
+              option(ng-value='true') {{"common.enable" | translate}}
+              option(ng-value='false') {{"common.disable" | translate}}
+          .form-group
+            label.small.text-muted {{"survey.reSubmit" | translate}}
+            p.small.text-muted.mb-1 {{"survey.reSubmitDesc" | translate}}
+            select.custom-select(ng-model='surv.reEdit' ng-style="{backgroundColor: surv.reEdit ? '#bcffbc':'#ffcccc'}")
+              option(ng-value='true') {{"common.enable" | translate}}
+              option(ng-value='false') {{"common.disable" | translate}}
+          label.small.text-muted {{"document.editor.language" | translate}}
+          .input-group.mb-2(ng-repeat="lang in surv.languages")
+            .input-group-prepend
+              span.input-group-text {{"language." + lang.language | translate}}
+            select.custom-select(ng-model='lang.enable' ng-style="{backgroundColor: lang.enable ? '#bcffbc':'#ffcccc'}")
+              option(ng-value='true') {{"common.enable" | translate}}
+              option(ng-value='false') {{"common.disable" | translate}}
+    .col-lg-6
+      .modern-card.mb-4
+        .modern-card-header
+          i.fas.fa-users.mr-2
+          | {{"survey.distribution" | translate}}
+        .modern-card-body
+          .form-group
+            label.small.text-muted {{"survey.league" | translate}}
+            ui-select(multiple='' ng-model='surv.league' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;')
+              ui-select-match(placeholder='Select league...') {{$item.name}}
+              ui-select-choices(repeat='league.id as league in leagues | filter: {id: $select.search}')
+                div(ng-bind-html='league.name')
+          .text-center.text-muted.font-weight-bold.my-2 OR
+          .form-group.mb-0
+            label.small.text-muted {{"survey.team" | translate}}
+            ui-select(multiple='' ng-model='surv.team' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;')
+              ui-select-match(placeholder='Select team...') {{$item.code}} {{$item.name}}
+              ui-select-choices(repeat='team._id as team in teams | filter: {_id: $select.search}')
+                span {{team.teamCode}} {{team.name}}
 
-      hr
-      .row
-        .col-md-12
-            h2 {{"survey.settings" | translate}}
-            ul.nav.nav-tabs.mb-3(role='tablist')
-                i.fas.fa-globe.fa-2x &nbsp;
-                li.nav-item(ng-repeat="i18n in surv.i18n track by $index", style="margin-right:5px;")
-                    a.nav-link(ng-class="{active:$first}",ng-attr-id="{{'common_lang'+ $index + '_tab'}}", data-toggle='pill',ng-href="{{'#common_lang'+ $index}}", role='tab', aria-controls="{{'common_lang'+ $index}}", aria-selected='true') {{"language." + i18n.language | translate}}
-            .tab-content
-                .tab-pane.fade.show(ng-class="{active:$first}", ng-attr-id="{{'common_lang'+ $index}}", role='tabpanel', aria-labelledby="'common_lang'+ $index + '_tab'", ng-repeat="i18n in surv.i18n track by $index")
-                    .input-group(style="margin 0 auto;")
-                        .input-group-prepend
-                            span.input-group-text {{"survey.name" | translate}}
-                        input.form-control(type='text', ng-model='i18n.name')
-                    br
-                    span(style="margin-top:10px;") {{"survey.description" | translate}}
-                    ng-quill-editor(ng-model="i18n.topDescription")
-                    br
-                    .input-group(style="margin 0 auto;")
-                        .input-group-prepend
-                            span.input-group-text {{"survey.myDescription" | translate}}
-                        input.form-control(type='text', ng-model='i18n.myDescription')
-           
-            hr
-            h5 {{"survey.openDate" | translate}}
-            input.form-control(type='datetime-local', step=1, ng-model='surv.open')
-            br
-            h5 {{"survey.deadline" | translate}}
-            input.form-control(type='datetime-local', step=1, ng-model='surv.deadline', ng-style="{backgroundColor: deadlineColour(surv.deadline)}")
-            br
-            h5 {{"survey.open" | translate}}
-            select.custom-select(ng-model='surv.enable', ng-style="{backgroundColor: surv.enable ? '#bcffbc':'#ffcccc'}")
-                option(ng-value='true') {{"common.enable" | translate}}
-                option(ng-value='false') {{"common.disable" | translate}}  
-            br
-            br
-            h5 {{"survey.reSubmit" | translate}}
-            p {{"survey.reSubmitDesc" | translate}}
-            select.custom-select(ng-model='surv.reEdit', ng-style="{backgroundColor: surv.reEdit ? '#bcffbc':'#ffcccc'}")
-                option(ng-value='true') {{"common.enable" | translate}}
-                option(ng-value='false') {{"common.disable" | translate}}  
-            br
-            br
-            h5 {{"survey.distribution" | translate}}
-            .row(style="background-color:#ecf0f1;padding:20px 0;margin-left:10px;border-radius: 10px;")
-                .col-md-5
-                    h6(style="text-align:center;") {{"survey.league" | translate}}
-                    ui-select(multiple='' ng-model='surv.league' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;')
-                        ui-select-match(placeholder='Select league...') {{$item.name}}
-                        ui-select-choices(repeat='league.id as league in leagues | filter: {id: $select.search}')
-                            div(ng-bind-html='league.name')
-                .col-md-1.d-flex.align-items-center.text-center
-                    h5 OR
+  //- Questions
+  h5.section-heading.mt-2
+    i.fas.fa-list-ol
+    | {{"document.editor.question" | translate}}
+  .text-center.mb-3
+    button.btn.btn-sm.btn-outline-success(type='button' ng-click="addQuestion(0,'input')")
+      i.fas.fa-plus.mr-1
+      | {{"document.editor.addQuestion" | translate}}
+
+  div(ng-repeat="question in surv.questions track by $index")
+    .modern-card.mb-3
+      .modern-card-header
+        .d-flex.justify-content-between.align-items-center.w-100
+          .d-flex.align-items-center(style="gap: 0.75rem;")
+            span.badge.badge-pill.badge-dark Q{{$index + 1}}
+            select.custom-select.custom-select-sm(ng-model='question.type' style="width: auto;")
+              option(value='explanationOnly') {{"document.editor.explanationOnly" | translate}}
+              option(value='input') {{"document.editor.writing" | translate}}
+              option(value='select') {{"document.editor.select" | translate}}
+              option(value='scale') {{"document.editor.scale" | translate}}
+              option(value='file') {{"document.editor.file" | translate}}
+              option(value='teamVote') {{"document.editor.teamVote" | translate}}
+          .btn-table-group
+            .btn-table-action(ng-click='$first || moveQuestion($index,$index-1)' ng-style="$first && {'opacity': 0.3}")
+              i.fas.fa-chevron-up
+            .btn-table-action(ng-click='$last || moveQuestion($index,$index+1)' ng-style="$last && {'opacity': 0.3}")
+              i.fas.fa-chevron-down
+            .btn-table-action.danger(ng-click='removeQuestion($index)')
+              i.fas.fa-trash-alt
+      .modern-card-body
+        ul.nav.nav-tabs.mb-3(role='tablist')
+          li.nav-item(ng-repeat="i18n in question.i18n track by $index" style="margin-right:5px;")
+            a.nav-link(ng-class="{active:$first}" ng-attr-id="{{'question' + $parent.$index + '_lang'+ $index + '_tab'}}" data-toggle='pill' ng-href="{{'#question' + $parent.$index + '_lang'+ $index}}" role='tab' aria-controls="{{'question' + $parent.$index + '_lang'+ $index}}" aria-selected='true') {{"language." + i18n.language | translate}}
+        .tab-content
+          .tab-pane.fade.show(ng-class="{active:$first}" ng-attr-id="{{'question' + $parent.$index + '_lang'+ $index}}" role='tabpanel' aria-labelledby="'question' + $parent.$index + '_lang'+ $index + '_tab'" ng-repeat="i18n in question.i18n track by $index")
+            .form-group
+              label.small.text-muted {{"document.editor.questionTitle" | translate}}
+              input.form-control(type='text' ng-model='i18n.title')
+            .form-group
+              label.small.text-muted {{"document.editor.description" | translate}}
+              ng-quill-editor(ng-model="i18n.description")
+            div(ng-if="question.type == 'select'")
+              label.small.text-muted {{"document.editor.choices" | translate}}
+              div(ng-repeat="option in i18n.options track by $index" style="margin-bottom: 0.5rem;")
+                .input-group
+                  .input-group-prepend
+                    span.input-group-text {{option.value}}
+                  input.form-control(type='text' ng-model='option.text')
+                  .input-group-append
+                    button.btn.btn-outline-secondary(type='button' ng-disabled="$first" ng-click='moveOption($parent.$parent.$parent.$index, $parent.$index, $index, $index-1)')
+                      i.fas.fa-chevron-up
+                    button.btn.btn-outline-secondary(type='button' ng-disabled="$last" ng-click='moveOption($parent.$parent.$parent.$index, $parent.$index, $index, $index+1)')
+                      i.fas.fa-chevron-down
+                    button.btn.btn-outline-danger(type='button' ng-click='removeOption($parent.$parent.$parent.$index, $parent.$index, $index)')
+                      i.fas.fa-trash-alt
+              .text-center.my-2
+                button.btn.btn-sm.btn-outline-success(type='button' ng-click='addOption($parent.$parent.$index, $parent.$index)')
+                  i.fas.fa-plus
+            div(ng-if="question.type == 'scale'")
+              label.small.text-muted {{"document.editor.scale" | translate}}
+              .row
                 .col-md-6
-                    h6(style="text-align:center;") {{"survey.team" | translate}}
-                    ui-select(multiple='' ng-model='surv.team' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;')
-                        ui-select-match(placeholder='Select team...') {{$item.code}} {{$item.name}}
-                        ui-select-choices(repeat='team._id as team in teams | filter: {_id: $select.search}')
-                            span {{team.teamCode}} {{team.name}}
-            br
-            h5 {{"document.editor.language" | translate}}
-            .input-group(style="width:100%;margin: 10px auto;", ng-repeat="lang in surv.languages")
-                .input-group-prepend
-                    span.input-group-text {{"language." + lang.language | translate}}
-                select.custom-select(ng-model='lang.enable', ng-style="{backgroundColor: lang.enable ? '#bcffbc':'#ffcccc'}")
-                    option(ng-value='true') {{"common.enable" | translate}}
-                    option(ng-value='false') {{"common.disable" | translate}}
-      hr
-      .row
-        .col-md-12
-            h3 {{"document.editor.question" | translate}}
-                div(style="text-align : center;")
-                    .btn-group                                
-                        button.btn.btn-success(type='button',ng-click="addQuestion(0,'input')")
-                            i.fas.fa-plus &nbsp;{{"document.editor.addQuestion" | translate}}
-                div(ng-repeat="question in surv.questions track by $index")
-                    hr
-                    .row(style="margin:10px 0px;")
-                        .col-md-8
-                            .input-group(style="width:100%;margin 0 auto;")
-                                .input-group-prepend
-                                    span.input-group-text {{"document.editor.questionType" | translate}}:
-                                select.custom-select(ng-model='question.type')
-                                    option(value='explanationOnly') {{"document.editor.explanationOnly" | translate}}
-                                    option(value='input') {{"document.editor.writing" | translate}}
-                                    option(value='select') {{"document.editor.select" | translate}}
-                                    option(value='scale') {{"document.editor.scale" | translate}}
-                                    option(value='file') {{"document.editor.file" | translate}}
-                                    option(value='teamVote') {{"document.editor.teamVote" | translate}}
-                        .col-md-4
-                            button.btn.btn-danger(type='button', ng-click='removeQuestion($index)', style="float:right;margin-left:5px;")
-                                i.fas.fa-trash-alt
-                            button.btn.btn-info(type='button', ng-click='moveQuestion($index,$index+1)', ng-disabled="$last", style="float:right;margin-left:5px;")
-                                i.fas.fa-chevron-down
-                            button.btn.btn-info(type='button', ng-click='moveQuestion($index,$index-1)', ng-disabled="$first", style="float:right;margin-left:5px;")
-                                i.fas.fa-chevron-up
-                    ul.nav.nav-tabs.mb-3(role='tablist', style="font-size:15px")
-                        i.fas.fa-globe.fa-2x &nbsp;
-                        li.nav-item(ng-repeat="i18n in question.i18n track by $index", style="margin-right:5px;")
-                            a.nav-link(ng-class="{active:$first}",ng-attr-id="{{'question' + $parent.$index + '_lang'+ $index + '_tab'}}", data-toggle='pill',ng-href="{{'#question' + $parent.$index + '_lang'+ $index}}", role='tab', aria-controls="{{'question' + $parent.$index + '_lang'+ $index}}", aria-selected='true') {{"language." + i18n.language | translate}}
-                    .tab-content
-                        .tab-pane.fade.show(ng-class="{active:$first}", ng-attr-id="{{'question' + $parent.$index + '_lang'+ $index}}", role='tabpanel', aria-labelledby="'question' + $parent.$index + '_lang'+ $index + '_tab'", ng-repeat="i18n in question.i18n track by $index")
-                            .input-group(style="margin 0 auto;")
-                                .input-group-prepend
-                                    span.input-group-text {{"document.editor.questionTitle" | translate}}
-                                input.form-control(type='text', ng-model='i18n.title')
-                            h5(style="margin-top:10px;") {{"document.editor.description" | translate}}
-                            ng-quill-editor(ng-model="i18n.description")
-                            div(ng-if="question.type == 'select'", style="margin-top:10px;")
-                                h5 {{"document.editor.choices" | translate}}
-                                
-                                div(ng-repeat="option in i18n.options track by $index", style="margin:10px 0px;")
-                                    .input-group(style="margin 0 auto;")
-                                        .input-group-prepend
-                                            span.input-group-text {{option.value}}
-                                        input.form-control(type='text', ng-model='option.text' style="width:950px;")
-                                        .input-group-append
-                                            button.btn.btn-info(type='button', ng-disabled="$first", ng-click='moveOption($parent.$parent.$parent.$index, $parent.$index, $index, $index-1)')
-                                                i.fas.fa-chevron-up
-                                        .input-group-append
-                                            button.btn.btn-info(type='button', ng-disabled="$last", ng-click='moveOption($parent.$parent.$parent.$index, $parent.$index, $index, $index+1)')
-                                                i.fas.fa-chevron-down
-                                        .input-group-append
-                                            button.btn.btn-danger(type='button', ng-click='removeOption($parent.$parent.$parent.$index, $parent.$index, $index)')
-                                                i.fas.fa-trash-alt
-                                div(style="text-align : center;margin:20px;")
-                                    button.btn.btn-success(type='button', ng-click='addOption($parent.$parent.$index, $parent.$index)')
-                                        i.fas.fa-plus
-                            div(ng-if="question.type == 'scale'", style="margin-top:10px;")
-                                h5 {{"document.editor.scale" | translate}}
-                                .input-group(style="margin: 5px auto;")
-                                    .input-group-prepend
-                                        span.input-group-text {{"document.editor.least" | translate}}
-                                    input.form-control(type='number', ng-model='question.scale.least')
-                                .input-group(style="margin: 5px auto;")
-                                    .input-group-prepend
-                                        span.input-group-text {{"document.editor.most" | translate}}
-                                    input.form-control(type='number', ng-model='question.scale.most')
-                            div(ng-if="question.type == 'teamVote'", style="margin-top:10px;")
-                                h5 {{"document.editor.teamVote" | translate}}
-                                h6(style="text-align:center;") {{"survey.league" | translate}}
-                                ui-select(multiple='' ng-model='question.teamVote.league' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;')
-                                    ui-select-match(placeholder='Select league...') {{$item.name}}
-                                    ui-select-choices(repeat='league.id as league in leagues | filter: {id: $select.search}')
-                                        div(ng-bind-html='league.name')
+                  .input-group.mb-2
+                    .input-group-prepend
+                      span.input-group-text {{"document.editor.least" | translate}}
+                    input.form-control(type='number' ng-model='question.scale.least')
+                .col-md-6
+                  .input-group.mb-2
+                    .input-group-prepend
+                      span.input-group-text {{"document.editor.most" | translate}}
+                    input.form-control(type='number' ng-model='question.scale.most')
+            div(ng-if="question.type == 'teamVote'")
+              label.small.text-muted {{"document.editor.teamVote" | translate}} - {{"survey.league" | translate}}
+              ui-select(multiple='' ng-model='question.teamVote.league' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;')
+                ui-select-match(placeholder='Select league...') {{$item.name}}
+                ui-select-choices(repeat='league.id as league in leagues | filter: {id: $select.search}')
+                  div(ng-bind-html='league.name')
 
-                    hr(ng-style="{borderTop: '3px solid #' + block.color}")
-                    div(style="text-align : center;")
-                        .btn-group    
-                            button.btn.btn-success(type='button',ng-click="addQuestion($index+1,'input')")
-                                i.fas.fa-plus &nbsp;{{"document.editor.addQuestion" | translate}}                         
-                                    
-            .text-center(style="margin:20px 0;")
-                button.btn.btn-lg.btn-outline-success(type='button', ng-click='save()')
-                    i.fas.fa-save &nbsp;
-                    | {{"common.save" | translate}}
+    .text-center.mb-3
+      button.btn.btn-sm.btn-outline-success(type='button' ng-click="addQuestion($index+1,'input')")
+        i.fas.fa-plus.mr-1
+        | {{"document.editor.addQuestion" | translate}}
+
+  .text-center.mb-4
+    button.btn.btn-premium-primary(type='button' ng-click='save()')
+      i.fas.fa-save.mr-2
+      | {{"common.save" | translate}}

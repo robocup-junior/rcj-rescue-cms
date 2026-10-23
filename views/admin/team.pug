@@ -1,140 +1,167 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'TeamAdmin'
+  - var heroContainerStyle = 'max-width: 1600px;'
+  - var contentContainerStyle = 'max-width: 1600px;'
 
 append scripts
   script.
     var competitionId = "#{id}"
-  script(src='/javascripts/admin/team.js')
+  script(src='/javascripts/admin/team.js?v=' + assetVersion)
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-    span.breadcrumb-item.active Teams
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+  span.breadcrumb-item.active Teams
 
+block hero_title
+  | {{competition.name}}
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{competition.name}} - {{"admin.teams.title" | translate}}
-      p(ng-if="showMd5" ng-bind="md5(competition.name)")
-      table.custom
-        thead
+block hero_subtitle
+  | {{"admin.teams.title" | translate}}
+
+block hero_actions
+  a.btn-create-map(ng-href='/admin/{{competitionId}}/teams/bulk')
+    i.fas.fa-upload
+    span {{"admin.teams.bulk" | translate}}
+
+block main_content
+  .modern-card.mb-4
+    .modern-card-header(ng-click="showAddTeam = !showAddTeam" style="cursor: pointer;")
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-plus-circle.mr-2
+          | {{"admin.teams.add" | translate}}
+        i.fas.text-muted(ng-class="showAddTeam ? 'fa-chevron-up' : 'fa-chevron-down'")
+    .modern-card-body(ng-show="showAddTeam")
+      .row
+        .col-md-2
+          .form-group
+            label {{"common.teamCode" | translate}}
+            input.form-control(ng-model='teamCode')
+        .col-md-3
+          .form-group
+            label {{"common.team" | translate}}
+            input.form-control(ng-model='teamName')
+        .col-md-2
+          .form-group
+            label {{"common.region" | translate}}
+            input.form-control(ng-model='country')
+        .col-md-2
+          .form-group
+            label {{"common.league" | translate}}
+            select.form-control(ng-model='teamLeague' ng-options='league for league in leagues')
+        .col-md-3
+          .form-group
+            label {{"common.email" | translate}}
+            .d-flex.align-items-center.mb-2(ng-repeat="em in email track by $index")
+              input.form-control(type="email" ng-model='email[$index]')
+              button.btn.btn-sm.btn-outline-success.ml-2(type='button' ng-click='addEmail()' ng-if="$last && email[$index]")
+                i.fas.fa-plus
+      .text-right
+        button.btn.btn-premium-primary(ng-click='addTeam()')
+          i.fas.fa-plus.mr-2
+          | {{"admin.teams.add" | translate}}
+
+  .modern-card
+    .modern-card-header
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-users.mr-2
+          | {{"admin.teams.title" | translate}}
+        .btn-table-group
+          .btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'common.refine' | translate}}")
+            i.fas.fa-filter
+          .btn-table-action(ng-click="selectAll()" uib-tooltip="{{'common.selectAll' | translate}}")
+            i.fas.fa-check-double
+          .btn-table-action.danger(ng-click="removeSelectedTeam()" uib-tooltip="{{'common.delS' | translate}}")
+            i.fas.fa-trash-alt
+
+    .filter-collapse(ng-show="showFilter" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 1.5rem;")
+      .row
+        .col-md-3
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"common.teamCode" | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-hashtag
+            input.form-control.form-control-sm(type='text' placeholder='{{"common.teamCode" | translate}}' ng-model='refineCode')
+        .col-md-3
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"common.team" | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-users
+            input.form-control.form-control-sm(type='text' placeholder='{{"common.team" | translate}}' ng-model='refineName')
+        .col-md-3
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"common.region" | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-globe-asia
+            input.form-control.form-control-sm(type='text' placeholder='{{"common.region" | translate}}' ng-model='refineRegion')
+        .col-md-3
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"common.league" | translate}}
+          .filter-container
+            span.filter-badge(ng-repeat='(key, value) in Rleagues track by key' ng-class="{'active': Rleagues[key]}" ng-click="Rleagues[key] = !Rleagues[key]") {{key}}
+
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
+          thead
             tr
-                th {{"common.teamCode" | translate}}
-                th {{"common.team" | translate}}
-                th {{"common.region" | translate}}
-                th {{"common.league" | translate}}
-                th {{"common.email" | translate}}
-                th {{"common.operation" | translate}}
-        tbody
-            tr
-                td
-                  input(ng-model='teamCode' style="width:100%;")
-                td
-                  input(ng-model='teamName' style="width:100%;")
-                td
-                  input(ng-model='country' style="width:100%;")
-                td
-                  select(ng-model='teamLeague' ng-options='league for league in leagues' style="width:100%;")
-                td
-                  div(ng-repeat="em in email track by $index")
-                    input(type="email", ng-model='email[$index]' style="width:100%;margin-bottom:5px;")
-                    button.btn.btn-success(type='button', ng-click='addEmail()', style="padding:0px 6px;margin: 5px;", ng-if="$last && email[$index]")
-                        i.fas.fa-plus
-                td
-                    button(ng-click='addTeam()' style="width:100%;") {{"admin.teams.add" | translate}}
-      a(ng-href='/admin/{{competitionId}}/teams/bulk') {{"admin.teams.bulk" | translate}}
-      br
-      br
-      .refine
-        .card.border-dark.mb-3(style='width:100%;')
-          .card-header.bg-transparent.border-dark.fa-2x
-            i.fas.fa-search(aria-hidden='true') &nbsp;
-            | {{'common.refine' | translate}}
-          .card-body.text-dark
-            h6.card-title {{"common.teamCode" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-list-ol(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.teamCode" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineCode')
-            hr
-            h6.card-title {{"common.team" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-users(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.team" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineName')
-            hr
-            h6.card-title {{"common.region" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-globe-asia(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.region" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineRegion')
-            hr
-            h6.card-title {{"common.league" | translate}}
-            span(ng-repeat='(key, value) in Rleagues track by key')
-              input(type='checkbox' ng-model='Rleagues[key]' id="checkL_{{key}}")
-              label.checkbox(for="checkL_{{key}}") {{key}}
-            
-      
-      div
-          button(ng-click="selectAll()" class='btn btn-primary' style="margin: 5px 5px 5px 5px;") {{"common.selectAll" | translate}}
-          button(ng-click="removeSelectedTeam()" class='btn btn-danger' style="margin: 5px 5px 5px 5px;") {{"common.delS" | translate}}
-          button(ng-click="reset_kiosk()" class='btn btn-secondary' style="margin: 5px 5px 5px 5px; text-align:right;") Reset Kiosk
-      table.custom(style="margin-bottom:60px;")
-        thead
-            tr
-              th
+              th(style="width: 50px;")
               th {{"common.teamCode" | translate}}
               th {{"common.team" | translate}}
               th {{"common.region" | translate}}
               th {{"common.league" | translate}}
               th {{"common.email" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
+              th(style="width: 140px;") {{"common.operation" | translate}}
+          tbody
             tr(ng-repeat='team in teams | filter:list_filter | orderBy:"[teamCode, name]"')
               td
-                input(type='checkbox' ng-model='team.checked' style="display:initial;")
+                .custom-checkbox(ng-class="{'checked': team.checked}" ng-click="team.checked = !team.checked")
+                  i.fas.fa-check(ng-if="team.checked")
               td
-                span(ng-bind='team.teamCode', ng-hide="team.edit")
-                input(ng-model="team.teamCode", ng-show="team.edit",style="width:100%;")
+                span(ng-bind='team.teamCode' ng-hide="team.edit")
+                input.form-control.form-control-sm(ng-model="team.teamCode" ng-show="team.edit")
               td
-                span(ng-bind='team.name', ng-hide="team.edit")
-                input(ng-model="team.name", ng-show="team.edit",style="width:100%;")
+                span.font-weight-bold(ng-bind='team.name' ng-hide="team.edit")
+                input.form-control.form-control-sm(ng-model="team.name" ng-show="team.edit")
               td
-                span(ng-bind='team.country', ng-hide="team.edit")
-                input(ng-model="team.country", ng-show="team.edit",style="width:100%;")
+                span(ng-bind='team.country' ng-hide="team.edit")
+                input.form-control.form-control-sm(ng-model="team.country" ng-show="team.edit")
               td
-                span(ng-bind='team.league', ng-hide="team.edit")
-                select(ng-model='team.league' ng-options='league for league in leagues' style="width:100%;", ng-show="team.edit")
+                span(ng-bind='team.league' ng-hide="team.edit")
+                select.form-control.form-control-sm(ng-model='team.league' ng-options='league for league in leagues' ng-show="team.edit")
               td
-                div(ng-repeat="em in team.email track by $index", ng-hide="team.edit")
-                  span(ng-bind="em")
-                  br
-                did(ng-show="team.edit")
-                  div(ng-repeat="em in team.email track by $index")
-                    input(type="email", ng-model='team.email[$index]' style="width:100%;margin-bottom:5px;")
-                    button.btn.btn-success(type='button', ng-click='addTeamEmail(team)', style="padding:0px 6px;margin: 5px;", ng-if="$last && team.email[$index]")
-                        i.fas.fa-plus
-                  input(type="email", ng-model='team.email[0]' style="width:100%;margin-bottom:5px;", ng-if="team.email.length == 0")
-              td
-                div(ng-hide="team.edit")
-                  .dropdown
-                  button#dropdownMenu.btn.btn-secondary.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false') {{"common.action" | translate}}
-                  .dropdown-menu(aria-labelledby='dropdownMenu')
-                      button.dropdown-item(type='button' ng-click="edit(team)") {{"common.edit" | translate}}
-                      button.dropdown-item(type='button' ng-click="goMyPage(team)") {{"common.mypage" | translate}}
-                      .dropdown-divider
-                      button.dropdown-item(type='button' ng-click='removeTeam(team._id)') {{"common.delete" | translate}}
-                
+                div(ng-repeat="em in team.email track by $index" ng-hide="team.edit")
+                  span.small(ng-bind="em")
                 div(ng-show="team.edit")
-                  button(ng-click="update(team)" class='btn btn-success') {{"common.save" | translate}}
-
-      
+                  .d-flex.align-items-center.mb-1(ng-repeat="em in team.email track by $index")
+                    input.form-control.form-control-sm(type="email" ng-model='team.email[$index]')
+                    button.btn.btn-sm.btn-outline-success.ml-2(type='button' ng-click='addTeamEmail(team)' ng-if="$last && team.email[$index]")
+                      i.fas.fa-plus
+                  input.form-control.form-control-sm(type="email" ng-model='team.email[0]' ng-if="team.email.length == 0")
+              td
+                .dropdown(ng-hide="team.edit")
+                  button.btn.btn-sm.btn-light.dropdown-toggle(type='button' data-toggle='dropdown') {{"common.action" | translate}}
+                  .dropdown-menu.dropdown-menu-right
+                    button.dropdown-item(type='button' ng-click="edit(team)")
+                      i.fas.fa-edit.mr-2
+                      | {{"common.edit" | translate}}
+                    button.dropdown-item(type='button' ng-click="goMyPage(team)")
+                      i.fas.fa-user.mr-2
+                      | {{"common.mypage" | translate}}
+                    .dropdown-divider
+                    button.dropdown-item.text-danger(type='button' ng-click='removeTeam(team._id)')
+                      i.fas.fa-trash-alt.mr-2
+                      | {{"common.delete" | translate}}
+                button.btn.btn-sm.btn-success(ng-show="team.edit" ng-click="update(team)")
+                  i.fas.fa-save.mr-1
+                  | {{"common.save" | translate}}

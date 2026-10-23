@@ -1,0 +1,59 @@
+<div class="modal-header sim-modal-header">
+  <h3 class="modal-title"><i class="fas fa-bullseye"></i>{{"admin.mazeMapEditor.cognitiveTargetSettings" | translate}} - {{label}}</h3>
+</div>
+<div class="modal-body sim-modal-body">
+  <div class="sim-ct-summary">
+    <img class="sim-ct-preview" ng-src="{{previewImage()}}" alt="Cognitive Target Preview">
+    <div class="sim-ct-summary-body">
+      <div class="sim-ct-status" ng-style="{'border-color': typeColor(), 'background-color': typeBgColor()}">
+        <span class="sim-ct-letter" ng-style="{'background-color': typeColor()}">{{typeLetter() || '?'}}</span>
+        <div>
+          <div class="sim-ct-status-label">{{"admin.simMapEditor.ctType" | translate}}</div>
+          <div class="sim-ct-status-value">{{typeName() | translate}}</div>
+        </div>
+      </div>
+      <table class="sim-victim-table sim-ct-sum">
+        <tr>
+          <th ng-repeat="i in ringNumbers">{{"admin.mazeMapEditor.ring" | translate}}{{i}}</th>
+          <th class="sim-ct-sum-head">{{"admin.simMapEditor.ctSum" | translate}}</th>
+        </tr>
+        <tr>
+          <td ng-repeat="i in ringNumbers">{{colorValue(rings[i - 1])}}</td>
+          <td class="sim-ct-sum-total">{{total()}}</td>
+        </tr>
+      </table>
+      <div class="sim-ct-rule">
+        <i class="fas fa-info-circle mr-1"></i>{{"admin.simMapEditor.ctRule" | translate}}
+      </div>
+    </div>
+  </div>
+
+  <div class="sim-ct-rings-header">
+    <div class="sim-modal-section-title mb-0">{{"admin.mazeMapEditor.ringConfiguration" | translate}}</div>
+    <div class="sim-ct-auto">
+      <span class="sim-ct-auto-label"><i class="fas fa-magic mr-1"></i>{{"admin.mazeMapEditor.autoConfigure" | translate}}</span>
+      <button type="button" class="sim-ct-auto-btn" ng-repeat="t in types" ng-click="autoSet(t)" ng-style="{'background-color': t.color}">
+        <i class="fas fa-dice mr-1"></i>{{t.letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}
+      </button>
+    </div>
+  </div>
+
+  <table class="sim-victim-table sim-ct-rings">
+    <tr>
+      <th>{{"admin.mazeMapEditor.ring" | translate}}</th>
+      <th>{{"admin.mazeMapEditor.color" | translate}}</th>
+    </tr>
+    <tr ng-repeat="i in ringNumbers">
+      <th>{{i}}</th>
+      <td>
+        <div class="btn-group btn-group-sm" role="group">
+          <button type="button" class="btn" ng-repeat="c in colors" ng-class="rings[i - 1] === c.code ? c.active : c.idle" ng-click="setRing(i - 1, c.code)">{{c.name | translate}}</button>
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
+<div class="modal-footer sim-modal-footer">
+  <button class="btn btn-outline-secondary" type="button" ng-click="cancel()">{{"common.cancel" | translate}}</button>
+  <button class="btn btn-primary" type="button" ng-click="ok()"><i class="fas fa-check mr-1"></i>OK</button>
+</div>

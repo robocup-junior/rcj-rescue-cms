@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'ReservationAdmin'
@@ -8,16 +8,16 @@ append scripts
   script.
     var competitionId = "#{id}"
     var resvId = "#{resvId}"
-  script(src='/javascripts/reservation/admin.js')
-  script(src='/components/quill/index.js')
-  script(src='/components/ngQuill/src/ng-quill.js')
-  script(src='/components/quill-image-resize-module/image-resize.min.js')
-  script(src='/components/quill-image-drop-and-paste/dist/quill-image-drop-and-paste.min.js')
+  script(src='/javascripts/reservation/admin.js?v=' + assetVersion)
+  script(src='/components/quill/index.js?v=' + assetVersion)
+  script(src='/components/ngQuill/src/ng-quill.js?v=' + assetVersion)
+  script(src='/components/quill-image-resize-module/image-resize.min.js?v=' + assetVersion)
+  script(src='/components/quill-image-drop-and-paste/dist/quill-image-drop-and-paste.min.js?v=' + assetVersion)
 
 append css 
-  link(rel='stylesheet', href='/components/quill.snow/index.css')
+  link(rel='stylesheet', href='/components/quill.snow/index.css?v=' + assetVersion)
   style.
-    .dropdown-menu {
+    .ui-select-bootstrap .dropdown-menu {
       display: initial;
     }
     .btn-default {
@@ -32,50 +32,53 @@ append css
         background-color: initial;
     }
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId + '/reservation')") Reservation
-    span.breadcrumb-item.active Admin
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId + '/reservation')") Reservation
+  span.breadcrumb-item.active Admin
 
+block hero_title_container
+  h1.hero-title(ng-bind-html="langContent(resv.i18n, 'name')")
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1(ng-bind-html="langContent(resv.i18n, 'name')")
-      p(ng-bind-html="langContent(resv.i18n, 'description')")
-      hr
-      table.custom(style="margin-bottom:20px;")
-        thead
+block hero_subtitle
+  span(ng-bind-html="langContent(resv.i18n, 'description')")
+
+block main_content
+  .modern-card
+    .modern-card-header
+      i.fas.fa-list.mr-2
+      | {{"reservation.status" | translate}}
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
+          thead
             tr
               th {{"reservation.start" | translate}}
               th {{"reservation.duration" | translate}}
               th {{"reservation.total" | translate}}
               th {{"reservation.remaining" | translate}}
               th {{"reservation.status" | translate}}
-              th {{"reservation.edit" | translate}}
-              
-        tbody
+              th(style="width: 90px;") {{"reservation.edit" | translate}}
+          tbody
             tr(ng-repeat="slot in resv.slot | orderBy: 'start' track by $index")
-              td(ng-bind="time(slot.start)")
+              td.text-nowrap(ng-bind="time(slot.start)")
               td(ng-bind='slot.duration')
               td(ng-bind='slot.max')
-              td(ng-bind='slot.max - slot.booked.length', ng-style="{color: (slot.max - slot.booked.length)>=0 ? 'black' : 'red'}")
-              td(ng-if="!slot.edit") 
-                div(ng-repeat="team in slot.booked")
-                  span.badge.badge-dark(style="font-size:14px;margin:2px;") {{team.teamCode}} {{team.name}}
+              td.font-weight-bold(ng-bind='slot.max - slot.booked.length' ng-class="(slot.max - slot.booked.length) >= 0 ? '' : 'text-danger'")
+              td(ng-if="!slot.edit")
+                span.badge.badge-pill.badge-dark.mr-1.mb-1(ng-repeat="team in slot.booked" style="font-size: 0.8rem;") {{team.teamCode}} {{team.name}}
               td(ng-if="slot.edit")
                 ui-select(multiple='' ng-model='slot.booked' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;')
                   ui-select-match(placeholder='Select team...') {{$item.code}} {{$item.name}}
                   ui-select-choices(repeat='team in teams | filter: teamFilter')
                     span {{team.teamCode}} {{team.name}}
-              td(ng-if="!slot.edit") 
-                button.btn.btn-dark.btn-sm(type='button', ng-click='edit(slot)')
-                  i.fas.fa-edit
-              td(ng-if="slot.edit")
-                 button.btn.btn-success.btn-sm(type='button', ng-click='save(slot)')
-                  i.fas.fa-save
-
-      br
+              td
+                .btn-table-group
+                  .btn-table-action.primary(ng-if="!slot.edit" ng-click='edit(slot)' uib-tooltip='{{"common.edit" | translate}}')
+                    i.fas.fa-edit
+                  .btn-table-action(ng-if="slot.edit" ng-click='save(slot)' style="color: #10b981;" uib-tooltip='{{"common.save" | translate}}')
+                    i.fas.fa-save

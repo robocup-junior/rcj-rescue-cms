@@ -1,4 +1,4 @@
-var app = angular.module("MazeCompetition", ['ngTouch','pascalprecht.translate', 'ngCookies','ngSanitize']);
+var app = angular.module("MazeCompetition", ['ngTouch','pascalprecht.translate', 'ngCookies','ngSanitize', 'ui.bootstrap']);
 var socket;
 app.controller("MazeCompetitionController", ['$scope', '$http', '$translate', function ($scope, $http, $translate) {
         $scope.competitionId = competitionId
@@ -50,6 +50,13 @@ app.controller("MazeCompetitionController", ['$scope', '$http', '$translate', fu
         $http.get("/api/competitions/leagues/" + league).then(function (response) {
             $scope.league = response.data
         })
+
+        // Manual input is not prepared for the Entry 2026 rules
+        $scope.manualInputEnabled = function () {
+            if (!$scope.competition) return false;
+            const leagueSetting = $scope.competition.leagues.find((l) => l.league == league);
+            return !!leagueSetting && leagueSetting.rule != '2026E';
+        };
 
         // launch socket.io
         socket = io(window.location.origin, {
