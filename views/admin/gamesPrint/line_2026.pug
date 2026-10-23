@@ -76,7 +76,7 @@ html(ng-app="RunAdmin")
                   button(onclick="window.print();" class='btn btn-info' style="text-align:right;")
                     i.fas.fa-print &nbsp;{{"common.print" | translate}}
             .card-body.text-dark
-              div(ng-if="displayMode == DisplayMode.LIST")
+              div(ng-show="displayMode == DisplayMode.LIST")
                 p Please use Google Chrome to print this page.
                 hr
                 h6.card-title {{'line.competition.refine.round' | translate}}
@@ -84,14 +84,14 @@ html(ng-app="RunAdmin")
                   input(type='checkbox' ng-model='Rrounds[key]' id="checkR_{{key}}")
                   label.checkbox(for="checkR_{{key}}") {{key}}
 
-              div(ng-if="displayMode == DisplayMode.RANKING")
+              div(ng-show="displayMode == DisplayMode.RANKING")
                 hr
                 h6.card-title Rounds (Normalization Groups)
                 span(ng-repeat='(key, value) in Rgroups track by key')
                   input(type='checkbox' ng-model='Rgroups[key]' id="checkG_{{key}}")
                   label.checkbox(for="checkG_{{key}}") Group {{key}}
 
-              div(ng-if="displayMode == DisplayMode.LIST")
+              div(ng-show="displayMode == DisplayMode.LIST")
                 hr
                 h6.card-title {{'line.competition.refine.field' | translate}}
                 span(ng-repeat='(key, value) in Rfields track by key')
@@ -105,7 +105,7 @@ html(ng-app="RunAdmin")
                       i.fas.fa-users(aria-hidden='true')
                   input.form-control(type='text', placeholder='Team name', aria-label='Username', aria-describedby='basic-addon1' ng-model='teamName')
 
-              div(ng-if="displayMode == DisplayMode.RANKING")
+              div(ng-show="displayMode == DisplayMode.RANKING")
                 hr
                 h6.card-title Ranking Table Settings
 
@@ -135,7 +135,7 @@ html(ng-app="RunAdmin")
                       i.fas.fa-pen(aria-hidden='true')
                   input.form-control(type='text', placeholder='', aria-label='comment', aria-describedby='basic-addon1' ng-model='ranking.comment')
 
-              div(ng-if="displayMode == DisplayMode.LIST")
+              div(ng-show="displayMode == DisplayMode.LIST")
                 hr
                 h6.card-title Display items
                 br
