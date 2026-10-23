@@ -92,13 +92,13 @@ const lineRunSchema = new Schema({
 lineRunSchema.pre('save', function (next) {
   const self = this
 
-  self.populate('map', "name finished", function (err, populatedRun) {
+  lineMapdb.lineMap.findById(self.map, "name finished", function (err, dbMap) {
     if (err) {
       return next(err)
-    } else if (!populatedRun.map) {
+    } else if (!dbMap) {
       return next(new Error('No map with that id!'))
-    } else if (!populatedRun.map.finished) {
-      err = new Error('Map "' + populatedRun.map.name + '" is not finished!')
+    } else if (!dbMap.finished) {
+      err = new Error('Map "' + dbMap.name + '" is not finished!')
       return next(err)
     } else {
       if (self.isNew) {
