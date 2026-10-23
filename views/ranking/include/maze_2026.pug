@@ -5,17 +5,6 @@ center
 div(ng-if="ranking!=null")
   .row#rank
     .col-lg-12
-      unless printSheet
-        .ranking-header
-          .ranking-title
-            h3 {{competition.name}}
-            h2 [{{'maze.score.rank' | translate}}] {{league.name}}
-
-          img.competition-logo(
-            ng-if="competition.logo"
-            ng-src="{{competition.logo}}"
-            alt="Competition Logo"
-          )
       table.custom(style="overflow: scroll;")
         thead
           if printSheet

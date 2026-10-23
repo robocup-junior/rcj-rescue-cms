@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'SimulationScore'
@@ -8,27 +8,42 @@ append scripts
   script.
     var competitionId = "#{competitionId}"
     var leagueId = "#{leagueId}"
-  
-  link(rel='stylesheet', href='/stylesheets/ranking.css?v=' + assetVersion)
-  script(src='/javascripts/ranking/simulation_2026.js?v=' + assetVersion)
 
+  script(src='/javascripts/ranking/simulation_2026.js?v=' + assetVersion)
   script(src = '/components/datatables/media/js/jquery.dataTables.min.js')
   script(src = '/components/angular-datatables/demo/src/archives/dist/angular-datatables.min.js')
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click='go("/home/"+ competitionId )') {{competition.name}}
-    a.breadcrumb-item(ng-click="go('/simulation/'+ competitionId + '/' + league.league)") {{league.name}}
-    span.breadcrumb-item.active {{'common.rank' | translate}}
+block page_css
+  link(rel='stylesheet', href='/stylesheets/ranking.css?v=' + assetVersion)
 
-block content
-  .public-ranking
-    button.btn.btn-light.btn-sm.ranking-back(type='button', ng-click="go('/simulation/' + competitionId + '/' + league.league)")
-      i.fas.fa-arrow-left(aria-hidden='true')
-      |  {{'common.back' | translate}}
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/home/' + competitionId)") {{competition.name}}
+  a.breadcrumb-item(ng-click="go('/simulation/' + competitionId + '/' + league.league)") {{league.name}}
+  span.breadcrumb-item.active {{'common.rank' | translate}}
 
-    .alert.alert-success(role='alert' ng-if="competition.message")
-      h4.alert-heading {{'common.message' | translate}}
-      p(ng-bind-html="competition.message")
+block hero_title
+  | {{competition.name}}
 
-    include include/simulation_2026
+block hero_subtitle
+  | [{{league.name}}] {{'common.rank' | translate}}
+
+block hero_actions
+  button.btn-action-icon(type='button' ng-click="go('/simulation/' + competitionId + '/' + league.league)" uib-tooltip="{{'common.back' | translate}}" tooltip-placement="bottom")
+    i.fas.fa-arrow-left
+
+block main_content
+  .message-box-modern(ng-if="competition.message")
+    h4
+      i.fas.fa-bullhorn.mr-2
+      | {{'common.message' | translate}}
+    p(ng-bind-html="competition.message" style="margin:0;")
+
+  .modern-card.public-ranking
+    .modern-card-header
+      i.fas.fa-trophy
+      | [{{league.name}}] {{'common.rank' | translate}}
+    .modern-card-body
+      include include/simulation_2026
