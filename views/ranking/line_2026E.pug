@@ -3,6 +3,7 @@ extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'LineScore'
+  - var contentContainerStyle = 'max-width: 100%;'
 
 append scripts
   script.
@@ -29,10 +30,6 @@ block hero_title
 
 block hero_subtitle
   | [{{league.name}}] {{'common.rank' | translate}}
-
-block hero_actions
-  button.btn-action-icon(type='button' ng-click="go('/line/' + competitionId + '/' + league.league)" uib-tooltip="{{'common.back' | translate}}" tooltip-placement="bottom")
-    i.fas.fa-arrow-left
 
 block main_content
   .message-box-modern(ng-if="competition.message")
