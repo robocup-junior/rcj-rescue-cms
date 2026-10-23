@@ -713,6 +713,20 @@
             "title": "Map",
             "create": "Create a new map"
         },
+        "gamesPrint": {
+            "back": "Back to runs",
+            "filter": "Filter",
+            "columns": "Columns",
+            "all": "All",
+            "none": "None",
+            "sheetTitle": "Sheet title",
+            "runs": "runs",
+            "excel": "Excel",
+            "chromeHint": "Please use Google Chrome to print this page.",
+            "runList": "Run List",
+            "originalScore": "Original score",
+            "adjustment": "Adjustment"
+        },
         "lineRun": {
             "title": "Games",
             "add": "Add run",

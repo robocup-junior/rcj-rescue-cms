@@ -1,0 +1,84 @@
+//- Toolbar, config panel and sheet header shared by the games print pages.
+//- Expects `columns` ([{model, label}]) from the including page.
+- var allColumns = columns.map((c) => `${c.model} = true`).join('; ')
+- var noColumns = columns.map((c) => `${c.model} = false`).join('; ')
+
+.print-toolbar.no_print
+  .print-toolbar-title
+    a.btn.btn-light.btn-sm(href=`/admin/${competitionId}/${leagueId}/games` title="{{'admin.gamesPrint.back' | translate}}")
+      i.fas.fa-arrow-left
+    div
+      .print-toolbar-sub {{competition.name}}
+      h1 {{league.name}}
+  .print-toolbar-actions
+    span.run-count
+      b {{(runs | filter:list_filter).length || 0}}
+      |  {{'admin.gamesPrint.runs' | translate}}
+    button.btn.btn-outline-success(type='button' ng-click='exportXlsx()' ng-disabled='!runs')
+      i.fas.fa-file-excel
+      |  {{'admin.gamesPrint.excel' | translate}}
+    button.btn.btn-primary(type='button' onclick='window.print()' title="{{'admin.gamesPrint.chromeHint' | translate}}")
+      i.fas.fa-print
+      |  {{"common.print" | translate}}
+
+.config-panel.no_print
+  section.config-section
+    h2.config-section-title
+      i.fas.fa-filter
+      |  {{'admin.gamesPrint.filter' | translate}}
+    .config-field
+      .config-label {{'line.competition.refine.round' | translate}}
+      .chips
+        button.chip(type='button' ng-class='{active: noneSelected(Rrounds)}' ng-click='clearSelection(Rrounds)') {{'admin.gamesPrint.all' | translate}}
+        button.chip(type='button' ng-repeat='(key, value) in Rrounds track by key' ng-class='{active: Rrounds[key]}' ng-click='Rrounds[key] = !Rrounds[key]')
+          i.fas.fa-check
+          | {{key}}
+    .config-field
+      .config-label {{'line.competition.refine.field' | translate}}
+      .chips
+        button.chip(type='button' ng-class='{active: noneSelected(Rfields)}' ng-click='clearSelection(Rfields)') {{'admin.gamesPrint.all' | translate}}
+        button.chip(type='button' ng-repeat='(key, value) in Rfields track by key' ng-class='{active: Rfields[key]}' ng-click='Rfields[key] = !Rfields[key]')
+          i.fas.fa-check
+          | {{key}}
+    .config-field
+      .config-label {{'line.competition.refine.team' | translate}}
+      .input-group.input-group-sm.team-search
+        .input-group-prepend
+          span.input-group-text
+            i.fas.fa-search
+        input.form-control(type='search' placeholder="{{'line.competition.refine.team' | translate}}" aria-label="{{'line.competition.refine.team' | translate}}" ng-model='teamName')
+
+  section.config-section
+    h2.config-section-title
+      i.fas.fa-columns
+      |  {{'admin.gamesPrint.columns' | translate}}
+      span.config-section-actions
+        button.btn.btn-link.btn-sm(type='button' ng-click=allColumns) {{'admin.gamesPrint.all' | translate}}
+        button.btn.btn-link.btn-sm(type='button' ng-click=noColumns) {{'admin.gamesPrint.none' | translate}}
+    .config-field
+      .chips
+        each c in columns
+          button.chip(type='button' ng-class=`{active: ${c.model}}` ng-click=`${c.model} = !${c.model}`)
+            i.fas.fa-check
+            = c.label
+    .config-field
+      .config-label {{'admin.gamesPrint.sheetTitle' | translate}}
+      input.form-control.form-control-sm(type='text' aria-label="{{'admin.gamesPrint.sheetTitle' | translate}}" ng-model='list.comment')
+
+//- Sheet header, used as the first thead row so print repeats it on every page
+mixin sheetHeader
+  tr.sheet-header-row
+    th(colspan='100')
+      .ranking-header
+        .ranking-title
+          h3 {{competition.name}}
+          h2 {{list.comment}}
+        img.competition-logo(
+          ng-if="competition.logo"
+          ng-src="{{competition.logo}}"
+          alt="Competition Logo"
+        )
+
+.loader.no_print
+  img(src="/images/loader2.gif")
+  p {{'common.loading' | translate}}

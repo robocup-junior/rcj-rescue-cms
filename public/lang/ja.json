@@ -713,6 +713,20 @@
             "title": "マップ管理",
             "create": "新しいマップを作る"
         },
+        "gamesPrint": {
+            "back": "競技一覧に戻る",
+            "filter": "絞り込み",
+            "columns": "表示項目",
+            "all": "すべて",
+            "none": "なし",
+            "sheetTitle": "シートのタイトル",
+            "runs": "件",
+            "excel": "Excel",
+            "chromeHint": "印刷には Google Chrome をご利用ください。",
+            "runList": "競技一覧",
+            "originalScore": "元の得点",
+            "adjustment": "調整"
+        },
         "lineRun": {
             "title": "競技管理",
             "add": "競技を追加",
