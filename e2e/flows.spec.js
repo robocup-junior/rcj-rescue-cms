@@ -81,3 +81,16 @@ test.describe('judging a maze run', () => {
     expect(run.LoPs).toBe(1);
   });
 });
+
+test.describe('line run view', () => {
+  test('the bar stays at the top and shows the score once the summary has scrolled away', async ({ page }) => {
+    await open(page, `/line/view/${ids.finishedRuns.Line}`);
+    const stats = page.locator('.rv-topbar-stats');
+    await expect(stats).toBeHidden();
+
+    await page.mouse.wheel(0, 1500);
+    await expect(stats).toBeVisible();
+    const bar = await page.locator('.rv-topbar').boundingBox();
+    expect(bar.y).toBe(0);
+  });
+});

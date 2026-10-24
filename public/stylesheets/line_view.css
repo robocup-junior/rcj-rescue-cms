@@ -19,6 +19,9 @@
   color: var(--rv-text);
   font-family: 'Outfit', sans-serif;
   padding-top: 0;
+  /* style.css hides the body's overflow, which makes the body a scroll box of its own and
+     keeps the sticky bar from sticking; html still stops sideways scrolling */
+  overflow: visible;
 }
 
 /* ---- Top bar ---- */
