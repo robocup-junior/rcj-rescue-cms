@@ -1639,7 +1639,9 @@
         },
         "inspection": {
             "do": "検査実施",
-            "cancel": "検査キャンセル"
+            "cancel": "検査キャンセル",
+            "noPhoto": "写真はまだありません",
+            "notInspected": "未検査"
         }
     },
     "mail": {

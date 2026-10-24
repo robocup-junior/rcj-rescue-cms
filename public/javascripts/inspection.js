@@ -74,6 +74,13 @@ app.controller("InspectionController", ['$scope', '$http', 'Upload', '$timeout',
     $scope.teamPhoto = {fileName: "teamPhoto"};
     $scope.robotPhoto = {fileName: "robotPhoto"};
 
+    // Called from the photo <img> onload/onerror to switch between the photo and the placeholder
+    $scope.photoLoaded = function (name, loaded) {
+        $scope.$applyAsync(function () {
+            $scope[name].loaded = loaded;
+        });
+    };
+
     $scope.uploadFiles = function(question, file, errFiles) {
         question.f = file;
         question.errFile = errFiles && errFiles[0];

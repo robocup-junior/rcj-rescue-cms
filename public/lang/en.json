@@ -1645,7 +1645,9 @@
         },
         "inspection": {
             "do": "Inspections carried out",
-            "cancel": "Inspection cancellation"
+            "cancel": "Inspection cancellation",
+            "noPhoto": "No photo yet",
+            "notInspected": "Not inspected"
         }
     },
     "mail": {
