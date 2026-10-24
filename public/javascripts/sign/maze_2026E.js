@@ -803,24 +803,32 @@ window.onload = function () {
 };
 
 function tile_size() {
+    // Same sizing as the judge page: scale the map from its top-left corner and center it in the column
     try {
         var mapTable = $('#mapTable');
+        var mapTopLeft = $('#mapTopLeft');
 
-        let areaTopLeftX = document.getElementById("mapTopLeft").getBoundingClientRect().left + window.pageXOffset;
+        let areaWidth = mapTopLeft.width();
+        let areaTopLeftY = mapTopLeft.offset().top;
+        let tableWidth = mapTable.outerWidth();
+        let tableHeight = mapTable.outerHeight();
+        if (!areaWidth || !tableWidth) throw new Error('Map is not rendered yet');
 
-        let scaleX = (window.innerWidth - areaTopLeftX - 10) / mapTable.width();
-        let scaleY = (window.innerHeight - 200) / mapTable.height();
-        let scale = Math.min(scaleX, scaleY);
+        let scaleX = (areaWidth - 10) / tableWidth;
+        let scaleY = (window.innerHeight - 200) / tableHeight;
+        // Below the md breakpoint the map column is stacked under the side panel, so fit to width only
+        let stacked = window.matchMedia('(max-width: 767.98px)').matches;
+        let scale = (stacked || scaleY <= 0) ? scaleX : Math.min(scaleX, scaleY);
 
-        if (scaleX > scaleY) {
-            $('#wrapTile').css('transform-origin', 'top center');
-        } else {
-            $('#wrapTile').css('transform-origin', 'top left');
-        }
-
-        $('#wrapTile').css('transform', `scale(${scale})`);
-        $('.tilearea').css('height', mapTable.height() * scale + 120);
+        $('#wrapTile').css({
+            'width': tableWidth + 'px',
+            'transform-origin': 'top left',
+            'transform': `scale(${scale})`,
+            'margin-left': Math.max(0, (areaWidth - tableWidth * scale) / 2) + 'px'
+        });
+        $('.tilearea').css('height', tableHeight * scale + 120);
     } catch (e) {
-        $timeout(tile_size, 500);
+        // Outside the controller, so there is no $timeout here
+        setTimeout(tile_size, 500);
     }
 }
