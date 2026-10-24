@@ -83,6 +83,9 @@ exports.ensureLoginApi = function ensureLogin(req, res, next) {
 exports.ensureAdmin = function ensureAdmin(req, res, next) {
   if (req.user && req.user.admin === true) {
     next();
+  } else if (req.isAuthenticated()) {
+    // Sending a logged-in user to /login would bounce straight back here
+    res.redirect('/home/access_denied');
   } else {
     now_access = req.originalUrl;
     res.redirect('/login?page=' + now_access);
@@ -101,6 +104,9 @@ exports.ensureAdminApi = function ensureAdminApi(req, res, next) {
 exports.ensureSuper = function ensureSuper(req, res, next) {
   if (req.user && req.user.superDuperAdmin === true) {
     next();
+  } else if (req.isAuthenticated()) {
+    // Sending a logged-in user to /login would bounce straight back here
+    res.redirect('/home/access_denied');
   } else {
     now_access = req.originalUrl;
     res.redirect('/login?page=' + now_access);
