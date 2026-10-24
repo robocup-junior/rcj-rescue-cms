@@ -880,6 +880,15 @@ app.directive('tile', function () {
                     return "";
             }
 
+            // Scoring status of the items on the tile alone, leaving out the checkpoint (run view map)
+            $scope.tileItemStatus = function (tile) {
+                if (!tile || tile.index.length == 0) return;
+                var max = $scope.tileMaxPoint(tile);
+                if (max == 0) return;
+                var points = $scope.tilePoint(tile);
+                return points == max ? 'done' : points > 0 ? 'halfdone' : 'undone';
+            }
+
             // Points the tile gives when every item on it is scored (counted as in tilePoint)
             $scope.tileMaxPoint = function (tile) {
                 var points = { gap: 10, intersection: 10, obstacle: 20, speedbump: 10, ramp: 10, seesaw: 20 };

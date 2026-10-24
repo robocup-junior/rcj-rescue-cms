@@ -480,23 +480,32 @@
 
 /* Checkpoint tiles: an orange ring round the status frame and the top left corner folded
    over in orange with the number - a shape no other badge on the map has */
-.rv-tile-frame.is-cp { box-shadow: 0 0 0 3px #f97316; }
+.rv-tile-cp-ring {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  box-shadow: 0 0 0 3px #f97316;
+  pointer-events: none;
+}
 
 .rv-tile-cp {
   position: absolute;
   left: 0;
   top: 0;
   z-index: 5;
-  width: 48%;
-  height: 48%;
-  padding: 4% 0 0 5%;
+  width: 62%;
+  height: 62%;
+  padding: 5% 0 0 6%;
   background: #f97316;
   clip-path: polygon(0 0, 100% 0, 0 100%);
   color: #fff;
-  font-size: max(10px, 17cqw);
+  font-size: max(10px, 16cqw);
   font-weight: 800;
   line-height: 1;
+  white-space: nowrap;
 }
+
+.rv-tile-cp i { margin-right: 0.15em; font-size: 0.6em; vertical-align: 0.15em; }
 
 .rv-tile-points small { font-size: 0.75em; font-weight: 700; opacity: 0.85; }
 .rv-tile-points.is-done { background: #059669; }
