@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'TeamHome'
@@ -9,104 +9,132 @@ append scripts
     var competitionId = "#{id}"
   script(src='/javascripts/team_home.js?v=' + assetVersion)
 
+block page_css
+  style.
+    .team-table td { vertical-align:middle; }
+    .team-table .team-code { font-weight:700; color:#64748b; }
+    .team-table .team-name { font-weight:700; color:#1e293b; }
+    .league-badge { display:inline-block; padding:0.2rem 0.7rem; border-radius:2rem; font-size:0.78rem; font-weight:700; color:#334155; }
+    .inspected-mark { font-size:1.15rem; }
+    .inspected-mark.ok { color:#10b981; }
+    .inspected-mark.ng { color:#ef4444; }
+    .team-count { margin-left:0.75rem; font-size:0.8rem; font-weight:700; color:#94a3b8; }
+    .filter-panel { background:#f8fafc; border-bottom:1px solid #f1f5f9; padding:1.5rem; }
+    .filter-panel h6 { font-weight:700; font-size:0.75rem; color:#64748b; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.5rem; }
+    .team-actions { display:flex; flex-wrap:nowrap; justify-content:flex-end; gap:0.5rem; }
+    .btn-team-action { display:inline-flex; align-items:center; gap:0.45rem; min-height:40px; padding:0.45rem 0.9rem; border-radius:10px; font-size:0.85rem; font-weight:700; border:2px solid transparent; cursor:pointer; white-space:nowrap; transition:background-color 0.15s ease; }
+    .btn-team-action:focus-visible { outline:3px solid rgba(59,130,246,0.45); outline-offset:2px; }
+    .btn-team-inspection { background:#fffbeb; color:#b45309; border-color:#fde68a; }
+    .btn-team-inspection:hover { background:#fef3c7; }
+    .btn-team-document { background:#eff6ff; color:#2563eb; border-color:#bfdbfe; }
+    .btn-team-document:hover { background:#dbeafe; }
+    .btn-team-review { background:#f5f3ff; color:#6d28d9; border-color:#ddd6fe; }
+    .btn-team-review:hover { background:#ede9fe; }
+    .btn-team-result { background:#f0fdf4; color:#047857; border-color:#bbf7d0; }
+    .btn-team-result:hover { background:#dcfce7; }
+    .loader-modern { display:flex; flex-direction:column; align-items:center; padding:3rem; color:#94a3b8; }
+    @media (max-width:768px) {
+      .team-table thead { display:none; }
+      .team-table, .team-table tbody, .team-table tr, .team-table td { display:block; width:100%; }
+      .team-table tr { margin-bottom:1rem; border-radius:1rem; box-shadow:0 4px 12px rgba(0,0,0,0.05); padding:1rem; border:1px solid #f1f5f9; }
+      .team-table.table-modern tbody td { border:none; border-radius:0; padding:0.45rem 0; border-bottom:1px solid #f8fafc; display:flex; justify-content:space-between; align-items:center; }
+      .team-table td::before { content:attr(data-content); font-weight:800; text-transform:uppercase; font-size:0.7rem; color:#94a3b8; margin-right:1rem; white-space:nowrap; }
+      .team-table.table-modern tbody td.team-actions-cell { display:block; border-bottom:none; padding-top:0.75rem; }
+      .team-table td.team-actions-cell::before { display:none; }
+      .team-actions { flex-wrap:wrap; justify-content:stretch; }
+      .team-actions .btn-team-action { flex:1 1 auto; justify-content:center; min-height:46px; }
+    }
 
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/home/' + competitionId)") {{competition.name}}
+  span.breadcrumb-item.active {{'team_home.title' | translate}}
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/home/' + competition._id)") {{competition.name}}
-    span.breadcrumb-item.active Teams
+block hero_title
+  | {{competition.name}}
 
+block hero_subtitle
+  | {{'team_home.title' | translate}}
 
+block main_content
+  .modern-card
+    .modern-card-header
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-users
+          | {{'team_home.title' | translate}}
+          span.team-count(ng-show="teams") {{(teams | filter:list_filter).length}} / {{teams.length}}
+        .btn-table-group
+          div.btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'common.refine' | translate}}" tooltip-placement="top" tooltip-append-to-body="true")
+            i.fas.fa-filter
 
-block content
-  .row
-    .col-12
-      h1 {{"team_home.title" | translate}} - {{competition.name}}
-      .refine
-        .card.border-dark.mb-3(style='width:100%;')
-          .card-header.bg-transparent.border-dark.fa-2x
-            i.fas.fa-search(aria-hidden='true') &nbsp;
-            | {{'common.refine' | translate}}
-          .card-body.text-dark
-            h6.card-title {{"common.teamCode" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-list-ol(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.teamCode" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineCode')
-            hr
-            h6.card-title {{"common.team" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-users(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.team" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineName')
-            hr
-            h6.card-title {{"common.region" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-globe-asia(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.region" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineRegion')
-            hr
-            h6.card-title {{"common.league" | translate}}
-            span(ng-repeat='(key, value) in Rleagues track by key')
-              input(type='checkbox' ng-model='Rleagues[key]' id="checkL_{{key}}")
-              label.checkbox(for="checkL_{{key}}") {{key}}
-            
-      
-      table.custom(style="margin-bottom:20px;" ng-if="!isSmartPhone()")
-        thead
+    .filter-panel(ng-show="showFilter")
+      .row
+        .col-md-4.mb-3
+          h6 {{'common.teamCode' | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-list-ol(aria-hidden='true')
+            input.form-control(type='text' placeholder="{{'common.teamCode' | translate}}" aria-label="{{'common.teamCode' | translate}}" ng-model='refineCode')
+        .col-md-4.mb-3
+          h6 {{'common.team' | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-users(aria-hidden='true')
+            input.form-control(type='text' placeholder="{{'common.team' | translate}}" aria-label="{{'common.team' | translate}}" ng-model='refineName')
+        .col-md-4.mb-3
+          h6 {{'common.region' | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-globe-asia(aria-hidden='true')
+            input.form-control(type='text' placeholder="{{'common.region' | translate}}" aria-label="{{'common.region' | translate}}" ng-model='refineRegion')
+      h6 {{'common.league' | translate}}
+      div
+        span.filter-badge(ng-repeat='(key, value) in Rleagues track by key' ng-class="{'active': Rleagues[key]}" ng-click="Rleagues[key] = !Rleagues[key]") {{key}}
+
+    .modern-card-body
+      .loader-modern(ng-show="teams == null")
+        img(src="/images/loader2.gif")
+        p {{'common.loading' | translate}}
+      .table-responsive(ng-show="teams != null")
+        table.table-modern.team-table
+          thead
             tr
-              th {{"common.teamCode" | translate}}
-              th {{"common.team" | translate}}
-              th {{"common.region" | translate}}
-              th {{"common.league" | translate}}
-              th {{"common.inspected" | translate}}
-              th {{'common.operation' | translate}}
-        tbody
+              th(style="width:11%") {{'common.teamCode' | translate}}
+              th(style="width:22%") {{'common.team' | translate}}
+              th(style="width:12%") {{'common.region' | translate}}
+              th(style="width:9%") {{'common.league' | translate}}
+              th(style="width:7%") {{'common.inspected' | translate}}
+              th
+          tbody
             tr(ng-repeat='team in teams | filter:list_filter | orderBy:"[teamCode, name]"')
-              td(ng-bind='team.teamCode')
-              td(ng-bind='team.name')
-              td(ng-bind='team.country')
-              td(ng-bind='team.league')
-              td
-                i(class="fa fa-2x fa-check" aria-hidden="true" style="color:#2ecc71;" ng-if="team.inspected")
-                i(class="fa fa-2x fa-times" aria-hidden="true" style="color:#e74c3c;" ng-if="!team.inspected")
-              td
-                if judge
-                  button.btn.btn-sm.btn-warning(type='button', ng-click="go('/document/inspection/' + team._id)", style="margin-right:5px;")
-                    i.fas.fa-ruler-combined &nbsp;
-                    | {{"common.inspection" | translate}}
-                button.btn.btn-sm.btn-info(type='button', ng-click="go('/document/public/' + team._id)", style="margin-right:5px;", ng-if="team.document.public")
-                  i.fas.fa-file-alt &nbsp;
-                  | {{"team_home.document" | translate}} 
-                if view
-                  button.btn.btn-sm.btn-success(type='button', ng-click="go('/document/reviewed/' + team._id + '?return=/home/' + team.competition + '/teams')", style="margin-right:5px;")
-                    i.fas.fa-file-alt &nbsp;
-                    | {{"team_home.result" | translate}} 
-
-      .card(style='width: 100%;margin-bottom:10px;' ng-repeat='team in teams | filter:list_filter | orderBy:"[teamCode, name]"'  ng-if="isSmartPhone()")
-        .card-body
-          h5.card-title {{team.teamCode}} {{team.name}}
-          h6.card-subtitle.mb-2.text-muted
-            span.badge(style="margin:0 5px 0 5px;color:#444;" ng-style="{backgroundColor: leagueColor(team.league)}") {{team.league}}
-            span.badge.badge-success(ng-if="team.inspected" style="margin:0 5px 0 5px;") {{"common.inspected" | translate}}&nbsp;
-              i(class="fa fa-check" aria-hidden="true" style="color:#fff;")
-            span.badge.badge-danger(ng-if="!team.inspected" style="margin:0 5px 0 5px;") {{"common.inspected" | translate}}&nbsp;
-              i(class="fa fa-times" aria-hidden="true" style="color:#fff;")
-            span(ng-show="team.country")
-              i.fas.fa-globe-asia &nbsp;
-              span {{team.country}}
-
-          button.btn.btn-sm.btn-outline-info(type='button', ng-click="go('/document/public/' + team._id)", style="margin:0 5px 5px 0;", ng-if="team.document.public")
-            i.fas.fa-file-alt &nbsp;
-            | {{"team_home.document" | translate}} 
-          if judge
-            button.btn.btn-sm.btn-outline-primary(type='button', ng-click="go('/document/review/' + team._id + '?return=/home/' + team.competition + '/teams')", style="margin:0 5px 5px 0;")
-              i.fas.fa-file-alt &nbsp;
-              | {{"team_home.review" | translate}} 
-          if view
-            button.btn.btn-sm.btn-outline-success(type='button', ng-click="go('/document/reviewed/' + team._id + '?return=/home/' + team.competition + '/teams')", style="margin:0 5px 5px 0;")
-              i.fas.fa-file-alt &nbsp;
-              | {{"team_home.result" | translate}} 
+              td.team-code(ng-bind='team.teamCode' data-content="{{'common.teamCode' | translate}}")
+              td.team-name(ng-bind='team.name' data-content="{{'common.team' | translate}}")
+              td(ng-bind='team.country' data-content="{{'common.region' | translate}}")
+              td(data-content="{{'common.league' | translate}}")
+                span.league-badge(ng-style="{backgroundColor: leagueColor(team.league)}") {{team.league}}
+              td(data-content="{{'common.inspected' | translate}}")
+                i.fas.fa-check-circle.inspected-mark.ok(ng-if="team.inspected" aria-label="{{'common.yes' | translate}}")
+                i.fas.fa-times-circle.inspected-mark.ng(ng-if="!team.inspected" aria-label="{{'common.no' | translate}}")
+              td.team-actions-cell
+                .team-actions
+                  if judge
+                    button.btn-team-action.btn-team-inspection(type='button' ng-click="go('/document/inspection/' + team._id)")
+                      i.fas.fa-ruler-combined
+                      | {{'common.inspection' | translate}}
+                  button.btn-team-action.btn-team-document(type='button' ng-click="go('/document/public/' + team._id)" ng-if="team.document.public")
+                    i.fas.fa-file-alt
+                    | {{'team_home.document' | translate}}
+                  if judge
+                    button.btn-team-action.btn-team-review(type='button' ng-click="go('/document/review/' + team._id + '?return=/home/' + team.competition + '/teams')")
+                      i.fas.fa-clipboard-check
+                      | {{'team_home.review' | translate}}
+                  if view
+                    button.btn-team-action.btn-team-result(type='button' ng-click="go('/document/reviewed/' + team._id + '?return=/home/' + team.competition + '/teams')")
+                      i.fas.fa-list-alt
+                      | {{'team_home.result' | translate}}
