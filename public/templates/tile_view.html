@@ -1,6 +1,7 @@
 <!-- A map tile on the run view page: the tile stays visible, its scoring status is a coloured frame
-     and a badge with the points scored out of the points possible (see line_view.css) -->
-<p class="text-right chnumtxt" style="font-size: 10px; color: #f39c12; z-index:2;position: relative; padding: 2 2 0 0;" >{{checkpointNumber(tile)}}</p>
+     and a badge in the top right corner with the points scored out of the points possible, like the
+     totals in the corners of the cards; checkpoints get the flag badge used elsewhere on the page,
+     top left (see line_view.css) -->
 
 <img ng-src="/images/tiles/{{tile.tileType.image}}"  class="rot{{tilerotate(tile.rot)}} tile-image" ng-class="{'drop-tile': isCheckPointTile(tile) || isStart(tile)}" ng-show="tile.tileType.image">
 <img ng-src="/images/tiles/ev-entrance.png"  class="rot{{evacTapeRot(tile)}} tile-image" ng-if="tile.evacEntrance>=0">
@@ -11,12 +12,14 @@
 <i class="fas fa-minus fa-fw tile-image tile-font-1-25" ng-show="tile.items.speedbumps>2" style="text-align:left; padding:20px 2px; color:#abb2b9; opacity:0.7;"></i>
 <i class="fas fa-minus fa-fw tile-image tile-font-1-25" ng-show="tile.items.speedbumps>3" style="text-align:left; padding:30px 2px; color:#abb2b9; opacity:0.7;"></i>
 <i class="fas fa-minus fa-fw tile-image tile-font-1-25" ng-show="tile.items.speedbumps>4" style="text-align:left; padding:40px 2px; color:#abb2b9; opacity:0.7;"></i>
-<i class="fas fa-cube fa-fw tile-image tile-font-1-25" ng-show="tile.items.obstacles>0" style="text-align:right; padding:1px 2px; color:#6e2c00; opacity:0.9;"></i>
-<i class="fas fa-mountain fa-fw tile-image tile-font-1-25" ng-show="tile.items.rampPoints" style="text-align:center; color:#d97706; opacity:0.9;"></i>
+<!-- Obstacles and ramps at the bottom here: the top corners hold the points and the checkpoint -->
+<i class="fas fa-cube fa-fw tile-image tile-font-1-25" ng-show="tile.items.obstacles>0" style="display:flex; align-items:flex-end; justify-content:flex-end; padding:2px 4px; color:#6e2c00; opacity:0.9;"></i>
+<i class="fas fa-mountain fa-fw tile-image tile-font-1-25" ng-show="tile.items.rampPoints" style="display:flex; align-items:flex-end; justify-content:center; padding-bottom:2px; color:#d97706; opacity:0.9;"></i>
 <i class="fas fa-angle-double-down fa-fw tile-image tile-font fa-3x" ng-class="rotateRamp(tile.levelUp)" ng-show="tile.levelUp" style="padding-top:4px; color:#10b981; opacity:0.7;"></i>
 <i class="fas fa-angle-double-down fa-fw tile-image tile-font fa-3x" ng-class="rotateRamp(tile.levelDown)" ng-show="tile.levelDown" style="padding-top:4px; color:#ef4444; opacity:0.7;"></i>
 <i class="far fa-play-circle fa-fw tile-image tile-font-1-25" ng-show="isStart(tile)" style="text-align:left; padding:1px 2px; color:#73e673; opacity:0.9;"></i>
 
+<span class="rv-tile-cp" ng-if="checkpointNumber(tile)"><i class="fas fa-flag"></i>{{checkpointNumber(tile)}}</span>
 <span class="rv-tile-frame" ng-if="tileStatus(tile)" ng-class="'is-' + tileStatus(tile)"></span>
 <span class="rv-tile-points" ng-if="tileStatus(tile) && !isStart(tile) && tilePoint(tile) != -1" ng-class="'is-' + tileStatus(tile)">
   <span ng-if="tileStatus(tile) == 'done'">+{{tilePoint(tile)}}</span>

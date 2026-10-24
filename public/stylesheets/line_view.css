@@ -471,7 +471,7 @@
 .rv-tile-points {
   position: absolute;
   right: 6%;
-  bottom: 6%;
+  top: 6%;
   z-index: 5;
   padding: 0.05em 0.4em;
   border-radius: 999px;
@@ -483,6 +483,27 @@
   font-variant-numeric: tabular-nums;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
 }
+
+.rv-tile-cp {
+  position: absolute;
+  left: 6%;
+  top: 6%;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2em;
+  padding: 0.05em 0.4em;
+  border-radius: 999px;
+  background: #ffedd5;
+  color: #c2410c;
+  font-size: max(9px, 15cqw);
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+}
+
+.rv-tile-cp i { font-size: 0.7em; }
 
 .rv-tile-points small { font-size: 0.75em; font-weight: 700; opacity: 0.85; }
 .rv-tile-points.is-done { background: #059669; }
