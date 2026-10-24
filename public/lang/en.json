@@ -377,7 +377,10 @@
             "checkpoint": "Checkpoint",
             "m_score": "Direction scored",
             "m_score_d": "Please tap the tile of the direction the team scored.",
-            "rescuedVictims": "Rescued Victims"
+            "rescuedVictims": "Rescued Victims",
+            "exitBase": "Base points",
+            "evacuationShort": "Evac Zone",
+            "perVictim": "/ victim"
         },
         "judge": {
             "before": "Before the start of the run record, please confirm that the following information is correct.",
