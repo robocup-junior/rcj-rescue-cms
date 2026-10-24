@@ -70,8 +70,9 @@ body {
   flex-grow: 1;
 }
 
+/* Use the full window width; pages that need a narrow column (forms) set contentContainerStyle */
 .maps-container {
-  max-width: 1200px;
+  max-width: none;
   margin: 0 auto;
   padding: 1rem 1.5rem 0;
 }
