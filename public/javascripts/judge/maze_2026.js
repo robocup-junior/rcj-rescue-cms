@@ -297,6 +297,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             length = response.data.length;
 
             for (let i = 0; i < response.data.cells.length; i++) {
+                // Walls have no tile
+                if (!response.data.cells[i].tile) continue;
                 if (!response.data.cells[i].tile.cognitiveTargets) response.data.cells[i].tile.cognitiveTargets = {};
                 if (response.data.cells[i].tile.victims.top == 'Cognitive' && !response.data.cells[i].tile.cognitiveTargets.top) response.data.cells[i].tile.cognitiveTargets.top = { rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' } };
                 if (response.data.cells[i].tile.victims.right == 'Cognitive' && !response.data.cells[i].tile.cognitiveTargets.right) response.data.cells[i].tile.cognitiveTargets.right = { rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' } };
