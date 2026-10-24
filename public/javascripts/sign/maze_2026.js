@@ -347,8 +347,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
     $scope.allItemScore = function () {
         let score = 0;
-        for (let x = 1; x <= width * 2; x += 2) {
-            for (let y = 1; y <= length * 2; y += 2) {
+        for (let x = 1; x <= $scope.width * 2; x += 2) {
+            for (let y = 1; y <= $scope.length * 2; y += 2) {
                 score += $scope.tilePoint(x, y, 0, true);
             }
         }
