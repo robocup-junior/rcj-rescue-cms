@@ -138,21 +138,26 @@ html(ng-app="ddApp")
                 i.fas.fa-undo
               button.rv-tool(type='button' title='+90°' ng-click='tileRot(90)')
                 i.fas.fa-redo
+          //- What the colours on the tiles mean
+          .rv-map-legend
+            span.rv-key.is-done {{'line.view.tileDone' | translate}}
+            span.rv-key.is-halfdone {{'line.view.tilePartial' | translate}}
+            span.rv-key.is-undone {{'line.view.tileNone' | translate}}
           .tilearea
             #wrapTile.mx-auto
               div(ng-repeat='r in range(length)', ng-if='sRotate==0', style='display: flex;')
                 div(style='text-align:center;')
                   .slot(ng-repeat='c in range(width)')
-                    tile(tile="mtiles[c+','+r+','+z]", ng-click='showElements(c,r,z)')
+                    tile(template='view' tile="mtiles[c+','+r+','+z]", ng-click='showElements(c,r,z)')
               div(ng-repeat='r in range(length)', ng-if='sRotate==180', style='display: flex;')
                 .slot(ng-repeat='c in range(width)')
-                  tile(tile="mtiles[width - c -1+','+(length - r -1)+','+z]", ng-click='showElements(width - c -1,length - r -1,z)')
+                  tile(template='view' tile="mtiles[width - c -1+','+(length - r -1)+','+z]", ng-click='showElements(width - c -1,length - r -1,z)')
               div(ng-repeat='r in range(width)', ng-if='sRotate==270', style='display: flex;')
                 .slot(ng-repeat='c in range(length)')
-                  tile(tile="mtiles[width - r -1+','+c+','+z]", ng-click='showElements(width-r-1,c,z)')
+                  tile(template='view' tile="mtiles[width - r -1+','+c+','+z]", ng-click='showElements(width-r-1,c,z)')
               div(ng-repeat='r in range(width)', ng-if='sRotate==90', style='display: flex;')
                 .slot(ng-repeat='c in range(length)')
-                  tile(tile="mtiles[r+','+ (length - c-1) +','+z]", ng-click='showElements(r,length-c-1,z)')
+                  tile(template='view' tile="mtiles[r+','+ (length - c-1) +','+z]", ng-click='showElements(r,length-c-1,z)')
 
       //- Checkpoints
       section.rv-card
@@ -295,3 +300,24 @@ html(ng-app="ddApp")
           bar.classList.toggle('show-stats', !entries[0].isIntersecting);
         }, { rootMargin: '-' + bar.offsetHeight + 'px 0px 0px 0px' }).observe(summary);
       })();
+
+      // View page only: start with the map turned the way it is drawn largest (0° or 90°).
+      // The rotation is set directly, because tileRot() would also save it in the cookie
+      // that the judge and sign pages read.
+      angular.element(document).ready(function () {
+        var scope = angular.element(document.body).scope();
+        var stop = scope.$watchGroup(['width', 'length'], function (size) {
+          if (!size[0] || !size[1]) return;
+          stop();
+          var area = document.querySelector('.tilearea');
+          var areaWidth = area.clientWidth - parseFloat(getComputedStyle(area).paddingLeft) * 2;
+          // Same space as tile_size() in sign/line_2026.js
+          var areaHeight = window.innerHeight - 140;
+          function tileSize(cols, rows) {
+            return Math.min((areaWidth - 2 * cols) / cols, areaHeight / rows);
+          }
+          scope.sRotate = tileSize(scope.length, scope.width) > tileSize(scope.width, scope.length) ? 90 : 0;
+          rotate = scope.sRotate;
+          setTimeout(tile_size, 0);
+        });
+      });

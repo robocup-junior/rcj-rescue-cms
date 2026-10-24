@@ -753,7 +753,10 @@ app.directive('tile', function () {
             tile: '='
         },
         restrict: 'E',
-        templateUrl: '/templates/tile.html',
+        // The run view page shows the tiles its own way (template="view")
+        templateUrl: function (element, attrs) {
+            return attrs.template == 'view' ? '/templates/tile_view.html' : '/templates/tile.html';
+        },
         link: function ($scope, element, attrs) {
             $scope.tilerotate = function (tilerot) {
                 if (!tilerot) return $scope.$parent.sRotate;
@@ -875,6 +878,19 @@ app.directive('tile', function () {
                     return "undone";
                 else
                     return "";
+            }
+
+            // Points the tile gives when every item on it is scored (counted as in tilePoint)
+            $scope.tileMaxPoint = function (tile) {
+                var points = { gap: 10, intersection: 10, obstacle: 20, speedbump: 10, ramp: 10, seesaw: 20 };
+                var max = 0;
+                for (var i = 0; i < tile.index.length; i++) {
+                    for (let item of $scope.$parent.stiles[tile.index[i]].scoredItems) {
+                        if (!points[item.item]) continue;
+                        max += points[item.item] * (item.item == 'gap' || item.item == 'speedbump' ? 1 : item.count);
+                    }
+                }
+                return max;
             }
 
             $scope.tilePoint = function (tile) {

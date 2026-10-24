@@ -439,6 +439,56 @@
   padding: 1rem;
 }
 
+.rv-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  padding: 0.6rem 1rem 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--rv-muted);
+}
+
+.rv-key { display: inline-flex; align-items: center; gap: 0.4rem; }
+.rv-key::before { content: ""; width: 14px; height: 14px; border-radius: 4px; border: 3px solid; }
+
+/* Scoring status of a tile: a frame and tint over the tile, and a badge with the points.
+   Green: every item scored, amber: some, red: none. */
+.run-view .slot { container-type: size; }
+
+.rv-tile-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border: 3px solid;
+  pointer-events: none;
+}
+
+.rv-key.is-done::before, .rv-tile-frame.is-done { border-color: #10b981; background: rgba(16, 185, 129, 0.12); }
+.rv-key.is-halfdone::before, .rv-tile-frame.is-halfdone { border-color: #f59e0b; background: rgba(245, 158, 11, 0.14); }
+.rv-key.is-undone::before, .rv-tile-frame.is-undone { border-color: #ef4444; background: rgba(239, 68, 68, 0.14); }
+
+.rv-tile-points {
+  position: absolute;
+  right: 6%;
+  bottom: 6%;
+  z-index: 5;
+  padding: 0.05em 0.4em;
+  border-radius: 999px;
+  color: #fff;
+  font-size: max(9px, 17cqw);
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
+}
+
+.rv-tile-points small { font-size: 0.75em; font-weight: 700; opacity: 0.85; }
+.rv-tile-points.is-done { background: #059669; }
+.rv-tile-points.is-halfdone { background: #d97706; }
+.rv-tile-points.is-undone { background: #dc2626; }
+
 /* ---- Checkpoints: the course from start to goal ----
    One grid for the whole track: row 1 dots and lines, row 2 labels and section details,
    row 3 points, so the same kind of value lines up across the course. */
