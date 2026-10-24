@@ -1,7 +1,7 @@
 <!-- A map tile on the run view page: the tile stays visible, its scoring status is a coloured frame
      and a badge in the top right corner with the points scored out of the points possible, like the
-     totals in the corners of the cards; checkpoints get the flag badge used elsewhere on the page,
-     top left (see line_view.css) -->
+     totals in the corners of the cards; checkpoints get an orange ring and a folded top left
+     corner with their number (see line_view.css) -->
 
 <img ng-src="/images/tiles/{{tile.tileType.image}}"  class="rot{{tilerotate(tile.rot)}} tile-image" ng-class="{'drop-tile': isCheckPointTile(tile) || isStart(tile)}" ng-show="tile.tileType.image">
 <img ng-src="/images/tiles/ev-entrance.png"  class="rot{{evacTapeRot(tile)}} tile-image" ng-if="tile.evacEntrance>=0">
@@ -19,7 +19,7 @@
 <i class="fas fa-angle-double-down fa-fw tile-image tile-font fa-3x" ng-class="rotateRamp(tile.levelDown)" ng-show="tile.levelDown" style="padding-top:4px; color:#ef4444; opacity:0.7;"></i>
 <i class="far fa-play-circle fa-fw tile-image tile-font-1-25" ng-show="isStart(tile)" style="text-align:left; padding:1px 2px; color:#73e673; opacity:0.9;"></i>
 
-<span class="rv-tile-cp" ng-if="checkpointNumber(tile)"><i class="fas fa-flag"></i>{{checkpointNumber(tile)}}</span>
+<span class="rv-tile-cp" ng-if="checkpointNumber(tile)">{{checkpointNumber(tile)}}</span>
 <span class="rv-tile-frame" ng-if="tileStatus(tile)" ng-class="['is-' + tileStatus(tile), {'is-cp': isCheckPointTile(tile)}]"></span>
 <span class="rv-tile-points" ng-if="tileStatus(tile) && !isStart(tile) && tilePoint(tile) != -1" ng-class="'is-' + tileStatus(tile)">
   <span ng-if="tileStatus(tile) == 'done'">+{{tilePoint(tile)}}</span>

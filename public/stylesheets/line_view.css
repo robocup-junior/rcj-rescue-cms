@@ -390,21 +390,14 @@
 
 .rv-lop-count.is-zero { background: #f1f5f9; color: var(--rv-muted); }
 
-.rv-map-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--rv-border);
-}
-
-.rv-rotate { margin-left: auto; }
+/* The map card's header holds the floor and rotation buttons, then the total */
+.rv-map .rv-card-header { padding-top: 0.6rem; padding-bottom: 0.6rem; white-space: nowrap; }
+.rv-map-tools { display: flex; gap: 0.5rem; margin-left: auto; letter-spacing: 0; }
+.rv-map .rv-header-total { margin-left: 0.75rem; }
 
 .rv-tool {
-  min-width: 40px;
-  height: 36px;
+  min-width: 36px;
+  height: 32px;
   padding: 0 0.7rem;
   border: 1px solid var(--rv-border);
   background: #fff;
@@ -467,8 +460,7 @@
 .rv-key.is-halfdone::before, .rv-tile-frame.is-halfdone { border-color: #f59e0b; background: rgba(245, 158, 11, 0.14); }
 .rv-key.is-undone::before, .rv-tile-frame.is-undone { border-color: #ef4444; background: rgba(239, 68, 68, 0.14); }
 .rv-key.is-cp { color: #c2410c; }
-.rv-key.is-cp::before { display: none; }
-.rv-key.is-cp i { padding: 0.2rem 0.35rem; border-radius: 999px; background: #f97316; color: #fff; font-size: 0.65rem; }
+.rv-key.is-cp::before { border-color: #f97316; background: linear-gradient(135deg, #f97316 50%, #fff 50%); }
 
 .rv-tile-points {
   position: absolute;
@@ -486,29 +478,25 @@
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.25);
 }
 
-/* Checkpoint tiles: an orange ring round the status frame and a solid flag badge */
+/* Checkpoint tiles: an orange ring round the status frame and the top left corner folded
+   over in orange with the number - a shape no other badge on the map has */
 .rv-tile-frame.is-cp { box-shadow: 0 0 0 3px #f97316; }
 
 .rv-tile-cp {
   position: absolute;
-  left: 6%;
-  top: 6%;
+  left: 0;
+  top: 0;
   z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2em;
-  padding: 0.05em 0.45em;
-  border-radius: 999px;
+  width: 48%;
+  height: 48%;
+  padding: 4% 0 0 5%;
   background: #f97316;
+  clip-path: polygon(0 0, 100% 0, 0 100%);
   color: #fff;
-  font-size: max(10px, 18cqw);
+  font-size: max(10px, 17cqw);
   font-weight: 800;
-  line-height: 1.25;
-  white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+  line-height: 1;
 }
-
-.rv-tile-cp i { font-size: 0.7em; }
 
 .rv-tile-points small { font-size: 0.75em; font-weight: 700; opacity: 0.85; }
 .rv-tile-points.is-done { background: #059669; }
@@ -877,6 +865,10 @@
   .rv-op { align-self: flex-end; padding: 0 0.75rem; font-size: 1rem; line-height: 1; }
   .rv-paren { display: none; }
   .rv-phone-only { display: flex; }
+  .rv-map .rv-card-header { gap: 0.4rem; padding-left: 1rem; padding-right: 1rem; }
+  .rv-map-tools { gap: 0.3rem; }
+  .rv-map .rv-header-total { margin-left: 0.4rem; }
+  .rv-tool { min-width: 30px; height: 30px; padding: 0 0.45rem; }
   .rv-exit-head { gap: 1rem; }
   .rv-exit-image { width: 88px; }
   .rv-exit-title { font-size: 1.15rem; }
