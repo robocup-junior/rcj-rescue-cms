@@ -379,6 +379,9 @@
             "m_score_d": "Please tap the tile of the direction the team scored.",
             "rescuedVictims": "Rescued Victims",
             "exitBase": "Base points",
+            "exitDone": "Exited",
+            "exitNotDone": "Did not exit",
+            "exitDeduction": "LoP deduction",
             "evacuationShort": "Evac Zone",
             "perVictim": "/ victim"
         },

@@ -525,8 +525,8 @@
 .rv-exit {
   flex: 1;
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
   gap: 1.25rem;
   padding: 1.25rem;
 }
@@ -534,43 +534,80 @@
 /* Cards side by side share a height; their bodies fill it */
 .rv-two-col > .rv-card { display: flex; flex-direction: column; }
 
-.rv-exit .rv-breakdown { flex: 1; min-width: 200px; }
+/* Without an exit there is nothing to measure: just the status, centred */
+.rv-exit.is-ng { justify-content: center; }
 
-/* An equation as a list: labels left, values right-aligned in one column */
-.rv-receipt { flex-direction: column; flex-wrap: nowrap; gap: 0.15rem; }
-.rv-receipt .rv-chip { flex-direction: row; align-items: baseline; gap: 1rem; padding: 0.5rem 0.9rem; }
-.rv-receipt .rv-chip-value { margin-left: auto; }
-.rv-receipt .rv-op { align-self: flex-end; padding: 0 0.9rem; font-size: 1rem; line-height: 1; }
+.rv-exit-head {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
 
 .rv-exit-image {
   position: relative;
   flex: none;
-  width: 160px;
-  padding: 4px;
+  width: 120px;
+  padding: 3px;
   border-radius: 12px;
 }
 
 .rv-exit-image.is-ok { background: var(--rv-ok); }
-.rv-exit-image.is-ng { background: var(--rv-ng); }
+.rv-exit-image.is-ng { background: #cbd5e1; }
+.rv-exit-image.is-ng img { filter: grayscale(1); opacity: 0.7; }
 .rv-exit-image img { display: block; width: 100%; border-radius: 9px; }
 
 .rv-exit-mark {
   position: absolute;
-  right: -10px;
-  bottom: -10px;
+  right: -8px;
+  bottom: -8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 3px solid #fff;
   color: #fff;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
 }
 
 .rv-exit-image.is-ok .rv-exit-mark { background: var(--rv-ok); }
 .rv-exit-image.is-ng .rv-exit-mark { background: var(--rv-ng); }
+
+.rv-exit-title { font-size: 1.3rem; font-weight: 800; }
+.rv-exit-title.is-ok { color: #047857; }
+.rv-exit-title.is-ng { color: #b91c1c; }
+.rv-exit-formula { margin-top: 0.2rem; font-size: 0.85rem; color: var(--rv-muted); font-variant-numeric: tabular-nums; }
+
+/* 60 points: what is left (green) and what the LoPs took (red stripes) */
+.rv-meter-track {
+  display: flex;
+  height: 14px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.rv-meter-bonus { background: var(--rv-ok); transition: width 0.3s ease; }
+.rv-meter-loss { background: repeating-linear-gradient(45deg, #fca5a5 0 6px, #fecaca 6px 12px); transition: width 0.3s ease; }
+
+.rv-meter-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 1.25rem;
+  margin-top: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--rv-muted);
+}
+
+.rv-legend { display: inline-flex; align-items: baseline; gap: 0.4rem; }
+.rv-legend::before { content: ""; align-self: center; width: 10px; height: 10px; border-radius: 3px; }
+.rv-legend-bonus::before { background: var(--rv-ok); }
+.rv-legend-loss::before { background: #fca5a5; }
+.rv-legend b { font-size: 1.1rem; color: var(--rv-text); font-variant-numeric: tabular-nums; }
+.rv-legend-loss b { color: #b91c1c; }
+.rv-legend-max { margin-left: auto; }
 
 .rv-rescue {
   flex: 1;
@@ -761,8 +798,12 @@
   .rv-op { align-self: flex-end; padding: 0 0.75rem; font-size: 1rem; line-height: 1; }
   .rv-paren { display: none; }
   .rv-phone-only { display: flex; }
+  .rv-exit-head { gap: 1rem; }
+  .rv-exit-image { width: 88px; }
+  .rv-exit-title { font-size: 1.15rem; }
+  .rv-exit-formula { font-size: 0.78rem; }
+  .rv-meter-legend { flex-wrap: nowrap; gap: 0.75rem; white-space: nowrap; }
+  .rv-legend-max { display: none; }
   .rv-op.rv-phone-only { display: block; }
-  .rv-exit-image { margin: 0 auto; }
-  .rv-exit .rv-breakdown { flex: 1 1 100%; }
   .run-view .tilearea { padding: 0.5rem; }
 }
