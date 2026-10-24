@@ -1647,7 +1647,11 @@
             "do": "Inspections carried out",
             "cancel": "Inspection cancellation",
             "noPhoto": "No photo yet",
-            "notInspected": "Not inspected"
+            "notInspected": "Not inspected",
+            "swipeToInspect": "Slide to complete the inspection",
+            "swipeToCancel": "Slide to cancel the inspection",
+            "completed": "Inspected",
+            "canceled": "Canceled"
         }
     },
     "mail": {
