@@ -28,3 +28,40 @@ jobs:
           key: mongodb-binaries-${{ runner.os }}-6.0.14
       - name: Run tests
         run: npm test
+
+  e2e:
+    runs-on: ubuntu-22.04
+    services:
+      # The mail and backup queues need Redis
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+      # Front-end components are served from public/components
+      - name: Install front-end components
+        run: npx --yes bower@1.8.14 install
+      - name: Cache MongoDB binary
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: mongodb-binaries-${{ runner.os }}-6.0.14
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run e2e tests
+        run: npm run e2e
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: playwright-report/

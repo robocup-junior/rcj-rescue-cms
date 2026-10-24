@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "minify": "grunt",
-    "test": "node --test test/*.test.js"
+    "test": "node --test test/*.test.js",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "@bull-board/express": "5.20.5",
@@ -65,6 +66,7 @@
     }
   },
   "devDependencies": {
+    "@playwright/test": "1.64.1",
     "eslint": "7.32.0",
     "eslint-config-airbnb-base": "14.2.1",
     "eslint-config-prettier": "8.3.0",

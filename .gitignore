@@ -65,3 +65,7 @@ mail.env
 tmp/course/
 /mailAttachment
 /tools/cognitive_targets_generator/output
+
+# Playwright (e2e)
+/test-results/
+/playwright-report/
