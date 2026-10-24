@@ -171,7 +171,7 @@ app.controller('LineEditorController', ['$scope', '$rootScope', '$uibModal', '$l
             }, function (response) {
                 console.log("Error: " + response.statusText);
             });
-        } else {
+        } else if (!pubService) {
             $http.get("/api/competitions/" +
               $scope.competitionId).then(function (response) {
                 $scope.competition = response.data;
