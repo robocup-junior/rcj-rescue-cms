@@ -120,8 +120,8 @@ html(ng-app="ddApp")
                 i.fas.fa-flag
                 | {{$index+1}}
               span.rv-sec.rv-sec-exit(ng-if='$last')
-                i.fas.fa-sign-out-alt
-                | {{'line.judge.Lexit' | translate}}
+                i.fas.fa-flag-checkered
+                | {{'line.view.goal' | translate}}
               span.rv-lop-count(ng-class="{'is-zero': !LoPs[$index]}") {{LoPs[$index]?LoPs[$index]:0}}
 
         section.rv-card.rv-map
