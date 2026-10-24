@@ -61,6 +61,7 @@ async function seed() {
     { _id: oid(ids.teams.Line), competition: compId, name: 'Line Team', league: 'Line', teamCode: 'L01' },
     { _id: oid(ids.teams.Maze), competition: compId, name: 'Maze Team', league: 'Maze', teamCode: 'M01' },
     { _id: oid(ids.teams.Erebus), competition: compId, name: 'Sim Team', league: 'Erebus', teamCode: 'S01' },
+    { _id: oid(ids.teams.LineNL), competition: compId, name: 'Line Entry Team', league: 'LineNL', teamCode: 'E01' },
   ]);
 
   // Saved through the model so the path finder numbers the tiles, as the map editor does
@@ -68,9 +69,8 @@ async function seed() {
     tileType.findOne({ gaps: 0, intersections: 0, seesaw: 0 }).lean(),
     tileType.findOne({ gaps: { $gt: 0 }, intersections: 0 }).lean(),
   ]);
-  await lineMap.create({
-    _id: oid(ids.maps.Line),
-    competition: compId, league: 'Line', name: 'Line Map', tileSet: compId, finished: true,
+  const lineMapData = {
+    competition: compId, tileSet: compId, finished: true,
     width: 2, length: 1, height: 1, victims: { live: 2, dead: 1 },
     startTile: { x: 0, y: 0, z: 0 },
     startTile2: { x: -1, y: -1, z: -1 },
@@ -78,7 +78,9 @@ async function seed() {
       { x: 0, y: 0, z: 0, rot: 0, tileType: plain._id },
       { x: 1, y: 0, z: 0, rot: 0, tileType: gap._id, items: { obstacles: 1 } },
     ],
-  });
+  };
+  await lineMap.create({ _id: oid(ids.maps.Line), league: 'Line', name: 'Line Map', ...lineMapData });
+  await lineMap.create({ _id: oid(ids.maps.LineNL), league: 'LineNL', name: 'Line Entry Map', ...lineMapData });
 
   const noVictims = { top: 'None', right: 'None', bottom: 'None', left: 'None', floor: 'None' };
   await mazeMap.create({
@@ -99,6 +101,13 @@ async function seed() {
   await lineRun.create([
     { _id: oid(ids.runs.Line), ...runRefs, team: oid(ids.teams.Line), map: oid(ids.maps.Line) },
     { _id: oid(ids.finishedRuns.Line), ...finished, team: oid(ids.teams.Line), map: oid(ids.maps.Line) },
+    {
+      _id: oid(ids.finishedRuns.LineNL), ...finished, team: oid(ids.teams.LineNL), map: oid(ids.maps.LineNL),
+      nl: {
+        liveVictim: [{ found: true, identified: true }, { found: true, identified: false }],
+        deadVictim: [{ found: false, identified: false }],
+      },
+    },
   ]);
   await mazeRun.create([
     { _id: oid(ids.runs.Maze), ...runRefs, team: oid(ids.teams.Maze), map: oid(ids.maps.Maze) },

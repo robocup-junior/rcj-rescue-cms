@@ -388,7 +388,10 @@
             "exitNotDone": "脱出できず",
             "exitDeduction": "進行停止による減点",
             "evacuationShort": "避難ゾーン",
-            "perVictim": "/ 人"
+            "perVictim": "/ 人",
+            "found": "発見",
+            "identified": "識別",
+            "exitFixed": "脱出すると {{points}} 点"
         },
         "judge": {
             "before": "次の画面に進む前に，以下の情報を『主審と一緒に』もう一度確認してください．",

@@ -52,6 +52,8 @@ const JUDGE_PAGES = [
 ];
 
 const ADMIN_PAGES = [
+  // The entry leagues are not disclosed, so their runs are checked as staff
+  `/line/view/${ids.finishedRuns.LineNL}`,
   '/admin',
   '/admin/user',
   '/admin/short',

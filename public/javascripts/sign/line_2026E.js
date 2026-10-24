@@ -362,6 +362,14 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         return $scope.exitBonus * 30;
     };
 
+    // Tiles from the last checkpoint to the goal (run view course); this section scores no checkpoint points
+    $scope.goalDistance = function () {
+        if (!$scope.stiles || !$scope.checkPointDistance) return 0;
+        let lastCheckPoint = 0;
+        for (let i = 1; i < $scope.checkPointDistance.length; i++) lastCheckPoint += $scope.checkPointDistance[i].dis;
+        return $scope.stiles.length - 1 - lastCheckPoint;
+    };
+
 
     $scope.range = function (n) {
         arr = [];
@@ -477,7 +485,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.open = function (x, y, z) {
         var modalInstance = $uibModal.open({
             animation: true,
-            templateUrl: '/templates/line_view_modal.html',
+            // The run view page lists the passes its own way
+            templateUrl: document.body.classList.contains('run-view') ? '/templates/line_view_modal_passes.html' : '/templates/line_view_modal.html',
             controller: 'ModalInstanceCtrl',
             size: 'lm',
             resolve: {
@@ -757,7 +766,10 @@ app.directive('tile', function () {
             tile: '='
         },
         restrict: 'E',
-        templateUrl: '/templates/tile.html',
+        // The run view page shows the tiles its own way (template="view")
+        templateUrl: function (element, attrs) {
+            return attrs.template == 'view' ? '/templates/tile_view.html' : '/templates/tile.html';
+        },
         link: function ($scope, element, attrs) {
             $scope.tilerotate = function (tilerot) {
                 if (!tilerot) return $scope.$parent.sRotate;
@@ -879,6 +891,28 @@ app.directive('tile', function () {
                     return "undone";
                 else
                     return "";
+            }
+
+            // Scoring status of the items on the tile alone, leaving out the checkpoint (run view map)
+            $scope.tileItemStatus = function (tile) {
+                if (!tile || tile.index.length == 0) return;
+                var max = $scope.tileMaxPoint(tile);
+                if (max == 0) return;
+                var points = $scope.tilePoint(tile);
+                return points == max ? 'done' : points > 0 ? 'halfdone' : 'undone';
+            }
+
+            // Points the tile gives when every item on it is scored (counted as in tilePoint)
+            $scope.tileMaxPoint = function (tile) {
+                var points = { gap: 10, obstacle: 20, speedbump: 10, ramp: 10 };
+                var max = 0;
+                for (var i = 0; i < tile.index.length; i++) {
+                    for (let item of $scope.$parent.stiles[tile.index[i]].scoredItems) {
+                        if (!points[item.item]) continue;
+                        max += points[item.item] * (item.item == 'gap' || item.item == 'speedbump' ? 1 : item.count);
+                    }
+                }
+                return max;
             }
 
             $scope.tilePoint = function (tile) {
@@ -1029,6 +1063,34 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'mtile', 'mt
             return "undone";
         else
             return "";
+    }
+
+    // For the list of passes on the run view page (line_view_modal_passes.html).
+    // Intersections and seesaws are not scoring elements in the Entry rules
+    var ITEM_POINTS = { gap: 10, obstacle: 20, speedbump: 10, ramp: 10 };
+    var ITEM_NAMES = {
+        gap: 'line.judge.js.gap', obstacle: 'line.judge.js.obstacle', speedbump: 'line.judge.js.bump', ramp: 'line.judge.js.ramp'
+    };
+    // Screen direction (0 top, 90 right, ...) the robot left the tile on each pass
+    $scope.passDir = (mtile.next_dir || []).map(function (dir) {
+        return (dir2num(dir) + sRotate) % 360;
+    });
+    // Passes leaving through each neighbour of the 3x3 grid (1 top, 3 left, 5 right, 7 bottom)
+    $scope.passesTo = { 1: [], 3: [], 5: [], 7: [] };
+    $scope.passDir.forEach(function (deg, pass) {
+        $scope.passesTo[{ 0: 1, 90: 5, 180: 7, 270: 3 }[deg]].push(pass);
+    });
+    $scope.itemName = function (item) {
+        return ITEM_NAMES[item.item];
+    }
+    // Points of an item when scored (gaps and speed bumps once, the others per count, as in tilePoint)
+    $scope.itemPoint = function (item) {
+        return ITEM_POINTS[item.item] * (item.item == 'gap' || item.item == 'speedbump' ? 1 : item.count);
+    }
+    $scope.passPoints = function (stile) {
+        return stile.scoredItems.reduce(function (sum, item) {
+            return sum + (ITEM_POINTS[item.item] && item.scored ? $scope.itemPoint(item) : 0);
+        }, 0);
     }
 
     $scope.tilerotate = function (tilerot) {

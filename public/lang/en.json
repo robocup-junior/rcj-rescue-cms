@@ -388,7 +388,10 @@
             "exitNotDone": "Did not exit",
             "exitDeduction": "LoP deduction",
             "evacuationShort": "Evac Zone",
-            "perVictim": "/ victim"
+            "perVictim": "/ victim",
+            "found": "Found",
+            "identified": "Identified",
+            "exitFixed": "{{points}} points for exiting"
         },
         "judge": {
             "before": "Before the start of the run record, please confirm that the following information is correct.",

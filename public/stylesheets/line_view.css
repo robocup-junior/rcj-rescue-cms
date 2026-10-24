@@ -1,4 +1,4 @@
-/* Rescue Line run view (views/view/line_2026.pug)
+/* Rescue Line run view (views/view/line_2026.pug, line_2026E.pug)
    The pages of a run each have their colour: view blue, judge red, sign orange. */
 @import url('/stylesheets/fonts.css');
 
@@ -800,6 +800,71 @@
 .rv-rescue-item.is-bonus .rv-rescue-mult { background: #ccfbf1; color: #0f766e; }
 .rv-rescue-item.is-void { opacity: 0.6; }
 
+/* Entry rules (line_2026E.pug): victim | found | identified | points, the same columns on every row */
+.rv-nl-list {
+  flex: 1;
+  display: grid;
+  grid-template-columns: auto auto auto 1fr;
+  align-content: start;
+  row-gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rv-nl-item {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: center;
+  column-gap: 0.6rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.rv-nl-victim {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 800;
+  color: var(--rv-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.rv-nl-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.rv-nl-check b { font-variant-numeric: tabular-nums; }
+.rv-nl-check.is-ok { background: var(--rv-ok-soft); color: #047857; }
+.rv-nl-check.is-ng { background: #f1f5f9; color: #94a3b8; }
+.rv-nl-check.is-ng b { text-decoration: line-through; }
+
+.rv-nl-points {
+  justify-self: end;
+  font-size: 1.15rem;
+  font-weight: 800;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.rv-nl-points small { margin-left: 0.1rem; font-size: 0.75rem; font-weight: 600; color: var(--rv-muted); }
+.rv-nl-item.is-none .rv-nl-points { color: #94a3b8; }
+
+/* A fixed bonus has nothing to measure: just the status, centred */
+.rv-exit.is-fixed { justify-content: center; }
+
+/* The goal of the Entry course scores no checkpoint points */
+.rv-node-points.is-none { color: #cbd5e1; }
+
 /* ---- Passes on a tile (modal, line_view_modal_passes.html) ---- */
 .run-view .modal-dialog { max-width: 620px; }
 .run-view .modal-content { border: none; border-radius: var(--rv-radius); overflow: hidden; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.3); }
@@ -1070,6 +1135,8 @@
   .rv-exit-image { width: 88px; }
   .rv-exit-title { font-size: 1.15rem; }
   .rv-exit-formula { font-size: 0.78rem; }
+  .rv-nl-item { column-gap: 0.4rem; padding: 0.4rem 0.5rem; }
+  .rv-nl-check { padding: 0.15rem 0.45rem; font-size: 0.78rem; }
   .rv-meter-legend { flex-wrap: nowrap; gap: 0.75rem; white-space: nowrap; }
   .rv-legend-max { display: none; }
   .rv-op.rv-phone-only { display: block; }
