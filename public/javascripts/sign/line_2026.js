@@ -475,7 +475,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.open = function (x, y, z) {
         var modalInstance = $uibModal.open({
             animation: true,
-            templateUrl: '/templates/line_view_modal.html',
+            // The run view page lists the passes its own way
+            templateUrl: document.body.classList.contains('run-view') ? '/templates/line_view_modal_passes.html' : '/templates/line_view_modal.html',
             controller: 'ModalInstanceCtrl',
             size: 'lm',
             resolve: {
@@ -1056,6 +1057,34 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'mtile', 'mt
             return "undone";
         else
             return "";
+    }
+
+    // For the list of passes on the run view page (line_view_modal_passes.html)
+    var ITEM_POINTS = { gap: 10, intersection: 10, obstacle: 20, speedbump: 10, ramp: 10, seesaw: 20 };
+    var ITEM_NAMES = {
+        gap: 'line.judge.js.gap', intersection: 'line.judge.js.intersection', obstacle: 'line.judge.js.obstacle',
+        speedbump: 'line.judge.js.bump', ramp: 'line.judge.js.ramp', seesaw: 'line.view.seesaw'
+    };
+    // Screen direction (0 top, 90 right, ...) the robot left the tile on each pass
+    $scope.passDir = (mtile.next_dir || []).map(function (dir) {
+        return (dir2num(dir) + sRotate) % 360;
+    });
+    // Passes leaving through each neighbour of the 3x3 grid (1 top, 3 left, 5 right, 7 bottom)
+    $scope.passesTo = { 1: [], 3: [], 5: [], 7: [] };
+    $scope.passDir.forEach(function (deg, pass) {
+        $scope.passesTo[{ 0: 1, 90: 5, 180: 7, 270: 3 }[deg]].push(pass);
+    });
+    $scope.itemName = function (item) {
+        return ITEM_NAMES[item.item];
+    }
+    // Points of an item when scored (gaps and speed bumps once, the others per count, as in tilePoint)
+    $scope.itemPoint = function (item) {
+        return ITEM_POINTS[item.item] * (item.item == 'gap' || item.item == 'speedbump' ? 1 : item.count);
+    }
+    $scope.passPoints = function (stile) {
+        return stile.scoredItems.reduce(function (sum, item) {
+            return sum + (ITEM_POINTS[item.item] && item.scored ? $scope.itemPoint(item) : 0);
+        }, 0);
     }
 
     $scope.tilerotate = function (tilerot) {

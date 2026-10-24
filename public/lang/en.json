@@ -379,6 +379,8 @@
             "m_score_d": "Please tap the tile of the direction the team scored.",
             "rescuedVictims": "Rescued Victims",
             "exitBase": "Base points",
+            "passTitle": "Points on each pass",
+            "seesaw": "Seesaw",
             "tileDone": "All items scored",
             "tilePartial": "Partly scored",
             "tileNone": "Not scored",

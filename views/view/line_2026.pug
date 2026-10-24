@@ -41,8 +41,9 @@ html(ng-app="ddApp")
             .rv-summary-value
               | {{score}}
               small {{'common.point' | translate}}
+            //- Same format as the ranking: two decimals, a plain 1 for the best run
             .rv-summary-sub(ng-if="normalizedScore != null")
-              | {{'common.normalizedScore' | translate}}: {{normalizedScore}}
+              | {{'common.normalizedScore' | translate}}: {{normalizedScore === 1 ? '1' : (normalizedScore | number:2)}}
           .rv-summary-item
             .rv-summary-label
               i.fas.fa-stopwatch

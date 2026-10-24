@@ -493,19 +493,33 @@
   left: 0;
   top: 0;
   z-index: 5;
-  width: 62%;
-  height: 62%;
-  padding: 5% 0 0 6%;
+  width: 56%;
+  height: 56%;
+  padding: 3% 0 0 7%;
   background: #f97316;
   clip-path: polygon(0 0, 100% 0, 0 100%);
   color: #fff;
-  font-size: max(10px, 16cqw);
+  font-size: max(12px, 26cqw);
   font-weight: 800;
   line-height: 1;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
-.rv-tile-cp i { margin-right: 0.15em; font-size: 0.6em; vertical-align: 0.15em; }
+/* A large faint flag over the tile, like a watermark */
+.rv-tile-cp-mark {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f97316;
+  font-size: 52cqw;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
 
 .rv-tile-points small { font-size: 0.75em; font-weight: 700; opacity: 0.85; }
 .rv-tile-points.is-done { background: #059669; }
@@ -785,6 +799,180 @@
 
 .rv-rescue-item.is-bonus .rv-rescue-mult { background: #ccfbf1; color: #0f766e; }
 .rv-rescue-item.is-void { opacity: 0.6; }
+
+/* ---- Passes on a tile (modal, line_view_modal_passes.html) ---- */
+.run-view .modal-dialog { max-width: 620px; }
+.run-view .modal-content { border: none; border-radius: var(--rv-radius); overflow: hidden; box-shadow: 0 20px 50px rgba(15, 23, 42, 0.3); }
+
+.rvm-header {
+  display: flex;
+  align-items: center;
+  padding: 0.9rem 1.25rem;
+  background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+  color: #fff;
+}
+
+.rvm-title { margin: 0; font-size: 1.05rem; font-weight: 800; }
+
+.rvm-close {
+  margin-left: auto;
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+}
+
+.rvm-body {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+  padding: 1.25rem;
+}
+
+.rvm-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  padding: 2px;
+  border-radius: 10px;
+  background: #e2e8f0;
+}
+
+.rvm-cell {
+  position: relative;
+  aspect-ratio: 1;
+  background: #f8fafc;
+  overflow: hidden;
+}
+
+.rvm-cell img { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* The tile that was tapped: a blue frame drawn over its image */
+.rvm-cell.is-center::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 3px var(--rv-accent); }
+
+/* Exit badges sit on the sides of the middle tile, pointing the way the robot left */
+.rvm-map { position: relative; }
+
+.rvm-exits {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  gap: 3px;
+  transform: translate(-50%, -50%);
+}
+
+.rvm-exits.side-1 { left: 50%; top: 33.3%; }
+.rvm-exits.side-7 { left: 50%; top: 66.7%; }
+.rvm-exits.side-3 { left: 33.3%; top: 50%; flex-direction: column; }
+.rvm-exits.side-5 { left: 66.7%; top: 50%; flex-direction: column; }
+
+.rvm-exit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  height: 1.6rem;
+  padding: 0 0.45rem;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: #94a3b8;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 800;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.3);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  font-variant-numeric: tabular-nums;
+}
+
+.rvm-exit i { font-size: 0.75rem; }
+.rvm-exit.is-done { background: #059669; }
+.rvm-exit.is-halfdone { background: #d97706; }
+.rvm-exit.is-undone { background: #dc2626; }
+.rvm-exit.is-active { transform: scale(1.2); }
+.rvm-exit.is-dimmed { opacity: 0.3; }
+
+.rvm-passes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rvm-pass {
+  border: 1px solid var(--rv-border);
+  border-left: 5px solid #94a3b8;
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease;
+}
+
+.rvm-pass.is-done { border-left-color: #059669; }
+.rvm-pass.is-halfdone { border-left-color: #d97706; }
+.rvm-pass.is-undone { border-left-color: #dc2626; }
+.rvm-pass.is-active { box-shadow: 0 0 0 2px var(--rv-accent); }
+
+.rvm-pass-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #f8fafc;
+  font-weight: 800;
+}
+
+
+.rvm-pass-points {
+  margin-left: auto;
+  font-size: 1.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.rvm-pass-points small { margin-left: 0.2rem; font-size: 0.75rem; color: var(--rv-muted); }
+
+.rvm-items { margin: 0; padding: 0.35rem 0.75rem; list-style: none; }
+
+/* icon | name | points scored/possible, the points in one column */
+.rvm-item {
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.3rem 0;
+  font-size: 0.9rem;
+}
+
+.rvm-item + .rvm-item { border-top: 1px dashed var(--rv-border); }
+.rvm-item.is-ok i { color: var(--rv-ok); }
+.rvm-item.is-ng i { color: var(--rv-ng); }
+.rvm-item.is-ng .rvm-item-name { color: var(--rv-muted); }
+.rvm-item-count { color: var(--rv-muted); font-size: 0.8rem; }
+.rvm-item-points { font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+.rvm-item-points small { color: var(--rv-muted); font-weight: 600; }
+
+.rvm-footer { padding: 0 1.25rem 1.25rem; }
+
+.rvm-ok {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  background: var(--rv-accent);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.rvm-ok:focus-visible, .rvm-close:focus-visible { outline: 3px solid rgba(59, 130, 246, 0.45); outline-offset: 2px; }
+
+@media (max-width: 575.98px) {
+  .rvm-body { grid-template-columns: minmax(0, 1fr); }
+  .rvm-map { width: 220px; margin: 0 auto; }
+}
 
 /* ---- Comment and signatures ---- */
 .rv-note { font-size: 0.9rem; color: var(--rv-accent); }

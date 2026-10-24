@@ -1,0 +1,46 @@
+<!-- Run view page: what was scored on each pass over a tile the robot crosses more than once.
+     The 3x3 grid shows the tile with a numbered arrow on the side the robot left by on each pass,
+     the same badge as in the list; pointing at a pass in the list picks out its arrow. -->
+<div class="rvm">
+  <div class="rvm-header">
+    <h5 class="rvm-title">{{'line.view.passTitle' | translate}}</h5>
+    <button type="button" class="rvm-close" ng-click="ok()" aria-label="Close"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="rvm-body">
+    <!-- The tile in the middle; on each of its sides, the passes that left that way -->
+    <div class="rvm-map">
+      <div class="rvm-grid">
+        <div class="rvm-cell" ng-repeat="t in nineTile track by $index" ng-class="{'is-center': $index == 4}">
+          <img ng-if="t.tileType.image" ng-src="/images/tiles/{{t.tileType.image}}" class="rot{{tilerotate(t.rot)}}" alt="">
+          <img ng-if="t.evacEntrance >= 0" ng-src="/images/tiles/ev-entrance.png" class="rot{{evacTapeRot(t)}}" alt="">
+          <img ng-if="t.evacExit >= 0" ng-src="/images/tiles/ev-exit.png" class="rot{{evacTapeRot(t)}}" alt="">
+        </div>
+      </div>
+      <div class="rvm-exits" ng-repeat="(cell, passes) in passesTo" ng-if="passes.length" ng-class="'side-' + cell">
+        <span class="rvm-exit" ng-repeat="p in passes" ng-class="['is-' + dirStatus(stiles[mtile.index[p]]), {'is-active': activePass === p, 'is-dimmed': activePass != null && activePass !== p}]">
+          {{p + 1}}<i class="fas fa-arrow-up" ng-style="{transform: 'rotate(' + passDir[p] + 'deg)'}"></i>
+        </span>
+      </div>
+    </div>
+
+    <ol class="rvm-passes">
+      <li class="rvm-pass" ng-repeat="idx in mtile.index track by $index" ng-init="stile = stiles[idx]" ng-class="['is-' + dirStatus(stile), {'is-active': activePass === $index}]"
+          ng-mouseenter="$parent.activePass = $index" ng-mouseleave="$parent.activePass = null" ng-click="$parent.activePass = ($parent.activePass === $index ? null : $index)">
+        <div class="rvm-pass-head">
+          <span class="rvm-exit" ng-class="'is-' + dirStatus(stile)">{{$index + 1}}<i class="fas fa-arrow-up" ng-if="passDir[$index] != null" ng-style="{transform: 'rotate(' + passDir[$index] + 'deg)'}"></i></span>
+          <span class="rvm-pass-points">{{passPoints(stile)}}<small>{{'common.point' | translate}}</small></span>
+        </div>
+        <ul class="rvm-items">
+          <li class="rvm-item" ng-repeat="item in stile.scoredItems" ng-if="itemName(item)" ng-class="item.scored ? 'is-ok' : 'is-ng'">
+            <i class="fas" ng-class="item.scored ? 'fa-check-circle' : 'fa-times-circle'"></i>
+            <span class="rvm-item-name">{{itemName(item) | translate}}<span class="rvm-item-count" ng-if="item.count > 1"> ×{{item.count}}</span></span>
+            <span class="rvm-item-points">{{item.scored ? itemPoint(item) : 0}}<small>/{{itemPoint(item)}}</small></span>
+          </li>
+        </ul>
+      </li>
+    </ol>
+  </div>
+  <div class="rvm-footer">
+    <button class="rvm-ok" type="button" ng-click="ok()">OK</button>
+  </div>
+</div>

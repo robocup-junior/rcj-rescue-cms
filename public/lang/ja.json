@@ -379,6 +379,8 @@
             "m_score_d": "ロボットが得点した方向（進んだ方向）のタイルをタップしてください．",
             "rescuedVictims": "救助済みの被災者",
             "exitBase": "基本点",
+            "passTitle": "通過ごとの得点",
+            "seesaw": "シーソー",
             "tileDone": "全項目で得点",
             "tilePartial": "一部で得点",
             "tileNone": "得点なし",

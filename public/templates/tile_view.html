@@ -1,7 +1,7 @@
 <!-- A map tile on the run view page, which shows item points: the tile stays visible, the status of
      its items is a coloured frame and a badge in the top right corner with the points scored out of
      the points possible, like the totals in the corners of the cards. Checkpoints only show where
-     they are (an orange ring and a folded top left corner with the flag and number); whether they
+     they are (an orange ring, a faint flag over the tile and a folded top left corner with the number); whether they
      were reached is shown in the checkpoint section. See line_view.css. -->
 
 <img ng-src="/images/tiles/{{tile.tileType.image}}"  class="rot{{tilerotate(tile.rot)}} tile-image" ng-show="tile.tileType.image">
@@ -22,7 +22,8 @@
 
 <span class="rv-tile-frame" ng-if="tileItemStatus(tile)" ng-class="'is-' + tileItemStatus(tile)"></span>
 <span class="rv-tile-cp-ring" ng-if="checkpointNumber(tile)"></span>
-<span class="rv-tile-cp" ng-if="checkpointNumber(tile)"><i class="fas fa-flag"></i>{{checkpointNumber(tile)}}</span>
+<i class="fas fa-flag rv-tile-cp-mark" ng-if="checkpointNumber(tile)"></i>
+<span class="rv-tile-cp" ng-if="checkpointNumber(tile)">{{checkpointNumber(tile)}}</span>
 <span class="rv-tile-points" ng-if="tileItemStatus(tile)" ng-class="'is-' + tileItemStatus(tile)">
   <span ng-if="tileItemStatus(tile) == 'done'">+{{tilePoint(tile)}}</span>
   <span ng-if="tileItemStatus(tile) != 'done'">{{tilePoint(tile)}}<small>/{{tileMaxPoint(tile)}}</small></span>
