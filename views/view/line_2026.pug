@@ -124,15 +124,15 @@ html(ng-app="ddApp")
               span.rv-lop-count(ng-class="{'is-zero': !LoPs[$index]}") {{LoPs[$index]?LoPs[$index]:0}}
 
         section.rv-card.rv-map
+          .rv-card-header
+            i.fas.fa-map
+            | {{'line.sign.item' | translate}}
+            span.rv-header-total {{raw_score - checkTotal() - exitBonusPoints()}} {{'common.point' | translate}}
           .rv-map-toolbar
             .btn-group.rv-floors(ng-show='height > 1')
               button.rv-tool(type='button' ng-repeat='zz in range(height)' ng-class='{active: zz == z}' ng-click='changeFloor(zz)')
                 i.fas.fa-layer-group(ng-if='$first')
                 |  {{zz}}
-            .rv-pill.rv-pill-blue
-              | {{'line.sign.item' | translate}}:&nbsp;
-              b {{raw_score - checkTotal() - exitBonusPoints()}}
-              | &nbsp;{{'common.point' | translate}}
             .btn-group.rv-rotate
               button.rv-tool(type='button' title='-90°' ng-click='tileRot(-90)')
                 i.fas.fa-undo
@@ -143,6 +143,9 @@ html(ng-app="ddApp")
             span.rv-key.is-done {{'line.view.tileDone' | translate}}
             span.rv-key.is-halfdone {{'line.view.tilePartial' | translate}}
             span.rv-key.is-undone {{'line.view.tileNone' | translate}}
+            span.rv-key.is-cp
+              i.fas.fa-flag
+              | {{'line.view.checkpoint' | translate}}
           .tilearea
             #wrapTile.mx-auto
               div(ng-repeat='r in range(length)', ng-if='sRotate==0', style='display: flex;')

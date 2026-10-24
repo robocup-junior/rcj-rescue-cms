@@ -20,7 +20,7 @@
 <i class="far fa-play-circle fa-fw tile-image tile-font-1-25" ng-show="isStart(tile)" style="text-align:left; padding:1px 2px; color:#73e673; opacity:0.9;"></i>
 
 <span class="rv-tile-cp" ng-if="checkpointNumber(tile)"><i class="fas fa-flag"></i>{{checkpointNumber(tile)}}</span>
-<span class="rv-tile-frame" ng-if="tileStatus(tile)" ng-class="'is-' + tileStatus(tile)"></span>
+<span class="rv-tile-frame" ng-if="tileStatus(tile)" ng-class="['is-' + tileStatus(tile), {'is-cp': isCheckPointTile(tile)}]"></span>
 <span class="rv-tile-points" ng-if="tileStatus(tile) && !isStart(tile) && tilePoint(tile) != -1" ng-class="'is-' + tileStatus(tile)">
   <span ng-if="tileStatus(tile) == 'done'">+{{tilePoint(tile)}}</span>
   <span ng-if="tileStatus(tile) != 'done'">{{tilePoint(tile)}}<small>/{{tileMaxPoint(tile)}}</small></span>
