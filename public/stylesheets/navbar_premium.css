@@ -347,3 +347,13 @@ body {
     font-weight: 700;
     color: #1e293b;
 }
+/* Phones: less padding so the brand, badge and user menu fit on one line */
+@media (max-width: 575.98px) {
+    .premium-navbar {
+        padding: 0.6rem 1rem;
+    }
+
+    .nav-user-link {
+        padding: 0.5rem 0.75rem;
+    }
+}
