@@ -1,6 +1,23 @@
-// Every page opens without script errors, console errors or failed requests.
-const { test, open } = require('./fixtures');
+// Every page opens without script errors, console errors or failed requests,
+// and its layout holds up on a PC and on a phone.
+const { test, expect, open } = require('./fixtures');
+const { findLayoutProblems } = require('./layout');
 const ids = require('./ids');
+
+const PHONE = { width: 390, height: 844 };
+// Tools made for a PC or for paper, which are not checked at phone width
+const PC_ONLY = [/\/mapEditor/, /^\/service\/editor\//, /\/games\/(print|ranking)$/];
+
+/** Open the page and check its layout at the default (PC) width, then at phone width. */
+async function checkPage(page, path) {
+  await open(page, path);
+  expect.soft(await findLayoutProblems(page), 'layout on a PC').toEqual([]);
+  if (PC_ONLY.some((re) => re.test(path))) return;
+  await page.setViewportSize(PHONE);
+  // Let resize handlers (e.g. map tile sizes) run
+  await page.waitForTimeout(300);
+  expect.soft(await findLayoutProblems(page), 'layout on a phone').toEqual([]);
+}
 
 const C = ids.competition;
 
@@ -74,7 +91,7 @@ const ADMIN_PAGES = [
 test.describe('public pages', () => {
   for (const path of PUBLIC_PAGES) {
     test(path, async ({ page }) => {
-      await open(page, path);
+      await checkPage(page, path);
     });
   }
 });
@@ -83,7 +100,7 @@ test.describe('judge pages', () => {
   test.use({ user: 'judge' });
   for (const path of JUDGE_PAGES) {
     test(path, async ({ page }) => {
-      await open(page, path);
+      await checkPage(page, path);
     });
   }
 });
@@ -92,7 +109,7 @@ test.describe('admin pages', () => {
   test.use({ user: 'admin' });
   for (const path of ADMIN_PAGES) {
     test(path, async ({ page }) => {
-      await open(page, path);
+      await checkPage(page, path);
     });
   }
 });

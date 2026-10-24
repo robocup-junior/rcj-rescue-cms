@@ -86,8 +86,10 @@ async function seed() {
     competition: compId, league: 'Maze', name: 'Maze Map', finished: true,
     width: 2, length: 1, height: 1, startTile: { x: 1, y: 1, z: 0 },
     cells: [
-      { x: 1, y: 1, z: 0, isTile: true, tile: { victims: noVictims } },
-      { x: 3, y: 1, z: 0, isTile: true, tile: { victims: { ...noVictims, top: 'H' } } },
+      { x: 1, y: 1, z: 0, isTile: true, isLinear: true, tile: { reachable: true, victims: noVictims } },
+      { x: 3, y: 1, z: 0, isTile: true, isLinear: true, tile: { reachable: true, victims: { ...noVictims, top: 'H' } } },
+      // Walls around the two tiles
+      ...[[1, 0], [3, 0], [1, 2], [3, 2], [0, 1], [4, 1]].map(([x, y]) => ({ x, y, z: 0, isWall: true, isLinear: true })),
     ],
   });
 
