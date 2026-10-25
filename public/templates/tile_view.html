@@ -23,7 +23,9 @@
 <span class="rv-tile-frame" ng-if="tileItemStatus(tile)" ng-class="'is-' + tileItemStatus(tile)"></span>
 <span class="rv-tile-cp-ring" ng-if="checkpointNumber(tile)"></span>
 <i class="fas fa-flag rv-tile-cp-mark" ng-if="checkpointNumber(tile)"></i>
-<span class="rv-tile-cp" ng-if="checkpointNumber(tile)">{{checkpointNumber(tile)}}</span>
+<!-- A tile passed twice can be two checkpoints ("2&5"): the first in the top left corner, the next in the bottom left one -->
+<span class="rv-tile-cp" ng-if="checkpointNumber(tile)" ng-class="{'is-long': checkpointNumber(tile).split('&')[0].length > 1}">{{checkpointNumber(tile).split('&')[0]}}</span>
+<span class="rv-tile-cp is-second" ng-if="checkpointNumber(tile).indexOf('&') >= 0" ng-class="{'is-long': checkpointNumber(tile).split('&').slice(1).join('·').length > 1}">{{checkpointNumber(tile).split('&').slice(1).join('·')}}</span>
 <span class="rv-tile-points" ng-if="tileItemStatus(tile)" ng-class="'is-' + tileItemStatus(tile)">
   <span ng-if="tileItemStatus(tile) == 'done'">+{{tilePoint(tile)}}</span>
   <span ng-if="tileItemStatus(tile) != 'done'">{{tilePoint(tile)}}<small>/{{tileMaxPoint(tile)}}</small></span>

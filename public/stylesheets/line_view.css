@@ -496,6 +496,19 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   font-variant-numeric: tabular-nums;
 }
 
+/* Checkpoints 10 and up: smaller, so they stay clear of the points in the top right corner */
+.rv-tile-cp.is-long { font-size: max(10px, 19cqw); }
+
+/* The second checkpoint of a tile passed twice: the same fold in the bottom left corner */
+.rv-tile-cp.is-second {
+  top: auto;
+  bottom: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 0 0 3% 7%;
+  clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
+
 /* A large faint flag over the tile, like a watermark */
 .rv-tile-cp-mark {
   position: absolute;
