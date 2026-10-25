@@ -291,36 +291,6 @@
 .rv-summary .rv-op,
 .rv-summary .rv-paren { color: rgba(255, 255, 255, 0.7); }
 
-/* ---- LoPs and map ---- */
-.rv-main {
-  display: grid;
-  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
-  gap: 1.25rem;
-  align-items: start;
-}
-
-.rv-lop-list {
-  display: grid;
-  /* The path takes the free width, so the evacuation zone fits and the counts stay at the right edge */
-  grid-template-columns: max-content minmax(0, 1fr) max-content max-content;
-  row-gap: 0.25rem;
-  margin: 0;
-  padding: 0.5rem;
-  list-style: none;
-}
-
-.rv-lop {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: subgrid;
-  align-items: center;
-  column-gap: 0.4rem;
-  padding: 0.6rem 0.5rem;
-  border-radius: 12px;
-}
-
-.rv-lop.is-evac { background: var(--rv-ng-soft); }
-
 /* Section ends: start, checkpoint (flag + number, orange like on the map), exit.
    All the same width wherever they appear; longer words get a smaller font instead. */
 .rv-sec {
@@ -347,48 +317,62 @@
 /* The evacuation zone sits on a section's path and keeps its full name */
 .rv-sec-evac { width: auto; padding: 0 0.5rem; background: #fff; border: 1px solid #fecaca; color: #b91c1c; font-size: 0.72rem; }
 
-/* A line from one end of the section to the other; it stretches so every row's "to" lines up */
-.rv-lop-path {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.rv-path-line {
-  position: relative;
-  flex: 1;
-  min-width: 1rem;
-  height: 2px;
-  background: #cbd5e1;
-}
-
-.rv-path-arrow::after {
-  content: "";
-  position: absolute;
-  right: -1px;
-  top: -4px;
-  border-left: 6px solid #cbd5e1;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-}
-
 .rv-lop-arrow { color: #94a3b8; }
 
+/* A number of LoPs: red when there were any */
 .rv-lop-count {
-  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
   flex: none;
-  min-width: 2.5rem;
-  padding: 0.25rem 0.6rem;
+  min-width: 2.75rem;
+  padding: 0.1rem 0.5rem;
   border-radius: 999px;
   background: #fee2e2;
   color: #b91c1c;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   font-weight: 800;
-  text-align: center;
   font-variant-numeric: tabular-nums;
 }
 
+.rv-lop-count i { font-size: 0.65rem; }
 .rv-lop-count.is-zero { background: #f1f5f9; color: var(--rv-muted); }
+
+/* Checkpoints and LoPs card: the LoP total next to the points, and the points per tile */
+.rv-header-lops {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-left: auto;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.rv-header-lops i { font-size: 0.7rem; }
+.rv-header-lops + .rv-header-total { margin-left: 0.75rem; }
+/* Only the title may wrap on narrow screens */
+.rv-header-lops,
+.rv-course .rv-header-total { flex: none; white-space: nowrap; }
+
+.rv-rates {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 1rem;
+  padding: 0.75rem 1.25rem 0;
+  font-size: 0.8rem;
+  color: var(--rv-muted);
+}
+
+.rv-rates-title { font-weight: 700; }
+.rv-rate { display: inline-flex; align-items: center; gap: 0.35rem; font-weight: 700; color: var(--rv-text); font-variant-numeric: tabular-nums; }
+.rv-rate .rv-lop-count { font-size: 0.75rem; min-width: 2.5rem; }
 
 /* The map card's header holds the floor and rotation buttons, then the total */
 .rv-map .rv-card-header { padding-top: 0.6rem; padding-bottom: 0.6rem; white-space: nowrap; }
@@ -585,8 +569,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+.rv-seg-meta { gap: 0.3rem; }
 .rv-seg-meta i { font-size: 0.7rem; }
-.rv-seg-meta .rv-sec-evac { margin-top: 0.2rem; }
+.rv-seg-meta .rv-lop-count i { font-size: 0.6rem; }
+/* tiles × points per tile: what the next checkpoint scores when reached */
+.rv-seg-calc { font-weight: 600; }
+.rv-track-seg:not(.is-ok) .rv-seg-calc { color: #94a3b8; text-decoration: line-through; }
 
 .rv-node-points {
   font-size: 1.6rem;
@@ -1071,9 +1059,6 @@
 }
 
 @media (max-width: 991.98px) {
-  .rv-main { grid-template-columns: minmax(0, 1fr); }
-  /* Map first, the LoP list below it */
-  .rv-map { order: -1; }
 }
 
 @media (max-width: 575.98px) {

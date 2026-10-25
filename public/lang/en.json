@@ -391,7 +391,9 @@
             "perVictim": "/ victim",
             "found": "Found",
             "identified": "Identified",
-            "exitFixed": "{{points}} points for exiting"
+            "exitFixed": "{{points}} points for exiting",
+            "cpAndLops": "Checkpoints and LoPs",
+            "perTile": "Points per tile"
         },
         "judge": {
             "before": "Before the start of the run record, please confirm that the following information is correct.",

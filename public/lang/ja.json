@@ -391,7 +391,9 @@
             "perVictim": "/ 人",
             "found": "発見",
             "identified": "識別",
-            "exitFixed": "脱出すると {{points}} 点"
+            "exitFixed": "脱出すると {{points}} 点",
+            "cpAndLops": "チェックポイントと進行停止",
+            "perTile": "1タイルあたりの点"
         },
         "judge": {
             "before": "次の画面に進む前に，以下の情報を『主審と一緒に』もう一度確認してください．",

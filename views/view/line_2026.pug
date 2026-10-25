@@ -93,93 +93,34 @@ html(ng-app="ddApp")
             i.fas.fa-book
             | #{rule}
 
-      //- LoPs per section and the map
-      .rv-main
-        section.rv-card.rv-lops
-          .rv-card-header
-            i.fas.fa-step-forward
-            | {{'common.lops' | translate}}
-            span.rv-header-total {{sum(LoPs)}} {{'common.times' | translate}}
-          //- One line per section: from | path | to | count, in columns shared by all rows.
-          //- The section with the evacuation zone shows it on the path: 1 → evacuation zone → 2
-          ul.rv-lop-list
-            li.rv-lop(ng-repeat='cp in range(LoPs.length) track by $index' ng-class="{'is-evac': $index == EvacuationAreaLoPIndex}")
-              span.rv-sec.rv-sec-start(ng-if='$first')
-                i.fas.fa-play
-                | {{'line.judge.start' | translate}}
-              span.rv-sec.rv-sec-cp(ng-if='!$first' title="{{'line.judge.checkpoint' | translate}} {{$index}}")
-                i.fas.fa-flag
-                | {{$index}}
-              span.rv-lop-path
-                span.rv-path-line(ng-if='$index == EvacuationAreaLoPIndex')
-                span.rv-sec.rv-sec-evac(ng-if='$index == EvacuationAreaLoPIndex' title="{{'line.view.evacuation' | translate}}")
-                  i.fas.fa-ambulance
-                  | {{'line.view.evacuationShort' | translate}}
-                span.rv-path-line.rv-path-arrow
-              span.rv-sec.rv-sec-cp(ng-if='!$last' title="{{'line.judge.checkpoint' | translate}} {{$index+1}}")
-                i.fas.fa-flag
-                | {{$index+1}}
-              span.rv-sec.rv-sec-exit(ng-if='$last')
-                i.fas.fa-flag-checkered
-                | {{'line.view.goal' | translate}}
-              span.rv-lop-count(ng-class="{'is-zero': !LoPs[$index]}") {{LoPs[$index]?LoPs[$index]:0}}
-
-        section.rv-card.rv-map
-          .rv-card-header
-            i.fas.fa-map
-            | {{'line.sign.item' | translate}}
-            //- Floor and rotation in the header row, before the total
-            .rv-map-tools
-              .btn-group(ng-show='height > 1')
-                button.rv-tool(type='button' ng-repeat='zz in range(height)' ng-class='{active: zz == z}' ng-click='changeFloor(zz)')
-                  i.fas.fa-layer-group(ng-if='$first')
-                  |  {{zz}}
-              .btn-group
-                button.rv-tool(type='button' title='-90°' ng-click='tileRot(-90)')
-                  i.fas.fa-undo
-                button.rv-tool(type='button' title='+90°' ng-click='tileRot(90)')
-                  i.fas.fa-redo
-            span.rv-header-total {{raw_score - checkTotal() - exitBonusPoints()}} {{'common.point' | translate}}
-          //- What the colours on the tiles mean
-          .rv-map-legend
-            span.rv-key.is-done {{'line.view.tileDone' | translate}}
-            span.rv-key.is-halfdone {{'line.view.tilePartial' | translate}}
-            span.rv-key.is-undone {{'line.view.tileNone' | translate}}
-            span.rv-key.is-cp {{'line.view.checkpoint' | translate}}
-          .tilearea
-            #wrapTile.mx-auto
-              div(ng-repeat='r in range(length)', ng-if='sRotate==0', style='display: flex;')
-                div(style='text-align:center;')
-                  .slot(ng-repeat='c in range(width)')
-                    tile(template='view' tile="mtiles[c+','+r+','+z]", ng-click='showElements(c,r,z)')
-              div(ng-repeat='r in range(length)', ng-if='sRotate==180', style='display: flex;')
-                .slot(ng-repeat='c in range(width)')
-                  tile(template='view' tile="mtiles[width - c -1+','+(length - r -1)+','+z]", ng-click='showElements(width - c -1,length - r -1,z)')
-              div(ng-repeat='r in range(width)', ng-if='sRotate==270', style='display: flex;')
-                .slot(ng-repeat='c in range(length)')
-                  tile(template='view' tile="mtiles[width - r -1+','+c+','+z]", ng-click='showElements(width-r-1,c,z)')
-              div(ng-repeat='r in range(width)', ng-if='sRotate==90', style='display: flex;')
-                .slot(ng-repeat='c in range(length)')
-                  tile(template='view' tile="mtiles[r+','+ (length - c-1) +','+z]", ng-click='showElements(r,length-c-1,z)')
-
-      //- Checkpoints
-      section.rv-card
+      //- Checkpoints and LoPs together: a section's checkpoint points are its tiles times the
+      //- points per tile, and those depend on the LoPs in the section
+      section.rv-card.rv-course
         .rv-card-header
           i.fas.fa-flag-checkered
-          | {{'line.sign.checkPointScore' | translate}}
+          | {{'line.view.cpAndLops' | translate}}
+          span.rv-header-lops(title="{{'common.lops' | translate}}")
+            i.fas.fa-step-forward
+            | {{sum(LoPs)}} {{'common.times' | translate}}
           span.rv-header-total {{checkTotal()}} {{'common.point' | translate}}
+        //- Points per tile for each number of LoPs in a section
+        .rv-rates
+          span.rv-rates-title {{'line.view.perTile' | translate}}
+          span.rv-rate(ng-repeat='n in [0, 1, 2, 3]')
+            span.rv-lop-count(ng-class="{'is-zero': !n}")
+              i.fas.fa-step-forward
+              | {{n}}{{$last ? '+' : ''}}
+            | {{LoPsCountPoint(n)}} {{'common.point' | translate}}
         //- The course from start to goal: a dot per checkpoint (reached or not) with the points
-        //- scored there, and between the dots the section's tiles and LoPs
+        //- scored there, and between the dots the section's LoPs and its tiles × points per tile
         .rv-track
           .rv-track-seg(ng-repeat-start='cp in checkPointDistance track by $index' ng-if='!$first' ng-class="{'is-ok': cp.status, 'is-evac': $index - 1 == EvacuationAreaLoPIndex}")
             .rv-seg-line
             .rv-seg-meta
-              span
-                i.fas.fa-road
-                |  {{cp.dis}} {{'common.tile' | translate}}
-              span
+              span.rv-lop-count(ng-class="{'is-zero': !LoPs[$index-1]}" title="{{'common.lops' | translate}}")
                 i.fas.fa-step-forward
-                |  {{LoPs[$index-1]}} {{'common.times' | translate}}
+                | {{LoPs[$index-1]}}
+              span.rv-seg-calc {{cp.dis}} {{'common.tile' | translate}} × {{LoPsCountPoint(LoPs[$index-1])}}
               span.rv-sec.rv-sec-evac(ng-if='$index - 1 == EvacuationAreaLoPIndex' title="{{'line.view.evacuation' | translate}}")
                 i.fas.fa-ambulance
                 | {{'line.view.evacuationShort' | translate}}
@@ -199,6 +140,45 @@ html(ng-app="ddApp")
             .rv-node-points
               | {{cp.point}}
               small {{'common.point' | translate}}
+
+      //- The map with the item points
+      section.rv-card.rv-map
+        .rv-card-header
+          i.fas.fa-map
+          | {{'line.sign.item' | translate}}
+          //- Floor and rotation in the header row, before the total
+          .rv-map-tools
+            .btn-group(ng-show='height > 1')
+              button.rv-tool(type='button' ng-repeat='zz in range(height)' ng-class='{active: zz == z}' ng-click='changeFloor(zz)')
+                i.fas.fa-layer-group(ng-if='$first')
+                |  {{zz}}
+            .btn-group
+              button.rv-tool(type='button' title='-90°' ng-click='tileRot(-90)')
+                i.fas.fa-undo
+              button.rv-tool(type='button' title='+90°' ng-click='tileRot(90)')
+                i.fas.fa-redo
+          span.rv-header-total {{raw_score - checkTotal() - exitBonusPoints()}} {{'common.point' | translate}}
+        //- What the colours on the tiles mean
+        .rv-map-legend
+          span.rv-key.is-done {{'line.view.tileDone' | translate}}
+          span.rv-key.is-halfdone {{'line.view.tilePartial' | translate}}
+          span.rv-key.is-undone {{'line.view.tileNone' | translate}}
+          span.rv-key.is-cp {{'line.view.checkpoint' | translate}}
+        .tilearea
+          #wrapTile.mx-auto
+            div(ng-repeat='r in range(length)', ng-if='sRotate==0', style='display: flex;')
+              div(style='text-align:center;')
+                .slot(ng-repeat='c in range(width)')
+                  tile(template='view' tile="mtiles[c+','+r+','+z]", ng-click='showElements(c,r,z)')
+            div(ng-repeat='r in range(length)', ng-if='sRotate==180', style='display: flex;')
+              .slot(ng-repeat='c in range(width)')
+                tile(template='view' tile="mtiles[width - c -1+','+(length - r -1)+','+z]", ng-click='showElements(width - c -1,length - r -1,z)')
+            div(ng-repeat='r in range(width)', ng-if='sRotate==270', style='display: flex;')
+              .slot(ng-repeat='c in range(length)')
+                tile(template='view' tile="mtiles[width - r -1+','+c+','+z]", ng-click='showElements(width-r-1,c,z)')
+            div(ng-repeat='r in range(width)', ng-if='sRotate==90', style='display: flex;')
+              .slot(ng-repeat='c in range(length)')
+                tile(template='view' tile="mtiles[r+','+ (length - c-1) +','+z]", ng-click='showElements(r,length-c-1,z)')
 
       .rv-two-col
         //- Exit bonus
