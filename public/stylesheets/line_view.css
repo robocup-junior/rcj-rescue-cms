@@ -129,6 +129,8 @@
 }
 
 .rv-card {
+  /* Clear of the sticky bar when jumped to */
+  scroll-margin-top: 4.5rem;
   background: var(--rv-card);
   border: 1px solid var(--rv-border);
   border-radius: var(--rv-radius);
@@ -263,6 +265,10 @@
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
 }
+
+/* The chips that jump to their card */
+a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s ease; }
+.rv-summary a.rv-chip:hover { background: rgba(255, 255, 255, 0.28); }
 
 .rv-chip-result { background: #eff6ff; }
 .rv-chip-result .rv-chip-value { color: var(--rv-accent); }
