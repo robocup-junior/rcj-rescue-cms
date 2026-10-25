@@ -181,38 +181,7 @@ html(ng-app="ddApp")
               small {{'common.point' | translate}}
 
       .rv-two-col
-        //- Exit bonus
-        section.rv-card#rv-exit
-          .rv-card-header
-            i.fas.fa-sign-out-alt
-            | {{'line.sign.exitBonus' | translate}}
-            span.rv-header-total {{exitBonusPoints()}} {{'common.point' | translate}}
-          //- Did the robot exit, and how much of the 60 points the LoPs took away
-          .rv-exit(ng-class="{'is-ng': !exitBonus}")
-            .rv-exit-head
-              .rv-exit-image(ng-class="exitBonus ? 'is-ok' : 'is-ng'")
-                img(src='/images/line_bonus.png', alt='', ng-if="league != 'LineNL'")
-                img(src='/images/nl_bonus.png', alt='', ng-if="league == 'LineNL'")
-                span.rv-exit-mark
-                  i.fas(ng-class="exitBonus ? 'fa-check' : 'fa-times'")
-              .rv-exit-status
-                .rv-exit-title(ng-class="exitBonus ? 'is-ok' : 'is-ng'")
-                  | {{(exitBonus ? 'line.view.exitDone' : 'line.view.exitNotDone') | translate}}
-                .rv-exit-formula(ng-if='exitBonus')
-                  | {{'line.view.exitBase' | translate}} 60 − {{'common.lops' | translate}} {{sum(LoPs)}} {{'common.times' | translate}} × 5
-            .rv-meter(ng-if='exitBonus')
-              .rv-meter-track
-                .rv-meter-bonus(ng-style="{width: (exitBonusPoints() / 60 * 100) + '%'}")
-                .rv-meter-loss(ng-style="{width: ((60 - exitBonusPoints()) / 60 * 100) + '%'}")
-              .rv-meter-legend
-                span.rv-legend.rv-legend-bonus
-                  | {{'line.sign.exitBonus' | translate}}
-                  b {{exitBonusPoints()}}
-                span.rv-legend.rv-legend-loss(ng-if='exitBonusPoints() < 60')
-                  | {{'line.view.exitDeduction' | translate}}
-                  b −{{60 - exitBonusPoints()}}
-                span.rv-legend-max 60 {{'common.point' | translate}}
-
+        //- Rescue, then the exit bonus: the order they happen in a run
         //- Rescue
         section.rv-card#rv-rescue
           .rv-card-header
@@ -245,6 +214,38 @@ html(ng-app="ddApp")
                     img(ng-src="{{v.zoneType == 'RED' ? '/images/evacZone/red_lv2.png' : '/images/evacZone/green_lv2.png'}}" alt="{{v.zoneType}}")
                   span.rv-rescue-mult
                     | {{calc_victim_multipliers($index) == 0 ? '—' : 'x' + calc_victim_multipliers($index)}}
+
+        //- Exit bonus
+        section.rv-card#rv-exit
+          .rv-card-header
+            i.fas.fa-sign-out-alt
+            | {{'line.sign.exitBonus' | translate}}
+            span.rv-header-total {{exitBonusPoints()}} {{'common.point' | translate}}
+          //- Did the robot exit, and how much of the 60 points the LoPs took away
+          .rv-exit(ng-class="{'is-ng': !exitBonus}")
+            .rv-exit-head
+              .rv-exit-image(ng-class="exitBonus ? 'is-ok' : 'is-ng'")
+                img(src='/images/line_bonus.png', alt='', ng-if="league != 'LineNL'")
+                img(src='/images/nl_bonus.png', alt='', ng-if="league == 'LineNL'")
+                span.rv-exit-mark
+                  i.fas(ng-class="exitBonus ? 'fa-check' : 'fa-times'")
+              .rv-exit-status
+                .rv-exit-title(ng-class="exitBonus ? 'is-ok' : 'is-ng'")
+                  | {{(exitBonus ? 'line.view.exitDone' : 'line.view.exitNotDone') | translate}}
+                .rv-exit-formula(ng-if='exitBonus')
+                  | {{'line.view.exitBase' | translate}} 60 − {{'common.lops' | translate}} {{sum(LoPs)}} {{'common.times' | translate}} × 5
+            .rv-meter(ng-if='exitBonus')
+              .rv-meter-track
+                .rv-meter-bonus(ng-style="{width: (exitBonusPoints() / 60 * 100) + '%'}")
+                .rv-meter-loss(ng-style="{width: ((60 - exitBonusPoints()) / 60 * 100) + '%'}")
+              .rv-meter-legend
+                span.rv-legend.rv-legend-bonus
+                  | {{'line.sign.exitBonus' | translate}}
+                  b {{exitBonusPoints()}}
+                span.rv-legend.rv-legend-loss(ng-if='exitBonusPoints() < 60')
+                  | {{'line.view.exitDeduction' | translate}}
+                  b −{{60 - exitBonusPoints()}}
+                span.rv-legend-max 60 {{'common.point' | translate}}
 
       //- Comment and signatures (staff only)
       if user
