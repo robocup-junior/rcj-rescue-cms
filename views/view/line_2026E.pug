@@ -110,6 +110,7 @@ html(ng-app="ddApp")
           span.rv-key.is-halfdone {{'line.view.tilePartial' | translate}}
           span.rv-key.is-undone {{'line.view.tileNone' | translate}}
           span.rv-key.is-cp {{'line.view.checkpoint' | translate}}
+          span.rv-key.is-evac(ng-if='hasEvacZone()') {{'line.view.evacuation' | translate}}
         .tilearea
           #wrapTile.mx-auto
             div(ng-repeat='r in range(length)', ng-if='sRotate==0', style='display: flex;')

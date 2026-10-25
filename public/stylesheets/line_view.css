@@ -451,6 +451,7 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rv-key.is-undone::before, .rv-tile-frame.is-undone { border-color: #ef4444; background: rgba(239, 68, 68, 0.14); }
 .rv-key.is-cp { color: #c2410c; }
 .rv-key.is-cp::before { border-color: #f97316; background: linear-gradient(135deg, #f97316 50%, #fff 50%); }
+.rv-key.is-evac::before { border-color: #475569; background: repeating-linear-gradient(45deg, #e2e8f0 0 1px, transparent 1px 4px), repeating-linear-gradient(135deg, #e2e8f0 0 1px, #f8fafc 1px 4px); }
 
 .rv-tile-points {
   position: absolute;

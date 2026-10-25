@@ -1,6 +1,12 @@
 // register the directive with your app module
 var app = angular.module('ddApp', ['ngTouch', 'ngAnimate', 'ui.bootstrap', 'pascalprecht.translate', 'ngCookies']);
 var marker = {};
+
+// Tile images of the evacuation zone: ev1.png, ev2.png, ev3.png
+function isEvacImage(image) {
+    return /^ev\d+\.png$/.test(image || '');
+}
+
 var socket;
 var txt_multi;
 var txt_gap;
@@ -360,6 +366,14 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         return $scope.exitBonus * Math.max(0, 60 - 5 * $scope.sum($scope.LoPs));
     };
 
+
+    // Whether the map has an evacuation zone (run view map legend)
+    $scope.hasEvacZone = function () {
+        for (let key in $scope.mtiles) {
+            if ($scope.mtiles[key] && isEvacImage($scope.mtiles[key].tileType && $scope.mtiles[key].tileType.image)) return true;
+        }
+        return false;
+    }
 
     $scope.range = function (n) {
         arr = [];
