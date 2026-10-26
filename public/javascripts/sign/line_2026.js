@@ -180,10 +180,9 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     launchSocketIo();
     setInterval(launchSocketIo, 15000);
 
-    // The view and sign pages are covered by a loading screen until the run and its map are drawn
+    // The view and sign pages are covered by a loading screen until the map is complete (line_view.js)
     function pageLoaded() {
-        tile_size();
-        document.body.classList.remove('rv-is-loading');
+        if (typeof revealRunPage === 'function') revealRunPage(tile_size);
     }
 
     function loadNewRun() {

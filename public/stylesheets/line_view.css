@@ -74,7 +74,7 @@
 
 .rv-loading svg { width: 112px; height: 112px; overflow: visible; filter: drop-shadow(0 8px 20px rgba(15, 23, 42, 0.1)); }
 .rv-loading-tile { fill: #fff; stroke: var(--rv-border); stroke-width: 2; }
-.rv-loading-line { fill: none; stroke: #1e293b; stroke-width: 7; stroke-linecap: round; }
+.rv-loading-line { fill: none; stroke: #1e293b; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
 
 /* The part of the line just followed, in the page's colour */
 .rv-loading-trail {
@@ -82,6 +82,7 @@
   stroke: var(--rv-accent);
   stroke-width: 7;
   stroke-linecap: round;
+  stroke-linejoin: round;
   stroke-dasharray: 22 100;
   animation: rv-trail 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
 }
