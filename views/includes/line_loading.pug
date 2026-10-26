@@ -1,25 +1,29 @@
 //- Covers the Rescue Line view and sign pages until the run and its map are drawn: the controller
 //- removes rv-is-loading from the body. Plain markup and script, since it shows before Angular
-//- has started. A robot follows a line across a tile in the page's colour; each time it reaches
-//- the end, the next course comes.
+//- has started. A robot follows the line across a tile in the page's colour; each time it reaches
+//- the end, the next tile comes. The tiles are drawn like the rules' tiles: the line enters and
+//- leaves at the middle of an edge (the tile is 4..116, its middle 60), and at an intersection a
+//- green marker before it shows the way (route), which is not the whole line then.
 -
   var tracks = [
-    'M26 96 C26 66 54 76 60 58 C66 40 94 54 94 24',
-    'M30 100 L30 60 Q30 46 44 46 L76 46 Q90 46 90 32 L90 18',
-    'M28 98 L28 62 A32 32 0 0 1 92 62 L92 98',
-    'M22 94 L46 70 L36 58 L66 44 L56 32 L96 22',
-    'M60 102 L60 80 C60 62 28 66 28 46 C28 24 62 18 78 28 C92 38 88 60 70 62',
-    'M18 60 C30 34 44 34 50 56 C56 78 70 78 76 56 C82 34 96 38 102 52'
+    { line: 'M60 116 L60 4' },
+    { line: 'M60 116 A56 56 0 0 1 116 60' },
+    { line: 'M60 116 L60 60 L4 60' },
+    { line: 'M60 116 L60 100 L32 84 L88 60 L32 36 L60 20 L60 4' },
+    { line: 'M60 116 L60 104 C24 98 24 70 60 60 C96 50 96 22 60 16 L60 4' },
+    { line: 'M60 116 L60 4 M4 60 L116 60', route: 'M60 116 L60 60 L116 60', green: [68, 70] }
   ];
+  tracks.forEach(function (t) { t.route = t.route || t.line; });
   var first = Math.floor(Math.random() * tracks.length);
   var track = tracks[first];
 .rv-loading(role='status' aria-label='Loading' data-tracks=JSON.stringify(tracks) data-track=first)
   .rv-loading-art
     svg(viewBox='0 0 120 120' aria-hidden='true')
       rect.rv-loading-tile(x='4' y='4' width='112' height='112' rx='20')
-      path.rv-loading-line(d=track)
-      path.rv-loading-trail(d=track pathLength='100')
-      circle.rv-loading-robot(r='7' style="offset-path: path('" + track + "')")
+      path.rv-loading-line(d=track.line)
+      rect.rv-loading-green(width='13' height='13' rx='2' x=track.green ? track.green[0] : 0 y=track.green ? track.green[1] : 0 style=track.green ? '' : 'display: none')
+      path.rv-loading-trail(d=track.route pathLength='100')
+      circle.rv-loading-robot(r='7' style="offset-path: path('" + track.route + "')")
     .rv-loading-label Rescue Line
     .rv-loading-dots
       span
@@ -31,13 +35,20 @@ script.
     var tracks = JSON.parse(loading.dataset.tracks);
     var index = Number(loading.dataset.track);
     var line = loading.querySelector('.rv-loading-line');
+    var green = loading.querySelector('.rv-loading-green');
     var trail = loading.querySelector('.rv-loading-trail');
     var robot = loading.querySelector('.rv-loading-robot');
-    // At the end of a run along the course, where the robot has faded out: the next course
+    // At the end of a run along the tile, where the robot has faded out: the next tile
     trail.addEventListener('animationiteration', function () {
       index = (index + 1) % tracks.length;
-      line.setAttribute('d', tracks[index]);
-      trail.setAttribute('d', tracks[index]);
-      robot.style.offsetPath = "path('" + tracks[index] + "')";
+      var track = tracks[index];
+      line.setAttribute('d', track.line);
+      trail.setAttribute('d', track.route);
+      robot.style.offsetPath = "path('" + track.route + "')";
+      green.style.display = track.green ? '' : 'none';
+      if (track.green) {
+        green.setAttribute('x', track.green[0]);
+        green.setAttribute('y', track.green[1]);
+      }
     });
   })();
