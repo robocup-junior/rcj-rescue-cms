@@ -101,9 +101,14 @@ test.describe('line sign page', () => {
   test('signs on the pad over the screen and gets the send button ready once all three have signed', async ({ page }) => {
     await open(page, `/line/sign/${ids.runs.Line}`);
     const count = page.locator('#rv-signatures .rv-header-total');
-    const overlay = page.locator('.rv-pad-overlay');
+    const overlay = page.locator('.rv-overlay.is-pad');
     const done = overlay.locator('.rv-pad-btn.is-done');
     await expect(count).toHaveText('0 / 3');
+
+    // Sending without the signatures points to the first missing one
+    await page.locator('.rv-submit').click();
+    await expect(page.locator('.rv-sign-slot').first()).toHaveClass(/is-missing/);
+    await expect(page.locator('.rv-overlay.is-send')).toBeHidden();
 
     async function stroke() {
       const pad = await page.locator('#rv-pad').boundingBox();
@@ -137,5 +142,26 @@ test.describe('line sign page', () => {
     await page.keyboard.press('Escape');
     await expect(overlay).toBeHidden();
     await expect(count).toHaveText('3 / 3');
+
+    // Check and send: an error keeps the sheet open to retry, then the run is sent.
+    // The request is answered here, so the seeded run stays unsent.
+    page.allowErrors(/500/);
+    let replies = [500, 200];
+    let sent = null;
+    await page.route(`**/api/runs/line/${ids.runs.Line}`, async (route) => {
+      if (route.request().method() !== 'PUT') return route.continue();
+      sent = route.request().postDataJSON();
+      await route.fulfill({ status: replies.shift(), body: '{}' });
+    });
+    const sheet = page.locator('.rv-overlay.is-send');
+    await page.locator('.rv-submit').click();
+    await expect(sheet).toBeVisible();
+    await expect(sheet.locator('.rv-send-signs img')).toHaveCount(3);
+    await sheet.locator('.rv-pad-btn.is-send').click();
+    await expect(sheet.locator('.rv-send-error')).toBeVisible();
+    await sheet.locator('.rv-pad-btn.is-send').click();
+    await expect(sheet.locator('.rv-send-done')).toBeVisible();
+    expect(sent.status).toBe(4);
+    expect(sent.sign.captain).toMatch(/^data:image\/svg\+xml;base64,/);
   });
 });

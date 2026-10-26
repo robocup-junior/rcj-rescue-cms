@@ -35,7 +35,7 @@ mixin signSlot(index, title)
 
 //- The pad over the whole screen, for the signature being written (signature_pad.js)
 mixin signPad
-  .rv-pad-overlay(ng-show='signing !== null' role='dialog' aria-modal='true' aria-labelledby='rv-pad-title')
+  .rv-overlay.is-pad(ng-show='signing !== null' role='dialog' aria-modal='true' aria-labelledby='rv-pad-title')
     .rv-pad-sheet
       .rv-pad-head
         i.fas.fa-signature
@@ -85,8 +85,57 @@ mixin signForm
         +signSlot(1, 'line.sign.ref_sign')
         +signSlot(2, 'line.sign.cref_sign')
 
+  //- Says what is still missing; once all have signed it opens the sheet to check and send
   button.rv-submit(type='button' ng-click='send_sign()' ng-class="{'is-ready': signedCount() == 3}")
-    i.fas.fa-paper-plane
-    | {{'line.sign.submit' | translate}}
+    i.fas(ng-class="signedCount() == 3 ? 'fa-paper-plane' : 'fa-signature'")
+    span(ng-if='signedCount() == 3') {{'line.sign.submit' | translate}}
+    span(ng-if='signedCount() < 3') {{'line.sign.needSigns' | translate:{n: 3 - signedCount()} }}
 
   +signPad
+  +sendSheet
+
+//- Checking the run once more before sending it, then sending, an error to retry, the end
+mixin sendSheet
+  .rv-overlay.is-send(ng-show='sendState' role='dialog' aria-modal='true' aria-labelledby='rv-send-title')
+    .rv-send-sheet
+      //- Done: the run is final
+      .rv-send-done(ng-if="sendState == 'done'")
+        .rv-send-done-mark
+          i.fas.fa-check
+        #rv-send-title.rv-send-title {{'line.sign.sent' | translate}}
+        p {{'line.sign.complete' | translate}}
+        button.rv-pad-btn.is-done(type='button' ng-click='leaveSign()')
+          | {{'line.sign.backToList' | translate}}
+      div(ng-if="sendState != 'done'")
+        .rv-pad-head
+          i.fas.fa-paper-plane
+          span#rv-send-title {{'line.sign.confirmTitle' | translate}}
+        .rv-send-body
+          //- What is being sent: the team, the score and time, the signatures and the comment
+          .rv-send-run
+            .rv-send-team {{team}}
+            .rv-send-stats
+              span
+                b {{score}}
+                |  {{'common.point' | translate}}
+              span
+                i.fas.fa-stopwatch
+                |  {{minutes*60*1000+seconds*1000 | date:'m:ss'}}
+          .rv-send-signs
+            figure(ng-repeat="title in ['line.sign.cap_sign', 'line.sign.ref_sign', 'line.sign.cref_sign']")
+              img(ng-src='{{signData[$index]}}' alt='')
+              figcaption {{title | translate}}
+          .rv-send-comment(ng-if='comment')
+            i.fas.fa-comment
+            | {{comment}}
+          p.rv-send-warning
+            i.fas.fa-exclamation-triangle
+            | {{'line.sign.sendNote' | translate}}
+          p.rv-send-error(ng-if="sendState == 'error'" role='alert')
+            i.fas.fa-wifi
+            | {{'line.sign.sendError' | translate}}
+        .rv-pad-foot
+          button.rv-pad-btn.is-cancel(type='button' ng-click='cancelSend()' ng-disabled="sendState == 'sending'") {{'common.cancel' | translate}}
+          button.rv-pad-btn.is-done.is-send(type='button' ng-click='confirmSend()' ng-disabled="sendState == 'sending'")
+            i.fas(ng-class="sendState == 'sending' ? 'fa-spinner fa-spin' : (sendState == 'error' ? 'fa-redo' : 'fa-paper-plane')")
+            |  {{(sendState == 'sending' ? 'line.sign.sending' : (sendState == 'error' ? 'line.sign.retry' : 'line.sign.send')) | translate}}

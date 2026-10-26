@@ -575,21 +575,6 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         });
     };
 
-    $scope.success_message = function () {
-        playSound(sInfo);
-        swal({
-            title: 'Recorded!',
-            text: txt_complete,
-            type: 'success'
-        }).then((result) => {
-            if (result.value) {
-                if ($scope.getParam('return')) $scope.go($scope.getParam('return'));
-                else $scope.go("/line/" + $scope.competition_id + "/" + $scope.league);
-            }
-        })
-        console.log("Success!!");
-    }
-
     // Signatures are written on a pad over the whole screen (signature_pad.js); signing again
     // replaces the signature only once the new one is done
     $scope.signing = null;
@@ -598,7 +583,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
     $scope.openSign = function (index) {
         $scope.signing = index;
-        document.documentElement.classList.add('rv-pad-open');
+        document.documentElement.classList.add('rv-overlay-open');
         $timeout(function () {
             if (!signPad) {
                 signPad = new SignaturePad(document.getElementById('rv-pad'), function () {
@@ -615,7 +600,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.closeSign = function (save) {
         if (save && !signPad.isEmpty()) $scope.signData[$scope.signing] = signPad.toDataURL();
         $scope.signing = null;
-        document.documentElement.classList.remove('rv-pad-open');
+        document.documentElement.classList.remove('rv-overlay-open');
     }
 
     $scope.undoSign = function () {
@@ -627,7 +612,9 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     }
 
     document.addEventListener('keydown', function (event) {
-        if (event.key == 'Escape' && $scope.signing !== null) $scope.$apply(function () { $scope.closeSign(false); });
+        if (event.key != 'Escape') return;
+        if ($scope.signing !== null) $scope.$apply(function () { $scope.closeSign(false); });
+        else if ($scope.sendState == 'confirm' || $scope.sendState == 'error') $scope.$apply($scope.cancelSend);
     });
 
     $scope.signedCount = function () {
@@ -636,58 +623,57 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         }).length;
     }
 
+    // Sending the run: the send button first leads to a missing signature, then to a sheet to check
+    // the run once more before it is final; the sheet shows the sending, an error to retry, the end
+    $scope.sendState = null;
+
     $scope.send_sign = function () {
         playSound(sClick);
-        var run = {}
-        run.comment = $scope.comment;
-        run.sign = {}
-        var err_mes = ""
-        if (!$scope.signData[0]) {
-            err_mes += "[" + txt_cap_sign + "] "
-        } else {
-            run.sign.captain = $scope.signData[0]
-        }
-
-        if (!$scope.signData[1]) {
-            err_mes += "[" + txt_ref_sign + "] "
-        } else {
-            run.sign.referee = $scope.signData[1]
-        }
-
-        if (!$scope.signData[2]) {
-            err_mes += "[" + txt_cref_sign + "] "
-        } else {
-            run.sign.referee_as = $scope.signData[2]
-        }
-
-
-        if (err_mes != "") {
-            playSound(sError);
-            swal("Oops!", err_mes + txt_no_sign, "error");
+        var missing = $scope.signData.findIndex(function (data) {
+            return !data;
+        });
+        if (missing >= 0) {
+            var slot = document.querySelectorAll('.rv-sign-slot')[missing];
+            slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            slot.classList.remove('is-missing');
+            void slot.offsetWidth;
+            slot.classList.add('is-missing');
             return;
         }
-        playSound(sInfo);
-        swal({
-            title: "Finish Run?",
-            text: txt_confirm,
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes, finish it!",
-            confirmButtonColor: "#ec6c62"
-        }).then((result) => {
-            if (result.value) {
-                console.log("STATUS UPDATED(4)")
-                run.status = 4;
-                $http.put("/api/runs/line/" + runId, run).then(function (response) {
-                    setTimeout($scope.success_message, 500);
-                }, function (response) {
-                    playSound(sError);
-                    swal("Oops", "We couldn't connect to the server! Please notice to system manager.", "error");
-                    console.log("Error: " + response.statusText);
-                });
-            }
-        })
+        $scope.sendState = 'confirm';
+        document.documentElement.classList.add('rv-overlay-open');
+    }
 
+    $scope.cancelSend = function () {
+        $scope.sendState = null;
+        document.documentElement.classList.remove('rv-overlay-open');
+    }
+
+    $scope.confirmSend = function () {
+        if ($scope.sendState == 'sending') return;
+        $scope.sendState = 'sending';
+        var run = {
+            comment: $scope.comment,
+            sign: {
+                captain: $scope.signData[0],
+                referee: $scope.signData[1],
+                referee_as: $scope.signData[2]
+            },
+            status: 4
+        };
+        $http.put("/api/runs/line/" + runId, run).then(function () {
+            playSound(sInfo);
+            $scope.sendState = 'done';
+        }, function (response) {
+            playSound(sError);
+            $scope.sendState = 'error';
+            console.log("Error: " + response.statusText);
+        });
+    }
+
+    $scope.leaveSign = function () {
+        if ($scope.getParam('return')) $scope.go($scope.getParam('return'));
+        else $scope.go("/line/" + $scope.competition_id + "/" + $scope.league);
     }
 
     function undefined2false(tmp) {

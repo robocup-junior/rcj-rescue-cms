@@ -1193,11 +1193,11 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   transition: background 0.15s ease;
 }
 
-/* The pad over the whole screen (signature_pad.js): the page behind stays still while signing */
-html.rv-pad-open,
-html.rv-pad-open body { overflow: hidden; overscroll-behavior: none; }
+/* The sheets over the page (the signature pad, sending the run): the page behind stays still */
+html.rv-overlay-open,
+html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 
-.rv-pad-overlay {
+.rv-overlay {
   position: fixed;
   inset: 0;
   z-index: 1060;
@@ -1325,6 +1325,98 @@ html.rv-pad-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-pad-btn:focus-visible,
 .rv-pad-close:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
 
+/* A slot still to sign, pointed out by the send button */
+.rv-sign-slot.is-missing { animation: rv-missing 1.2s ease-out; }
+
+@keyframes rv-missing {
+  0%, 40% { border-color: var(--rv-accent); box-shadow: 0 0 0 4px var(--rv-focus); }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-sign-slot.is-missing { animation: none; border-color: var(--rv-accent); }
+}
+
+/* The sheet to check and send the run */
+.rv-send-sheet {
+  width: min(560px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  border-radius: var(--rv-radius);
+  background: #fff;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.3);
+}
+
+/* No close button here: the sheet's own cancel button closes it */
+.rv-send-sheet .rv-pad-head { padding: 0.9rem 1.1rem; }
+
+.rv-send-body { display: flex; flex-direction: column; gap: 1rem; padding: 1.1rem 1.1rem 1rem; }
+
+.rv-send-run {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+}
+
+.rv-send-team { font-size: 1.15rem; font-weight: 800; }
+.rv-send-stats { display: flex; gap: 1rem; color: var(--rv-muted); font-weight: 700; }
+.rv-send-stats b { color: var(--rv-text); font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+
+.rv-send-signs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; }
+.rv-send-signs figure { margin: 0; padding: 0.4rem; border: 1px solid var(--rv-border); border-radius: 10px; background: #f8fafc; }
+.rv-send-signs img { display: block; width: 100%; height: 56px; object-fit: contain; border-radius: 6px; background: #fff; }
+.rv-send-signs figcaption { margin-top: 0.3rem; font-size: 0.72rem; font-weight: 700; color: var(--rv-muted); text-align: center; }
+
+.rv-send-comment {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: #f8fafc;
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.rv-send-comment i { margin-top: 0.2rem; color: var(--rv-muted); }
+
+.rv-send-warning,
+.rv-send-error {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.rv-send-warning { background: #fffbeb; color: #b45309; }
+.rv-send-error { background: var(--rv-ng-soft); color: #b91c1c; }
+.rv-send-warning i,
+.rv-send-error i { margin-top: 0.2rem; }
+
+.rv-pad-btn.is-send { flex: 0 1 12rem; }
+
+/* Sent: the run is final */
+.rv-send-done { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 2rem 1.5rem 1.5rem; text-align: center; }
+.rv-send-done p { margin: 0; color: var(--rv-muted); }
+.rv-send-done .rv-pad-btn { width: 100%; margin-top: 0.5rem; }
+.rv-send-title { font-size: 1.4rem; font-weight: 800; }
+
+.rv-send-done-mark {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--rv-ok);
+  color: #fff;
+  font-size: 2rem;
+}
+
 /* In the page's colour once all three have signed */
 .rv-submit.is-ready {
   background: linear-gradient(135deg, var(--rv-accent-strong) 0%, var(--rv-accent) 100%);
@@ -1400,13 +1492,17 @@ html.rv-pad-open body { overflow: hidden; overscroll-behavior: none; }
   .rv-back-label { width: 40px; padding: 0; justify-content: center; }
   .rv-back-label span { display: none; }
   /* The pad fills the phone; the small buttons keep only their icons */
-  .rv-pad-overlay { padding: 0; }
+  .rv-overlay { padding: 0; }
   .rv-pad-sheet { width: 100%; height: 100%; border-radius: 0; }
   .rv-pad-area { margin: 0.5rem; }
   .rv-pad-foot { padding: 0 0.5rem calc(0.5rem + env(safe-area-inset-bottom)); }
   .rv-pad-btn { padding: 0 0.8rem; }
   .rv-pad-btn:not(.is-cancel):not(.is-done) span { display: none; }
   .rv-pad-btn.is-done { min-width: 0; flex: 1; }
+  /* The send sheet comes up from the bottom */
+  .rv-overlay.is-send { align-items: flex-end; }
+  .rv-send-sheet { border-radius: var(--rv-radius) var(--rv-radius) 0 0; }
+  .rv-send-sheet .rv-pad-foot { padding-bottom: calc(0.75rem + env(safe-area-inset-bottom)); }
   .rv-exit-head { gap: 1rem; }
   .rv-exit-image { width: 88px; }
   .rv-exit-title { font-size: 1.15rem; }
@@ -1425,7 +1521,7 @@ html.rv-pad-open body { overflow: hidden; overscroll-behavior: none; }
 
 /* Phones held sideways: little height, so the bars get thin */
 @media (max-height: 480px) {
-  .rv-pad-overlay { padding: 0; }
+  .rv-overlay { padding: 0; }
   .rv-pad-sheet { width: 100%; height: 100%; border-radius: 0; }
   .rv-pad-head { padding: 0.25rem 0.25rem 0.25rem 0.9rem; font-size: 0.95rem; }
   .rv-pad-close { width: 36px; height: 36px; }

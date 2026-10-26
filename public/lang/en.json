@@ -497,7 +497,16 @@
             "undo": "Undo",
             "erase": "Erase all",
             "padHint": "Sign large, using the whole box",
-            "padRotate": "Turn the phone sideways for more room"
+            "padRotate": "Turn the phone sideways for more room",
+            "needSigns": "{{n}} more signature(s) needed",
+            "confirmTitle": "Send the run data?",
+            "sendNote": "Once sent, the run data is final and can no longer be corrected.",
+            "send": "Send",
+            "sending": "Sending...",
+            "retry": "Send again",
+            "sendError": "Could not reach the server. Check the connection and send again.",
+            "sent": "Sent",
+            "backToList": "Back to the list"
         }
     },
     "maze": {
