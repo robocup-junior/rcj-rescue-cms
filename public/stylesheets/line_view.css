@@ -1,5 +1,5 @@
-/* Rescue Line run view and sign pages (views/view/line_2026*.pug, views/sign/line_2026*.pug,
-   both showing views/view/common/line_2026*.pug)
+/* Rescue Line and Maze run view and sign pages (views/view/{line,maze}_2026*.pug,
+   views/sign/{line,maze}_2026*.pug, both showing views/view/common/{line,maze}_2026*.pug)
    The pages of a run each have their colour: view blue, judge red, sign orange. */
 @import url('/stylesheets/fonts.css');
 
@@ -153,6 +153,15 @@
   .rv-loading-robot { animation: none; offset-distance: 100%; }
   .rv-loading-dots span { animation-duration: 2.4s; }
 }
+
+/* The maze: walls on the tile edges, the robot's way faintly dotted, the tiles that are not plain */
+.is-maze .rv-loading-walls,
+.is-maze .rv-loading-outer { fill: none; stroke: #1e293b; stroke-width: 5; stroke-linecap: square; }
+.is-maze .rv-loading-route { fill: none; stroke: #cbd5e1; stroke-width: 3; stroke-dasharray: 1 6; stroke-linecap: round; }
+.is-maze .rv-loading-trail { stroke-width: 9; stroke-linejoin: round; }
+.rv-loading-black { fill: #1e293b; }
+.rv-loading-blue { fill: #93c5fd; }
+.rv-loading-cp { fill: #cbd5e1; }
 
 /* Nothing to scroll behind the loading screen */
 html:has(.rv-is-loading) { overflow: hidden; }
@@ -660,6 +669,84 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rv-tile-points.is-done { background: #059669; }
 .rv-tile-points.is-halfdone { background: #d97706; }
 .rv-tile-points.is-undone { background: #dc2626; }
+
+/* ---- Maze map (views/view/common/maze_2026*.pug) ----
+   The map is a table of 120px tiles scaled as a whole to the card (tile_size), so the status
+   frame and the points badge are sized in px of that table, like the tile images. */
+.rv-mz-area { box-sizing: content-box; padding: 1rem; overflow: hidden; }
+.rv-mz-area #wrapTile { margin-top: 0 !important; }
+
+.rv-mz-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  border: 8px solid;
+  pointer-events: none;
+}
+
+.rv-mz-frame.is-done { border-color: #10b981; background: rgba(16, 185, 129, 0.14); }
+.rv-mz-frame.is-halfdone { border-color: #f59e0b; background: rgba(245, 158, 11, 0.14); }
+.rv-mz-frame.is-undone { border-color: #ef4444; background: rgba(239, 68, 68, 0.12); }
+
+.rv-mz-points {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 50;
+  padding: 2px 12px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1.2;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.3);
+}
+
+.rv-mz-points.is-done { background: #059669; }
+.rv-mz-points.is-halfdone { background: #d97706; }
+.rv-mz-points.is-undone { background: #dc2626; }
+
+/* ---- Maze bonuses: a list of terms that add up, like a receipt ---- */
+.rv-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.rv-calc {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 1rem 1.25rem 1.25rem;
+  list-style: none;
+}
+
+.rv-calc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 4.5rem;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.rv-calc-label { min-width: 0; font-weight: 700; }
+.rv-calc-label i { width: 1.1rem; color: var(--rv-muted); text-align: center; }
+.rv-calc-expr { color: var(--rv-muted); font-size: 0.9rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rv-calc-value { font-size: 1.15rem; font-weight: 800; text-align: right; font-variant-numeric: tabular-nums; }
+.rv-calc-row.is-minus { background: var(--rv-ng-soft); }
+.rv-calc-row.is-minus .rv-calc-value { color: #b91c1c; }
+.rv-calc-row.is-total { grid-template-columns: minmax(0, 1fr) 4.5rem; margin-top: 0.25rem; border-top: 2px solid var(--rv-border); border-radius: 0; background: none; }
+.rv-calc-row.is-total .rv-calc-value { color: var(--rv-accent); font-size: 1.4rem; }
+.rv-calc-row.is-total .rv-calc-label { color: var(--rv-muted); }
+
+/* The exit card here has its list below the status */
+#rv-exit .rv-calc { padding-top: 0; }
 
 /* ---- Checkpoints: the course from start to goal ----
    One grid for the whole track: row 1 dots and lines, row 2 labels and section details,

@@ -1,9 +1,11 @@
-//- The parts of the Rescue Line sign pages (views/sign/line_2026*.pug) around the run they show.
-//- The controller is public/javascripts/sign/line_2026*.js, the styles line_view.css.
+//- The parts of the Rescue Line and Maze sign pages (views/sign/line_2026*.pug, maze_2026*.pug)
+//- around the run they show. The controllers are public/javascripts/sign/*_2026*.js, the styles
+//- line_view.css.
 
-mixin signTopbar
+//- kind: 'line' or 'maze', the path of the judge page
+mixin signTopbar(kind)
   header.rv-topbar
-    button.rv-back.rv-back-label(type='button' title="{{'line.sign.to_judge' | translate}}" ng-click="go('/line/judge/' + runId + '?return=' + getParam('return'))")
+    button.rv-back.rv-back-label(type='button' title="{{'line.sign.to_judge' | translate}}" ng-click="go('/" + (kind || 'line') + "/judge/' + runId + '?return=' + getParam('return'))")
       i.fas.fa-edit
       span {{'line.sign.to_judge' | translate}}
     .rv-team

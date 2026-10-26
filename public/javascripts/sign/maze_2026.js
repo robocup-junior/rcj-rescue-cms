@@ -66,7 +66,6 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
     $scope.MisIdent = 0;
 
-    $scope.enableSign = [false, false, false];
     $scope.signData = [null, null, null];
 
     $scope.cells = {};
@@ -116,6 +115,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         }
 
     })();
+
+    // The view and sign pages are covered by a loading screen until the map is complete (line_view.js)
+    function pageLoaded() {
+        if (typeof revealRunPage === 'function') revealRunPage(tile_size);
+    }
 
     function loadNewRun() {
         $http.get("/api/runs/maze/" + runId +
@@ -202,9 +206,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                         width = response.data.width;
                         length = response.data.length;
                         $timeout(tile_size, 0);
+                        $timeout(pageLoaded, 0);
 
                     }, function (response) {
                         console.log("Error: " + response.statusText);
+                        pageLoaded();
                     });
 
             }, function (response) {
@@ -311,6 +317,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         } else {
             return Math.min(bonus, $scope.LoPs * 15);
         }
+    }
+
+    // Misidentifications take 5 points each, but never more than the rest of the score
+    $scope.misIdentPoints = function () {
+        return Math.min($scope.MisIdent * 5, $scope.allItemScore() + $scope.reliability() + $scope.exitBonusPoints());
     }
 
     $scope.changeFloor = function (z) {
@@ -680,127 +691,105 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     }
 
 
-    $scope.success_message = function () {
-        playSound(sInfo);
-        swal({
-            title: 'Recorded!',
-            text: txt_complete,
-            type: 'success'
-        }).then((result) => {
-            if (result.value) {
-                if ($scope.getParam('return')) $scope.go($scope.getParam('return'));
-                else $scope.go("/maze/" + $scope.competition_id + "/" + $scope.league);
+    // Signatures are written on a pad over the whole screen (signature_pad.js); signing again
+    // replaces the signature only once the new one is done
+    $scope.signing = null;
+    $scope.padEmpty = true;
+    var signPad = null;
+
+    $scope.openSign = function (index) {
+        $scope.signing = index;
+        document.documentElement.classList.add('rv-overlay-open');
+        $timeout(function () {
+            if (!signPad) {
+                signPad = new SignaturePad(document.getElementById('rv-pad'), function () {
+                    $scope.$applyAsync(function () {
+                        $scope.padEmpty = signPad.isEmpty();
+                    });
+                });
             }
-        })
-        console.log("Success!!");
+            signPad.resize();
+            signPad.clear();
+        });
     }
 
-    $scope.toggleSign = function (index) {
-        $scope.enableSign[index] = !$scope.enableSign[index];
-        if (!$scope.enableSign[index]) {
-            let datapair;
-            switch (index) {
-                case 0:
-                    datapair = $("#cap_sig").jSignature("getData", "svgbase64");
-                    break;
-                case 1:
-                    datapair = $("#ref_sig").jSignature("getData", "svgbase64");
-                    break;
-                case 2:
-                    datapair = $("#refas_sig").jSignature("getData", "svgbase64")
-                    break;
-            }
-            $scope.signData[index] = "data:" + datapair[0] + "," + datapair[1];
-        } else {
-            if (!$scope.signData[index]) setTimeout(initSign, 100, index);
-        }
+    $scope.closeSign = function (save) {
+        if (save && !signPad.isEmpty()) $scope.signData[$scope.signing] = signPad.toDataURL();
+        $scope.signing = null;
+        document.documentElement.classList.remove('rv-overlay-open');
     }
 
-    function initSign(index) {
-        switch (index) {
-            case 0:
-                $("#cap_sig").jSignature();
-                break;
-            case 1:
-                $("#ref_sig").jSignature();
-                break;
-            case 2:
-                $("#refas_sig").jSignature();
-                break;
-        }
+    $scope.undoSign = function () {
+        signPad.undo();
     }
 
-    $scope.clearSign = function (index) {
-        switch (index) {
-            case 0:
-                $("#cap_sig").jSignature("clear");
-                break;
-            case 1:
-                $("#ref_sig").jSignature("clear");
-                break;
-            case 2:
-                $("#refas_sig").jSignature("clear");
-                break;
-        }
-        $scope.toggleSign(index);
+    $scope.eraseSign = function () {
+        signPad.clear();
     }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key != 'Escape') return;
+        if ($scope.signing !== null) $scope.$apply(function () { $scope.closeSign(false); });
+        else if ($scope.sendState == 'confirm' || $scope.sendState == 'error') $scope.$apply($scope.cancelSend);
+    });
+
+    $scope.signedCount = function () {
+        return $scope.signData.filter(function (data) {
+            return data;
+        }).length;
+    }
+
+    // Sending the run: the send button first leads to a missing signature, then to a sheet to check
+    // the run once more before it is final; the sheet shows the sending, an error to retry, the end
+    $scope.sendState = null;
 
     $scope.send_sign = function () {
         playSound(sClick);
-        var sign_empty = "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+PCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj48c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmVyc2lvbj0iMS4xIiB3aWR0aD0iMCIgaGVpZ2h0PSIwIj48L3N2Zz4="
-        var run = {}
-        run.comment = $scope.comment;
-        run.sign = {}
-        var err_mes = ""
-        if (!$scope.signData[0]) {
-            err_mes += "[" + txt_cap_sign + "] "
-        } else {
-            run.sign.captain = $scope.signData[0]
-        }
-
-        if (!$scope.signData[1]) {
-            err_mes += "[" + txt_ref_sign + "] "
-        } else {
-            run.sign.referee = $scope.signData[1]
-        }
-
-        if (!$scope.signData[2]) {
-            err_mes += "[" + txt_cref_sign + "] "
-        } else {
-            run.sign.referee_as = $scope.signData[2]
-        }
-
-
-        if (err_mes != "") {
-            playSound(sError);
-            swal("Oops!", err_mes + txt_no_sign, "error");
+        var missing = $scope.signData.findIndex(function (data) {
+            return !data;
+        });
+        if (missing >= 0) {
+            var slot = document.querySelectorAll('.rv-sign-slot')[missing];
+            slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            slot.classList.remove('is-missing');
+            void slot.offsetWidth;
+            slot.classList.add('is-missing');
             return;
         }
-        playSound(sInfo);
+        $scope.sendState = 'confirm';
+        document.documentElement.classList.add('rv-overlay-open');
+    }
 
-        swal({
-            title: "Finish Run?",
-            text: txt_confirm,
-            type: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Yes, finish it!",
-            confirmButtonColor: "#ec6c62"
-        }).then((result) => {
-            if (result.value) {
-                console.log("STATUS UPDATED(4)")
-                run.status = 4;
-                $http.put("/api/runs/maze/" + runId, run).then(function (response) {
-                    setTimeout($scope.success_message, 500);
-                }, function (response) {
-                    playSound(sError);
-                    swal("Oops", "We couldn't connect to the server! Please notice to system manager.", "error");
-                    console.log("Error: " + response.statusText);
-                });
-            }
+    $scope.cancelSend = function () {
+        $scope.sendState = null;
+        document.documentElement.classList.remove('rv-overlay-open');
+    }
 
-        })
+    $scope.confirmSend = function () {
+        if ($scope.sendState == 'sending') return;
+        $scope.sendState = 'sending';
+        var run = {
+            comment: $scope.comment,
+            sign: {
+                captain: $scope.signData[0],
+                referee: $scope.signData[1],
+                referee_as: $scope.signData[2]
+            },
+            status: 4
+        };
+        $http.put("/api/runs/maze/" + runId, run).then(function () {
+            playSound(sInfo);
+            $scope.sendState = 'done';
+        }, function (response) {
+            playSound(sError);
+            $scope.sendState = 'error';
+            console.log("Error: " + response.statusText);
+        });
+    }
 
-
+    $scope.leaveSign = function () {
+        if ($scope.getParam('return')) $scope.go($scope.getParam('return'));
+        else $scope.go("/maze/" + $scope.competition_id + "/" + $scope.league);
     }
 
     $scope.wallColor = function(x,y,z){
@@ -1141,7 +1130,8 @@ function tile_size() {
             'transform': `scale(${scale})`,
             'margin-left': Math.max(0, (areaWidth - tableWidth * scale) / 2) + 'px'
         });
-        $('.tilearea').css('height', tableHeight * scale + 120);
+        // The old iframe page keeps its controls in the same box; the run view does not
+        $('.tilearea').css('height', tableHeight * scale + (document.body.classList.contains('run-view') ? 0 : 120));
     } catch (e) {
         // Outside the controller, so there is no $timeout here
         setTimeout(tile_size, 500);

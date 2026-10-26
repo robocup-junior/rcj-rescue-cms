@@ -1,73 +1,32 @@
-
-.row
-  .col-md-4.col-lg-3(style='margin-bottom:30px;')
-    #card_area
-      .card
-        h3.card-header
-          i.fas.fa-step-forward(aria-hidden='true')
-          |  LoPs
-        .card-body
-          .col-md-12(style='position: relative;')
-            p.card-text
-              b {{'maze.sign.total_lops' | translate}}
-              br
-            .input-group.mb-3(style='width:100%;height:40px;')
-              .input-group-prepend
-                button.btn.btn-danger(type='button', disabled)
-                  i.fas.fa-minus(aria-hidden='true')
-              div(style='background-color: #F2F2F2; width:calc(100% - 80px); text-align: center;')
-                span.count {{LoPs}}
-              .input-group-append
-                button.btn.btn-success(type='button', disabled)
-                  i.fas.fa-plus(aria-hidden='true')
-          p
-        h3.card-header
-          i.fas.fa-home(aria-hidden='true')
-          |  {{'common.other' | translate}}
-        .card-body
-          .col-md-12(style='position: relative;')
-            strong {{'maze.judge.misidentification' | translate}}
-            br
-            .input-group.mb-3(style='width:100%;height:40px;')
-              .input-group-prepend
-                button.btn.btn-danger(type='button', disabled)
-                  i.fas.fa-minus(aria-hidden='true')
-              div(style='background-color: #F2F2F2; width:calc(100% - 80px); text-align: center;')
-                span.count {{MisIdent}}
-              .input-group-append
-                button.btn.btn-success(type='button', disabled)
-                  i.fas.fa-plus(aria-hidden='true')
-            br
-          .col-md-12(style='position: relative;')
-            strong {{'maze.judge.return' | translate}}
-            br
-            img.img-thumbnail(src='/images/maze_bonus.png', width='100px', height='100px', ng-style="{'background-color': exitBonus?'#2ecc71':'#D91E18'}")
-            div(style='position:absolute; top:30px; left:25px;')
-              i.fas.fa-check.fa-fw.fa-5x(ng-show='exitBonus && !exitBonusP', style='color:#27ae60; opacity:0.9;')
-              i.fas.fa-times.fa-fw.fa-5x(ng-show='!exitBonus && !exitBonusP', style='padding-top:4px; color:#e74c3c; opacity:0.9;')
-  .col-md-8.col-lg-9.tilearea
-    .row(style="margin-bottom: 5px;")
-      .col-3(style="margin-bottom: 5px;")
-        div(style='text-align:left;float:left;')
-          .btn-group
-            .input-group-prepend
-              span.input-group-text
-                i.fas.fa-arrows-alt-v(aria-hidden='true')
-            button.btn.btn-outline-dark(type='button', ng-click='changeFloor(zz)', ng-repeat='zz in range(height)', ng-class='{active: zz == z}')  {{zz}} 
-      .col-6(style="margin-bottom: 5px;")
-        .alert.alert-primary(style='padding: 0;margin: 0;text-align:center;', role='alert')
-          h3(style='text-align:center;margin: 0;')
-            | {{'common.stotal' | translate}} : {{allItemScore()}} {{'common.point' |translate}}
-      .col-3(style="margin-bottom: 5px;")
-        div(style='text-align:right;float:right;')
-          .btn-group
-            button.btn.btn-outline-dark(type='button', ng-click='tileRot(-90)')
-              i.fas.fa-undo(aria-hidden='true')
-            button.btn.btn-outline-dark(type='button', ng-click='tileRot(90)')
-              i.fas.fa-redo(aria-hidden='true')
-    div(style='clear:both;')#mapTopLeft
+//- The parts of a run's score as the maze view and sign pages show them: the map with the item
+//- points, the reliability bonus, the exit bonus and the misidentifications. Their sum is
+//- common/maze_2026_summary.pug. See line_view.css.
+//- The map with the item points
+section.rv-card.rv-map#rv-items
+  .rv-card-header
+    i.fas.fa-map
+    | {{'maze.sign.item' | translate}}
+    //- Floor and rotation in the header row, before the total
+    .rv-map-tools
+      .btn-group(ng-show='height > 1')
+        button.rv-tool(type='button' ng-repeat='zz in range(height)' ng-class='{active: zz == z}' ng-click='changeFloor(zz)')
+          i.fas.fa-layer-group(ng-if='$first')
+          |  {{zz}}
+      .btn-group
+        button.rv-tool(type='button' title='-90°' ng-click='tileRot(-90)')
+          i.fas.fa-undo
+        button.rv-tool(type='button' title='+90°' ng-click='tileRot(90)')
+          i.fas.fa-redo
+    span.rv-header-total {{allItemScore()}} {{'common.point' | translate}}
+  //- What the colours on the tiles mean
+  .rv-map-legend
+    span.rv-key.is-done {{'line.view.tileDone' | translate}}
+    span.rv-key.is-halfdone {{'line.view.tilePartial' | translate}}
+    span.rv-key.is-undone {{'line.view.tileNone' | translate}}
+  //- The map is scaled to the card by tile_size() in sign/maze_2026.js, from #mapTopLeft
+  .tilearea.rv-mz-area
+    #mapTopLeft
     #wrapTile(style='margin-top:5px;transform-origin: top left;')
-      h2(ng-show='!(length&&width)', style='text-align:center') {{'common.loading' | translate}}
       table.map.mx-auto(ng-if='sRotate == 0')#mapTable
         tbody
           tr(ng-repeat='r in range(2*length + 1)')
@@ -90,7 +49,7 @@
                 img.tile-image(ng-src='/images/omega_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'OMEGA'")
                 img.tile-image(ng-src='/images/omega_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'OMEGA'")
                 img.tile-image(ng-src='/images/omega_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'OMEGA'")
-                p.tile-point(ng-if='tileStatus(c,r,z,$odd && $parent.$odd)', style='color:#000; opacity:1;z-index:50;position: relative;text-align:center;') {{tilePoint(c,r,z,$odd && $parent.$odd)}}
+                span.rv-mz-points(ng-if="tileStatus(c,r,z,$odd && $parent.$odd)" ng-class="'is-' + tileStatus(c,r,z,$odd && $parent.$odd)") {{tileStatus(c,r,z,$odd && $parent.$odd) == 'done' ? '+' : ''}}{{tilePoint(c,r,z,$odd && $parent.$odd)}}
                 img.tile-image(ng-src='/images/red_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'Red'")
                 img.tile-image(ng-src='/images/red_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'Red'")
                 img.tile-image(ng-src='/images/red_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'Red'")
@@ -128,9 +87,7 @@
                   img.tile-image(ng-src="{{'/images/cognitive_rings/left_ring3_' + cells[c+','+r+','+z].tile.cognitiveTargets.left.rings.ring3 + '.png'}}", style="position: absolute; top: 0; left: 0; z-index: 3;")
                   img.tile-image(ng-src="{{'/images/cognitive_rings/left_ring4_' + cells[c+','+r+','+z].tile.cognitiveTargets.left.rings.ring4 + '.png'}}", style="position: absolute; top: 0; left: 0; z-index: 4;")
                   img.tile-image(ng-src="{{'/images/cognitive_rings/left_ring5_' + cells[c+','+r+','+z].tile.cognitiveTargets.left.rings.ring5 + '.png'}}", style="position: absolute; top: 0; left: 0; z-index: 5;")
-                i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9; z-index: 10;')
-                i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9; z-index: 10;')
-                i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9; z-index: 10;')
+                span.rv-mz-frame(ng-if="tileStatus(c,r,z,$odd && $parent.$odd)" ng-class="'is-' + tileStatus(c,r,z,$odd && $parent.$odd)")
       table.map.mx-auto(ng-if='sRotate == 90')#mapTable
         tbody
           tr(ng-repeat='r in range(2*width + 1)')
@@ -153,7 +110,7 @@
                 img.tile-image(ng-src='/images/omega_bottom.png', ng-show="cells[r+','+(2*length - c)+','+z].tile.victims.right == 'OMEGA'")
                 img.tile-image(ng-src='/images/omega_left.png', ng-show="cells[r+','+(2*length - c)+','+z].tile.victims.bottom == 'OMEGA'")
                 img.tile-image(ng-src='/images/omega_top.png', ng-show="cells[r+','+(2*length - c)+','+z].tile.victims.left == 'OMEGA'")
-                p.tile-point(ng-if='tileStatus(r,(2*length - c),z,$odd && $parent.$odd)', style='color:#000; opacity:1;z-index:50;position: relative;text-align:center;') {{tilePoint(r,(2*length - c),z,$odd && $parent.$odd)}}
+                span.rv-mz-points(ng-if="tileStatus(r,(2*length - c),z,$odd && $parent.$odd)" ng-class="'is-' + tileStatus(r,(2*length - c),z,$odd && $parent.$odd)") {{tileStatus(r,(2*length - c),z,$odd && $parent.$odd) == 'done' ? '+' : ''}}{{tilePoint(r,(2*length - c),z,$odd && $parent.$odd)}}
                 img.tile-image(ng-src='/images/red_right.png', ng-show="cells[r+','+(2*length - c)+','+z].tile.victims.top == 'Red'")
                 img.tile-image(ng-src='/images/red_bottom.png', ng-show="cells[r+','+(2*length - c)+','+z].tile.victims.right == 'Red'")
                 img.tile-image(ng-src='/images/red_left.png', ng-show="cells[r+','+(2*length - c)+','+z].tile.victims.bottom == 'Red'")
@@ -191,9 +148,7 @@
                   img.tile-image(ng-src="{{'/images/cognitive_rings/top_ring3_' + cells[r+','+(2*length - c)+','+z].tile.cognitiveTargets.left.rings.ring3 + '.png'}}", style="position: absolute; top: 0; left: 0; z-index: 3;")
                   img.tile-image(ng-src="{{'/images/cognitive_rings/top_ring4_' + cells[r+','+(2*length - c)+','+z].tile.cognitiveTargets.left.rings.ring4 + '.png'}}", style="position: absolute; top: 0; left: 0; z-index: 4;")
                   img.tile-image(ng-src="{{'/images/cognitive_rings/top_ring5_' + cells[r+','+(2*length - c)+','+z].tile.cognitiveTargets.left.rings.ring5 + '.png'}}", style="position: absolute; top: 0; left: 0; z-index: 5;")
-                i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(r,(2*length - c),z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9; z-index: 10;')
-                i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(r,(2*length - c),z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9; z-index: 10;')
-                i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(r,(2*length - c),z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9; z-index: 10;')
+                span.rv-mz-frame(ng-if="tileStatus(r,(2*length - c),z,$odd && $parent.$odd)" ng-class="'is-' + tileStatus(r,(2*length - c),z,$odd && $parent.$odd)")
       table.map.mx-auto(ng-if='sRotate == 180')#mapTable
         tbody
           tr(ng-repeat='r in range(2*length + 1)')
@@ -216,7 +171,7 @@
                 img.tile-image(ng-src='/images/omega_left.png', ng-show="cells[2*width - c+','+(2*length - r)+','+z].tile.victims.right == 'OMEGA'")
                 img.tile-image(ng-src='/images/omega_top.png', ng-show="cells[2*width - c+','+(2*length - r)+','+z].tile.victims.bottom == 'OMEGA'")
                 img.tile-image(ng-src='/images/omega_right.png', ng-show="cells[2*width - c+','+(2*length - r)+','+z].tile.victims.left == 'OMEGA'")
-                p.tile-point(ng-if='tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd)', style='color:#000; opacity:1;z-index:50;position: relative;text-align:center;') {{tilePoint(2*width - c,2*length - r,z,$odd && $parent.$odd)}}
+                span.rv-mz-points(ng-if="tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd)" ng-class="'is-' + tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd)") {{tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd) == 'done' ? '+' : ''}}{{tilePoint(2*width - c,2*length - r,z,$odd && $parent.$odd)}}
                 img.tile-image(ng-src='/images/red_bottom.png', ng-show="cells[2*width - c+','+(2*length - r)+','+z].tile.victims.top == 'Red'")
                 img.tile-image(ng-src='/images/red_left.png', ng-show="cells[2*width - c+','+(2*length - r)+','+z].tile.victims.right == 'Red'")
                 img.tile-image(ng-src='/images/red_top.png', ng-show="cells[2*width - c+','+(2*length - r)+','+z].tile.victims.bottom == 'Red'")
@@ -254,9 +209,7 @@
                   img.tile-image(ng-src="{{'/images/cognitive_rings/right_ring3_' + cells[2*width - c+','+(2*length - r)+','+z].tile.cognitiveTargets.left.rings.ring3 + '.png'}}", style="position: absolute; top: 0; left: 0; z-index: 3;")
                   img.tile-image(ng-src="{{'/images/cognitive_rings/right_ring4_' + cells[2*width - c+','+(2*length - r)+','+z].tile.cognitiveTargets.left.rings.ring4 + '.png'}}", style="position: absolute; top: 0; left: 0; z-index: 4;")
                   img.tile-image(ng-src="{{'/images/cognitive_rings/right_ring5_' + cells[2*width - c+','+(2*length - r)+','+z].tile.cognitiveTargets.left.rings.ring5 + '.png'}}", style="position: absolute; top: 0; left: 0; z-index: 5;")
-                i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9; z-index: 10;')
-                i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9; z-index: 10;')
-                i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9; z-index: 10;')
+                span.rv-mz-frame(ng-if="tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd)" ng-class="'is-' + tileStatus(2*width - c,2*length - r,z,$odd && $parent.$odd)")
       table.map.mx-auto(ng-if='sRotate == 270')#mapTable
         tbody
           tr(ng-repeat='r in range(2*width + 1)')
@@ -279,7 +232,7 @@
                 img.tile-image(ng-src='/images/omega_top.png', ng-show="cells[2*width - r+','+c+','+z].tile.victims.right == 'OMEGA'")
                 img.tile-image(ng-src='/images/omega_right.png', ng-show="cells[2*width - r+','+c+','+z].tile.victims.bottom == 'OMEGA'")
                 img.tile-image(ng-src='/images/omega_bottom.png', ng-show="cells[2*width - r+','+c+','+z].tile.victims.left == 'OMEGA'")
-                p.tile-point(ng-if='tileStatus(2*width - r,c,z,$odd && $parent.$odd)', style='color:#000; opacity:1;z-index:50;position: relative;text-align:center;') {{tilePoint(2*width - r,c,z,$odd && $parent.$odd)}}
+                span.rv-mz-points(ng-if="tileStatus(2*width - r,c,z,$odd && $parent.$odd)" ng-class="'is-' + tileStatus(2*width - r,c,z,$odd && $parent.$odd)") {{tileStatus(2*width - r,c,z,$odd && $parent.$odd) == 'done' ? '+' : ''}}{{tilePoint(2*width - r,c,z,$odd && $parent.$odd)}}
                 img.tile-image(ng-src='/images/red_left.png', ng-show="cells[2*width - r+','+c+','+z].tile.victims.top == 'Red'")
                 img.tile-image(ng-src='/images/red_top.png', ng-show="cells[2*width - r+','+c+','+z].tile.victims.right == 'Red'")
                 img.tile-image(ng-src='/images/red_right.png', ng-show="cells[2*width - r+','+c+','+z].tile.victims.bottom == 'Red'")
@@ -317,139 +270,100 @@
                   img.tile-image(ng-src="{{'/images/cognitive_rings/bottom_ring3_' + cells[2*width - r+','+c+','+z].tile.cognitiveTargets.left.rings.ring3 + '.png'}}", style="position: absolute; top: 0; left: 0; z-index: 3;")
                   img.tile-image(ng-src="{{'/images/cognitive_rings/bottom_ring4_' + cells[2*width - r+','+c+','+z].tile.cognitiveTargets.left.rings.ring4 + '.png'}}", style="position: absolute; top: 0; left: 0; z-index: 4;")
                   img.tile-image(ng-src="{{'/images/cognitive_rings/bottom_ring5_' + cells[2*width - r+','+c+','+z].tile.cognitiveTargets.left.rings.ring5 + '.png'}}", style="position: absolute; top: 0; left: 0; z-index: 5;")
-                i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(2*width - r,c,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9; z-index: 10;')
-                i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(2*width - r,c,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9; z-index: 10;')
-                i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(2*width - r,c,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9; z-index: 10;')
-hr
-h2 {{'maze.sign.reliability' | translate}}
-.alert.alert-info(style='margin-bottom:30px;text-align:center;', role='alert', ng-if="leagueType=='standard'")
-  .row(style='display: flex; align-items: center;')
-    .col-md-2
-      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.rescue' | translate}}
-      i.fas.fa-child.fa-2x(aria-hidden='true')
-        | : {{foundVictims}}
-      br
-      br
-      |                     {{foundVictims * 10}} {{'common.point' | translate}}
-    .col-md-half(style='width: 4%;')
-      h1(style='text-align:center; margin:0;') +
-    .col-md-2
-      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.kits' | translate}}
-      i.fas.fa-medkit.fa-2x(aria-hidden='true')
-        | : {{distKits}}
-      br
-      br
-      |                     {{rescueDeploymentPoints()}} {{'common.point' | translate}}
-    .col-md-half(style='width: 4%;')
-      h1(style='text-align:center; margin:0;') +
-    .col-md-2
-      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.blue' | translate}}
-      i.fas.fa-trailer.fa-2x(aria-hidden='true')
-        | : {{blueTilesVisited()}}
-      br
-      br
-      |                     {{blueTilesVisited() * 10}} {{'common.point' | translate}}
-    .col-md-half(style='width: 4%;')
-      h1(style='text-align:center; margin:0;') -
-    .col-md-2
-      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.total_lops' | translate}}
-      i.fas.fa-step-forward.fa-2x(aria-hidden='true')
-        | : {{LoPs}}
-      br
-      br
-      |                     {{reliabilityLoPs()}} {{'common.point' | translate}}
-    .col-md-half(style='width: 4%;')
-      h1(style='text-align:center; margin:0;') =
-    .col-md-2
-      h1(style='text-align:center; margin:0;') {{reliability()}} {{'common.point' | translate}}
-.alert.alert-info(style='margin-bottom:30px;text-align:center;', role='alert', ng-if="leagueType=='entry'")
-  .row(style='display: flex; align-items: center;')
-    .col-md-3
-      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.rescue' | translate}}
-      i.fas.fa-child.fa-2x(aria-hidden='true')
-        | : {{foundVictims}}
-      br
-      br
-      |                     {{foundVictims * 10}} {{'common.point' | translate}}
-    .col-md-1
-      h1(style='text-align:center; margin:0;') -
-    .col-md-4
-      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.total_lops' | translate}}
-      i.fas.fa-step-forward.fa-2x(aria-hidden='true')
-        | : {{LoPs}}
-      br
-      br
-      |                     {{reliabilityLoPs()}} {{'common.point' | translate}}
-    .col-md-1
-      h1(style='text-align:center; margin:0;') =
-    .col-md-3
-      h1(style='text-align:center; margin:0;') {{reliability()}} {{'common.point' | translate}}
-h2(ng-if="exitBonus") {{'maze.sign.exit' | translate}}
-.alert.alert-success(style='margin-bottom:30px;text-align:center; background-color: #e2d9f3; border-color: #d1c4e9; color: #4527a0;', role='alert', ng-if="exitBonus")
-  .row(style='display: flex; align-items: center;')
-    .col-md-2
-      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.rescue' | translate}}
-      i.fas.fa-child.fa-2x(aria-hidden='true')
-        | : {{foundVictims}}
-      br
-      br
-      |                     {{foundVictims * 10}} {{'common.point' | translate}}
-    .col-md-half(style='width: 4%;')
-      h1(style='text-align:center; margin:0;') +
-    .col-md-2
-      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.blue' | translate}}
-      i.fas.fa-trailer.fa-2x(aria-hidden='true')
-        | : {{blueTilesVisited()}}
-      br
-      br
-      |                     {{blueTilesVisited() * 10}} {{'common.point' | translate}}
-    .col-md-half(style='width: 4%;')
-      h1(style='text-align:center; margin:0;') +
-    .col-md-2
-      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.stairs' | translate}}
-      i.fas.fa-align-left.fa-2x(aria-hidden='true')
-        | : {{stairsNavigation()}}
-      br
-      br
-      |                     {{stairsNavigation() * 5}} {{'common.point' | translate}}
-    .col-md-half(style='width: 4%;')
-      h1(style='text-align:center; margin:0;') +
-    .col-md-2
-      p(style='text-align:center;height:40px; margin-bottom:0;') {{'maze.sign.ramp' | translate}}
-      i.fas.fa-terminal.fa-2x.fa-rotate-315(aria-hidden='true')
-        | : {{rampNavigation()}}
-      br
-      br
-      |                     {{rampNavigation() * 5}} {{'common.point' | translate}}
-    .col-md-half(style='width: 4%;')
-      h1(style='text-align:center; margin:0;') =
-    .col-md-2
-      h1(style='text-align:center; margin:0;') {{exitBonusPoints()}} {{'common.point' | translate}}
-h2 {{'maze.sign.calc' | translate}}
-.alert.alert-warning(style='margin-bottom:80px;text-align:center;', role='alert')
-  .row
-    .col-md-3
-      p(style='height:30px;') {{'maze.sign.item' | translate}}
-      h1
-        | {{allItemScore()}} {{'common.point' | translate}}
-    .col-md-1
-      p(style='height:30px;')
-      h1
-        | +
-    .col-md-2
-      p(style='height:30px;') {{'maze.sign.reliability' | translate}}
-      h1 {{reliability()}} {{'common.point' | translate}}
-    .col-md-1
-      p(style='height:30px;')
-      h1
-        | +
-    .col-md-2
-      p(style='height:30px;') {{'maze.sign.exit' | translate}}
-      h1 {{exitBonusPoints()}} {{'common.point' | translate}}
-    .col-md-1
-      p(style='height:30px;')
-      h1
-        | -
-    .col-md-2
-      p(style='height:30px;') {{'maze.sign.misidentification' | translate}}
-      h1 {{MisIdent*5}} {{'common.point' | translate}}
+                span.rv-mz-frame(ng-if="tileStatus(2*width - r,c,z,$odd && $parent.$odd)" ng-class="'is-' + tileStatus(2*width - r,c,z,$odd && $parent.$odd)")
+
+//- Then the bonuses and the deduction, side by side where there is room
+.rv-grid-3
+  //- The reliability bonus: what the run achieved, less the LoPs (never below 0)
+  section.rv-card#rv-reliability
+    .rv-card-header
+      i.fas.fa-shield-alt
+      | {{'maze.sign.reliability' | translate}}
+      span.rv-header-total {{reliability()}} {{'common.point' | translate}}
+    ul.rv-calc
+      li.rv-calc-row
+        span.rv-calc-label
+          i.fas.fa-child
+          |  {{'maze.sign.rescue' | translate}}
+        span.rv-calc-expr {{foundVictims}} × 10
+        span.rv-calc-value {{foundVictims * 10}}
+      li.rv-calc-row(ng-if="leagueType != 'entry'")
+        span.rv-calc-label
+          i.fas.fa-medkit
+          |  {{'maze.sign.kits' | translate}}
+        span.rv-calc-expr {{rescueDeploymentPoints() / 10}} × 10
+        span.rv-calc-value {{rescueDeploymentPoints()}}
+      li.rv-calc-row(ng-if="leagueType != 'entry'")
+        span.rv-calc-label
+          i.fas.fa-square
+          |  {{'maze.sign.blue' | translate}}
+        span.rv-calc-expr {{blueTilesVisited()}} × 10
+        span.rv-calc-value {{blueTilesVisited() * 10}}
+      li.rv-calc-row.is-minus
+        span.rv-calc-label
+          i.fas.fa-step-forward
+          |  {{'maze.sign.total_lops' | translate}}
+        span.rv-calc-expr {{LoPs}} × {{leagueType == 'entry' ? 5 : 15}}
+        span.rv-calc-value −{{reliabilityLoPs()}}
+      li.rv-calc-row.is-total
+        span.rv-calc-label {{'maze.sign.reliability' | translate}}
+        span.rv-calc-value {{reliability()}}
+
+  //- The exit bonus: earned by returning to the start, from what the run achieved
+  section.rv-card#rv-exit
+    .rv-card-header
+      i.fas.fa-sign-out-alt
+      | {{'maze.sign.exit' | translate}}
+      span.rv-header-total {{exitBonusPoints()}} {{'common.point' | translate}}
+    .rv-exit(ng-class="{'is-ng': !exitBonus}")
+      .rv-exit-head
+        .rv-exit-image(ng-class="exitBonus ? 'is-ok' : 'is-ng'")
+          img(src='/images/maze_bonus.png', alt='')
+          span.rv-exit-mark
+            i.fas(ng-class="exitBonus ? 'fa-check' : 'fa-times'")
+        .rv-exit-status
+          .rv-exit-title(ng-class="exitBonus ? 'is-ok' : 'is-ng'")
+            | {{(exitBonus ? 'line.view.exitDone' : 'line.view.exitNotDone') | translate}}
+    ul.rv-calc(ng-if='exitBonus')
+      li.rv-calc-row
+        span.rv-calc-label
+          i.fas.fa-child
+          |  {{'maze.sign.rescue' | translate}}
+        span.rv-calc-expr {{foundVictims}} × 10
+        span.rv-calc-value {{foundVictims * 10}}
+      li.rv-calc-row
+        span.rv-calc-label
+          i.fas.fa-square
+          |  {{'maze.sign.blue' | translate}}
+        span.rv-calc-expr {{blueTilesVisited()}} × 10
+        span.rv-calc-value {{blueTilesVisited() * 10}}
+      li.rv-calc-row
+        span.rv-calc-label
+          i.fas.fa-stream
+          |  {{'maze.sign.stairs' | translate}}
+        span.rv-calc-expr {{stairsNavigation()}} × 5
+        span.rv-calc-value {{stairsNavigation() * 5}}
+      li.rv-calc-row
+        span.rv-calc-label
+          i.fas.fa-mountain
+          |  {{'maze.sign.ramp' | translate}}
+        span.rv-calc-expr {{rampNavigation()}} × 5
+        span.rv-calc-value {{rampNavigation() * 5}}
+      li.rv-calc-row.is-total
+        span.rv-calc-label {{'maze.sign.exit' | translate}}
+        span.rv-calc-value {{exitBonusPoints()}}
+
+  //- Misidentifications: 5 points each, taken from the rest
+  section.rv-card#rv-misident
+    .rv-card-header
+      i.fas.fa-exclamation-triangle
+      | {{'maze.sign.misidentification' | translate}}
+      span.rv-header-total {{misIdentPoints() ? '−' + misIdentPoints() : 0}} {{'common.point' | translate}}
+    ul.rv-calc
+      li.rv-calc-row.is-minus
+        span.rv-calc-label
+          i.fas.fa-times-circle
+          |  {{'maze.sign.misidentification' | translate}}
+        span.rv-calc-expr {{MisIdent}} × 5
+        span.rv-calc-value {{misIdentPoints() ? '−' + misIdentPoints() : 0}}
+

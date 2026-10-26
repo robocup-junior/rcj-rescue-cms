@@ -48,6 +48,7 @@ const JUDGE_PAGES = [
   `/line/sign/${ids.runs.Line}`,
   `/maze/judge/${ids.runs.Maze}`,
   `/maze/input/${ids.runs.Maze}`,
+  `/maze/sign/${ids.runs.Maze}`,
   `/simulation/judge/${ids.runs.Erebus}`,
   `/document/assigned/${C}`,
 ];
