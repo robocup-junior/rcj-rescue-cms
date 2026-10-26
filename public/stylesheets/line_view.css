@@ -75,8 +75,13 @@
 .rv-loading svg { width: 112px; height: 112px; overflow: visible; filter: drop-shadow(0 8px 20px rgba(15, 23, 42, 0.1)); }
 .rv-loading-tile { fill: #fff; stroke: var(--rv-border); stroke-width: 2; }
 .rv-loading-line { fill: none; stroke: #1e293b; stroke-width: 7; stroke-linejoin: round; }
-/* A green marker before an intersection */
+/* What else is on the tiles: a green marker touching the line before an intersection, a speed
+   bump, an obstacle the robot goes around, a seesaw on its pivot */
 .rv-loading-green { fill: #16a34a; }
+.rv-loading-bump { fill: #94a3b8; }
+.rv-loading-obstacle { fill: #92400e; }
+.rv-loading-seesaw { fill: #e2e8f0; stroke: #94a3b8; stroke-width: 2; }
+.rv-loading-pivot { fill: #94a3b8; }
 
 /* The part of the line just followed, in the page's colour */
 .rv-loading-trail {

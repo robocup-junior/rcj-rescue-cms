@@ -14,6 +14,7 @@ html(ng-app="ddApp")
     meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
 
   body.run-view.rv-is-loading(ng-controller="ddController")
+    - var loadingEntry = true
     include ../includes/line_loading
     //- Sticky bar: team, live score and time
     header.rv-topbar

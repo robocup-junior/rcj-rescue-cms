@@ -16,6 +16,7 @@ html(ng-app="ddApp")
     meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
 
   body.run-view.is-sign.rv-is-loading(ng-controller="ddController")
+    - var loadingEntry = true
     include ../includes/line_loading
     include ../includes/line_sign_parts
     //- Sticky bar: back to the judge page to correct the run, team and time
