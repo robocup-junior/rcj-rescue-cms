@@ -205,6 +205,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
                         width = response.data.width;
                         length = response.data.length;
+                        drawMap();
                         $timeout(tile_size, 0);
                         $timeout(pageLoaded, 0);
 
@@ -327,6 +328,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.changeFloor = function (z) {
         playSound(sClick);
         $scope.z = z;
+        drawMap();
         $timeout(tile_size, 100);
     }
 
@@ -335,6 +337,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         $scope.sRotate += r;
         if ($scope.sRotate >= 360) $scope.sRotate -= 360;
         else if ($scope.sRotate < 0) $scope.sRotate += 360;
+        drawMap();
         $timeout(tile_size, 0);
 
         $cookies.put('sRotate', $scope.sRotate, {
@@ -351,6 +354,16 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         return arr;
     }
 
+
+    // The map as the view and sign pages draw it, for the floor and rotation shown (line_view.js)
+    function drawMap() {
+        if (typeof buildMazeMap === 'function')
+            $scope.mazeView = buildMazeMap($scope.cells, $scope.width, $scope.length, $scope.z, $scope.sRotate);
+    }
+
+    $scope.victimImage = function (cell, side) {
+        return mazeVictimImage(cell, side);
+    }
 
     $scope.isUndefined = function (thing) {
         return (typeof thing === "undefined");
@@ -1107,6 +1120,8 @@ window.onload = function () {
 };
 
 function tile_size() {
+    // The view and sign pages lay their map out in % and need no sizing (buildMazeMap in line_view.js)
+    if (document.body.classList.contains('run-view')) return;
     // Same sizing as the judge page: scale the map from its top-left corner and center it in the column
     try {
         var mapTable = $('#mapTable');

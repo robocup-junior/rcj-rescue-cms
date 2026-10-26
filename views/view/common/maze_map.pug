@@ -1,0 +1,19 @@
+//- The maze map of the view and sign pages (common/maze_2026*.pug): the tiles and the walls between
+//- them, placed in % of the map by buildMazeMap() in line_view.js, so that the map scales with the
+//- card. Each tile's items turn with the map; its status and points stay upright. See line_view.css.
+.tilearea.rv-mz-area
+  .rv-mz-map(ng-if='mazeView' ng-style='mazeView.style')
+    .rv-mz-tile(ng-repeat='t in mazeView.tiles track by t.key' ng-class='t.cls' ng-style='t.style' ng-click='cellClick(t.x, t.y, z, false, true)')
+      .rv-mz-items(ng-style="{transform: 'rotate(' + sRotate + 'deg)'}")
+        img(ng-if='t.cell.tile.speedbump' src='/images/log.png' alt='')
+        img(ng-if='t.cell.tile.ramp' src='/images/ramp.png' alt='')
+        img(ng-if='t.cell.tile.steps' src='/images/steps.png' alt='')
+        img(ng-repeat="side in ['top', 'right', 'bottom', 'left', 'floor']" ng-if='victimImage(t.cell, side)' ng-src='{{victimImage(t.cell, side)}}' alt='')
+        //- A cognitive target: its five rings, one image each
+        div(ng-repeat="side in ['top', 'right', 'bottom', 'left']" ng-if="t.cell.tile.victims[side] == 'Cognitive' && t.cell.tile.cognitiveTargets[side].rings")
+          img(ng-repeat='n in [1, 2, 3, 4, 5]' ng-src="{{'/images/cognitive_rings/' + side + '_ring' + n + '_' + t.cell.tile.cognitiveTargets[side].rings['ring' + n] + '.png'}}" alt='')
+      img.rv-mz-mark(ng-if='startTile.x == t.x && startTile.y == t.y && startTile.z == z' src='/images/start.png' alt='Start')
+      img.rv-mz-mark(ng-if='!isUndefined(t.cell.tile.changeFloorTo) && t.cell.tile.changeFloorTo != z' src='/images/elevator.png' alt='')
+      span.rv-mz-frame(ng-if='tileStatus(t.x, t.y, z, true)' ng-class="'is-' + tileStatus(t.x, t.y, z, true)")
+      span.rv-mz-points(ng-if='tileStatus(t.x, t.y, z, true)' ng-class="'is-' + tileStatus(t.x, t.y, z, true)") {{tileStatus(t.x, t.y, z, true) == 'done' ? '+' : ''}}{{tilePoint(t.x, t.y, z, true)}}
+    .rv-mz-wall(ng-repeat='w in mazeView.walls track by w.key' ng-class="'is-' + w.kind" ng-style='w.style')

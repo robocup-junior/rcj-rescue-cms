@@ -1,4 +1,4 @@
-// Shared by the Rescue Line view and sign pages (views/view/common/line_2026.pug)
+// Shared by the Rescue Line and Maze view and sign pages (views/view/common/line_2026.pug, maze_2026.pug)
 
 // The chips of the score equation jump to their cards. Scrolled from here, since Angular
 // would take the #hash links for its own routes
@@ -48,8 +48,10 @@ function revealRunPage(resize) {
     var complete = images.every(function (img) {
       return img.complete;
     });
-    // Loaded when there are images, all complete, and no more came since the last look
-    if (!(images.length && complete && images.length == lastCount)) {
+    // A maze map shows only the images its tiles need, so it may have none
+    var drawn = images.length || document.querySelector('.tilearea .rv-mz-tile');
+    // Loaded when the map is drawn, its images complete, and no more came since the last look
+    if (!(drawn && complete && images.length == lastCount)) {
       lastCount = images.length;
       return setTimeout(check, 100);
     }
@@ -58,4 +60,84 @@ function revealRunPage(resize) {
       return img.decode ? img.decode().catch(function () {}) : null;
     })).then(reveal);
   })();
+}
+
+// The maze map as the view and sign pages draw it (views/view/common/maze_map.pug): its tiles and
+// the walls between them, placed in % of the map, so that it scales with the card by itself. cells
+// are the map's cells by "x,y,z", in half tiles (odd x and y a tile, one of them even a wall);
+// rotate turns the map clockwise by 0, 90, 180 or 270 degrees.
+function buildMazeMap(cells, width, length, z, rotate) {
+  var quarter = rotate == 90 || rotate == 270;
+  var across = quarter ? length : width;
+  var down = quarter ? width : length;
+  // Where a cell is on the screen, in the same half tiles
+  function place(x, y) {
+    if (rotate == 90) return [2 * length - y, x];
+    if (rotate == 180) return [2 * width - x, 2 * length - y];
+    if (rotate == 270) return [y, 2 * width - x];
+    return [x, y];
+  }
+  function box(left, top, w, h) {
+    return {
+      left: left / across * 100 + '%',
+      top: top / down * 100 + '%',
+      width: w / across * 100 + '%',
+      height: h / down * 100 + '%'
+    };
+  }
+  // A wall is this part of a tile thick, and runs over the corners into the next one
+  var thick = 0.1;
+  var tiles = [];
+  var walls = [];
+  for (var x = 0; x <= 2 * width; x++) {
+    for (var y = 0; y <= 2 * length; y++) {
+      var cell = cells[x + ',' + y + ',' + z];
+      var at = place(x, y);
+      if (x % 2 && y % 2) {
+        var tile = cell && cell.tile || {};
+        tiles.push({
+          x: x,
+          y: y,
+          key: x + ',' + y,
+          cell: cell,
+          cls: {
+            'is-void': !cell,
+            'is-checkpoint': tile.checkpoint,
+            'is-black': tile.black,
+            'is-blue': tile.blue,
+            'is-red': tile.red,
+            'is-linear': tile.reachable && cell.isLinear,
+            'is-floating': tile.reachable && !cell.isLinear
+          },
+          style: box((at[0] - 1) / 2, (at[1] - 1) / 2, 1, 1)
+        });
+      } else if ((x + y) % 2 && cell && cell.isWall) {
+        walls.push({
+          key: x + ',' + y,
+          kind: cell.isLinear ? 'linear' : (cell.ignoreWall ? 'ignored' : 'floating'),
+          // Across the screen when its column is that of a tile
+          style: at[0] % 2 ?
+            box((at[0] - 1 - thick) / 2, (at[1] - thick) / 2, 1 + thick, thick) :
+            box((at[0] - thick) / 2, (at[1] - 1 - thick) / 2, thick, 1 + thick)
+        });
+      }
+    }
+  }
+  return {
+    tiles: tiles,
+    walls: walls,
+    // Not taller than most of the window, so that a whole floor is in view
+    style: {
+      'aspect-ratio': across + ' / ' + down,
+      'max-width': 'min(100%, calc(70vh * ' + across + ' / ' + down + '))'
+    }
+  };
+}
+
+// The image of the victim on a side of a tile ('top', 'right', 'bottom', 'left' or 'floor'), which
+// the map turns with the tile; none for no victim, or a cognitive target, which is drawn from its rings
+function mazeVictimImage(cell, side) {
+  var type = cell && cell.tile && cell.tile.victims && cell.tile.victims[side];
+  if (!type || type == 'None' || type == 'Cognitive') return null;
+  return '/images/' + type.toLowerCase() + '_' + side + '.png';
 }

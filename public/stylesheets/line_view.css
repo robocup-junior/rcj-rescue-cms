@@ -670,17 +670,63 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rv-tile-points.is-halfdone { background: #d97706; }
 .rv-tile-points.is-undone { background: #dc2626; }
 
-/* ---- Maze map (views/view/common/maze_2026*.pug) ----
-   The map is a table of 120px tiles scaled as a whole to the card (tile_size), so the status
-   frame and the points badge are sized in px of that table, like the tile images. */
-.rv-mz-area { box-sizing: content-box; padding: 1rem; overflow: hidden; }
-.rv-mz-area #wrapTile { margin-top: 0 !important; }
+/* ---- Maze map (views/view/common/maze_map.pug) ----
+   Tiles and walls placed in % of the map (buildMazeMap in line_view.js). Each tile is a size
+   container, so its frame, badge and marks are sized in parts of the tile (cqw). */
+.rv-mz-area { padding: 1rem; }
+
+.rv-mz-map {
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.rv-mz-tile {
+  position: absolute;
+  container-type: size;
+  background: #e5e7eb;
+  /* A faint line where tiles meet without a wall */
+  box-shadow: inset 0 0 0 0.5px rgba(15, 23, 42, 0.14);
+  cursor: pointer;
+}
+
+.rv-mz-tile.is-void { background: transparent; box-shadow: none; cursor: default; }
+.rv-mz-tile.is-linear { background: #fffbeb; }
+.rv-mz-tile.is-floating { background: #dcfce7; }
+.rv-mz-tile.is-checkpoint { background: linear-gradient(135deg, #cbd5e1, #f1f5f9 45%, #94a3b8 55%, #e2e8f0); }
+.rv-mz-tile.is-black { background: #111827; }
+.rv-mz-tile.is-blue { background: #2563eb; }
+.rv-mz-tile.is-red { background: #ef4444; }
+
+.rv-mz-items,
+.rv-mz-items div,
+.rv-mz-items img,
+.rv-mz-mark {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.rv-mz-mark { pointer-events: none; }
+
+.rv-mz-wall {
+  position: absolute;
+  z-index: 3;
+  border-radius: 999px;
+  background: #1e293b;
+  pointer-events: none;
+}
+
+.rv-mz-wall.is-floating { background: #1e40af; }
+.rv-mz-wall.is-ignored { background: #16a34a; }
 
 .rv-mz-frame {
   position: absolute;
-  inset: 0;
-  z-index: 40;
-  border: 8px solid;
+  inset: 7cqw;
+  z-index: 1;
+  border: 5cqw solid;
+  border-radius: 9cqw;
   pointer-events: none;
 }
 
@@ -690,18 +736,18 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 
 .rv-mz-points {
   position: absolute;
-  right: 8px;
-  top: 8px;
-  z-index: 50;
-  padding: 2px 12px;
+  right: 4cqw;
+  top: 4cqw;
+  z-index: 2;
+  padding: 0.5cqw 7cqw;
   border-radius: 999px;
   color: #fff;
-  font-size: 30px;
+  font-size: 21cqw;
   font-weight: 800;
-  line-height: 1.2;
+  line-height: 1.25;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.3);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
 }
 
 .rv-mz-points.is-done { background: #059669; }
