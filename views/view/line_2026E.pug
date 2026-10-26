@@ -31,26 +31,21 @@ html(ng-app="ddApp")
           span.rv-stat-value {{minutes*60*1000+seconds*1000 | date:'m:ss'}}
 
     main.rv-page
-      //- The result first: score, time, how the score adds up, then the run's details
+      //- The result first: the score is the left side of the equation that adds it up, then the time and the run's details
       section.rv-summary
-        .rv-summary-top
-          .rv-summary-item
-            .rv-summary-label
-              i.fas.fa-trophy
-              |  {{'common.score' | translate}}
-            .rv-summary-value
-              | {{score}}
-              small {{'common.point' | translate}}
-            //- Same format as the ranking: two decimals, a plain 1 for the best run
-            .rv-summary-sub(ng-if="normalizedScore != null")
-              | {{'common.normalizedScore' | translate}}: {{normalizedScore === 1 ? '1' : (normalizedScore | number:2)}}
-          .rv-summary-item
-            .rv-summary-label
-              i.fas.fa-stopwatch
-              |  {{'common.time' | translate}}
-            .rv-summary-value {{minutes*60*1000+seconds*1000 | date:'m:ss'}}
+        .rv-summary-item.is-score
+          .rv-summary-label
+            i.fas.fa-trophy
+            |  {{'common.score' | translate}}
+          .rv-summary-value
+            | {{score}}
+            small {{'common.point' | translate}}
+          //- Same format as the ranking: two decimals, a plain 1 for the best run
+          .rv-summary-sub(ng-if="normalizedScore != null")
+            | {{'common.normalizedScore' | translate}}: {{normalizedScore === 1 ? '1' : (normalizedScore | number:2)}}
         //- Entry rules: no multiplier, the rescue points are added like the others
         .rv-breakdown
+          span.rv-op.rv-equals =
           a.rv-chip(href='#rv-items' data-jump)
             .rv-chip-label {{'line.sign.item' | translate}}
             .rv-chip-value {{raw_score - checkTotal() - exitBonusPoints()}}
@@ -66,10 +61,11 @@ html(ng-app="ddApp")
           a.rv-chip(href='#rv-exit' data-jump)
             .rv-chip-label {{'line.sign.exitBonus' | translate}}
             .rv-chip-value {{exitBonusPoints()}}
-          span.rv-op =
-          .rv-chip.rv-chip-result
-            .rv-chip-label {{'common.score' | translate}}
-            .rv-chip-value {{score}}
+        .rv-summary-item.is-time
+          .rv-summary-label
+            i.fas.fa-stopwatch
+            |  {{'common.time' | translate}}
+          .rv-summary-value {{minutes*60*1000+seconds*1000 | date:'m:ss'}}
         ul.rv-meta
           li(title="{{'common.competition' | translate}}")
             i.fas.fa-trophy
