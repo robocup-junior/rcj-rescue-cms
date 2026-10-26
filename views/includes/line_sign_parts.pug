@@ -35,7 +35,7 @@ mixin signSlot(index, title)
 
 //- The pad over the whole screen, for the signature being written (signature_pad.js)
 mixin signPad
-  .rv-overlay.is-pad(ng-show='signing !== null' role='dialog' aria-modal='true' aria-labelledby='rv-pad-title')
+  .rv-overlay.is-pad(ng-cloak ng-show='signing !== null' role='dialog' aria-modal='true' aria-labelledby='rv-pad-title')
     .rv-pad-sheet
       .rv-pad-head
         i.fas.fa-signature
@@ -96,7 +96,7 @@ mixin signForm
 
 //- Checking the run once more before sending it, then sending, an error to retry, the end
 mixin sendSheet
-  .rv-overlay.is-send(ng-show='sendState' role='dialog' aria-modal='true' aria-labelledby='rv-send-title')
+  .rv-overlay.is-send(ng-cloak ng-show='sendState' role='dialog' aria-modal='true' aria-labelledby='rv-send-title')
     .rv-send-sheet
       //- Done: the run is final
       .rv-send-done(ng-if="sendState == 'done'")

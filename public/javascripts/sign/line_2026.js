@@ -180,6 +180,12 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     launchSocketIo();
     setInterval(launchSocketIo, 15000);
 
+    // The view and sign pages are covered by a loading screen until the run and its map are drawn
+    function pageLoaded() {
+        tile_size();
+        document.body.classList.remove('rv-is-loading');
+    }
+
     function loadNewRun() {
         $http.get("/api/runs/line/" + runId +
             "?normalized=true").then(function (response) {
@@ -287,9 +293,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                         $timeout(tile_size, 500);
                         $timeout(tile_size, 1500);
                         $timeout(tile_size, 3000);
+                        $timeout(pageLoaded, 0);
 
                     }, function (response) {
                         console.log("Error: " + response.statusText);
+                        pageLoaded();
                     });
             }, function (response) {
                 console.log("Error: " + response.statusText);

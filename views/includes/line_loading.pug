@@ -1,0 +1,16 @@
+//- Covers the Rescue Line view and sign pages until the run and its map are drawn: the controller
+//- removes rv-is-loading from the body. Plain markup, since it shows before Angular has started.
+//- A robot follows a line across a tile, in the page's colour.
+- var track = 'M26 96 C26 66 54 76 60 58 C66 40 94 54 94 24'
+.rv-loading(role='status' aria-label='Loading')
+  .rv-loading-art
+    svg(viewBox='0 0 120 120' aria-hidden='true')
+      rect.rv-loading-tile(x='4' y='4' width='112' height='112' rx='20')
+      path.rv-loading-line(d=track)
+      path.rv-loading-trail(d=track pathLength='100')
+      circle.rv-loading-robot(r='7' style="offset-path: path('" + track + "')")
+    .rv-loading-label Rescue Line
+    .rv-loading-dots
+      span
+      span
+      span

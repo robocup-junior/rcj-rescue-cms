@@ -40,6 +40,115 @@
   --rv-on-accent-muted: #fed7aa;
 }
 
+/* ---- Loading (views/includes/line_loading.pug) ---- */
+/* Angular's own rule comes with its script, later than the page: keep the sheets hidden until then */
+[ng-cloak] { display: none !important; }
+
+.rv-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 42%, #fff 0%, var(--rv-bg) 60%);
+  opacity: 0;
+  visibility: hidden;
+  /* Fades away once the page is drawn */
+  transition: opacity 0.35s ease, visibility 0s linear 0.35s;
+}
+
+.rv-is-loading .rv-loading { opacity: 1; visibility: visible; transition: none; }
+
+/* The art comes in a moment later, so a quick load does not flash it */
+.rv-loading-art {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  animation: rv-loading-in 0.4s ease-out 0.15s both;
+}
+
+@keyframes rv-loading-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.96); }
+}
+
+.rv-loading svg { width: 112px; height: 112px; overflow: visible; filter: drop-shadow(0 8px 20px rgba(15, 23, 42, 0.1)); }
+.rv-loading-tile { fill: #fff; stroke: var(--rv-border); stroke-width: 2; }
+.rv-loading-line { fill: none; stroke: #1e293b; stroke-width: 7; stroke-linecap: round; }
+
+/* The part of the line just followed, in the page's colour */
+.rv-loading-trail {
+  fill: none;
+  stroke: var(--rv-accent);
+  stroke-width: 7;
+  stroke-linecap: round;
+  stroke-dasharray: 22 100;
+  animation: rv-trail 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+/* The trail's head goes from the start to the end of the line (offset 22 to -78), with the robot */
+@keyframes rv-trail {
+  from { stroke-dashoffset: 22; }
+  to { stroke-dashoffset: -78; }
+}
+
+/* The robot at the head of the trail; browsers without motion paths show only the trail */
+.rv-loading-robot { display: none; }
+
+@supports (offset-path: path('M0 0')) {
+  .rv-loading-robot {
+    display: block;
+    fill: #fff;
+    stroke: var(--rv-accent-strong);
+    stroke-width: 4;
+    offset-rotate: 0deg;
+    animation: rv-robot 1.6s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  }
+}
+
+@keyframes rv-robot {
+  0% { offset-distance: 0%; opacity: 0; }
+  12% { opacity: 1; }
+  82% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+
+.rv-loading-label {
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--rv-muted);
+}
+
+.rv-loading-dots { display: flex; gap: 6px; }
+
+.rv-loading-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--rv-accent);
+  animation: rv-dot 1.2s ease-in-out infinite;
+}
+
+.rv-loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+.rv-loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes rv-dot {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-loading-art { animation: none; }
+  .rv-loading-trail { animation: none; stroke-dasharray: none; }
+  .rv-loading-robot { animation: none; offset-distance: 100%; }
+  .rv-loading-dots span { animation-duration: 2.4s; }
+}
+
+/* Nothing to scroll behind the loading screen */
+html:has(.rv-is-loading) { overflow: hidden; }
+
 /* ---- Top bar ---- */
 .rv-topbar {
   position: sticky;
@@ -1485,7 +1594,10 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   .rv-op { align-self: flex-end; padding: 0 0.75rem; font-size: 1rem; line-height: 1; }
   .rv-paren { display: none; }
   .rv-phone-only { display: flex; }
-  .rv-map .rv-card-header { gap: 0.4rem; padding-left: 1rem; padding-right: 1rem; }
+  /* The title may take two lines (longer in English); the tools and the total keep theirs */
+  .rv-map .rv-card-header { gap: 0.4rem; padding-left: 1rem; padding-right: 1rem; white-space: normal; }
+  .rv-map-tools,
+  .rv-map .rv-header-total { flex: none; white-space: nowrap; }
   .rv-map-tools { gap: 0.3rem; }
   .rv-map .rv-header-total { margin-left: 0.4rem; }
   .rv-tool { min-width: 30px; height: 30px; padding: 0 0.45rem; }
