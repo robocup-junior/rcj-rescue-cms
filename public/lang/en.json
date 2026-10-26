@@ -493,7 +493,11 @@
             "kit": "Rescue kit",
             "write": "Write signature",
             "clear": "Clear",
-            "comp": "Complete"
+            "comp": "Complete",
+            "undo": "Undo",
+            "erase": "Erase all",
+            "padHint": "Sign large, using the whole box",
+            "padRotate": "Turn the phone sideways for more room"
         }
     },
     "maze": {

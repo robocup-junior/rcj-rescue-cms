@@ -1,57 +1,5 @@
-//- The run as the view and sign pages show it: the score and how it adds up, the map with the
-//- item points, the checkpoints and LoPs, the rescue and the exit bonus. See line_view.css.
-//- The result first: the score is the left side of the equation that adds it up, then the time and the run's details
-section.rv-summary
-  .rv-summary-item.is-score
-    .rv-summary-label
-      i.fas.fa-trophy
-      |  {{'common.score' | translate}}
-    .rv-summary-value
-      | {{score}}
-      small {{'common.point' | translate}}
-    //- Same format as the ranking: two decimals, a plain 1 for the best run
-    .rv-summary-sub(ng-if="normalizedScore != null")
-      | {{'common.normalizedScore' | translate}}: {{normalizedScore === 1 ? '1' : (normalizedScore | number:2)}}
-  //- Entry rules: no multiplier, the rescue points are added like the others
-  .rv-breakdown
-    span.rv-op.rv-equals =
-    a.rv-chip(href='#rv-items' data-jump)
-      .rv-chip-label {{'line.sign.item' | translate}}
-      .rv-chip-value {{raw_score - checkTotal() - exitBonusPoints()}}
-    span.rv-op +
-    a.rv-chip(href='#rv-checkpoints' data-jump)
-      .rv-chip-label {{'line.sign.checkPointScore' | translate}}
-      .rv-chip-value {{checkTotal()}}
-    span.rv-op +
-    a.rv-chip(href='#rv-rescue' data-jump)
-      .rv-chip-label {{'line.sign.rescue' | translate}}
-      .rv-chip-value {{nlPoints()}}
-    span.rv-op +
-    a.rv-chip(href='#rv-exit' data-jump)
-      .rv-chip-label {{'line.sign.exitBonus' | translate}}
-      .rv-chip-value {{exitBonusPoints()}}
-  .rv-summary-item.is-time
-    .rv-summary-label
-      i.fas.fa-stopwatch
-      |  {{'common.time' | translate}}
-    .rv-summary-value {{minutes*60*1000+seconds*1000 | date:'m:ss'}}
-  ul.rv-meta
-    li(title="{{'common.competition' | translate}}")
-      i.fas.fa-trophy
-      | {{competition}}
-    li(title="{{'common.round' | translate}}")
-      i.fas.fa-redo-alt
-      | {{round}}
-    li(title="{{'common.field' | translate}}")
-      i.fas.fa-map-marker-alt
-      | {{field}}
-    li(title="{{'common.league' | translate}}")
-      i.fas.fa-route
-      | {{league}}
-    li(title="{{'common.rule' | translate}}")
-      i.fas.fa-book
-      | #{rule}
-
+//- The parts of a run's score as the view and sign pages show them: the map with the item points,
+//- the checkpoints and LoPs, the rescue and the exit bonus. Their sum is common/line_2026E_summary.pug.
 //- The map with the item points
 section.rv-card.rv-map#rv-items
   .rv-card-header

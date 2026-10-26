@@ -114,7 +114,6 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.victimNL_Live = [];
     $scope.victimNL_Dead = [];
 
-    $scope.enableSign = [false, false, false];
     $scope.signData = [null, null, null];
 
     $scope.sum = function (arr) {
@@ -591,53 +590,50 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         console.log("Success!!");
     }
 
-    $scope.toggleSign = function (index) {
-        $scope.enableSign[index] = !$scope.enableSign[index];
-        if (!$scope.enableSign[index]) {
-            let datapair;
-            switch (index) {
-                case 0:
-                    datapair = $("#cap_sig").jSignature("getData", "svgbase64");
-                    break;
-                case 1:
-                    datapair = $("#ref_sig").jSignature("getData", "svgbase64");
-                    break;
-                case 2:
-                    datapair = $("#refas_sig").jSignature("getData", "svgbase64")
-                    break;
+    // Signatures are written on a pad over the whole screen (signature_pad.js); signing again
+    // replaces the signature only once the new one is done
+    $scope.signing = null;
+    $scope.padEmpty = true;
+    var signPad = null;
+
+    $scope.openSign = function (index) {
+        $scope.signing = index;
+        document.documentElement.classList.add('rv-pad-open');
+        $timeout(function () {
+            if (!signPad) {
+                signPad = new SignaturePad(document.getElementById('rv-pad'), function () {
+                    $scope.$applyAsync(function () {
+                        $scope.padEmpty = signPad.isEmpty();
+                    });
+                });
             }
-            $scope.signData[index] = "data:" + datapair[0] + "," + datapair[1];
-        } else {
-            if (!$scope.signData[index]) setTimeout(initSign, 100, index);
-        }
+            signPad.resize();
+            signPad.clear();
+        });
     }
 
-    // Signatures finished: written, and not open on the pad again
+    $scope.closeSign = function (save) {
+        if (save && !signPad.isEmpty()) $scope.signData[$scope.signing] = signPad.toDataURL();
+        $scope.signing = null;
+        document.documentElement.classList.remove('rv-pad-open');
+    }
+
+    $scope.undoSign = function () {
+        signPad.undo();
+    }
+
+    $scope.eraseSign = function () {
+        signPad.clear();
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key == 'Escape' && $scope.signing !== null) $scope.$apply(function () { $scope.closeSign(false); });
+    });
+
     $scope.signedCount = function () {
-        return [0, 1, 2].filter(function (index) {
-            return $scope.signData[index] && !$scope.enableSign[index];
+        return $scope.signData.filter(function (data) {
+            return data;
         }).length;
-    }
-
-    // The pad keeps jSignature's 4:1 shape, but stays tall enough to sign on a phone
-    function initSign(index) {
-        var pad = $(['#cap_sig', '#ref_sig', '#refas_sig'][index]);
-        pad.jSignature({ height: Math.max(180, Math.round(pad.width() / 4)) });
-    }
-
-    $scope.clearSign = function (index) {
-        switch (index) {
-            case 0:
-                $("#cap_sig").jSignature("clear");
-                break;
-            case 1:
-                $("#ref_sig").jSignature("clear");
-                break;
-            case 2:
-                $("#refas_sig").jSignature("clear");
-                break;
-        }
-        $scope.toggleSign(index);
     }
 
     $scope.send_sign = function () {

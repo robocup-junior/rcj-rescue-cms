@@ -497,7 +497,8 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   background: #f97316;
   clip-path: polygon(0 0, 100% 0, 0 100%);
   color: #fff;
-  font-size: max(12px, 26cqw);
+  /* In proportion to the tile, so the number always stays inside the fold */
+  font-size: 26cqw;
   font-weight: 800;
   line-height: 1;
   white-space: nowrap;
@@ -505,7 +506,7 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 }
 
 /* Checkpoints 10 and up: smaller, so they stay clear of the points in the top right corner */
-.rv-tile-cp.is-long { font-size: max(10px, 19cqw); }
+.rv-tile-cp.is-long { font-size: 19cqw; }
 
 /* The second checkpoint of a tile passed twice: the same fold in the bottom left corner */
 .rv-tile-cp.is-second {
@@ -515,6 +516,12 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   align-items: flex-end;
   padding: 0 0 3% 7%;
   clip-path: polygon(0 0, 100% 100%, 0 100%);
+}
+
+/* Small tiles (phones, large maps): a larger fold, so the number stays readable */
+@container (max-width: 48px) {
+  .rv-tile-cp { width: 68%; height: 68%; font-size: 32cqw; }
+  .rv-tile-cp.is-long { font-size: 23cqw; }
 }
 
 /* A large faint flag over the tile, like a watermark */
@@ -1101,7 +1108,6 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   overflow: hidden;
 }
 
-.rv-sign-slot.is-drawing { border-color: var(--rv-accent); box-shadow: 0 0 0 3px var(--rv-focus); background: #fff; }
 .rv-sign-slot.is-signed { border-color: #a7f3d0; background: var(--rv-ok-soft); }
 
 .rv-sign-slot-head {
@@ -1127,7 +1133,6 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 }
 
 .is-signed .rv-sign-state { background: var(--rv-ok); color: #fff; }
-.is-drawing .rv-sign-state { background: var(--rv-accent); color: #fff; }
 
 .rv-sign-slot-title { flex: 1; min-width: 0; font-weight: 800; }
 
@@ -1143,7 +1148,6 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   cursor: pointer;
 }
 
-.rv-sign-action.is-done { border-color: var(--rv-ok); background: var(--rv-ok); color: #fff; }
 .rv-sign-action:focus-visible,
 .rv-sign-start:focus-visible,
 .rv-submit:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
@@ -1169,10 +1173,8 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rv-sign-start i { font-size: 1.6rem; }
 .rv-sign-start:hover { border-color: var(--rv-accent); }
 
-.rv-sign-pad,
 .rv-sign-image { padding: 0 0.75rem 0.75rem; }
-.rv-sign-pad .confirmation { border: 2px dashed #cbd5e1; border-radius: 10px; background: #fff; }
-.rv-sign-image img { display: block; max-width: 100%; height: auto; border-radius: 10px; background: #fff; }
+.rv-sign-image img { display: block; max-width: 100%; max-height: 160px; padding: 0.5rem 1rem; border-radius: 10px; background: #fff; }
 
 .rv-submit {
   display: flex;
@@ -1190,6 +1192,138 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   cursor: pointer;
   transition: background 0.15s ease;
 }
+
+/* The pad over the whole screen (signature_pad.js): the page behind stays still while signing */
+html.rv-pad-open,
+html.rv-pad-open body { overflow: hidden; overscroll-behavior: none; }
+
+.rv-pad-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1060;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.rv-pad-sheet {
+  display: flex;
+  flex-direction: column;
+  width: min(1100px, 100%);
+  height: min(680px, 100%);
+  border-radius: var(--rv-radius);
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.3);
+}
+
+.rv-pad-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.6rem 0.6rem 1.1rem;
+  background: linear-gradient(135deg, var(--rv-accent-strong) 0%, var(--rv-accent) 100%);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+#rv-pad-title { flex: 1; min-width: 0; }
+
+.rv-pad-close {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  cursor: pointer;
+}
+
+.rv-pad-area {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  margin: 0.75rem;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #fff;
+}
+
+/* The canvas takes every touch: no scrolling or zooming while writing */
+.rv-pad-area canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.rv-pad-baseline {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 28%;
+  border-bottom: 2px solid #e2e8f0;
+  pointer-events: none;
+}
+
+.rv-pad-baseline::before {
+  content: "×";
+  position: absolute;
+  left: 0;
+  bottom: 0.2rem;
+  color: #cbd5e1;
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.rv-pad-hint {
+  position: absolute;
+  inset: 0 0 auto;
+  padding-top: 18%;
+  color: #cbd5e1;
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Only phones held upright */
+.rv-pad-rotate { display: none; margin-top: 0.5rem; font-size: 0.9rem; }
+
+.rv-pad-foot {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 0.75rem 0.75rem;
+}
+
+.rv-pad-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  min-width: 48px;
+  min-height: 52px;
+  padding: 0 1.1rem;
+  border: 1px solid var(--rv-border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--rv-text);
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.rv-pad-btn:disabled { opacity: 0.4; cursor: default; }
+.rv-pad-btn.is-cancel { margin-left: auto; }
+.rv-pad-btn.is-done { min-width: 8rem; border-color: var(--rv-ok); background: var(--rv-ok); color: #fff; font-size: 1.1rem; }
+.rv-pad-btn:focus-visible,
+.rv-pad-close:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
 
 /* In the page's colour once all three have signed */
 .rv-submit.is-ready {
@@ -1265,6 +1399,14 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   .rv-tool { min-width: 30px; height: 30px; padding: 0 0.45rem; }
   .rv-back-label { width: 40px; padding: 0; justify-content: center; }
   .rv-back-label span { display: none; }
+  /* The pad fills the phone; the small buttons keep only their icons */
+  .rv-pad-overlay { padding: 0; }
+  .rv-pad-sheet { width: 100%; height: 100%; border-radius: 0; }
+  .rv-pad-area { margin: 0.5rem; }
+  .rv-pad-foot { padding: 0 0.5rem calc(0.5rem + env(safe-area-inset-bottom)); }
+  .rv-pad-btn { padding: 0 0.8rem; }
+  .rv-pad-btn:not(.is-cancel):not(.is-done) span { display: none; }
+  .rv-pad-btn.is-done { min-width: 0; flex: 1; }
   .rv-exit-head { gap: 1rem; }
   .rv-exit-image { width: 88px; }
   .rv-exit-title { font-size: 1.15rem; }
@@ -1275,4 +1417,19 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   .rv-legend-max { display: none; }
   .rv-op.rv-phone-only { display: block; }
   .run-view .tilearea { padding: 0.5rem; }
+}
+
+@media (max-width: 575.98px) and (orientation: portrait) {
+  .rv-pad-rotate { display: block; }
+}
+
+/* Phones held sideways: little height, so the bars get thin */
+@media (max-height: 480px) {
+  .rv-pad-overlay { padding: 0; }
+  .rv-pad-sheet { width: 100%; height: 100%; border-radius: 0; }
+  .rv-pad-head { padding: 0.25rem 0.25rem 0.25rem 0.9rem; font-size: 0.95rem; }
+  .rv-pad-close { width: 36px; height: 36px; }
+  .rv-pad-area { margin: 0.4rem 0.5rem; }
+  .rv-pad-foot { padding: 0 0.5rem 0.4rem; }
+  .rv-pad-btn { min-height: 40px; }
 }

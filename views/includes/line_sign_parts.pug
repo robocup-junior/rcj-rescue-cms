@@ -9,38 +9,59 @@ mixin signTopbar
     .rv-team
       span.rv-live(title='Live')
       span.rv-team-name {{team}}
+    //- Only the time: the score is summed up at the end of the page, after its parts are reviewed
     .rv-topbar-stats
-      .rv-stat
-        i.fas.fa-calculator
-        span.rv-stat-value {{score}}
-        span.rv-stat-unit {{'common.point' | translate}}
       .rv-stat
         i.fas.fa-stopwatch
         span.rv-stat-value {{minutes*60*1000+seconds*1000 | date:'m:ss'}}
 
-//- One signature: a button to start, the pad while signing, then the signature
-mixin signSlot(index, padId, title)
-  - var drawing = 'enableSign[' + index + ']'
-  - var signed = '!enableSign[' + index + '] && signData[' + index + ']'
-  .rv-sign-slot(ng-class="{'is-drawing': " + drawing + ", 'is-signed': " + signed + "}")
+//- One signature: a button to sign, then the signature and a button to sign again
+mixin signSlot(index, title)
+  - var signed = 'signData[' + index + ']'
+  .rv-sign-slot(ng-class="{'is-signed': " + signed + "}")
     .rv-sign-slot-head
       span.rv-sign-state
         i.fas.fa-check(ng-if=signed)
-        span(ng-if="!(" + signed + ")")= index + 1
+        span(ng-if="!" + signed)= index + 1
       .rv-sign-slot-title(translate=title)
-      button.rv-sign-action.is-done(type='button' ng-show=drawing ng-click='toggleSign(' + index + ')')
-        i.fas.fa-check
-        |  {{'line.sign.comp' | translate}}
-      button.rv-sign-action(type='button' ng-show=signed ng-click='clearSign(' + index + ')')
-        i.fas.fa-eraser
+      button.rv-sign-action(type='button' ng-show=signed ng-click='openSign(' + index + ')')
+        i.fas.fa-redo
         |  {{'line.sign.clear' | translate}}
-    button.rv-sign-start(type='button' ng-show="!enableSign[" + index + "] && !signData[" + index + "]" ng-click='toggleSign(' + index + ')')
+    button.rv-sign-start(type='button' ng-show="!" + signed ng-click='openSign(' + index + ')')
       i.fas.fa-signature
       | {{'line.sign.write' | translate}}
-    .rv-sign-pad(ng-show=drawing)
-      .confirmation(id=padId)
     .rv-sign-image(ng-show=signed)
       img(ng-src='{{signData[' + index + ']}}' alt='')
+
+//- The pad over the whole screen, for the signature being written (signature_pad.js)
+mixin signPad
+  .rv-pad-overlay(ng-show='signing !== null' role='dialog' aria-modal='true' aria-labelledby='rv-pad-title')
+    .rv-pad-sheet
+      .rv-pad-head
+        i.fas.fa-signature
+        span#rv-pad-title(translate="{{['line.sign.cap_sign', 'line.sign.ref_sign', 'line.sign.cref_sign'][signing]}}")
+        button.rv-pad-close(type='button' title="{{'common.cancel' | translate}}" ng-click='closeSign(false)')
+          i.fas.fa-times
+      .rv-pad-area
+        //- Where to sign: a line with a cross, like on paper
+        .rv-pad-baseline
+        .rv-pad-hint(ng-show='padEmpty')
+          | {{'line.sign.padHint' | translate}}
+          .rv-pad-rotate
+            i.fas.fa-mobile-alt
+            |  {{'line.sign.padRotate' | translate}}
+        canvas#rv-pad
+      .rv-pad-foot
+        button.rv-pad-btn(type='button' ng-click='undoSign()' ng-disabled='padEmpty' title="{{'line.sign.undo' | translate}}")
+          i.fas.fa-undo
+          span {{'line.sign.undo' | translate}}
+        button.rv-pad-btn(type='button' ng-click='eraseSign()' ng-disabled='padEmpty' title="{{'line.sign.erase' | translate}}")
+          i.fas.fa-eraser
+          span {{'line.sign.erase' | translate}}
+        button.rv-pad-btn.is-cancel(type='button' ng-click='closeSign(false)') {{'common.cancel' | translate}}
+        button.rv-pad-btn.is-done(type='button' ng-click='closeSign(true)' ng-disabled='padEmpty')
+          i.fas.fa-check
+          |  {{'line.sign.comp' | translate}}
 
 //- Comment, the three signatures and sending the run
 mixin signForm
@@ -60,10 +81,12 @@ mixin signForm
     .rv-card-body
       p.rv-note.rv-note-warning(translate='line.sign.sign_e')
       .rv-sign-slots
-        +signSlot(0, 'cap_sig', 'line.sign.cap_sign')
-        +signSlot(1, 'ref_sig', 'line.sign.ref_sign')
-        +signSlot(2, 'refas_sig', 'line.sign.cref_sign')
+        +signSlot(0, 'line.sign.cap_sign')
+        +signSlot(1, 'line.sign.ref_sign')
+        +signSlot(2, 'line.sign.cref_sign')
 
   button.rv-submit(type='button' ng-click='send_sign()' ng-class="{'is-ready': signedCount() == 3}")
     i.fas.fa-paper-plane
     | {{'line.sign.submit' | translate}}
+
+  +signPad

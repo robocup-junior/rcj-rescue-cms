@@ -98,23 +98,44 @@ test.describe('line run view', () => {
 test.describe('line sign page', () => {
   test.use({ user: 'judge' });
 
-  test('counts the signatures and gets the send button ready once all three are written', async ({ page }) => {
+  test('signs on the pad over the screen and gets the send button ready once all three have signed', async ({ page }) => {
     await open(page, `/line/sign/${ids.runs.Line}`);
     const count = page.locator('#rv-signatures .rv-header-total');
+    const overlay = page.locator('.rv-pad-overlay');
+    const done = overlay.locator('.rv-pad-btn.is-done');
     await expect(count).toHaveText('0 / 3');
+
+    async function stroke() {
+      const pad = await page.locator('#rv-pad').boundingBox();
+      await page.mouse.move(pad.x + 40, pad.y + pad.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(pad.x + 240, pad.y + pad.height / 3, { steps: 8 });
+      await page.mouse.up();
+    }
 
     for (let index = 0; index < 3; index++) {
       const slot = page.locator('.rv-sign-slot').nth(index);
       await slot.locator('.rv-sign-start').click();
-      const pad = await slot.locator('canvas').boundingBox();
-      await page.mouse.move(pad.x + 20, pad.y + pad.height / 2);
-      await page.mouse.down();
-      await page.mouse.move(pad.x + 120, pad.y + pad.height / 3, { steps: 5 });
-      await page.mouse.up();
-      await slot.locator('.rv-sign-action.is-done').click();
+      await expect(overlay).toBeVisible();
+      // Nothing to save until something is written; undo takes the stroke back
+      await expect(done).toBeDisabled();
+      await stroke();
+      await overlay.locator('.rv-pad-btn').first().click();
+      await expect(done).toBeDisabled();
+      await stroke();
+      await done.click();
+      await expect(overlay).toBeHidden();
       await expect(slot).toHaveClass(/is-signed/);
+      await expect(slot.locator('.rv-sign-image img')).toHaveAttribute('src', /^data:image\/svg\+xml;base64,/);
     }
     await expect(count).toHaveText('3 / 3');
     await expect(page.locator('.rv-submit')).toHaveClass(/is-ready/);
+
+    // Cancelling a new signature keeps the one before
+    await page.locator('.rv-sign-slot').first().locator('.rv-sign-action').click();
+    await stroke();
+    await page.keyboard.press('Escape');
+    await expect(overlay).toBeHidden();
+    await expect(count).toHaveText('3 / 3');
   });
 });
