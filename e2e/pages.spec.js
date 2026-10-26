@@ -45,6 +45,7 @@ const JUDGE_PAGES = [
   `/home/${C}/teams`,
   `/line/judge/${ids.runs.Line}`,
   `/line/input/${ids.runs.Line}`,
+  `/line/sign/${ids.runs.Line}`,
   `/maze/judge/${ids.runs.Maze}`,
   `/maze/input/${ids.runs.Maze}`,
   `/simulation/judge/${ids.runs.Erebus}`,
@@ -54,6 +55,7 @@ const JUDGE_PAGES = [
 const ADMIN_PAGES = [
   // The entry leagues are not disclosed, so their runs are checked as staff
   `/line/view/${ids.finishedRuns.LineNL}`,
+  `/line/sign/${ids.finishedRuns.LineNL}`,
   '/admin',
   '/admin/user',
   '/admin/short',

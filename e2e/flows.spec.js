@@ -94,3 +94,27 @@ test.describe('line run view', () => {
     expect(bar.y).toBe(0);
   });
 });
+
+test.describe('line sign page', () => {
+  test.use({ user: 'judge' });
+
+  test('counts the signatures and gets the send button ready once all three are written', async ({ page }) => {
+    await open(page, `/line/sign/${ids.runs.Line}`);
+    const count = page.locator('#rv-signatures .rv-header-total');
+    await expect(count).toHaveText('0 / 3');
+
+    for (let index = 0; index < 3; index++) {
+      const slot = page.locator('.rv-sign-slot').nth(index);
+      await slot.locator('.rv-sign-start').click();
+      const pad = await slot.locator('canvas').boundingBox();
+      await page.mouse.move(pad.x + 20, pad.y + pad.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(pad.x + 120, pad.y + pad.height / 3, { steps: 5 });
+      await page.mouse.up();
+      await slot.locator('.rv-sign-action.is-done').click();
+      await expect(slot).toHaveClass(/is-signed/);
+    }
+    await expect(count).toHaveText('3 / 3');
+    await expect(page.locator('.rv-submit')).toHaveClass(/is-ready/);
+  });
+});

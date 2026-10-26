@@ -602,18 +602,17 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         }
     }
 
+    // Signatures finished: written, and not open on the pad again
+    $scope.signedCount = function () {
+        return [0, 1, 2].filter(function (index) {
+            return $scope.signData[index] && !$scope.enableSign[index];
+        }).length;
+    }
+
+    // The pad keeps jSignature's 4:1 shape, but stays tall enough to sign on a phone
     function initSign(index) {
-        switch (index) {
-            case 0:
-                $("#cap_sig").jSignature();
-                break;
-            case 1:
-                $("#ref_sig").jSignature();
-                break;
-            case 2:
-                $("#refas_sig").jSignature();
-                break;
-        }
+        var pad = $(['#cap_sig', '#ref_sig', '#refas_sig'][index]);
+        pad.jSignature({ height: Math.max(180, Math.round(pad.width() / 4)) });
     }
 
     $scope.clearSign = function (index) {

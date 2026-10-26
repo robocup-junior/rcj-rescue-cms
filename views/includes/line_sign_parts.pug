@@ -1,0 +1,69 @@
+//- The parts of the Rescue Line sign pages (views/sign/line_2026*.pug) around the run they show.
+//- The controller is public/javascripts/sign/line_2026*.js, the styles line_view.css.
+
+mixin signTopbar
+  header.rv-topbar
+    button.rv-back.rv-back-label(type='button' title="{{'line.sign.to_judge' | translate}}" ng-click="go('/line/judge/' + runId + '?return=' + getParam('return'))")
+      i.fas.fa-edit
+      span {{'line.sign.to_judge' | translate}}
+    .rv-team
+      span.rv-live(title='Live')
+      span.rv-team-name {{team}}
+    .rv-topbar-stats
+      .rv-stat
+        i.fas.fa-calculator
+        span.rv-stat-value {{score}}
+        span.rv-stat-unit {{'common.point' | translate}}
+      .rv-stat
+        i.fas.fa-stopwatch
+        span.rv-stat-value {{minutes*60*1000+seconds*1000 | date:'m:ss'}}
+
+//- One signature: a button to start, the pad while signing, then the signature
+mixin signSlot(index, padId, title)
+  - var drawing = 'enableSign[' + index + ']'
+  - var signed = '!enableSign[' + index + '] && signData[' + index + ']'
+  .rv-sign-slot(ng-class="{'is-drawing': " + drawing + ", 'is-signed': " + signed + "}")
+    .rv-sign-slot-head
+      span.rv-sign-state
+        i.fas.fa-check(ng-if=signed)
+        span(ng-if="!(" + signed + ")")= index + 1
+      .rv-sign-slot-title(translate=title)
+      button.rv-sign-action.is-done(type='button' ng-show=drawing ng-click='toggleSign(' + index + ')')
+        i.fas.fa-check
+        |  {{'line.sign.comp' | translate}}
+      button.rv-sign-action(type='button' ng-show=signed ng-click='clearSign(' + index + ')')
+        i.fas.fa-eraser
+        |  {{'line.sign.clear' | translate}}
+    button.rv-sign-start(type='button' ng-show="!enableSign[" + index + "] && !signData[" + index + "]" ng-click='toggleSign(' + index + ')')
+      i.fas.fa-signature
+      | {{'line.sign.write' | translate}}
+    .rv-sign-pad(ng-show=drawing)
+      .confirmation(id=padId)
+    .rv-sign-image(ng-show=signed)
+      img(ng-src='{{signData[' + index + ']}}' alt='')
+
+//- Comment, the three signatures and sending the run
+mixin signForm
+  section.rv-card#rv-comment
+    .rv-card-header
+      i.fas.fa-comment
+      | {{'line.sign.comment' | translate}}
+    .rv-card-body
+      p.rv-note {{'line.sign.comment_e' | translate}}
+      textarea.form-control(ng-model='comment' rows='3')
+
+  section.rv-card#rv-signatures
+    .rv-card-header
+      i.fas.fa-pencil-alt
+      | {{'line.sign.sign' | translate}}
+      span.rv-header-total {{signedCount()}} / 3
+    .rv-card-body
+      p.rv-note.rv-note-warning(translate='line.sign.sign_e')
+      .rv-sign-slots
+        +signSlot(0, 'cap_sig', 'line.sign.cap_sign')
+        +signSlot(1, 'ref_sig', 'line.sign.ref_sign')
+        +signSlot(2, 'refas_sig', 'line.sign.cref_sign')
+
+  button.rv-submit(type='button' ng-click='send_sign()' ng-class="{'is-ready': signedCount() == 3}")
+    i.fas.fa-paper-plane
+    | {{'line.sign.submit' | translate}}
