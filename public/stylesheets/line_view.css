@@ -2521,52 +2521,35 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-exit-toggle:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: -3px; }
 
 /* The end: the time as timed, then on to the sign page */
-#rv-finish .rv-card-body { display: flex; flex-direction: column; gap: 1.25rem; }
+/* The time of the run and the button on to the sign page, side by side where there is room */
+.rv-finish-row { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
+.rv-finish-row .rv-submit { flex: 1 1 14rem; width: auto; min-height: 60px; }
 
-/* The time of the run, m : ss, large, each part with arrows above and below and its unit */
-.rv-time-edit {
-  display: grid;
-  grid-template-columns: auto auto auto;
-  grid-template-rows: auto auto;
-  justify-content: center;
-  align-items: center;
-  column-gap: 0.5rem;
-}
-
-.rv-time-title {
-  grid-column: 1 / -1;
-  margin-bottom: 0.5rem;
-  text-align: center;
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--rv-muted);
-}
-
-.rv-time-title i { color: var(--rv-accent); }
-.rv-time-field { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+/* m : ss on one line, each part between its − and + */
+.rv-time-edit { display: flex; flex: none; align-items: center; gap: 0.3rem; margin: 0 auto; }
+.rv-time-field { display: flex; align-items: center; gap: 0.2rem; }
 
 .rv-time-step {
-  width: 100%;
-  height: 40px;
+  width: 38px;
+  height: 52px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   background: #f1f5f9;
   color: var(--rv-text);
+  font-size: 0.8rem;
   cursor: pointer;
 }
 
 .rv-time-step:disabled { opacity: 0.35; cursor: default; }
 
 .rv-time-input {
-  width: 5.5rem;
-  height: 76px;
+  width: 3.4rem;
+  height: 56px;
   border: 2px solid var(--rv-border);
-  border-radius: 14px;
+  border-radius: 12px;
   background: #fff;
   color: var(--rv-text);
-  font-size: 2.75rem;
+  font-size: 2rem;
   font-weight: 800;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -2574,8 +2557,7 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 
 .rv-time-input:focus { outline: none; border-color: var(--rv-accent); box-shadow: 0 0 0 3px var(--rv-focus); }
 .rv-time-input:disabled { background: #f8fafc; color: var(--rv-muted); }
-.rv-time-colon { align-self: center; padding-bottom: 1.6rem; font-size: 2.5rem; font-weight: 800; color: #94a3b8; }
-.rv-time-unit { font-size: 0.8rem; font-weight: 700; color: var(--rv-muted); }
+.rv-time-colon { font-size: 1.75rem; font-weight: 800; color: #94a3b8; }
 
 @media (max-width: 575.98px) {
   /* The label over the value */
