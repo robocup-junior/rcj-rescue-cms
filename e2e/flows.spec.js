@@ -112,6 +112,7 @@ test.describe('judging a line run', () => {
     expect((await sent).postDataJSON().LoPs[0]).toBe(1);
     await expect(page.locator('.rv-lop-row').first().locator('.rv-step-count')).toHaveText('1');
 
+
     // A rescue is registered on its sheet, opened from the evacuation zone on the map (the seed
     // map has none, so from the button in the map card instead): the victim, then the zone, which
     // closes the sheet

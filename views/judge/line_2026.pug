@@ -202,7 +202,7 @@ html(ng-app="ddApp")
               | {{'common.lops' | translate}}
               span.rv-header-total {{sum(LoPs)}} {{'common.times' | translate}}
             ol.rv-lop-list
-              li.rv-lop-row(ng-repeat='cp in range(LoPs.length) track by $index' ng-class="{'is-evac': $index == EvacuationAreaLoPIndex}")
+              li.rv-lop-row(ng-repeat='cp in range(LoPs.length) track by $index' ng-class="{'is-evac': $index == EvacuationAreaLoPIndex, 'is-skip': LoPs[$index] >= 3 && !$last && !pastSection($index)}")
                 //- The section in three columns, the same in every row so the checkpoints line up:
                 //- where it starts, the way (with the evacuation zone's icon on it), where it ends
                 .rv-lop-section
@@ -225,6 +225,11 @@ html(ng-app="ddApp")
                   span.rv-step-count(ng-class="{'is-zero': !LoPs[$index]}") {{LoPs[$index] ? LoPs[$index] : 0}}
                   button.rv-step.is-plus(type='button' ng-click='increment($index,$last)' title='+1')
                     i.fas.fa-plus
+                //- From the third LoP of a section the team may skip to its checkpoint, unless it has
+                //- moved on already
+                p.rv-lop-skip(ng-if='LoPs[$index] >= 3 && !$last && !pastSection($index)' role='status')
+                  i.fas.fa-forward
+                  |  {{'line.judge.maySkip' | translate:{cp: 'C' + ($index + 1)} }}
 
           //- Exit bonus: one tap to switch
           section.rv-card#rv-exit

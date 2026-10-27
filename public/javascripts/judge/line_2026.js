@@ -17,7 +17,7 @@ var txt_checkpoint;
 app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$http', '$translate', '$cookies', function ($scope, $uibModal, $log, $timeout, $http, $translate, $cookies) {
 
   var db_mtile;
-  var txt_score_element, txt_not_yet, txt_timeup, txt_timeup_mes, txt_lops, txt_lops_mes, txt_cantvisit, txt_start,
+  var txt_score_element, txt_not_yet, txt_timeup, txt_timeup_mes, txt_cantvisit, txt_start,
     txt_implicit;
   $translate('line.judge.js.score_element').then(function (val) {
     txt_score_element = val;
@@ -36,16 +36,6 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
   });
   $translate('line.judge.js.timeup.content').then(function (val) {
     txt_timeup_mes = val;
-  }, function (translationId) {
-    // = translationId;
-  });
-  $translate('line.judge.js.lops.title').then(function (val) {
-    txt_lops = val;
-  }, function (translationId) {
-    // = translationId;
-  });
-  $translate('line.judge.js.lops.content').then(function (val) {
-    txt_lops_mes = val;
   }, function (translationId) {
     // = translationId;
   });
@@ -266,9 +256,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       // Scoring elements of the tiles
       $scope.stiles = response.data.tiles;
       let checkPointNumber = 1;
+      checkPointAt = {};
       for(let i in $scope.stiles){
         if ($scope.isCheckPoint($scope.stiles[i])) {
             marker[i] = checkPointNumber;
+            checkPointAt[checkPointNumber] = Number(i);
             checkPointNumber++;
         }
       }
@@ -407,11 +399,31 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     upload_run({
       LoPs: $scope.LoPs
     });
-    if ($scope.LoPs[index] >= 3 && !last) {
+    // From the third, the team may skip to the next checkpoint: the row says so (no dialog, which
+    // would stop the judge during the run), with a sound when it first does
+    if ($scope.LoPs[index] == 3 && !last && !$scope.pastSection(index)) {
       playSound(sInfo);
-      swal(txt_lops, txt_lops_mes, "info");
     }
 
+  };
+
+  // Where each checkpoint is on the course (its number to the index of its pass in stiles)
+  var checkPointAt = {};
+
+  // Whether the run is past section `index` (to checkpoint index + 1): that checkpoint or anything
+  // after it scored, or LoPs in a later section. Then the team has moved on, skipping or not, and
+  // three LoPs there no longer mean it may skip
+  $scope.pastSection = function (index) {
+    for (var j = index + 1; j < $scope.LoPs.length; j++) {
+      if ($scope.LoPs[j] > 0) return true;
+    }
+    var end = checkPointAt[index + 1];
+    if (end == null) return false;
+    for (var i = end; i < $scope.stiles.length; i++) {
+      var stile = $scope.stiles[i];
+      if (stile && stile.scoredItems.some(function (item) { return item.scored; })) return true;
+    }
+    return false;
   };
 
   $scope.calc_victim_type_lop_multiplier = function (lop=-1){

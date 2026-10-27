@@ -2182,7 +2182,35 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   border-bottom: 1px solid var(--rv-border);
 }
 
+.rv-lop-row { flex-wrap: wrap; }
 .rv-lop-row:last-child { border-bottom: none; }
+
+/* Three LoPs or more: the team may skip to the section's checkpoint, said under the row */
+.rv-lop-row.is-skip { background: #fffbeb; }
+
+.rv-lop-skip {
+  flex-basis: 100%;
+  margin: 0;
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.9rem;
+  font-weight: 800;
+  animation: rv-skip-in 0.35s ease-out;
+}
+
+/* Gone at once when it no longer applies (ngAnimate would play the animation again first) */
+.rv-lop-skip.ng-leave { animation: none; }
+
+@keyframes rv-skip-in {
+  from { transform: translateY(-4px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-lop-skip { animation: none; }
+}
 .rv-lop-row.is-evac { background: #fff5f5; }
 /* Where the section starts | the way | where it ends: columns of the same width in every row, so the
    checkpoints line up; the way is an arrow, with the evacuation zone on it */
