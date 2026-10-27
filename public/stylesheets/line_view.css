@@ -2462,7 +2462,7 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   justify-content: center;
   gap: 0.5rem;
   padding: 0;
-  border: 3px dashed rgba(220, 38, 38, 0.75);
+  border: none;
   border-radius: 10px;
   background: rgba(254, 226, 226, 0.35);
   cursor: pointer;
@@ -2497,7 +2497,6 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  border: 3px dashed rgba(71, 85, 105, 0.5);
   border-radius: 10px;
   background: rgba(241, 245, 249, 0.35);
   pointer-events: none;
