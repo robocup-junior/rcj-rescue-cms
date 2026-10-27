@@ -744,8 +744,10 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 
 .rv-mz-wall.is-floating { background: #1e40af; }
 
-/* The victims, over the walls (they are drawn against them); taps go through to the tile */
+/* The victims, over the walls (they are drawn against them), then the rest of each tile over them
+   (sized as the tile is, for its status and points); taps go through to the tile */
 .rv-mz-victims { position: absolute; z-index: 4; pointer-events: none; }
+.rv-mz-over { position: absolute; z-index: 5; container-type: size; pointer-events: none; }
 .rv-mz-wall.is-ignored { background: #16a34a; }
 
 .rv-mz-frame {
@@ -785,7 +787,7 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 
 /* Out of the way while pointing at the tile, to see all of it */
 @media (hover: hover) {
-  .rv-mz-tile:hover .rv-mz-points { opacity: 0.12; }
+  .rv-mz-over.is-hover .rv-mz-points { opacity: 0.12; }
 }
 
 .rv-mz-points.is-done { background: #059669; }

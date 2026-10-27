@@ -1,10 +1,22 @@
 //- The maze map of the view, sign and judge pages (common/maze_2026*.pug, judge/maze_2026*.pug): the
 //- tiles and the walls between them, placed in % of the map by buildMazeMap() in line_view.js, so
 //- that the map scales with the card. Each tile's items turn with the map; its status and points
-//- stay upright. See line_view.css.
+//- stay upright. From the bottom: the tiles, the walls, the victims (drawn against the walls), then
+//- the rest of each tile, each in a layer of its own over the whole map. See line_view.css.
 .tilearea.rv-mz-area
   .rv-mz-map(ng-if='mazeView' ng-style='mazeView.style')
-    .rv-mz-tile(ng-repeat='t in mazeView.tiles track by t.key' ng-class='t.cls' ng-style='t.style' ng-click='cellClick(t.x, t.y, z, false, true)')
+    //- The tile pointed at, whose points step aside (they are in the layer over it)
+    .rv-mz-tile(ng-repeat='t in mazeView.tiles track by t.key' ng-class='t.cls' ng-style='t.style' ng-click='cellClick(t.x, t.y, z, false, true)' ng-mouseenter='mazeView.hover = t.key' ng-mouseleave='mazeView.hover = null')
+    .rv-mz-wall(ng-repeat='w in mazeView.walls track by w.key' ng-class="'is-' + w.kind" ng-style='w.style')
+    .rv-mz-victims(ng-repeat='t in mazeView.tiles track by t.key' ng-if='t.victims' ng-style='t.style')
+      .rv-mz-items(ng-style="{transform: 'rotate(' + sRotate + 'deg)'}")
+        img(ng-repeat="side in ['top', 'right', 'bottom', 'left', 'floor']" ng-if='victimImage(t.cell, side)' ng-src='{{victimImage(t.cell, side)}}' alt='')
+        //- A cognitive target: its five rings, one image each
+        div(ng-repeat="side in ['top', 'right', 'bottom', 'left']" ng-if="t.cell.tile.victims[side] == 'Cognitive' && t.cell.tile.cognitiveTargets[side].rings")
+          img(ng-repeat='n in [1, 2, 3, 4, 5]' ng-src="{{'/images/cognitive_rings/' + side + '_ring' + n + '_' + t.cell.tile.cognitiveTargets[side].rings['ring' + n] + '.png'}}" alt='')
+    //- The rest of each tile over the victims: its items, the start and the elevator, its status
+    //- and points; taps go through to the tile
+    .rv-mz-over(ng-repeat='t in mazeView.tiles track by t.key' ng-if='t.cell' ng-style='t.style' ng-class="{'is-hover': mazeView.hover == t.key}")
       .rv-mz-items(ng-style="{transform: 'rotate(' + sRotate + 'deg)'}")
         img(ng-if='t.cell.tile.speedbump' src='/images/log.png' alt='')
         img(ng-if='t.cell.tile.ramp' src='/images/ramp.png' alt='')
@@ -20,12 +32,3 @@
           span(ng-if="tileStatus(t.x, t.y, z, true) != 'done'")
             | {{tilePoint(t.x, t.y, z, true)}}
             small /{{tileMaxPoint(t.x, t.y, z)}}
-    .rv-mz-wall(ng-repeat='w in mazeView.walls track by w.key' ng-class="'is-' + w.kind" ng-style='w.style')
-    //- The victims over the walls, against which they are drawn: a layer of their own, since a tile
-    //- keeps what it holds below the walls
-    .rv-mz-victims(ng-repeat='t in mazeView.tiles track by t.key' ng-if='t.victims' ng-style='t.style')
-      .rv-mz-items(ng-style="{transform: 'rotate(' + sRotate + 'deg)'}")
-        img(ng-repeat="side in ['top', 'right', 'bottom', 'left', 'floor']" ng-if='victimImage(t.cell, side)' ng-src='{{victimImage(t.cell, side)}}' alt='')
-        //- A cognitive target: its five rings, one image each
-        div(ng-repeat="side in ['top', 'right', 'bottom', 'left']" ng-if="t.cell.tile.victims[side] == 'Cognitive' && t.cell.tile.cognitiveTargets[side].rings")
-          img(ng-repeat='n in [1, 2, 3, 4, 5]' ng-src="{{'/images/cognitive_rings/' + side + '_ring' + n + '_' + t.cell.tile.cognitiveTargets[side].rings['ring' + n] + '.png'}}" alt='')
