@@ -221,25 +221,33 @@ html:has(.rv-is-loading) { overflow: hidden; }
   text-overflow: ellipsis;
 }
 
-/* Updates arrive live over socket.io */
+/* Updates arrive live over socket.io. The pulse is a ring that grows and fades (transform and
+   opacity only, which the compositor runs without restyling the page on every frame) */
 .rv-live {
+  position: relative;
   flex: none;
   width: 10px;
   height: 10px;
   border-radius: 50%;
   background: #4ade80;
-  box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6);
+}
+
+.rv-live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #4ade80;
   animation: rv-pulse 2s ease-out infinite;
 }
 
 @keyframes rv-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.6); }
-  70% { box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+  0% { transform: scale(1); opacity: 0.6; }
+  70%, 100% { transform: scale(2.6); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rv-live { animation: none; }
+  .rv-live::after { animation: none; opacity: 0; }
 }
 
 .rv-topbar-stats {
@@ -1977,17 +1985,27 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 
 .rv-timer-btn.is-running { background: #dc2626; box-shadow: 0 6px 18px rgba(220, 38, 38, 0.3); }
 .rv-timer-btn:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
-/* Before the run starts: a ring that calls for the referee's start */
-.rv-timer-btn.is-blink { animation: rv-call 1.6s ease-out infinite; }
+/* Before the run starts: a ring that calls for the referee's start (transform and opacity only,
+   so it does not restyle the page on every frame) */
+.rv-timer-btn.is-blink { position: relative; }
+
+.rv-timer-btn.is-blink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 3px solid rgba(5, 150, 105, 0.6);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: rv-call 1.6s ease-out infinite;
+}
 
 @keyframes rv-call {
-  0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.55); }
-  70% { box-shadow: 0 0 0 14px rgba(5, 150, 105, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+  0% { transform: scale(1); opacity: 1; }
+  70%, 100% { transform: scale(1.12, 1.35); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rv-timer-btn.is-blink { animation: none; }
+  .rv-timer-btn.is-blink::after { animation: none; opacity: 0; }
 }
 
 /* The timer card at the top, while the timer does not run: the time and the start. Running, the
@@ -2027,6 +2045,7 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 /* Running, the time in the bar is the button that stops it: white on the red bar, with a red
    stop label, and a glow around it a few times when the timer has just started */
 .rv-stat-stop {
+  position: relative;
   align-items: center;
   gap: 0.55rem;
   padding: 0.3rem 0.35rem 0.3rem 0.75rem;
@@ -2034,6 +2053,17 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   background: #fff;
   color: var(--rv-text);
   cursor: pointer;
+}
+
+/* The glow when the timer has just started, as a ring outside the button */
+.rv-stat-stop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
   animation: rv-stop-call 1.4s ease-out 3;
 }
 
@@ -2056,13 +2086,12 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-stat .rv-stop-label i { color: #fff; font-size: 0.7rem; }
 
 @keyframes rv-stop-call {
-  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.9); }
-  70% { box-shadow: 0 0 0 12px rgba(255, 255, 255, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+  0% { transform: scale(1); opacity: 1; }
+  70%, 100% { transform: scale(1.15, 1.6); opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rv-stat-stop { animation: none; }
+  .rv-stat-stop::after { animation: none; }
 }
 
 /* The question over the page: the stop takes the time of the tap in the bar */

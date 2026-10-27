@@ -40,6 +40,12 @@ function revealRunPage(resize) {
     requestAnimationFrame(function () {
       document.body.classList.remove('rv-is-loading');
     });
+    // Gone once it has faded: hidden, its animations would still run and lay the page out on
+    // every frame
+    setTimeout(function () {
+      var loading = document.querySelector('.rv-loading');
+      if (loading) loading.remove();
+    }, 1000);
   }
   setTimeout(reveal, 15000);
 
