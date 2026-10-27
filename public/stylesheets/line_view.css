@@ -2141,65 +2141,27 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 
 .rv-timer-btn.is-running { background: #dc2626; box-shadow: 0 6px 18px rgba(220, 38, 38, 0.3); }
 .rv-timer-btn:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
-/* Before the run starts: a ring that calls for the referee's start (transform and opacity only,
-   so it does not restyle the page on every frame) */
-.rv-timer-btn.is-blink { position: relative; }
 
-.rv-timer-btn.is-blink::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border: 3px solid rgba(5, 150, 105, 0.6);
-  border-radius: inherit;
-  pointer-events: none;
-  animation: rv-call 1.6s ease-out infinite;
-}
-
-@keyframes rv-call {
-  0% { transform: scale(1); opacity: 1; }
-  70%, 100% { transform: scale(1.12, 1.35); opacity: 0; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .rv-timer-btn.is-blink::after { animation: none; opacity: 0; }
-}
-
-/* The timer card at the top, while the timer does not run: the time and the start. Running, the
-   bar shows the time and is what stops it, away from the scoring */
-.rv-timer-card {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1.5rem;
-  padding: 0.9rem 1.25rem;
-}
-
-.rv-timer-display { display: flex; align-items: center; gap: 0.75rem; }
-.rv-timer-display > i { color: var(--rv-accent); font-size: 1.4rem; }
-.rv-timer-time { font-size: 2.25rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-
-.rv-timer-actions { display: flex; gap: 0.75rem; }
-
-.rv-timer-reset {
+/* Back to 0:00, beside the time of the run, while the timer is stopped */
+.rv-time-reset {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  min-height: 56px;
-  padding: 0 1.1rem;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0 0.9rem;
   border: 1px solid var(--rv-border);
-  border-radius: 14px;
+  border-radius: 12px;
   background: #fff;
-  color: var(--rv-text);
+  color: var(--rv-muted);
   font-weight: 700;
   cursor: pointer;
 }
 
-.rv-timer-actions .rv-timer-btn { min-width: 200px; }
+.rv-time-reset:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
 
 /* Running, the time in the bar is the button that stops it: white on the red bar, with a red
    stop label, and a glow around it a few times when the timer has just started */
+.rv-stat-start,
 .rv-stat-stop {
   position: relative;
   align-items: center;
@@ -2223,9 +2185,39 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   animation: rv-stop-call 1.4s ease-out 3;
 }
 
+.rv-stat-start .rv-stat-value,
 .rv-stat-stop .rv-stat-value { color: var(--rv-text); }
+.rv-stat-start:hover { background: #ecfdf5; }
 .rv-stat-stop:hover { background: #fef2f2; }
+.rv-stat-start:focus-visible,
 .rv-stat-stop:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+/* Before the run: a ring that keeps calling for the referee's start, outside the button (transform
+   and opacity only, so it does not restyle the page on every frame) */
+.rv-stat-start.is-blink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  animation: rv-stop-call 1.6s ease-out infinite;
+}
+
+.rv-start-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  background: #059669;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.rv-stat .rv-start-label i { color: #fff; font-size: 0.7rem; }
 
 .rv-stop-label {
   display: inline-flex;
@@ -2247,7 +2239,8 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rv-stat-stop::after { animation: none; }
+  .rv-stat-stop::after,
+  .rv-stat-start.is-blink::after { animation: none; }
 }
 
 /* The question over the page: the stop takes the time of the tap in the bar */
@@ -2768,10 +2761,8 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   .rv-lop-section .rv-sec-exit i { display: none; }
   .rv-step { width: 42px; height: 42px; }
   .rv-step-count { min-width: 1.8rem; font-size: 1.4rem; }
-  .rv-timer-actions { width: 100%; }
-  /* Room for the stop button: the judge needs no score here */
+  /* Room for the start and stop buttons: the judge needs no score here */
   .is-judge .rv-stat-score { display: none; }
   /* The stop question comes up from the bottom, clear of the home bar */
   .rv-stop-actions { padding-bottom: calc(1.1rem + env(safe-area-inset-bottom)); }
-  .rv-timer-actions .rv-timer-btn { flex: 1; min-width: 0; }
 }

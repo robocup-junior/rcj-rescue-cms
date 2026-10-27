@@ -82,6 +82,8 @@ test.describe('judging a maze run', () => {
     const minus = page.locator('#rv-lops .rv-step.is-minus').first();
     for (let i = 0; i < 3; i++) await plus.click();
     for (let i = 0; i < 3; i++) await minus.click();
+    // All saved: none on its way (the bar's mark follows a frame later, as ngAnimate sets classes)
+    await expect.poll(() => page.evaluate(() => angular.element(document.body).scope().sync)).toBe(0);
     await expect(page.locator('.rv-sync')).toHaveClass(/is-saved/);
     await expect(page.locator('.rv-alert')).toBeHidden();
 
@@ -115,16 +117,16 @@ test.describe('judging a line run', () => {
     await page.locator('.rv-photo-check').nth(1).click();
     await confirm.click();
 
-    // Tiles score before the timer is started as well
-    const timerCard = page.locator('.rv-timer-card');
+    // Tiles score before the timer is started as well; it is started from the time in the bar
+    const start = page.locator('.rv-stat-start');
     const tileSent = page.waitForRequest((req) => req.method() === 'PUT' && 'tiles' in req.postDataJSON());
     await page.locator('.rv-judge-map tile').nth(1).click();
     expect(Object.values((await tileSent).postDataJSON().tiles)[0].scoredItems[0]).toMatchObject({ scored: true });
-    await expect(timerCard).toBeVisible();
+    await expect(start).toBeVisible();
 
-    // Running, the timer is gone from the top
-    await timerCard.locator('.rv-timer-btn').click();
-    await expect(timerCard).toHaveCount(0);
+    // Running, the time in the bar stops it instead
+    await start.click();
+    await expect(start).toHaveCount(0);
 
     // What the page sends is checked, since other tests save to the same run
     const sent = page.waitForRequest((req) => req.url().includes(`/api/runs/line/${ids.runs.Line}`) && req.method() === 'PUT' && 'LoPs' in req.postDataJSON());
@@ -137,6 +139,8 @@ test.describe('judging a line run', () => {
     const minus = page.locator('.rv-lop-row').first().locator('.rv-step.is-minus');
     for (let i = 0; i < 4; i++) await plus.click();
     for (let i = 0; i < 4; i++) await minus.click();
+    // All saved: none on its way (the bar's mark follows a frame later, as ngAnimate sets classes)
+    await expect.poll(() => page.evaluate(() => angular.element(document.body).scope().sync)).toBe(0);
     await expect(page.locator('.rv-sync')).toHaveClass(/is-saved/);
     await expect(page.locator('.rv-alert')).toBeHidden();
     await expect(page.locator('.rv-lop-row').first().locator('.rv-step-count')).toHaveText('1');
@@ -162,16 +166,20 @@ test.describe('judging a line run', () => {
     const stop = page.locator('.rv-stat-stop');
     await stop.click();
     await page.getByRole('button', { name: 'Keep running' }).click();
-    await expect(timerCard).toHaveCount(0);
+    await expect(start).toHaveCount(0);
     await stop.click();
     const stopAt = await page.evaluate(() => angular.element(document.body).scope().stopAt);
     await page.waitForTimeout(1100);
     await page.locator('.rv-stop-now[ng-click="confirmStop()"]').click();
-    await expect(timerCard).toBeVisible();
+    await expect(start).toBeVisible();
     await expect(stop).toHaveCount(0);
     expect(await page.evaluate(() => angular.element(document.body).scope().time)).toBe(stopAt);
     const finish = page.locator('#rv-finish');
     await expect(finish.locator('.rv-submit')).toBeEnabled();
+    // Reset beside the time of the run takes it back to 0:00
+    await finish.locator('.rv-time-reset').click();
+    await expect(start.locator('.rv-stat-value')).toHaveText('0:00');
+    await expect(finish.locator('.rv-time-reset')).toBeHidden();
   });
 });
 
@@ -188,7 +196,7 @@ test.describe('the end of a line run', () => {
 
     // A run of two seconds, so as not to wait for eight minutes
     await page.evaluate(() => { angular.element(document.body).scope().duration = 2; });
-    await page.locator('.rv-timer-card .rv-timer-btn').click();
+    await page.locator('.rv-stat-start').click();
     const sheet = page.locator('.rv-overlay', { has: page.locator('.rv-timeup') });
     await expect(sheet).toBeVisible({ timeout: 5000 });
     await expect(sheet.locator('.rv-timeup-clock')).toHaveText('0:02');

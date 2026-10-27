@@ -38,11 +38,17 @@ html(ng-app="ddApp")
           i.fas.fa-calculator
           span.rv-stat-value {{score}}
           span.rv-stat-unit {{'common.point' | translate}}
-        .rv-stat(ng-if='!startedTime')
+        //- Before the run is checked, only the time (a team that does not come is timed below)
+        .rv-stat(ng-if='!startedTime && !checked')
           i.fas.fa-stopwatch
           span.rv-stat-value {{time | date:'m:ss'}}
-        //- Running, the time is what stops it: in reach without scrolling, away from the scoring,
-        //- and asked once more (the sheet below)
+        //- The time is what starts and stops the timer: in reach without scrolling, away from the
+        //- scoring. Stopping is asked once more (the sheet below)
+        button.rv-stat.rv-stat-start(type='button' ng-if='!startedTime && checked' ng-click='toggleTime()' ng-class="{'is-blink': minutes < 8 && !fromSign}" title="{{'maze.judge.tim_start' | translate}}")
+          span.rv-stat-value {{time | date:'m:ss'}}
+          span.rv-start-label
+            i.fas.fa-play
+            | {{'maze.judge.tim_start' | translate}}
         button.rv-stat.rv-stat-stop(type='button' ng-if='startedTime' ng-click='askStop(true)' title="{{'line.judge.stopTimer' | translate}}")
           span.rv-live
           span.rv-stat-value {{time | date:'m:ss'}}
@@ -120,20 +126,6 @@ html(ng-app="ddApp")
         button.rv-alert-action(type='button' ng-click='saveEverything()')
           i.fas.fa-redo
           |  {{'maze.judge.reSend' | translate}}
-
-      //- The timer is started here, and gone from here while it runs (the time in the bar stops
-      //- it); stopped, it can be started again or reset
-      section.rv-card.rv-timer-card(ng-if='!startedTime')
-        .rv-timer-display
-          i.fas.fa-stopwatch
-          span.rv-timer-time {{time | date:'m:ss'}}
-        .rv-timer-actions
-          button.rv-timer-reset(type='button' ng-show='time != 0' ng-click='timeReset()')
-            i.fas.fa-undo
-            span {{'maze.judge.tim_reset' | translate}}
-          button.rv-timer-btn(type='button' ng-click='toggleTime()' ng-class="{'is-blink': minutes < 8 && !fromSign}")
-            i.fas.fa-play
-            | {{'maze.judge.tim_start' | translate}}
 
       .rv-judge-grid
         section.rv-card.rv-map.rv-judge-map#rv-items
@@ -215,7 +207,7 @@ html(ng-app="ddApp")
                     i.fas.fa-hand-pointer
                     |  {{'line.judge.tapToggle' | translate}}
 
-      //- The end: the time as the referee timed it, then on to the sign page
+      //- The end: the time as the referee timed it (or reset), then on to the sign page
       section.rv-card#rv-finish
         .rv-card-header
           i.fas.fa-flag-checkered
@@ -239,6 +231,10 @@ html(ng-app="ddApp")
                 input.rv-time-input(type='text' inputmode='numeric' aria-label='sec' ng-model='seconds' rv-two-digits ng-blur='tidyTime()' ng-disabled='startedTime' maxlength='2')
                 button.rv-time-step(type='button' ng-click="stepTime(-1)" ng-disabled='startedTime' aria-label='−1 sec')
                   i.fas.fa-chevron-down
+            //- Back to 0:00, while the timer is stopped
+            button.rv-time-reset(type='button' ng-show='!startedTime && time != 0' ng-click='timeReset()')
+              i.fas.fa-undo
+              span {{'maze.judge.tim_reset' | translate}}
             button.rv-submit(type='button' ng-click='confirm()' ng-disabled='startedTime || networkError' ng-class="{'is-ready': !startedTime && !networkError}")
               i.fas.fa-arrow-right
               | {{'maze.judge.toSign' | translate}}
