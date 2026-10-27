@@ -159,9 +159,12 @@ html(ng-app="ddApp")
             span.rv-key.is-cp {{'line.view.checkpoint' | translate}}
           //- A map without evacuation zone tiles (or another floor): the rescue from here instead
           button.rv-rescue-add(type='button' ng-if='!evacBox && EvacuationAreaLoPIndex >= 0' ng-click='openRescue()')
-            i.fas.fa-first-aid
-            |  {{'line.judge.rescue' | translate}}
-            span.rv-evac-count {{victim_list.length}}
+            span
+              i.fas.fa-first-aid
+              |  {{'line.judge.rescue' | translate}}
+            span.rv-evac-rescues(ng-if='victim_list.length')
+              span.rv-evac-victim(ng-repeat='v in victim_list track by $index' ng-class="v.zoneType == 'RED' ? 'is-red' : 'is-green'")
+                img(ng-src="{{v.victimType == 'LIVE' ? '/images/liveVictim.png' : '/images/deadVictim.png'}}" alt='{{v.victimType}} {{v.zoneType}}')
           //- Tiles score only once the timer has run
           p.rv-map-hint(ng-if='time == 0')
             i.fas.fa-stopwatch
@@ -181,12 +184,15 @@ html(ng-app="ddApp")
               div(ng-repeat='r in range(width)', ng-if='sRotate==90', style='display: flex;')
                 .slot(ng-repeat='c in range(length)')
                   tile(template='judge' tile="mtiles[r+','+ (length - c-1) +','+z]", ng-click='doScoring(r,length-c-1,z)')
-              //- Over the evacuation zone's tiles (evacBox, from tile_size): tapped to register a rescue
+              //- Over the evacuation zone's tiles (evacBox, from tile_size): tapped to register a rescue.
+              //- It shows the rescues so far, in order: each victim in the colour of its zone
               button.rv-evac-hit(type='button' ng-if='evacBox && EvacuationAreaLoPIndex >= 0' ng-style='evacBox' ng-click='openRescue()')
                 span.rv-evac-label
                   i.fas.fa-first-aid
                   |  {{'line.judge.rescue' | translate}}
-                  span.rv-evac-count {{victim_list.length}}
+                span.rv-evac-rescues(ng-if='victim_list.length')
+                  span.rv-evac-victim(ng-repeat='v in victim_list track by $index' ng-class="v.zoneType == 'RED' ? 'is-red' : 'is-green'")
+                    img(ng-src="{{v.victimType == 'LIVE' ? '/images/liveVictim.png' : '/images/deadVictim.png'}}" alt='{{v.victimType}} {{v.zoneType}}')
 
         .rv-judge-side
           //- LoPs: a counter for each section of the course, from one checkpoint to the next

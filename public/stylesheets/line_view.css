@@ -2232,8 +2232,10 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   position: absolute;
   z-index: 5;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
   padding: 0;
   border: 3px dashed rgba(220, 38, 38, 0.75);
   border-radius: 10px;
@@ -2258,14 +2260,31 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
 }
 
-.rv-evac-count {
-  min-width: 1.6em;
-  padding: 0 0.4rem;
-  border-radius: 999px;
-  background: #fff;
-  color: #b91c1c;
-  font-variant-numeric: tabular-nums;
+/* The rescues so far, in order: each victim ringed in the colour of the zone it was taken to */
+.rv-evac-rescues {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  max-width: 92%;
+  padding: 4px 6px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
 }
+
+.rv-evac-victim {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 3px solid;
+  border-radius: 50%;
+}
+
+.rv-evac-victim.is-red { border-color: #db2777; background: #fde7f3; }
+.rv-evac-victim.is-green { border-color: #16a34a; background: #e7f7d9; }
+.rv-evac-victim img { width: 18px; height: 18px; }
 
 .rv-rescue-add {
   display: flex;
@@ -2284,7 +2303,8 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 
 /* In the map card, for a map without evacuation zone tiles */
 .rv-map .rv-rescue-add { width: auto; margin: 0.6rem 1rem 0; }
-.rv-rescue-add .rv-evac-count { background: #dc2626; color: #fff; }
+.rv-rescue-add { flex-wrap: wrap; gap: 0.5rem 0.75rem; padding: 0.4rem 0.75rem; }
+.rv-rescue-add .rv-evac-rescues { max-width: none; padding: 0; }
 
 .rv-rescue-sheet { padding: 1.1rem 1.1rem calc(1.1rem + env(safe-area-inset-bottom)); }
 /* Its close button at the far end of the head */

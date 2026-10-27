@@ -123,7 +123,8 @@ test.describe('judging a line run', () => {
     await rescueSheet.locator('.rv-zone-pick.is-green').click();
     expect((await rescued).postDataJSON().rescueOrder).toEqual([{ victimType: 'LIVE', zoneType: 'GREEN' }]);
     await expect(rescueSheet).toBeHidden();
-    await expect(page.locator('.rv-rescue-add .rv-evac-count')).toHaveText('1');
+    // The rescues so far show without opening it
+    await expect(page.locator('.rv-rescue-add .rv-evac-victim.is-green')).toHaveCount(1);
     await expect(rescueSheet.locator('.rv-rescue-item')).toHaveCount(1);
 
     // It is stopped from the time in the bar, asked twice; stopped, the time recorded is that of
