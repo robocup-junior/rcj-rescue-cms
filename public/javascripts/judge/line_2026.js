@@ -731,6 +731,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       animation: true,
       // The judge page in the run pages' design has its own (views/judge/line_2026.pug)
       templateUrl: document.body.classList.contains('run-view') ? '/templates/line_judge_modal_passes.html' : '/templates/line_judge_modal.html',
+      windowClass: 'rv-judge-modal',
       controller: 'ModalInstanceCtrl',
       size: 'lm',
       resolve: {

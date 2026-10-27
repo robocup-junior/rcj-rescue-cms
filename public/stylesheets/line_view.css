@@ -1335,9 +1335,11 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   .rvm-map { width: 220px; margin: 0 auto; }
 }
 
-/* The same on the judge page (line_judge_modal_passes.html): a larger map, whose arrows are buttons
-   over the neighbours the robot left to, and a list of passes to tap, each cleared or not */
-.rvm-judge .rvm-body { grid-template-columns: 260px minmax(0, 1fr); }
+/* The same on the judge page (line_judge_modal_passes.html): only the map, larger, whose arrows are
+   buttons over the neighbours the robot left to */
+.rv-judge-modal .modal-dialog { max-width: 440px; }
+.rvm-judge .rvm-body { grid-template-columns: minmax(0, 1fr); }
+.rvm-judge .rvm-map { width: 100%; max-width: 360px; margin: 0 auto; }
 
 .rvm-dirs {
   position: absolute;
@@ -1376,25 +1378,10 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 }
 
 .rvm-dir i { font-size: 0.85rem; }
+/* Not scored grey rather than red, as nothing went wrong yet */
 .rvm-dir.is-done { background: #059669; }
 .rvm-dir.is-halfdone { background: #d97706; }
 .rvm-dir:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
-/* Not scored: grey rather than red, as nothing went wrong yet */
-.rvm-judge .rvm-exit.is-undone { background: #94a3b8; }
-.rvm-judge .rvm-pass.is-undone { border-left-color: #94a3b8; }
-
-.rvm-judge .rvm-pass-head { min-height: 52px; background: #fff; }
-.rvm-pass-items { flex: 1; min-width: 0; font-size: 0.95rem; font-weight: 700; color: var(--rv-muted); }
-.rvm-pass.is-done .rvm-pass-items { color: #047857; }
-.rvm-pass-state { font-size: 1.5rem; color: #cbd5e1; }
-.rvm-pass.is-done .rvm-pass-state { color: var(--rv-ok); }
-.rvm-pass.is-halfdone .rvm-pass-state { color: #d97706; }
-.rvm-judge .rvm-pass:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
-
-@media (max-width: 575.98px) {
-  .rvm-judge .rvm-body { grid-template-columns: minmax(0, 1fr); }
-  .rvm-judge .rvm-map { width: min(100%, 280px); }
-}
 
 /* ---- Comment and signatures ---- */
 .rv-note { font-size: 0.9rem; color: var(--rv-accent); }
