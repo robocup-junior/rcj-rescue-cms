@@ -1421,8 +1421,10 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rvm-judge .rvm-body { grid-template-columns: minmax(0, 1fr); }
 .rvm-judge .rvm-map { width: 100%; max-width: 360px; margin: 0 auto; }
 
-/* A maze tile on the judge page (maze_judge_modal_2026*.html): its items as buttons, green once
-   scored, the blue tile's visits and each victim's rescue kits counted */
+/* A maze tile on the judge, view and sign pages (maze_judge_modal_2026*.html,
+   maze_view_modal_2026*.html): its items, green once scored, the blue tile's visits and each
+   victim's rescue kits counted; on the judge page they are buttons */
+.rv-maze-modal .modal-dialog { max-width: 440px; }
 .rvm-maze .rvm-body { display: flex; flex-direction: column; align-items: stretch; gap: 0.75rem; }
 .rvm-toggles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; }
 
@@ -1449,6 +1451,7 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rvm-toggle.is-on i { color: #059669; }
 .rvm-toggle:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
 .rvm-toggle:disabled { opacity: 0.4; cursor: default; }
+.rvm-toggle.is-static { cursor: default; }
 
 .rvm-counter,
 .rvm-victim {
@@ -1463,6 +1466,7 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 
 .rvm-counter.is-on,
 .rvm-victim.is-on { border-color: #059669; }
+.rvm-victim.is-half { border-color: #f59e0b; }
 .rvm-counter img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; }
 .rvm-counter-name { flex: 1; font-weight: 800; }
 .rvm-maze .rv-step { width: 40px; height: 40px; }
@@ -1471,6 +1475,26 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rvm-victims { display: flex; flex-direction: column; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
 .rvm-victim-side { width: 1.25rem; color: var(--rv-muted); text-align: center; }
 .rvm-victim-image { width: 40px; height: 40px; object-fit: contain; }
+
+/* The victim and, under it, its category, in the colour that says the kits it needs */
+.rvm-victim-who { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; }
+
+.rvm-category {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: #64748b;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.rvm-category.is-harmed { background: #dc2626; }
+.rvm-category.is-stable { background: #d97706; }
+.rvm-category.is-unharmed { background: #059669; }
 .rvm-victim .rvm-found { flex: 1 1 0; min-width: 0; padding: 0.4rem 0.6rem; }
 
 /* The kits: those placed of those needed, green once enough */

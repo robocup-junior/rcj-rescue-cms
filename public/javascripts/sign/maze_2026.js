@@ -683,7 +683,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             animation: true,
             templateUrl: '/templates/maze_view_modal_2026.html',
             controller: 'ModalInstanceCtrl',
-            size: 'lm',
+            windowClass: 'rv-maze-modal',
             resolve: {
                 cell: function () {
                     return $scope.cells[x + ',' + y + ',' + z];

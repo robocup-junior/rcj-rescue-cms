@@ -573,6 +573,12 @@
             "m_found": "Discovery",
             "m_victim": "Victims and Targets",
             "m_required": "Required",
+            "victimStatus": {
+                "Harmed": "Harmed",
+                "Stable": "Stable",
+                "Unharmed": "Unharmed",
+                "Dummy": "Dummy"
+            },
             "misidentification": "Misidentification"
         },
         "judge": {

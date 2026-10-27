@@ -573,6 +573,12 @@
             "m_found": "発見",
             "m_victim": "被災者・ターゲット",
             "m_required": "必要数",
+            "victimStatus": {
+                "Harmed": "負傷",
+                "Stable": "安定",
+                "Unharmed": "無傷",
+                "Dummy": "ダミー"
+            },
             "misidentification": "誤発見"
         },
         "judge": {
