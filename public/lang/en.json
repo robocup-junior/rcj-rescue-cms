@@ -450,6 +450,7 @@
             "keepRunning": "Keep running",
             "stopAt": "Stop at {{t}}",
             "recordedTime": "Time to record",
+            "runTime": "Time of the run",
             "maySkip": "The team may skip to {{cp}}",
             "close": "Close",
             "js": {

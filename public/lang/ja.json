@@ -450,6 +450,7 @@
             "keepRunning": "続ける",
             "stopAt": "{{t}} で止める",
             "recordedTime": "記録されるタイム",
+            "runTime": "競技時間",
             "maySkip": "{{cp}} へスキップできます",
             "close": "閉じる",
             "js": {

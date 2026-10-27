@@ -2009,7 +2009,7 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 }
 
 /* The timer card at the top, while the timer does not run: the time and the start. Running, the
-   bar shows the time and it is stopped at the end of the page (#rv-finish), away from the scoring */
+   bar shows the time and is what stops it, away from the scoring */
 .rv-timer-card {
   display: flex;
   flex-wrap: wrap;
@@ -2119,7 +2119,6 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-stop-choice { font-size: 1.1rem; font-variant-numeric: tabular-nums; }
 .rv-stop-clock { display: inline-flex; align-items: center; gap: 0.4rem; color: #047857; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
 .rv-stop-caption { font-size: 0.75rem; font-weight: 600; opacity: 0.85; }
-.rv-finish-label { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rv-muted); }
 
 .rv-alert {
   display: flex;
@@ -2522,10 +2521,61 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-exit-toggle:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: -3px; }
 
 /* The end: the time as timed, then on to the sign page */
-#rv-finish .rv-card-body { display: flex; flex-direction: column; gap: 1rem; }
-.rv-time-inputs { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-.rv-time-inputs label { display: flex; align-items: center; gap: 0.4rem; margin: 0; font-weight: 700; color: var(--rv-muted); }
-.rv-time-inputs input { width: 5.5rem; height: 52px; font-size: 1.4rem; font-weight: 800; text-align: center; }
+#rv-finish .rv-card-body { display: flex; flex-direction: column; gap: 1.25rem; }
+
+/* The time of the run, m : ss, large, each part with arrows above and below and its unit */
+.rv-time-edit {
+  display: grid;
+  grid-template-columns: auto auto auto;
+  grid-template-rows: auto auto;
+  justify-content: center;
+  align-items: center;
+  column-gap: 0.5rem;
+}
+
+.rv-time-title {
+  grid-column: 1 / -1;
+  margin-bottom: 0.5rem;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--rv-muted);
+}
+
+.rv-time-title i { color: var(--rv-accent); }
+.rv-time-field { display: flex; flex-direction: column; align-items: center; gap: 0.3rem; }
+
+.rv-time-step {
+  width: 100%;
+  height: 40px;
+  border: none;
+  border-radius: 12px;
+  background: #f1f5f9;
+  color: var(--rv-text);
+  cursor: pointer;
+}
+
+.rv-time-step:disabled { opacity: 0.35; cursor: default; }
+
+.rv-time-input {
+  width: 5.5rem;
+  height: 76px;
+  border: 2px solid var(--rv-border);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--rv-text);
+  font-size: 2.75rem;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.rv-time-input:focus { outline: none; border-color: var(--rv-accent); box-shadow: 0 0 0 3px var(--rv-focus); }
+.rv-time-input:disabled { background: #f8fafc; color: var(--rv-muted); }
+.rv-time-colon { align-self: center; padding-bottom: 1.6rem; font-size: 2.5rem; font-weight: 800; color: #94a3b8; }
+.rv-time-unit { font-size: 0.8rem; font-weight: 700; color: var(--rv-muted); }
 
 @media (max-width: 575.98px) {
   /* The label over the value */

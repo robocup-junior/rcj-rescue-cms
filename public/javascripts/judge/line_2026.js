@@ -341,6 +341,28 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     return total;
   };
 
+  // Setting the time by hand (the time of the run, on the judge page): in seconds, kept from 0 to
+  // the run's duration, shown as minutes and seconds and used when the timer starts again
+  function setTime(total) {
+    total = Math.max(0, Math.min($scope.duration || 480, total));
+    $scope.minutes = Math.floor(total / 60);
+    $scope.seconds = total % 60;
+    $scope.time = total * 1000;
+    prevTime = $scope.time;
+  }
+
+  $scope.stepTime = function (seconds) {
+    if ($scope.startedTime) return;
+    playSound(sClick);
+    setTime(($scope.minutes || 0) * 60 + ($scope.seconds || 0) + seconds);
+  };
+
+  // After typing: numbers only, seconds over 59 carried into the minutes
+  $scope.tidyTime = function () {
+    if ($scope.startedTime) return;
+    setTime((parseInt($scope.minutes, 10) || 0) * 60 + (parseInt($scope.seconds, 10) || 0));
+  };
+
   $scope.TimeReset = function () {
     playSound(sClick);
     prevTime = 0;
@@ -1175,6 +1197,21 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$timeout', 
   };
 }]);
 
+
+// A number shown in two digits (the seconds of the time of the run: 0:05), read back as a number
+app.directive('rvTwoDigits', function () {
+  return {
+    require: 'ngModel',
+    link: function ($scope, element, attrs, ngModel) {
+      ngModel.$formatters.push(function (value) {
+        return value == null || value === '' ? value : ('0' + value).slice(-2);
+      });
+      ngModel.$parsers.push(function (value) {
+        return value === '' ? value : parseInt(value, 10);
+      });
+    }
+  };
+});
 
 app.directive('tile', function () {
   return {

@@ -255,16 +255,27 @@ html(ng-app="ddApp")
           i.fas.fa-flag-checkered
           | {{'line.judge.finish' | translate}}
         .rv-card-body
-          .rv-finish-label
-            i.fas.fa-stopwatch
-            |  {{'line.judge.adjust' | translate}}
-          .rv-time-inputs
-            label
-              input.form-control(type='tel' aria-label='min' min='0' max='8' ng-model='minutes' ng-disabled='startedTime')
-              span {{'common.min' | translate}}
-            label
-              input.form-control(type='tel' aria-label='sec' min='0' max='60' ng-model='seconds' ng-disabled='startedTime')
-              span {{'common.sec' | translate}}
+          //- The time as the referee timed it: m : ss, each nudged a step with the arrows or typed;
+          //- locked while the timer runs
+          .rv-time-edit(ng-class="{'is-locked': startedTime}")
+            .rv-time-title
+              i.fas.fa-stopwatch
+              |  {{'line.judge.runTime' | translate}}
+            .rv-time-field
+              button.rv-time-step(type='button' ng-click="stepTime(60)" ng-disabled='startedTime' aria-label='+')
+                i.fas.fa-chevron-up
+              input.rv-time-input(type='text' inputmode='numeric' aria-label='min' ng-model='minutes' ng-blur='tidyTime()' ng-disabled='startedTime' maxlength='2')
+              button.rv-time-step(type='button' ng-click="stepTime(-60)" ng-disabled='startedTime' aria-label='−')
+                i.fas.fa-chevron-down
+              span.rv-time-unit {{'common.min' | translate}}
+            span.rv-time-colon :
+            .rv-time-field
+              button.rv-time-step(type='button' ng-click="stepTime(1)" ng-disabled='startedTime' aria-label='+')
+                i.fas.fa-chevron-up
+              input.rv-time-input(type='text' inputmode='numeric' aria-label='sec' ng-model='seconds' rv-two-digits ng-blur='tidyTime()' ng-disabled='startedTime' maxlength='2')
+              button.rv-time-step(type='button' ng-click="stepTime(-1)" ng-disabled='startedTime' aria-label='−')
+                i.fas.fa-chevron-down
+              span.rv-time-unit {{'common.sec' | translate}}
           button.rv-submit(type='button' ng-click='confirm()' ng-disabled='startedTime || networkError' ng-class="{'is-ready': !startedTime && !networkError}")
             i.fas.fa-arrow-right
             | {{'line.judge.toSign' | translate}}
