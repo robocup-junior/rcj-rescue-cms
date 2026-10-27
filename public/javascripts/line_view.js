@@ -9,11 +9,12 @@ document.querySelectorAll('[data-jump]').forEach(function (link) {
   });
 });
 
-// The score and time in the bar would repeat the summary, so show them only once it has scrolled away
+// The score and time in the bar would repeat the summary, so show them only once it has scrolled
+// away; on the sign page (stats-always) they stay in view
 (function () {
   var bar = document.querySelector('.rv-topbar');
   var summary = document.querySelector('.rv-summary');
-  if (!bar || !summary || !('IntersectionObserver' in window)) return;
+  if (!bar || !summary || bar.classList.contains('stats-always') || !('IntersectionObserver' in window)) return;
   bar.classList.add('stats-follow-summary');
   new IntersectionObserver(function (entries) {
     bar.classList.toggle('show-stats', !entries[0].isIntersecting);

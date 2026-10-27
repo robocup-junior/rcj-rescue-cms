@@ -257,6 +257,9 @@ test.describe('line sign page', () => {
 
   test('signs on the pad over the screen and gets the send button ready once all three have signed', async ({ page }) => {
     await open(page, `/line/sign/${ids.runs.Line}`);
+    // The score and time are in the bar from the top of the page
+    await expect(page.locator('.rv-topbar-stats .rv-stat')).toHaveCount(2);
+    await expect(page.locator('.rv-topbar-stats')).toBeVisible();
     const count = page.locator('#rv-signatures .rv-header-total');
     const overlay = page.locator('.rv-overlay.is-pad');
     const done = overlay.locator('.rv-pad-btn.is-done');

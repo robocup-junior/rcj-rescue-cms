@@ -4,15 +4,19 @@
 
 //- kind: 'line' or 'maze', the path of the judge page
 mixin signTopbar(kind)
-  header.rv-topbar
+  //- The score and time always in view (stats-always): what is signed for, wherever the page is
+  header.rv-topbar.stats-always
     button.rv-back.rv-back-label(type='button' title="{{'line.sign.to_judge' | translate}}" ng-click="go('/" + (kind || 'line') + "/judge/' + runId + '?return=' + getParam('return'))")
       i.fas.fa-edit
       span {{'line.sign.to_judge' | translate}}
     .rv-team
       span.rv-live(title='Live')
       span.rv-team-name {{team}}
-    //- Only the time: the score is summed up at the end of the page, after its parts are reviewed
     .rv-topbar-stats
+      .rv-stat
+        i.fas.fa-calculator
+        span.rv-stat-value {{score}}
+        span.rv-stat-unit {{'common.point' | translate}}
       .rv-stat
         i.fas.fa-stopwatch
         span.rv-stat-value {{minutes*60*1000+seconds*1000 | date:'m:ss'}}
