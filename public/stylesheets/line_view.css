@@ -2120,6 +2120,13 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-stop-clock { display: inline-flex; align-items: center; gap: 0.4rem; color: #047857; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
 .rv-stop-caption { font-size: 0.75rem; font-weight: 600; opacity: 0.85; }
 
+/* The time of the run is up: the time recorded, large, over the two ways on; going on is in the
+   page's colour */
+.rv-timeup { display: flex; flex-direction: column; align-items: center; gap: 0.15rem; padding: 1.4rem 1.1rem 0.2rem; }
+.rv-timeup-clock { font-size: 3.4rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; color: var(--rv-text); }
+.rv-timeup-caption { font-size: 0.8rem; font-weight: 700; color: var(--rv-muted); }
+.rv-stop-now:disabled { background: #94a3b8; box-shadow: none; cursor: default; }
+
 .rv-alert {
   display: flex;
   align-items: flex-start;

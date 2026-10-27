@@ -17,7 +17,7 @@ var txt_checkpoint;
 app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$http', '$translate', '$cookies', function ($scope, $uibModal, $log, $timeout, $http, $translate, $cookies) {
 
   var db_mtile;
-  var txt_score_element, txt_not_yet, txt_timeup, txt_timeup_mes, txt_cantvisit, txt_start,
+  var txt_score_element, txt_not_yet, txt_cantvisit, txt_start,
     txt_implicit;
   $translate('line.judge.js.score_element').then(function (val) {
     txt_score_element = val;
@@ -26,16 +26,6 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
   });
   $translate('line.judge.js.not_yet').then(function (val) {
     txt_not_yet = val;
-  }, function (translationId) {
-    // = translationId;
-  });
-  $translate('line.judge.js.timeup.title').then(function (val) {
-    txt_timeup = val;
-  }, function (translationId) {
-    // = translationId;
-  });
-  $translate('line.judge.js.timeup.content').then(function (val) {
-    txt_timeup_mes = val;
   }, function (translationId) {
     // = translationId;
   });
@@ -621,8 +611,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         playSound(sTimeup);
         $scope.startedTime = !$scope.startedTime;
         $scope.time = $scope.duration*1000;
+        prevTime = $scope.time;
         $scope.saveEverything();
-        swal(txt_timeup, '', "info");
+        // The stop asked is moot: the run is over, which the sheet says
+        $scope.stopAsked = false;
+        $scope.timeUp = true;
       }
       $timeout(tick, 1000);
     }
@@ -651,13 +644,22 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.rescueOpen = false;
   };
 
+  // The time of the run is up: the sheet says so, with the time recorded, and goes on to the sign
+  // page or is closed to look over the run first (the finish card goes on from there too)
+  $scope.timeUp = false;
+  $scope.closeTimeUp = function () {
+    playSound(sClick);
+    $scope.timeUp = false;
+  };
+
   // The page behind a sheet stays still; Escape closes the sheet (and keeps the timer running)
-  $scope.$watchGroup(['stopAsked', 'rescueOpen'], function (open) {
-    document.documentElement.classList.toggle('rv-overlay-open', !!(open[0] || open[1]));
+  $scope.$watchGroup(['stopAsked', 'rescueOpen', 'timeUp'], function (open) {
+    document.documentElement.classList.toggle('rv-overlay-open', !!(open[0] || open[1] || open[2]));
   });
   document.addEventListener('keydown', function (event) {
     if (event.key != 'Escape') return;
-    if ($scope.stopAsked) $scope.$apply(function () {
+    if ($scope.timeUp) $scope.$apply($scope.closeTimeUp);
+    else if ($scope.stopAsked) $scope.$apply(function () {
       $scope.askStop(false);
     });
     else if ($scope.rescueOpen) $scope.$apply($scope.closeRescue);

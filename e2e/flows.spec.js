@@ -146,12 +146,38 @@ test.describe('judging a line run', () => {
     await stop.click();
     const stopAt = await page.evaluate(() => angular.element(document.body).scope().stopAt);
     await page.waitForTimeout(1100);
-    await page.locator('.rv-stop-now').click();
+    await page.locator('.rv-stop-now[ng-click="confirmStop()"]').click();
     await expect(timerCard).toBeVisible();
     await expect(stop).toHaveCount(0);
     expect(await page.evaluate(() => angular.element(document.body).scope().time)).toBe(stopAt);
     const finish = page.locator('#rv-finish');
     await expect(finish.locator('.rv-submit')).toBeEnabled();
+  });
+});
+
+test.describe('the end of a line run', () => {
+  test.use({ user: 'judge' });
+
+  test('the time running out stops the timer and says so, with the time recorded', async ({ page }) => {
+    await open(page, `/line/judge/${ids.runs.Line}`);
+    await page.locator('.rv-check').nth(0).click();
+    await page.locator('.rv-check').nth(1).click();
+    await page.locator('.rv-photo-check').nth(0).click();
+    await page.locator('.rv-photo-check').nth(1).click();
+    await page.locator('button[ng-click="infochecked()"]').click();
+
+    // A run of two seconds, so as not to wait for eight minutes
+    await page.evaluate(() => { angular.element(document.body).scope().duration = 2; });
+    await page.locator('.rv-timer-card .rv-timer-btn').click();
+    const sheet = page.locator('.rv-overlay', { has: page.locator('.rv-timeup') });
+    await expect(sheet).toBeVisible({ timeout: 5000 });
+    await expect(sheet.locator('.rv-timeup-clock')).toHaveText('0:02');
+    await expect(page.locator('.rv-stat-stop')).toHaveCount(0);
+
+    // Closed, the run is there to look over, and goes on from the finish card
+    await sheet.locator('.rv-timeup-review').click();
+    await expect(sheet).toBeHidden();
+    await expect(page.locator('#rv-finish .rv-submit')).toBeEnabled();
   });
 });
 

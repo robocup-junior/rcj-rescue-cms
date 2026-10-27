@@ -347,4 +347,26 @@ html(ng-app="ddApp")
               |  {{'line.judge.stopAt' | translate:{t: (stopAt | date:'m:ss')} }}
             span.rv-stop-caption {{'line.judge.recordedTime' | translate}}
 
+    //- The time of the run is up: the time recorded, then on to the sign page, or closed to look
+    //- over the run first
+    .rv-overlay.is-send(ng-cloak ng-show='timeUp' role='alertdialog' aria-modal='true' aria-labelledby='rv-timeup-title')
+      .rv-send-sheet.rv-timeup-sheet
+        .rv-pad-head
+          i.fas.fa-flag-checkered
+          span#rv-timeup-title {{'line.judge.timeUp' | translate}}
+        .rv-timeup
+          span.rv-timeup-clock {{time | date:'m:ss'}}
+          span.rv-timeup-caption {{'line.judge.recordedTime' | translate}}
+        .rv-stop-actions
+          button.rv-stop-keep.rv-timeup-review(type='button' ng-click='closeTimeUp()')
+            span.rv-stop-choice
+              i.fas.fa-search
+              |  {{'line.judge.reviewRun' | translate}}
+            span.rv-stop-caption {{'line.judge.reviewRunNote' | translate}}
+          button.rv-stop-now.rv-timeup-go(type='button' ng-click='confirm()' ng-disabled='networkError')
+            span.rv-stop-choice
+              | {{'line.judge.toSign' | translate}}
+              |  
+              i.fas.fa-arrow-right
+
     script(src="/javascripts/line_view.js?v=" + assetVersion)
