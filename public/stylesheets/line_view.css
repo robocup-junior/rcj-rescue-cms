@@ -2226,7 +2226,6 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-zone-pick img { display: block; width: 100%; max-height: 64px; object-fit: contain; }
 
 /* The evacuation zone on the map: one button over its tiles, which opens the rescue sheet */
-.is-judge #wrapTile { position: relative; }
 
 .rv-evac-hit {
   position: absolute;
@@ -2258,6 +2257,37 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   font-weight: 800;
   white-space: nowrap;
   box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+}
+
+/* The same over the evacuation zone of the run view and sign pages, where it is only shown: taps
+   go through to the tiles */
+.run-view #wrapTile { position: relative; }
+
+.rv-evac-area {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 3px dashed rgba(71, 85, 105, 0.5);
+  border-radius: 10px;
+  background: rgba(241, 245, 249, 0.35);
+  pointer-events: none;
+}
+
+.rv-evac-area.is-off { display: none; }
+.rv-evac-area .rv-evac-label { background: var(--rv-accent); box-shadow: 0 4px 12px var(--rv-accent-glow); }
+
+.rv-evac-count {
+  min-width: 1.6em;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--rv-accent-strong);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 /* The rescues so far, in order: each victim ringed in the colour of the zone it was taken to */

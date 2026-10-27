@@ -141,3 +141,27 @@ function mazeVictimImage(cell, side) {
   if (!type || type == 'None' || type == 'Cognitive') return null;
   return '/images/' + type.toLowerCase() + '_' + side + '.png';
 }
+
+// The evacuation zone on the Line map of the view and sign pages: the box around its tiles (marked
+// is-evac by the tile directive), for the rescues shown over it. Called when the tiles are sized.
+function placeEvacZone() {
+  var wrap = document.getElementById('wrapTile');
+  var area = wrap && wrap.querySelector('.rv-evac-area');
+  if (!area) return;
+  var tiles = wrap.querySelectorAll('tile.is-evac');
+  area.classList.toggle('is-off', !tiles.length);
+  if (!tiles.length) return;
+  var origin = wrap.getBoundingClientRect();
+  var box = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
+  Array.prototype.forEach.call(tiles, function (tile) {
+    var r = tile.getBoundingClientRect();
+    box.left = Math.min(box.left, r.left);
+    box.top = Math.min(box.top, r.top);
+    box.right = Math.max(box.right, r.right);
+    box.bottom = Math.max(box.bottom, r.bottom);
+  });
+  area.style.left = (box.left - origin.left) + 'px';
+  area.style.top = (box.top - origin.top) + 'px';
+  area.style.width = (box.right - box.left) + 'px';
+  area.style.height = (box.bottom - box.top) + 'px';
+}

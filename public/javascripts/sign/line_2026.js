@@ -761,6 +761,11 @@ app.directive('tile', function () {
             return attrs.template == 'view' ? '/templates/tile_view.html' : '/templates/tile.html';
         },
         link: function ($scope, element, attrs) {
+            // A tile of the evacuation zone, for what the run view shows over it (placeEvacZone)
+            $scope.$watch('tile', function (tile) {
+                element.toggleClass('is-evac', !!(tile && tile.tileType && isEvacImage(tile.tileType.image)));
+            });
+
             $scope.tilerotate = function (tilerot) {
                 if (!tilerot) return $scope.$parent.sRotate;
                 var ro = tilerot + $scope.$parent.sRotate;
@@ -1240,6 +1245,8 @@ function tile_size() {
         }
 
         $('#card_area').css('height', (window.innerHeight - 130));
+        // The rescues shown over the evacuation zone (run view and sign pages, line_view.js)
+        if (typeof placeEvacZone === 'function') placeEvacZone();
         if (b.height() == 0) setTimeout("tile_size()", 1000);
     } catch (e) {
         setTimeout("tile_size()", 1000);
