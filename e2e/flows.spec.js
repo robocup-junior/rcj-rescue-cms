@@ -82,6 +82,36 @@ test.describe('judging a maze run', () => {
   });
 });
 
+test.describe('judging a line run', () => {
+  test.use({ user: 'judge' });
+
+  test('the judge checks the team, starts the timer and records a lack of progress', async ({ page }) => {
+    await open(page, `/line/judge/${ids.runs.Line}`);
+
+    // Going on takes all four checks: the team, the round, the members and the robot
+    const confirm = page.locator('button[ng-click="infochecked()"]');
+    await page.locator('.rv-check').nth(0).click();
+    await page.locator('.rv-check').nth(1).click();
+    await page.locator('.rv-photo-check').nth(0).click();
+    await expect(confirm).toBeDisabled();
+    await page.locator('.rv-photo-check').nth(1).click();
+    await confirm.click();
+
+    // Tiles score once the timer has run; the hint says so until then
+    const timer = page.locator('.rv-dock .rv-timer-btn');
+    await expect(page.locator('.rv-map-hint')).toHaveClass(/is-waiting/);
+    await timer.click();
+    await expect(timer).toHaveClass(/is-running/);
+
+    // Until something on the run scores, reading it starts it afresh (initRunData.initLine), LoPs
+    // and all, so what is checked is what the page sends
+    const sent = page.waitForRequest((req) => req.url().includes(`/api/runs/line/${ids.runs.Line}`) && req.method() === 'PUT' && 'LoPs' in req.postDataJSON());
+    await page.locator('.rv-lop-row').first().locator('.rv-step.is-plus').click();
+    expect((await sent).postDataJSON().LoPs[0]).toBe(1);
+    await expect(page.locator('.rv-lop-row').first().locator('.rv-step-count')).toHaveText('1');
+  });
+});
+
 test.describe('line run view', () => {
   test('the bar stays at the top and shows the score once the summary has scrolled away', async ({ page }) => {
     await open(page, `/line/view/${ids.finishedRuns.Line}`);

@@ -312,17 +312,25 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         //$timeout($scope.tile_size, 1000);
         $timeout($scope.tile_size, 1500);
         $timeout($scope.tile_size, 3000);
+        $timeout(pageLoaded, 0);
 
 
       }, function (response) {
         console.log("Error: " + response.statusText);
+        pageLoaded();
       });
     }, function (response) {
       console.log("Error: " + response.statusText);
+      pageLoaded();
       if (response.status == 401) {
         $scope.go('/home/access_denied');
       }
     });
+  }
+
+  // Takes the loading screen away once the map is drawn (line_view.js)
+  function pageLoaded() {
+    if (typeof revealRunPage === 'function') revealRunPage($scope.tile_size);
   }
 
   setRunId(0);
@@ -333,6 +341,12 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       arr.push(i);
     }
     return arr;
+  };
+
+  $scope.sum = function (list) {
+    var total = 0;
+    for (var i = 0; i < (list || []).length; i++) total += list[i] || 0;
+    return total;
   };
 
   $scope.TimeReset = function () {
@@ -856,12 +870,18 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       var b = $('.tilearea');
       //console.log('コンテンツ本体：' + b.height() + '×' + b.width());
       //console.log('window：' + window.innerHeight);
+      // The map card, kept in view under the bar (its sticky top), fits above the timer, beside
+      // the side column; on narrow screens it is above the rest and fits the width only
+      var area = $('.tilearea');
+      var mapHeight = window.matchMedia('(max-width: 991.98px)').matches ? Infinity :
+        window.innerHeight - $('.rv-dock').outerHeight() - parseFloat($('.rv-judge-map').css('top')) -
+        (area.offset().top - $('.rv-judge-map').offset().top) - (area.innerHeight() - area.height()) - 20;
       if ($scope.sRotate % 180 == 0) {
         var tilesize_w = ($('.tilearea').width() - 2 * width) / width;
-        var tilesize_h = (window.innerHeight - 130) / length;
+        var tilesize_h = mapHeight / length;
       } else {
         var tilesize_w = ($('.tilearea').width() - 2 * length) / length;
-        var tilesize_h = (window.innerHeight - 130) / width;
+        var tilesize_h = mapHeight / width;
       }
 
       //console.log('tilesize_w:' + tilesize_w);
@@ -1069,7 +1089,10 @@ app.directive('tile', function () {
       tile: '='
     },
     restrict: 'E',
-    templateUrl: '/templates/tile.html',
+    // The judge page draws the tiles like the run view (template="judge")
+    templateUrl: function (element, attrs) {
+      return attrs.template == 'judge' ? '/templates/tile_judge.html' : '/templates/tile.html';
+    },
     link: function ($scope, element, attrs) {
       $scope.tilerotate = function (tilerot) {
         if (!tilerot) return $scope.$parent.sRotate;
@@ -1187,6 +1210,39 @@ app.directive('tile', function () {
           return "undone";
         else
           return "";
+      };
+
+      // The points of the items on the tile, scored and possible, as on the run view
+      // (sign/line_2026.js); the checkpoint is counted in its section
+      var itemPoints = { gap: 10, intersection: 10, obstacle: 20, speedbump: 10, ramp: 10, seesaw: 20 };
+
+      function sumItemPoints(tile, scoredOnly) {
+        var sum = 0;
+        if (!tile) return sum;
+        for (var i = 0; i < tile.index.length; i++) {
+          for (let item of $scope.$parent.stiles[tile.index[i]].scoredItems) {
+            if (!itemPoints[item.item] || (scoredOnly && !item.scored)) continue;
+            sum += itemPoints[item.item] * (item.item == 'gap' || item.item == 'speedbump' ? 1 : item.count);
+          }
+        }
+        return sum;
+      }
+
+      $scope.tilePoint = function (tile) {
+        return sumItemPoints(tile, true);
+      };
+
+      $scope.tileMaxPoint = function (tile) {
+        return sumItemPoints(tile, false);
+      };
+
+      // Scoring status of the items on the tile alone, for its badge
+      $scope.tileItemStatus = function (tile) {
+        if (!tile || tile.index.length == 0) return;
+        var max = $scope.tileMaxPoint(tile);
+        if (max == 0) return;
+        var points = $scope.tilePoint(tile);
+        return points == max ? 'done' : points > 0 ? 'halfdone' : 'undone';
       };
 
       $scope.rotateRamp = function (direction) {

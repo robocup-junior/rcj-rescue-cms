@@ -1,5 +1,6 @@
 /* Rescue Line and Maze run view and sign pages (views/view/{line,maze}_2026*.pug,
-   views/sign/{line,maze}_2026*.pug, both showing views/view/common/{line,maze}_2026*.pug)
+   views/sign/{line,maze}_2026*.pug, both showing views/view/common/{line,maze}_2026*.pug), and the
+   Line judge page (views/judge/line_2026.pug)
    The pages of a run each have their colour: view blue, judge red, sign orange. */
 @import url('/stylesheets/fonts.css');
 
@@ -29,6 +30,15 @@
   /* style.css hides the body's overflow, which makes the body a scroll box of its own and
      keeps the sticky bar from sticking; html still stops sideways scrolling */
   overflow: visible;
+}
+
+.run-view.is-judge {
+  --rv-accent-strong: #b91c1c;
+  --rv-accent: #dc2626;
+  --rv-accent-glow: rgba(185, 28, 28, 0.3);
+  --rv-focus: rgba(220, 38, 38, 0.45);
+  --rv-on-accent: #fee2e2;
+  --rv-on-accent-muted: #fecaca;
 }
 
 .run-view.is-sign {
@@ -1793,4 +1803,409 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   .rv-pad-area { margin: 0.4rem 0.5rem; }
   .rv-pad-foot { padding: 0 0.5rem 0.4rem; }
   .rv-pad-btn { min-height: 40px; }
+}
+
+/* ---- Judge page (views/judge/line_2026.pug) ---- */
+/* Whether what was scored is on the server: saved, being saved, or not (then see the alert) */
+.rv-sync {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 0.8rem;
+}
+
+.rv-sync.is-error { background: #facc15; color: #7c2d12; }
+
+/* Before the run: what to check with the team, red until tapped, then green */
+.rv-lead { margin: 0; font-size: 1.05rem; font-weight: 700; text-align: center; }
+.rv-lead i { color: var(--rv-accent); }
+
+.rv-check {
+  display: grid;
+  grid-template-columns: auto 7rem 1fr;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  border: none;
+  border-bottom: 1px solid var(--rv-border);
+  background: var(--rv-ng-soft);
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.rv-check.is-ok { background: var(--rv-ok-soft); }
+.rv-check:focus-visible,
+.rv-photo-check:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: -3px; }
+.rv-check-label { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rv-muted); }
+.rv-check-value { font-size: 1.75rem; font-weight: 800; line-height: 1.2; overflow-wrap: anywhere; }
+
+.rv-check-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--rv-ng);
+  color: #fff;
+  font-size: 0.95rem;
+}
+
+.is-ok .rv-check-mark { background: var(--rv-ok); }
+
+.rv-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 0.75rem 1.5rem;
+  margin: 0;
+  padding: 1rem 1.25rem 1.25rem;
+}
+
+.rv-facts dt { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rv-muted); }
+.rv-facts dd { margin: 0; font-weight: 600; }
+
+.rv-photo-check {
+  padding: 0;
+  border: 2px solid #fecaca;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rv-photo-check.is-ok { border-color: #a7f3d0; }
+.rv-photo-check .rv-card-header { background: var(--rv-ng-soft); }
+.rv-photo-check.is-ok .rv-card-header { background: var(--rv-ok-soft); }
+.rv-photo-check .rv-check-mark { margin-left: auto; width: 30px; height: 30px; font-size: 0.8rem; }
+
+.rv-photo-check img {
+  display: block;
+  width: 100%;
+  height: 320px;
+  padding: 1rem;
+  object-fit: contain;
+  background: #f8fafc;
+}
+
+.rv-note-center { margin: 0; text-align: center; }
+
+.rv-noshow .rv-card-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+}
+
+.rv-noshow p { margin: 0; color: var(--rv-muted); font-weight: 600; }
+
+/* The timer: green to start, red while it runs */
+.rv-timer-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 56px;
+  padding: 0 1.5rem;
+  border: none;
+  border-radius: 14px;
+  background: #059669;
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(5, 150, 105, 0.3);
+  transition: background-color 0.15s ease;
+}
+
+.rv-timer-btn.is-running { background: #dc2626; box-shadow: 0 6px 18px rgba(220, 38, 38, 0.3); }
+.rv-timer-btn:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
+/* Before the run starts: a ring that calls for the referee's start */
+.rv-timer-btn.is-blink { animation: rv-call 1.6s ease-out infinite; }
+
+@keyframes rv-call {
+  0% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0.55); }
+  70% { box-shadow: 0 0 0 14px rgba(5, 150, 105, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(5, 150, 105, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-timer-btn.is-blink { animation: none; }
+}
+
+.rv-timer-time { font-size: 1.35rem; font-variant-numeric: tabular-nums; opacity: 0.9; }
+
+.rv-dock {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  padding: 0.6rem 1.25rem calc(0.6rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--rv-border);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.08);
+}
+
+.rv-dock-inner {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.rv-dock .rv-timer-btn { min-width: 240px; }
+
+.rv-dock-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 56px;
+  padding: 0 1.1rem;
+  border: 1px solid var(--rv-border);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--rv-text);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* Room for the timer under the end of the page */
+.rv-judge { padding-bottom: 7rem; }
+
+.rv-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid #fcd34d;
+  border-radius: var(--rv-radius);
+  background: #fffbeb;
+  color: #78350f;
+}
+
+.rv-alert > i { margin-top: 0.2rem; color: #d97706; font-size: 1.25rem; }
+.rv-alert-body { flex: 1; }
+.rv-alert-body p { margin: 0.25rem 0 0; font-size: 0.9rem; }
+
+.rv-alert-action {
+  flex: none;
+  min-height: 44px;
+  padding: 0 1rem;
+  border: none;
+  border-radius: 12px;
+  background: #d97706;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* The map beside the column of the LoPs, the rescue and the exit; the map stays in view */
+.rv-judge-grid { display: grid; gap: 1.25rem; align-items: start; }
+.rv-judge-side { display: flex; flex-direction: column; gap: 1.25rem; min-width: 0; }
+
+@media (min-width: 992px) {
+  .rv-judge-grid { grid-template-columns: minmax(340px, 420px) minmax(0, 1fr); grid-template-areas: "side map"; }
+  .rv-judge-map { grid-area: map; position: sticky; top: 4.75rem; }
+  .rv-judge-side { grid-area: side; }
+}
+
+.rv-map-hint {
+  margin: 0.6rem 1rem 0;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: var(--rv-muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.rv-map-hint.is-waiting { background: #fef3c7; color: #92400e; }
+.rv-judge-map tile { cursor: pointer; }
+
+/* LoPs: one row per section, a counter with buttons big enough for a thumb */
+.rv-lop-list { margin: 0; padding: 0; list-style: none; }
+
+.rv-lop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.65rem 1.25rem;
+  border-bottom: 1px solid var(--rv-border);
+}
+
+.rv-lop-row:last-child { border-bottom: none; }
+.rv-lop-row.is-evac { background: #fff5f5; }
+.rv-lop-section { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; min-width: 0; }
+
+.rv-stepper { display: flex; flex: none; align-items: center; gap: 0.35rem; }
+
+.rv-step {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border: none;
+  border-radius: 12px;
+  background: #f1f5f9;
+  color: var(--rv-text);
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.rv-step.is-plus { background: #dc2626; color: #fff; }
+.rv-step:disabled { opacity: 0.35; cursor: default; }
+.rv-step:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
+
+.rv-step-count {
+  min-width: 2.25rem;
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.rv-step-count.is-zero { color: #cbd5e1; }
+
+/* Rescue: pick the victims taken to a zone together, then the zone */
+.rv-rescue-input { display: flex; flex-direction: column; gap: 1rem; }
+.rv-victim-picks,
+.rv-zone-picks { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+.rv-victim-pick {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.75rem 0.5rem;
+  border: 2px solid var(--rv-border);
+  border-radius: 14px;
+  background: #f8fafc;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.rv-victim-pick:hover:not(:disabled) { border-color: var(--rv-accent); }
+.rv-victim-pick:disabled { opacity: 0.4; cursor: default; }
+.rv-victim-pick img { width: 52px; height: 52px; }
+.rv-pick-name { font-weight: 800; }
+.rv-pick-left { font-size: 0.8rem; color: var(--rv-muted); font-variant-numeric: tabular-nums; }
+
+.rv-staged {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  border: 2px dashed #fca5a5;
+  border-radius: 14px;
+  background: #fffafa;
+}
+
+.rv-staged-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 0.8rem; font-weight: 700; color: var(--rv-muted); }
+
+.rv-staged-clear {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: #f1f5f9;
+  color: var(--rv-muted);
+  cursor: pointer;
+}
+
+.rv-staged-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.rv-staged-victim {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border: 1px solid var(--rv-border);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.rv-staged-victim img { width: 34px; height: 34px; }
+
+.rv-staged-victim i {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #64748b;
+  color: #fff;
+  font-size: 0.65rem;
+}
+
+.rv-zone-pick {
+  padding: 0.5rem;
+  border: 2px solid;
+  border-radius: 14px;
+  cursor: pointer;
+}
+
+.rv-zone-pick.is-red { border-color: #f9a8d4; background: #fdf2f8; }
+.rv-zone-pick.is-green { border-color: #86efac; background: #f0fdf4; }
+.rv-zone-pick img { display: block; width: 100%; max-height: 64px; object-fit: contain; }
+
+/* A rescue can be taken back: one more column for its button */
+.is-judge .rv-rescue-list { grid-template-columns: auto auto auto auto 1fr auto; }
+
+.rv-rescue-del {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--rv-muted);
+  cursor: pointer;
+}
+
+.rv-rescue-del:hover { background: var(--rv-ng-soft); color: var(--rv-ng); }
+
+.rv-exit-toggle {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.rv-exit-toggle:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: -3px; }
+
+/* The end: the time as timed, then on to the sign page */
+#rv-finish .rv-card-body { display: flex; flex-direction: column; gap: 1rem; }
+.rv-time-inputs { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.rv-time-inputs label { display: flex; align-items: center; gap: 0.4rem; margin: 0; font-weight: 700; color: var(--rv-muted); }
+.rv-time-inputs input { width: 5.5rem; height: 52px; font-size: 1.4rem; font-weight: 800; text-align: center; }
+
+@media (max-width: 575.98px) {
+  /* The label over the value */
+  .rv-check { grid-template-columns: auto 1fr; row-gap: 0.1rem; }
+  .rv-check-mark { grid-row: span 2; }
+  .rv-check-value { font-size: 1.4rem; }
+  .rv-photo-check img { height: 220px; }
+  .rv-lop-row { padding: 0.6rem 0.9rem; }
+  .rv-dock { padding-left: 0.75rem; padding-right: 0.75rem; }
+  .rv-dock .rv-timer-btn { flex: 1; min-width: 0; }
+  .rv-dock-reset span { display: none; }
 }

@@ -1,0 +1,31 @@
+<!-- A map tile on the judge page (views/judge/line_2026.pug), drawn like the run view's
+     (tile_view.html): the coloured frame is the status of all that is scored on the tile, its
+     checkpoint and, on the start tile, whether the team showed up; the badge has the points of its
+     items. Tapping the tile scores it. See line_view.css. -->
+
+<img ng-src="/images/tiles/{{tile.tileType.image}}"  class="rot{{tilerotate(tile.rot)}} tile-image" ng-show="tile.tileType.image">
+<img ng-src="/images/tiles/ev-entrance.png"  class="rot{{evacTapeRot(tile)}} tile-image" ng-if="tile.evacEntrance>=0">
+<img ng-src="/images/tiles/ev-exit.png"  class="rot{{evacTapeRot(tile)}} tile-image" ng-if="tile.evacExit>=0">
+
+<i class="fas fa-minus fa-fw tile-image tile-font-1-25" ng-show="tile.items.speedbumps>0" style="text-align:left; padding:0px 2px; color:#abb2b9; opacity:0.7;"></i>
+<i class="fas fa-minus fa-fw tile-image tile-font-1-25" ng-show="tile.items.speedbumps>1" style="text-align:left; padding:10px 2px; color:#abb2b9; opacity:0.7;"></i>
+<i class="fas fa-minus fa-fw tile-image tile-font-1-25" ng-show="tile.items.speedbumps>2" style="text-align:left; padding:20px 2px; color:#abb2b9; opacity:0.7;"></i>
+<i class="fas fa-minus fa-fw tile-image tile-font-1-25" ng-show="tile.items.speedbumps>3" style="text-align:left; padding:30px 2px; color:#abb2b9; opacity:0.7;"></i>
+<i class="fas fa-minus fa-fw tile-image tile-font-1-25" ng-show="tile.items.speedbumps>4" style="text-align:left; padding:40px 2px; color:#abb2b9; opacity:0.7;"></i>
+<!-- Obstacles and ramps at the bottom here: the top corners hold the points and the checkpoint -->
+<i class="fas fa-cube fa-fw tile-image tile-font-1-25" ng-show="tile.items.obstacles>0" style="display:flex; align-items:flex-end; justify-content:flex-end; padding:2px 4px; color:#6e2c00; opacity:0.9;"></i>
+<i class="fas fa-mountain fa-fw tile-image tile-font-1-25" ng-show="tile.items.rampPoints" style="display:flex; align-items:flex-end; justify-content:center; padding-bottom:2px; color:#d97706; opacity:0.9;"></i>
+<i class="fas fa-angle-double-down fa-fw tile-image tile-font fa-3x" ng-class="rotateRamp(tile.levelUp)" ng-show="tile.levelUp" style="padding-top:4px; color:#10b981; opacity:0.7;"></i>
+<i class="fas fa-angle-double-down fa-fw tile-image tile-font fa-3x" ng-class="rotateRamp(tile.levelDown)" ng-show="tile.levelDown" style="padding-top:4px; color:#ef4444; opacity:0.7;"></i>
+<i class="far fa-play-circle fa-fw tile-image tile-font-1-25" ng-show="isStart(tile)" style="text-align:left; padding:1px 2px; color:#73e673; opacity:0.9;"></i>
+
+<span class="rv-tile-frame" ng-if="tileStatus(tile)" ng-class="'is-' + tileStatus(tile)"></span>
+<span class="rv-tile-cp-ring" ng-if="checkpointNumber(tile)"></span>
+<i class="fas fa-flag rv-tile-cp-mark" ng-if="checkpointNumber(tile)"></i>
+<!-- A tile passed twice can be two checkpoints ("2&5"): the first in the top left corner, the next in the bottom left one -->
+<span class="rv-tile-cp" ng-if="checkpointNumber(tile)" ng-class="{'is-long': checkpointNumber(tile).split('&')[0].length > 1}">{{checkpointNumber(tile).split('&')[0]}}</span>
+<span class="rv-tile-cp is-second" ng-if="checkpointNumber(tile).indexOf('&') >= 0" ng-class="{'is-long': checkpointNumber(tile).split('&').slice(1).join('·').length > 1}">{{checkpointNumber(tile).split('&').slice(1).join('·')}}</span>
+<span class="rv-tile-points" ng-if="tileItemStatus(tile)" ng-class="'is-' + tileItemStatus(tile)">
+  <span ng-if="tileItemStatus(tile) == 'done'">+{{tilePoint(tile)}}</span>
+  <span ng-if="tileItemStatus(tile) != 'done'">{{tilePoint(tile)}}<small>/{{tileMaxPoint(tile)}}</small></span>
+</span>
