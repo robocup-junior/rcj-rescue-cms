@@ -646,7 +646,7 @@
             "write": "@:line.sign.write",
             "clear": "@:line.sign.clear",
             "comp": "@:line.sign.comp",
-            "blue": "Successful bluetile visits",
+            "blue": "Blue tiles visited once",
             "exit": "Exit bonus",
             "stairs": "Successful stair navigation",
             "ramp": "Successful ramp navigation"

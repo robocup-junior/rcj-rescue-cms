@@ -265,8 +265,10 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
 
     $scope.blueTilesVisited = function () {
         let count = 0;
+        // Blue tiles of the map visited once: a second visit takes the tile out (as the server)
         for (const key in $scope.tiles) {
-            if (Number($scope.tiles[key].scoredItems.blue) === 1) {
+            const cell = $scope.cells[key];
+            if (cell && cell.tile && cell.tile.blue && Number($scope.tiles[key].scoredItems.blue) === 1) {
                 count++;
             }
         }
