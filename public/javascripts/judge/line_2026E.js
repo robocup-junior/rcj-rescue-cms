@@ -27,7 +27,7 @@ function removeIntersections(tiles) {
 app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$http', '$translate', '$cookies', function ($scope, $uibModal, $log, $timeout, $http, $translate, $cookies) {
 
   var db_mtile;
-  var txt_score_element, txt_not_yet, txt_timeup, txt_timeup_mes, txt_lops, txt_lops_mes, txt_cantvisit, txt_start,
+  var txt_score_element, txt_not_yet, txt_cantvisit, txt_start,
     txt_implicit;
   $translate('line.judge.js.score_element').then(function (val) {
     txt_score_element = val;
@@ -36,26 +36,6 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
   });
   $translate('line.judge.js.not_yet').then(function (val) {
     txt_not_yet = val;
-  }, function (translationId) {
-    // = translationId;
-  });
-  $translate('line.judge.js.timeup.title').then(function (val) {
-    txt_timeup = val;
-  }, function (translationId) {
-    // = translationId;
-  });
-  $translate('line.judge.js.timeup.content').then(function (val) {
-    txt_timeup_mes = val;
-  }, function (translationId) {
-    // = translationId;
-  });
-  $translate('line.judge.js.lops.title').then(function (val) {
-    txt_lops = val;
-  }, function (translationId) {
-    // = translationId;
-  });
-  $translate('line.judge.js.lops.content').then(function (val) {
-    txt_lops_mes = val;
   }, function (translationId) {
     // = translationId;
   });
@@ -169,32 +149,70 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     timeout: 10000
   };
 
+  // Saving the run. Requests go one at a time, in order: what changes while one is on its way waits,
+  // merged into the next (each part with its latest value). Two at once were refused by the server
+  // (VersionError), and one overtaking another could save an older value. `done` is called once
+  // what it came with is saved; what failed is kept for the next save or the resend
+  var unsent = null;
+  var unsentDone = [];
+  var sending = false;
+
+  function save(data, done) {
+    unsent = Object.assign(unsent || {}, data);
+    if (done) unsentDone.push(done);
+    if (!sending) sendNext();
+  }
+
+  function keepUnsent(data, done) {
+    unsent = Object.assign(data, unsent || {});
+    unsentDone = done.concat(unsentDone);
+  }
+
+  function sendNext() {
+    if (!unsent) return;
+    var data = unsent;
+    var done = unsentDone;
+    unsent = null;
+    unsentDone = [];
+    sending = true;
+    $scope.sync++;
+    $http.put("/api/runs/line/" + runId, data, http_config).then(function (response) {
+      sending = false;
+      $scope.sync--;
+      // The score could not be worked out yet: again in a moment
+      if (response.status == 202) {
+        keepUnsent(data, done);
+        $timeout(sendNext, 100);
+        return;
+      }
+      $scope.score = response.data.score;
+      $scope.networkError = false;
+      done.forEach(function (f) {
+        f();
+      });
+      sendNext();
+    }, function (response) {
+      sending = false;
+      $scope.sync--;
+      if (response.status == 401) {
+        $scope.go('/home/access_denied');
+      }
+      keepUnsent(data, done);
+      $scope.networkError = true;
+    });
+  }
+
   function upload_run(data) {
     if ($scope.networkError) {
       $scope.saveEverything();
       return;
     }
-
-    $scope.sync++;
-    $http.put("/api/runs/line/" + runId, Object.assign(data, {
+    save(Object.assign(data, {
       time: {
         minutes: Math.floor($scope.time / 60000),
         seconds: Math.floor(($scope.time % 60000) / 1000)
       }
-    }), http_config).then(function (response) {
-      if(response.statusCode == 202){
-        setTimeout($scope.upload_run, 100, data);
-        return;
-      }
-      $scope.sync--;
-      $scope.score = response.data.score;
-    }, function (response) {
-      if (response.status == 401) {
-        $scope.go('/home/access_denied');
-      }
-      $scope.networkError = true;
-    });
-
+    }));
   }
 
   var date = new Date();
@@ -290,9 +308,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       // Scoring elements of the tiles
       $scope.stiles = removeIntersections(response.data.tiles);
       let checkPointNumber = 1;
+      checkPointAt = {};
       for(let i in $scope.stiles){
         if ($scope.isCheckPoint($scope.stiles[i])) {
             marker[i] = checkPointNumber;
+            checkPointAt[checkPointNumber] = Number(i);
             checkPointNumber++;
         }
       }
@@ -338,17 +358,25 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         //$timeout($scope.tile_size, 1000);
         $timeout($scope.tile_size, 1500);
         $timeout($scope.tile_size, 3000);
+        $timeout(pageLoaded, 0);
 
 
       }, function (response) {
         console.log("Error: " + response.statusText);
+        pageLoaded();
       });
     }, function (response) {
       console.log("Error: " + response.statusText);
+      pageLoaded();
       if (response.status == 401) {
         $scope.go('/home/access_denied');
       }
     });
+  }
+
+  // Takes the loading screen away once the map is drawn (line_view.js)
+  function pageLoaded() {
+    if (typeof revealRunPage === 'function') revealRunPage($scope.tile_size);
   }
 
   setRunId(0);
@@ -359,6 +387,34 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       arr.push(i);
     }
     return arr;
+  };
+
+  $scope.sum = function (list) {
+    var total = 0;
+    for (var i = 0; i < (list || []).length; i++) total += list[i] || 0;
+    return total;
+  };
+
+  // Setting the time by hand (the time of the run, on the judge page): in seconds, kept from 0 to
+  // the run's duration, shown as minutes and seconds and used when the timer starts again
+  function setTime(total) {
+    total = Math.max(0, Math.min($scope.duration || 480, total));
+    $scope.minutes = Math.floor(total / 60);
+    $scope.seconds = total % 60;
+    $scope.time = total * 1000;
+    prevTime = $scope.time;
+  }
+
+  $scope.stepTime = function (seconds) {
+    if ($scope.startedTime) return;
+    playSound(sClick);
+    setTime(($scope.minutes || 0) * 60 + ($scope.seconds || 0) + seconds);
+  };
+
+  // After typing: numbers only, seconds over 59 carried into the minutes
+  $scope.tidyTime = function () {
+    if ($scope.startedTime) return;
+    setTime((parseInt($scope.minutes, 10) || 0) * 60 + (parseInt($scope.seconds, 10) || 0));
   };
 
   $scope.TimeReset = function () {
@@ -426,11 +482,31 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     upload_run({
       LoPs: $scope.LoPs
     });
-    if ($scope.LoPs[index] >= 3 && !last) {
+    // From the third, the team may skip to the next checkpoint: the row says so (no dialog, which
+    // would stop the judge during the run), with a sound when it first does
+    if ($scope.LoPs[index] == 3 && !last && !$scope.pastSection(index)) {
       playSound(sInfo);
-      swal(txt_lops, txt_lops_mes, "info");
     }
 
+  };
+
+  // Where each checkpoint is on the course (its number to the index of its pass in stiles)
+  var checkPointAt = {};
+
+  // Whether the run is past section `index` (to checkpoint index + 1): that checkpoint or anything
+  // after it scored, or LoPs in a later section. Then the team has moved on, skipping or not, and
+  // three LoPs there no longer mean it may skip
+  $scope.pastSection = function (index) {
+    for (var j = index + 1; j < $scope.LoPs.length; j++) {
+      if ($scope.LoPs[j] > 0) return true;
+    }
+    var end = checkPointAt[index + 1];
+    if (end == null) return false;
+    for (var i = end; i < $scope.stiles.length; i++) {
+      var stile = $scope.stiles[i];
+      if (stile && stile.scoredItems.some(function (item) { return item.scored; })) return true;
+    }
+    return false;
   };
 
   $scope.victimNL = function (type, number, found, identified) {
@@ -450,6 +526,23 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         deadVictim: $scope.victimNL_Dead
       }
     });
+  };
+
+  // The run's victims, live then dead, for the rescue sheet and the map; the same list until the
+  // map's numbers change, so that it can be repeated over
+  var nlList = [];
+  $scope.$watchGroup(['maxLiveVictims', 'maxDeadVictims'], function (max) {
+    nlList = [];
+    for (let i = 0; i < (max[0] || 0); i++) nlList.push({ type: 'L', number: i });
+    for (let i = 0; i < (max[1] || 0); i++) nlList.push({ type: 'D', number: i });
+  });
+  $scope.nlVictims = function () {
+    return nlList;
+  };
+  $scope.nlState = function (v) {
+    let victim = ((v.type == 'D' ? $scope.victimNL_Dead : $scope.victimNL_Live) || [])[v.number];
+    if (!victim || !victim.found) return 'none';
+    return victim.identified ? 'identified' : 'found';
   };
 
   $scope.victimNLActivate = function (type, number, found, identified) {
@@ -614,6 +707,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     if(kit) $scope.addVictim("KIT", zoneType);
 
     $scope.victim_tmp_clear();
+    $scope.rescueOpen = false;
 
     upload_run({
       rescueOrder: $scope.victim_list
@@ -635,18 +729,74 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         playSound(sTimeup);
         $scope.startedTime = !$scope.startedTime;
         $scope.time = $scope.duration*1000;
+        prevTime = $scope.time;
         $scope.saveEverything();
-        swal(txt_timeup, '', "info");
+        // The stop asked is moot: the run is over, which the sheet says
+        $scope.stopAsked = false;
+        $scope.timeUp = true;
       }
       $timeout(tick, 1000);
     }
   };
 
 
+  // Stopping the timer is asked twice, as it runs to the end of the run. The time of the first
+  // tap is the one recorded when the stop is confirmed; kept running, the timer just goes on
+  $scope.stopAsked = false;
+  $scope.askStop = function (asked) {
+    playSound(sClick);
+    if (asked) $scope.stopAt = prevTime + (new Date().getTime() - $scope.startUnixTime);
+    $scope.stopAsked = asked;
+  };
+
+  // Registering a rescue, on a sheet opened from the evacuation zone on the map or the rescue
+  // card; the victims picked and not taken to a zone are dropped when it closes
+  $scope.rescueOpen = false;
+  $scope.openRescue = function () {
+    playSound(sClick);
+    $scope.rescueOpen = true;
+  };
+  $scope.closeRescue = function () {
+    playSound(sClick);
+    $scope.victim_tmp = [];
+    $scope.rescueOpen = false;
+  };
+
+  // The time of the run is up: the sheet says so, with the time recorded, and goes on to the sign
+  // page or is closed to look over the run first (the finish card goes on from there too)
+  $scope.timeUp = false;
+  $scope.closeTimeUp = function () {
+    playSound(sClick);
+    $scope.timeUp = false;
+  };
+
+  // The page behind a sheet stays still; Escape closes the sheet (and keeps the timer running)
+  $scope.$watchGroup(['stopAsked', 'rescueOpen', 'timeUp'], function (open) {
+    document.documentElement.classList.toggle('rv-overlay-open', !!(open[0] || open[1] || open[2]));
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key != 'Escape') return;
+    if ($scope.timeUp) $scope.$apply($scope.closeTimeUp);
+    else if ($scope.stopAsked) $scope.$apply(function () {
+      $scope.askStop(false);
+    });
+    else if ($scope.rescueOpen) $scope.$apply($scope.closeRescue);
+  });
+
+  $scope.confirmStop = function () {
+    playSound(sClick);
+    $scope.stopAsked = false;
+    $scope.startedTime = false;
+    $scope.time = $scope.stopAt;
+    prevTime = $scope.time;
+    $scope.saveEverything();
+  };
+
   $scope.toggleTime = function () {
     playSound(sClick);
     // Start/stop timer
     $scope.startedTime = !$scope.startedTime;
+    $scope.stopAsked = false;
     if ($scope.startedTime) {
       // Start the timer
       $timeout(tick, 0);
@@ -789,7 +939,9 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
   $scope.open = function (x, y, z) {
     var modalInstance = $uibModal.open({
       animation: true,
-      templateUrl: '/templates/line_judge_modal.html',
+      // The judge page in the run pages' design has its own (views/judge/line_2026.pug)
+      templateUrl: document.body.classList.contains('run-view') ? '/templates/line_judge_modal_passes.html' : '/templates/line_judge_modal.html',
+      windowClass: 'rv-judge-modal',
       controller: 'ModalInstanceCtrl',
       size: 'lm',
       resolve: {
@@ -884,22 +1036,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       minutes: $scope.minutes,
       seconds: $scope.seconds
     };
-    $scope.sync++;
-    $http.put("/api/runs/line/" + runId, run, http_config).then(function (response) {
-      if(response.statusCode == 202){
-        setTimeout($scope.saveEverything, 100);
-        return;
-      }
-      $scope.score = response.data.score;
-      $scope.networkError = false;
-      $scope.sync = 0;
-    }, function (response) {
-      console.log("Error: " + response.statusText);
-      $scope.networkError = true;
-    });
-    //console.log("Update run", run);
-
-
+    save(run);
   };
 
   $scope.confirm = function () {
@@ -925,19 +1062,9 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       };
       run.status = 3;
 
-
-      $scope.sync++;
-      $http.put("/api/runs/line/" + runId, run, http_config).then(function (response) {
-        if(response.statusCode == 202){
-          setTimeout($scope.confirm, 100);
-          return;
-        }
-        $scope.score = response.data.score;
-        $scope.sync--;
+      // On to the sign page once this, after all before it, is saved
+      save(run, function () {
         $scope.go('/line/sign/' + runId + '?return=' + $scope.getParam('return'));
-      }, function (response) {
-        console.log("Error: " + response.statusText);
-        $scope.networkError = true;
       });
     }
   };
@@ -966,14 +1093,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       run.status = 3;
 
 
-      $scope.sync++;
-      $http.put("/api/runs/line/" + runId, run, http_config).then(function (response) {
-        if(response.statusCode == 202){
-          setTimeout($scope.confirm, 100);
-          return;
-        }
-        $scope.score = response.data.score;
-        $scope.sync--;
+      // On to the next run, or done, once this, after all before it, is saved
+      save(run, function () {
         if(flag){
           setRunId($scope.nowRun+1);
           $(window).scrollTop(0);
@@ -987,9 +1108,6 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             window.close();
           })
         }
-      }, function (response) {
-        console.log("Error: " + response.statusText);
-        $scope.networkError = true;
       });
     }
   }
@@ -1033,12 +1151,18 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       var b = $('.tilearea');
       //console.log('コンテンツ本体：' + b.height() + '×' + b.width());
       //console.log('window：' + window.innerHeight);
+      // The map card, kept in view under the bar (its sticky top), fits the window beside the
+      // side column; on narrow screens it is above the rest and fits the width only
+      var area = $('.tilearea');
+      var mapHeight = window.matchMedia('(max-width: 991.98px)').matches ? Infinity :
+        window.innerHeight - parseFloat($('.rv-judge-map').css('top')) -
+        (area.offset().top - $('.rv-judge-map').offset().top) - (area.innerHeight() - area.height()) - 20;
       if ($scope.sRotate % 180 == 0) {
         var tilesize_w = ($('.tilearea').width() - 2 * width) / width;
-        var tilesize_h = (window.innerHeight - 130) / length;
+        var tilesize_h = mapHeight / length;
       } else {
         var tilesize_w = ($('.tilearea').width() - 2 * length) / length;
-        var tilesize_h = (window.innerHeight - 130) / width;
+        var tilesize_h = mapHeight / width;
       }
 
       //console.log('tilesize_w:' + tilesize_w);
@@ -1060,6 +1184,29 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       } else {
         $('#wrapTile').css('width', (tilesize + 3) * length);
       }
+
+      // The evacuation zone on the map, a button over the box around its tiles
+      var evac = $('#wrapTile tile.is-evac');
+      if (evac.length) {
+        var wrap = $('#wrapTile')[0].getBoundingClientRect();
+        var box = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
+        evac.each(function () {
+          var r = this.getBoundingClientRect();
+          box.left = Math.min(box.left, r.left);
+          box.top = Math.min(box.top, r.top);
+          box.right = Math.max(box.right, r.right);
+          box.bottom = Math.max(box.bottom, r.bottom);
+        });
+        $scope.evacBox = {
+          left: (box.left - wrap.left) + 'px',
+          top: (box.top - wrap.top) + 'px',
+          width: (box.right - box.left) + 'px',
+          height: (box.bottom - box.top) + 'px'
+        };
+      } else {
+        $scope.evacBox = null;
+      }
+      $scope.$evalAsync();
 
       if(movie){
         $('#card_area').css('height', (window.innerHeight - 130 - $('#video_area').height()));
@@ -1140,6 +1287,17 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$timeout', 
     }
   }
 
+  // For the passes in the run pages' design (line_judge_modal_passes.html): the screen direction
+  // (0 top, 90 right, ...) the robot left the tile by on each pass, and the passes leaving through
+  // each neighbour of the 3x3 grid (1 top, 3 left, 5 right, 7 bottom)
+  $scope.passDir = (mtile.next_dir || []).map(function (dir) {
+    return (dir2num(dir) + sRotate) % 360;
+  });
+  $scope.passesTo = { 1: [], 3: [], 5: [], 7: [] };
+  $scope.passDir.forEach(function (deg, pass) {
+    var cell = { 0: 1, 90: 5, 180: 7, 270: 3 }[deg];
+    if (cell) $scope.passesTo[cell].push(pass);
+  });
   $scope.dirStatus = function (tile) {
     if (tile.scoredItems.length == 0) return;
 
@@ -1240,14 +1398,37 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$timeout', 
 }]);
 
 
+// A number shown in two digits (the seconds of the time of the run: 0:05), read back as a number
+app.directive('rvTwoDigits', function () {
+  return {
+    require: 'ngModel',
+    link: function ($scope, element, attrs, ngModel) {
+      ngModel.$formatters.push(function (value) {
+        return value == null || value === '' ? value : ('0' + value).slice(-2);
+      });
+      ngModel.$parsers.push(function (value) {
+        return value === '' ? value : parseInt(value, 10);
+      });
+    }
+  };
+});
+
 app.directive('tile', function () {
   return {
     scope: {
       tile: '='
     },
     restrict: 'E',
-    templateUrl: '/templates/tile.html',
+    // The judge page draws the tiles like the run view (template="judge")
+    templateUrl: function (element, attrs) {
+      return attrs.template == 'judge' ? '/templates/tile_judge.html' : '/templates/tile.html';
+    },
     link: function ($scope, element, attrs) {
+      // A tile of the evacuation zone, for the button over it (tile_size)
+      $scope.$watch('tile', function (tile) {
+        element.toggleClass('is-evac', !!(tile && tile.tileType && /^ev\d+\.png$/.test(tile.tileType.image)));
+      });
+
       $scope.tilerotate = function (tilerot) {
         if (!tilerot) return $scope.$parent.sRotate;
         var ro = tilerot + $scope.$parent.sRotate;

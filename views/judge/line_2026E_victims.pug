@@ -1,0 +1,6 @@
+//- The victims of an Entry run on the map (judge/line_2026E.pug), each as found or identified so
+//- far: faint until found, a tick once found, two once identified
+span.rv-evac-rescues(ng-if='nlVictims().length')
+  span.rv-evac-victim.rv-nl-chip(ng-repeat='v in nlVictims()' ng-class="'is-' + nlState(v)" title="{{v.number + 1}}")
+    img(ng-src="{{v.type == 'L' ? '/images/greenVictim.png' : '/images/blackVictim.png'}}" alt="{{v.type == 'L' ? 'LIVE' : 'DEAD'}} {{v.number + 1}}")
+    i.fas(ng-if="nlState(v) != 'none'" ng-class="nlState(v) == 'identified' ? 'fa-check-double' : 'fa-check'")

@@ -1104,6 +1104,72 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rv-rescue-item.is-bonus .rv-rescue-mult { background: #ccfbf1; color: #0f766e; }
 .rv-rescue-item.is-void { opacity: 0.6; }
 
+/* Entry rules (judge/line_2026E.pug): each victim not found, found, or found and identified, one
+   tap each; the same columns on every row */
+.rv-nl-picks {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem 0.75rem;
+  align-items: center;
+  margin: 0;
+  padding: 1.1rem 1.1rem calc(1.1rem + env(safe-area-inset-bottom));
+  list-style: none;
+}
+
+.rv-nl-pick { display: contents; }
+.rv-nl-pick .rv-nl-victim { font-size: 1.1rem; color: var(--rv-text); }
+.rv-nl-pick .rv-victim { width: 30px; height: 30px; }
+
+.rv-nl-seg {
+  display: grid;
+  grid-template-columns: 52px 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: #f1f5f9;
+}
+
+.rv-nl-opt {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 48px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #64748b;
+  font-weight: 800;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.rv-nl-opt:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 1px; }
+.rv-nl-opt.is-on { background: #fff; color: var(--rv-text); box-shadow: 0 1px 4px rgba(15, 23, 42, 0.15); }
+.rv-nl-opt.is-found.is-on { background: #0284c7; color: #fff; }
+.rv-nl-opt.is-identified.is-on { background: #059669; color: #fff; }
+
+/* On the map: faint until found, a tick once found, two once identified */
+.rv-evac-victim.rv-nl-chip { position: relative; border-color: #cbd5e1; background: #fff; }
+.rv-nl-chip.is-none img { opacity: 0.35; }
+.rv-evac-victim.rv-nl-chip.is-found { border-color: #0284c7; background: #e0f2fe; }
+.rv-evac-victim.rv-nl-chip.is-identified { border-color: #059669; background: #d1fae5; }
+.rv-nl-chip i {
+  position: absolute;
+  right: -6px;
+  bottom: -5px;
+  padding: 2px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.55rem;
+}
+.rv-nl-chip.is-found i { background: #0284c7; }
+.rv-nl-chip.is-identified i { background: #059669; }
+
+/* The scoring is started from the hint, where it has not been (not for Entry runs, which start
+   scoring from the first) */
+.rv-map-hint-action { border: none; background: none; color: inherit; font-weight: 800; cursor: pointer; }
+
 /* Entry rules (line_2026E.pug): victim | found | identified | points, the same columns on every row */
 .rv-nl-list {
   flex: 1;

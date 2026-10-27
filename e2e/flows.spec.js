@@ -181,6 +181,51 @@ test.describe('the end of a line run', () => {
   });
 });
 
+test.describe('judging a line entry run', () => {
+  test.use({ user: 'judge' });
+
+  test('each victim is set as found or identified on the rescue sheet, and shows so on the map', async ({ page }) => {
+    // The saves are answered here, so the seeded run stays as it is
+    let sent = null;
+    await page.route(`**/api/runs/line/${ids.finishedRuns.LineNL}`, async (route) => {
+      if (route.request().method() !== 'PUT') return route.continue();
+      sent = route.request().postDataJSON();
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{"score":0}' });
+    });
+    await open(page, `/line/judge/${ids.finishedRuns.LineNL}`);
+    await page.locator('.rv-check').nth(0).click();
+    await page.locator('.rv-check').nth(1).click();
+    await page.locator('.rv-photo-check').nth(0).click();
+    await page.locator('.rv-photo-check').nth(1).click();
+    await page.locator('button[ng-click="infochecked()"]').click();
+
+    // Two live victims and a dead one. Until something on the run scores, reading it starts it
+    // afresh (initRunData.initLine), so none is found yet
+    const chips = page.locator('.rv-rescue-add .rv-nl-chip');
+    await expect(chips).toHaveCount(3);
+    for (let i = 0; i < 3; i++) await expect(chips.nth(i)).toHaveClass(/is-none/);
+
+    const sheet = page.locator('.rv-overlay', { has: page.locator('.rv-nl-picks') });
+    await page.locator('.rv-rescue-add').click();
+    await expect(sheet).toBeVisible();
+    const live = sheet.locator('.rv-nl-pick').nth(1);
+    const dead = sheet.locator('.rv-nl-pick').nth(2);
+    await expect(dead.locator('.rv-nl-opt.is-none')).toHaveClass(/is-on/);
+    await live.locator('.rv-nl-opt.is-found').click();
+    await dead.locator('.rv-nl-opt.is-identified').click();
+    await expect(dead.locator('.rv-nl-opt.is-identified')).toHaveClass(/is-on/);
+    await expect(dead.locator('.rv-nl-opt.is-none')).not.toHaveClass(/is-on/);
+    await expect.poll(() => sent && sent.nl && sent.nl.deadVictim[0]).toMatchObject({ found: true, identified: true });
+    expect(sent.nl.liveVictim[1]).toMatchObject({ found: true, identified: false });
+
+    await page.keyboard.press('Escape');
+    await expect(sheet).toBeHidden();
+    await expect(chips.nth(0)).toHaveClass(/is-none/);
+    await expect(chips.nth(1)).toHaveClass(/is-found/);
+    await expect(chips.nth(2)).toHaveClass(/is-identified/);
+  });
+});
+
 test.describe('saving a line run', () => {
   test.use({ user: 'judge' });
 

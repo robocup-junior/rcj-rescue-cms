@@ -456,6 +456,7 @@
             "runTime": "Time of the run",
             "maySkip": "The team may skip to {{cp}}",
             "close": "Close",
+            "notFound": "Not found",
             "js": {
                 "score_element": "Place checkpoint markers on tiles without scoring elements (rule 3.3.5)",
                 "cantvisit": "Cannot place checkpoint markers on tile that robot can't visit.",
