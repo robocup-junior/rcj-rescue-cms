@@ -756,46 +756,44 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     }
 
 
-    // If the run is started, allow to score a point
-    if ($scope.time > 0) {
-      var total = (mtile.items.obstacles > 0 ||
-        mtile.items.speedbumps > 0 ||
-        mtile.tileType.gaps > 0 ||
-        mtile.tileType.intersections > 0 ||
-        mtile.tileType.seesaw > 0 ||
-        undefined2false(mtile.items.rampPoints)) * mtile.index.length;
+    // Scored whether or not the timer has been started, as the Entry page does
+    var total = (mtile.items.obstacles > 0 ||
+      mtile.items.speedbumps > 0 ||
+      mtile.tileType.gaps > 0 ||
+      mtile.tileType.intersections > 0 ||
+      mtile.tileType.seesaw > 0 ||
+      undefined2false(mtile.items.rampPoints)) * mtile.index.length;
 
-      // Add the number of possible passes for drop tiles
-      if (isCheckpointTile) {
-        total = 0;
-        for (let i = 0; i < stile.length; i++) {
-          if (stileIndex[i] < $scope.mapIndexCount) {
-            total++;
-          }
+    // Add the number of possible passes for drop tiles
+    if (isCheckpointTile) {
+      total = 0;
+      for (let i = 0; i < stile.length; i++) {
+        if (stileIndex[i] < $scope.mapIndexCount) {
+          total++;
         }
       }
+    }
 
 
-      if (isStart(mtile)) {
-        $scope.showedUp = !$scope.showedUp;
-        $scope.changeShowedUp();
-        return;
+    if (isStart(mtile)) {
+      $scope.showedUp = !$scope.showedUp;
+      $scope.changeShowedUp();
+      return;
+    }
+
+
+    if (total > 1) {
+      // Show modal
+      $scope.open(x, y, z);
+      // Save data from modal when closing it
+    } else if (total == 1) {
+      console.log(stile);
+      for(let i=0;i<stile[0].scoredItems.length;i++) {
+        stile[0].scoredItems[i].scored = !stile[0].scoredItems[i].scored;
       }
-
-
-      if (total > 1) {
-        // Show modal
-        $scope.open(x, y, z);
-        // Save data from modal when closing it
-      } else if (total == 1) {
-        console.log(stile);
-        for(let i=0;i<stile[0].scoredItems.length;i++) {
-          stile[0].scoredItems[i].scored = !stile[0].scoredItems[i].scored;
-        }
-        httpdata.tiles[mtile.index[0]] = stile[0];
-        $scope.stiles[mtile.index[0]] = stile[0];
-        upload_run(httpdata);
-      }
+      httpdata.tiles[mtile.index[0]] = stile[0];
+      $scope.stiles[mtile.index[0]] = stile[0];
+      upload_run(httpdata);
     }
   };
 

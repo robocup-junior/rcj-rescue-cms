@@ -167,10 +167,6 @@ html(ng-app="ddApp")
             span.rv-evac-rescues(ng-if='victim_list.length')
               span.rv-evac-victim(ng-repeat='v in victim_list track by $index' ng-class="v.zoneType == 'RED' ? 'is-red' : 'is-green'")
                 img(ng-src="{{v.victimType == 'LIVE' ? '/images/liveVictim.png' : '/images/deadVictim.png'}}" alt='{{v.victimType}} {{v.zoneType}}')
-          //- Tiles score only once the timer has run
-          p.rv-map-hint(ng-if='time == 0')
-            i.fas.fa-stopwatch
-            |  {{'line.judge.push_timer' | translate}}
           .tilearea
             #wrapTile.mx-auto
               div(ng-repeat='r in range(length)', ng-if='sRotate==0', style='display: flex;')

@@ -97,13 +97,16 @@ test.describe('judging a line run', () => {
     await page.locator('.rv-photo-check').nth(1).click();
     await confirm.click();
 
-    // Tiles score once the timer has run; the hint says so until then. Running, the timer is gone
-    // from the top
+    // Tiles score before the timer is started as well
     const timerCard = page.locator('.rv-timer-card');
-    await expect(page.locator('.rv-map-hint')).toBeVisible();
+    const tileSent = page.waitForRequest((req) => req.method() === 'PUT' && 'tiles' in req.postDataJSON());
+    await page.locator('.rv-judge-map tile').nth(1).click();
+    expect(Object.values((await tileSent).postDataJSON().tiles)[0].scoredItems[0]).toMatchObject({ scored: true });
+    await expect(timerCard).toBeVisible();
+
+    // Running, the timer is gone from the top
     await timerCard.locator('.rv-timer-btn').click();
     await expect(timerCard).toHaveCount(0);
-    await expect(page.locator('.rv-map-hint')).toHaveCount(0);
 
     // What the page sends is checked, since other tests save to the same run
     const sent = page.waitForRequest((req) => req.url().includes(`/api/runs/line/${ids.runs.Line}`) && req.method() === 'PUT' && 'LoPs' in req.postDataJSON());
