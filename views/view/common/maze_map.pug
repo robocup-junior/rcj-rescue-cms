@@ -9,10 +9,6 @@
         img(ng-if='t.cell.tile.speedbump' src='/images/log.png' alt='')
         img(ng-if='t.cell.tile.ramp' src='/images/ramp.png' alt='')
         img(ng-if='t.cell.tile.steps' src='/images/steps.png' alt='')
-        img(ng-repeat="side in ['top', 'right', 'bottom', 'left', 'floor']" ng-if='victimImage(t.cell, side)' ng-src='{{victimImage(t.cell, side)}}' alt='')
-        //- A cognitive target: its five rings, one image each
-        div(ng-repeat="side in ['top', 'right', 'bottom', 'left']" ng-if="t.cell.tile.victims[side] == 'Cognitive' && t.cell.tile.cognitiveTargets[side].rings")
-          img(ng-repeat='n in [1, 2, 3, 4, 5]' ng-src="{{'/images/cognitive_rings/' + side + '_ring' + n + '_' + t.cell.tile.cognitiveTargets[side].rings['ring' + n] + '.png'}}" alt='')
       img.rv-mz-mark(ng-if='startTile.x == t.x && startTile.y == t.y && startTile.z == z' src='/images/start.png' alt='Start')
       img.rv-mz-mark(ng-if='!isUndefined(t.cell.tile.changeFloorTo) && t.cell.tile.changeFloorTo != z' src='/images/elevator.png' alt='')
       span.rv-mz-frame(ng-if='tileStatus(t.x, t.y, z, true)' ng-class="'is-' + tileStatus(t.x, t.y, z, true)")
@@ -25,3 +21,11 @@
             | {{tilePoint(t.x, t.y, z, true)}}
             small /{{tileMaxPoint(t.x, t.y, z)}}
     .rv-mz-wall(ng-repeat='w in mazeView.walls track by w.key' ng-class="'is-' + w.kind" ng-style='w.style')
+    //- The victims over the walls, against which they are drawn: a layer of their own, since a tile
+    //- keeps what it holds below the walls
+    .rv-mz-victims(ng-repeat='t in mazeView.tiles track by t.key' ng-if='t.victims' ng-style='t.style')
+      .rv-mz-items(ng-style="{transform: 'rotate(' + sRotate + 'deg)'}")
+        img(ng-repeat="side in ['top', 'right', 'bottom', 'left', 'floor']" ng-if='victimImage(t.cell, side)' ng-src='{{victimImage(t.cell, side)}}' alt='')
+        //- A cognitive target: its five rings, one image each
+        div(ng-repeat="side in ['top', 'right', 'bottom', 'left']" ng-if="t.cell.tile.victims[side] == 'Cognitive' && t.cell.tile.cognitiveTargets[side].rings")
+          img(ng-repeat='n in [1, 2, 3, 4, 5]' ng-src="{{'/images/cognitive_rings/' + side + '_ring' + n + '_' + t.cell.tile.cognitiveTargets[side].rings['ring' + n] + '.png'}}" alt='')

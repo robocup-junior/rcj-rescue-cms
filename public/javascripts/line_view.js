@@ -102,11 +102,16 @@ function buildMazeMap(cells, width, length, z, rotate) {
       var at = place(x, y);
       if (x % 2 && y % 2) {
         var tile = cell && cell.tile || {};
+        var victims = tile.victims || {};
         tiles.push({
           x: x,
           y: y,
           key: x + ',' + y,
           cell: cell,
+          // Whether it has a victim, drawn over the walls
+          victims: ['top', 'right', 'bottom', 'left', 'floor'].some(function (side) {
+            return victims[side] && victims[side] != 'None';
+          }),
           cls: {
             'is-void': !cell,
             'is-checkpoint': tile.checkpoint,

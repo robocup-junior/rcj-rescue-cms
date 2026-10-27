@@ -743,6 +743,9 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 }
 
 .rv-mz-wall.is-floating { background: #1e40af; }
+
+/* The victims, over the walls (they are drawn against them); taps go through to the tile */
+.rv-mz-victims { position: absolute; z-index: 4; pointer-events: none; }
 .rv-mz-wall.is-ignored { background: #16a34a; }
 
 .rv-mz-frame {
