@@ -555,6 +555,9 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rv-tool:hover { background: #f8fafc; }
 .rv-tool.active { background: var(--rv-text); border-color: var(--rv-text); color: #fff; }
 .rv-tool:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 1px; position: relative; }
+/* The icon before the floors, joined to them but not a button */
+.rv-tool-label { display: inline-flex; align-items: center; justify-content: center; padding: 0 0.6rem; background: #f1f5f9; color: var(--rv-muted); cursor: default; }
+.rv-tool-label:hover { background: #f1f5f9; }
 
 .rv-pill {
   display: inline-flex;

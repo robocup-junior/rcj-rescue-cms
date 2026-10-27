@@ -8,9 +8,11 @@ section.rv-card.rv-map#rv-items
     //- Floor and rotation in the header row, before the total
     .rv-map-tools
       .btn-group(ng-show='height > 1')
+        //- The floors, after an icon that says what they are
+        span.rv-tool.rv-tool-label(aria-hidden='true')
+          i.fas.fa-layer-group
         button.rv-tool(type='button' ng-repeat='zz in range(height)' ng-class='{active: zz == z}' ng-click='changeFloor(zz)')
-          i.fas.fa-layer-group(ng-if='$first')
-          |  {{zz}}
+          | {{zz}}
       .btn-group
         button.rv-tool(type='button' title='-90°' ng-click='tileRot(-90)')
           i.fas.fa-undo
