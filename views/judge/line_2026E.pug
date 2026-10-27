@@ -161,7 +161,7 @@ html(ng-app="ddApp")
             span
               i.fas.fa-first-aid
               |  {{'line.judge.rescue' | translate}}
-            include line_2026E_victims
+            include ../view/common/line_2026E_victims
           //- Tiles score once the scoring has started (from the start for Entry runs)
           p.rv-map-hint(ng-if='!startedScoring')
             button.rv-map-hint-action(type='button' ng-click='toggleScoring()')
@@ -188,7 +188,7 @@ html(ng-app="ddApp")
                 span.rv-evac-label
                   i.fas.fa-first-aid
                   |  {{'line.judge.rescue' | translate}}
-                include line_2026E_victims
+                include ../view/common/line_2026E_victims
 
         .rv-judge-side
           //- LoPs: a counter for each section of the course, from one checkpoint to the next

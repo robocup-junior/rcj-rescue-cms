@@ -39,6 +39,14 @@ section.rv-card.rv-map#rv-items
       div(ng-repeat='r in range(width)', ng-if='sRotate==90', style='display: flex;')
         .slot(ng-repeat='c in range(length)')
           tile(template='view' tile="mtiles[r+','+ (length - c-1) +','+z]", ng-click='showElements(r,length-c-1,z)')
+      //- Over the evacuation zone's tiles (placed by line_view.js): the victims found so far, of all
+      //- of them, and each as found or identified
+      .rv-evac-area.is-off(ng-show='nlVictims().length')
+        span.rv-evac-label
+          i.fas.fa-first-aid
+          |  {{'line.view.rescue' | translate}}
+          span.rv-evac-count {{nlFound()}} / {{nlVictims().length}}
+        include line_2026E_victims
 
 //- Checkpoints and LoPs together: a section's checkpoint points are its tiles times the
 //- points per tile, and those depend on the LoPs in the section

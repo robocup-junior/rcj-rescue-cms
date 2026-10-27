@@ -383,6 +383,26 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     };
 
 
+    // The run's victims, live then dead, shown over the evacuation zone; the same list until the
+    // map's numbers change, so that it can be repeated over
+    var nlList = [];
+    $scope.$watchGroup(['maxLiveVictims', 'maxDeadVictims'], function (max) {
+        nlList = [];
+        for (let i = 0; i < (max[0] || 0); i++) nlList.push({ type: 'L', number: i });
+        for (let i = 0; i < (max[1] || 0); i++) nlList.push({ type: 'D', number: i });
+    });
+    $scope.nlVictims = function () {
+        return nlList;
+    };
+    $scope.nlState = function (v) {
+        let victim = ((v.type == 'D' ? $scope.victimNL_Dead : $scope.victimNL_Live) || [])[v.number];
+        if (!victim || !victim.found) return 'none';
+        return victim.identified ? 'identified' : 'found';
+    };
+    $scope.nlFound = function () {
+        return nlList.filter(function (v) { return $scope.nlState(v) != 'none'; }).length;
+    };
+
     // Whether the map has an evacuation zone (run view map legend)
     $scope.hasEvacZone = function () {
         for (let key in $scope.mtiles) {
@@ -773,6 +793,11 @@ app.directive('tile', function () {
             return attrs.template == 'view' ? '/templates/tile_view.html' : '/templates/tile.html';
         },
         link: function ($scope, element, attrs) {
+            // A tile of the evacuation zone, for what the run view shows over it (placeEvacZone)
+            $scope.$watch('tile', function (tile) {
+                element.toggleClass('is-evac', !!(tile && tile.tileType && isEvacImage(tile.tileType.image)));
+            });
+
             $scope.tilerotate = function (tilerot) {
                 if (!tilerot) return $scope.$parent.sRotate;
                 var ro = tilerot + $scope.$parent.sRotate;
@@ -1246,6 +1271,8 @@ function tile_size() {
         }
 
         $('#card_area').css('height', (window.innerHeight - 130));
+        // The victims shown over the evacuation zone (run view and sign pages, line_view.js)
+        if (typeof placeEvacZone === 'function') placeEvacZone();
         if (b.height() == 0) setTimeout("tile_size()", 1000);
     } catch (e) {
         setTimeout("tile_size()", 1000);
