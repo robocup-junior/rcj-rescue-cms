@@ -2225,6 +2225,71 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-zone-pick.is-green { border-color: #86efac; background: #f0fdf4; }
 .rv-zone-pick img { display: block; width: 100%; max-height: 64px; object-fit: contain; }
 
+/* The evacuation zone on the map: one button over its tiles, which opens the rescue sheet */
+.is-judge #wrapTile { position: relative; }
+
+.rv-evac-hit {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 3px dashed rgba(220, 38, 38, 0.75);
+  border-radius: 10px;
+  background: rgba(254, 226, 226, 0.35);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.rv-evac-hit:hover { background: rgba(254, 226, 226, 0.6); }
+.rv-evac-hit:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
+
+.rv-evac-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.6rem 0.45rem 0.9rem;
+  border-radius: 999px;
+  background: #dc2626;
+  color: #fff;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.35);
+}
+
+.rv-evac-count {
+  min-width: 1.6em;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: #fff;
+  color: #b91c1c;
+  font-variant-numeric: tabular-nums;
+}
+
+.rv-rescue-add {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 52px;
+  border: 2px dashed #fca5a5;
+  border-radius: 14px;
+  background: #fff;
+  color: #b91c1c;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+/* In the map card, for a map without evacuation zone tiles */
+.rv-map .rv-rescue-add { width: auto; margin: 0.6rem 1rem 0; }
+.rv-rescue-add .rv-evac-count { background: #dc2626; color: #fff; }
+
+.rv-rescue-sheet { padding: 1.1rem 1.1rem calc(1.1rem + env(safe-area-inset-bottom)); }
+/* Its close button at the far end of the head */
+.rv-send-sheet .rv-pad-head > span { flex: 1; }
+
 /* No multiplier here (the judge needs no points), but a button to take the rescue back */
 .is-judge .rv-rescue-list { grid-template-columns: auto auto auto 1fr auto; }
 .is-judge .rv-zone { justify-self: start; }

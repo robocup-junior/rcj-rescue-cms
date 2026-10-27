@@ -157,6 +157,11 @@ html(ng-app="ddApp")
             span.rv-key.is-halfdone {{'line.view.tilePartial' | translate}}
             span.rv-key.is-undone {{'line.view.tileNone' | translate}}
             span.rv-key.is-cp {{'line.view.checkpoint' | translate}}
+          //- A map without evacuation zone tiles (or another floor): the rescue from here instead
+          button.rv-rescue-add(type='button' ng-if='!evacBox && EvacuationAreaLoPIndex >= 0' ng-click='openRescue()')
+            i.fas.fa-first-aid
+            |  {{'line.judge.rescue' | translate}}
+            span.rv-evac-count {{victim_list.length}}
           //- Tiles score only once the timer has run
           p.rv-map-hint(ng-if='time == 0')
             i.fas.fa-stopwatch
@@ -176,6 +181,12 @@ html(ng-app="ddApp")
               div(ng-repeat='r in range(width)', ng-if='sRotate==90', style='display: flex;')
                 .slot(ng-repeat='c in range(length)')
                   tile(template='judge' tile="mtiles[r+','+ (length - c-1) +','+z]", ng-click='doScoring(r,length-c-1,z)')
+              //- Over the evacuation zone's tiles (evacBox, from tile_size): tapped to register a rescue
+              button.rv-evac-hit(type='button' ng-if='evacBox && EvacuationAreaLoPIndex >= 0' ng-style='evacBox' ng-click='openRescue()')
+                span.rv-evac-label
+                  i.fas.fa-first-aid
+                  |  {{'line.judge.rescue' | translate}}
+                  span.rv-evac-count {{victim_list.length}}
 
         .rv-judge-side
           //- LoPs: a counter for each section of the course, from one checkpoint to the next
@@ -209,52 +220,6 @@ html(ng-app="ddApp")
                   span.rv-step-count(ng-class="{'is-zero': !LoPs[$index]}") {{LoPs[$index] ? LoPs[$index] : 0}}
                   button.rv-step.is-plus(type='button' ng-click='increment($index,$last)' title='+1')
                     i.fas.fa-plus
-
-          //- Rescue: the victims taken to a zone together are picked first, then the zone
-          section.rv-card#rv-rescue(ng-if='EvacuationAreaLoPIndex >= 0')
-            .rv-card-header
-              i.fas.fa-first-aid
-              | {{'line.judge.rescue' | translate}}
-            .rv-card-body.rv-rescue-input
-              .rv-victim-picks
-                button.rv-victim-pick(type='button' ng-click="addVictimTmp('LIVE')" ng-disabled='count_victim_list("L") + count_victim_tmp("L") >= maxLiveVictims')
-                  img(src='/images/liveVictim.png' alt='')
-                  span.rv-pick-name {{'line.judge.live' | translate}}
-                  span.rv-pick-left {{'line.judge.victimsLeft' | translate:{n: maxLiveVictims - count_victim_list('L') - count_victim_tmp('L')} }}
-                button.rv-victim-pick(type='button' ng-click="addVictimTmp('DEAD')" ng-disabled='count_victim_list("D") + count_victim_tmp("D") >= maxDeadVictims')
-                  img(src='/images/deadVictim.png' alt='')
-                  span.rv-pick-name {{'line.judge.dead' | translate}}
-                  span.rv-pick-left {{'line.judge.victimsLeft' | translate:{n: maxDeadVictims - count_victim_list('D') - count_victim_tmp('D')} }}
-              .rv-staged(ng-if='victim_tmp.length > 0')
-                .rv-staged-head
-                  span {{'line.judge.staged' | translate}}
-                  button.rv-staged-clear(type='button' ng-click='victim_tmp_clear()' title="{{'common.delete' | translate}}")
-                    i.far.fa-trash-alt
-                .rv-staged-list
-                  button.rv-staged-victim(type='button' ng-repeat='v in victim_tmp track by $index' ng-click='delete_victim_tmp($index)')
-                    img(ng-src="{{v == 'LIVE' ? '/images/liveVictim.png' : '/images/deadVictim.png'}}" alt='{{v}}')
-                    i.fas.fa-times
-                .rv-staged-head
-                  span {{'line.judge.toZone' | translate}}
-                .rv-zone-picks
-                  button.rv-zone-pick.is-red(type='button' ng-click='victimRegist("RED")')
-                    img(src='/images/evacZone/red_lv2_a.png' alt='RED')
-                  button.rv-zone-pick.is-green(type='button' ng-click='victimRegist("GREEN")')
-                    img(src='/images/evacZone/green_lv2_a.png' alt='GREEN')
-              //- The rescues so far, in order; each can be taken back
-              .rv-rescues
-                .rv-rescues-title
-                  | {{'line.view.rescuedVictims' | translate}}
-                  span.rv-rescues-count {{victim_list.length}}
-                ol.rv-rescue-list(ng-if='victim_list.length')
-                  li.rv-rescue-item(ng-repeat='v in victim_list track by $index')
-                    span.rv-rescue-order {{$index + 1}}
-                    img.rv-victim(ng-src="{{v.victimType == 'LIVE' ? '/images/liveVictim.png' : '/images/deadVictim.png'}}" alt="{{v.victimType}}")
-                    i.fas.fa-long-arrow-alt-right.rv-lop-arrow
-                    span.rv-zone(ng-class="v.zoneType == 'RED' ? 'is-red' : 'is-green'")
-                      img(ng-src="{{v.zoneType == 'RED' ? '/images/evacZone/red_lv2.png' : '/images/evacZone/green_lv2.png'}}" alt="{{v.zoneType}}")
-                    button.rv-rescue-del(type='button' ng-click='delete_victim($index)' title="{{'common.delete' | translate}}")
-                      i.fas.fa-times
 
           //- Exit bonus: one tap to switch
           section.rv-card#rv-exit
@@ -293,6 +258,57 @@ html(ng-app="ddApp")
           button.rv-submit(type='button' ng-click='confirm()' ng-disabled='startedTime || networkError' ng-class="{'is-ready': !startedTime && !networkError}")
             i.fas.fa-arrow-right
             | {{'line.judge.toSign' | translate}}
+
+    //- Rescue, opened from the evacuation zone on the map: the victims taken to a zone together are
+    //- picked first, then the zone, which registers them and closes the sheet; below, the rescues so
+    //- far, each of which can be taken back
+    .rv-overlay.is-send(ng-cloak ng-show='rescueOpen' role='dialog' aria-modal='true' aria-labelledby='rv-rescue-title')
+      .rv-send-sheet
+        .rv-pad-head
+          i.fas.fa-first-aid
+          span#rv-rescue-title {{'line.judge.rescue' | translate}}
+          button.rv-pad-close(type='button' title="{{'line.judge.close' | translate}}" ng-click='closeRescue()')
+            i.fas.fa-times
+        .rv-rescue-input.rv-rescue-sheet
+          .rv-victim-picks
+            button.rv-victim-pick(type='button' ng-click="addVictimTmp('LIVE')" ng-disabled='count_victim_list("L") + count_victim_tmp("L") >= maxLiveVictims')
+              img(src='/images/liveVictim.png' alt='')
+              span.rv-pick-name {{'line.judge.live' | translate}}
+              span.rv-pick-left {{'line.judge.victimsLeft' | translate:{n: maxLiveVictims - count_victim_list('L') - count_victim_tmp('L')} }}
+            button.rv-victim-pick(type='button' ng-click="addVictimTmp('DEAD')" ng-disabled='count_victim_list("D") + count_victim_tmp("D") >= maxDeadVictims')
+              img(src='/images/deadVictim.png' alt='')
+              span.rv-pick-name {{'line.judge.dead' | translate}}
+              span.rv-pick-left {{'line.judge.victimsLeft' | translate:{n: maxDeadVictims - count_victim_list('D') - count_victim_tmp('D')} }}
+          .rv-staged(ng-if='victim_tmp.length > 0')
+            .rv-staged-head
+              span {{'line.judge.staged' | translate}}
+              button.rv-staged-clear(type='button' ng-click='victim_tmp_clear()' title="{{'common.delete' | translate}}")
+                i.far.fa-trash-alt
+            .rv-staged-list
+              button.rv-staged-victim(type='button' ng-repeat='v in victim_tmp track by $index' ng-click='delete_victim_tmp($index)')
+                img(ng-src="{{v == 'LIVE' ? '/images/liveVictim.png' : '/images/deadVictim.png'}}" alt='{{v}}')
+                i.fas.fa-times
+            .rv-staged-head
+              span {{'line.judge.toZone' | translate}}
+            .rv-zone-picks
+              button.rv-zone-pick.is-red(type='button' ng-click='victimRegist("RED")')
+                img(src='/images/evacZone/red_lv2_a.png' alt='RED')
+              button.rv-zone-pick.is-green(type='button' ng-click='victimRegist("GREEN")')
+                img(src='/images/evacZone/green_lv2_a.png' alt='GREEN')
+          //- The rescues so far, in order; each can be taken back
+          .rv-rescues
+            .rv-rescues-title
+              | {{'line.view.rescuedVictims' | translate}}
+              span.rv-rescues-count {{victim_list.length}}
+            ol.rv-rescue-list(ng-if='victim_list.length')
+              li.rv-rescue-item(ng-repeat='v in victim_list track by $index')
+                span.rv-rescue-order {{$index + 1}}
+                img.rv-victim(ng-src="{{v.victimType == 'LIVE' ? '/images/liveVictim.png' : '/images/deadVictim.png'}}" alt="{{v.victimType}}")
+                i.fas.fa-long-arrow-alt-right.rv-lop-arrow
+                span.rv-zone(ng-class="v.zoneType == 'RED' ? 'is-red' : 'is-green'")
+                  img(ng-src="{{v.zoneType == 'RED' ? '/images/evacZone/red_lv2.png' : '/images/evacZone/green_lv2.png'}}" alt="{{v.zoneType}}")
+                button.rv-rescue-del(type='button' ng-click='delete_victim($index)' title="{{'common.delete' | translate}}")
+                  i.fas.fa-times
 
     //- Stopping the timer: the time of the first tap is what is recorded; kept running, the timer
     //- goes on

@@ -527,6 +527,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     }
 
     $scope.victim_tmp_clear();
+    $scope.rescueOpen = false;
 
     upload_run({
       rescueOrder: $scope.victim_list
@@ -565,14 +566,29 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.stopAsked = asked;
   };
 
-  // The page behind the question stays still; Escape keeps the timer running
-  $scope.$watch('stopAsked', function (asked) {
-    document.documentElement.classList.toggle('rv-overlay-open', !!asked);
+  // Registering a rescue, on a sheet opened from the evacuation zone on the map or the rescue
+  // card; the victims picked and not taken to a zone are dropped when it closes
+  $scope.rescueOpen = false;
+  $scope.openRescue = function () {
+    playSound(sClick);
+    $scope.rescueOpen = true;
+  };
+  $scope.closeRescue = function () {
+    playSound(sClick);
+    $scope.victim_tmp = [];
+    $scope.rescueOpen = false;
+  };
+
+  // The page behind a sheet stays still; Escape closes the sheet (and keeps the timer running)
+  $scope.$watchGroup(['stopAsked', 'rescueOpen'], function (open) {
+    document.documentElement.classList.toggle('rv-overlay-open', !!(open[0] || open[1]));
   });
   document.addEventListener('keydown', function (event) {
-    if (event.key == 'Escape' && $scope.stopAsked) $scope.$apply(function () {
+    if (event.key != 'Escape') return;
+    if ($scope.stopAsked) $scope.$apply(function () {
       $scope.askStop(false);
     });
+    else if ($scope.rescueOpen) $scope.$apply($scope.closeRescue);
   });
 
   $scope.confirmStop = function () {
@@ -933,6 +949,29 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         $('#wrapTile').css('width', (tilesize + 3) * length);
       }
 
+      // The evacuation zone on the map, a button over the box around its tiles
+      var evac = $('#wrapTile tile.is-evac');
+      if (evac.length) {
+        var wrap = $('#wrapTile')[0].getBoundingClientRect();
+        var box = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
+        evac.each(function () {
+          var r = this.getBoundingClientRect();
+          box.left = Math.min(box.left, r.left);
+          box.top = Math.min(box.top, r.top);
+          box.right = Math.max(box.right, r.right);
+          box.bottom = Math.max(box.bottom, r.bottom);
+        });
+        $scope.evacBox = {
+          left: (box.left - wrap.left) + 'px',
+          top: (box.top - wrap.top) + 'px',
+          width: (box.right - box.left) + 'px',
+          height: (box.bottom - box.top) + 'px'
+        };
+      } else {
+        $scope.evacBox = null;
+      }
+      $scope.$evalAsync();
+
       if(movie){
         $('#card_area').css('height', (window.innerHeight - 130 - $('#video_area').height()));
       }else{
@@ -1123,6 +1162,11 @@ app.directive('tile', function () {
       return attrs.template == 'judge' ? '/templates/tile_judge.html' : '/templates/tile.html';
     },
     link: function ($scope, element, attrs) {
+      // A tile of the evacuation zone, for the button over it (tile_size)
+      $scope.$watch('tile', function (tile) {
+        element.toggleClass('is-evac', !!(tile && tile.tileType && /^ev\d+\.png$/.test(tile.tileType.image)));
+      });
+
       $scope.tilerotate = function (tilerot) {
         if (!tilerot) return $scope.$parent.sRotate;
         var ro = tilerot + $scope.$parent.sRotate;

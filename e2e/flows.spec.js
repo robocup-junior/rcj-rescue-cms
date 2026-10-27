@@ -112,6 +112,20 @@ test.describe('judging a line run', () => {
     expect((await sent).postDataJSON().LoPs[0]).toBe(1);
     await expect(page.locator('.rv-lop-row').first().locator('.rv-step-count')).toHaveText('1');
 
+    // A rescue is registered on its sheet, opened from the evacuation zone on the map (the seed
+    // map has none, so from the button in the map card instead): the victim, then the zone, which
+    // closes the sheet
+    const rescueSheet = page.locator('.rv-overlay', { has: page.locator('.rv-rescue-sheet') });
+    await page.locator('.rv-rescue-add').click();
+    await expect(rescueSheet).toBeVisible();
+    await rescueSheet.locator('.rv-victim-pick').first().click();
+    const rescued = page.waitForRequest((req) => req.method() === 'PUT' && 'rescueOrder' in req.postDataJSON());
+    await rescueSheet.locator('.rv-zone-pick.is-green').click();
+    expect((await rescued).postDataJSON().rescueOrder).toEqual([{ victimType: 'LIVE', zoneType: 'GREEN' }]);
+    await expect(rescueSheet).toBeHidden();
+    await expect(page.locator('.rv-rescue-add .rv-evac-count')).toHaveText('1');
+    await expect(rescueSheet.locator('.rv-rescue-item')).toHaveCount(1);
+
     // It is stopped from the time in the bar, asked twice; stopped, the time recorded is that of
     // the first tap, not of the confirmation
     const stop = page.locator('.rv-stat-stop');
