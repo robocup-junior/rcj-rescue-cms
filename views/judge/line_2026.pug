@@ -36,7 +36,7 @@ html(ng-app="ddApp")
           i.fas(ng-class="networkError ? 'fa-exclamation-triangle' : (sync > 0 ? 'fa-sync fa-spin' : 'fa-cloud')")
         span.rv-team-name {{team.name}}
       .rv-topbar-stats
-        .rv-stat
+        .rv-stat.rv-stat-score
           i.fas.fa-calculator
           span.rv-stat-value {{score}}
           span.rv-stat-unit {{'common.point' | translate}}
@@ -46,8 +46,11 @@ html(ng-app="ddApp")
         //- Running, the time is what stops it: in reach without scrolling, away from the scoring,
         //- and asked once more (the sheet below)
         button.rv-stat.rv-stat-stop(type='button' ng-if='startedTime' ng-click='askStop(true)' title="{{'line.judge.stopTimer' | translate}}")
-          i.fas.fa-stop
+          span.rv-live
           span.rv-stat-value {{time | date:'m:ss'}}
+          span.rv-stop-label
+            i.fas.fa-stop
+            | {{'line.judge.tim_stop' | translate}}
 
     //- Before the run: the team, the round and the photos, checked one by one with the team
     main.rv-page.rv-judge-check(ng-if='!checked')

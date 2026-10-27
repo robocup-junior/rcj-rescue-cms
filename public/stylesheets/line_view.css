@@ -1974,19 +1974,46 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 
 .rv-timer-actions .rv-timer-btn { min-width: 200px; }
 
-/* Running, the time in the bar is the button that stops it */
+/* Running, the time in the bar is the button that stops it: white on the red bar, with a red
+   stop label, and a glow around it a few times when the timer has just started */
 .rv-stat-stop {
   align-items: center;
+  gap: 0.55rem;
+  padding: 0.3rem 0.35rem 0.3rem 0.75rem;
   border: none;
-  background: #059669;
-  color: #fff;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
+  background: #fff;
+  color: var(--rv-text);
   cursor: pointer;
+  animation: rv-stop-call 1.4s ease-out 3;
 }
 
-.rv-stat-stop i { color: #fff; font-size: 0.8rem; }
-.rv-stat-stop:hover { background: #047857; }
+.rv-stat-stop .rv-stat-value { color: var(--rv-text); }
+.rv-stat-stop:hover { background: #fef2f2; }
 .rv-stat-stop:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+
+.rv-stop-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.rv-stat .rv-stop-label i { color: #fff; font-size: 0.7rem; }
+
+@keyframes rv-stop-call {
+  0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.9); }
+  70% { box-shadow: 0 0 0 12px rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-stat-stop { animation: none; }
+}
 
 /* The question over the page: the stop takes the time of the tap in the bar */
 .rv-stop-actions { display: flex; gap: 0.75rem; padding: 1.1rem; }
@@ -2239,6 +2266,8 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   .rv-photo-check img { height: 220px; }
   .rv-lop-row { padding: 0.6rem 0.9rem; }
   .rv-timer-actions { width: 100%; }
+  /* Room for the stop button: the judge needs no score here */
+  .is-judge .rv-stat-score { display: none; }
   /* The stop question comes up from the bottom, clear of the home bar */
   .rv-stop-actions { padding-bottom: calc(1.1rem + env(safe-area-inset-bottom)); }
   .rv-timer-actions .rv-timer-btn { flex: 1; min-width: 0; }
