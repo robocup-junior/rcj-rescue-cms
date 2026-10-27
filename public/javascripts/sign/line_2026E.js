@@ -399,9 +399,6 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         if (!victim || !victim.found) return 'none';
         return victim.identified ? 'identified' : 'found';
     };
-    $scope.nlFound = function () {
-        return nlList.filter(function (v) { return $scope.nlState(v) != 'none'; }).length;
-    };
 
     // Whether the map has an evacuation zone (run view map legend)
     $scope.hasEvacZone = function () {

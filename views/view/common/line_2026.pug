@@ -39,13 +39,12 @@ section.rv-card.rv-map#rv-items
       div(ng-repeat='r in range(width)', ng-if='sRotate==90', style='display: flex;')
         .slot(ng-repeat='c in range(length)')
           tile(template='view' tile="mtiles[r+','+ (length - c-1) +','+z]", ng-click='showElements(r,length-c-1,z)')
-      //- Over the evacuation zone (placed by placeEvacZone in line_view.js): how many victims were
-      //- rescued, and each of them in order, ringed in the colour of the zone it was taken to
+      //- Over the evacuation zone (placed by placeEvacZone in line_view.js): each victim rescued, in
+      //- order, ringed in the colour of the zone it was taken to
       .rv-evac-area.is-off(ng-show='EvacuationAreaLoPIndex >= 0')
         span.rv-evac-label
           i.fas.fa-first-aid
           |  {{'line.view.rescue' | translate}}
-          span.rv-evac-count {{victim_list.length}}
         span.rv-evac-rescues(ng-if='victim_list.length')
           span.rv-evac-victim(ng-repeat='v in victim_list track by $index' ng-class="v.zoneType == 'RED' ? 'is-red' : 'is-green'")
             img(ng-src="{{v.victimType == 'LIVE' ? '/images/liveVictim.png' : '/images/deadVictim.png'}}" alt='{{v.victimType}} {{v.zoneType}}')

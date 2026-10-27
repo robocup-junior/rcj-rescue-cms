@@ -2505,16 +2505,6 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-evac-area.is-off { display: none; }
 .rv-evac-area .rv-evac-label { background: var(--rv-accent); box-shadow: 0 4px 12px var(--rv-accent-glow); }
 
-.rv-evac-count {
-  min-width: 1.6em;
-  padding: 0 0.4rem;
-  border-radius: 999px;
-  background: #fff;
-  color: var(--rv-accent-strong);
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-}
-
 /* The rescues so far, in order: each victim ringed in the colour of the zone it was taken to */
 .rv-evac-rescues {
   display: flex;
