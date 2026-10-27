@@ -158,6 +158,17 @@ publicRouter.get('/competition/:competitionId', function (req, res, next) {
   });
 });
 
+/** Whether anything of the run has been recorded: points, a tile scored, a LoP, a rescue (which
+ *  scores only as a multiplier), a victim found or the exit bonus. */
+function isRecorded(run) {
+  if (run.score > 0 || run.exitBonus) return true;
+  if ((run.LoPs || []).some((n) => n > 0)) return true;
+  if ((run.rescueOrder || []).length) return true;
+  const victims = [...((run.nl && run.nl.liveVictim) || []), ...((run.nl && run.nl.deadVictim) || [])];
+  if (victims.some((v) => v.found || v.identified)) return true;
+  return (run.tiles || []).some((tile) => (tile.scoredItems || []).some((item) => item.scored));
+}
+
 function getMaxScoreWithCache(runs, league, normalizationGroup, cache) {
   if (cache[league+normalizationGroup] != null) {
     return cache[league+normalizationGroup];
@@ -614,22 +625,9 @@ privateRouter.put('/:runid', function (req, res, next) {
           dbRun.raw_score = cal.raw_score;
           dbRun.multiplier = cal.multiplier;
 
-          if (!dbRun.started) {
-            if (dbRun.score > 0) {
-              dbRun.started = true;
-            } else {
-              if (run.tiles) {
-                scoredCheck : for (let tile of run.tiles) {
-                  for (let item of tile.scoredItems) {
-                    if (item.scored) {
-                      dbRun.started = true;
-                      break scoredCheck;
-                    }
-                  }
-                }
-              }
-            }
-          }
+          // Started once anything of the run is recorded: until then, reading the run starts it
+          // afresh for its map (initRunData.initLine), which would drop what was recorded
+          if (!dbRun.started && isRecorded(dbRun)) dbRun.started = true;
           
           dbRun.save(function (err) {
             // Saved by another request since it was read (the judge page sends one at a time, but

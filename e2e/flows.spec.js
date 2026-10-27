@@ -105,8 +105,7 @@ test.describe('judging a line run', () => {
     await expect(timerCard).toHaveCount(0);
     await expect(page.locator('.rv-map-hint')).toHaveCount(0);
 
-    // Until something on the run scores, reading it starts it afresh (initRunData.initLine), LoPs
-    // and all, so what is checked is what the page sends
+    // What the page sends is checked, since other tests save to the same run
     const sent = page.waitForRequest((req) => req.url().includes(`/api/runs/line/${ids.runs.Line}`) && req.method() === 'PUT' && 'LoPs' in req.postDataJSON());
     await page.locator('.rv-lop-row').first().locator('.rv-step.is-plus').click();
     expect((await sent).postDataJSON().LoPs[0]).toBe(1);
@@ -199,7 +198,7 @@ test.describe('judging a line entry run', () => {
     await page.locator('.rv-photo-check').nth(1).click();
     await page.locator('button[ng-click="infochecked()"]').click();
 
-    // Two live victims and a dead one. Until something on the run scores, reading it starts it
+    // Two live victims and a dead one. Until anything of the run is recorded, reading it starts it
     // afresh (initRunData.initLine), so none is found yet
     const chips = page.locator('.rv-rescue-add .rv-nl-chip');
     await expect(chips).toHaveCount(3);

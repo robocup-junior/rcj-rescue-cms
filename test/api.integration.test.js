@@ -173,4 +173,23 @@ describe('line runs', () => {
     assert.strictEqual(stored.raw_score, 15);
     assert.strictEqual(stored.score, Math.round(15 * 1.4 ** 3));
   });
+
+  // Read before anything is recorded, a run is started afresh for its map (initRunData.initLine);
+  // what scores no points yet is recorded all the same, and is read back
+  for (const [what, league, data, kept] of [
+    ['a rescue', 'Line', { rescueOrder: [{ victimType: 'LIVE', zoneType: 'GREEN' }] }, (r) => r.rescueOrder.length == 1],
+    ['a LoP', 'Line', { LoPs: [2] }, (r) => r.LoPs[0] == 2],
+    ['the exit bonus', 'Line', { exitBonus: true }, (r) => r.exitBonus],
+    ['a victim found', 'LineNL', { nl: { liveVictim: [{ found: true, identified: false }, { found: false, identified: false }], deadVictim: [{ found: false, identified: false }] } }, (r) => r.nl.liveVictim[0].found],
+  ]) {
+    test(`${what} without points is still there when the run is read again`, async () => {
+      lineApi.setUser(admin);
+      const run = await createLineRun(league);
+      assert.strictEqual((await lineApi.request('PUT', `/api/runs/line/${run}`, data)).status, 200);
+      const read = await lineApi.request('GET', `/api/runs/line/${run}`);
+      assert.strictEqual(read.status, 200);
+      const body = await read.json();
+      assert.ok(kept(body), JSON.stringify(body));
+    });
+  }
 });
