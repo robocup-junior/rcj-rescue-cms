@@ -494,142 +494,104 @@ privateRouter.put('/:runid', function (req, res, next) {
   delete run.field;
   delete run.score;
 
-  lineRun
-    .findById(id)
-    // .select("-_id -__v -competition -round -team -field -score")
-    .populate([
-      {
-        path: 'map',
-        populate: {
-          select: 'indexCount, victims',
-          path: 'tiles.tileType',
-        }
-      }
-    ])
-    .populate(['competition', 'team'])
-    .exec(function (err, dbRun) {
-      if (err) {
-        logger.error(err);
-        res.status(400).send({
-          msg: 'Could not get run',
-          err: err.message,
-        });
-      } else if (dbRun) {
-        if (
-          !auth.authCompetition(
-            req.user,
-            dbRun.competition._id,
-            ACCESSLEVELS.JUDGE
-          )
-        ) {
-          return res.status(401).send({
-            msg: 'You have no authority to access this api!!',
-          });
-        }
-        if (run.tiles != null && run.tiles.constructor === Object) {
-          // Handle dict as "sparse" array
-          const { tiles } = run;
-          run.tiles = [];
-          Object.keys(tiles).forEach(function (key) {
-            if (!isNaN(key)) {
-              run.tiles[key] = tiles[key];
-            }
-          });
-        }
-
-        if (run.LoPs != null && run.LoPs.length != dbRun.LoPs.length) {
-          dbRun.LoPs.length = run.LoPs.length;
-        }
-
-        if (run.rescueOrder != null) {
-          dbRun.rescueOrder = run.rescueOrder;
-        }
-
-        if (run.nl != null) {
-          if (run.nl.liveVictim != null) {
-            dbRun.nl.liveVictim = run.nl.liveVictim ;
-          }
-
-          if (run.nl.deadVictim != null) {
-            dbRun.nl.deadVictim = run.nl.deadVictim ;
+  // Read, change and save the run, again if another request saved it in between
+  const update = function (retries) {
+    lineRun
+      .findById(id)
+      // .select("-_id -__v -competition -round -team -field -score")
+      .populate([
+        {
+          path: 'map',
+          populate: {
+            select: 'indexCount, victims',
+            path: 'tiles.tileType',
           }
         }
-
-        if (run.status) {
-          if (dbRun.status > run.status && dbRun.status != 6) delete run.status;
-        }
-
-        const prevStatus = dbRun.status;
-
-        // Recursively updates properties in "dbObj" from "obj"
-        const copyProperties = function (obj, dbObj) {
-          for (const prop in obj) {
-            if (
-              obj.constructor == Array ||
-              (obj.hasOwnProperty(prop) &&
-                (dbObj.hasOwnProperty(prop) ||
-                  (dbObj.get !== undefined && dbObj.get(prop) !== undefined)))
-            ) {
-              // Mongoose objects don't have hasOwnProperty
-              if (typeof obj[prop] === 'object' && dbObj[prop] != null) {
-                // Catches object and array
-                copyProperties(obj[prop], dbObj[prop]);
-
-                if (dbObj.markModified !== undefined) {
-                  dbObj.markModified(prop);
-                }
-              } else if (obj[prop] !== undefined) {
-                // logger.debug("copy " + prop)
-                dbObj[prop] = obj[prop];
-              }
-            } else {
-              return new Error(`Illegal key: ${prop}`);
-            }
-          }
-        };
-
-        err = copyProperties(run, dbRun);
-
+      ])
+      .populate(['competition', 'team'])
+      .exec(function (err, dbRun) {
         if (err) {
           logger.error(err);
-          return res.status(400).send({
+          res.status(400).send({
+            msg: 'Could not get run',
             err: err.message,
-            msg: 'Could not save run',
           });
-        }
-
-        if (prevStatus != dbRun.status) statusUpdate = 1;
-
-        const cal = scoreCalculator.calculateScore(dbRun);
-        if (!cal) {
-          logger.error('Value Error');
-          return res.status(202).send({
-            msg: 'Try again later',
-          });
-        }
-
-        dbRun.score = cal.score;
-        dbRun.raw_score = cal.raw_score;
-        dbRun.multiplier = cal.multiplier;
-
-        if (!dbRun.started) {
-          if (dbRun.score > 0) {
-            dbRun.started = true;
-          } else {
-            if (run.tiles) {
-              scoredCheck : for (let tile of run.tiles) {
-                for (let item of tile.scoredItems) {
-                  if (item.scored) {
-                    dbRun.started = true;
-                    break scoredCheck;
-                  }
-                }
+        } else if (dbRun) {
+          if (
+            !auth.authCompetition(
+              req.user,
+              dbRun.competition._id,
+              ACCESSLEVELS.JUDGE
+            )
+          ) {
+            return res.status(401).send({
+              msg: 'You have no authority to access this api!!',
+            });
+          }
+          if (run.tiles != null && run.tiles.constructor === Object) {
+            // Handle dict as "sparse" array
+            const { tiles } = run;
+            run.tiles = [];
+            Object.keys(tiles).forEach(function (key) {
+              if (!isNaN(key)) {
+                run.tiles[key] = tiles[key];
               }
+            });
+          }
+
+          if (run.LoPs != null && run.LoPs.length != dbRun.LoPs.length) {
+            dbRun.LoPs.length = run.LoPs.length;
+          }
+
+          if (run.rescueOrder != null) {
+            dbRun.rescueOrder = run.rescueOrder;
+          }
+
+          if (run.nl != null) {
+            if (run.nl.liveVictim != null) {
+              dbRun.nl.liveVictim = run.nl.liveVictim ;
+            }
+
+            if (run.nl.deadVictim != null) {
+              dbRun.nl.deadVictim = run.nl.deadVictim ;
             }
           }
-        }
-        
-        dbRun.save(function (err) {
+
+          if (run.status) {
+            if (dbRun.status > run.status && dbRun.status != 6) delete run.status;
+          }
+
+          const prevStatus = dbRun.status;
+
+          // Recursively updates properties in "dbObj" from "obj"
+          const copyProperties = function (obj, dbObj) {
+            for (const prop in obj) {
+              if (
+                obj.constructor == Array ||
+                (obj.hasOwnProperty(prop) &&
+                  (dbObj.hasOwnProperty(prop) ||
+                    (dbObj.get !== undefined && dbObj.get(prop) !== undefined)))
+              ) {
+                // Mongoose objects don't have hasOwnProperty
+                if (typeof obj[prop] === 'object' && dbObj[prop] != null) {
+                  // Catches object and array
+                  copyProperties(obj[prop], dbObj[prop]);
+
+                  if (dbObj.markModified !== undefined) {
+                    dbObj.markModified(prop);
+                  }
+                } else if (obj[prop] !== undefined) {
+                  // logger.debug("copy " + prop)
+                  dbObj[prop] = obj[prop];
+                }
+              } else {
+                return new Error(`Illegal key: ${prop}`);
+              }
+            }
+          };
+
+          err = copyProperties(run, dbRun);
+
           if (err) {
             logger.error(err);
             return res.status(400).send({
@@ -637,30 +599,78 @@ privateRouter.put('/:runid', function (req, res, next) {
               msg: 'Could not save run',
             });
           }
-          if (socketIo !== undefined) {
-            socketIo.sockets.in('runs/line').emit('changed');
-            socketIo.sockets
-              .in(`runs/line/${dbRun.competition._id}`)
-              .emit('changed');
-            socketIo.sockets.in(`runs/${dbRun._id}`).emit('data', dbRun);
-            socketIo.sockets
-              .in(`fields/${dbRun.field}`)
-              .emit('data', { newRun: dbRun._id });
-            if (statusUpdate) {
-              socketIo.sockets
-                .in(`runs/line/${dbRun.competition._id}/status`)
-                .emit('LChanged');
+
+          if (prevStatus != dbRun.status) statusUpdate = 1;
+
+          const cal = scoreCalculator.calculateScore(dbRun);
+          if (!cal) {
+            logger.error('Value Error');
+            return res.status(202).send({
+              msg: 'Try again later',
+            });
+          }
+
+          dbRun.score = cal.score;
+          dbRun.raw_score = cal.raw_score;
+          dbRun.multiplier = cal.multiplier;
+
+          if (!dbRun.started) {
+            if (dbRun.score > 0) {
+              dbRun.started = true;
+            } else {
+              if (run.tiles) {
+                scoredCheck : for (let tile of run.tiles) {
+                  for (let item of tile.scoredItems) {
+                    if (item.scored) {
+                      dbRun.started = true;
+                      break scoredCheck;
+                    }
+                  }
+                }
+              }
             }
           }
-          return res.status(200).send({
-            msg: 'Saved run',
-            score: dbRun.score,
-            raw_score: dbRun.raw_score,
-            multiplier: dbRun.multiplier,
+          
+          dbRun.save(function (err) {
+            // Saved by another request since it was read (the judge page sends one at a time, but
+            // two devices may not): read it again and apply this one over that
+            if (err && err.name == 'VersionError' && retries > 0) {
+              // After a moment, which varies so that requests that clashed do not clash again
+              return setTimeout(update, 5 + Math.random() * 20, retries - 1);
+            }
+            if (err) {
+              logger.error(err);
+              return res.status(400).send({
+                err: err.message,
+                msg: 'Could not save run',
+              });
+            }
+            if (socketIo !== undefined) {
+              socketIo.sockets.in('runs/line').emit('changed');
+              socketIo.sockets
+                .in(`runs/line/${dbRun.competition._id}`)
+                .emit('changed');
+              socketIo.sockets.in(`runs/${dbRun._id}`).emit('data', dbRun);
+              socketIo.sockets
+                .in(`fields/${dbRun.field}`)
+                .emit('data', { newRun: dbRun._id });
+              if (statusUpdate) {
+                socketIo.sockets
+                  .in(`runs/line/${dbRun.competition._id}/status`)
+                  .emit('LChanged');
+              }
+            }
+            return res.status(200).send({
+              msg: 'Saved run',
+              score: dbRun.score,
+              raw_score: dbRun.raw_score,
+              multiplier: dbRun.multiplier,
+            });
           });
-        });
-      }
-    });
+        }
+      });
+  };
+  update(10);
 });
 
 adminRouter.get('/scoresheet2', function (req, res, next) {

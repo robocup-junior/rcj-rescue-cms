@@ -112,6 +112,15 @@ test.describe('judging a line run', () => {
     expect((await sent).postDataJSON().LoPs[0]).toBe(1);
     await expect(page.locator('.rv-lop-row').first().locator('.rv-step-count')).toHaveText('1');
 
+    // Tapped quickly, each tap is saved in turn: none is refused (the fixture fails on an error)
+    const plus = page.locator('.rv-lop-row').first().locator('.rv-step.is-plus');
+    const minus = page.locator('.rv-lop-row').first().locator('.rv-step.is-minus');
+    for (let i = 0; i < 4; i++) await plus.click();
+    for (let i = 0; i < 4; i++) await minus.click();
+    await expect(page.locator('.rv-sync')).toHaveClass(/is-saved/);
+    await expect(page.locator('.rv-alert')).toBeHidden();
+    await expect(page.locator('.rv-lop-row').first().locator('.rv-step-count')).toHaveText('1');
+
 
     // A rescue is registered on its sheet, opened from the evacuation zone on the map (the seed
     // map has none, so from the button in the map card instead): the victim, then the zone, which
@@ -143,6 +152,17 @@ test.describe('judging a line run', () => {
     expect(await page.evaluate(() => angular.element(document.body).scope().time)).toBe(stopAt);
     const finish = page.locator('#rv-finish');
     await expect(finish.locator('.rv-submit')).toBeEnabled();
+  });
+});
+
+test.describe('saving a line run', () => {
+  test.use({ user: 'judge' });
+
+  test('saves that arrive together are all made, one after the other', async ({ page }) => {
+    await open(page, `/line/judge/${ids.runs.Line}`);
+    const saves = await Promise.all([1, 2, 3, 4, 5].map((n) =>
+      page.request.put(`/api/runs/line/${ids.runs.Line}`, { data: { LoPs: [n], time: { minutes: 0, seconds: n } } })));
+    expect(saves.map((res) => res.status())).toEqual([200, 200, 200, 200, 200]);
   });
 });
 

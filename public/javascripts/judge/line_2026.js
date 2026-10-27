@@ -148,32 +148,70 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     timeout: 10000
   };
 
+  // Saving the run. Requests go one at a time, in order: what changes while one is on its way waits,
+  // merged into the next (each part with its latest value). Two at once were refused by the server
+  // (VersionError), and one overtaking another could save an older value. `done` is called once
+  // what it came with is saved; what failed is kept for the next save or the resend
+  var unsent = null;
+  var unsentDone = [];
+  var sending = false;
+
+  function save(data, done) {
+    unsent = Object.assign(unsent || {}, data);
+    if (done) unsentDone.push(done);
+    if (!sending) sendNext();
+  }
+
+  function keepUnsent(data, done) {
+    unsent = Object.assign(data, unsent || {});
+    unsentDone = done.concat(unsentDone);
+  }
+
+  function sendNext() {
+    if (!unsent) return;
+    var data = unsent;
+    var done = unsentDone;
+    unsent = null;
+    unsentDone = [];
+    sending = true;
+    $scope.sync++;
+    $http.put("/api/runs/line/" + runId, data, http_config).then(function (response) {
+      sending = false;
+      $scope.sync--;
+      // The score could not be worked out yet: again in a moment
+      if (response.status == 202) {
+        keepUnsent(data, done);
+        $timeout(sendNext, 100);
+        return;
+      }
+      $scope.score = response.data.score;
+      $scope.networkError = false;
+      done.forEach(function (f) {
+        f();
+      });
+      sendNext();
+    }, function (response) {
+      sending = false;
+      $scope.sync--;
+      if (response.status == 401) {
+        $scope.go('/home/access_denied');
+      }
+      keepUnsent(data, done);
+      $scope.networkError = true;
+    });
+  }
+
   function upload_run(data) {
     if ($scope.networkError) {
       $scope.saveEverything();
       return;
     }
-
-    $scope.sync++;
-    $http.put("/api/runs/line/" + runId, Object.assign(data, {
+    save(Object.assign(data, {
       time: {
         minutes: Math.floor($scope.time / 60000),
         seconds: Math.floor(($scope.time % 60000) / 1000)
       }
-    }), http_config).then(function (response) {
-      if(response.statusCode == 202){
-        setTimeout($scope.upload_run, 100, data);
-        return;
-      }
-      $scope.sync--;
-      $scope.score = response.data.score;
-    }, function (response) {
-      if (response.status == 401) {
-        $scope.go('/home/access_denied');
-      }
-      $scope.networkError = true;
-    });
-
+    }));
   }
 
   var date = new Date();
@@ -858,22 +896,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       minutes: $scope.minutes,
       seconds: $scope.seconds
     };
-    $scope.sync++;
-    $http.put("/api/runs/line/" + runId, run, http_config).then(function (response) {
-      if(response.statusCode == 202){
-        setTimeout($scope.saveEverything, 100);
-        return;
-      }
-      $scope.score = response.data.score;
-      $scope.networkError = false;
-      $scope.sync = 0;
-    }, function (response) {
-      console.log("Error: " + response.statusText);
-      $scope.networkError = true;
-    });
-    //console.log("Update run", run);
-
-
+    save(run);
   };
 
   $scope.confirm = function () {
@@ -895,19 +918,9 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       };
       run.status = 3;
 
-
-      $scope.sync++;
-      $http.put("/api/runs/line/" + runId, run, http_config).then(function (response) {
-        if(response.statusCode == 202){
-          setTimeout($scope.confirm, 100);
-          return;
-        }
-        $scope.score = response.data.score;
-        $scope.sync--;
+      // On to the sign page once this, after all before it, is saved
+      save(run, function () {
         $scope.go('/line/sign/' + runId + '?return=' + $scope.getParam('return'));
-      }, function (response) {
-        console.log("Error: " + response.statusText);
-        $scope.networkError = true;
       });
     }
   };
