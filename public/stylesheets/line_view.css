@@ -2525,58 +2525,48 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-finish-row { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
 .rv-finish-row .rv-submit { flex: 1 1 14rem; width: auto; min-height: 60px; }
 
-/* m : ss as one clock in one frame, between the arrows of its parts, quieter than the digits */
-.rv-time-edit {
-  display: flex;
-  flex: none;
-  align-items: center;
-  gap: 0.15rem;
-  margin: 0 auto;
-  padding: 0.35rem;
-  border: 2px solid var(--rv-border);
-  border-radius: 16px;
-  background: #fff;
-}
-
-.rv-time-edit:focus-within { border-color: var(--rv-accent); box-shadow: 0 0 0 3px var(--rv-focus); }
-.rv-time-edit.is-locked { background: #f8fafc; }
-.rv-time-field { display: flex; align-items: center; gap: 0.15rem; }
+/* m:ss as a clock, large, with plain arrows above and below each part (a time picker) */
+.rv-time-edit { display: flex; flex: none; align-items: center; margin: 0 auto; }
+.rv-time-field { display: flex; flex-direction: column; align-items: center; }
 
 .rv-time-input {
-  width: 3.3rem;
-  height: 64px;
+  /* As wide as two digits (ch), so none is cut */
+  width: 2.4ch;
+  height: 3.25rem;
   padding: 0;
   border: none;
+  border-bottom: 2px dashed transparent;
   background: transparent;
   color: var(--rv-text);
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: 800;
+  line-height: 1;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
 
-.rv-time-input:focus { outline: none; }
+/* One digit of minutes (8:00) as wide as one, close to the colon */
+.rv-time-input.is-one { width: 1.3ch; }
+.rv-time-input:hover:not(:disabled) { border-bottom-color: var(--rv-border); }
+.rv-time-input:focus { outline: none; border-bottom: 2px solid var(--rv-accent); }
 .rv-time-input:disabled { color: var(--rv-muted); }
-.rv-time-steps { display: flex; flex-direction: column; gap: 2px; }
-/* The minutes' arrows on the left, the seconds' on the right: the digits keep together, 8:00 */
-.rv-time-field:first-child .rv-time-steps { order: -1; }
-.rv-time-field:first-child .rv-time-input { text-align: right; }
-.rv-time-field:last-child .rv-time-input { text-align: left; }
 
 .rv-time-step {
-  width: 34px;
-  height: 31px;
+  width: 100%;
+  min-width: 36px;
+  height: 36px;
   border: none;
-  border-radius: 8px;
-  background: #f1f5f9;
-  color: #64748b;
-  font-size: 0.75rem;
+  border-radius: 10px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 1rem;
   cursor: pointer;
 }
 
-.rv-time-step:hover:not(:disabled) { background: #e2e8f0; color: var(--rv-text); }
-.rv-time-step:disabled { opacity: 0.35; cursor: default; }
-.rv-time-colon { padding-bottom: 0.3rem; font-size: 2.25rem; font-weight: 800; color: var(--rv-text); }
+.rv-time-step:hover:not(:disabled) { background: #f1f5f9; color: var(--rv-text); }
+.rv-time-step:active:not(:disabled) { background: #e2e8f0; }
+.rv-time-step:disabled { visibility: hidden; }
+.rv-time-colon { padding: 0 0 0.4rem; font-size: 2.75rem; font-weight: 800; color: var(--rv-text); }
 
 @media (max-width: 575.98px) {
   /* The label over the value */
