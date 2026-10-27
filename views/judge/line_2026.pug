@@ -40,8 +40,13 @@ html(ng-app="ddApp")
           i.fas.fa-calculator
           span.rv-stat-value {{score}}
           span.rv-stat-unit {{'common.point' | translate}}
-        .rv-stat(ng-class="{'is-running': startedTime}")
+        .rv-stat(ng-if='!startedTime')
           i.fas.fa-stopwatch
+          span.rv-stat-value {{time | date:'m:ss'}}
+        //- Running, the time is what stops it: in reach without scrolling, away from the scoring,
+        //- and asked once more (the sheet below)
+        button.rv-stat.rv-stat-stop(type='button' ng-if='startedTime' ng-click='askStop(true)' title="{{'line.judge.stopTimer' | translate}}")
+          i.fas.fa-stop
           span.rv-stat-value {{time | date:'m:ss'}}
 
     //- Before the run: the team, the round and the photos, checked one by one with the team
@@ -115,8 +120,8 @@ html(ng-app="ddApp")
           i.fas.fa-redo
           |  {{'line.judge.reSend' | translate}}
 
-      //- The timer is started here, and gone from here while it runs (the bar shows the time; it
-      //- is stopped at the end of the page); stopped, it can be started again or reset
+      //- The timer is started here, and gone from here while it runs (the time in the bar stops
+      //- it); stopped, it can be started again or reset
       section.rv-card.rv-timer-card(ng-if='!startedTime')
         .rv-timer-display
           i.fas.fa-stopwatch
@@ -266,34 +271,12 @@ html(ng-app="ddApp")
                     i.fas.fa-hand-pointer
                     |  {{'line.judge.tapToggle' | translate}}
 
-      //- The end: the timer stopped (asked twice), the time as the referee timed it, then on to the
-      //- sign page
+      //- The end: the time as the referee timed it, then on to the sign page
       section.rv-card#rv-finish
         .rv-card-header
           i.fas.fa-flag-checkered
           | {{'line.judge.finish' | translate}}
         .rv-card-body
-          .rv-stop(ng-if='startedTime')
-            button.rv-stop-btn(type='button' ng-if='!stopAsked' ng-click='askStop(true)')
-              i.fas.fa-stop
-              span {{'line.judge.stopTimer' | translate}}
-              span.rv-stop-time {{time | date:'m:ss'}}
-            //- The time of the first tap is what is recorded; kept running, the timer goes on
-            .rv-stop-confirm(ng-if='stopAsked' role='alertdialog')
-              p
-                i.fas.fa-exclamation-triangle
-                |  {{'line.judge.stopConfirm' | translate}}
-              .rv-stop-actions
-                button.rv-stop-keep(type='button' ng-click='askStop(false)')
-                  span.rv-stop-choice {{'line.judge.keepRunning' | translate}}
-                  span.rv-stop-clock
-                    span.rv-live
-                    | {{time | date:'m:ss'}}
-                button.rv-stop-now(type='button' ng-click='confirmStop()')
-                  span.rv-stop-choice
-                    i.fas.fa-stop
-                    |  {{'line.judge.stopAt' | translate:{t: (stopAt | date:'m:ss')} }}
-                  span.rv-stop-caption {{'line.judge.recordedTime' | translate}}
           .rv-finish-label
             i.fas.fa-stopwatch
             |  {{'line.judge.adjust' | translate}}
@@ -307,5 +290,24 @@ html(ng-app="ddApp")
           button.rv-submit(type='button' ng-click='confirm()' ng-disabled='startedTime || networkError' ng-class="{'is-ready': !startedTime && !networkError}")
             i.fas.fa-arrow-right
             | {{'line.judge.toSign' | translate}}
+
+    //- Stopping the timer: the time of the first tap is what is recorded; kept running, the timer
+    //- goes on
+    .rv-overlay.is-send(ng-cloak ng-show='stopAsked' role='alertdialog' aria-modal='true' aria-labelledby='rv-stop-title')
+      .rv-send-sheet
+        .rv-pad-head
+          i.fas.fa-stopwatch
+          span#rv-stop-title {{'line.judge.stopConfirm' | translate}}
+        .rv-stop-actions
+          button.rv-stop-keep(type='button' ng-click='askStop(false)')
+            span.rv-stop-choice {{'line.judge.keepRunning' | translate}}
+            span.rv-stop-clock
+              span.rv-live
+              | {{time | date:'m:ss'}}
+          button.rv-stop-now(type='button' ng-click='confirmStop()')
+            span.rv-stop-choice
+              i.fas.fa-stop
+              |  {{'line.judge.stopAt' | translate:{t: (stopAt | date:'m:ss')} }}
+            span.rv-stop-caption {{'line.judge.recordedTime' | translate}}
 
     script(src="/javascripts/line_view.js?v=" + assetVersion)

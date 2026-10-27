@@ -1955,8 +1955,7 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-timer-display > i { color: var(--rv-accent); font-size: 1.4rem; }
 .rv-timer-time { font-size: 2.25rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
 
-.rv-timer-actions,
-.rv-stop-actions { display: flex; gap: 0.75rem; }
+.rv-timer-actions { display: flex; gap: 0.75rem; }
 
 .rv-timer-reset {
   display: inline-flex;
@@ -1974,47 +1973,23 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 }
 
 .rv-timer-actions .rv-timer-btn { min-width: 200px; }
-.rv-stat.is-running { background: #059669; }
-.rv-stat.is-running i { color: #fff; }
 
-/* Stopping the timer, at the end of the run: a red button with the running time, then a question */
-.rv-stop-btn {
-  display: flex;
+/* Running, the time in the bar is the button that stops it */
+.rv-stat-stop {
   align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
-  width: 100%;
-  min-height: 64px;
   border: none;
-  border-radius: 14px;
-  background: #dc2626;
+  background: #059669;
   color: #fff;
-  font-size: 1.2rem;
-  font-weight: 800;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.5);
   cursor: pointer;
-  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.3);
 }
 
-.rv-stop-btn:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
+.rv-stat-stop i { color: #fff; font-size: 0.8rem; }
+.rv-stat-stop:hover { background: #047857; }
+.rv-stat-stop:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
 
-.rv-stop-time {
-  padding: 0.1rem 0.6rem;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.2);
-  font-variant-numeric: tabular-nums;
-}
-
-.rv-stop-confirm {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  padding: 1rem;
-  border: 2px solid #fca5a5;
-  border-radius: 14px;
-  background: var(--rv-ng-soft);
-}
-
-.rv-stop-confirm p { margin: 0; color: #991b1b; font-weight: 700; }
+/* The question over the page: the stop takes the time of the tap in the bar */
+.rv-stop-actions { display: flex; gap: 0.75rem; padding: 1.1rem; }
 
 /* The two answers: going on, with the clock still running, or stopping at the time of the first
    tap, which stays as it was */
@@ -2264,5 +2239,7 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   .rv-photo-check img { height: 220px; }
   .rv-lop-row { padding: 0.6rem 0.9rem; }
   .rv-timer-actions { width: 100%; }
+  /* The stop question comes up from the bottom, clear of the home bar */
+  .rv-stop-actions { padding-bottom: calc(1.1rem + env(safe-area-inset-bottom)); }
   .rv-timer-actions .rv-timer-btn { flex: 1; min-width: 0; }
 }

@@ -112,18 +112,20 @@ test.describe('judging a line run', () => {
     expect((await sent).postDataJSON().LoPs[0]).toBe(1);
     await expect(page.locator('.rv-lop-row').first().locator('.rv-step-count')).toHaveText('1');
 
-    // It is stopped at the end of the page, asked twice
-    const finish = page.locator('#rv-finish');
-    await finish.locator('.rv-stop-btn').click();
-    await finish.getByRole('button', { name: 'Keep running' }).click();
+    // It is stopped from the time in the bar, asked twice; stopped, the time recorded is that of
+    // the first tap, not of the confirmation
+    const stop = page.locator('.rv-stat-stop');
+    await stop.click();
+    await page.getByRole('button', { name: 'Keep running' }).click();
     await expect(timerCard).toHaveCount(0);
-    // Stopped, the time recorded is that of the first tap, not of the confirmation
-    await finish.locator('.rv-stop-btn').click();
+    await stop.click();
     const stopAt = await page.evaluate(() => angular.element(document.body).scope().stopAt);
     await page.waitForTimeout(1100);
-    await finish.locator('.rv-stop-now').click();
+    await page.locator('.rv-stop-now').click();
     await expect(timerCard).toBeVisible();
+    await expect(stop).toHaveCount(0);
     expect(await page.evaluate(() => angular.element(document.body).scope().time)).toBe(stopAt);
+    const finish = page.locator('#rv-finish');
     await expect(finish.locator('.rv-submit')).toBeEnabled();
   });
 });

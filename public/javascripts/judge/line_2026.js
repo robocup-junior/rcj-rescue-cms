@@ -565,6 +565,16 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.stopAsked = asked;
   };
 
+  // The page behind the question stays still; Escape keeps the timer running
+  $scope.$watch('stopAsked', function (asked) {
+    document.documentElement.classList.toggle('rv-overlay-open', !!asked);
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key == 'Escape' && $scope.stopAsked) $scope.$apply(function () {
+      $scope.askStop(false);
+    });
+  });
+
   $scope.confirmStop = function () {
     playSound(sClick);
     $scope.stopAsked = false;
