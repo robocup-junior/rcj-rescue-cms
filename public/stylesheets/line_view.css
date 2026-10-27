@@ -1336,7 +1336,7 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 }
 
 /* The same on the judge page (line_judge_modal_passes.html): a larger map, whose arrows are buttons
-   over the neighbours the robot left to, and a list of passes to tap, without points */
+   over the neighbours the robot left to, and a list of passes to tap, each cleared or not */
 .rvm-judge .rvm-body { grid-template-columns: 260px minmax(0, 1fr); }
 
 .rvm-dirs {
@@ -1384,7 +1384,8 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rvm-judge .rvm-pass.is-undone { border-left-color: #94a3b8; }
 
 .rvm-judge .rvm-pass-head { min-height: 52px; background: #fff; }
-.rvm-pass-items { flex: 1; min-width: 0; font-size: 0.9rem; font-weight: 700; }
+.rvm-pass-items { flex: 1; min-width: 0; font-size: 0.95rem; font-weight: 700; color: var(--rv-muted); }
+.rvm-pass.is-done .rvm-pass-items { color: #047857; }
 .rvm-pass-state { font-size: 1.5rem; color: #cbd5e1; }
 .rvm-pass.is-done .rvm-pass-state { color: var(--rv-ok); }
 .rvm-pass.is-halfdone .rvm-pass-state { color: #d97706; }

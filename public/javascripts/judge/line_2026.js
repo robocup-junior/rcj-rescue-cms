@@ -1053,13 +1053,8 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$timeout', 
   }
 
   // For the passes in the run pages' design (line_judge_modal_passes.html): the screen direction
-  // (0 top, 90 right, ...) the robot left the tile by on each pass, the passes leaving through each
-  // neighbour of the 3x3 grid (1 top, 3 left, 5 right, 7 bottom) and the names of the items
-  var ITEM_NAMES = {
-    gap: 'line.judge.js.gap', intersection: 'line.judge.js.intersection', obstacle: 'line.judge.js.obstacle',
-    speedbump: 'line.judge.js.bump', ramp: 'line.judge.js.ramp', seesaw: 'line.view.seesaw',
-    checkpoint: 'line.view.checkpoint'
-  };
+  // (0 top, 90 right, ...) the robot left the tile by on each pass, and the passes leaving through
+  // each neighbour of the 3x3 grid (1 top, 3 left, 5 right, 7 bottom)
   $scope.passDir = (mtile.next_dir || []).map(function (dir) {
     return (dir2num(dir) + sRotate) % 360;
   });
@@ -1068,10 +1063,6 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$timeout', 
     var cell = { 0: 1, 90: 5, 180: 7, 270: 3 }[deg];
     if (cell) $scope.passesTo[cell].push(pass);
   });
-  $scope.itemName = function (item) {
-    return ITEM_NAMES[item.item];
-  };
-
   $scope.dirStatus = function (tile) {
     if (tile.scoredItems.length == 0) return;
 

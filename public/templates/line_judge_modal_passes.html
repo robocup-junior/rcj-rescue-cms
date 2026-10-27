@@ -1,7 +1,8 @@
 <!-- Judge page (views/judge/line_2026.pug): scoring a tile the robot crosses more than once, in the
-     run pages' design (line_view_modal_passes.html) without the points. Each pass is scored by
-     tapping its arrow on the side the robot left by, or its row in the list; it shows done (green)
-     or not (grey), and the sheet closes a moment after. -->
+     run pages' design (line_view_modal_passes.html). A tile is cleared on each pass as a whole, so
+     only whether each pass cleared it is shown, not its items or points. Each pass is scored by
+     tapping its arrow on the side the robot left by, or its row in the list; it shows cleared
+     (green) or not (grey), and the sheet closes a moment after. -->
 <div class="rvm rvm-judge">
   <div class="rvm-header">
     <h5 class="rvm-title">{{'line.judge.m_score' | translate}}</h5>
@@ -28,9 +29,7 @@
       <li class="rvm-pass" ng-repeat="idx in mtile.index track by $index" ng-init="stile = stiles[idx]" ng-class="'is-' + dirStatus(stile)" ng-click="toggle_scored(idx)" ng-keydown="$event.key == 'Enter' && toggle_scored(idx)" role="button" tabindex="0">
         <div class="rvm-pass-head">
           <span class="rvm-exit" ng-class="'is-' + dirStatus(stile)">{{$index + 1}}<i class="fas fa-arrow-up" ng-if="passDir[$index] != null" ng-style="{transform: 'rotate(' + passDir[$index] + 'deg)'}"></i></span>
-          <span class="rvm-pass-items">
-            <span ng-repeat="item in stile.scoredItems" ng-if="itemName(item)">{{itemName(item) | translate}}<span class="rvm-item-count" ng-if="item.count > 1"> ×{{item.count}}</span>{{$last ? '' : ' · '}}</span>
-          </span>
+          <span class="rvm-pass-items">{{(dirStatus(stile) == 'done' ? 'line.judge.passDone' : 'line.judge.passNotDone') | translate}}</span>
           <i class="fas rvm-pass-state" ng-class="dirStatus(stile) == 'done' ? 'fa-check-circle' : (dirStatus(stile) == 'halfdone' ? 'fa-adjust' : 'fa-times-circle')"></i>
         </div>
       </li>

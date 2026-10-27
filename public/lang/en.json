@@ -450,6 +450,8 @@
             "keepRunning": "Keep running",
             "stopAt": "Stop at {{t}}",
             "recordedTime": "Time to record",
+            "passDone": "Cleared",
+            "passNotDone": "Not cleared",
             "close": "Close",
             "js": {
                 "score_element": "Place checkpoint markers on tiles without scoring elements (rule 3.3.5)",

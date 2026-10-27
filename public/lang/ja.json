@@ -450,6 +450,8 @@
             "keepRunning": "続ける",
             "stopAt": "{{t}} で止める",
             "recordedTime": "記録されるタイム",
+            "passDone": "クリア",
+            "passNotDone": "未クリア",
             "close": "閉じる",
             "js": {
                 "score_element": "チェックポイントマーカーは，得点項目のあるタイルには設置できません． (ルール 3.3.5)",
