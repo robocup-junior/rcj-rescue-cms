@@ -33,19 +33,6 @@ const victimConstantWL = {
 app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$http','$translate', '$cookies',function ($scope, $uibModal, $log, $timeout, $http, $translate, $cookies) {
     $scope.victimConstantWL = victimConstantWL;
 
-    var txt_timeup,txt_timeup_mes;
-
-    $translate('maze.judge.js.timeup.title').then(function (val) {
-        txt_timeup = val;
-    }, function (translationId) {
-        // = translationId;
-    });
-    $translate('maze.judge.js.timeup.content').then(function (val) {
-        txt_timeup_mes = val;
-    }, function (translationId) {
-        // = translationId;
-    });
-
     $scope.runIds = runId.split(',');
     $scope.runNum = $scope.runIds.length;
     $scope.nowRun = 0;
@@ -132,28 +119,75 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         timeout: 10000
     };
 
+    // Saving the run. Requests go one at a time, in order: what changes while one is on its way
+    // waits, merged into the next (each part with its latest value). Two at once were refused by
+    // the server (VersionError), and one overtaking another could save an older value. `done` is
+    // called once what it came with is saved; what failed is kept for the next save or the resend
+    var unsent = null;
+    var unsentDone = [];
+    var sending = false;
+
+    function save(data, done) {
+        // The tiles are merged one by one, so that a tile's change does not drop another's
+        var tiles = Object.assign({}, unsent && unsent.tiles, data.tiles);
+        unsent = Object.assign(unsent || {}, data);
+        if (data.tiles) unsent.tiles = tiles;
+        if (done) unsentDone.push(done);
+        if (!sending) sendNext();
+    }
+
+    function keepUnsent(data, done) {
+        var tiles = Object.assign({}, data.tiles, unsent && unsent.tiles);
+        unsent = Object.assign(data, unsent || {});
+        if (Object.keys(tiles).length) unsent.tiles = tiles;
+        unsentDone = done.concat(unsentDone);
+    }
+
+    function sendNext() {
+        if (!unsent) return;
+        var data = unsent;
+        var done = unsentDone;
+        unsent = null;
+        unsentDone = [];
+        sending = true;
+        $scope.sync++;
+        $http.put("/api/runs/maze/" + runId, data, http_config).then(function (response) {
+            sending = false;
+            $scope.sync--;
+            // The score could not be worked out yet: again in a moment
+            if (response.status == 202) {
+                keepUnsent(data, done);
+                $timeout(sendNext, 100);
+                return;
+            }
+            $scope.score = response.data.score;
+            $scope.networkError = false;
+            done.forEach(function (f) {
+                f();
+            });
+            sendNext();
+        }, function (response) {
+            sending = false;
+            $scope.sync--;
+            if (response.status == 401) {
+                $scope.go('/home/access_denied');
+            }
+            keepUnsent(data, done);
+            $scope.networkError = true;
+        });
+    }
+
     function upload_run(data) {
         if ($scope.networkError) {
             $scope.saveEverything();
             return;
         }
-
-        $scope.sync++;
-        $http.put("/api/runs/maze/" + runId, Object.assign(data, {
+        save(Object.assign(data, {
             time: {
                 minutes: Math.floor($scope.time / 60000),
                 seconds: Math.floor(($scope.time % 60000) / 1000)
             }
-        }), http_config).then(function (response) {
-            console.log(response);
-            $scope.score = response.data.score;
-            $scope.sync--;
-        }, function (response) {
-            if (response.status == 401) {
-                $scope.go('/home/access_denied');
-            }
-            $scope.networkError = true;
-        });
+        }));
     }
 
     $scope.lopProcessing = false;
@@ -214,9 +248,25 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             if (response.status == 401) {
                 $scope.go('/home/access_denied');
             }
+            pageLoaded();
         });
     }
-    
+
+    // Takes the loading screen away once the map is drawn (line_view.js)
+    function pageLoaded() {
+        if (typeof revealRunPage === 'function') revealRunPage($scope.tile_size);
+    }
+
+    // The map as the view and sign pages draw it, for the floor and rotation shown (line_view.js)
+    function drawMap() {
+        if (typeof buildMazeMap === 'function' && $scope.width)
+            $scope.mazeView = buildMazeMap($scope.cells, $scope.width, $scope.length, $scope.z, $scope.sRotate);
+    }
+
+    $scope.victimImage = function (cell, side) {
+        return mazeVictimImage(cell, side);
+    };
+
 
     $scope.randomDice = function(){
         playSound(sClick);
@@ -306,10 +356,12 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 if (response.data.cells[i].tile.victims.left == 'Cognitive' && !response.data.cells[i].tile.cognitiveTargets.left) response.data.cells[i].tile.cognitiveTargets.left = { rings: { ring1: 'Y', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' } };
             }
 
-            $timeout($scope.tile_size, 100);
+            drawMap();
+            $timeout(pageLoaded, 0);
 
         }, function (response) {
             console.log("Error: " + response.statusText);
+            pageLoaded();
         });
     }
 
@@ -361,6 +413,28 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         }
         return arr;
     }
+
+    // Setting the time by hand (the time of the run): in seconds, kept from 0 to the run's duration,
+    // shown as minutes and seconds and used when the timer starts again
+    function setTime(total) {
+        total = Math.max(0, Math.min($scope.duration || 480, total));
+        $scope.minutes = Math.floor(total / 60);
+        $scope.seconds = total % 60;
+        $scope.time = total * 1000;
+        prevTime = $scope.time;
+    }
+
+    $scope.stepTime = function (seconds) {
+        if ($scope.startedTime) return;
+        playSound(sClick);
+        setTime(($scope.minutes || 0) * 60 + ($scope.seconds || 0) + seconds);
+    };
+
+    // After typing: numbers only, seconds over 59 carried into the minutes
+    $scope.tidyTime = function () {
+        if ($scope.startedTime) return;
+        setTime((parseInt($scope.minutes, 10) || 0) * 60 + (parseInt($scope.seconds, 10) || 0));
+    };
 
     $scope.timeReset = function () {
         playSound(sClick);
@@ -420,6 +494,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.changeFloor = function (z){
         playSound(sClick);
         $scope.z = z;
+        drawMap();
     }
 
     $scope.tileRot = function (r){
@@ -427,7 +502,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         $scope.sRotate += r;
         if($scope.sRotate >= 360)$scope.sRotate -= 360;
         else if($scope.sRotate < 0) $scope.sRotate+= 360;
-        $timeout($scope.tile_size, 50);
+        drawMap();
 
         $cookies.put('sRotate', $scope.sRotate, {
           path: '/'
@@ -454,12 +529,53 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 playSound(sTimeup);
                 $scope.startedTime = !$scope.startedTime;
                 $scope.time = $scope.duration*1000;
+                prevTime = $scope.time;
                 $scope.saveEverything();
-                swal(txt_timeup, '', "info");
+                // The stop asked is moot: the run is over, which the sheet says
+                $scope.stopAsked = false;
+                $scope.timeUp = true;
             }
             $timeout(tick, 1000);
         }
     }
+
+    // Stopping the timer is asked twice, as it runs to the end of the run. The time of the first
+    // tap is the one recorded when the stop is confirmed; kept running, the timer just goes on
+    $scope.stopAsked = false;
+    $scope.askStop = function (asked) {
+        playSound(sClick);
+        if (asked) $scope.stopAt = prevTime + (new Date().getTime() - $scope.startUnixTime);
+        $scope.stopAsked = asked;
+    };
+
+    $scope.confirmStop = function () {
+        playSound(sClick);
+        $scope.stopAsked = false;
+        $scope.startedTime = false;
+        $scope.time = $scope.stopAt;
+        prevTime = $scope.time;
+        $scope.saveEverything();
+    };
+
+    // The time of the run is up: the sheet says so, with the time recorded, and goes on to the sign
+    // page or is closed to look over the run first (the finish card goes on from there too)
+    $scope.timeUp = false;
+    $scope.closeTimeUp = function () {
+        playSound(sClick);
+        $scope.timeUp = false;
+    };
+
+    // The page behind a sheet stays still; Escape closes the sheet (and keeps the timer running)
+    $scope.$watchGroup(['stopAsked', 'timeUp'], function (open) {
+        document.documentElement.classList.toggle('rv-overlay-open', !!(open[0] || open[1]));
+    });
+    document.addEventListener('keydown', function (event) {
+        if (event.key != 'Escape') return;
+        if ($scope.timeUp) $scope.$apply($scope.closeTimeUp);
+        else if ($scope.stopAsked) $scope.$apply(function () {
+            $scope.askStop(false);
+        });
+    });
 
     $scope.toggleScoring = function(){
         playSound(sClick);
@@ -470,6 +586,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         playSound(sClick);
         // Start/stop timer
         $scope.startedTime = !$scope.startedTime;
+        $scope.stopAsked = false;
         if ($scope.startedTime) {
             // Start the timer
             $timeout(tick, 0);
@@ -838,7 +955,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             animation: true,
             templateUrl: '/templates/maze_judge_modal_2026.html',
             controller: 'ModalInstanceCtrl',
-            size: 'lm',
+            windowClass: 'rv-judge-modal',
             resolve: {
                 cell: function () {
                     return $scope.cells[x + ',' + y + ',' + z];
@@ -878,15 +995,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             seconds: $scope.seconds
         };
 
-        console.log("Update run", run);
-        $http.put("/api/runs/maze/" + runId, run, http_config).then(function (response) {
-            $scope.score = response.data.score;
-            $scope.networkError = false;
-            $scope.sync = 0;
-        }, function (response) {
-            console.log("Error: " + response.statusText);
-            $scope.networkError = true;
-        });
+        save(run);
     };
 
     $scope.confirm = function () {
@@ -905,11 +1014,9 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         run.time.seconds = $scope.seconds;
         run.status = 3;
 
-        $http.put("/api/runs/maze/" + runId, run).then(function (response) {
-            $scope.score = response.data.score;
+        // On to the sign page once this, after all before it, is saved
+        save(run, function () {
             $scope.go('/maze/sign/' + runId + '?return=' + $scope.getParam('return'));
-        }, function (response) {
-            console.log("Error: " + response.statusText);
         });
     };
 
@@ -929,8 +1036,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         run.time.seconds = $scope.seconds;
         run.status = 3;
 
-        $http.put("/api/runs/maze/" + runId, run).then(function (response) {
-            $scope.score = response.data.score;
+        // On to the next run, or done, once this, after all before it, is saved
+        save(run, function () {
             if(flag){
                 setRunId($scope.nowRun+1);
                 $(window).scrollTop(0);
@@ -944,8 +1051,6 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 window.close();
             })
             }
-        }, function (response) {
-            console.log("Error: " + response.statusText);
         });
     };
 
@@ -970,42 +1075,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         window.location = path
     }
 
-    $scope.tile_size = function () {
-        try {
-            var mapTable = $('#mapTable');
-            var mapTopLeft = $('#mapTopLeft');
-
-            // Use the content width of the map column (excludes column padding and the scrollbar)
-            let areaWidth = mapTopLeft.width();
-            let areaTopLeftY = mapTopLeft.offset().top;
-            let tableWidth = mapTable.outerWidth();
-            let tableHeight = mapTable.outerHeight();
-            if (!areaWidth || !tableWidth) throw new Error('Map is not rendered yet');
-
-            let scaleX = (areaWidth - 10) / tableWidth;
-            let scaleY = (window.innerHeight - areaTopLeftY - 10) / tableHeight;
-            // Below the md breakpoint the map column is stacked under the side panel, so fit to width only
-            let stacked = window.matchMedia('(max-width: 767.98px)').matches;
-            let scale = (stacked || scaleY <= 0) ? scaleX : Math.min(scaleX, scaleY);
-
-            // Scale from the top-left corner and center the scaled map in the column
-            $('#wrapTile').css({
-                'width': tableWidth + 'px',
-                'transform-origin': 'top left',
-                'transform': `scale(${scale})`,
-                'margin-left': Math.max(0, (areaWidth - tableWidth * scale) / 2) + 'px'
-            });
-            // The unscaled layout box of the map must not widen the page
-            let tileArea = $('.tilearea');
-            let requiredHeight = (areaTopLeftY - tileArea.offset().top) + 5 + tableHeight * scale + 10;
-            tileArea.css({
-                'height': Math.max(tableHeight * scale + areaTopLeftY - 50, requiredHeight),
-                'overflow': 'hidden'
-            });
-        } catch (e) {
-            $timeout($scope.tile_size, 500);
-        }
-      }
+    // The map scales with its card by itself (line_view.css); nothing to size
+    $scope.tile_size = function () {};
 
 var currentWidth = -1;
 
@@ -1021,6 +1092,21 @@ $(window).on('load resize', function () {
 
 }]);
 
+
+// A number shown in two digits (the seconds of the time of the run: 0:05), read back as a number
+app.directive('rvTwoDigits', function () {
+    return {
+        require: 'ngModel',
+        link: function ($scope, element, attrs, ngModel) {
+            ngModel.$formatters.push(function (value) {
+                return value == null || value === '' ? value : ('0' + value).slice(-2);
+            });
+            ngModel.$parsers.push(function (value) {
+                return value === '' ? value : parseInt(value, 10);
+            });
+        }
+    };
+});
 
 // Please note that $uibModalInstance represents a modal window (instance) dependency.
 // It is not the same as the $uibModal service used above.

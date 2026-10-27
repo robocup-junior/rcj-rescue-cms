@@ -1,6 +1,7 @@
-//- The maze map of the view and sign pages (common/maze_2026*.pug): the tiles and the walls between
-//- them, placed in % of the map by buildMazeMap() in line_view.js, so that the map scales with the
-//- card. Each tile's items turn with the map; its status and points stay upright. See line_view.css.
+//- The maze map of the view, sign and judge pages (common/maze_2026*.pug, judge/maze_2026*.pug): the
+//- tiles and the walls between them, placed in % of the map by buildMazeMap() in line_view.js, so
+//- that the map scales with the card. Each tile's items turn with the map; its status and points
+//- stay upright. See line_view.css.
 .tilearea.rv-mz-area
   .rv-mz-map(ng-if='mazeView' ng-style='mazeView.style')
     .rv-mz-tile(ng-repeat='t in mazeView.tiles track by t.key' ng-class='t.cls' ng-style='t.style' ng-click='cellClick(t.x, t.y, z, false, true)')
@@ -15,10 +16,12 @@
       img.rv-mz-mark(ng-if='startTile.x == t.x && startTile.y == t.y && startTile.z == z' src='/images/start.png' alt='Start')
       img.rv-mz-mark(ng-if='!isUndefined(t.cell.tile.changeFloorTo) && t.cell.tile.changeFloorTo != z' src='/images/elevator.png' alt='')
       span.rv-mz-frame(ng-if='tileStatus(t.x, t.y, z, true)' ng-class="'is-' + tileStatus(t.x, t.y, z, true)")
-      //- Like the Line map: what a done tile earned, else what it earned of what it could
-      span.rv-mz-points(ng-if='tileStatus(t.x, t.y, z, true)' ng-class="'is-' + tileStatus(t.x, t.y, z, true)")
-        span(ng-if="tileStatus(t.x, t.y, z, true) == 'done'") +{{tilePoint(t.x, t.y, z, true)}}
-        span(ng-if="tileStatus(t.x, t.y, z, true) != 'done'")
-          | {{tilePoint(t.x, t.y, z, true)}}
-          small /{{tileMaxPoint(t.x, t.y, z)}}
+      //- Like the Line map: what a done tile earned, else what it earned of what it could. Not on
+      //- the judge page (mazeJudge), which shows no points
+      if !mazeJudge
+        span.rv-mz-points(ng-if='tileStatus(t.x, t.y, z, true)' ng-class="'is-' + tileStatus(t.x, t.y, z, true)")
+          span(ng-if="tileStatus(t.x, t.y, z, true) == 'done'") +{{tilePoint(t.x, t.y, z, true)}}
+          span(ng-if="tileStatus(t.x, t.y, z, true) != 'done'")
+            | {{tilePoint(t.x, t.y, z, true)}}
+            small /{{tileMaxPoint(t.x, t.y, z)}}
     .rv-mz-wall(ng-repeat='w in mazeView.walls track by w.key' ng-class="'is-' + w.kind" ng-style='w.style')

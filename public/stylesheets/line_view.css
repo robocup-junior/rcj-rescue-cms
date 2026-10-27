@@ -1418,6 +1418,64 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rvm-judge .rvm-body { grid-template-columns: minmax(0, 1fr); }
 .rvm-judge .rvm-map { width: 100%; max-width: 360px; margin: 0 auto; }
 
+/* A maze tile on the judge page (maze_judge_modal_2026*.html): its items as buttons, green once
+   scored, the blue tile's visits and each victim's rescue kits counted */
+.rvm-maze .rvm-body { display: flex; flex-direction: column; align-items: stretch; gap: 0.75rem; }
+.rvm-toggles { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.5rem; }
+
+.rvm-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 52px;
+  padding: 0.4rem 0.75rem;
+  border: 2px solid var(--rv-border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--rv-text);
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.rvm-toggle img { width: 32px; height: 32px; object-fit: contain; }
+.rvm-toggle span { flex: 1; }
+.rvm-toggle i { color: #cbd5e1; font-size: 1.25rem; }
+.rvm-toggle.is-on { border-color: #059669; background: var(--rv-ok-soft); color: #047857; }
+.rvm-toggle.is-on i { color: #059669; }
+.rvm-toggle:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
+.rvm-toggle:disabled { opacity: 0.4; cursor: default; }
+
+.rvm-counter,
+.rvm-victim {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid var(--rv-border);
+  border-radius: 12px;
+}
+
+.rvm-counter.is-on,
+.rvm-victim.is-on { border-color: #059669; }
+.rvm-counter img { width: 36px; height: 36px; border-radius: 6px; object-fit: cover; }
+.rvm-counter-name { flex: 1; font-weight: 800; }
+.rvm-maze .rv-step { width: 40px; height: 40px; }
+.rvm-maze .rv-step-count { min-width: 1.75rem; font-size: 1.3rem; }
+
+.rvm-victims { display: flex; flex-direction: column; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+.rvm-victim-side { width: 1.25rem; color: var(--rv-muted); text-align: center; }
+.rvm-victim-image { width: 40px; height: 40px; object-fit: contain; }
+.rvm-victim .rvm-found { flex: 1 1 0; min-width: 0; padding: 0.4rem 0.6rem; }
+
+/* The kits: those placed of those needed, green once enough */
+.rvm-kits { display: flex; flex: 1 1 100%; align-items: center; justify-content: space-between; gap: 0.5rem; padding-left: 1.75rem; }
+.rvm-kits-name { font-size: 1.2rem; font-weight: 800; color: #b91c1c; font-variant-numeric: tabular-nums; }
+.rvm-kits-name small { color: var(--rv-muted); font-size: 0.85rem; }
+.rvm-kits.is-enough .rvm-kits-name { color: #047857; }
+
 .rvm-dirs {
   position: absolute;
   z-index: 2;
@@ -2243,7 +2301,41 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   font-weight: 600;
 }
 
-.rv-judge-map tile { cursor: pointer; }
+.rv-judge-map tile,
+.rv-judge-map .rv-mz-tile { cursor: pointer; }
+
+/* A counter with its name (the maze judge page: LoPs and misidentifications) */
+.rv-count-label { display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 800; }
+.rv-count-label i { color: var(--rv-accent); }
+
+/* The maze's pattern: the six as dice, the one picked dark; or one at random */
+.rv-pattern-random {
+  margin-left: auto;
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--rv-border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--rv-text);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.rv-pattern-picks { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.4rem; padding: 0.75rem 1rem 1rem; }
+
+.rv-pattern-pick {
+  padding: 0.25rem;
+  border: 2px solid var(--rv-border);
+  border-radius: 10px;
+  background: #fff;
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.rv-pattern-pick img { display: block; width: 100%; }
+.rv-pattern-pick.active { border-color: var(--rv-text); opacity: 1; box-shadow: 0 0 0 2px var(--rv-text); }
 
 /* LoPs: one row per section, a counter with buttons big enough for a thumb */
 .rv-lop-list { margin: 0; padding: 0; list-style: none; }

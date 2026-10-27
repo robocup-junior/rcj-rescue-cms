@@ -66,19 +66,37 @@ test.describe('judging a maze run', () => {
     await open(page, `/maze/judge/${ids.runs.Maze}`);
     await expect(page.getByText('Maze Team').first()).toBeVisible();
 
-    // Tap the four red cells to confirm the team, round, members and robot
-    await page.locator('tr[ng-click="toggleCheckTeam()"]').click();
-    await page.locator('tr[ng-click="toggleCheckRound()"]').click();
-    await page.locator('[ng-click="toggleCheckMember()"]').click();
-    await page.locator('[ng-click="toggleCheckMachine()"]').click();
+    // The team, the round, the members and the robot, each checked
+    await page.locator('.rv-check').nth(0).click();
+    await page.locator('.rv-check').nth(1).click();
+    await page.locator('.rv-photo-check').nth(0).click();
+    await page.locator('.rv-photo-check').nth(1).click();
     await page.locator('button[ng-click="infochecked()"]').click();
 
     const saved = page.waitForResponse((res) => res.url().includes(`/api/runs/maze/${ids.runs.Maze}`) && res.request().method() === 'PUT');
-    await page.locator('button[ng-click="increment()"]').first().click();
+    await page.locator('#rv-lops .rv-step.is-plus').first().click();
     expect((await saved).ok()).toBeTruthy();
+
+    // Tapped quickly, each tap is saved in turn: none is refused (the fixture fails on an error)
+    const plus = page.locator('#rv-lops .rv-step.is-plus').first();
+    const minus = page.locator('#rv-lops .rv-step.is-minus').first();
+    for (let i = 0; i < 3; i++) await plus.click();
+    for (let i = 0; i < 3; i++) await minus.click();
+    await expect(page.locator('.rv-sync')).toHaveClass(/is-saved/);
+    await expect(page.locator('.rv-alert')).toBeHidden();
 
     const run = await (await page.request.get(`/api/runs/maze/${ids.runs.Maze}`)).json();
     expect(run.LoPs).toBe(1);
+
+    // The victim on the seed map's second tile is found on the tile's sheet, saved as it closes
+    await page.locator('.rv-mz-tile:not(.is-void)').nth(1).click();
+    const sheet = page.locator('.rvm-maze');
+    await expect(sheet).toBeVisible();
+    await sheet.locator('.rvm-victim .rvm-found').first().click();
+    const tileSent = page.waitForRequest((req) => req.method() === 'PUT' && 'tiles' in req.postDataJSON());
+    await sheet.locator('.rvm-ok').click();
+    const tiles = (await tileSent).postDataJSON().tiles;
+    expect(Object.values(tiles)[0].scoredItems.victims.top).toBe(true);
   });
 });
 
@@ -228,13 +246,20 @@ test.describe('judging a line entry run', () => {
   });
 });
 
-test.describe('saving a line run', () => {
+test.describe('saving runs', () => {
   test.use({ user: 'judge' });
 
-  test('saves that arrive together are all made, one after the other', async ({ page }) => {
+  test('line saves that arrive together are all made, one after the other', async ({ page }) => {
     await open(page, `/line/judge/${ids.runs.Line}`);
     const saves = await Promise.all([1, 2, 3, 4, 5].map((n) =>
       page.request.put(`/api/runs/line/${ids.runs.Line}`, { data: { LoPs: [n], time: { minutes: 0, seconds: n } } })));
+    expect(saves.map((res) => res.status())).toEqual([200, 200, 200, 200, 200]);
+  });
+
+  test('maze saves that arrive together are all made as well', async ({ page }) => {
+    await open(page, `/maze/judge/${ids.runs.Maze}`);
+    const saves = await Promise.all([1, 2, 3, 4, 5].map((n) =>
+      page.request.put(`/api/runs/maze/${ids.runs.Maze}`, { data: { misidentification: n, tiles: { '3,1,0': { scoredItems: { victims: { top: n % 2 == 1 } } } } } })));
     expect(saves.map((res) => res.status())).toEqual([200, 200, 200, 200, 200]);
   });
 });
