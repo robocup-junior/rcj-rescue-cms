@@ -633,6 +633,8 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   background: #f97316;
   clip-path: polygon(0 0, 100% 0, 0 100%);
   color: #fff;
+  /* In the corner, whatever the rows of tiles align (the unturned map centres its rows) */
+  text-align: left;
   /* In proportion to the tile, so the number always stays inside the fold */
   font-size: 26cqw;
   font-weight: 800;
