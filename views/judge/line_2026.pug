@@ -255,23 +255,26 @@ html(ng-app="ddApp")
           i.fas.fa-flag-checkered
           | {{'line.judge.finish' | translate}}
         .rv-card-body
-          //- The time as the referee timed it, m : ss on one line, each part stepped with − and + or
-          //- typed; locked while the timer runs. Beside it, room allowing, on to the sign page
+          //- The time as the referee timed it, read as one clock, m:ss, in one frame between the arrows
+          //- of the minutes (left) and the seconds (right); typed or stepped. Locked while the timer
+          //- runs. Beside it, room allowing, on to the sign page
           .rv-finish-row
-            .rv-time-edit(title="{{'line.judge.runTime' | translate}}")
+            .rv-time-edit(title="{{'line.judge.runTime' | translate}}" ng-class="{'is-locked': startedTime}")
               .rv-time-field
-                button.rv-time-step(type='button' ng-click="stepTime(-60)" ng-disabled='startedTime' aria-label='−1 min')
-                  i.fas.fa-minus
                 input.rv-time-input(type='text' inputmode='numeric' aria-label='min' ng-model='minutes' ng-blur='tidyTime()' ng-disabled='startedTime' maxlength='2')
-                button.rv-time-step(type='button' ng-click="stepTime(60)" ng-disabled='startedTime' aria-label='+1 min')
-                  i.fas.fa-plus
+                .rv-time-steps
+                  button.rv-time-step(type='button' ng-click="stepTime(60)" ng-disabled='startedTime' aria-label='+1 min')
+                    i.fas.fa-chevron-up
+                  button.rv-time-step(type='button' ng-click="stepTime(-60)" ng-disabled='startedTime' aria-label='−1 min')
+                    i.fas.fa-chevron-down
               span.rv-time-colon :
               .rv-time-field
-                button.rv-time-step(type='button' ng-click="stepTime(-1)" ng-disabled='startedTime' aria-label='−1 sec')
-                  i.fas.fa-minus
                 input.rv-time-input(type='text' inputmode='numeric' aria-label='sec' ng-model='seconds' rv-two-digits ng-blur='tidyTime()' ng-disabled='startedTime' maxlength='2')
-                button.rv-time-step(type='button' ng-click="stepTime(1)" ng-disabled='startedTime' aria-label='+1 sec')
-                  i.fas.fa-plus
+                .rv-time-steps
+                  button.rv-time-step(type='button' ng-click="stepTime(1)" ng-disabled='startedTime' aria-label='+1 sec')
+                    i.fas.fa-chevron-up
+                  button.rv-time-step(type='button' ng-click="stepTime(-1)" ng-disabled='startedTime' aria-label='−1 sec')
+                    i.fas.fa-chevron-down
             button.rv-submit(type='button' ng-click='confirm()' ng-disabled='startedTime || networkError' ng-class="{'is-ready': !startedTime && !networkError}")
               i.fas.fa-arrow-right
               | {{'line.judge.toSign' | translate}}

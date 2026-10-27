@@ -2525,39 +2525,58 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-finish-row { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; }
 .rv-finish-row .rv-submit { flex: 1 1 14rem; width: auto; min-height: 60px; }
 
-/* m : ss on one line, each part between its − and + */
-.rv-time-edit { display: flex; flex: none; align-items: center; gap: 0.3rem; margin: 0 auto; }
-.rv-time-field { display: flex; align-items: center; gap: 0.2rem; }
-
-.rv-time-step {
-  width: 38px;
-  height: 52px;
-  border: none;
-  border-radius: 10px;
-  background: #f1f5f9;
-  color: var(--rv-text);
-  font-size: 0.8rem;
-  cursor: pointer;
+/* m : ss as one clock in one frame, between the arrows of its parts, quieter than the digits */
+.rv-time-edit {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: 0.15rem;
+  margin: 0 auto;
+  padding: 0.35rem;
+  border: 2px solid var(--rv-border);
+  border-radius: 16px;
+  background: #fff;
 }
 
-.rv-time-step:disabled { opacity: 0.35; cursor: default; }
+.rv-time-edit:focus-within { border-color: var(--rv-accent); box-shadow: 0 0 0 3px var(--rv-focus); }
+.rv-time-edit.is-locked { background: #f8fafc; }
+.rv-time-field { display: flex; align-items: center; gap: 0.15rem; }
 
 .rv-time-input {
-  width: 3.4rem;
-  height: 56px;
-  border: 2px solid var(--rv-border);
-  border-radius: 12px;
-  background: #fff;
+  width: 3.3rem;
+  height: 64px;
+  padding: 0;
+  border: none;
+  background: transparent;
   color: var(--rv-text);
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 800;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
 
-.rv-time-input:focus { outline: none; border-color: var(--rv-accent); box-shadow: 0 0 0 3px var(--rv-focus); }
-.rv-time-input:disabled { background: #f8fafc; color: var(--rv-muted); }
-.rv-time-colon { font-size: 1.75rem; font-weight: 800; color: #94a3b8; }
+.rv-time-input:focus { outline: none; }
+.rv-time-input:disabled { color: var(--rv-muted); }
+.rv-time-steps { display: flex; flex-direction: column; gap: 2px; }
+/* The minutes' arrows on the left, the seconds' on the right: the digits keep together, 8:00 */
+.rv-time-field:first-child .rv-time-steps { order: -1; }
+.rv-time-field:first-child .rv-time-input { text-align: right; }
+.rv-time-field:last-child .rv-time-input { text-align: left; }
+
+.rv-time-step {
+  width: 34px;
+  height: 31px;
+  border: none;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.rv-time-step:hover:not(:disabled) { background: #e2e8f0; color: var(--rv-text); }
+.rv-time-step:disabled { opacity: 0.35; cursor: default; }
+.rv-time-colon { padding-bottom: 0.3rem; font-size: 2.25rem; font-weight: 800; color: var(--rv-text); }
 
 @media (max-width: 575.98px) {
   /* The label over the value */
