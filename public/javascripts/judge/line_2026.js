@@ -729,7 +729,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
   $scope.open = function (x, y, z) {
     var modalInstance = $uibModal.open({
       animation: true,
-      templateUrl: '/templates/line_judge_modal.html',
+      // The judge page in the run pages' design has its own (views/judge/line_2026.pug)
+      templateUrl: document.body.classList.contains('run-view') ? '/templates/line_judge_modal_passes.html' : '/templates/line_judge_modal.html',
       controller: 'ModalInstanceCtrl',
       size: 'lm',
       resolve: {
@@ -1050,6 +1051,26 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$timeout', 
         break;
     }
   }
+
+  // For the passes in the run pages' design (line_judge_modal_passes.html): the screen direction
+  // (0 top, 90 right, ...) the robot left the tile by on each pass, the passes leaving through each
+  // neighbour of the 3x3 grid (1 top, 3 left, 5 right, 7 bottom) and the names of the items
+  var ITEM_NAMES = {
+    gap: 'line.judge.js.gap', intersection: 'line.judge.js.intersection', obstacle: 'line.judge.js.obstacle',
+    speedbump: 'line.judge.js.bump', ramp: 'line.judge.js.ramp', seesaw: 'line.view.seesaw',
+    checkpoint: 'line.view.checkpoint'
+  };
+  $scope.passDir = (mtile.next_dir || []).map(function (dir) {
+    return (dir2num(dir) + sRotate) % 360;
+  });
+  $scope.passesTo = { 1: [], 3: [], 5: [], 7: [] };
+  $scope.passDir.forEach(function (deg, pass) {
+    var cell = { 0: 1, 90: 5, 180: 7, 270: 3 }[deg];
+    if (cell) $scope.passesTo[cell].push(pass);
+  });
+  $scope.itemName = function (item) {
+    return ITEM_NAMES[item.item];
+  };
 
   $scope.dirStatus = function (tile) {
     if (tile.scoredItems.length == 0) return;

@@ -1335,6 +1335,66 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   .rvm-map { width: 220px; margin: 0 auto; }
 }
 
+/* The same on the judge page (line_judge_modal_passes.html): a larger map, whose arrows are buttons
+   over the neighbours the robot left to, and a list of passes to tap, without points */
+.rvm-judge .rvm-body { grid-template-columns: 260px minmax(0, 1fr); }
+
+.rvm-dirs {
+  position: absolute;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 33.3%;
+  height: 33.3%;
+}
+
+.rvm-dirs.side-1 { left: 33.3%; top: 0; }
+.rvm-dirs.side-7 { left: 33.3%; bottom: 0; }
+.rvm-dirs.side-3 { left: 0; top: 33.3%; }
+.rvm-dirs.side-5 { right: 0; top: 33.3%; }
+
+.rvm-dir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-width: 48px;
+  height: 40px;
+  padding: 0 0.5rem;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background: #94a3b8;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.35);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+
+.rvm-dir i { font-size: 0.85rem; }
+.rvm-dir.is-done { background: #059669; }
+.rvm-dir.is-halfdone { background: #d97706; }
+.rvm-dir:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
+/* Not scored: grey rather than red, as nothing went wrong yet */
+.rvm-judge .rvm-exit.is-undone { background: #94a3b8; }
+.rvm-judge .rvm-pass.is-undone { border-left-color: #94a3b8; }
+
+.rvm-judge .rvm-pass-head { min-height: 52px; background: #fff; }
+.rvm-pass-items { flex: 1; min-width: 0; font-size: 0.9rem; font-weight: 700; }
+.rvm-pass-state { font-size: 1.5rem; color: #cbd5e1; }
+.rvm-pass.is-done .rvm-pass-state { color: var(--rv-ok); }
+.rvm-pass.is-halfdone .rvm-pass-state { color: #d97706; }
+.rvm-judge .rvm-pass:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
+
+@media (max-width: 575.98px) {
+  .rvm-judge .rvm-body { grid-template-columns: minmax(0, 1fr); }
+  .rvm-judge .rvm-map { width: min(100%, 280px); }
+}
+
 /* ---- Comment and signatures ---- */
 .rv-note { font-size: 0.9rem; color: var(--rv-accent); }
 .rv-note-warning { color: #b45309; }

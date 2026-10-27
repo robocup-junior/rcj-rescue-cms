@@ -1,0 +1,42 @@
+<!-- Judge page (views/judge/line_2026.pug): scoring a tile the robot crosses more than once, in the
+     run pages' design (line_view_modal_passes.html) without the points. Each pass is scored by
+     tapping its arrow on the side the robot left by, or its row in the list; it shows done (green)
+     or not (grey), and the sheet closes a moment after. -->
+<div class="rvm rvm-judge">
+  <div class="rvm-header">
+    <h5 class="rvm-title">{{'line.judge.m_score' | translate}}</h5>
+    <button type="button" class="rvm-close" ng-click="ok()" aria-label="Close"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="rvm-body">
+    <div class="rvm-map">
+      <div class="rvm-grid">
+        <div class="rvm-cell" ng-repeat="t in nineTile track by $index" ng-class="{'is-center': $index == 4}">
+          <img ng-if="t.tileType.image" ng-src="/images/tiles/{{t.tileType.image}}" class="rot{{tilerotate(t.rot)}}" alt="">
+          <img ng-if="t.evacEntrance >= 0" ng-src="/images/tiles/ev-entrance.png" class="rot{{evacTapeRot(t)}}" alt="">
+          <img ng-if="t.evacExit >= 0" ng-src="/images/tiles/ev-exit.png" class="rot{{evacTapeRot(t)}}" alt="">
+        </div>
+      </div>
+      <!-- Over each neighbour the robot left to: a button for each pass that left that way -->
+      <div class="rvm-dirs" ng-repeat="(cell, passes) in passesTo" ng-if="passes.length" ng-class="'side-' + cell">
+        <button type="button" class="rvm-dir" ng-repeat="p in passes" ng-click="toggle_scored(mtile.index[p])" ng-class="'is-' + dirStatus(stiles[mtile.index[p]])">
+          <i class="fas fa-arrow-up" ng-style="{transform: 'rotate(' + passDir[p] + 'deg)'}"></i>{{p + 1}}
+        </button>
+      </div>
+    </div>
+
+    <ol class="rvm-passes">
+      <li class="rvm-pass" ng-repeat="idx in mtile.index track by $index" ng-init="stile = stiles[idx]" ng-class="'is-' + dirStatus(stile)" ng-click="toggle_scored(idx)" ng-keydown="$event.key == 'Enter' && toggle_scored(idx)" role="button" tabindex="0">
+        <div class="rvm-pass-head">
+          <span class="rvm-exit" ng-class="'is-' + dirStatus(stile)">{{$index + 1}}<i class="fas fa-arrow-up" ng-if="passDir[$index] != null" ng-style="{transform: 'rotate(' + passDir[$index] + 'deg)'}"></i></span>
+          <span class="rvm-pass-items">
+            <span ng-repeat="item in stile.scoredItems" ng-if="itemName(item)">{{itemName(item) | translate}}<span class="rvm-item-count" ng-if="item.count > 1"> ×{{item.count}}</span>{{$last ? '' : ' · '}}</span>
+          </span>
+          <i class="fas rvm-pass-state" ng-class="dirStatus(stile) == 'done' ? 'fa-check-circle' : (dirStatus(stile) == 'halfdone' ? 'fa-adjust' : 'fa-times-circle')"></i>
+        </div>
+      </li>
+    </ol>
+  </div>
+  <div class="rvm-footer">
+    <button class="rvm-ok" type="button" ng-click="ok()">OK</button>
+  </div>
+</div>
