@@ -556,10 +556,29 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
   };
 
 
+  // Stopping the timer is asked twice, as it runs to the end of the run. The time of the first
+  // tap is the one recorded when the stop is confirmed; kept running, the timer just goes on
+  $scope.stopAsked = false;
+  $scope.askStop = function (asked) {
+    playSound(sClick);
+    if (asked) $scope.stopAt = prevTime + (new Date().getTime() - $scope.startUnixTime);
+    $scope.stopAsked = asked;
+  };
+
+  $scope.confirmStop = function () {
+    playSound(sClick);
+    $scope.stopAsked = false;
+    $scope.startedTime = false;
+    $scope.time = $scope.stopAt;
+    prevTime = $scope.time;
+    $scope.saveEverything();
+  };
+
   $scope.toggleTime = function () {
     playSound(sClick);
     // Start/stop timer
     $scope.startedTime = !$scope.startedTime;
+    $scope.stopAsked = false;
     if ($scope.startedTime) {
       // Start the timer
       $timeout(tick, 0);
@@ -870,11 +889,11 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       var b = $('.tilearea');
       //console.log('コンテンツ本体：' + b.height() + '×' + b.width());
       //console.log('window：' + window.innerHeight);
-      // The map card, kept in view under the bar (its sticky top), fits above the timer, beside
-      // the side column; on narrow screens it is above the rest and fits the width only
+      // The map card, kept in view under the bar (its sticky top), fits the window beside the
+      // side column; on narrow screens it is above the rest and fits the width only
       var area = $('.tilearea');
       var mapHeight = window.matchMedia('(max-width: 991.98px)').matches ? Infinity :
-        window.innerHeight - $('.rv-dock').outerHeight() - parseFloat($('.rv-judge-map').css('top')) -
+        window.innerHeight - parseFloat($('.rv-judge-map').css('top')) -
         (area.offset().top - $('.rv-judge-map').offset().top) - (area.innerHeight() - area.height()) - 20;
       if ($scope.sRotate % 180 == 0) {
         var tilesize_w = ($('.tilearea').width() - 2 * width) / width;
@@ -1210,39 +1229,6 @@ app.directive('tile', function () {
           return "undone";
         else
           return "";
-      };
-
-      // The points of the items on the tile, scored and possible, as on the run view
-      // (sign/line_2026.js); the checkpoint is counted in its section
-      var itemPoints = { gap: 10, intersection: 10, obstacle: 20, speedbump: 10, ramp: 10, seesaw: 20 };
-
-      function sumItemPoints(tile, scoredOnly) {
-        var sum = 0;
-        if (!tile) return sum;
-        for (var i = 0; i < tile.index.length; i++) {
-          for (let item of $scope.$parent.stiles[tile.index[i]].scoredItems) {
-            if (!itemPoints[item.item] || (scoredOnly && !item.scored)) continue;
-            sum += itemPoints[item.item] * (item.item == 'gap' || item.item == 'speedbump' ? 1 : item.count);
-          }
-        }
-        return sum;
-      }
-
-      $scope.tilePoint = function (tile) {
-        return sumItemPoints(tile, true);
-      };
-
-      $scope.tileMaxPoint = function (tile) {
-        return sumItemPoints(tile, false);
-      };
-
-      // Scoring status of the items on the tile alone, for its badge
-      $scope.tileItemStatus = function (tile) {
-        if (!tile || tile.index.length == 0) return;
-        var max = $scope.tileMaxPoint(tile);
-        if (max == 0) return;
-        var points = $scope.tilePoint(tile);
-        return points == max ? 'done' : points > 0 ? 'halfdone' : 'undone';
       };
 
       $scope.rotateRamp = function (direction) {

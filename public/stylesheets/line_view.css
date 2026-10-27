@@ -1940,34 +1940,28 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   .rv-timer-btn.is-blink { animation: none; }
 }
 
-.rv-timer-time { font-size: 1.35rem; font-variant-numeric: tabular-nums; opacity: 0.9; }
-
-.rv-dock {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 60;
-  padding: 0.6rem 1.25rem calc(0.6rem + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--rv-border);
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 -4px 16px rgba(15, 23, 42, 0.08);
-}
-
-.rv-dock-inner {
+/* The timer card at the top, while the timer does not run: the time and the start. Running, the
+   bar shows the time and it is stopped at the end of the page (#rv-finish), away from the scoring */
+.rv-timer-card {
   display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  max-width: 1600px;
-  margin: 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1.5rem;
+  padding: 0.9rem 1.25rem;
 }
 
-.rv-dock .rv-timer-btn { min-width: 240px; }
+.rv-timer-display { display: flex; align-items: center; gap: 0.75rem; }
+.rv-timer-display > i { color: var(--rv-accent); font-size: 1.4rem; }
+.rv-timer-time { font-size: 2.25rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
 
-.rv-dock-reset {
+.rv-timer-actions,
+.rv-stop-actions { display: flex; gap: 0.75rem; }
+
+.rv-timer-reset {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   min-height: 56px;
   padding: 0 1.1rem;
@@ -1979,8 +1973,72 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   cursor: pointer;
 }
 
-/* Room for the timer under the end of the page */
-.rv-judge { padding-bottom: 7rem; }
+.rv-timer-actions .rv-timer-btn { min-width: 200px; }
+.rv-stat.is-running { background: #059669; }
+.rv-stat.is-running i { color: #fff; }
+
+/* Stopping the timer, at the end of the run: a red button with the running time, then a question */
+.rv-stop-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 64px;
+  border: none;
+  border-radius: 14px;
+  background: #dc2626;
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(220, 38, 38, 0.3);
+}
+
+.rv-stop-btn:focus-visible { outline: 3px solid var(--rv-focus); outline-offset: 2px; }
+
+.rv-stop-time {
+  padding: 0.1rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  font-variant-numeric: tabular-nums;
+}
+
+.rv-stop-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 2px solid #fca5a5;
+  border-radius: 14px;
+  background: var(--rv-ng-soft);
+}
+
+.rv-stop-confirm p { margin: 0; color: #991b1b; font-weight: 700; }
+
+/* The two answers: going on, with the clock still running, or stopping at the time of the first
+   tap, which stays as it was */
+.rv-stop-keep,
+.rv-stop-now {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-height: 76px;
+  padding: 0.5rem;
+  border-radius: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.rv-stop-keep { border: 1px solid var(--rv-border); background: #fff; color: var(--rv-text); }
+.rv-stop-now { border: none; background: #dc2626; color: #fff; box-shadow: 0 6px 18px rgba(220, 38, 38, 0.3); }
+.rv-stop-choice { font-size: 1.1rem; font-variant-numeric: tabular-nums; }
+.rv-stop-clock { display: inline-flex; align-items: center; gap: 0.4rem; color: #047857; font-size: 0.9rem; font-variant-numeric: tabular-nums; }
+.rv-stop-caption { font-size: 0.75rem; font-weight: 600; opacity: 0.85; }
+.rv-finish-label { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rv-muted); }
 
 .rv-alert {
   display: flex;
@@ -2023,13 +2081,12 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   margin: 0.6rem 1rem 0;
   padding: 0.5rem 0.75rem;
   border-radius: 10px;
-  background: #f8fafc;
-  color: var(--rv-muted);
+  background: #fef3c7;
+  color: #92400e;
   font-size: 0.85rem;
   font-weight: 600;
 }
 
-.rv-map-hint.is-waiting { background: #fef3c7; color: #92400e; }
 .rv-judge-map tile { cursor: pointer; }
 
 /* LoPs: one row per section, a counter with buttons big enough for a thumb */
@@ -2166,8 +2223,9 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-zone-pick.is-green { border-color: #86efac; background: #f0fdf4; }
 .rv-zone-pick img { display: block; width: 100%; max-height: 64px; object-fit: contain; }
 
-/* A rescue can be taken back: one more column for its button */
-.is-judge .rv-rescue-list { grid-template-columns: auto auto auto auto 1fr auto; }
+/* No multiplier here (the judge needs no points), but a button to take the rescue back */
+.is-judge .rv-rescue-list { grid-template-columns: auto auto auto 1fr auto; }
+.is-judge .rv-zone { justify-self: start; }
 
 .rv-rescue-del {
   width: 32px;
@@ -2205,7 +2263,6 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   .rv-check-value { font-size: 1.4rem; }
   .rv-photo-check img { height: 220px; }
   .rv-lop-row { padding: 0.6rem 0.9rem; }
-  .rv-dock { padding-left: 0.75rem; padding-right: 0.75rem; }
-  .rv-dock .rv-timer-btn { flex: 1; min-width: 0; }
-  .rv-dock-reset span { display: none; }
+  .rv-timer-actions { width: 100%; }
+  .rv-timer-actions .rv-timer-btn { flex: 1; min-width: 0; }
 }

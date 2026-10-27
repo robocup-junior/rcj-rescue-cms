@@ -85,7 +85,7 @@ test.describe('judging a maze run', () => {
 test.describe('judging a line run', () => {
   test.use({ user: 'judge' });
 
-  test('the judge checks the team, starts the timer and records a lack of progress', async ({ page }) => {
+  test('the judge checks the team, starts the timer, records a lack of progress and stops the timer', async ({ page }) => {
     await open(page, `/line/judge/${ids.runs.Line}`);
 
     // Going on takes all four checks: the team, the round, the members and the robot
@@ -97,11 +97,13 @@ test.describe('judging a line run', () => {
     await page.locator('.rv-photo-check').nth(1).click();
     await confirm.click();
 
-    // Tiles score once the timer has run; the hint says so until then
-    const timer = page.locator('.rv-dock .rv-timer-btn');
-    await expect(page.locator('.rv-map-hint')).toHaveClass(/is-waiting/);
-    await timer.click();
-    await expect(timer).toHaveClass(/is-running/);
+    // Tiles score once the timer has run; the hint says so until then. Running, the timer is gone
+    // from the top
+    const timerCard = page.locator('.rv-timer-card');
+    await expect(page.locator('.rv-map-hint')).toBeVisible();
+    await timerCard.locator('.rv-timer-btn').click();
+    await expect(timerCard).toHaveCount(0);
+    await expect(page.locator('.rv-map-hint')).toHaveCount(0);
 
     // Until something on the run scores, reading it starts it afresh (initRunData.initLine), LoPs
     // and all, so what is checked is what the page sends
@@ -109,6 +111,20 @@ test.describe('judging a line run', () => {
     await page.locator('.rv-lop-row').first().locator('.rv-step.is-plus').click();
     expect((await sent).postDataJSON().LoPs[0]).toBe(1);
     await expect(page.locator('.rv-lop-row').first().locator('.rv-step-count')).toHaveText('1');
+
+    // It is stopped at the end of the page, asked twice
+    const finish = page.locator('#rv-finish');
+    await finish.locator('.rv-stop-btn').click();
+    await finish.getByRole('button', { name: 'Keep running' }).click();
+    await expect(timerCard).toHaveCount(0);
+    // Stopped, the time recorded is that of the first tap, not of the confirmation
+    await finish.locator('.rv-stop-btn').click();
+    const stopAt = await page.evaluate(() => angular.element(document.body).scope().stopAt);
+    await page.waitForTimeout(1100);
+    await finish.locator('.rv-stop-now').click();
+    await expect(timerCard).toBeVisible();
+    expect(await page.evaluate(() => angular.element(document.body).scope().time)).toBe(stopAt);
+    await expect(finish.locator('.rv-submit')).toBeEnabled();
   });
 });
 

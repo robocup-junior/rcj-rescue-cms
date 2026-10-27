@@ -1,7 +1,7 @@
 <!-- A map tile on the judge page (views/judge/line_2026.pug), drawn like the run view's
-     (tile_view.html): the coloured frame is the status of all that is scored on the tile, its
-     checkpoint and, on the start tile, whether the team showed up; the badge has the points of its
-     items. Tapping the tile scores it. See line_view.css. -->
+     (tile_view.html) without the points: the coloured frame is the status of all that is scored on
+     the tile, its checkpoint and, on the start tile, whether the team showed up. Tapping the tile
+     scores it. See line_view.css. -->
 
 <img ng-src="/images/tiles/{{tile.tileType.image}}"  class="rot{{tilerotate(tile.rot)}} tile-image" ng-show="tile.tileType.image">
 <img ng-src="/images/tiles/ev-entrance.png"  class="rot{{evacTapeRot(tile)}} tile-image" ng-if="tile.evacEntrance>=0">
@@ -25,7 +25,4 @@
 <!-- A tile passed twice can be two checkpoints ("2&5"): the first in the top left corner, the next in the bottom left one -->
 <span class="rv-tile-cp" ng-if="checkpointNumber(tile)" ng-class="{'is-long': checkpointNumber(tile).split('&')[0].length > 1}">{{checkpointNumber(tile).split('&')[0]}}</span>
 <span class="rv-tile-cp is-second" ng-if="checkpointNumber(tile).indexOf('&') >= 0" ng-class="{'is-long': checkpointNumber(tile).split('&').slice(1).join('·').length > 1}">{{checkpointNumber(tile).split('&').slice(1).join('·')}}</span>
-<span class="rv-tile-points" ng-if="tileItemStatus(tile)" ng-class="'is-' + tileItemStatus(tile)">
-  <span ng-if="tileItemStatus(tile) == 'done'">+{{tilePoint(tile)}}</span>
-  <span ng-if="tileItemStatus(tile) != 'done'">{{tilePoint(tile)}}<small>/{{tileMaxPoint(tile)}}</small></span>
-</span>
+
