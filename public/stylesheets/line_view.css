@@ -735,20 +735,31 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rv-mz-frame.is-halfdone { border-color: #f59e0b; background: rgba(245, 158, 11, 0.14); }
 .rv-mz-frame.is-undone { border-color: #ef4444; background: rgba(239, 68, 68, 0.12); }
 
+/* In the top right corner, which the tile images leave free: a victim is drawn at the middle of
+   its side (a third of the tile wide), the start mark and the speed bump on the left. A small tile
+   (a wide map on a phone) still has room for the number only over its images */
 .rv-mz-points {
   position: absolute;
-  right: 4cqw;
-  top: 4cqw;
+  /* Clear of the walls, half of whose width (5% of a tile) lies over the tile */
+  right: 5cqw;
+  top: 5cqw;
   z-index: 2;
-  padding: 0.5cqw 7cqw;
+  padding: 0.5cqw 3.5cqw;
   border-radius: 999px;
   color: #fff;
-  font-size: 21cqw;
+  font-size: max(8px, 13.5cqw);
   font-weight: 800;
   line-height: 1.25;
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.3);
+  transition: opacity 0.15s;
+}
+
+/* Out of the way while pointing at the tile, to see all of it */
+@media (hover: hover) {
+  .rv-mz-tile:hover .rv-mz-points { opacity: 0.12; }
 }
 
 .rv-mz-points.is-done { background: #059669; }
