@@ -665,7 +665,8 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 }
 
 
-.rv-tile-points small { font-size: 0.75em; font-weight: 700; opacity: 0.85; }
+.rv-tile-points small,
+.rv-mz-points small { font-size: 0.75em; font-weight: 700; opacity: 0.85; }
 .rv-tile-points.is-done { background: #059669; }
 .rv-tile-points.is-halfdone { background: #d97706; }
 .rv-tile-points.is-undone { background: #dc2626; }

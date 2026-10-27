@@ -15,5 +15,10 @@
       img.rv-mz-mark(ng-if='startTile.x == t.x && startTile.y == t.y && startTile.z == z' src='/images/start.png' alt='Start')
       img.rv-mz-mark(ng-if='!isUndefined(t.cell.tile.changeFloorTo) && t.cell.tile.changeFloorTo != z' src='/images/elevator.png' alt='')
       span.rv-mz-frame(ng-if='tileStatus(t.x, t.y, z, true)' ng-class="'is-' + tileStatus(t.x, t.y, z, true)")
-      span.rv-mz-points(ng-if='tileStatus(t.x, t.y, z, true)' ng-class="'is-' + tileStatus(t.x, t.y, z, true)") {{tileStatus(t.x, t.y, z, true) == 'done' ? '+' : ''}}{{tilePoint(t.x, t.y, z, true)}}
+      //- Like the Line map: what a done tile earned, else what it earned of what it could
+      span.rv-mz-points(ng-if='tileStatus(t.x, t.y, z, true)' ng-class="'is-' + tileStatus(t.x, t.y, z, true)")
+        span(ng-if="tileStatus(t.x, t.y, z, true) == 'done'") +{{tilePoint(t.x, t.y, z, true)}}
+        span(ng-if="tileStatus(t.x, t.y, z, true) != 'done'")
+          | {{tilePoint(t.x, t.y, z, true)}}
+          small /{{tileMaxPoint(t.x, t.y, z)}}
     .rv-mz-wall(ng-repeat='w in mazeView.walls track by w.key' ng-class="'is-' + w.kind" ng-style='w.style')

@@ -565,8 +565,29 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
                 }
             };
         }
-        var tile = $scope.tiles[x + ',' + y + ',' + z];
+        return itemPoints(cell, $scope.tiles[x + ',' + y + ',' + z]);
+    };
 
+    // The most the items on a tile can earn: all of them scored, with as many kits as count
+    $scope.tileMaxPoint = function (x, y, z) {
+        var cell = $scope.cells[x + ',' + y + ',' + z];
+        if (!cell)
+            return 0;
+        return itemPoints(cell, {
+            scoredItems: {
+                speedbump: true,
+                checkpoint: true,
+                ramp: true,
+                steps: true,
+                blue: 1,
+                victims: { top: true, right: true, bottom: true, left: true, floor: true },
+                rescueKits: { top: 99, right: 99, bottom: 99, left: 99, floor: 99 }
+            }
+        });
+    };
+
+    // The points of the items on a tile: cell is its map cell, tile what the run scored on it
+    function itemPoints(cell, tile) {
         // Current "score" for this tile
         var current = 0;
 
@@ -652,7 +673,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             current += Math.max(0, MAX_BLUE_BONUS - tile.scoredItems.blue * BLUE_VISIT_PENALTY);
         }
         return current;
-    };
+    }
 
 
     $scope.open = function (x, y, z) {
