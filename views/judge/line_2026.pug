@@ -203,23 +203,22 @@ html(ng-app="ddApp")
               span.rv-header-total {{sum(LoPs)}} {{'common.times' | translate}}
             ol.rv-lop-list
               li.rv-lop-row(ng-repeat='cp in range(LoPs.length) track by $index' ng-class="{'is-evac': $index == EvacuationAreaLoPIndex}")
+                //- The section on one line: where it starts, the evacuation zone if it is on the
+                //- way (C1 → EZ → C2), and where it ends
                 .rv-lop-section
                   span.rv-sec.rv-sec-start(ng-if='$first')
                     i.fas.fa-play
                     | {{'line.judge.start' | translate}}
-                  span.rv-sec.rv-sec-cp(ng-if='!$first' title="{{'line.view.checkpoint' | translate}} {{$index}}")
-                    i.fas.fa-flag
-                    | {{$index}}
-                  i.fas.fa-long-arrow-alt-right.rv-lop-arrow
-                  span.rv-sec.rv-sec-cp(ng-if='!$last' title="{{'line.view.checkpoint' | translate}} {{$index + 1}}")
-                    i.fas.fa-flag
-                    | {{$index + 1}}
+                  span.rv-sec.rv-sec-cp(ng-if='!$first' title="{{'line.view.checkpoint' | translate}} {{$index}}") C{{$index}}
+                  i.fas.fa-chevron-right.rv-lop-arrow
+                  span.rv-sec.rv-sec-ez(ng-if='$index == EvacuationAreaLoPIndex' title="{{'line.view.evacuation' | translate}}")
+                    i.fas.fa-ambulance
+                    | EZ
+                  i.fas.fa-chevron-right.rv-lop-arrow(ng-if='$index == EvacuationAreaLoPIndex')
+                  span.rv-sec.rv-sec-cp(ng-if='!$last' title="{{'line.view.checkpoint' | translate}} {{$index + 1}}") C{{$index + 1}}
                   span.rv-sec.rv-sec-exit(ng-if='$last')
                     i.fas.fa-flag-checkered
                     | {{'line.view.goal' | translate}}
-                  span.rv-sec.rv-sec-evac(ng-if='$index == EvacuationAreaLoPIndex' title="{{'line.view.evacuation' | translate}}")
-                    i.fas.fa-ambulance
-                    | {{'line.view.evacuationShort' | translate}}
                 .rv-stepper
                   button.rv-step.is-minus(type='button' ng-click='decrement($index,$last)' ng-disabled='!LoPs[$index]' title='−1')
                     i.fas.fa-minus

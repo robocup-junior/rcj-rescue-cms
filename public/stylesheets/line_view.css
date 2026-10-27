@@ -2184,7 +2184,13 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 
 .rv-lop-row:last-child { border-bottom: none; }
 .rv-lop-row.is-evac { background: #fff5f5; }
-.rv-lop-section { display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem; min-width: 0; }
+.rv-lop-section { display: flex; align-items: center; gap: 0.3rem; min-width: 0; }
+/* Chips as wide as their label (C1, EZ, Start, Goal), so a section fits on one line */
+.rv-lop-section .rv-sec { width: auto; min-width: 2.6rem; height: 2rem; padding: 0 0.6rem; font-size: 0.9rem; }
+.rv-lop-section .rv-sec-start,
+.rv-lop-section .rv-sec-exit { font-size: 0.8rem; }
+.rv-lop-section .rv-lop-arrow { font-size: 0.7rem; color: #cbd5e1; }
+.rv-sec-ez { background: #dc2626; color: #fff; }
 
 .rv-stepper { display: flex; flex: none; align-items: center; gap: 0.35rem; }
 
@@ -2458,7 +2464,13 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   .rv-check-mark { grid-row: span 2; }
   .rv-check-value { font-size: 1.4rem; }
   .rv-photo-check img { height: 220px; }
-  .rv-lop-row { padding: 0.6rem 0.9rem; }
+  .rv-lop-row { gap: 0.5rem; padding: 0.6rem 0.75rem; }
+  /* A section with the evacuation zone (C1 > EZ > C2) still on one line */
+  .rv-lop-section { gap: 0.2rem; }
+  .rv-lop-section .rv-sec { min-width: 2.3rem; padding: 0 0.45rem; }
+  .rv-sec-ez i { display: none; }
+  .rv-step { width: 42px; height: 42px; }
+  .rv-step-count { min-width: 1.8rem; font-size: 1.4rem; }
   .rv-timer-actions { width: 100%; }
   /* Room for the stop button: the judge needs no score here */
   .is-judge .rv-stat-score { display: none; }
