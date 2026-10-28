@@ -357,3 +357,49 @@ test.describe('a maze map made in the map editor', () => {
     expect((await (await page.request.get(`/api/runs/maze/${runId}`)).json()).score).toBe(5 + 10 + 10);
   });
 });
+
+test('a simulation run, judged, signed and sent', async ({ page, context, request }) => {
+  const runId = await newRun(request, 'simulation', 'Erebus');
+  const viewer = await context.newPage();
+  await open(viewer, `/simulation/view/${runId}`);
+
+  await open(page, `/simulation/judge/${runId}`);
+  await page.locator('tr[ng-click="toggleCheckTeam()"]').click();
+  await page.locator('tr[ng-click="toggleCheckRound()"]').click();
+  await page.locator('[ng-click="toggleCheckMember()"]').click();
+  await page.locator('button[ng-click="infochecked()"]').click();
+
+  // The score and time the simulator gave, typed in
+  await page.locator('input[ng-model="score"]').fill('123');
+  await page.locator('input[ng-model="minutes"]').fill('7');
+  await page.locator('input[ng-model="seconds"]').fill('45');
+  await page.locator('button[ng-click="confirm()"]').click();
+  await page.waitForURL(new RegExp(`/simulation/sign/${runId}`));
+  await page.waitForLoadState('networkidle');
+
+  // Sending without the signatures says which are missing
+  await page.locator('button[ng-click="send_sign()"]').click();
+  await expect(page.locator('.swal2-popup')).toBeVisible();
+  await page.locator('.swal2-confirm').click();
+
+  // Each signature written on its pad, kept when the pad is closed
+  for (const [index, pad] of [[0, '#cap_sig'], [1, '#ref_sig'], [2, '#refas_sig']]) {
+    await page.locator(`button[ng-click="toggleSign(${index})"]:visible`).click();
+    const canvas = page.locator(`${pad} canvas`);
+    await expect(canvas).toBeVisible();
+    const box = await canvas.boundingBox();
+    await page.mouse.move(box.x + 20, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 200, box.y + box.height / 3, { steps: 8 });
+    await page.mouse.up();
+    await page.locator(`button[ng-click="toggleSign(${index})"]:visible`).click();
+  }
+  await page.locator('textarea[ng-model="comment"]').fill('Well done');
+  await page.locator('button[ng-click="send_sign()"]').click();
+  await page.locator('.swal2-confirm').click();
+
+  await expect.poll(async () => (await (await page.request.get(`/api/runs/simulation/${runId}`)).json()).status).toBe(4);
+  const run = await (await page.request.get(`/api/runs/simulation/${runId}`)).json();
+  expect(run).toMatchObject({ score: 123, time: { minutes: 7, seconds: 45 }, comment: 'Well done' });
+  await expect(viewer.getByText('123').first()).toBeVisible();
+});
