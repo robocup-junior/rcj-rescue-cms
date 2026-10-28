@@ -138,4 +138,6 @@ test('a competition is set up from nothing, a run added, judged and taken back, 
   await modal.locator('button[ng-click="ok()"]').click();
   await expect(card).toHaveCount(0);
   expect((await page.request.get(`/api/competitions/${id}`)).status()).toBeGreaterThanOrEqual(400);
+  // Its backups' folder is kept, for it to be restored; not the test's to leave behind
+  require('fs').rmSync(require('path').join(__dirname, '..', 'backup', id), { recursive: true, force: true });
 });
