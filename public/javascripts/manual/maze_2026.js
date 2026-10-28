@@ -458,12 +458,10 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         }
     };
 
+    // Sent with the rest of the run (send())
     $scope.changeExitBonus = function () {
         playSound(sClick);
         $scope.exitBonus = ! $scope.exitBonus
-        upload_run({
-            exitBonus: $scope.exitBonus
-        });
     }
 
     function  checkNull(val) {
