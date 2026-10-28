@@ -118,7 +118,8 @@ app.controller('FormEditorController', ['$scope', '$uibModal', '$log', '$http', 
 
     $http.get("/api/competitions/leagues/"+leagueId).then(function (response) {
         $scope.league = response.data
-        $http.get("/api/competitions/" + competitionId + "/" + $scope.league.type + "/maps").then(function (response) {
+        // The league's maps, by its id (as the map editors ask for them)
+        $http.get("/api/competitions/" + competitionId + "/" + leagueId + "/maps").then(function (response) {
             $scope.maps = response.data
           })
     });
