@@ -62,6 +62,7 @@ async function seed() {
     { _id: oid(ids.teams.Maze), competition: compId, name: 'Maze Team', league: 'Maze', teamCode: 'M01' },
     { _id: oid(ids.teams.Erebus), competition: compId, name: 'Sim Team', league: 'Erebus', teamCode: 'S01' },
     { _id: oid(ids.teams.LineNL), competition: compId, name: 'Line Entry Team', league: 'LineNL', teamCode: 'E01' },
+    { _id: oid(ids.teams.MazeNL), competition: compId, name: 'Maze Entry Team', league: 'MazeNL', teamCode: 'E02' },
   ]);
 
   // Saved through the model so the path finder numbers the tiles, as the map editor does
@@ -83,15 +84,31 @@ async function seed() {
   await lineMap.create({ _id: oid(ids.maps.LineNL), league: 'LineNL', name: 'Line Entry Map', ...lineMapData });
 
   const noVictims = { top: 'None', right: 'None', bottom: 'None', left: 'None', floor: 'None' };
+  // Walls around two tiles
+  const walls = [[1, 0], [3, 0], [1, 2], [3, 2], [0, 1], [4, 1]].map(([x, y]) => ({ x, y, z: 0, isWall: true, isLinear: true }));
   await mazeMap.create({
     _id: oid(ids.maps.Maze),
     competition: compId, league: 'Maze', name: 'Maze Map', finished: true,
     width: 2, length: 1, height: 1, startTile: { x: 1, y: 1, z: 0 },
     cells: [
-      { x: 1, y: 1, z: 0, isTile: true, isLinear: true, tile: { reachable: true, victims: noVictims } },
+      // A cognitive target on the start tile's wall, red in the centre; its rings add up to 0 (unharmed)
+      {
+        x: 1, y: 1, z: 0, isTile: true, isLinear: true,
+        tile: { reachable: true, victims: { ...noVictims, left: 'Cognitive' }, cognitiveTargets: { left: { rings: { ring1: 'R', ring2: 'G', ring3: 'B', ring4: 'K', ring5: 'Y' } } } },
+      },
       { x: 3, y: 1, z: 0, isTile: true, isLinear: true, tile: { reachable: true, victims: { ...noVictims, top: 'H' } } },
-      // Walls around the two tiles
-      ...[[1, 0], [3, 0], [1, 2], [3, 2], [0, 1], [4, 1]].map(([x, y]) => ({ x, y, z: 0, isWall: true, isLinear: true })),
+      ...walls,
+    ],
+  });
+  // Entry: a red victim on the floor of the first tile and a green one on the second
+  await mazeMap.create({
+    _id: oid(ids.maps.MazeNL),
+    competition: compId, league: 'MazeNL', leagueType: 'entry', name: 'Maze Entry Map', finished: true,
+    width: 2, length: 1, height: 1, startTile: { x: 1, y: 1, z: 0 },
+    cells: [
+      { x: 1, y: 1, z: 0, isTile: true, isLinear: true, tile: { reachable: true, victims: { ...noVictims, floor: 'Red' } } },
+      { x: 3, y: 1, z: 0, isTile: true, isLinear: true, tile: { reachable: true, victims: { ...noVictims, floor: 'Green' } } },
+      ...walls,
     ],
   });
 
@@ -112,6 +129,7 @@ async function seed() {
   await mazeRun.create([
     { _id: oid(ids.runs.Maze), ...runRefs, team: oid(ids.teams.Maze), map: oid(ids.maps.Maze) },
     { _id: oid(ids.finishedRuns.Maze), ...finished, team: oid(ids.teams.Maze), map: oid(ids.maps.Maze) },
+    { _id: oid(ids.runs.MazeNL), ...runRefs, team: oid(ids.teams.MazeNL), map: oid(ids.maps.MazeNL) },
   ]);
   await simRun.create([
     { _id: oid(ids.runs.Erebus), ...runRefs, team: oid(ids.teams.Erebus) },

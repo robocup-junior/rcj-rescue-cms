@@ -10,6 +10,28 @@ async function submitLogin(page, username, password) {
   await form.locator('button[type=submit]').click();
 }
 
+/** On a maze judge page: check the team, the round, the members and the robot. */
+async function checkMazeTeam(page) {
+  await page.locator('.rv-check').nth(0).click();
+  await page.locator('.rv-check').nth(1).click();
+  await page.locator('.rv-photo-check').nth(0).click();
+  await page.locator('.rv-photo-check').nth(1).click();
+  await page.locator('button[ng-click="infochecked()"]').click();
+}
+
+/** The CSS background of an element drawing a cognitive target. */
+const background = (locator) => locator.evaluate((e) => e.style.backgroundImage);
+
+// The seed map's target, red in the centre, then green, blue, black and yellow
+const RINGS = ['rgb(238, 0, 0)', 'rgb(0, 176, 80)', 'rgb(0, 176, 240)', 'rgb(0, 0, 0)', 'rgb(255, 255, 0)'];
+
+function expectRings(css) {
+  expect(css).toMatch(/^radial-gradient\(/);
+  const at = RINGS.map((colour) => css.indexOf(colour));
+  expect(at.every((i) => i > 0), css).toBeTruthy();
+  expect([...at].sort((a, b) => a - b)).toEqual(at);
+}
+
 test.describe('login', () => {
   test('a user logs in with the form and is taken to the home page', async ({ page }) => {
     await open(page, '/login');
@@ -63,15 +85,15 @@ test.describe('judging a maze run', () => {
   test.use({ user: 'judge' });
 
   test('the judge checks the team and records a lack of progress', async ({ page }) => {
+    // No lack of progress and the victim not found yet, whatever a test before recorded
+    const reset = await page.request.put(`/api/runs/maze/${ids.runs.Maze}`, {
+      data: { LoPs: 0, tiles: { '3,1,0': { scoredItems: { victims: { top: false } } } } },
+    });
+    expect(reset.ok()).toBeTruthy();
     await open(page, `/maze/judge/${ids.runs.Maze}`);
     await expect(page.getByText('Maze Team').first()).toBeVisible();
 
-    // The team, the round, the members and the robot, each checked
-    await page.locator('.rv-check').nth(0).click();
-    await page.locator('.rv-check').nth(1).click();
-    await page.locator('.rv-photo-check').nth(0).click();
-    await page.locator('.rv-photo-check').nth(1).click();
-    await page.locator('button[ng-click="infochecked()"]').click();
+    await checkMazeTeam(page);
 
     const saved = page.waitForResponse((res) => res.url().includes(`/api/runs/maze/${ids.runs.Maze}`) && res.request().method() === 'PUT');
     await page.locator('#rv-lops .rv-step.is-plus').first().click();
@@ -99,6 +121,99 @@ test.describe('judging a maze run', () => {
     await sheet.locator('.rvm-ok').click();
     const tiles = (await tileSent).postDataJSON().tiles;
     expect(Object.values(tiles)[0].scoredItems.victims.top).toBe(true);
+  });
+});
+
+test.describe('cognitive targets', () => {
+  test('are drawn from their rings on the map and on the tile sheet, with their category', async ({ page }) => {
+    await open(page, `/maze/view/${ids.finishedRuns.Maze}`);
+    // Against the start tile's left wall: half the tile across
+    const target = page.locator('.rv-mz-victims span').first();
+    expectRings(await background(target));
+    const [tile, box] = await Promise.all([page.locator('.rv-mz-tile:not(.is-void)').first().boundingBox(), target.boundingBox()]);
+    expect(Math.abs(box.width - tile.width / 2)).toBeLessThan(2);
+    expect(Math.abs(box.x - tile.x)).toBeLessThan(2);
+
+    await page.locator('.rv-mz-tile:not(.is-void)').first().click();
+    const sheet = page.locator('.rvm-maze');
+    await expect(sheet).toBeVisible();
+    expectRings(await background(sheet.locator('.rvm-victim-image')));
+    await expect(sheet.locator('.rvm-category')).toHaveClass(/is-unharmed/);
+  });
+
+  test.describe('in the map editor', () => {
+    test.use({ user: 'admin' });
+
+    test('are drawn from their rings on the map and in their settings', async ({ page }) => {
+      await open(page, `/admin/${ids.competition}/Maze/mapEditor/${ids.maps.Maze}`);
+      const target = page.locator('span[ng-style^="cognitiveSideStyle"]');
+      await expect(target).toHaveCount(1);
+      expectRings(await background(target));
+
+      await target.click({ force: true });
+      const settings = page.locator('[ng-click^="openCognitiveTargetSettings"]');
+      await expect(settings).toBeVisible();
+      expectRings(await background(settings.locator('span[ng-style]').first()));
+      await settings.click();
+      const preview = page.locator('[ng-style="previewStyle"]');
+      expectRings(await background(preview));
+      // The preview follows the rings as they are set: the centre made black
+      await page.locator(`button[ng-click^="rings.ring1 = 'K'"]`).click();
+      expect(await background(preview)).toMatch(/^radial-gradient\(circle closest-side, rgb\(0, 0, 0\)/);
+    });
+  });
+});
+
+test.describe('judging a maze entry run', () => {
+  test.use({ user: 'judge' });
+
+  test('the sheet of each victim shows its category by its colour, and identifies it only once found', async ({ page }) => {
+    // The first victim not found yet, whatever a test before recorded
+    const reset = await page.request.put(`/api/runs/maze/${ids.runs.MazeNL}`, {
+      data: { tiles: { '1,1,0': { scoredItems: { victims: { floor: false }, rescueKits: { floor: 0 } } } } },
+    });
+    expect(reset.ok()).toBeTruthy();
+    await open(page, `/maze/judge/${ids.runs.MazeNL}`);
+    await expect(page.getByText('Maze Entry Team').first()).toBeVisible();
+    await checkMazeTeam(page);
+
+    const sheet = page.locator('.rvm-maze');
+    for (const [n, category] of [[0, /is-harmed/], [1, /is-unharmed/]]) {
+      await page.locator('.rv-mz-tile:not(.is-void)').nth(n).click();
+      await expect(sheet).toBeVisible();
+      await expect(sheet.locator('.rvm-category')).toHaveClass(category);
+      await sheet.locator('.rvm-ok').click();
+      await expect(sheet).toBeHidden();
+    }
+
+    // Identified only once found, and no longer when it is not found after all
+    await page.locator('.rv-mz-tile:not(.is-void)').first().click();
+    const [found, identified] = [sheet.locator('.rvm-found').nth(0), sheet.locator('.rvm-found').nth(1)];
+    await expect(identified).toBeDisabled();
+    await found.click();
+    await identified.click();
+    await expect(sheet.locator('.rvm-victim')).toHaveClass(/is-on/);
+    await expect(sheet.locator('.rvm-victim')).not.toHaveClass(/is-half/);
+    await found.click();
+    await expect(identified).toBeDisabled();
+    await expect(identified).not.toHaveClass(/is-on/);
+    await found.click();
+    await expect(sheet.locator('.rvm-victim')).toHaveClass(/is-half/);
+    const tileSent = page.waitForRequest((req) => req.method() === 'PUT' && 'tiles' in req.postDataJSON());
+    await sheet.locator('.rvm-ok').click();
+    const tile = Object.values((await tileSent).postDataJSON().tiles)[0];
+    expect(tile.scoredItems.victims.floor).toBe(true);
+    expect(tile.scoredItems.rescueKits.floor).toBe(0);
+  });
+});
+
+test.describe('maze sign page', () => {
+  test.use({ user: 'judge' });
+
+  test('the score and the time are in the bar from the top of the page', async ({ page }) => {
+    await open(page, `/maze/sign/${ids.runs.Maze}`);
+    await expect(page.locator('.rv-topbar-stats .rv-stat')).toHaveCount(2);
+    await expect(page.locator('.rv-topbar-stats')).toBeVisible();
   });
 });
 
