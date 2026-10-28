@@ -36,6 +36,8 @@ if (process.env.MAIL_SMTP &&process.env.MAIL_PORT &&process.env.MAIL_FROM) {
 
 const mailQueue = new Queue('mail queue', {
   redis: {port: process.env.REDIS_PORT, host: process.env.REDIS_HOST},
+  // The queues of another app on the same Redis (the e2e tests') kept apart
+  prefix: process.env.QUEUE_PREFIX || 'bull',
   limiter: {
     max: process.env.MAIL_MAX_PER_SECOND || 1,
     duration: 1000

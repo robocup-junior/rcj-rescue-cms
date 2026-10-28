@@ -28,6 +28,8 @@ const b_keep = process.env.BACKUP_KEEP_VERSION;
 
 const backupQueue = new Queue('backup', {
   redis: {port: process.env.REDIS_PORT, host: process.env.REDIS_HOST},
+  // The queues of another app on the same Redis (the e2e tests') kept apart
+  prefix: process.env.QUEUE_PREFIX || 'bull',
   limiter: {
     max: 1,
     duration: 10000
