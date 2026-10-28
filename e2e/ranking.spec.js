@@ -59,3 +59,42 @@ test('a league ranking is disclosed on the settings, then lists the teams by the
   await open(page, `/admin/${competition}/Maze/games/ranking`);
   await expectRanking(page);
 });
+
+test('a technical challenge is scored by the judges, and counted in a ranking that takes it in', async ({ page }) => {
+  const { request } = page;
+  const competition = await api.competition(request);
+  const [round, field] = await Promise.all([api.round(request, competition, 'R1'), api.field(request, competition, 'F1')]);
+  // Teams added get a technical challenge of their own
+  const teams = [await api.team(request, competition, 'Maze', 'Challenger', 'C1'), await api.team(request, competition, 'Maze', 'Runner', 'C2')];
+  const map = await api.mazeMap(request, competition, 'Maze', 'Challenge Map', [{}, { checkpoint: true }]);
+  for (const team of teams) await api.run(request, 'maze', { competition, round, field, team, map });
+
+  // The ranking of the league made of the runs, documents and technical challenge
+  await open(page, `/admin/${competition}/settings`);
+  const mode = page.locator('tr[ng-repeat^="league in leagues"]', { has: page.locator('td', { hasText: /^\s*Rescue Maze\s*$/ }) })
+    .locator('select[ng-model="league.mode"]');
+  await mode.selectOption('GAMES_DOCUMENT_CHALLENGE');
+  await Promise.all([page.waitForEvent('load'), page.locator('button.btn-hero-action[ng-click="set()"]').click()]);
+
+  // Then the league's page has the challenge for the judges
+  await open(page, `/maze/${competition}/Maze`);
+  await page.locator('.action-card.tech-card').first().click();
+  await page.waitForURL(new RegExp(`/maze/${competition}/Maze/technicalChallenge`));
+  await page.waitForLoadState('networkidle');
+  const score = (name) => page.locator('tr[ng-repeat]', { hasText: name }).locator('input[ng-model="team.score"]');
+  for (const [name, points] of [['Challenger', '42'], ['Runner', '21']]) {
+    const saved = page.waitForResponse((res) => res.request().method() === 'PUT' && res.url().includes('/api/technicalChallenge/'));
+    await score(name).fill(points);
+    await score(name).blur();
+    expect((await saved).ok()).toBeTruthy();
+  }
+
+  await page.reload();
+  await expect(score('Challenger')).toHaveValue('42');
+  await expect(score('Runner')).toHaveValue('21');
+  // Counted against the best: 42 is 1, 21 is 0.5
+  const ranking = await (await request.get(`/api/ranking/${competition}/Maze`)).json();
+  expect(ranking.modeDetails.technicalChallenge).toBeTruthy();
+  const challenge = Object.fromEntries(ranking.ranking.map((r) => [r.team.name, r.technicalChallenge]));
+  expect(challenge).toEqual({ Challenger: 1, Runner: 0.5 });
+});
