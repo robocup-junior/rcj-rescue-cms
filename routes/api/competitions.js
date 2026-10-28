@@ -851,6 +851,11 @@ adminRouter.delete('/:competitionid', function (req, res, next) {
             logger.error(err.message);
           }
         });
+        fs.rm(`${__dirname}/../../mailAttachment/${id}`, { recursive: true, force: true }, (err) => {
+          if (err) {
+            logger.error(err.message);
+          }
+        });
 
         // fs.rmdir(`${__dirname}/../../backup/${id}`, { recursive: true }, (err) => {
         //   if (err) {
