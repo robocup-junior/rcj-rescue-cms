@@ -42,4 +42,21 @@ function mazeMap(request, competition, league, name, tiles) {
 /** A run waiting for the judge; kind is line, maze or simulation. */
 const run = (request, kind, data) => post(request, `/api/runs/${kind}`, data);
 
-module.exports = { login, competition, round, field, team, mazeMap, run, NO_VICTIMS };
+/**
+ * The mails the app queued to an address, newest first: there is no mail server in the tests, so
+ * they are read from the app's mail queue (Redis), as the queue worker would send them.
+ */
+async function mailsTo(address) {
+  const Queue = require('bull');
+  const queue = new Queue('mail queue', { redis: { port: process.env.REDIS_PORT || 6379, host: process.env.REDIS_HOST || 'localhost' } });
+  try {
+    const jobs = await queue.getJobs(['waiting', 'active', 'delayed', 'failed', 'completed']);
+    return jobs.filter((job) => job && job.data.message && [].concat(job.data.message.to).join(' ').includes(address))
+      .sort((a, b) => b.timestamp - a.timestamp)
+      .map((job) => job.data.message);
+  } finally {
+    await queue.close();
+  }
+}
+
+module.exports = { login, competition, round, field, team, mazeMap, run, mailsTo, NO_VICTIMS };
