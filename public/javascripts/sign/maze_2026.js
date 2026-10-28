@@ -363,6 +363,9 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             $scope.mazeView = buildMazeMap($scope.cells, $scope.width, $scope.length, $scope.z, $scope.sRotate);
     }
 
+    // A cognitive target on a side of a tile on the map
+    $scope.cognitiveSideStyle = cognitiveTarget.sideStyle;
+
     $scope.victimImage = function (cell, side) {
         return mazeVictimImage(cell, side);
     }
@@ -901,10 +904,10 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'cell', 'til
         return (Number(kit) >= mk);
     };
 
-    $scope.getModalCognitiveImage = function (cell, direction) {
-        if (!cell || !cell.tile || !cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction]) return '';
-        let rings = cell.tile.cognitiveTargets[direction].rings;
-        return '/images/cognitive_targets/' + rings.ring1 + rings.ring2 + rings.ring3 + rings.ring4 + rings.ring5 + '.png';
+    // A cognitive target, drawn by CSS (cognitive_target.js)
+    $scope.getModalCognitiveStyle = function (cell, direction) {
+        if (!cell || !cell.tile || !cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction]) return {};
+        return cognitiveTarget.style(cell.tile.cognitiveTargets[direction].rings);
     };
 
     $scope.getColorValue = function (colorCode) {

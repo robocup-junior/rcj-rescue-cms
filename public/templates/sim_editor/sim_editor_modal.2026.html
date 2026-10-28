@@ -88,7 +88,7 @@
         <td class="sim-ct-cell">
           <span class="sim-ct-wrap">
             <button type="button" class="sim-ct-chip" ng-click="editWallCognitive('top')" ng-disabled="!wallAt('top') && !wallCogCode('top')" ng-style="wallCogCode('top') ? {'border-color': cogType(wallCogCode('top')).color, 'background-color': cogType(wallCogCode('top')).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
-              <img ng-if="wallCogCode('top')" ng-src="{{cogImage(wallCogCode('top'))}}" alt="">
+              <span class="sim-ct-target" ng-if="wallCogCode('top')" ng-style="cogStyle(wallCogCode('top'))"></span>
               <span ng-if="wallCogCode('top')" class="sim-ct-chip-letter" ng-style="{'color': cogType(wallCogCode('top')).color}">{{cogType(wallCogCode('top')).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
               <i ng-if="!wallCogCode('top')" class="fas fa-plus"></i>
               <i class="fas fa-cog sim-ct-chip-gear"></i>
@@ -106,7 +106,7 @@
         <td class="sim-ct-cell">
           <span class="sim-ct-wrap">
             <button type="button" class="sim-ct-chip" ng-click="editWallCognitive('bottom')" ng-disabled="!wallAt('bottom') && !wallCogCode('bottom')" ng-style="wallCogCode('bottom') ? {'border-color': cogType(wallCogCode('bottom')).color, 'background-color': cogType(wallCogCode('bottom')).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
-              <img ng-if="wallCogCode('bottom')" ng-src="{{cogImage(wallCogCode('bottom'))}}" alt="">
+              <span class="sim-ct-target" ng-if="wallCogCode('bottom')" ng-style="cogStyle(wallCogCode('bottom'))"></span>
               <span ng-if="wallCogCode('bottom')" class="sim-ct-chip-letter" ng-style="{'color': cogType(wallCogCode('bottom')).color}">{{cogType(wallCogCode('bottom')).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
               <i ng-if="!wallCogCode('bottom')" class="fas fa-plus"></i>
               <i class="fas fa-cog sim-ct-chip-gear"></i>
@@ -124,7 +124,7 @@
         <td class="sim-ct-cell">
           <span class="sim-ct-wrap">
             <button type="button" class="sim-ct-chip" ng-click="editWallCognitive('left')" ng-disabled="!wallAt('left') && !wallCogCode('left')" ng-style="wallCogCode('left') ? {'border-color': cogType(wallCogCode('left')).color, 'background-color': cogType(wallCogCode('left')).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
-              <img ng-if="wallCogCode('left')" ng-src="{{cogImage(wallCogCode('left'))}}" alt="">
+              <span class="sim-ct-target" ng-if="wallCogCode('left')" ng-style="cogStyle(wallCogCode('left'))"></span>
               <span ng-if="wallCogCode('left')" class="sim-ct-chip-letter" ng-style="{'color': cogType(wallCogCode('left')).color}">{{cogType(wallCogCode('left')).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
               <i ng-if="!wallCogCode('left')" class="fas fa-plus"></i>
               <i class="fas fa-cog sim-ct-chip-gear"></i>
@@ -142,7 +142,7 @@
         <td class="sim-ct-cell">
           <span class="sim-ct-wrap">
             <button type="button" class="sim-ct-chip" ng-click="editWallCognitive('right')" ng-disabled="!wallAt('right') && !wallCogCode('right')" ng-style="wallCogCode('right') ? {'border-color': cogType(wallCogCode('right')).color, 'background-color': cogType(wallCogCode('right')).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
-              <img ng-if="wallCogCode('right')" ng-src="{{cogImage(wallCogCode('right'))}}" alt="">
+              <span class="sim-ct-target" ng-if="wallCogCode('right')" ng-style="cogStyle(wallCogCode('right'))"></span>
               <span ng-if="wallCogCode('right')" class="sim-ct-chip-letter" ng-style="{'color': cogType(wallCogCode('right')).color}">{{cogType(wallCogCode('right')).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
               <i ng-if="!wallCogCode('right')" class="fas fa-plus"></i>
               <i class="fas fa-cog sim-ct-chip-gear"></i>
@@ -277,7 +277,7 @@
         <td ng-repeat="c in range(16)" class="sim-ct-cell">
           <span class="sim-ct-wrap">
             <button type="button" class="sim-ct-chip sim-ct-chip-small" ng-click="editHalfWallCognitive(c)" ng-disabled="!halfWallSlotHasWall(c) && !halfWallCogCode(c)" ng-style="halfWallCogCode(c) ? {'border-color': cogType(halfWallCogCode(c)).color, 'background-color': cogType(halfWallCogCode(c)).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
-              <img ng-if="halfWallCogCode(c)" ng-src="{{cogImage(halfWallCogCode(c))}}" alt="">
+              <span class="sim-ct-target" ng-if="halfWallCogCode(c)" ng-style="cogStyle(halfWallCogCode(c))"></span>
               <span ng-if="halfWallCogCode(c)" class="sim-ct-chip-letter" ng-style="{'color': cogType(halfWallCogCode(c)).color}">{{cogType(halfWallCogCode(c)).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
               <i ng-if="!halfWallCogCode(c)" class="fas fa-plus"></i>
             </button>

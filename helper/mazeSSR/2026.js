@@ -4,6 +4,7 @@ const { createCanvas, loadImage } = require('@napi-rs/canvas');
 const path = require('path');
 const fs = require('fs');
 const { boldFont } = require('../ssrFont');
+const cognitiveTarget = require('../../public/javascripts/cognitive_target');
 
 const COLORS = {
   wall: 'navy',
@@ -387,12 +388,14 @@ async function drawMazeCanvas(map) {
             const v = victims[dir];
             if (v && v !== 'None') {
               if (v === 'Cognitive') {
+                // Its rings, half the tile across against the wall
                 const ct = cell.tile.cognitiveTargets && cell.tile.cognitiveTargets[dir];
-                if (ct && ct.rings) {
-                  for (let i = 1; i <= 5; i++) {
-                    const ringVal = ct.rings[`ring${i}`];
-                    if (ringVal) await drawIcon(`cognitive_rings/${dir}_ring${i}_${ringVal}.png`);
-                  }
+                const [cx, cy] = cognitiveTarget.SIDE_CENTRES[dir];
+                for (const c of cognitiveTarget.circles(ct && ct.rings)) {
+                  ctx.beginPath();
+                  ctx.arc(tx + tw * cx, ty + th * cy, c.radius * Math.min(tw, th) / 4, 0, 2 * Math.PI);
+                  ctx.fillStyle = c.color;
+                  ctx.fill();
                 }
               } else if (['H', 'S', 'U', 'PHI', 'PSI', 'OMEGA', 'Red', 'Yellow', 'Green'].includes(v)) {
                 await drawIcon(`${v.toLowerCase()}_${dir}.png`);

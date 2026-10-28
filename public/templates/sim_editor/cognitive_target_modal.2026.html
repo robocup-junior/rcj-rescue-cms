@@ -3,7 +3,7 @@
 </div>
 <div class="modal-body sim-modal-body">
   <div class="sim-ct-summary">
-    <img class="sim-ct-preview" ng-src="{{previewImage()}}" alt="Cognitive Target Preview">
+    <span class="sim-ct-preview" ng-style="previewStyle()" role="img" aria-label="Cognitive Target Preview"></span>
     <div class="sim-ct-summary-body">
       <div class="sim-ct-status" ng-style="{'border-color': typeColor(), 'background-color': typeBgColor()}">
         <span class="sim-ct-letter" ng-style="{'background-color': typeColor()}">{{typeLetter() || '?'}}</span>

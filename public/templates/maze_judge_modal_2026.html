@@ -51,7 +51,7 @@
         <span class="rvm-victim-side"><i class="fas" ng-class="{'top': 'fa-arrow-up', 'right': 'fa-arrow-right', 'bottom': 'fa-arrow-down', 'left': 'fa-arrow-left'}[modalRotate(direction)]"></i></span>
         <span class="rvm-victim-who">
           <img class="rvm-victim-image" ng-if="cell.tile.victims[direction] != 'Cognitive'" ng-src="/images/{{['H', 'S', 'U'].indexOf(cell.tile.victims[direction]) >= 0 ? cell.tile.victims[direction] : (cell.tile.victims[direction] | lowercase)}}.png" alt="{{cell.tile.victims[direction]}}">
-          <img class="rvm-victim-image" ng-if="cell.tile.victims[direction] == 'Cognitive' && cell.tile.cognitiveTargets[direction]" ng-src="{{getModalCognitiveImage(cell, direction)}}" alt="Cognitive">
+          <span class="rvm-victim-image" ng-if="cell.tile.victims[direction] == 'Cognitive' && cell.tile.cognitiveTargets[direction]" ng-style="getModalCognitiveStyle(cell, direction)" role="img" aria-label="Cognitive"></span>
           <!-- Its category, which says the kits it needs -->
           <span class="rvm-category" ng-if="getModalVictimStatus(cell, direction)" ng-class="'is-' + (getModalVictimStatus(cell, direction) | lowercase)">
             <i class="fas" ng-class="{'Harmed': 'fa-heartbeat', 'Stable': 'fa-user-check', 'Unharmed': 'fa-smile', 'Dummy': 'fa-robot'}[getModalVictimStatus(cell, direction)]"></i>

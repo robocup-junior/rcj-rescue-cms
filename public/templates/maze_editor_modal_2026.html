@@ -75,7 +75,7 @@
             <div style="display: inline-flex; align-items: center; gap: 8px;">
               <input type="radio" ng-model="cell.tile.victims.top" value="Cognitive" ng-disabled="isVictimDisabled()" style="display: block; transform: scale(1.4);">
               <span ng-if="cell.tile.victims.top == 'Cognitive'" ng-click="openCognitiveTargetSettings('top')" ng-style="{'border-color': getCognitiveStatusColor('top'), 'display': 'inline-flex', 'align-items': 'center', 'cursor': 'pointer', 'padding': '6px', 'border-radius': '8px', 'border': '2px solid', 'background-color': getCognitiveStatusBgColor('top'), 'transition': 'all 0.2s'}">
-                <img ng-src="{{getCognitiveTargetImage('top')}}" alt="Cognitive Target" height="32" style="border-radius: 4px;">
+                <span ng-style="getCognitiveTargetStyle('top')" role="img" aria-label="Cognitive Target" style="display: inline-block; width: 32px; height: 32px;"></span>
                 <i class="fas fa-cog" ng-style="{'margin-left': '8px', 'color': getCognitiveStatusColor('top'), 'font-size': '16px'}"></i>
               </span>
             </div>
@@ -91,7 +91,7 @@
             <div style="display: inline-flex; align-items: center; gap: 8px;">
               <input type="radio" ng-model="cell.tile.victims.bottom" value="Cognitive" ng-disabled="isVictimDisabled()" style="display: block; transform: scale(1.4);">
               <span ng-if="cell.tile.victims.bottom == 'Cognitive'" ng-click="openCognitiveTargetSettings('bottom')" ng-style="{'border-color': getCognitiveStatusColor('bottom'), 'display': 'inline-flex', 'align-items': 'center', 'cursor': 'pointer', 'padding': '6px', 'border-radius': '8px', 'border': '2px solid', 'background-color': getCognitiveStatusBgColor('bottom'), 'transition': 'all 0.2s'}">
-                <img ng-src="{{getCognitiveTargetImage('bottom')}}" alt="Cognitive Target" height="32" style="border-radius: 4px;">
+                <span ng-style="getCognitiveTargetStyle('bottom')" role="img" aria-label="Cognitive Target" style="display: inline-block; width: 32px; height: 32px;"></span>
                 <i class="fas fa-cog" ng-style="{'margin-left': '8px', 'color': getCognitiveStatusColor('bottom'), 'font-size': '16px'}"></i>
               </span>
             </div>
@@ -107,7 +107,7 @@
             <div style="display: inline-flex; align-items: center; gap: 8px;">
               <input type="radio" ng-model="cell.tile.victims.left" value="Cognitive" ng-disabled="isVictimDisabled()" style="display: block; transform: scale(1.4);">
               <span ng-if="cell.tile.victims.left == 'Cognitive'" ng-click="openCognitiveTargetSettings('left')" ng-style="{'border-color': getCognitiveStatusColor('left'), 'display': 'inline-flex', 'align-items': 'center', 'cursor': 'pointer', 'padding': '6px', 'border-radius': '8px', 'border': '2px solid', 'background-color': getCognitiveStatusBgColor('left'), 'transition': 'all 0.2s'}">
-                <img ng-src="{{getCognitiveTargetImage('left')}}" alt="Cognitive Target" height="32" style="border-radius: 4px;">
+                <span ng-style="getCognitiveTargetStyle('left')" role="img" aria-label="Cognitive Target" style="display: inline-block; width: 32px; height: 32px;"></span>
                 <i class="fas fa-cog" ng-style="{'margin-left': '8px', 'color': getCognitiveStatusColor('left'), 'font-size': '16px'}"></i>
               </span>
             </div>
@@ -123,7 +123,7 @@
             <div style="display: inline-flex; align-items: center; gap: 8px;">
               <input type="radio" ng-model="cell.tile.victims.right" value="Cognitive" ng-disabled="isVictimDisabled()" style="display: block; transform: scale(1.4);">
               <span ng-if="cell.tile.victims.right == 'Cognitive'" ng-click="openCognitiveTargetSettings('right')" ng-style="{'border-color': getCognitiveStatusColor('right'), 'display': 'inline-flex', 'align-items': 'center', 'cursor': 'pointer', 'padding': '6px', 'border-radius': '8px', 'border': '2px solid', 'background-color': getCognitiveStatusBgColor('right'), 'transition': 'all 0.2s'}">
-                <img ng-src="{{getCognitiveTargetImage('right')}}" alt="Cognitive Target" height="32" style="border-radius: 4px;">
+                <span ng-style="getCognitiveTargetStyle('right')" role="img" aria-label="Cognitive Target" style="display: inline-block; width: 32px; height: 32px;"></span>
                 <i class="fas fa-cog" ng-style="{'margin-left': '8px', 'color': getCognitiveStatusColor('right'), 'font-size': '16px'}"></i>
               </span>
             </div>

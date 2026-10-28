@@ -217,10 +217,10 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         return '#6c757d';
     }
 
-    $scope.getModalCognitiveImage = function (cell, direction) {
-        if (!cell || !cell.tile || !cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction] || !cell.tile.cognitiveTargets[direction].rings) return '';
-        let rings = cell.tile.cognitiveTargets[direction].rings;
-        return `/images/cognitive_targets/${rings.ring1}${rings.ring2}${rings.ring3}${rings.ring4}${rings.ring5}.png`;
+    // A cognitive target, drawn by CSS (cognitive_target.js)
+    $scope.getModalCognitiveStyle = function (cell, direction) {
+        if (!cell || !cell.tile || !cell.tile.cognitiveTargets || !cell.tile.cognitiveTargets[direction]) return {};
+        return cognitiveTarget.style(cell.tile.cognitiveTargets[direction].rings);
     };
 
     $scope.range = function (n) {

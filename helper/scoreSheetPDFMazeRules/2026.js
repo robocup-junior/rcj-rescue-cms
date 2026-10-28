@@ -3,6 +3,7 @@ const pdf = require('../scoreSheetPDFUtil');
 const qr = require('qr-image');
 const fs = require('fs');
 const { applyFont } = require('../pdfFont');
+const cognitiveTarget = require('../../public/javascripts/cognitive_target');
 
 /**
  * Defines some important numbers for the placement of different objects in the scoresheet.
@@ -283,22 +284,24 @@ function drawRun(doc, config, scoringRun) {
 
     pdf.drawImage(doc, x, y, bg, base_size_x, 50, 'center');
 
-    let icon = 'scoresheet_generation/maze/';
+    // A cognitive target as its rings, the other victims as images
+    const icon_size = base_size_y - 5;
     if (v.type === 'Cognitive' && v.imgCode) {
-      icon = `public/images/cognitive_targets/${v.imgCode}.png`;
+      for (const c of cognitiveTarget.circles(v.imgCode)) {
+        doc.circle(x + 2 + icon_size / 2, y + 2 + icon_size / 2, c.radius * icon_size / 2).fill(c.color);
+      }
+      doc.fillColor('black');
     } else {
-      icon += v.type.toLowerCase() + '.png';
+      pdf.drawImage(
+        doc,
+        x + 2,
+        y + 2,
+        'scoresheet_generation/maze/' + v.type.toLowerCase() + '.png',
+        icon_size,
+        icon_size,
+        'center'
+      );
     }
-
-    pdf.drawImage(
-      doc,
-      x + 2,
-      y + 2,
-      icon,
-      base_size_y - 5,
-      base_size_y - 5,
-      'center'
-    );
 
     pdf.drawTextWithAlign(
       doc,

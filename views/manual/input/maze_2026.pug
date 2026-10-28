@@ -5,6 +5,7 @@ html(ng-app="ddApp")
       var runId = "#{id}"
 
     include ../../includes/common_component
+    script(src="/javascripts/cognitive_target.js?v=" + assetVersion)
     script(src="/javascripts/manual/maze_2026.js?v=" + assetVersion)
 
     script(src="/javascripts/translate_config.js?v=" + assetVersion)
@@ -549,7 +550,7 @@ html(ng-app="ddApp")
           div.entry-item(ng-repeat="victim in itemList.allVictims", ng-init="maxKits = getModalMaxKitNum(cells[victim.x+','+victim.y+','+victim.z], victim.direction)", ng-class="{'active': clearStatus(victim) && (maxKits == 0 || tiles[victim.x+','+victim.y+','+victim.z].scoredItems.rescueKits[victim.direction] == maxKits)}")
             .item-id {{victim.name}}
             .item-img-wrapper
-              img(ng-src="{{getModalCognitiveImage(cells[victim.x+','+victim.y+','+victim.z], victim.direction)}}", ng-if="victim.type == 'Cognitive'")
+              span(ng-if="victim.type == 'Cognitive'" ng-style="getModalCognitiveStyle(cells[victim.x+','+victim.y+','+victim.z], victim.direction)" style="display: block; width: 100%; height: 100%;" role="img" aria-label="Cognitive")
               img(ng-src="/images/phi.png", ng-if="victim.type == 'PHI'")
               img(ng-src="/images/psi.png", ng-if="victim.type == 'PSI'")
               img(ng-src="/images/omega.png", ng-if="victim.type == 'OMEGA'")

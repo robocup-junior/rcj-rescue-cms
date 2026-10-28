@@ -4,7 +4,7 @@
 <div class="modal-body" style="padding: 20px;">
   <div style="margin-bottom: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 8px;">
     <div style="display: flex; align-items: flex-start; gap: 20px;">
-      <img ng-src="{{previewImage}}" alt="Cognitive Target Preview" height="120" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+      <span ng-style="previewStyle" role="img" aria-label="Cognitive Target Preview" style="flex: none; width: 120px; height: 120px;"></span>
       <div style="flex: 1;">
         <div class="alert" style="margin-bottom: 10px; border-left: 4px solid;" ng-class="{'alert-danger': getVictimStatus() === 'harmed', 'alert-warning': getVictimStatus() === 'stable', 'alert-success': getVictimStatus() === 'unharmed', 'alert-dark': getVictimStatus() === 'dummy', 'border-danger': getVictimStatus() === 'harmed', 'border-warning': getVictimStatus() === 'stable', 'border-success': getVictimStatus() === 'unharmed', 'border-dark': getVictimStatus() === 'dummy'}">
           <strong><i class="fas fa-info-circle" style="margin-right: 5px;"></i>{{"admin.mazeMapEditor.victimStatus" | translate}}:</strong>

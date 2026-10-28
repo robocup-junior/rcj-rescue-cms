@@ -1245,8 +1245,9 @@ var SimCognitive = (function () {
         fromCentreFirst: function (rings) {
             return rings.slice().reverse().join('');
         },
-        image: function (code) {
-            return isCode(code) ? '/images/cognitive_targets/' + code.split('').reverse().join('') + '.png' : '';
+        // Drawn by CSS (cognitive_target.js), which takes the rings from the centre
+        style: function (code) {
+            return isCode(code) ? cognitiveTarget.style(code.split('').reverse().join('')) : {};
         }
     };
 })();
@@ -1418,7 +1419,7 @@ app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', '$uibModal', 
         }).result.then(onSet, angular.noop);
     }
 
-    $scope.cogImage = SimCognitive.image;
+    $scope.cogStyle = SimCognitive.style;
     $scope.cogType = SimCognitive.type;
 
     $scope.wallCogCode = function (dir) {
@@ -1562,8 +1563,8 @@ app.controller('SimCognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'c
     $scope.total = function () {
         return SimCognitive.sum(currentCode());
     };
-    $scope.previewImage = function () {
-        return SimCognitive.image(currentCode());
+    $scope.previewStyle = function () {
+        return SimCognitive.style(currentCode());
     };
     $scope.typeLetter = function () {
         return SimCognitive.type(currentCode()).letter;

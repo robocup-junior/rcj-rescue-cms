@@ -3,6 +3,7 @@ const { applyFont } = require('./pdfFont');
 const fs = require('fs');
 const path = require('path');
 const mazeSSR = require('./mazeSSR');
+const cognitiveTarget = require('../public/javascripts/cognitive_target');
 
 /**
  * Generates a PDF with Cognitive Targets and optionally Letter Victims for printing
@@ -190,7 +191,6 @@ function drawTarget(doc, x, y, target) {
   let status = '';
   if (target.type === 'Cognitive') {
     const colorCode = target.colorCode;
-    imagePath = path.join(__dirname, '../public/images/cognitive_targets', `${colorCode}.png`);
     status = getVictimStatus(colorCode);
     const statusName = getStatusName(status);
     labelText = `${colorCode} (${status}: ${statusName})`;
@@ -213,8 +213,13 @@ function drawTarget(doc, x, y, target) {
 
   const victimLetter = target.victimLetter;
 
-  // Draw image if exists
-  if (isExistFile(imagePath)) {
+  // A cognitive target as its rings, the letter victims as images
+  if (target.type === 'Cognitive') {
+    for (const c of cognitiveTarget.circles(target.colorCode)) {
+      doc.circle(x + TARGET_SIZE / 2, y + TARGET_SIZE / 2, c.radius * TARGET_SIZE / 2).fill(c.color);
+    }
+    doc.fillColor('#000000');
+  } else if (isExistFile(imagePath)) {
     doc.image(imagePath, x, y, {
       width: TARGET_SIZE,
       height: TARGET_SIZE

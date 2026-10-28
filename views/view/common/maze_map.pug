@@ -11,9 +11,8 @@
     .rv-mz-victims(ng-repeat='t in mazeView.tiles track by t.key' ng-if='t.victims' ng-style='t.style')
       .rv-mz-items(ng-style="{transform: 'rotate(' + sRotate + 'deg)'}")
         img(ng-repeat="side in ['top', 'right', 'bottom', 'left', 'floor']" ng-if='victimImage(t.cell, side)' ng-src='{{victimImage(t.cell, side)}}' alt='')
-        //- A cognitive target: its five rings, one image each
-        div(ng-repeat="side in ['top', 'right', 'bottom', 'left']" ng-if="t.cell.tile.victims[side] == 'Cognitive' && t.cell.tile.cognitiveTargets[side].rings")
-          img(ng-repeat='n in [1, 2, 3, 4, 5]' ng-src="{{'/images/cognitive_rings/' + side + '_ring' + n + '_' + t.cell.tile.cognitiveTargets[side].rings['ring' + n] + '.png'}}" alt='')
+        //- A cognitive target, drawn by CSS (cognitive_target.js)
+        span(ng-repeat="side in ['top', 'right', 'bottom', 'left']" ng-if="t.cell.tile.victims[side] == 'Cognitive' && t.cell.tile.cognitiveTargets[side].rings" ng-style='cognitiveSideStyle(t.cell.tile.cognitiveTargets[side].rings, side)')
     //- The rest of each tile over the victims: its items, the start and the elevator, its status
     //- and points; taps go through to the tile
     .rv-mz-over(ng-repeat='t in mazeView.tiles track by t.key' ng-if='t.cell' ng-style='t.style' ng-class="{'is-hover': mazeView.hover == t.key}")

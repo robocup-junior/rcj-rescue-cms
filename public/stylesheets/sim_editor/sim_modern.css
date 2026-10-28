@@ -500,9 +500,9 @@
     border-style: solid;
 }
 
-.sim-ct-chip img {
+.sim-ct-chip .sim-ct-target {
+    width: 32px;
     height: 32px;
-    border-radius: 4px;
 }
 
 .sim-ct-chip-letter {
@@ -520,7 +520,8 @@
     gap: 0.2rem;
 }
 
-.sim-ct-chip.sim-ct-chip-small img {
+.sim-ct-chip.sim-ct-chip-small .sim-ct-target {
+    width: 22px;
     height: 22px;
 }
 
@@ -540,10 +541,9 @@
 }
 
 .sim-ct-preview {
+    flex: none;
+    width: 140px;
     height: 140px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    background: white;
 }
 
 .sim-ct-summary-body {
@@ -789,7 +789,8 @@
     min-width: 26px;
 }
 
-.sim-halfwall-table .sim-ct-chip.sim-ct-chip-small img {
+.sim-halfwall-table .sim-ct-chip.sim-ct-chip-small .sim-ct-target {
+    width: 20px;
     height: 20px;
 }
 

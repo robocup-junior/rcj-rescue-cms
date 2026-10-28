@@ -19,6 +19,9 @@ app.directive('autoResize', ['$timeout', function($timeout) {
 
 // function referenced by the drop target
 app.controller('MazeEditorController', ['$scope', '$uibModal', '$log', '$http', '$translate', function ($scope, $uibModal, $log, $http, $translate) {
+    // A cognitive target on a side of a tile on the map, drawn by CSS (cognitive_target.js)
+    $scope.cognitiveSideStyle = cognitiveTarget.sideStyle;
+
     const Toast = Swal.mixin({
         toast: true,
         position: 'top-end',
@@ -1206,16 +1209,15 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$uibModal',
         return arr;
     }
 
-    $scope.getCognitiveTargetImage = function (direction) {
+    // A cognitive target, drawn by CSS (cognitive_target.js)
+    $scope.getCognitiveTargetStyle = function (direction) {
         if (!$scope.cell.tile.victims ||
             $scope.cell.tile.victims[direction] !== 'Cognitive' ||
             !$scope.cell.tile.cognitiveTargets ||
             !$scope.cell.tile.cognitiveTargets[direction]) {
-            return '';
+            return {};
         }
-        var rings = $scope.cell.tile.cognitiveTargets[direction].rings;
-        var colorCode = rings.ring1 + rings.ring2 + rings.ring3 + rings.ring4 + rings.ring5;
-        return '/images/cognitive_targets/' + colorCode + '.png';
+        return cognitiveTarget.style($scope.cell.tile.cognitiveTargets[direction].rings);
     }
 
     $scope.getCognitiveStatusColor = function (direction) {
@@ -1336,8 +1338,7 @@ app.controller('CognitiveTargetModalCtrl', ['$scope', '$uibModalInstance', 'dire
     };
 
     $scope.updatePreview = function () {
-        var colorCode = $scope.rings.ring1 + $scope.rings.ring2 + $scope.rings.ring3 + $scope.rings.ring4 + $scope.rings.ring5;
-        $scope.previewImage = '/images/cognitive_targets/' + colorCode + '.png';
+        $scope.previewStyle = cognitiveTarget.style($scope.rings);
     }
 
     $scope.calculateTotalValue = function () {
