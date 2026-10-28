@@ -63,6 +63,8 @@ function writeLog(req, competitionId, teamId, message) {
 function returnFiles(res, competition, folder){
   let path = `${__dirname}/../../cabinet/${competition}/${folder}`;
   fs.readdir(path, { withFileTypes: true }, (err, dirents) => {
+    // A cabinet nothing was put in yet may have no folder
+    if (err && err.code == 'ENOENT') return res.send([]);
     if (err) {
       res.status(500).send({
         msg: 'Could not get file list'
