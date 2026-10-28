@@ -221,6 +221,13 @@ const cases = [
   // Backups, mails, bookings, surveys, reviews
   { name: 'back the competition up', allow: ['admin'], make: () => ['post', `/api/backup/${fx.competition}`, { fullBackup: false }] },
   { name: 'list its backups', allow: ['admin'], make: () => ['get', `/api/backup/list/${fx.competition}`] },
+  {
+    // To the team's own address, whatever the request says
+    name: 'mail a team', allow: ['admin'],
+    make: () => ['post', '/api/mail/send', {
+      data: [{ _id: fx.mazeTeam, competition: fx.other, email: ['someone@example.com'], mailData: { title: 'Hello', content: '<p>Hello</p>' } }],
+    }],
+  },
   { name: 'read its sent mails', allow: ['admin'], make: () => ['get', `/api/mail/sent/${fx.competition}`] },
   { name: 'read its bookings', allow: ['admin'], make: () => ['get', `/api/reservation/config/${fx.competition}`] },
   { name: 'read its surveys', allow: ['admin'], make: () => ['get', `/api/survey/list/${fx.competition}`] },

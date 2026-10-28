@@ -174,7 +174,7 @@ function writeFile (path, contents, cb) {
   fs.writeFile(path, contents, cb);
 }
 
-adminRouter.post('/send', function (req, res, next) {
+adminRouter.post('/send', async function (req, res, next) {
   const teams = req.body.data;
   let reservation = req.body.reservation;
   
@@ -183,6 +183,21 @@ adminRouter.post('/send', function (req, res, next) {
       msg: 'Please check smtp parameters',
     });
     return;
+  }
+
+  // The teams as stored, not as the request has them: of a competition the user administers, and
+  // at their own addresses
+  if (!Array.isArray(teams) || !teams.every((team) => team && ObjectId.isValid(team._id))) {
+    return res.status(400).send({ msg: 'Bad request' });
+  }
+  const dbTeams = await competitiondb.team.find({ _id: { $in: teams.map((team) => team._id) } }).select('competition email').lean();
+  for (const team of teams) {
+    const dbTeam = dbTeams.find((t) => t._id.equals(team._id));
+    if (!dbTeam || !auth.authCompetition(req.user, dbTeam.competition, ACCESSLEVELS.ADMIN)) {
+      return res.status(401).send(auth.NO_AUTHORITY);
+    }
+    team.competition = dbTeam.competition;
+    team.email = dbTeam.email;
   }
 
   if(reservation){
