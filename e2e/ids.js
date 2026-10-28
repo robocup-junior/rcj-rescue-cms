@@ -18,6 +18,11 @@ module.exports = {
     LineNL: '6e2e00000000000000000032',
     MazeNL: '6e2e00000000000000000033',
   },
+  // Maps with a tile of each kind, for whole runs judged on the UI (scenarios.spec.js)
+  scenarioMaps: {
+    Maze: '6e2e00000000000000000034',
+    MazeNL: '6e2e00000000000000000035',
+  },
   runs: {
     Line: '6e2e00000000000000000040',
     Maze: '6e2e00000000000000000041',

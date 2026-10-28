@@ -112,6 +112,44 @@ async function seed() {
     ],
   });
 
+  // For whole runs judged on the UI (scenarios.spec.js): five tiles in a row, none linear.
+  // The start with a stable cognitive target, a checkpoint, a blue tile, an unharmed and a harmed
+  // victim, a speed bump
+  const row = (n) => [...Array(n).keys()].map((i) => 2 * i + 1);
+  const wallsAround = (n) => [
+    ...row(n).flatMap((x) => [{ x, y: 0 }, { x, y: 2 }]), { x: 0, y: 1 }, { x: 2 * n, y: 1 },
+  ].map(({ x, y }) => ({ x, y, z: 0, isWall: true }));
+  const tile = (n, props) => ({ x: 2 * n + 1, y: 1, z: 0, isTile: true, isLinear: false, tile: { reachable: true, victims: noVictims, ...props } });
+  await mazeMap.create({
+    _id: oid(ids.scenarioMaps.Maze),
+    competition: compId, league: 'Maze', name: 'Maze Scenario Map', finished: true,
+    width: 5, length: 1, height: 1, startTile: { x: 1, y: 1, z: 0 },
+    cells: [
+      tile(0, {
+        victims: { ...noVictims, top: 'Cognitive' },
+        cognitiveTargets: { top: { rings: { ring1: 'G', ring2: 'Y', ring3: 'Y', ring4: 'Y', ring5: 'Y' } } },
+      }),
+      tile(1, { checkpoint: true }),
+      tile(2, { blue: true }),
+      tile(3, { victims: { ...noVictims, top: 'OMEGA', bottom: 'PHI' } }),
+      tile(4, { speedbump: true }),
+      ...wallsAround(5),
+    ],
+  });
+  // Entry: the start with a red victim on the floor, a checkpoint, a green victim, a speed bump
+  await mazeMap.create({
+    _id: oid(ids.scenarioMaps.MazeNL),
+    competition: compId, league: 'MazeNL', leagueType: 'entry', name: 'Maze Entry Scenario Map', finished: true,
+    width: 4, length: 1, height: 1, startTile: { x: 1, y: 1, z: 0 },
+    cells: [
+      tile(0, { victims: { ...noVictims, floor: 'Red' } }),
+      tile(1, { checkpoint: true }),
+      tile(2, { victims: { ...noVictims, floor: 'Green' } }),
+      tile(3, { speedbump: true }),
+      ...wallsAround(4),
+    ],
+  });
+
   // Runs waiting for the judge in round 1, and finished runs (status 6), which the public may see, in round 2
   const runRefs = { competition: compId, round: roundId, field: fieldId };
   const finished = { competition: compId, round: finishedRoundId, field: fieldId, status: 6 };
