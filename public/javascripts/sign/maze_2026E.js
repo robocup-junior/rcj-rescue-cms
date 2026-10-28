@@ -725,6 +725,11 @@ app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'cell', 'til
         return (victimConstant[type].maxKitNum <= kit);
     };
 
+    // A colour victim's category: red is harmed, green unharmed (yellow, stable, is not used by the Entry rules)
+    $scope.getModalVictimStatus = function (cell, direction) {
+        return {'Red': 'Harmed', 'Yellow': 'Stable', 'Green': 'Unharmed'}[cell.tile.victims[direction]] || '';
+    };
+
     $scope.modalRotate = function (dir) {
         var ro;
         switch (dir) {

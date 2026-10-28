@@ -1,7 +1,7 @@
 <!-- The judge page's sheet of a maze tile, by the Entry rules. Written from one source with
      the other maze tile sheets (maze_judge_modal_2026*.html, maze_view_modal_2026*.html), so that
      they look the same: the judge operates it. Each item is green once scored; each victim
-     shows its side of the tile as the map is turned and whether it was found,
+     shows its side of the tile as the map is turned, its category and whether it was found,
      then identified. No points. -->
 <div class="rvm rvm-judge rvm-maze">
   <div class="rvm-header">
@@ -31,6 +31,11 @@
         <span class="rvm-victim-side"><i class="fas" ng-class="direction == 'floor' ? 'fa-dot-circle' : {'top': 'fa-arrow-up', 'right': 'fa-arrow-right', 'bottom': 'fa-arrow-down', 'left': 'fa-arrow-left'}[modalRotate(direction)]"></i></span>
         <span class="rvm-victim-who">
           <img class="rvm-victim-image" ng-src="/images/{{['H', 'S', 'U'].indexOf(cell.tile.victims[direction]) >= 0 ? cell.tile.victims[direction] : (cell.tile.victims[direction] | lowercase)}}.png" alt="{{cell.tile.victims[direction]}}">
+          <!-- Its category, by its colour -->
+          <span class="rvm-category" ng-if="getModalVictimStatus(cell, direction)" ng-class="'is-' + (getModalVictimStatus(cell, direction) | lowercase)">
+            <i class="fas" ng-class="{'Harmed': 'fa-heartbeat', 'Stable': 'fa-user-check', 'Unharmed': 'fa-smile', 'Dummy': 'fa-robot'}[getModalVictimStatus(cell, direction)]"></i>
+            {{('maze.view.victimStatus.' + getModalVictimStatus(cell, direction)) | translate}}
+          </span>
         </span>
         <button type="button" class="rvm-toggle rvm-found" ng-class="{'is-on': tile.scoredItems.victims[direction]}" ng-click="toggleVictim(direction)" aria-pressed="{{!!(tile.scoredItems.victims[direction])}}">
           <span>{{'maze.judge.m_found' | translate}}</span>

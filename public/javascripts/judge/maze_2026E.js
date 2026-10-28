@@ -917,6 +917,11 @@ app.controller('ModalInstanceCtrl', ['$scope','$uibModalInstance','cell','tile',
         playSound(sClick);
     };
 
+    // A colour victim's category: red is harmed, green unharmed (yellow, stable, is not used by the Entry rules)
+    $scope.getModalVictimStatus = function (cell, direction) {
+        return {'Red': 'Harmed', 'Yellow': 'Stable', 'Green': 'Unharmed'}[cell.tile.victims[direction]] || '';
+    };
+
     $scope.incKits = function (direction) {
         playSound(sClick);
         $scope.tile.scoredItems.rescueKits[direction]++;
