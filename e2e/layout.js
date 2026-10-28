@@ -54,14 +54,16 @@ async function findLayoutProblems(page) {
     }
 
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    // (file names, as in a list of files, are not)
     const translationKey = /^[a-z][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)+$/;
+    const fileName = /\.(png|jpe?g|gif|svg|webp|mp4|webm|pdf|html?|txt|csv|zip|cms|json)$/i;
     for (let node = walker.nextNode(); node; node = walker.nextNode()) {
       const text = node.textContent.trim();
       if (!text) continue;
       const parent = node.parentElement;
       if (!parent || ['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEXTAREA'].includes(parent.tagName) || !isVisible(parent)) continue;
       if (/\{\{|\}\}/.test(text)) problems.push(`unrendered binding "${text.slice(0, 60)}": ${describe(parent)}`);
-      else if (translationKey.test(text)) problems.push(`untranslated key "${text}": ${describe(parent)}`);
+      else if (translationKey.test(text) && !fileName.test(text)) problems.push(`untranslated key "${text}": ${describe(parent)}`);
     }
     return problems;
   });

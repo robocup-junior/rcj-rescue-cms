@@ -5,8 +5,9 @@ const { findLayoutProblems } = require('./layout');
 const ids = require('./ids');
 
 const PHONE = { width: 390, height: 844 };
-// Tools made for a PC or for paper, which are not checked at phone width
-const PC_ONLY = [/\/mapEditor/, /^\/service\/editor\//, /\/games\/(print|ranking)$/];
+// Tools made for a PC or for paper, and views embedded at the size their page gives them, which
+// are not checked at phone width
+const PC_ONLY = [/\/mapEditor/, /^\/service\/editor\//, /\/games\/(print|ranking)$/, /\/iframe$/];
 
 /** Open the page and check its layout at the default (PC) width, then at phone width. */
 async function checkPage(page, path) {
@@ -39,6 +40,10 @@ const PUBLIC_PAGES = [
   '/service',
   '/service/editor/line/2026',
   '/service/editor/maze/2026',
+  '/service/editor/simulation/2026/classic',
+  `/line/view/${ids.finishedRuns.Line}/iframe`,
+  `/maze/view/${ids.finishedRuns.Maze}/iframe`,
+  `/registration/${C}/Maze`,
 ];
 
 const JUDGE_PAGES = [
@@ -53,6 +58,12 @@ const JUDGE_PAGES = [
   `/maze/sign/${ids.runs.MazeNL}`,
   `/simulation/judge/${ids.runs.Erebus}`,
   `/document/assigned/${C}`,
+  `/line/check/${ids.runs.Line}`,
+  `/maze/check/${ids.runs.Maze}`,
+  `/simulation/sign/${ids.runs.Erebus}`,
+  `/maze/${C}/Maze/technicalChallenge`,
+  `/signage/clock/${C}`,
+  `/signage/field/${C}/${ids.field}`,
 ];
 
 const ADMIN_PAGES = [
@@ -93,6 +104,26 @@ const ADMIN_PAGES = [
   `/admin/${C}/Maze/mapEditor/${ids.maps.Maze}`,
   `/signage/setting`,
   `/signage/games/${C}/`,
+  '/signage/setting/editor',
+  '/signage/setting/files',
+  '/admin/mailTemplates/editor',
+  `/admin/${C}/mails/sent`,
+  `/admin/${C}/documents/teams`,
+  `/admin/${C}/documents/reviewStatus`,
+  `/admin/${C}/documents/Maze/results`,
+  `/admin/${C}/documents/Maze/form`,
+  `/admin/${C}/documents/Maze/review`,
+  `/admin/${C}/documents/Maze/preview`,
+  `/admin/${C}/reservation/edit`,
+  `/admin/${C}/survey/edit`,
+  `/admin/${C}/cabinet/Maze`,
+  `/admin/${C}/cabinet/${ids.teams.Maze}`,
+  `/admin/${C}/LineNL/maps`,
+  `/admin/${C}/MazeNL/maps`,
+  `/admin/${C}/LineNL/mapEditor/${ids.maps.LineNL}`,
+  `/admin/${C}/MazeNL/mapEditor/${ids.maps.MazeNL}`,
+  `/maze/view/${ids.runs.MazeNL}`,
+  `/maze/sign/${ids.runs.MazeNL}`,
 ];
 
 test.describe('public pages', () => {

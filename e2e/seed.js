@@ -57,12 +57,14 @@ async function seed() {
   await round.create({ _id: roundId, competition: compId, name: 'Round 1' });
   await round.create({ _id: finishedRoundId, competition: compId, name: 'Round 2' });
   await field.create({ _id: fieldId, competition: compId, name: 'Field A' });
+  // Each with the token of its own pages, as the teams API gives them
+  const own = (code) => ({ document: { token: `token${code}`, answers: [] } });
   await team.create([
-    { _id: oid(ids.teams.Line), competition: compId, name: 'Line Team', league: 'Line', teamCode: 'L01' },
-    { _id: oid(ids.teams.Maze), competition: compId, name: 'Maze Team', league: 'Maze', teamCode: 'M01' },
-    { _id: oid(ids.teams.Erebus), competition: compId, name: 'Sim Team', league: 'Erebus', teamCode: 'S01' },
-    { _id: oid(ids.teams.LineNL), competition: compId, name: 'Line Entry Team', league: 'LineNL', teamCode: 'E01' },
-    { _id: oid(ids.teams.MazeNL), competition: compId, name: 'Maze Entry Team', league: 'MazeNL', teamCode: 'E02' },
+    { _id: oid(ids.teams.Line), competition: compId, name: 'Line Team', league: 'Line', teamCode: 'L01', ...own('L01') },
+    { _id: oid(ids.teams.Maze), competition: compId, name: 'Maze Team', league: 'Maze', teamCode: 'M01', ...own('M01') },
+    { _id: oid(ids.teams.Erebus), competition: compId, name: 'Sim Team', league: 'Erebus', teamCode: 'S01', ...own('S01') },
+    { _id: oid(ids.teams.LineNL), competition: compId, name: 'Line Entry Team', league: 'LineNL', teamCode: 'E01', ...own('E01') },
+    { _id: oid(ids.teams.MazeNL), competition: compId, name: 'Maze Entry Team', league: 'MazeNL', teamCode: 'E02', ...own('E02') },
   ]);
 
   // Saved through the model so the path finder numbers the tiles, as the map editor does
