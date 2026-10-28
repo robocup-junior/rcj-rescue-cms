@@ -1,5 +1,6 @@
 // The line map editor: tiles dragged from the toolbox onto the map, turned, given their items and
-// the start, saved, and the map judged. (The maze map editor is in scenarios.spec.js.)
+// the start, saved, and the map judged; and the tile sets its toolbox is made of. (The maze map
+// editor is in scenarios.spec.js.)
 const { test, expect, open } = require('./fixtures');
 const api = require('./api');
 
@@ -63,4 +64,41 @@ test('a line map is drawn from the toolbox, saved as drawn, and judged', async (
   const runId = await api.run(request, 'line', { competition, round, field, team, map: mapId });
   await open(page, `/line/judge/${runId}`);
   await expect(page.locator('.rv-judge-map tile')).toHaveCount(3);
+});
+
+test('a line tile set is made, used by the line map editor, and deleted', async ({ page }) => {
+  const name = `Kit ${Date.now()}`;
+  await open(page, '/admin/line/tilesets');
+  await page.locator('input[ng-model="newTileSetName"]').fill(name);
+  await page.locator('button[ng-click="createNewTileSet()"]').click();
+  await page.locator('.swal2-confirm').click();
+  // The new set is the one shown, with no tiles yet: two of the types added, three of the first
+  await expect(page.locator('select[ng-model="tileSet"] option:checked')).toHaveText(name);
+  const inSet = page.locator('img.tile[ng-click="removeTile(tile)"]');
+  await expect(inSet).toHaveCount(0);
+  const types = page.locator('img.tile[ng-click="addTile(tileType)"]');
+  await types.nth(0).click();
+  await types.nth(1).click();
+  await expect(inSet).toHaveCount(2);
+  await page.locator('input[ng-model="tile.count"]').first().fill('3');
+  const saved = page.waitForResponse((res) => res.request().method() === 'PUT' && res.url().includes('/api/maps/line/tilesets/'));
+  await page.locator('button[ng-click="save()"]').click();
+  expect((await saved).ok()).toBeTruthy();
+  const sets = await (await page.request.get('/api/maps/line/tilesets?populate=true')).json();
+  const set = sets.find((s) => s.name == name);
+  expect(set.tiles.map((t) => t.count)).toEqual([3, 1]);
+
+  // The line map editor offers it, with its tiles in the toolbox
+  const competition = await api.competition(page.request);
+  await open(page, `/admin/${competition}/Line/mapEditor`);
+  await page.locator('select[ng-model="tileSet"]').selectOption({ label: name });
+  await expect(page.locator('img.toolbox-tile')).toHaveCount(2);
+
+  // Deleted, once its name is typed in
+  await open(page, '/admin/line/tilesets');
+  await page.locator('select[ng-model="tileSet"]').selectOption({ label: name });
+  await page.locator('button[ng-click="delete()"]').click();
+  await page.locator('.swal2-input').fill(name);
+  await page.locator('.swal2-confirm').click();
+  await expect(page.locator('select[ng-model="tileSet"] option', { hasText: name })).toHaveCount(0);
 });
