@@ -60,8 +60,11 @@ app.controller("LineCompetitionController", ['$scope', '$http', '$translate', fu
         transports: ['websocket']
     });
     if (typeof competitionId !== 'undefined') {
-        socket.emit('subscribe', 'runs/line/' + competitionId + '/status');
-        socket.on('StatusChanged', function (data) {
+        // (again on reconnecting: the server forgets the rooms of a lost connection)
+        socket.on('connect', function () {
+            socket.emit('subscribe', 'runs/line/' + competitionId + '/status');
+        });
+        socket.on('LChanged', function (data) {
             $scope.update_list();
             $scope.$apply();
         });

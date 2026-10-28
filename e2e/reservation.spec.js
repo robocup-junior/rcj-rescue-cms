@@ -1,5 +1,6 @@
 // Bookings: a booking master with a slot for one team, made by the admin; a team books it from its
-// own page, another finds it taken, and the booking is seen by the admin, then cancelled.
+// own page, another finds it taken, and the booking is seen by the admin, then cancelled. The other
+// team's page and the admin's are open all along, and follow without a reload.
 const { test, expect, open } = require('./fixtures');
 const api = require('./api');
 
@@ -27,8 +28,14 @@ test('a slot is set up, booked by a team, taken for the others, and cancelled', 
   await page.waitForURL(new RegExp(`/admin/${competition}/reservation/edit/[0-9a-f]{24}$`));
   const resvId = page.url().split('/').pop();
 
-  // A team books it from its page
+  // Open before anyone books
+  await open(page, `/admin/${competition}/reservation/admin/${resvId}`);
   const team = await browser.newContext({ baseURL });
+  const other = await team.newPage();
+  await open(other, `/mypage/${second}/${tokens[second]}/reservation/${resvId}`);
+  await expect(other.locator('[ng-click^="book("]:visible')).toHaveCount(1);
+
+  // A team books it from its page
   const myPage = await team.newPage();
   await open(myPage, `/mypage/${first}/${tokens[first]}`);
   // Opened in a tab of its own
@@ -40,13 +47,8 @@ test('a slot is set up, booked by a team, taken for the others, and cancelled', 
   await teamPage.locator('.swal2-confirm').click();
   await expect(teamPage.locator('[ng-click^="cancel("]').first()).toBeVisible();
 
-  // The other team finds it taken
-  const other = await team.newPage();
-  await open(other, `/mypage/${second}/${tokens[second]}/reservation/${resvId}`);
+  // The other team finds it taken, the admin sees who booked it
   await expect(other.locator('[ng-click^="book("]:visible')).toHaveCount(0);
-
-  // The admin sees who booked it
-  await open(page, `/admin/${competition}/reservation/admin/${resvId}`);
   await expect(page.getByText('Early Team').first()).toBeVisible();
 
   // Cancelled by the team, it is free again
@@ -54,7 +56,6 @@ test('a slot is set up, booked by a team, taken for the others, and cancelled', 
   await teamPage.locator('.swal2-confirm').click();
   await expect(teamPage.locator('.swal2-popup')).toContainText(/./);
   await teamPage.locator('.swal2-confirm').click();
-  await other.reload();
   await expect(other.locator('[ng-click^="book("]:visible')).toHaveCount(1);
   await team.close();
 });

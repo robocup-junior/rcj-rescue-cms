@@ -63,9 +63,12 @@ app.controller("MazeCompetitionController", ['$scope', '$http', '$translate', fu
             transports: ['websocket']
         });
         if (typeof competitionId !== 'undefined') {
-            socket.emit('subscribe', 'runs/maze/' + competitionId + '/status');
+            // (again on reconnecting: the server forgets the rooms of a lost connection)
+            socket.on('connect', function () {
+                socket.emit('subscribe', 'runs/maze/' + competitionId + '/status');
+            });
 
-            socket.on('StatusChanged', function () {
+            socket.on('MChanged', function () {
                 $scope.update_list();
                 $scope.$apply();
                 //console.log($scope.runs);
