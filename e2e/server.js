@@ -21,6 +21,8 @@ async function main() {
     dAdmin: 'true',
     dSDAdmin: 'true',
     ENVIRONMENT: 'E2E',
+    // Queues of their own, apart from those of an app run on the same Redis
+    QUEUE_PREFIX: 'e2e',
     // A mail server that is not there: mails are queued as they would be sent (registration needs
     // one), and the tests read them from the queue
     MAIL_SMTP: '127.0.0.1',
