@@ -1,6 +1,11 @@
 html(ng-app="ddApp")
   head
     title Rescue Maze View Iframe
+    //- Rows with no container around them: without their gutters, so that they stay in the frame;
+    //- and the map scaled to the frame (tile_size), whose box scales past it with it
+    style.
+      body > .row, #bottomBox > .row { margin-left: 0; margin-right: 0; }
+      .tilearea { overflow: hidden; }
     script.
       var runId = "#{id}"
       var timeIncrement = true;

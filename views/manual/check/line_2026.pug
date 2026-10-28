@@ -57,6 +57,9 @@ html(ng-app="ddApp")
             display: flex;
             align-items: center;
             gap: 8px;
+            /* Narrower than its contents on a phone, rather than past the window's edge */
+            min-width: 0;
+            overflow: hidden;
         }
 
         .mode-badge {
