@@ -16,19 +16,11 @@ async function competitionWithRuns(request) {
     api.team(request, competition, 'Erebus', 'Sim Live'),
   ]);
   const mazeMap = await api.mazeMap(request, competition, 'Maze', 'Live Map', [{}, { checkpoint: true }]);
-  const tileType = (await (await request.get('/api/maps/line/tiletypes')).json())[0]._id;
-  const lineMap = await (await request.post('/api/maps/line', {
-    data: {
-      competition, league: 'Line', name: 'Live Line Map', tileSet: competition, finished: true,
-      width: 1, length: 1, height: 1, victims: { live: 2, dead: 1 },
-      startTile: { x: 0, y: 0, z: 0 }, startTile2: { x: -1, y: -1, z: -1 },
-      tiles: [{ x: 0, y: 0, z: 0, rot: 0, tileType, items: { obstacles: 0, speedbumps: 0 } }],
-    },
-  })).json();
+  const lineMap = await api.lineMap(request, competition, 'Line', 'Live Line Map');
   const refs = { competition, round, field };
   const runs = {
     maze: await api.run(request, 'maze', { ...refs, team: mazeTeam, map: mazeMap }),
-    line: await api.run(request, 'line', { ...refs, team: lineTeam, map: lineMap.id }),
+    line: await api.run(request, 'line', { ...refs, team: lineTeam, map: lineMap }),
     simulation: await api.run(request, 'simulation', { ...refs, team: simTeam }),
   };
   return { competition, field, runs };

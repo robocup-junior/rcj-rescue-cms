@@ -5,6 +5,16 @@
 // Each judges a run made for it (by the admin API), so that the tests do not depend on each other.
 const { test, expect, open, USERS } = require('./fixtures');
 const ids = require('./ids');
+const api = require('./api');
+
+/** Line tile types the app makes, each a straight line from the left to the right. */
+const TILE_TYPES = {
+  plain: '570c27c3f5a9dabe23f3af90',
+  gap: '58cfe0d457501b50da7afa62',
+  intersection: '570c27c3f5a9dabe23f3afae',
+  gapIntersections: '570c27c3f5a9dabe23f3afac',
+  seesaw: '58cfd6549792e9313b1610df',
+};
 
 test.use({ user: 'judge' });
 
@@ -164,6 +174,90 @@ test('a maze run, judged, signed and sent', async ({ page, context, request }) =
   await expect(viewScore(page)).toContainText(String(expected));
 });
 
+test('a maze run on a course of two floors and every element, judged, signed and sent', async ({ page, request }) => {
+  const victim = (side, type, rest = {}) => ({ victims: { ...api.NO_VICTIMS, [side]: type }, ...rest });
+  const cognitive = (side, rings) => victim(side, 'Cognitive', {
+    cognitiveTargets: { [side]: { rings: Object.fromEntries([...rings].map((colour, i) => [`ring${i + 1}`, colour])) } },
+  });
+  expect((await request.post('/api/auth/login', { data: USERS.admin })).ok()).toBeTruthy();
+  const map = await api.mazeMap(request, ids.competition, 'Maze', `Floors ${Date.now()}`, [
+    // The ground floor: letters (harmed, stable, unharmed), a checkpoint, a speed bump, blue tiles,
+    // the ramp up
+    [
+      victim('top', 'PHI', { linear: true }), victim('left', 'PSI', { linear: true }), victim('right', 'OMEGA'),
+      { checkpoint: true }, { speedbump: true }, { blue: true }, { blue: true }, { ramp: true },
+    ],
+    // Upstairs: cognitive targets, harmed (2), stable (1) and unharmed (0); stairs; a victim and a
+    // checkpoint
+    [
+      { ...cognitive('top', 'GGYYY'), linear: true }, cognitive('bottom', 'GYYYY'), cognitive('left', 'RGBKY'),
+      { steps: true }, victim('right', 'PHI'), { checkpoint: true },
+    ],
+  ]);
+  const runId = await newRun(request, 'maze', 'Maze', map);
+
+  await open(page, `/maze/judge/${runId}`);
+  await checkTeam(page);
+  await page.locator('.rv-stat-start').click();
+  const victims = () => mazeSheet(page).locator('.rvm-victim');
+  const kit = (v) => v.locator('.rvm-kits .rv-step.is-plus');
+    const floor = (z) => page.locator('button.rv-tool[ng-click="changeFloor(zz)"]', { hasText: String(z) });
+
+  // The ground floor: each victim found, with the kits it needs (none for the unharmed)
+  for (const [n, kits] of [[0, 2], [1, 1], [2, 0]]) {
+    await mazeTile(page, n).click();
+    await victims().nth(0).locator('.rvm-found').click();
+    for (let i = 0; i < kits; i++) await kit(victims().nth(0)).click();
+    await closeSheet(page);
+  }
+  // The checkpoint, the speed bump and the ramp, the one item of their tiles, with a tap
+  for (const n of [3, 4, 7]) {
+    await mazeTile(page, n).click();
+    await expect(mazeSheet(page)).toHaveCount(0);
+  }
+  for (const [n, visits] of [[5, 1], [6, 3]]) {
+    await mazeTile(page, n).click();
+    for (let i = 0; i < visits; i++) await mazeSheet(page).locator('.rvm-counter .rv-step.is-plus').click();
+    await closeSheet(page);
+  }
+
+  // Upstairs
+  await floor(1).click();
+  await expect(floor(1)).toHaveClass(/active/);
+  for (const [n, kits] of [[0, 2], [1, 1], [2, 0]]) {
+    await mazeTile(page, n).click();
+    await victims().nth(0).locator('.rvm-found').click();
+    for (let i = 0; i < kits; i++) await kit(victims().nth(0)).click();
+    await closeSheet(page);
+  }
+  // The stairs climbed, with a tap; the victim after them missed, the checkpoint not reached
+  await mazeTile(page, 3).click();
+  await expect(mazeSheet(page)).toHaveCount(0);
+
+  // Two lacks of progress, two misidentifications, the exit bonus
+  for (let i = 0; i < 2; i++) {
+    await page.locator('#rv-lops .rv-step.is-plus').nth(0).click();
+    await page.locator('#rv-lops .rv-step.is-plus').nth(1).click();
+  }
+  await page.locator('#rv-exit .rv-exit-toggle').click();
+
+  await stopAndSetTime(page);
+  await finish(page, 'maze', runId);
+
+  // victims: letters linear 5 + 5, floating 15; cognitive linear 10, floating 30 + 30
+  // kits: 2 to one victim 30, 1 to one 10, 2 to one 30, 1 to one 10
+  // checkpoint 10 + speed bump 5 + blue 40 - 1 visit x 10 + blue 40 - 3 visits x 10 + ramp 10 + stairs 10
+  // reliability: 6 victims x 10 + 6 kits x 10 + 1 blue tile visited once x 10 - 2 LoPs x 15
+  // exit: 6 victims x 10 + 1 blue tile x 10 + 1 stairs x 5 + 1 ramp x 5; - 2 misidentifications x 5
+  const expected = (5 + 5 + 15 + 10 + 30 + 30) + (30 + 10 + 30 + 10) + (10 + 5 + 30 + 10 + 10 + 10)
+    + (60 + 60 + 10 - 30) + (60 + 10 + 5 + 5) - 10;
+  await expect(signScore(page)).toHaveText(String(expected));
+  await signAndSend(page);
+
+  const run = await storedRun(page, 'maze', runId);
+  expect(run).toMatchObject({ score: expected, LoPs: 2, misidentification: 2, exitBonus: true });
+});
+
 test('a maze entry run, judged, signed and sent', async ({ page, context, request }) => {
   const runId = await newRun(request, 'maze', 'MazeNL', ids.scenarioMaps.MazeNL);
   const viewer = await context.newPage();
@@ -250,6 +344,60 @@ test('a line run, judged, signed and sent', async ({ page, context, request }) =
   expect(run).toMatchObject({ raw_score: raw, score: expected, exitBonus: true });
   expect(run.rescueOrder.map((r) => `${r.victimType} ${r.zoneType}`)).toEqual(['LIVE GREEN', 'LIVE GREEN', 'DEAD RED']);
   await expect(viewScore(viewer)).toContainText(String(expected));
+});
+
+test('a line run on a course of every element, judged, signed and sent', async ({ page, request }) => {
+  // Ten tiles from the left: a gap, an intersection, a checkpoint, an obstacle with a speed bump, a
+  // ramp, a seesaw, a checkpoint, a gap with two intersections, then the evacuation zone (the last
+  // section)
+  const tile = (image, rest = {}) => ({ tileType: TILE_TYPES[image], ...rest });
+  expect((await request.post('/api/auth/login', { data: USERS.admin })).ok()).toBeTruthy();
+  const map = await api.lineMap(request, ids.competition, 'Line', `Course ${Date.now()}`, [
+    tile('plain'), tile('gap'), tile('intersection'), tile('plain', { checkPoint: true }),
+    tile('plain', { items: { obstacles: 1, speedbumps: 1 } }), tile('plain', { items: { rampPoints: true } }),
+    tile('seesaw'), tile('plain', { checkPoint: true }), tile('gapIntersections'), tile('plain'),
+  ], { EvacuationAreaLoPIndex: 2 });
+  const runId = await newRun(request, 'line', 'Line', map);
+
+  await open(page, `/line/judge/${runId}`);
+  await checkTeam(page);
+  await page.locator('.rv-stat-start').click();
+
+  // Every tile passed but the seesaw: one tap scores all the tile has
+  const tiles = page.locator('.rv-judge-map tile');
+  await expect(tiles).toHaveCount(10);
+  for (const n of [0, 1, 2, 3, 4, 5, 7, 8]) await tiles.nth(n).click();
+  // Two lacks of progress in the first section, and one in the evacuation zone
+  const lops = page.locator('.rv-lop-row');
+  await expect(lops).toHaveCount(3);
+  for (let i = 0; i < 2; i++) await lops.nth(0).locator('.rv-step.is-plus').click();
+  await lops.nth(2).locator('.rv-step.is-plus').click();
+
+  const sheet = page.locator('.rv-overlay', { has: page.locator('.rv-rescue-sheet') });
+  for (const [victim, zone] of [[0, 'green'], [0, 'green'], [1, 'red']]) {
+    await page.locator('.rv-rescue-add').click();
+    await sheet.locator('.rv-victim-pick').nth(victim).click();
+    await sheet.locator(`.rv-zone-pick.is-${zone}`).click();
+    await expect(sheet).toBeHidden();
+  }
+  await page.locator('#rv-exit .rv-exit-toggle').click();
+
+  await stopAndSetTime(page);
+  await finish(page, 'line', runId);
+
+  // gap 10 + intersection 10 + obstacle 20 + speed bump 10 + ramp 10 + gap 10 + 2 intersections 20
+  // + checkpoints: 3 tiles x (5 - 2 LoPs x 2), 4 tiles x 5
+  // + exit 60 - 3 LoPs x 5, and the 2 tiles after the last checkpoint x (5 - 1 LoP x 2) + start 5
+  // x each rescue (1.4 - 1 LoP in the zone x 0.05)
+  const raw = 10 + 10 + 20 + 10 + 10 + 10 + 20 + (3 + 20) + (45 + 6) + 5;
+  const expected = Math.round(raw * 1.35 ** 3);
+  await expect(signScore(page)).toHaveText(String(expected));
+  await signAndSend(page);
+
+  const run = await storedRun(page, 'line', runId);
+  expect(run).toMatchObject({ raw_score: raw, score: expected, LoPs: [2, 0, 1] });
+  const scored = run.tiles.map((t) => t.scoredItems.filter((i) => i.scored).map((i) => i.item).sort().join(' '));
+  expect(scored).toEqual(['', 'gap', 'intersection', 'checkpoint', 'obstacle speedbump', 'ramp', '', 'checkpoint', 'gap intersection', '']);
 });
 
 test('a line entry run, judged, signed and sent', async ({ page, context, request }) => {

@@ -22,20 +22,49 @@ const team = (request, competition, league, name, teamCode = name) => post(reque
 
 const NO_VICTIMS = { top: 'None', right: 'None', bottom: 'None', left: 'None', floor: 'None' };
 
-/** A maze map of tiles in a row (each the tile's properties), walls around them, none linear. */
+/**
+ * A maze map of tiles in a row (each the tile's properties, and linear: true for a tile taken as
+ * along a wall), walls around them; or of floors, each such a row ([[...], [...]]).
+ */
 function mazeMap(request, competition, league, name, tiles) {
-  const n = tiles.length;
-  const walls = [];
-  for (let i = 0; i < n; i++) walls.push({ x: 2 * i + 1, y: 0 }, { x: 2 * i + 1, y: 2 });
-  walls.push({ x: 0, y: 1 }, { x: 2 * n, y: 1 });
+  const floors = Array.isArray(tiles[0]) ? tiles : [tiles];
+  const width = Math.max(...floors.map((row) => row.length));
+  const cells = floors.flatMap((row, z) => {
+    const n = row.length;
+    const walls = [];
+    for (let i = 0; i < n; i++) walls.push({ x: 2 * i + 1, y: 0 }, { x: 2 * i + 1, y: 2 });
+    walls.push({ x: 0, y: 1 }, { x: 2 * n, y: 1 });
+    return [
+      ...row.map(({ linear = false, ...tile }, i) => ({
+        x: 2 * i + 1, y: 1, z, isTile: true, isLinear: linear, tile: { reachable: true, victims: NO_VICTIMS, ...tile },
+      })),
+      ...walls.map(({ x, y }) => ({ x, y, z, isWall: true })),
+    ];
+  });
   return post(request, '/api/maps/maze', {
-    competition, league, name, finished: true, width: n, length: 1, height: 1,
+    competition, league, name, finished: true, width, length: 1, height: floors.length,
     leagueType: league.endsWith('NL') ? 'entry' : 'standard',
     startTile: { x: 1, y: 1, z: 0 },
-    cells: [
-      ...tiles.map((tile, i) => ({ x: 2 * i + 1, y: 1, z: 0, isTile: true, isLinear: false, tile: { reachable: true, victims: NO_VICTIMS, ...tile } })),
-      ...walls.map(({ x, y }) => ({ x, y, z: 0, isWall: true })),
-    ],
+    cells,
+  });
+}
+
+/** The plain tile of a line, from the left to the right. */
+const PLAIN_LINE = '570c27c3f5a9dabe23f3af90';
+
+/**
+ * A line map of tiles in a row, from the left to the right, starting on the first: each { tileType,
+ * items, checkPoint } (a plain tile by default; the tile types are those the app makes); its id.
+ */
+function lineMap(request, competition, league, name, tiles = [{}], props = {}) {
+  return post(request, '/api/maps/line', {
+    competition, league, name, tileSet: competition, finished: true,
+    width: tiles.length, length: 1, height: 1, victims: { live: 2, dead: 1 },
+    startTile: { x: 0, y: 0, z: 0 }, startTile2: { x: -1, y: -1, z: -1 },
+    tiles: tiles.map(({ tileType = PLAIN_LINE, items = {}, ...rest }, x) => ({
+      x, y: 0, z: 0, rot: 0, tileType, items: { obstacles: 0, speedbumps: 0, ...items }, ...rest,
+    })),
+    ...props,
   });
 }
 
@@ -62,4 +91,4 @@ async function mailsTo(address) {
   }
 }
 
-module.exports = { login, competition, round, field, team, mazeMap, run, mailsTo, NO_VICTIMS };
+module.exports = { login, competition, round, field, team, mazeMap, lineMap, run, mailsTo, NO_VICTIMS };

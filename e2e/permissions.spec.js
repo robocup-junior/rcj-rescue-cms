@@ -29,9 +29,7 @@ test.beforeAll(async ({ playwright, baseURL }) => {
     api.team(root, c, 'Maze', 'Maze Team'), api.team(root, c, 'Line', 'Line Team'), api.team(root, c, 'Erebus', 'Sim Team'),
   ]);
   fx.mazeMap = await api.mazeMap(root, c, 'Maze', 'Maze Map', [{}, { checkpoint: true }]);
-  const tileType = (await (await root.get('/api/maps/line/tiletypes')).json())[0]._id;
-  fx.lineMap = await lineMap(root, c, tileType);
-  fx.tileType = tileType;
+  fx.lineMap = await api.lineMap(root, c, 'Line', 'Line Map');
   const refs = { competition: c, round: fx.round, field: fx.field };
   fx.mazeRun = await api.run(root, 'maze', { ...refs, team: fx.mazeTeam, map: fx.mazeMap });
   fx.lineRun = await api.run(root, 'line', { ...refs, team: fx.lineTeam, map: fx.lineMap });
@@ -71,20 +69,6 @@ test.afterAll(async () => {
   // The backups' folder of the competition removed at the end is kept, for it to be restored
   fs.rmSync(path.join(__dirname, '..', 'backup', fx.competition), { recursive: true, force: true });
 });
-
-/** A line map of one tile in the competition; its id. */
-async function lineMap(request, competition, tileType, name = `Line Map ${Math.random()}`) {
-  const res = await request.post('/api/maps/line', {
-    data: {
-      competition, league: 'Line', name, tileSet: competition, finished: true,
-      width: 1, length: 1, height: 1, victims: { live: 2, dead: 1 },
-      startTile: { x: 0, y: 0, z: 0 }, startTile2: { x: -1, y: -1, z: -1 },
-      tiles: [{ x: 0, y: 0, z: 0, rot: 0, tileType, items: { obstacles: 0, speedbumps: 0 } }],
-    },
-  });
-  expect(res.status(), await res.text()).toBeLessThan(300);
-  return (await res.json()).id;
-}
 
 /** A run of its own to be removed, in a round of its own (a team has one run in a round). */
 async function spareRun(kind, team, map) {
@@ -152,12 +136,15 @@ const cases = [
     name: 'remove a maze map', allow: ['admin'],
     make: async () => ['delete', `/api/maps/maze/${await api.mazeMap(as.root, fx.competition, 'Maze', `Gone ${Math.random()}`, [{}])}`],
   },
-  { name: 'add a line map', allow: ['admin'], make: () => ['post', '/api/maps/line', lineMapData()] },
+  {
+    name: 'add a line map', allow: ['admin'],
+    make: async () => ['post', '/api/maps/line', { ...(await map('line', fx.lineMap)), competition: fx.competition, name: `Line ${Math.random()}` }],
+  },
   { name: 'change a line map', allow: ['admin'], make: async () => ['put', `/api/maps/line/${fx.lineMap}`, { ...(await map('line', fx.lineMap)), name: `Changed ${Math.random()}` }] },
   { name: 'read a line map\'s full marks', allow: ['admin'], make: () => ['get', `/api/maps/line/${fx.lineMap}/maxScore`] },
   {
     name: 'remove a line map', allow: ['admin'],
-    make: async () => ['delete', `/api/maps/line/${await lineMap(as.root, fx.competition, fx.tileType)}`],
+    make: async () => ['delete', `/api/maps/line/${await api.lineMap(as.root, fx.competition, 'Line', `Gone ${Math.random()}`)}`],
   },
 
   // Runs: judged by the judges, made and removed by the admins
@@ -243,15 +230,6 @@ const cases = [
     kept: async () => expect((await as.root.get(`/api/competitions/${fx.competition}`)).ok()).toBeTruthy(),
   },
 ];
-
-function lineMapData() {
-  return {
-    competition: fx.competition, league: 'Line', name: `Line ${Math.random()}`, tileSet: fx.competition, finished: true,
-    width: 1, length: 1, height: 1, victims: { live: 2, dead: 1 },
-    startTile: { x: 0, y: 0, z: 0 }, startTile2: { x: -1, y: -1, z: -1 },
-    tiles: [{ x: 0, y: 0, z: 0, rot: 0, tileType: fx.tileType, items: { obstacles: 0, speedbumps: 0 } }],
-  };
-}
 
 /** A map as the editor has it, to be saved back. */
 async function map(kind, id) {
