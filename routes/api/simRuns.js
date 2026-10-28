@@ -459,6 +459,7 @@ adminRouter.post('/', function (req, res, next) {
   if (!ObjectId.isValid(run.field)) {
     return next();
   }
+  if (!auth.authCompetition(req.user, run.competition, ACCESSLEVELS.ADMIN)) return res.status(401).send(auth.NO_AUTHORITY);
   new simRun({
     competition: run.competition,
     round: run.round,

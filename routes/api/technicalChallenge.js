@@ -109,6 +109,7 @@ privateRouter.get('/:competitionId/:leagueId', function (req, res, next) {
 
 adminRouter.get('/recovery/:competitionId', function (req, res) {
   const competitionId = req.params.competitionId;
+  if (!auth.authCompetition(req.user, competitionId, ACCESSLEVELS.ADMIN)) return res.status(401).send(auth.NO_AUTHORITY);
 
   competitiondb.team
     .find({

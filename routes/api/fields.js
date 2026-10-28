@@ -11,6 +11,8 @@ const query = require('../../helper/query-helper');
 const { ObjectId } = require('mongoose').Types;
 const logger = require('../../config/logger').mainLogger;
 const competitiondb = require('../../models/competition');
+const auth = require('../../helper/authLevels');
+const { ACCESSLEVELS } = require('../../models/user');
 //= =======================================================================
 //                          /maps Api endpoints
 //= =======================================================================
@@ -46,7 +48,7 @@ publicRouter.get('/:fieldid/runs', function (req, res, next) {
   });
 });
 
-adminRouter.delete('/:fieldid', function (req, res, next) {
+adminRouter.delete('/:fieldid', auth.ensureCompetitionOf(competitiondb.field, 'fieldid'), function (req, res, next) {
   const id = req.params.fieldid;
 
   if (!ObjectId.isValid(id)) {
@@ -65,6 +67,7 @@ adminRouter.delete('/:fieldid', function (req, res, next) {
 
 adminRouter.post('/', function (req, res) {
   const field = req.body;
+  if (!auth.authCompetition(req.user, field.competition, ACCESSLEVELS.ADMIN)) return res.status(401).send(auth.NO_AUTHORITY);
 
   const newField = new competitiondb.field({
     name: field.name,

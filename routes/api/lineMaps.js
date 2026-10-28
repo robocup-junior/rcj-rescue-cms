@@ -68,6 +68,7 @@ adminRouter.post('/', function (req, res) {
     res.status(400).send("Bad request");
     return;
   }
+  if (!auth.authCompetition(req.user, map.competition, ACCESSLEVELS.ADMIN)) return res.status(401).send(auth.NO_AUTHORITY);
 
   const tiles = [];
   for (const i in map.tiles) {
@@ -173,7 +174,7 @@ publicRouter.get('/:map', function (req, res, next) {
   });
 });
 
-adminRouter.get('/:map/maxScore', async function (req, res, next) {
+adminRouter.get('/:map/maxScore', auth.ensureCompetitionOf(lineMap, 'map'), async function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {
@@ -242,7 +243,7 @@ const copyProperties = function (obj, dbObj) {
   }
 };
 
-adminRouter.put('/:map', function (req, res, next) {
+adminRouter.put('/:map', auth.ensureCompetitionOf(lineMap, 'map'), function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {
@@ -334,7 +335,7 @@ adminRouter.put('/:map', function (req, res, next) {
 
 
 
-adminRouter.delete('/:map', function (req, res, next) {
+adminRouter.delete('/:map', auth.ensureCompetitionOf(lineMap, 'map'), function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {

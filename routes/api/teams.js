@@ -108,6 +108,9 @@ adminRouter.get('/set/:teamId/:teamCode', function (req, res, next) {
         err: err.message,
       });
     } else if (dbTeam) {
+      if (!auth.authCompetition(req.user, dbTeam.competition, ACCESSLEVELS.ADMIN)) {
+        return res.status(401).send({ msg: 'You have no authority to access this api' });
+      }
       dbTeam.teamCode = code;
 
       dbTeam.save(function (err) {
@@ -163,7 +166,7 @@ privateRouter.put('/:competitionid/:teamid', function (req, res, next) {
     res.status(401).send({
       msg: 'You have no authority to access this api',
     });
-    return next();
+    return;
   }
 
   const team = req.body;
@@ -300,6 +303,9 @@ adminRouter.delete('/:teamid', function (req, res, next) {
 
 adminRouter.post('/', function (req, res) {
   const team = req.body;
+  if (!auth.authCompetition(req.user, team.competition, ACCESSLEVELS.ADMIN)) {
+    return res.status(401).send({ msg: 'You have no authority to access this api' });
+  }
 
   competitiondb.competition
     .findOne({
@@ -368,6 +374,10 @@ adminRouter.post('/bulk', function (req, res) {
   if (typeof(teams) != "object") {
     res.status(400).send("Bad request");
     return;
+  }
+  // Every team is of a competition the user administers
+  if (!teams.every((team) => auth.authCompetition(req.user, team.competition, ACCESSLEVELS.ADMIN))) {
+    return res.status(401).send({ msg: 'You have no authority to access this api' });
   }
 
   competitiondb.competition

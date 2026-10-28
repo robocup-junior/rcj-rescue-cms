@@ -139,7 +139,7 @@ adminRouter.put('/:userid/:competitionid/role', function (req, res, next) {
     res.status(401).send({
       msg: 'You have no authority to access this api',
     });
-    return next();
+    return;
   }
 
   userdb.user.findById(userid).exec(function (err, dbUser) {
@@ -190,7 +190,7 @@ adminRouter.put('/:userid/:competitionid/:aLevel', function (req, res, next) {
     res.status(401).send({
       msg: 'You have no authority to access this api',
     });
-    return next();
+    return;
   }
 
   userdb.user.findById(userid).exec(function (err, dbUser) {

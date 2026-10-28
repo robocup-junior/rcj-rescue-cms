@@ -11,6 +11,8 @@ const query = require('../../helper/query-helper');
 const { ObjectId } = require('mongoose').Types;
 const logger = require('../../config/logger').mainLogger;
 const competitiondb = require('../../models/competition');
+const auth = require('../../helper/authLevels');
+const { ACCESSLEVELS } = require('../../models/user');
 
 publicRouter.get('/', function (req, res) {
   query.doFindResultSortQuery(req, res, null, null, competitiondb.round);
@@ -43,7 +45,7 @@ publicRouter.get('/:roundid/runs', function (req, res, next) {
   });
 });
 
-adminRouter.delete('/:roundid', function (req, res, next) {
+adminRouter.delete('/:roundid', auth.ensureCompetitionOf(competitiondb.round, 'roundid'), function (req, res, next) {
   const id = req.params.roundid;
 
   if (!ObjectId.isValid(id)) {
@@ -62,6 +64,7 @@ adminRouter.delete('/:roundid', function (req, res, next) {
 
 adminRouter.post('/', function (req, res) {
   const round = req.body;
+  if (!auth.authCompetition(req.user, round.competition, ACCESSLEVELS.ADMIN)) return res.status(401).send(auth.NO_AUTHORITY);
 
   const newRound = new competitiondb.round({
     name: round.name,
