@@ -212,75 +212,84 @@ adminRouter.put('/:competitionid', function (req, res, next) {
     });
   }
 
-  competitiondb.competition.findById(id).exec(function (err, dbCompetition) {
-    if (err) {
-      logger.error(err);
-      res.status(400).send({
-        msg: 'Could not get competition',
-        err: err.message,
-      });
-    } else if (dbCompetition) {
-      if (data.name != null) dbCompetition.name = data.name;
-      if (data.rules != null) dbCompetition.rules = data.rules;
-      if (data.logo != null) dbCompetition.logo = data.logo;
-      if (data.bkColor != null) dbCompetition.bkColor = data.bkColor;
-      if (data.color != null) dbCompetition.color = data.color;
-      if (data.message != null) dbCompetition.message = data.message;
-      if (data.description != null)
-        dbCompetition.description = data.description;
-      if (data.preparation != null) dbCompetition.preparation = data.preparation;
+  // Read, change and save the competition, again if another request saved it in between (the
+  // document editors save as they are changed, and again from their save button)
+  const update = function (retries) {
+    competitiondb.competition.findById(id).exec(function (err, dbCompetition) {
+      if (err) {
+        logger.error(err);
+        res.status(400).send({
+          msg: 'Could not get competition',
+          err: err.message,
+        });
+      } else if (dbCompetition) {
+        if (data.name != null) dbCompetition.name = data.name;
+        if (data.rules != null) dbCompetition.rules = data.rules;
+        if (data.logo != null) dbCompetition.logo = data.logo;
+        if (data.bkColor != null) dbCompetition.bkColor = data.bkColor;
+        if (data.color != null) dbCompetition.color = data.color;
+        if (data.message != null) dbCompetition.message = data.message;
+        if (data.description != null)
+          dbCompetition.description = data.description;
+        if (data.preparation != null) dbCompetition.preparation = data.preparation;
 
-      if (data.leagues != null) dbCompetition.leagues = data.leagues;
-      if (data.documents != null) {
-        if (data.documents.enable != null)
-          dbCompetition.documents.enable = data.documents.enable;
-        if (data.documents.deadline != null)
-          dbCompetition.documents.deadline = data.documents.deadline;
+        if (data.leagues != null) dbCompetition.leagues = data.leagues;
+        if (data.documents != null) {
+          if (data.documents.enable != null)
+            dbCompetition.documents.enable = data.documents.enable;
+          if (data.documents.deadline != null)
+            dbCompetition.documents.deadline = data.documents.deadline;
 
-        if (data.documents.league != null) {
-          let updated = false;
-          for (const l of dbCompetition.documents.leagues) {
-            if (l.league == data.documents.league) {
-              if (data.documents.notifications != null)
-                l.notifications = data.documents.notifications;
-              if (data.documents.blocks != null)
-                l.blocks = data.documents.blocks;
-              if (data.documents.languages != null)
-                l.languages = data.documents.languages;
-              if (data.documents.review != null)
-                l.review = data.documents.review;
-              l.maxLength = data.documents.maxLength;
-              updated = true;
+          if (data.documents.league != null) {
+            let updated = false;
+            for (const l of dbCompetition.documents.leagues) {
+              if (l.league == data.documents.league) {
+                if (data.documents.notifications != null)
+                  l.notifications = data.documents.notifications;
+                if (data.documents.blocks != null)
+                  l.blocks = data.documents.blocks;
+                if (data.documents.languages != null)
+                  l.languages = data.documents.languages;
+                if (data.documents.review != null)
+                  l.review = data.documents.review;
+                l.maxLength = data.documents.maxLength;
+                updated = true;
+              }
+            }
+            if (!updated) {
+              const tmp = {
+                league: data.documents.league,
+                notifications: data.documents.notifications,
+                blocks: data.documents.blocks,
+                languages: data.documents.languages,
+                review: data.documents.review,
+                maxLength: data.documents.maxLength
+              };
+              dbCompetition.documents.leagues.push(tmp);
             }
           }
-          if (!updated) {
-            const tmp = {
-              league: data.documents.league,
-              notifications: data.documents.notifications,
-              blocks: data.documents.blocks,
-              languages: data.documents.languages,
-              review: data.documents.review,
-              maxLength: data.documents.maxLength
-            };
-            dbCompetition.documents.leagues.push(tmp);
-          }
         }
-      }
 
-      dbCompetition.save(function (err) {
-        if (err) {
-          logger.error(err);
-          return res.status(400).send({
-            err: err.message,
-            msg: 'Could not save changes',
+        dbCompetition.save(function (err) {
+          if (err && err.name == 'VersionError' && retries > 0) {
+            // After a moment, which varies so that requests that clashed do not clash again
+            return setTimeout(update, 5 + Math.random() * 20, retries - 1);
+          }
+          if (err) {
+            logger.error(err);
+            return res.status(400).send({
+              err: err.message,
+              msg: 'Could not save changes',
+            });
+          }
+          res.status(200).send({
+            msg: 'Settings has been saved',
           });
-        }
-        res.status(200).send({
-          msg: 'Settings has been saved',
         });
-      });
-    }
-  });
+      }
+    });
+  };
+  update(10);
 });
 
 adminRouter.get('/:competition/teams/documents', function (req, res, next) {
