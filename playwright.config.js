@@ -17,6 +17,7 @@ module.exports = defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  globalTeardown: './e2e/teardown.js',
   webServer: {
     command: 'node e2e/server.js',
     url: `http://localhost:${PORT}/home`,
