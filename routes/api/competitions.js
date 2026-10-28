@@ -14,9 +14,7 @@ const competitiondb = require('../../models/competition');
 
 const userdb = require('../../models/user');
 const lineMapsApi = require('./lineMaps');
-const lineRunsApi = require('./lineRuns');
 const mazeMapsApi = require('./mazeMaps');
-const mazeRunsApi = require('./mazeRuns');
 const logger = require('../../config/logger').mainLogger;
 const auth = require('../../helper/authLevels');
 
@@ -589,24 +587,6 @@ privateRouter.get('/:competition/:league/teams', function (req, res, next) {
         res.status(200).send(data);
       }
     });
-});
-
-publicRouter.get('/:competition/line/runs', function (req, res, next) {
-  const id = req.params.competition;
-
-  if (!ObjectId.isValid(id)) {
-    return next();
-  }
-  return lineRunsApi.getLineRuns(req, res, next);
-});
-
-publicRouter.get('/:competition/maze/runs', function (req, res, next) {
-  const id = req.params.competition;
-
-  if (!ObjectId.isValid(id)) {
-    return next();
-  }
-  return mazeRunsApi.getMazeRuns(req, res, next);
 });
 
 privateRouter.get('/:competition/:league/maps', function (req, res, next) {
