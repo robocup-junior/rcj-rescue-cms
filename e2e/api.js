@@ -50,7 +50,7 @@ async function mailsTo(address) {
   const Queue = require('bull');
   const queue = new Queue('mail queue', {
     redis: { port: process.env.REDIS_PORT || 6379, host: process.env.REDIS_HOST || 'localhost' },
-    prefix: 'e2e', // the e2e server's (server.js)
+    prefix: `e2e${process.env.E2E_PORT || 3100}`, // the e2e server's (server.js)
   });
   try {
     const jobs = await queue.getJobs(['waiting', 'active', 'delayed', 'failed', 'completed']);

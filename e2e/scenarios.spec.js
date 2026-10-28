@@ -32,9 +32,10 @@ async function checkTeam(page) {
 
 /** Stop the timer from the bar if it runs, then set the time of the run to 2:05 on the finish card. */
 async function stopAndSetTime(page) {
-  const stop = page.locator('.rv-stat-stop');
-  if (await stop.count()) {
-    await stop.click();
+  // (asked of the page: the stop button may still be on its way out)
+  const running = await page.evaluate(() => angular.element(document.body).scope().startedTime);
+  if (running) {
+    await page.locator('.rv-stat-stop').click();
     await page.locator('.rv-stop-now[ng-click="confirmStop()"]').click();
   }
   await expect(page.locator('.rv-stat-start')).toBeVisible();
