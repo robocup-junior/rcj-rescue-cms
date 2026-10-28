@@ -97,6 +97,33 @@ describe('maze runs', () => {
     assert.strictEqual(stored.tiles.length, 1);
   });
 
+  test('PUTs that arrive together are all saved, one over the other', async () => {
+    mazeApi.setUser(admin);
+    const { run } = await createEntryRun();
+    // Each adds the victim's tile, then finds it or not: the tile is added once
+    const saves = await Promise.all([1, 2, 3, 4, 5].map((n) => mazeApi.request('PUT', `/api/runs/maze/${run._id}`, {
+      misidentification: n,
+      tiles: { '3,1,0': { scoredItems: { victims: { floor: n % 2 == 1 }, rescueKits: { floor: 0 } } } },
+    })));
+    assert.deepStrictEqual(saves.map((res) => res.status), [200, 200, 200, 200, 200]);
+    const stored = await models.mazeRun.findById(run._id).lean();
+    assert.strictEqual(stored.tiles.length, 1);
+  });
+
+  test('PUTs that arrive together for different tiles keep each tile', async () => {
+    mazeApi.setUser(admin);
+    const { run } = await createEntryRun();
+    for (let round = 0; round < 5; round++) {
+      const kits = round % 2;
+      const saves = await Promise.all(['1,1,0', '3,1,0'].map((key) => mazeApi.request('PUT', `/api/runs/maze/${run._id}`, {
+        tiles: { [key]: { scoredItems: { victims: { floor: true }, rescueKits: { floor: kits } } } },
+      })));
+      assert.deepStrictEqual(saves.map((res) => res.status), [200, 200]);
+      const stored = await models.mazeRun.findById(run._id).lean();
+      assert.deepStrictEqual(stored.tiles.map((t) => [t.x, t.scoredItems.rescueKits.floor]).sort(), [[1, kits], [3, kits]], `round ${round}`);
+    }
+  });
+
   test('PUT is refused for users without access to the competition', async () => {
     mazeApi.setUser(admin);
     const { run } = await createEntryRun();
@@ -128,7 +155,8 @@ describe('line runs', () => {
     });
     const refs = await createRoundFieldTeam(comp, league);
     const { insertedId: run } = await models.lineRun.collection.insertOne({
-      competition: comp._id, map, ...refs, started: false, status: 0, score: 0,
+      // A version, as the runs made by the model have
+      competition: comp._id, map, ...refs, started: false, status: 0, score: 0, __v: 0,
       time: { minutes: 0, seconds: 0 }, LoPs: [0], exitBonus: false, rescueOrder: [],
       isNL: league === 'LineNL',
       nl: { liveVictim: [{ found: false, identified: false }, { found: false, identified: false }], deadVictim: [{ found: false, identified: false }] },
@@ -172,6 +200,31 @@ describe('line runs', () => {
     const stored = await models.lineRun.findById(run).lean();
     assert.strictEqual(stored.raw_score, 15);
     assert.strictEqual(stored.score, Math.round(15 * 1.4 ** 3));
+  });
+
+  test('PUTs that arrive together are all saved, one over the other', async () => {
+    lineApi.setUser(admin);
+    const run = await createLineRun('Line');
+    const saves = await Promise.all([1, 2, 3, 4, 5].map((n) => lineApi.request('PUT', `/api/runs/line/${run}`, {
+      LoPs: [n], time: { minutes: 0, seconds: n },
+    })));
+    assert.deepStrictEqual(saves.map((res) => res.status), [200, 200, 200, 200, 200]);
+  });
+
+  test('PUTs that arrive together for different tiles keep each tile', async () => {
+    lineApi.setUser(admin);
+    const run = await createLineRun('Line');
+    await models.lineRun.updateOne({ _id: run }, { $set: { 'tiles.0.scoredItems': [{ item: 'obstacle', scored: false, count: 1 }] } });
+    for (let round = 0; round < 5; round++) {
+      const scored = round % 2 == 0;
+      const saves = await Promise.all([
+        { 0: { scoredItems: [{ item: 'obstacle', scored, count: 1 }] } },
+        { 1: { scoredItems: [{ item: 'gap', scored, count: 1 }] } },
+      ].map((tiles) => lineApi.request('PUT', `/api/runs/line/${run}`, { tiles })));
+      assert.deepStrictEqual(saves.map((res) => res.status), [200, 200]);
+      const stored = await models.lineRun.findById(run).lean();
+      assert.deepStrictEqual(stored.tiles.map((t) => t.scoredItems[0].scored), [scored, scored], `round ${round}`);
+    }
   });
 
   // Read before anything is recorded, a run is started afresh for its map (initRunData.initLine);

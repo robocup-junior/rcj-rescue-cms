@@ -609,6 +609,10 @@ privateRouter.put('/:runid', function (req, res, next) {
             dbRun.started = false;
           }
 
+          // Only if no other request saved it since it was read. Mongoose checks the version for
+          // most changes, but not for a tile only added to the run: saves made together would add
+          // the same tile once each
+          dbRun.increment();
           dbRun.save(function (err) {
             // Saved by another request since it was read (the judge page sends one at a time, but
             // two devices may not): read it again and apply this one over that
