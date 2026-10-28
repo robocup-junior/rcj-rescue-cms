@@ -37,8 +37,9 @@ app.controller('DocumentResultController', ['$scope', '$uibModal', '$log', '$htt
     })
 
     $http.get("/api/competitions/" + competitionId + "/documents/" + leagueId + "/review").then(function (response) {
-        $scope.languages = response.data.languages;
-        $scope.review = response.data.review;
+        // None until the league's form and review are written
+        $scope.languages = response.data.languages || [];
+        $scope.review = response.data.review || [];
 
         $scope.scaleBlock = [];
         $scope.blockTitle = [];
@@ -66,7 +67,8 @@ app.controller('DocumentResultController', ['$scope', '$uibModal', '$log', '$htt
             $scope.teams = response.data;
 
             $scope.blockTitle = {};
-            for (let block of $scope.teams[0].details) {
+            // The blocks, from any team's results (none without teams)
+            for (let block of ($scope.teams.length ? $scope.teams[0].details : [])) {
                 $scope.blockTitle[block.blockId] = getBlockTitle(block.blockId);
             }
 

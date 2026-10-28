@@ -126,12 +126,14 @@ app.controller('FormEditorController', ['$scope', '$uibModal', '$log', '$http', 
 
     $scope.videos = [];
     $http.get("/api/competitions/" + competitionId + "/documents/" + leagueId).then(function (response) {
-        $scope.languages = response.data.languages;
+        // The league's form, none until it is written
+        const blocks = response.data.blocks || [];
+        if(response.data.languages) $scope.languages = response.data.languages;
         $scope.videos = [];
-        for(let b of response.data.blocks){
+        for(let b of blocks){
             $scope.videos = $scope.videos.concat(b.questions.filter(q=>q.type=="movie"));
         }
-        $scope.qBlocks = response.data.blocks.map((b) => {
+        $scope.qBlocks = blocks.map((b) => {
             return {
                 'title': b.i18n.find((bt) => bt.language == $scope.displayLang).title,
                 '_id': b._id

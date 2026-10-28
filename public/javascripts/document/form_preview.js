@@ -84,9 +84,10 @@ app.controller('FormPreviewController', ['$scope', '$uibModal', '$log', '$http',
     })
 
     $http.get("/api/competitions/" + competitionId + "/documents/" + leagueId).then(function (response) {
-        $scope.blocks = response.data.blocks;
-        $scope.notifications = response.data.notifications;
-        $scope.languages = response.data.languages;
+        // None until the league's form is written
+        $scope.blocks = response.data.blocks || [];
+        $scope.notifications = response.data.notifications || [];
+        $scope.languages = response.data.languages || [];
 
         $scope.answers = [];
         for(let b of $scope.blocks){
