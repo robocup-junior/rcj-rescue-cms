@@ -65,6 +65,8 @@ mailQueue.process('send', function(job, done){
           }
       });
     }
+    // Not sent: there is nothing to send it with
+    return;
   }
   job.progress(10);
 
