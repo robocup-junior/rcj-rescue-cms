@@ -91,7 +91,10 @@ block main_content
               td
                 a(href="" ng-click="mailView(mail)" ng-bind="mail.subject")
               td(ng-bind='mail.team.teamCode')
-              td.font-weight-bold(ng-bind='mail.team.name')
+              td.font-weight-bold(ng-if='mail.team' ng-bind='mail.team.name')
+              td.font-weight-bold(ng-if='!mail.team')
+                i.fas.fa-user-tie.mr-1.text-muted(uib-tooltip='{{"mail.home.toStaff" | translate}}')
+                | {{mail.user.username}}
               td(ng-bind='mail.team.country')
               td(ng-bind='mail.team.league')
               td.text-nowrap

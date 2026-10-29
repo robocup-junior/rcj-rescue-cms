@@ -21,6 +21,8 @@ const mailDb = require('../../models/mail');
 const sanitizeFilename = require('sanitize-filename');
 const {escapeRegExp} = require('lodash');
 const competitiondb = require('../../models/competition');
+const userdb = require('../../models/user');
+const validator = require('validator');
 const {mailQueue} = require("../../queue/mailQueue")
 const mkdirp = require("mkdirp");
 const { match } = require('assert');
@@ -175,10 +177,139 @@ function writeFile (path, contents, cb) {
   fs.writeFile(path, contents, cb);
 }
 
+/**
+ * A mail queued for the mail server and kept with the competition's sent mails: to a team, or to a
+ * user of the competition's staff (recipient: {competition, team} or {competition, user}).
+ */
+async function queueMail(req, recipient, to, mailData, reservation) {
+  let html = mailData.content
+    .replace(/\r?\n/g, '')
+    .replace(/<p><br><\/p>/g, '<br>')
+    .replace(/<\/p><p>/g, '<br>')
+    .replace(/<span class="ql-cursor">﻿<\/span>/, '');
+
+  const regexpHref = /(href=)["|'](.*?)["|']+/g;
+
+  const mailId = randomToken(N);
+
+  let match;
+
+  // Image attachment
+  const regexpSrc = /<img src=["|'](.*?)["|']+/g;
+  let attachments = [];
+  const htmlB = html
+  const destination = safePath('mailAttachment', recipient.competition, mailId);
+  while (match = regexpSrc.exec(htmlB)) {
+    // Only the pictures put in the mail (data: URIs) are attached: a path or a URL there would
+    // have the server attach its own files, or what it is given at the URL. The others are left
+    // to the mail readers to fetch.
+    if (!/^data:image\//i.test(match[1])) continue;
+    let cid = `${mailId}-${attachments.length}`;
+    attachments.push({
+      'path': match[1],
+      'cid': cid
+    })
+    html = html.replace(match[1], `cid:${cid}`);
+    writeFile(`${destination}/${cid}`,match[1],function(err){
+      if(err) throw err;
+    });
+  }
+
+  let html4text = html;
+
+  const replacedURL = [];
+  while ((match = regexpHref.exec(html)) !== null) {
+    if (match[2].indexOf('/api/mail/click/') == -1) {
+      const token = randomToken(N / 4);
+
+      html = html.replace(
+        new RegExp(escapeRegExp(match[0]), 'g'),
+        `href="${req.headers.origin}/api/mail/click/${mailId}/${token}"`
+      );
+      html4text = html4text.replace(
+        new RegExp(escapeRegExp(match[2]), 'g'),
+        `${req.headers.origin}/api/mail/click/${mailId}/${token}`
+      );
+
+      const tmp = {
+        token,
+        url: match[2],
+      };
+      replacedURL.push(tmp);
+    }
+  }
+
+  const text = htmlToText(html4text, {
+    tags: { a: { options: { hideLinkHrefIfSameAsText: true } } },
+  });
+
+  html = `<style type="text/css">p {margin:0; padding:0; margin-bottom:0;}</style>${html}<img src="${req.headers.origin}/api/mail/open/${mailId}"/>`;
+
+  const subject = mailData.title.replace("_", "");
+  const message = {
+    from: {
+      name: process.env.MAIL_SENDER || 'RoboCupJunior CMS',
+      address: process.env.MAIL_FROM,
+    },
+    to,
+    subject,
+    html,
+    text,
+    replyTo: process.env.MAIL_REPLY || process.env.MAIL_FROM,
+    attachments,
+    // (nothing of the message read from the server's files or fetched from URLs)
+    disableFileAccess: true,
+    disableUrlAccess: true,
+  };
+
+  const now = Math.floor(new Date().getTime() / 1000);
+  const data = await new mailDb.mail({
+    competition: recipient.competition,
+    team: recipient.team,
+    user: recipient.user,
+    mailId,
+    messageId: null,
+    time: reservation / 1000 || now,
+    reservation: reservation > 0,
+    to,
+    subject,
+    html,
+    plain: text,
+    status: -1,
+    events: [
+      {
+        time: now,
+        event: '== Email has been added to the queue. ==',
+        user: req.user.username,
+      },
+    ],
+    replacedURL,
+  }).save();
+
+  let delay = 0;
+  if(reservation){
+    delay = reservation - new Date().getTime();
+    if(delay < 0) delay = 0;
+  }
+  mailQueue.add('send',{message, mailDbID: data._id}, {attempts:3, backoff:60000, delay});
+}
+
+// The mails of a request ({data: [{_id, mailData: {title, content}}], reservation}): each of a
+// recipient by its id, with its subject and content as strings
+function mailsOf(body) {
+  const recipients = body.data;
+  if (!Array.isArray(recipients) || !recipients.every((r) => r && ObjectId.isValid(r._id) && r.mailData
+    && typeof r.mailData.title === 'string' && typeof r.mailData.content === 'string')) {
+    return null;
+  }
+  return recipients;
+}
+
+function reservationOf(body) {
+  return body.reservation ? new Date(body.reservation).getTime() : undefined;
+}
+
 adminRouter.post('/send', access.of(competitiondb.team, 'body.data[]._id', ACCESSLEVELS.ADMIN), async function (req, res, next) {
-  const teams = req.body.data;
-  let reservation = req.body.reservation;
-  
   if(smtp == null){
     res.status(500).send({
       msg: 'Please check smtp parameters',
@@ -186,11 +317,11 @@ adminRouter.post('/send', access.of(competitiondb.team, 'body.data[]._id', ACCES
     return;
   }
 
+  const teams = mailsOf(req.body);
+  if (!teams) return res.status(400).send({ msg: 'Bad request' });
+
   // The teams as stored, not as the request has them: of a competition the user administers, and
   // at their own addresses
-  if (!Array.isArray(teams) || !teams.every((team) => team && ObjectId.isValid(team._id))) {
-    return res.status(400).send({ msg: 'Bad request' });
-  }
   const dbTeams = await competitiondb.team.find({ _id: { $in: teams.map((team) => team._id) } }).select('competition email').lean();
   for (const team of teams) {
     const dbTeam = dbTeams.find((t) => t._id.equals(team._id));
@@ -201,152 +332,93 @@ adminRouter.post('/send', access.of(competitiondb.team, 'body.data[]._id', ACCES
     team.email = dbTeam.email;
   }
 
-  if(reservation){
-    reservation = new Date(reservation).getTime();
+  const reservation = reservationOf(req.body);
+  try {
+    for (const team of teams) {
+      await queueMail(req, { competition: team.competition, team: team._id }, team.email, team.mailData, reservation);
+    }
+  } catch (e) {
+    logger.error(e);
+    return res.status(500).send({ msg: e.message });
   }
+  res.status(200).send({
+    msg: 'Emails have been added to the queue!',
+  });
+});
 
-  let count = teams.length;
-  let sent = false;
-
-  for (const team of teams) {
-    let html = team.mailData.content
-      .replace(/\r?\n/g, '')
-      .replace(/<p><br><\/p>/g, '<br>')
-      .replace(/<\/p><p>/g, '<br>')
-      .replace(/<span class="ql-cursor">﻿<\/span>/, '');
-
-    const regexpHref = /(href=)["|'](.*?)["|']+/g;
-
-    const mailId = randomToken(N);
-
-    let match;
-
-    // Image attachment
-    const regexpSrc = /<img src=["|'](.*?)["|']+/g;
-    let attachments = [];
-    const htmlB = html
-    const destination = safePath('mailAttachment', team.competition, mailId);
-    while (match = regexpSrc.exec(htmlB)) {
-      // Only the pictures put in the mail (data: URIs) are attached: a path or a URL there would
-      // have the server attach its own files, or what it is given at the URL. The others are left
-      // to the mail readers to fetch.
-      if (!/^data:image\//i.test(match[1])) continue;
-      let cid = `${mailId}-${attachments.length}`;
-      attachments.push({
-        'path': match[1],
-        'cid': cid
-      })
-      html = html.replace(match[1], `cid:${cid}`);
-      writeFile(`${destination}/${cid}`,match[1],function(err){
-        if(err) throw err;
-      });
-    }
-
-    let html4text = html;
-
-    const replacedURL = [];
-    while ((match = regexpHref.exec(html)) !== null) {
-      if (match[2].indexOf('/api/mail/click/') == -1) {
-        const token = randomToken(N / 4);
-
-        html = html.replace(
-          new RegExp(escapeRegExp(match[0]), 'g'),
-          `href="${req.headers.origin}/api/mail/click/${mailId}/${token}"`
-        );
-        html4text = html4text.replace(
-          new RegExp(escapeRegExp(match[2]), 'g'),
-          `${req.headers.origin}/api/mail/click/${mailId}/${token}`
-        );
-
-        const tmp = {
-          token,
-          url: match[2],
-        };
-        replacedURL.push(tmp);
-      }
-    }
-
-    const text = htmlToText(html4text, {
-      tags: { a: { options: { hideLinkHrefIfSameAsText: true } } },
-    });
-
-    html = `<style type="text/css">p {margin:0; padding:0; margin-bottom:0;}</style>${html}<img src="${req.headers.origin}/api/mail/open/${mailId}"/>`;
-
-    const message = {
-      from: {
-        name: process.env.MAIL_SENDER || 'RoboCupJunior CMS',
-        address: process.env.MAIL_FROM,
+// The competition's staff: the users with a level or a role in it
+function staffOf(competitionId) {
+  return {
+    competitions: {
+      $elemMatch: {
+        id: competitionId,
+        $or: [{ accessLevel: { $gt: ACCESSLEVELS.NONE } }, { 'role.0': { $exists: true } }],
       },
-      to: team.email,
-      subject: team.mailData.title.replace("_", ""),
-      html,
-      text,
-      replyTo: process.env.MAIL_REPLY || process.env.MAIL_FROM,
-      attachments,
-      // (nothing of the message read from the server's files or fetched from URLs)
-      disableFileAccess: true,
-      disableUrlAccess: true,
-    };
+    },
+  };
+}
 
-    try {
-      const now = Math.floor(new Date().getTime() / 1000);
-      const newMail = new mailDb.mail({
-        competition: team.competition,
-        team: team._id,
-        mailId,
-        messageId: null,
-        time: reservation / 1000 || now,
-        reservation: reservation > 0,
-        to: team.email,
-        subject: team.mailData.title.replace("_", ""),
-        html,
-        plain: text,
-        status: -1,
-        events: [
-          {
-            time: now,
-            event: '== Email has been added to the queue. ==',
-            user: req.user.username,
-          },
-        ],
-        replacedURL,
-      });
+adminRouter.get('/staff/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), async function (req, res, next) {
+  const id = req.params.competitionId;
 
-      newMail.save(function (err, data) {
-        if (err) {
-          logger.error(err);
-          sent = true;
-          res.status(500).send({
-            msg: err.message,
-          });
-        } else {
-          let delay = 0;
-          if(reservation){
-            delay = reservation - new Date().getTime();
-            if(delay < 0) delay = 0;
-          }
-          mailQueue.add('send',{message, mailDbID: data._id}, {attempts:3, backoff:60000, delay});
-          count--;
-          if (count <= 0 && !sent) {
-            sent = true;
-            res.status(200).send({
-              msg: 'Emails have been added to the queue!',
-            });
-          }
-        }
-      });
-
-
-    } catch (e) {
-      if (!sent) {
-        sent = true;
-        res.status(500).send({
-          msg: e,
-        });
-      }
-      logger.error(e);
-    }
+  try {
+    const users = await userdb.user.find(staffOf(id)).select('username email competitions').lean();
+    res.status(200).send(users.map((user) => {
+      const right = user.competitions.find((c) => c.id.equals(id));
+      return {
+        _id: user._id,
+        username: user.username,
+        accessLevel: right.accessLevel,
+        role: right.role,
+        // The addresses are for the super admins (who manage the users) only, as in /api/users
+        email: req.user.superDuperAdmin ? user.email : undefined,
+        hasEmail: typeof user.email === 'string' && validator.isEmail(user.email),
+      };
+    }));
+  } catch (err) {
+    logger.error(err);
+    res.status(400).send({
+      msg: 'Could not get staff',
+      err: err.message,
+    });
   }
+});
+
+adminRouter.post('/staff/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), async function (req, res, next) {
+  const id = req.params.competitionId;
+
+  if(smtp == null){
+    res.status(500).send({
+      msg: 'Please check smtp parameters',
+    });
+    return;
+  }
+
+  const users = mailsOf(req.body);
+  if (!users) return res.status(400).send({ msg: 'Bad request' });
+
+  // The users as stored: of the competition's staff, and at their own addresses
+  const dbUsers = await userdb.user.find({ _id: { $in: users.map((user) => user._id) }, ...staffOf(id) }).select('email').lean();
+  for (const user of users) {
+    const dbUser = dbUsers.find((u) => u._id.equals(user._id));
+    if (!dbUser || typeof dbUser.email !== 'string' || !validator.isEmail(dbUser.email)) {
+      return res.status(400).send({ msg: 'Not a user of the staff with an address' });
+    }
+    user.email = dbUser.email;
+  }
+
+  const reservation = reservationOf(req.body);
+  try {
+    for (const user of users) {
+      await queueMail(req, { competition: id, user: user._id }, [user.email], user.mailData, reservation);
+    }
+  } catch (e) {
+    logger.error(e);
+    return res.status(500).send({ msg: e.message });
+  }
+  res.status(200).send({
+    msg: 'Emails have been added to the queue!',
+  });
 });
 
 adminRouter.get('/sent/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
@@ -366,8 +438,9 @@ adminRouter.get('/sent/:competitionId', access.competition(ACCESSLEVELS.ADMIN, '
     .find({
       competition: id,
     })
-    .select('competition mailId messageId status subject team time to reservation')
+    .select('competition mailId messageId status subject team user time to reservation')
     .populate('team', 'name league teamCode country email')
+    .populate('user', 'username')
     .exec(function (err, dbMail) {
       if (err) {
         logger.error(err);

@@ -11,6 +11,8 @@ const logger = require('../config/logger').mainLogger
 const mailSchema = new Schema({
   competition: {type: ObjectId, ref: 'Competition'},
   team: {type: ObjectId, ref: 'Team'},
+  // or, for a mail to the competition's staff, the user
+  user: {type: ObjectId, ref: 'User'},
   mailId: {type: String},
   messageId: {type: String},
   time: {type: Number},

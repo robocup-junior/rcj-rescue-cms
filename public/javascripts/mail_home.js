@@ -81,6 +81,36 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
     })
 
 
+    // The competition's staff: the users with a level or a role in it
+    $http.get("/api/mail/staff/" + competitionId).then(function (response) {
+        $scope.staff = response.data;
+    })
+
+    let levelName = {};
+    for (let level of [0, 1, 5, 10]) {
+        $translate('admin.authority.level' + level).then(function (val) {
+            levelName[level] = val;
+        }, function (translationId) {
+            levelName[level] = translationId;
+        });
+    }
+    $scope.levelName = function (accessLevel) {
+        if (accessLevel >= 10) return levelName[10];
+        if (accessLevel >= 5) return levelName[5];
+        if (accessLevel >= 1) return levelName[1];
+        return levelName[0];
+    }
+
+    // To the teams or to the staff
+    $scope.target = "team";
+    $scope.switchTarget = function (target) {
+        if ($scope.target == target) return;
+        angular.forEach($scope.teams, function (team) { team.checked = false; });
+        angular.forEach($scope.staff, function (user) { user.checked = false; });
+        $scope.selectedAll = false;
+        $scope.target = target;
+    }
+
     $scope.selectedTemplate = null;
     $http.get("/api/mail/templates").then(function (response) {
         $scope.templates = response.data
@@ -104,6 +134,13 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
 
     $scope.selectedAll = false;
     $scope.selectAll = function () {
+        if($scope.target == "staff"){
+            angular.forEach($scope.staff, function (user) {
+                user.checked = !$scope.selectedAll && user.hasEmail && !!$scope.staff_filter(user);
+            });
+            $scope.selectedAll = !$scope.selectedAll;
+            return;
+        }
         if($scope.selectedAll){
             angular.forEach($scope.teams, function (team) {
                 team.checked = false;
@@ -122,7 +159,7 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
 
     $scope.newEmail2SelectedTeam = function () {
         let chk = [];
-        angular.forEach($scope.teams, function (team) {
+        angular.forEach($scope.target == "staff" ? $scope.staff : $scope.teams, function (team) {
             if (team.checked) chk.push(team);
         });
         $scope.toTeam = chk;
@@ -130,6 +167,21 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
     }
 
     function prepareVariable(){
+        if($scope.target == "staff"){
+            for(let user of $scope.toTeam){
+                user.variable = {
+                    "userName": user.username,
+                    "competitionName": $scope.competition.name,
+                    "competitionId": $scope.competition._id,
+                    "accessLevel": $scope.levelName(user.accessLevel),
+                    "role": user.role.join(", "),
+                    "loginUrl": `${location.protocol}//${location.host}/login`
+                };
+            }
+            $scope.mode = "write";
+            window.scrollTo(0,0);
+            return;
+        }
         for(let i=0; i<$scope.toTeam.length; i++){
             let teamDeadline = $scope.toTeam[i].document.deadline;
             let deadline = $scope.competition.documents.deadline;
@@ -230,7 +282,7 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
     $scope.showVariable = function(variable){
         let html = `<div style="max-height:calc(100vh - 200px);overflow:auto;"><table class='custom'><thead><tr><th>変数名</th><th>内容</th></tr></thead><tbody>`;
         Object.keys(variable).forEach((key) => {
-            html += `<tr><td>\${${key}}</td><td>${variable[key]}</td></tr>`;
+            html += `<tr><td>\${${key}}</td><td>${escapeHtml(variable[key])}</td></tr>`;
         })
         html += "</tbody></table></div>";
 
@@ -256,7 +308,8 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
             html: wait_mes,
             onBeforeOpen: () => {
                 Swal.showLoading()
-                $http.post(`/api/mail/send`, {data: $scope.toTeam, reservation: $scope.reservation}).then(function (response) {
+                let url = $scope.target == "staff" ? `/api/mail/staff/${competitionId}` : `/api/mail/send`;
+                $http.post(url, {data: $scope.toTeam, reservation: $scope.reservation}).then(function (response) {
                     Swal.close()
                     Swal({
                         type: 'success',
@@ -264,6 +317,9 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
                         html: completeMes_mes
                     })
                     $scope.toTeam = [];
+                    angular.forEach($scope.teams, function (team) { team.checked = false; });
+                    angular.forEach($scope.staff, function (user) { user.checked = false; });
+                    $scope.selectedAll = false;
                     $scope.mailContent = "";
                     $scope.mailTitle = "";
                     $scope.previewNo = 0;
@@ -306,6 +362,11 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
 
     $scope.list_filter = function (value, index, array) {
         return (showAllLeagues || $scope.Rleagues[value.league])  && (~value.name.indexOf($scope.refineName)) && (~value.teamCode.indexOf($scope.refineCode)) && (~value.country.indexOf($scope.refineRegion))
+    }
+
+    $scope.refineUser = "";
+    $scope.staff_filter = function (value, index, array) {
+        return ~value.username.indexOf($scope.refineUser)
     }
 
     $scope.quillHeight = function (editor) {

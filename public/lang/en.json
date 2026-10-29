@@ -1737,6 +1737,11 @@
             "reservation": "Delivery Reservation",
             "sendTime": "Delivery Time",
             "now": "Now!",
+            "toTeams": "To teams",
+            "toStaff": "To staff",
+            "staffDescription": "The users with an access level or a role in this competition. Only those with an email address registered can be mailed.",
+            "role": "Role",
+            "noEmail": "Not registered",
             "js": {
                 "sending": "In the process of delivery",
                 "wait": "Please wait for a while.",
