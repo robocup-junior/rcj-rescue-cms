@@ -20,12 +20,16 @@ async function ensureMapImages(runs) {
     fs.mkdirSync(tmpDir, { recursive: true });
   }
 
-  const mapKeys = new Set();
+  // The picture of each map, made once for all the runs on it
+  const images = new Map();
   for (const run of runs) {
     if (run.map) {
-      const mapKey = run.map._id ? run.map._id.toString() : `inline-${runs.indexOf(run)}`;
-      if (!mapKeys.has(mapKey)) {
-        mapKeys.add(mapKey);
+      // Kept as a file by the id of the map: only one of the database's (the maps the public editors
+      // send have one of their own, which could be ../...)
+      const id = run.map._id ? String(run.map._id) : null;
+      const file = id && /^[0-9a-f]{24}$/i.test(id) ? path.join(tmpDir, `${id}.png`) : null;
+      const mapKey = id || `inline-${runs.indexOf(run)}`;
+      if (!images.has(mapKey)) {
         let rule = '2026';
         if (run.competition && run.competition.leagues && run.team) {
           const league = run.competition.leagues.find((l) => l.league == run.team.league);
@@ -33,13 +37,10 @@ async function ensureMapImages(runs) {
         }
 
         run.mapImageBuffer = await lineSSR.generatePNG(run.map, rule);
-        if (!run.map._id) continue;
-
-        const buffer = run.mapImageBuffer;
-        fs.writeFileSync(path.join(tmpDir, `${run.map._id}.png`), buffer);
-      } else if (run.map._id) {
-        const existingPath = path.join(tmpDir, `${run.map._id}.png`);
-        if (fs.existsSync(existingPath)) run.mapImageBuffer = fs.readFileSync(existingPath);
+        images.set(mapKey, run.mapImageBuffer);
+        if (file) fs.writeFileSync(file, run.mapImageBuffer);
+      } else {
+        run.mapImageBuffer = images.get(mapKey);
       }
     }
   }

@@ -406,9 +406,10 @@ adminRouter.get('/sent/:competitionId/:mailId', access.competition(ACCESSLEVELS.
       const destination = safePath('mailAttachment', id, mailId);
       let match;
       while (match = regexpSrc.exec(dbMail.html)) {
-        let cid = match[1]
-        if (fs.existsSync(`${destination}/${cid}`)) {
-          htmlMail = htmlMail.replace(`cid:${match[1]}`, fs.readFileSync(`${destination}/${cid}`, { encoding: "utf-8" }));
+        // A file of the mail's: the cid is of the HTML kept, which an admin wrote
+        const file = pathL.join(destination, sanitizeFilename(match[1]));
+        if (fs.existsSync(file)) {
+          htmlMail = htmlMail.replace(`cid:${match[1]}`, fs.readFileSync(file, { encoding: "utf-8" }));
         }
       }
       return res.status(200).send({ html: htmlMail, plain: dbMail.plain });
@@ -629,9 +630,10 @@ publicRouter.get('/get/:teamId/:token/:mailId', access.team(), function (req, re
             const destination = safePath('mailAttachment', team.competition, mailId);
             let match;
             while (match = regexpSrc.exec(dbMail.html)) {
-              let cid = match[1]
-              if (fs.existsSync(`${destination}/${cid}`)) {
-                htmlMail = htmlMail.replace(`cid:${match[1]}`, fs.readFileSync(`${destination}/${cid}`, { encoding: "utf-8" }));
+              // A file of the mail's: the cid is of the HTML kept, which an admin wrote
+              const file = pathL.join(destination, sanitizeFilename(match[1]));
+              if (fs.existsSync(file)) {
+                htmlMail = htmlMail.replace(`cid:${match[1]}`, fs.readFileSync(file, { encoding: "utf-8" }));
               }
             }
             return res.status(200).send({ html: htmlMail, plain: dbMail.plain });

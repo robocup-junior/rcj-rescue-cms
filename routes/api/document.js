@@ -1164,7 +1164,7 @@ privateRouter.get('/review/files/:teamId', access.of(competitiondb.team, 'params
 
           const files = read(path);
           for (let i = 0; i < files.length; i++) {
-            files[i] = files[i].replace('\\', '/');
+            files[i] = files[i].replace(/\\/g, '/');
           }
           res.send(files);
         } else {
