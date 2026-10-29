@@ -216,9 +216,10 @@ app.controller('DocumentResultController', ['$scope', '$uibModal', '$log', '$htt
                                     if(cc != "") sheet.getRow(row).getCell(col).value = Number(cc);
                                     break;
                                 case 'input':
-                                    let d = document.createElement('div');
-                                    d.innerHTML = cc;
-                                    sheet.getRow(row).getCell(col).value = d.innerText;
+                                    // The text of the comment, parsed where nothing of it is run (an
+                                    // element's innerHTML would load its images, with their onerror)
+                                    let d = new DOMParser().parseFromString(cc, 'text/html');
+                                    sheet.getRow(row).getCell(col).value = d.body.textContent;
                                     break;
                                 case 'select':
                                     let val = q.i18n.find(i=>i.language == $scope.displayLang).options.find(o=>o.value == cc).text;
