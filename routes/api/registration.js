@@ -78,7 +78,7 @@ if (process.env.MAIL_SMTP &&process.env.MAIL_PORT &&process.env.MAIL_FROM) {
   smtp = null;
 }
 
-publicRouter.post('/auth/:competitionId/:leagueId/:lang', function (req, res, next) {
+publicRouter.post('/auth/:competitionId/:leagueId/:lang', require('../../helper/guessLimits').registrationCode, function (req, res, next) {
   const { competitionId } = req.params;
   const { leagueId } = req.params;
   const { lang } = req.params;
@@ -98,7 +98,7 @@ publicRouter.post('/auth/:competitionId/:leagueId/:lang', function (req, res, ne
         } else if (dbCompetition) {
           const now = new Date();
           const timestamp = Math.floor(now.getTime() / 1000);
-          let l = dbCompetition.registration.filter(r => r.league == leagueId && r.enable &&  r.deadline >= timestamp && r.passCode == passCode);
+          let l = dbCompetition.registration.filter(r => r.league == leagueId && r.enable &&  r.deadline >= timestamp && r.passCode === String(passCode));
           if(l.length == 1){
             if(smtp == null){
               res.status(500).send({

@@ -9,6 +9,7 @@ const validator = require('validator');
 const passport = require('passport');
 const userdb = require('../../models/user');
 const logger = require('../../config/logger').mainLogger;
+const guessLimits = require('../../helper/guessLimits');
 
 //= =======================================================================
 //                          auth(mixed) Api endpoints
@@ -29,10 +30,14 @@ const logger = require('../../config/logger').mainLogger;
  *
  * @apiSuccess (400) {String}   msg Bottled message
  */
-router.post('/login', function (req, res) {
+router.post('/login', guessLimits.login, function (req, res) {
   const { username } = req.body;
   const { password } = req.body;
 
+  // (only names and passwords: an object here would be a query of the database)
+  if (typeof username !== 'string' || typeof password !== 'string') {
+    return res.status(400).send({ msg: 'Login failed' });
+  }
   if (!validator.isAscii(password)) {
     return res.status(400).send({ msg: 'Invalid characters' });
   }
