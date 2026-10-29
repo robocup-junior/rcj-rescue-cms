@@ -333,7 +333,10 @@ app.controller('DocumentReviewController', ['$scope', '$uibModal', '$log', '$htt
 
     $scope.go = function (path) {
         //$scope.save();
-        window.location = path
+        // Only to a page of this site: the path may be the ?return= of a link anyone could have made
+        var url = new URL(path, location.href);
+        if (url.origin !== location.origin) return;
+        window.location = url.pathname + url.search + url.hash;
     }
 
     $scope.openRun = function(qId){

@@ -447,7 +447,10 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     $scope.go = function (path) {
         playSound(sClick);
         socket.emit('unsubscribe', 'runs/' + runId);
-        window.location = path;
+        // Only to a page of this site: the path may be the ?return= of a link anyone could have made
+        var url = new URL(path, location.href);
+        if (url.origin !== location.origin) return;
+        window.location = url.pathname + url.search + url.hash;
     }
 
     $scope.changeFloor = function (z) {
