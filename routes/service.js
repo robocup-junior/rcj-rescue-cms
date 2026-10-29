@@ -1,6 +1,8 @@
 // -*- tab-width: 2 -*-
 const { ObjectId } = require('mongoose').Types;
 const express = require('express');
+const fs = require('fs');
+const path = require('path');
 
 const router = express.Router();
 
@@ -9,9 +11,14 @@ router.get('/', function (req, res) {
   res.render('service_home', { user: req.user });
 });
 
+// The editors there are, by the views of admin/mapEditor (maze_2026...): the rule of the URL may
+// be anything (../ too, as %2F)
+const EDITORS = fs.readdirSync(path.join(__dirname, '../views/admin/mapEditor')).map((file) => path.parse(file).name);
+
 router.get('/editor/maze/:rule', async function (req, res, next) {
-  const { rule } = req.params;
-  res.render(`admin/mapEditor/maze_${rule}`, { user: req.user, pubService: true, leagueId: "Maze" });
+  const editor = `maze_${req.params.rule}`;
+  if (!EDITORS.includes(editor)) return next();
+  res.render(`admin/mapEditor/${editor}`, { user: req.user, pubService: true, leagueId: "Maze" });
 });
 
 // The public Simulation world editor still supports the 2025 rules, unlike the rest of the CMS
@@ -30,8 +37,9 @@ router.get('/editor/simulation/2026/classic', async function (req, res, next) {
 });
 
 router.get('/editor/line/:rule', function (req, res, next) {
-  const { rule } = req.params;
-  res.render(`admin/mapEditor/line_${rule}`, { user: req.user, pubService: true, leagueId: "Line" });
+  const editor = `line_${req.params.rule}`;
+  if (!EDITORS.includes(editor)) return next();
+  res.render(`admin/mapEditor/${editor}`, { user: req.user, pubService: true, leagueId: "Line" });
 });
 
 module.exports = router;

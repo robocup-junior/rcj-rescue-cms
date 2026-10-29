@@ -60,11 +60,24 @@ exports.ensureAuthenticated = function ensureAuthenticated(req, res, next) {
   res.redirect('/login?page=' + now_access);
 }
 
+// Whether the URL (of a redirect) is of a page of the site, wherever the site is: a path, with no
+// host of its own (as //other.site/ and /\other.site/ have)
+function isOfThisSite(url) {
+  const site = 'http://this-site.invalid';
+  try {
+    return url.startsWith('/') && new URL(url, site).origin === site;
+  } catch (e) {
+    return false;
+  }
+}
+
 // check to see that user is not logged in, check for visiting /login
 exports.ensureNotAuthenticated = function ensureNotAuthenticated(req, res, next) {
   if (req.isAuthenticated()) {
-    if (req.query.page === undefined)return res.redirect('/home')
-    else return res.redirect(req.query.page)
+    // Back to the page asked for before the login: only one of this site (not //other.site/...)
+    const page = req.query.page;
+    if (typeof page === 'string' && isOfThisSite(page)) return res.redirect(page);
+    return res.redirect('/home');
   }
   next();
 }
