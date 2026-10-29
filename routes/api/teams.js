@@ -10,7 +10,7 @@ const adminRouter = express.Router();
 const { ObjectId } = require('mongoose').Types;
 const mkdirp = require('mkdirp');
 const fs = require('fs');
-const crypto = require('crypto');
+const { randomToken } = require('../../helper/crypto');
 const { ACCESSLEVELS } = require('../../models/user');
 const logger = require('../../config/logger').mainLogger;
 const competitiondb = require('../../models/competition');
@@ -21,7 +21,6 @@ const safePath = require('../../helper/safePath');
 
 const { LEAGUES_JSON } = competitiondb;
 
-const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const N = 32;
 
 // publicRouter.get('/', function (req, res) {
@@ -263,9 +262,7 @@ adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition')
           teamCode: team.teamCode,
           country: team.country,
           document: {
-            token: Array.from(crypto.randomFillSync(new Uint8Array(N)))
-              .map((n) => S[n % S.length])
-              .join(''),
+            token: randomToken(N),
             answers: [],
           },
           email: team.email,
@@ -339,9 +336,7 @@ adminRouter.post('/bulk', access.competition(ACCESSLEVELS.ADMIN, 'body[].competi
             teamCode: team.teamCode,
             country: team.country,
             document: {
-              token: Array.from(crypto.randomFillSync(new Uint8Array(N)))
-                .map((n) => S[n % S.length])
-                .join(''),
+              token: randomToken(N),
               answers: [],
             },
             email: team.email,

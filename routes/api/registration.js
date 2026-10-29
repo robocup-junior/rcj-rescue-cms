@@ -10,7 +10,7 @@ const adminRouter = express.Router();
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 const { htmlToText } = require('html-to-text');
-const crypto = require('crypto');
+const { randomToken } = require('../../helper/crypto');
 const logger = require('../../config/logger').mainLogger;
 const mailDb = require('../../models/mail');
 const competitiondb = require('../../models/competition');
@@ -21,7 +21,6 @@ const access = require('../../helper/access');
 const safePath = require('../../helper/safePath');
 
 
-const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const N = 32;
 
 const TRANSPARENT_GIF_BUFFER = Buffer.from(
@@ -109,7 +108,7 @@ publicRouter.post('/auth/:competitionId/:leagueId/:lang', access.anyone("the lea
               return;
             }
             
-            const token = Array.from(crypto.randomFillSync(new Uint8Array(N))).map((n) => S[n % S.length]).join('');
+            const token = randomToken(N);
             const newMailAuth = new mailDb.mailAuth({
               competition: dbCompetition._id,
               league: leagueId,
@@ -216,7 +215,7 @@ publicRouter.post('/reg/:authId/:token/:lang', access.anyone('the token mailed c
           if (err) {
             logger.error(err);
           } else {
-            const team_token = Array.from(crypto.randomFillSync(new Uint8Array(N))).map((n) => S[n % S.length]).join('');
+            const team_token = randomToken(N);
             const newTeam = new competitiondb.team({
               name: teamName,
               league: authInfo.league,
@@ -279,15 +278,13 @@ publicRouter.post('/reg/:authId/:token/:lang', access.anyone('the token mailed c
                     let html4text = html;
                     const regexpHref = /(href=)["|'](.*?)["|']+/g;
 
-                    const mailId = Array.from(crypto.randomFillSync(new Uint8Array(N)))
-                      .map((n) => S[n % S.length])
-                      .join('');
+                    const mailId = randomToken(N);
 
                     let match;
                     let replacedURL = [];
                     while ((match = regexpHref.exec(html)) !== null) {
                       if (match[2].indexOf('/api/mail/click/') == -1) {
-                        let Mtoken = Array.from(crypto.randomFillSync(new Uint8Array(N / 4))).map((n) => S[n % S.length]).join('');
+                        let Mtoken = randomToken(N / 4);
                 
                         html = html.replace(
                           new RegExp(escapeRegExp(match[0]), 'g'),

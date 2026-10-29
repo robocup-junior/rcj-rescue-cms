@@ -13,7 +13,7 @@ const fs = require('fs');
 const mime = require('mime');
 const nodemailer = require('nodemailer');
 const { htmlToText } = require('html-to-text');
-const crypto = require('crypto');
+const { randomToken } = require('../../helper/crypto');
 const { ACCESSLEVELS } = require('../../models/user');
 const auth = require('../../helper/authLevels');
 const logger = require('../../config/logger').mainLogger;
@@ -30,7 +30,6 @@ const safePath = require('../../helper/safePath');
 
 
 
-const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const N = 32;
 
 const TRANSPARENT_GIF_BUFFER = Buffer.from(
@@ -218,9 +217,7 @@ adminRouter.post('/send', access.of(competitiondb.team, 'body.data[]._id', ACCES
 
     const regexpHref = /(href=)["|'](.*?)["|']+/g;
 
-    const mailId = Array.from(crypto.randomFillSync(new Uint8Array(N)))
-      .map((n) => S[n % S.length])
-      .join('');
+    const mailId = randomToken(N);
 
     let match;
 
@@ -246,9 +243,7 @@ adminRouter.post('/send', access.of(competitiondb.team, 'body.data[]._id', ACCES
     const replacedURL = [];
     while ((match = regexpHref.exec(html)) !== null) {
       if (match[2].indexOf('/api/mail/click/') == -1) {
-        const token = Array.from(crypto.randomFillSync(new Uint8Array(N / 4)))
-          .map((n) => S[n % S.length])
-          .join('');
+        const token = randomToken(N / 4);
 
         html = html.replace(
           new RegExp(escapeRegExp(match[0]), 'g'),

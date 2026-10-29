@@ -142,7 +142,17 @@ function verifyPassword(stored, salt, candidate, cb) {
   });
 }
 
+const TOKEN_LETTERS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+
+/** A random token of letters and digits, of the length; each letter as likely as any other. */
+function randomToken(length) {
+  let token = '';
+  for (let i = 0; i < length; i++) token += TOKEN_LETTERS[crypto.randomInt(TOKEN_LETTERS.length)];
+  return token;
+}
+
 module.exports.hashPassword = hashPassword;
+module.exports.randomToken = randomToken;
 module.exports.verifyPassword = verifyPassword;
 module.exports.generateHashWithSalt = generateHashWithSalt;
 module.exports.generateUniqueToken = generateUniqueToken;
