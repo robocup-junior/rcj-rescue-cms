@@ -38,7 +38,7 @@
     "ngQuill": "ng-quill#^4.5.3",
     "pdfjs": "https://github.com/mozilla/pdf.js/releases/download/v4.3.136/pdfjs-4.3.136-dist.zip",
     "popper.js": "^1.16.0",
-    "quill": "https://cdn.quilljs.com/1.3.7/quill.min.js",
+    "quill-dist": "https://cdn.quilljs.com/1.3.7/quill.min.js",
     "quill.snow": "https://cdn.quilljs.com/1.3.7/quill.snow.css",
     "quill-image-drop-and-paste": "https://github.com/chenjuneking/quill-image-drop-and-paste.git#1.3.0",
     "quill-image-resize-module": "https://github.com/kensnyder/quill-image-resize-module.git",
@@ -71,8 +71,7 @@
     "angular-translate-storage-cookie": "^2.18.1",
     "jquery": "^3.4.1",
     "popper.js": "^1.10.8",
-    "video.js": "e-tag:e373309b8",
-    "quill": "*"
+    "video.js": "e-tag:e373309b8"
   },
   "version": "21.4.33"
 }
