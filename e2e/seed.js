@@ -100,7 +100,7 @@ async function seed() {
         x: 1, y: 1, z: 0, isTile: true, isLinear: true,
         tile: { reachable: true, victims: { ...noVictims, left: 'Cognitive' }, cognitiveTargets: { left: { rings: { ring1: 'R', ring2: 'G', ring3: 'B', ring4: 'K', ring5: 'Y' } } } },
       },
-      { x: 3, y: 1, z: 0, isTile: true, isLinear: true, tile: { reachable: true, victims: { ...noVictims, top: 'H' } } },
+      { x: 3, y: 1, z: 0, isTile: true, isLinear: true, tile: { reachable: true, victims: { ...noVictims, top: 'OMEGA' } } },
       ...walls,
     ],
   });
