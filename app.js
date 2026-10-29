@@ -147,6 +147,8 @@ async function bootstrap(){
         extended: false
     }))
     app.use(cookieParser())
+    // No operators of the database in what requests give (helper/stripOperators.js)
+    app.use(require('./helper/stripOperators'))
     // The signage contents are put in by admins: not run as pages either (helper/servedFiles.js)
     app.use('/signage_content', require('./helper/servedFiles'))
     app.use(express.static(path.join(__dirname, 'public')))
