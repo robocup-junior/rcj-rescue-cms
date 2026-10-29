@@ -55,6 +55,9 @@ if (!process.env.MAIL_SMTP && process.env.MAIL_DEV_SMTP) {
 
 //Queue
 require("./queue/mailQueue")
+
+// The system's templates of the mails to the staff, where they are now (once, before the workers)
+if (cluster.isMaster) require('./helper/mailSender').moveStaffTemplates();
  
  cluster.schedulingPolicy = cluster.SCHED_RR;
  if (cluster.isMaster && numProcess > 1) {

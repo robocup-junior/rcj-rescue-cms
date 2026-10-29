@@ -109,3 +109,15 @@ test('the admin of a competition, not a super admin, gives rights on its setting
   const users = await (await request.get('/api/users')).json();
   expect(users.find((u) => u.username === `helper${stamp}`).competitions[0].accessLevel).toBe(5);
 });
+
+// The mail of a new account, made from the system's template of the mails to the staff (in
+// templates/mail/staff): sent to the user's address with the user's name in it.
+test('a new user is mailed the account, from the staff template', async ({ page }) => {
+  const username = `mailed${Date.now()}`;
+  const address = `${username}@example.com`;
+  const res = await page.request.post('/api/users', { data: { username, password: 'mailedpass', email: address, emailNotification: true } });
+  expect(res.ok()).toBeTruthy();
+  await expect.poll(async () => (await api.mailsTo(address)).map((m) => m.subject)).toContain('Welcome to RCJ CMS – Your Account Information');
+  const [mail] = await api.mailsTo(address);
+  expect(mail.html).toContain(`Dear ${username},`);
+});

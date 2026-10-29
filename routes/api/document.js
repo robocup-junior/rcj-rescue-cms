@@ -25,7 +25,7 @@ const VIDEO_FORMATS = 'mov,mp4,m4a,3gp,3g2,mj2,matroska,webm,avi,mpegts,mpeg,mpe
 
 const competitiondb = require('../../models/competition');
 const { LEAGUES_JSON } = competitiondb;
-const {sendMail} = require('../../helper/mailSender');
+const {sendMail, STAFF} = require('../../helper/mailSender');
 
 const dateformat = require('dateformat');
 let read = require('fs-readdir-recursive');
@@ -1986,7 +1986,7 @@ adminRouter.get('/:competitionId/reviewStatus', access.competition(ACCESSLEVELS.
                           };
                           const subject = "Document Evaluation Reminder & Status Update";
                           const templateName = "_Document Evaluation Reminder and Status Update";
-                          sendMail(subject, templateName, "", variables, user.email);
+                          sendMail(subject, templateName, "", variables, user.email, STAFF);
                         }
                       }
                       

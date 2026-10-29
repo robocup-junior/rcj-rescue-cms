@@ -11,7 +11,7 @@ const { ObjectId } = require('mongoose').Types;
 const logger = require('../../config/logger').mainLogger;
 const auth = require('../../helper/authLevels');
 const { ACCESSLEVELS } = require('../../models/user');
-const {sendMail} = require('../../helper/mailSender');
+const {sendMail, STAFF} = require('../../helper/mailSender');
 const access = require('../../helper/access');
 
 adminRouter.get('/', access.anyAdmin('the users, to give them rights in a competition; their addresses for the super admins only'), function (req, res) {
@@ -127,7 +127,7 @@ superRouter.post('/', access.superAdmin(), function (req, res) {
     };
     const subject = "Welcome to RCJ CMS – Your Account Information";
     const templateName = "_Welcome to RCJ CMS – Your Account Information";
-    sendMail(subject, templateName, "", variables, user.email);
+    sendMail(subject, templateName, "", variables, user.email, STAFF);
   }
 });
 
