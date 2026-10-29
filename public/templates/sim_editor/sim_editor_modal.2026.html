@@ -1,0 +1,312 @@
+<style>
+  .innerTileImg {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .modal-dialog {
+    margin: auto;
+    width: 80vw; 
+    min-width: 80vw;
+  }
+
+</style>
+<div class="modal-header sim-modal-header">
+  <h3 class="modal-title"><i class="fas fa-cube"></i>{{"admin.simMapEditor.item" | translate}}</h3>
+</div>
+<div class="modal-body sim-modal-body">
+  <div class="sim-modal-section">
+    <div class="sim-modal-section-title">{{"admin.mazeMapEditor.tileProperties" | translate}}</div>
+    <div class="sim-chip-group">
+      <label class="sim-chip" ng-class="{active: cell.tile.checkpoint}"><input type="checkbox" ng-model="cell.tile.checkpoint" id="isCheckpoint"><img src="/images/checkpoint.png" height="20" alt="">{{"admin.simMapEditor.cp" | translate}}</label>
+      <label class="sim-chip" ng-class="{active: cell.tile.black}"><input type="checkbox" ng-model="cell.tile.black" id="isBlack" ng-change="blackChanged()"><i class="fas fa-square"></i>{{"admin.simMapEditor.black" | translate}}</label>
+      <label class="sim-chip" ng-class="{active: cell.tile.swamp}"><input type="checkbox" ng-model="cell.tile.swamp" id="isSwamp"><i class="fas fa-water"></i>{{"admin.simMapEditor.swamp" | translate}}</label>
+      <label class="sim-chip" ng-class="{active: cell.tile.obstacle}"><input type="checkbox" ng-model="cell.tile.obstacle" id="isObstacle"><img src="/images/obstacle.png" height="20" alt="">{{"admin.simMapEditor.obstacle" | translate}}</label>
+      <label class="sim-chip start" ng-class="{active: isStart, disabled: isStart}"><input type="checkbox" ng-model="isStart" ng-disabled="isStart" ng-change="startChanged()" id="isStart"><i class="fas fa-play"></i>{{"admin.simMapEditor.start" | translate}}</label>
+    </div>
+  </div>
+  
+  <div class="sim-modal-section">
+    <div class="sim-modal-section-title passage">{{"admin.simMapEditor.passageTitle" | translate}}<small>{{"admin.simMapEditor.passageHint" | translate}}</small></div>
+    <div class="sim-passage-context" ng-if="passageInfo">
+      <i class="fas fa-map-marker-alt"></i>
+      <span>{{"admin.simMapEditor.passageCtx.here" | translate:{room: passageInfo.room} }}</span>
+      <span class="sim-passage-context-borders" ng-if="passageInfo.borders.length && passageInfo.ownOpen">
+        {{"admin.simMapEditor.passageCtx.borders" | translate}}
+        <span class="sim-passage-context-room" ng-repeat="r in passageInfo.borders">{{"admin.simMapEditor.areaShort" | translate}}{{r}}</span>
+      </span>
+      <span class="sim-passage-context-none" ng-if="!passageInfo.borders.length">{{"admin.simMapEditor.passageCtx.noBorder" | translate}}</span>
+      <span class="sim-passage-context-none" ng-if="passageInfo.borders.length && !passageInfo.ownOpen">{{"admin.simMapEditor.passageCtx.ownClosed" | translate:{room: passageInfo.room} }}</span>
+    </div>
+    <div class="sim-passage-grid">
+      <button type="button" class="sim-passage" ng-class="{'active': !cell.tile.color}" ng-click="cell.tile.color = ''">
+        <span class="sim-passage-swatch none"><i class="fas fa-ban"></i></span>
+        <span class="sim-passage-text">
+          <span class="sim-passage-rooms">{{"admin.simMapEditor.passageNone" | translate}}</span>
+        </span>
+      </button>
+      <button type="button" class="sim-passage" ng-repeat="p in passageColors" ng-class="{'active': cell.tile.color === p.color, 'unavailable': !passageOk(p)}" ng-click="cell.tile.color = p.color" ng-disabled="!passageOk(p) && cell.tile.color !== p.color" ng-style="{'--passage-color': p.color}" title="{{passageOk(p) ? '' : ('admin.simMapEditor.passageCtx.only' | translate:{from: p.from, to: p.to})}}">
+        <span class="sim-passage-swatch"></span>
+        <span class="sim-passage-text">
+          <span class="sim-passage-rooms">
+            <span class="sim-passage-room">{{"admin.simMapEditor.areaShort" | translate}}{{p.from}}</span><i class="fas fa-exchange-alt"></i><span class="sim-passage-room">{{"admin.simMapEditor.areaShort" | translate}}{{p.to}}</span>
+          </span>
+          <span class="sim-passage-name" ng-if="passageOk(p)">{{p.name | translate}}</span>
+          <span class="sim-passage-name" ng-if="!passageOk(p)">{{"admin.simMapEditor.passageCtx.only" | translate:{from: p.from, to: p.to} }}</span>
+        </span>
+        <i class="fas fa-check-circle sim-passage-check"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="sim-modal-section">
+  <div class="sim-modal-section-title victims">{{"admin.simMapEditor.placement" | translate}}<small>{{"admin.simMapEditor.oneVictim" | translate}}</small></div>
+  <div class="sim-victim-layout">
+  <div class="sim-victim-main sim-table-scroll">
+  <table class="sim-victim-table sim-placement-table">
+    <tr class="sim-group-row">
+      <th></th>
+      <th class="sim-group-none"></th>
+      <th class="sim-group-letter" colspan="3">{{"admin.simMapEditor.letterVictims" | translate}}<small>{{"admin.simMapEditor.letterOnlyHint" | translate}}</small></th>
+      <th class="sim-group-ct">{{"admin.simMapEditor.ctGroup" | translate}}<small>{{"admin.simMapEditor.ctGroupHint" | translate}}</small></th>
+    </tr>
+    <tr align="center">
+      <th>&nbsp;</th>
+      <th><img src="/images/no_victims.png" alt="None" height="20"></th>
+      <th>Φ</th>
+      <th>Ψ</th>
+      <th>Ω</th>
+      <th><img src="/images/COG_nobg.png" alt="None" height="20"></th>
+    </tr>
+    <tr align="center">
+      <th>{{"admin.simMapEditor.top" | translate}}<small class="sim-nowall" ng-if="!wallAt('top')">{{"admin.simMapEditor.noWall" | translate}}</small></th>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="None" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="H" ng-disabled="!wallAt('top') && cell.tile.victims.top !== 'H'" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="S" ng-disabled="!wallAt('top') && cell.tile.victims.top !== 'S'" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.top" value="U" ng-disabled="!wallAt('top') && cell.tile.victims.top !== 'U'" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+        <td class="sim-ct-cell">
+          <span class="sim-ct-wrap">
+            <button type="button" class="sim-ct-chip" ng-click="editWallCognitive('top')" ng-disabled="!wallAt('top') && !wallCogCode('top')" ng-style="wallCogCode('top') ? {'border-color': cogType(wallCogCode('top')).color, 'background-color': cogType(wallCogCode('top')).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
+              <span class="sim-ct-target" ng-if="wallCogCode('top')" ng-style="cogStyle(wallCogCode('top'))"></span>
+              <span ng-if="wallCogCode('top')" class="sim-ct-chip-letter" ng-style="{'color': cogType(wallCogCode('top')).color}">{{cogType(wallCogCode('top')).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
+              <i ng-if="!wallCogCode('top')" class="fas fa-plus"></i>
+              <i class="fas fa-cog sim-ct-chip-gear"></i>
+            </button>
+            <button ng-if="wallCogCode('top')" type="button" class="sim-ct-clear" ng-click="clearWallCognitive('top')" title="{{'admin.simMapEditor.ctRemove' | translate}}"><i class="fas fa-times"></i></button>
+          </span>
+        </td>
+    </tr>
+    <tr align="center">
+      <th>{{"admin.simMapEditor.bottom" | translate}}<small class="sim-nowall" ng-if="!wallAt('bottom')">{{"admin.simMapEditor.noWall" | translate}}</small></th>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="None" style="display: block;"  ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="H" ng-disabled="!wallAt('bottom') && cell.tile.victims.bottom !== 'H'" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="S" ng-disabled="!wallAt('bottom') && cell.tile.victims.bottom !== 'S'" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.bottom" value="U" ng-disabled="!wallAt('bottom') && cell.tile.victims.bottom !== 'U'" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+        <td class="sim-ct-cell">
+          <span class="sim-ct-wrap">
+            <button type="button" class="sim-ct-chip" ng-click="editWallCognitive('bottom')" ng-disabled="!wallAt('bottom') && !wallCogCode('bottom')" ng-style="wallCogCode('bottom') ? {'border-color': cogType(wallCogCode('bottom')).color, 'background-color': cogType(wallCogCode('bottom')).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
+              <span class="sim-ct-target" ng-if="wallCogCode('bottom')" ng-style="cogStyle(wallCogCode('bottom'))"></span>
+              <span ng-if="wallCogCode('bottom')" class="sim-ct-chip-letter" ng-style="{'color': cogType(wallCogCode('bottom')).color}">{{cogType(wallCogCode('bottom')).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
+              <i ng-if="!wallCogCode('bottom')" class="fas fa-plus"></i>
+              <i class="fas fa-cog sim-ct-chip-gear"></i>
+            </button>
+            <button ng-if="wallCogCode('bottom')" type="button" class="sim-ct-clear" ng-click="clearWallCognitive('bottom')" title="{{'admin.simMapEditor.ctRemove' | translate}}"><i class="fas fa-times"></i></button>
+          </span>
+        </td>
+    </tr>
+    <tr align="center">
+      <th>{{"admin.simMapEditor.left" | translate}}<small class="sim-nowall" ng-if="!wallAt('left')">{{"admin.simMapEditor.noWall" | translate}}</small></th>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="None" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="H" ng-disabled="!wallAt('left') && cell.tile.victims.left !== 'H'" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="S" ng-disabled="!wallAt('left') && cell.tile.victims.left !== 'S'" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.left" value="U" ng-disabled="!wallAt('left') && cell.tile.victims.left !== 'U'" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+        <td class="sim-ct-cell">
+          <span class="sim-ct-wrap">
+            <button type="button" class="sim-ct-chip" ng-click="editWallCognitive('left')" ng-disabled="!wallAt('left') && !wallCogCode('left')" ng-style="wallCogCode('left') ? {'border-color': cogType(wallCogCode('left')).color, 'background-color': cogType(wallCogCode('left')).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
+              <span class="sim-ct-target" ng-if="wallCogCode('left')" ng-style="cogStyle(wallCogCode('left'))"></span>
+              <span ng-if="wallCogCode('left')" class="sim-ct-chip-letter" ng-style="{'color': cogType(wallCogCode('left')).color}">{{cogType(wallCogCode('left')).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
+              <i ng-if="!wallCogCode('left')" class="fas fa-plus"></i>
+              <i class="fas fa-cog sim-ct-chip-gear"></i>
+            </button>
+            <button ng-if="wallCogCode('left')" type="button" class="sim-ct-clear" ng-click="clearWallCognitive('left')" title="{{'admin.simMapEditor.ctRemove' | translate}}"><i class="fas fa-times"></i></button>
+          </span>
+        </td>
+    </tr>
+    <tr align="center">
+      <th>{{"admin.simMapEditor.right" | translate}}<small class="sim-nowall" ng-if="!wallAt('right')">{{"admin.simMapEditor.noWall" | translate}}</small></th>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="None" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="H" ng-disabled="!wallAt('right') && cell.tile.victims.right !== 'H'" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="S" ng-disabled="!wallAt('right') && cell.tile.victims.right !== 'S'" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+      <td><input type="radio" name="victim" ng-model="cell.tile.victims.right" value="U" ng-disabled="!wallAt('right') && cell.tile.victims.right !== 'U'" style="display: block;" ng-click="cell.tile.victims={}; cell.tile.cognitives={};"></td>
+        <td class="sim-ct-cell">
+          <span class="sim-ct-wrap">
+            <button type="button" class="sim-ct-chip" ng-click="editWallCognitive('right')" ng-disabled="!wallAt('right') && !wallCogCode('right')" ng-style="wallCogCode('right') ? {'border-color': cogType(wallCogCode('right')).color, 'background-color': cogType(wallCogCode('right')).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
+              <span class="sim-ct-target" ng-if="wallCogCode('right')" ng-style="cogStyle(wallCogCode('right'))"></span>
+              <span ng-if="wallCogCode('right')" class="sim-ct-chip-letter" ng-style="{'color': cogType(wallCogCode('right')).color}">{{cogType(wallCogCode('right')).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
+              <i ng-if="!wallCogCode('right')" class="fas fa-plus"></i>
+              <i class="fas fa-cog sim-ct-chip-gear"></i>
+            </button>
+            <button ng-if="wallCogCode('right')" type="button" class="sim-ct-clear" ng-click="clearWallCognitive('right')" title="{{'admin.simMapEditor.ctRemove' | translate}}"><i class="fas fa-times"></i></button>
+          </span>
+        </td>
+    </tr>
+  </table>
+  </div>
+
+  <div class="sim-victim-side sim-letter-panel" ng-class="{'inactive': !wallVictimSymbol()}">
+    <div class="sim-letter-panel-head">
+      <span class="sim-letter-panel-title">{{"admin.simMapEditor.letterSettings" | translate}}</span>
+      <span class="sim-letter-badges"><span>Φ</span><span>Ψ</span><span>Ω</span></span>
+    </div>
+    <div class="sim-letter-state" ng-if="wallVictimSymbol()">
+      <i class="fas fa-crosshairs"></i>{{("admin.simMapEditor." + wallVictimDir()) | translate}} : <strong>{{wallVictimSymbol()}}</strong>
+    </div>
+    <div class="sim-letter-state muted" ng-if="!wallVictimSymbol() && !wallHasCognitive()">
+      <i class="fas fa-info-circle"></i>{{"admin.simMapEditor.noLetterVictim" | translate}}
+    </div>
+    <div class="sim-letter-state ct" ng-if="wallHasCognitive()">
+      <i class="fas fa-bullseye"></i>{{"admin.simMapEditor.ctNoLetterSettings" | translate}}
+    </div>
+    <div class="sim-option-block">
+      <div class="sim-option-label"><i class="fas fa-sync-alt"></i>{{"admin.simMapEditor.victimRotation" | translate}}</div>
+      <sim-rotation-dial ng-model="cell.tile.single_victim_rotation" symbol="wallVictimSymbol()" ng-disabled="!wallVictimSymbol()"></sim-rotation-dial>
+    </div>
+    <label class="sim-option-block sim-fake-toggle" ng-class="{'active': cell.tile.victim_is_fake, 'disabled': !wallVictimSymbol()}">
+      <input type="checkbox" name="is-fake-checkbox" ng-model="cell.tile.victim_is_fake" ng-disabled="!wallVictimSymbol()">
+      <span class="sim-fake-text">
+        <span class="sim-option-label"><i class="fas fa-user-secret"></i>{{"admin.simMapEditor.victimIsFake" | translate}}</span>
+        <span class="sim-fake-hint">{{"admin.simMapEditor.fakeHint" | translate}}</span>
+      </span>
+    </label>
+  </div>
+  </div>
+
+  </div>
+  <div id="halfTileSlot" class="sim-modal-section" ng-if="cell && cell.tile && cell.tile.halfTile">
+    <div class="sim-modal-section-title">{{"admin.simMapEditor.innerTile" | translate}}</div>
+    <div class="sim-inner-tile">
+      <div class="sim-inner-figure">
+        <svg class="sim-inner-svg" viewBox="-14 -14 268 268" role="img" aria-label="{{'admin.simMapEditor.innerTile' | translate}}">
+          <rect x="0" y="0" width="240" height="240" class="sim-in-floor"></rect>
+          <rect ng-repeat="Q in innerQuarters" ng-attr-x="{{Q.x}}" ng-attr-y="{{Q.y}}" width="120" height="120" class="sim-in-quarter" ng-class="{'hover': inner.hoverQ === Q.q, 'clickable': !isRoom2}" ng-click="cycleCurve(Q.q)" ng-mouseenter="inner.hoverQ = Q.q" ng-mouseleave="inner.hoverQ = -1"><title ng-if="!isRoom2">{{"admin.simMapEditor.inner.curveCycle" | translate}}</title></rect>
+          <line x1="120" y1="0" x2="120" y2="240" class="sim-in-grid"></line>
+          <line x1="0" y1="120" x2="240" y2="120" class="sim-in-grid"></line>
+          <line ng-repeat="w in innerOuter" ng-attr-x1="{{w.x1}}" ng-attr-y1="{{w.y1}}" ng-attr-x2="{{w.x2}}" ng-attr-y2="{{w.y2}}" class="sim-in-outer"></line>
+          <path ng-repeat="Q in innerQuarters" ng-if="cell.tile.curve[Q.q]" ng-attr-d="{{curvePath(Q.q, cell.tile.curve[Q.q])}}" class="sim-in-curve" ng-class="{'bad': isRoom2}"></path>
+          <g ng-repeat="a in innerArms" class="sim-in-arm" ng-class="{'on': cell.tile.halfWallIn[a.i], 'hover': inner.hoverArm === a.i}" ng-click="toggleArm(a.i)" ng-mouseenter="inner.hoverArm = a.i" ng-mouseleave="inner.hoverArm = -1">
+            <title>{{(cell.tile.halfWallIn[a.i] ? 'admin.simMapEditor.inner.armRemove' : 'admin.simMapEditor.inner.armAdd') | translate}}</title>
+            <line ng-attr-x1="{{a.x1}}" ng-attr-y1="{{a.y1}}" ng-attr-x2="{{a.x2}}" ng-attr-y2="{{a.y2}}" class="sim-in-arm-hit"></line>
+            <line ng-attr-x1="{{a.x1}}" ng-attr-y1="{{a.y1}}" ng-attr-x2="{{a.x2}}" ng-attr-y2="{{a.y2}}" class="sim-in-arm-line"></line>
+          </g>
+          <g ng-repeat="s in innerSlots" class="sim-in-slot" ng-class="{'nowall': !halfWallSlotHasWall(s.i), 'used': slotUsed(s.i), 'hover': inner.hoverSlot === s.i}">
+            <circle ng-attr-cx="{{s.x}}" ng-attr-cy="{{s.y}}" r="11"></circle>
+            <text ng-attr-x="{{s.x}}" ng-attr-y="{{s.y}}">{{s.i + 1}}</text>
+          </g>
+        </svg>
+        <div class="sim-inner-legend">
+          <span><i class="sim-in-key outer"></i>{{"admin.simMapEditor.inner.keyOuter" | translate}}</span>
+          <span><i class="sim-in-key arm"></i>{{"admin.simMapEditor.inner.keyArm" | translate}}</span>
+          <span><i class="sim-in-key slot">1</i>{{"admin.simMapEditor.inner.keySlot" | translate}}</span>
+        </div>
+      </div>
+
+      <div class="sim-inner-controls">
+        <div class="sim-inner-group">
+          <div class="sim-option-label"><i class="fas fa-plus"></i>{{"admin.simMapEditor.inner.armTitle" | translate}}</div>
+          <p class="sim-inner-hint">{{"admin.simMapEditor.inner.armHint" | translate}}</p>
+          <div class="sim-inner-arms">
+            <button type="button" class="sim-inner-btn" ng-repeat="a in innerArms" ng-class="{'active': cell.tile.halfWallIn[a.i]}" aria-pressed="{{!!cell.tile.halfWallIn[a.i]}}" ng-click="toggleArm(a.i)" ng-mouseenter="inner.hoverArm = a.i" ng-mouseleave="inner.hoverArm = -1">
+              <i class="fas" ng-class="a.icon"></i>{{("admin.simMapEditor." + a.name) | translate}}
+            </button>
+          </div>
+        </div>
+
+        <div class="sim-inner-group">
+          <div class="sim-option-label"><i class="fas fa-circle-notch"></i>{{"admin.simMapEditor.inner.curveTitle" | translate}}</div>
+          <div ng-if="isRoom2" class="sim-inner-lock">
+            <i class="fas fa-ban"></i>
+            <div>
+              <div>{{"admin.simMapEditor.inner.curveRoom2" | translate}}</div>
+              <div ng-if="hasCurve()" class="sim-inner-lock-warn">
+                {{"admin.simMapEditor.inner.curveRoom2Found" | translate}}
+                <button type="button" class="btn btn-sm btn-outline-danger" ng-click="clearCurves()"><i class="fas fa-eraser"></i> {{"admin.simMapEditor.inner.curveRemove" | translate}}</button>
+              </div>
+            </div>
+          </div>
+          <p ng-if="!isRoom2" class="sim-inner-hint">{{"admin.simMapEditor.inner.curveHint" | translate}}</p>
+          <div ng-if="!isRoom2" class="sim-inner-curves">
+            <div class="sim-inner-quarter" ng-repeat="Q in innerQuarters" ng-mouseenter="inner.hoverQ = Q.q" ng-mouseleave="inner.hoverQ = -1">
+              <div class="sim-inner-quarter-name">{{("admin.simMapEditor.inner." + Q.name) | translate}}</div>
+              <div class="sim-inner-curve-btns">
+                <button type="button" class="sim-inner-curve-btn" ng-repeat="v in [0, 1, 2, 3, 4]" ng-class="{'active': (cell.tile.curve[Q.q] || 0) == v}" aria-pressed="{{(cell.tile.curve[Q.q] || 0) == v}}" ng-click="setCurve(Q.q, v)" title="{{(v ? 'admin.simMapEditor.inner.curve' + v : 'admin.simMapEditor.inner.curveNone') | translate}}">
+                  <svg viewBox="-12 -12 144 144">
+                    <rect x="0" y="0" width="120" height="120" class="sim-in-mini-box"></rect>
+                    <path ng-if="v" ng-attr-d="{{curvePath(0, v, 120)}}" class="sim-in-mini-curve"></path>
+                    <line ng-if="!v" x1="30" y1="30" x2="90" y2="90" class="sim-in-mini-none"></line>
+                    <line ng-if="!v" x1="90" y1="30" x2="30" y2="90" class="sim-in-mini-none"></line>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-table-scroll">
+    <table class="sim-victim-table sim-halfwall-table" style="width: 100%; min-width: 100%; --row-width: 7ch">
+      <tr style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)">
+        <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)"></th>
+        <th style="width: var(--row-width); min-width: var(--row-width); max-width: var(--row-width)" ng-repeat="c in range(16)" ng-class="{'sim-nowall-col': !halfWallSlotHasWall(c)}" ng-mouseenter="inner.hoverSlot = c" ng-mouseleave="inner.hoverSlot = -1" title="{{halfWallSlotHasWall(c) ? '' : ('admin.simMapEditor.noWall' | translate)}}">{{c + 1}}</th>
+      </tr>
+      <tr>
+        <th style="width: var(--row-with)">Φ</th>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="1" ng-disabled="!halfWallSlotHasWall(c) && cell.tile.halfWallVic[c] != 1" style="display: block;" ng-change="cell.tile.halfWallCognitives[c] = ''"> </td>
+      </tr>
+      <tr>
+        <th style="width: var(--row-with)">Ψ</th>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="3" ng-disabled="!halfWallSlotHasWall(c) && cell.tile.halfWallVic[c] != 3" style="display: block;" ng-change="cell.tile.halfWallCognitives[c] = ''"> </td>
+      </tr>
+      <tr>
+        <th style="width: var(--row-with)">Ω</th>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="2" ng-disabled="!halfWallSlotHasWall(c) && cell.tile.halfWallVic[c] != 2" style="display: block;" ng-change="cell.tile.halfWallCognitives[c] = ''"> </td>
+      </tr>
+      <tr>
+        <th style="width: var(--row-with)">{{"admin.simMapEditor.cognitives" | translate}}</th>
+        <td ng-repeat="c in range(16)" class="sim-ct-cell">
+          <span class="sim-ct-wrap">
+            <button type="button" class="sim-ct-chip sim-ct-chip-small" ng-click="editHalfWallCognitive(c)" ng-disabled="!halfWallSlotHasWall(c) && !halfWallCogCode(c)" ng-style="halfWallCogCode(c) ? {'border-color': cogType(halfWallCogCode(c)).color, 'background-color': cogType(halfWallCogCode(c)).bg} : {}" title="{{'admin.mazeMapEditor.cognitiveTargetSettings' | translate}}">
+              <span class="sim-ct-target" ng-if="halfWallCogCode(c)" ng-style="cogStyle(halfWallCogCode(c))"></span>
+              <span ng-if="halfWallCogCode(c)" class="sim-ct-chip-letter" ng-style="{'color': cogType(halfWallCogCode(c)).color}">{{cogType(halfWallCogCode(c)).letter || ('admin.simMapEditor.ctFakeAbbr' | translate)}}</span>
+              <i ng-if="!halfWallCogCode(c)" class="fas fa-plus"></i>
+            </button>
+            <button ng-if="halfWallCogCode(c)" type="button" class="sim-ct-clear" ng-click="clearHalfWallCognitive(c)" title="{{'admin.simMapEditor.ctRemove' | translate}}"><i class="fas fa-times"></i></button>
+          </span>
+        </td>
+      </tr>
+      <tr>
+        <th style="width: var(--row-with)"><img src="/images/no_victims.png" alt="None" height="20"/></th>
+        <td height="50%" ng-repeat="c in range(16)"> <input type="radio" ng-model="cell.tile.halfWallVic[c]" value="" style="display: block;" ng-change="cell.tile.halfWallCognitives[c] = ''"> </td>
+      </tr>
+      <tr class="sim-letter-row">
+        <th class="sim-letter-row-head" style="width: var(--row-with)">{{"admin.simMapEditor.victimRotation" | translate}}<small class="sim-letter-only">Φ Ψ Ω</small></th>
+        <td ng-repeat="c in range(16)">
+          <button type="button" class="sim-rot-mini" ng-click="editHalfWallRotation(c)" ng-disabled="!halfWallSymbol(c) || (cell.tile.halfWallCognitives && cell.tile.halfWallCognitives[c] && cell.tile.halfWallCognitives[c].length === 5)" title="{{'admin.simMapEditor.victimRotation' | translate}}">
+            <span ng-if="halfWallSymbol(c)" class="sim-rot-mini-symbol" ng-style="{'transform': 'rotate(' + halfWallRotation(c) + 'deg)'}">{{halfWallSymbol(c)}}</span>
+            <span ng-if="halfWallSymbol(c)" class="sim-rot-mini-value sim-rot-num">{{halfWallRotation(c)}}<span class="sim-rot-deg">°</span></span>
+            <span ng-if="!halfWallSymbol(c)" class="sim-rot-mini-empty">–</span>
+          </button>
+        </td>
+      </tr>
+      <tr class="sim-letter-row">
+        <th class="sim-letter-row-head" style="width: var(--row-with)">{{"admin.simMapEditor.victimIsFake" | translate}}<small class="sim-letter-only">Φ Ψ Ω</small></th>
+        <td ng-repeat="c in range(16)"> <input type="checkbox" style="width: 100%; display: block;" ng-model="cell.tile.halfWallVicFakes[c]" value="false" ng-disabled="!halfWallSymbol(c)"> </td>
+      </tr>
+    </table>
+    </div>
+</div>
+</div>
+<div class="modal-footer sim-modal-footer">
+  <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+</div>

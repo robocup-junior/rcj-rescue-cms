@@ -1,0 +1,170 @@
+//- The parts of a run's score as the view and sign pages show them: the map with the item points,
+//- the checkpoints and LoPs, the rescue and the exit bonus. Their sum is common/line_2026E_summary.pug.
+//- The map with the item points
+section.rv-card.rv-map#rv-items
+  .rv-card-header
+    i.fas.fa-map
+    | {{'line.sign.item' | translate}}
+    //- Floor and rotation in the header row, before the total
+    .rv-map-tools
+      .btn-group(ng-show='height > 1')
+        //- The floors, after an icon that says what they are
+        span.rv-tool.rv-tool-label(aria-hidden='true')
+          i.fas.fa-layer-group
+        button.rv-tool(type='button' ng-repeat='zz in range(height)' ng-class='{active: zz == z}' ng-click='changeFloor(zz)')
+          | {{zz}}
+      .btn-group
+        button.rv-tool(type='button' title='-90°' ng-click='tileRot(-90)')
+          i.fas.fa-undo
+        button.rv-tool(type='button' title='+90°' ng-click='tileRot(90)')
+          i.fas.fa-redo
+    span.rv-header-total {{raw_score - checkTotal() - exitBonusPoints()}} {{'common.point' | translate}}
+  //- What the colours on the tiles mean
+  .rv-map-legend
+    span.rv-key.is-done {{'line.view.tileDone' | translate}}
+    span.rv-key.is-halfdone {{'line.view.tilePartial' | translate}}
+    span.rv-key.is-undone {{'line.view.tileNone' | translate}}
+    span.rv-key.is-cp {{'line.view.checkpoint' | translate}}
+    span.rv-key.is-evac(ng-if='hasEvacZone()') {{'line.view.evacuation' | translate}}
+  .tilearea
+    #wrapTile.mx-auto
+      div(ng-repeat='r in range(length)', ng-if='sRotate==0', style='display: flex;')
+        div(style='text-align:center;')
+          .slot(ng-repeat='c in range(width)')
+            tile(template='view' tile="mtiles[c+','+r+','+z]", ng-click='showElements(c,r,z)')
+      div(ng-repeat='r in range(length)', ng-if='sRotate==180', style='display: flex;')
+        .slot(ng-repeat='c in range(width)')
+          tile(template='view' tile="mtiles[width - c -1+','+(length - r -1)+','+z]", ng-click='showElements(width - c -1,length - r -1,z)')
+      div(ng-repeat='r in range(width)', ng-if='sRotate==270', style='display: flex;')
+        .slot(ng-repeat='c in range(length)')
+          tile(template='view' tile="mtiles[width - r -1+','+c+','+z]", ng-click='showElements(width-r-1,c,z)')
+      div(ng-repeat='r in range(width)', ng-if='sRotate==90', style='display: flex;')
+        .slot(ng-repeat='c in range(length)')
+          tile(template='view' tile="mtiles[r+','+ (length - c-1) +','+z]", ng-click='showElements(r,length-c-1,z)')
+      //- Over the evacuation zone's tiles (placed by line_view.js): each victim as found or
+      //- identified so far
+      .rv-evac-area.is-off(ng-show='nlVictims().length')
+        span.rv-evac-label
+          i.fas.fa-first-aid
+          |  {{'line.view.rescue' | translate}}
+        include line_2026E_victims
+
+//- Checkpoints and LoPs together: a section's checkpoint points are its tiles times the
+//- points per tile, and those depend on the LoPs in the section
+section.rv-card.rv-course#rv-checkpoints
+  .rv-card-header
+    i.fas.fa-flag-checkered
+    | {{'line.view.cpAndLops' | translate}}
+    span.rv-header-lops(title="{{'common.lops' | translate}}")
+      i.fas.fa-step-forward
+      | {{sum(LoPs)}} {{'common.times' | translate}}
+    span.rv-header-total {{checkTotal()}} {{'common.point' | translate}}
+  //- Points per tile for each number of LoPs in a section
+  .rv-rates
+    span.rv-rates-title {{'line.view.perTile' | translate}}
+    span.rv-rate(ng-repeat='n in [0, 1, 2, 3]')
+      span.rv-lop-count(ng-class="{'is-zero': !n}")
+        i.fas.fa-step-forward
+        | {{n}}{{$last ? '+' : ''}}
+      | {{LoPsCountPoint(n)}} {{'common.point' | translate}}
+  //- The course from start to goal: a dot per checkpoint (reached or not) with the points
+  //- scored there, and between the dots the section's LoPs and its tiles × points per tile. The last section,
+  //- to the goal, scores no checkpoint points in the Entry rules: its dot shows the exit
+  .rv-track
+    .rv-track-seg(ng-repeat-start='cp in checkPointDistance track by $index' ng-if='!$first' ng-class="{'is-ok': cp.status}")
+      .rv-seg-line
+      .rv-seg-meta
+        span.rv-lop-count(ng-class="{'is-zero': !LoPs[$index-1]}" title="{{'common.lops' | translate}}")
+          i.fas.fa-step-forward
+          | {{LoPs[$index-1]}}
+        span.rv-seg-calc {{cp.dis}} {{'common.tile' | translate}} × {{LoPsCountPoint(LoPs[$index-1])}}
+    .rv-track-node(ng-repeat-end ng-class="cp.status ? 'is-ok' : 'is-ng'")
+      .rv-node-dot
+        i.fas(ng-class="cp.status ? 'fa-check' : 'fa-times'")
+      .rv-node-label
+        span.rv-sec.rv-sec-start(ng-if='$first')
+          i.fas.fa-play
+          | {{'line.view.start' | translate}}
+        span.rv-sec.rv-sec-cp(ng-if='!$first' title="{{'line.view.checkpoint' | translate}} {{$index}}")
+          i.fas.fa-flag
+          | {{$index}}
+      .rv-node-points
+        | {{cp.point}}
+        small {{'common.point' | translate}}
+    .rv-track-seg(ng-if='checkPointDistance.length' ng-class="{'is-ok': exitBonus}")
+      .rv-seg-line
+      .rv-seg-meta
+        span.rv-lop-count(ng-class="{'is-zero': !LoPs[checkPointDistance.length-1]}" title="{{'common.lops' | translate}}")
+          i.fas.fa-step-forward
+          | {{LoPs[checkPointDistance.length-1]}}
+        //- Courses that end on the last checkpoint's tile have no tiles to count
+        span.rv-seg-calc(ng-if='goalDistance() > 0')
+          i.fas.fa-road
+          |  {{goalDistance()}} {{'common.tile' | translate}}
+    .rv-track-node(ng-if='checkPointDistance.length' ng-class="exitBonus ? 'is-ok' : 'is-ng'")
+      .rv-node-dot
+        i.fas(ng-class="exitBonus ? 'fa-check' : 'fa-times'")
+      .rv-node-label
+        span.rv-sec.rv-sec-exit
+          i.fas.fa-flag-checkered
+          | {{'line.view.goal' | translate}}
+      .rv-node-points.is-none —
+
+.rv-two-col
+  //- Rescue, then the exit bonus: the order they happen in a run
+  //- Rescue: each victim found and identified, live ones 10 + 20 points, dead ones 10 + 10
+  section.rv-card#rv-rescue
+    .rv-card-header
+      i.fas.fa-first-aid
+      | {{'line.sign.rescue' | translate}}
+      span.rv-header-total {{nlPoints()}} {{'common.point' | translate}}
+    .rv-rescue
+      //- victim | found | identified | points, the same columns on every row
+      ol.rv-nl-list
+        li.rv-nl-item(ng-repeat='i in range(maxLiveVictims)' ng-class="{'is-none': !victimNL_Live[i].found && !victimNL_Live[i].identified}")
+          span.rv-nl-victim
+            img.rv-victim(src='/images/greenVictim.png' alt='LIVE')
+            | {{i + 1}}
+          span.rv-nl-check(ng-class="victimNL_Live[i].found ? 'is-ok' : 'is-ng'")
+            i.fas(ng-class="victimNL_Live[i].found ? 'fa-check' : 'fa-times'")
+            | {{'line.view.found' | translate}}
+            b 10
+          span.rv-nl-check(ng-class="victimNL_Live[i].identified ? 'is-ok' : 'is-ng'")
+            i.fas(ng-class="victimNL_Live[i].identified ? 'fa-check' : 'fa-times'")
+            | {{'line.view.identified' | translate}}
+            b 20
+          span.rv-nl-points
+            | {{10 * !!victimNL_Live[i].found + 20 * !!victimNL_Live[i].identified}}
+            small /30
+        li.rv-nl-item(ng-repeat='i in range(maxDeadVictims)' ng-class="{'is-none': !victimNL_Dead[i].found && !victimNL_Dead[i].identified}")
+          span.rv-nl-victim
+            img.rv-victim(src='/images/blackVictim.png' alt='DEAD')
+            | {{i + 1}}
+          span.rv-nl-check(ng-class="victimNL_Dead[i].found ? 'is-ok' : 'is-ng'")
+            i.fas(ng-class="victimNL_Dead[i].found ? 'fa-check' : 'fa-times'")
+            | {{'line.view.found' | translate}}
+            b 10
+          span.rv-nl-check(ng-class="victimNL_Dead[i].identified ? 'is-ok' : 'is-ng'")
+            i.fas(ng-class="victimNL_Dead[i].identified ? 'fa-check' : 'fa-times'")
+            | {{'line.view.identified' | translate}}
+            b 10
+          span.rv-nl-points
+            | {{10 * !!victimNL_Dead[i].found + 10 * !!victimNL_Dead[i].identified}}
+            small /20
+
+  //- Exit bonus: a fixed 30 points in the Entry rules
+  section.rv-card#rv-exit
+    .rv-card-header
+      i.fas.fa-sign-out-alt
+      | {{'line.sign.exitBonus' | translate}}
+      span.rv-header-total {{exitBonusPoints()}} {{'common.point' | translate}}
+    .rv-exit.is-fixed(ng-class="{'is-ng': !exitBonus}")
+      .rv-exit-head
+        .rv-exit-image(ng-class="exitBonus ? 'is-ok' : 'is-ng'")
+          img(src='/images/nl_bonus.png', alt='')
+          span.rv-exit-mark
+            i.fas(ng-class="exitBonus ? 'fa-check' : 'fa-times'")
+        .rv-exit-status
+          .rv-exit-title(ng-class="exitBonus ? 'is-ok' : 'is-ng'")
+            | {{(exitBonus ? 'line.view.exitDone' : 'line.view.exitNotDone') | translate}}
+          .rv-exit-formula {{'line.view.exitFixed' | translate:{points: 30} }}

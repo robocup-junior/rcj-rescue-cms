@@ -53,7 +53,7 @@ function floodFill(tile, cells, dim) {
   }
   if (
     cells[`${tile.x + 1},${tile.y},${tile.z}`] == null &&
-    tile.x / 2 < dim.width
+    (tile.x + 1) / 2 < dim.width
   ) {
     // right
     let right = cells[`${tile.x + 2},${tile.y},${tile.z}`];
@@ -75,7 +75,7 @@ function floodFill(tile, cells, dim) {
   }
   if (
     cells[`${tile.x},${tile.y + 1},${tile.z}`] == null &&
-    tile.y / 2 < dim.length
+    (tile.y + 1) / 2 < dim.length
   ) {
     // bottom
     let bottom = cells[`${tile.x},${tile.y + 2},${tile.z}`];
@@ -90,7 +90,7 @@ function floodFill(tile, cells, dim) {
         tile: {},
       };
 
-      cells[`${tile.x},${tile.y}${2},${tile.z}`] = bottom;
+      cells[`${tile.x},${tile.y + 2},${tile.z}`] = bottom;
     }
 
     floodFill(bottom, cells, dim);

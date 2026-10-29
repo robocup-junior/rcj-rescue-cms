@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'MailSent'
@@ -7,63 +7,113 @@ block vars
 append scripts
   script.
     var competitionId = "#{id}"
-  script(src='/javascripts/mail_sent.js')
+    var mailEnable = #{!!mailEnable}
+  script(src='/javascripts/mail_sent.js?v=' + assetVersion)
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/' + competition._id)") {{competition.name}}
-    a.breadcrumb-item(ng-click="go('/admin/' + competition._id + '/mails')") Mail
-    span.breadcrumb-item.active Sent
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/' + competition._id)") {{competition.name}}
+  a.breadcrumb-item(ng-click="go('/admin/' + competition._id + '/mails')") Mail
+  span.breadcrumb-item.active Sent
 
+block hero_title
+  | {{competition.name}}
 
+block hero_subtitle
+  | {{"mail.sent.title" | translate}}
 
-block content
-  .row
-    .col-12
-      h1 {{"mail.sent.title" | translate}} - {{competition.name}}
-      .refine
-        .card.border-dark.mb-3(style='width:100%;')
-          .card-header.bg-transparent.border-dark.fa-2x
-            i.fas.fa-search(aria-hidden='true') &nbsp;
-            | {{'common.refine' | translate}}
-          .card-body.text-dark
-            h6.card-title {{"mail.sent.subject" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-envelope(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"mail.sent.subject" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineSubject')
-            hr
-            h6.card-title {{"common.teamCode" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-list-ol(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.teamCode" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineCode')
-            hr
-            h6.card-title {{"common.team" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-users(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.team" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineName')
-            hr
-            h6.card-title {{"common.region" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-globe-asia(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.region" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineRegion')
-            hr
-            h6.card-title {{"common.league" | translate}}
-            span(ng-repeat='(key, value) in Rleagues track by key')
-              input(type='checkbox' ng-model='Rleagues[key]' id="checkL_{{key}}")
-              label.checkbox(for="checkL_{{key}}") {{key}}
-            
-      
-      table.custom(style="margin-bottom:20px;")
-        thead
+block hero_actions
+  if mailWebUi
+    button.btn-action-icon(type='button' ng-click="open('" + mailWebUi + "')" uib-tooltip='{{"mail.home.devInbox" | translate}}' tooltip-placement="bottom")
+      i.fas.fa-inbox
+  button.btn-action-icon(type='button' ng-click="go('/admin/' + competition._id + '/mails')" uib-tooltip='{{"mail.home.newMail" | translate}}' tooltip-placement="bottom")
+    i.fas.fa-pen
+
+block main_content
+  if !mailEnable
+    .alert.alert-warning.d-flex.align-items-start
+      i.fas.fa-exclamation-triangle.mr-3.mt-1
+      div
+        b {{"mail.home.noSmtp" | translate}}
+        div.small {{"mail.home.error" | translate}}
+
+  //- The numbers in each state, each a filter
+  .d-flex.justify-content-between.align-items-center.flex-wrap.mb-2(style="gap: 0.75rem;")
+    div
+      span.mail-stat(ng-repeat="s in STATUSES" ng-click="toggleStatus(s)" ng-class="{'active': refineStatus === s}")
+        span.status-dot(ng-style="{'background-color': statusColour(s)}")
+        | {{statusLabel[s]}}
+        b(ng-bind="counts[s] || 0")
+    .segmented.mb-2
+      button(type='button' ng-click="refineType='all'" ng-class="{'active': refineType=='all'}") {{"mail.sent.all" | translate}}
+      button(type='button' ng-click="refineType='team'" ng-class="{'active': refineType=='team'}")
+        i.fas.fa-users.mr-1
+        | {{"mail.home.toTeams" | translate}}
+      button(type='button' ng-click="refineType='staff'" ng-class="{'active': refineType=='staff'}")
+        i.fas.fa-user-tie.mr-1
+        | {{"mail.home.toStaff" | translate}}
+
+  .modern-card
+    .modern-card-header
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-mail-bulk.mr-2
+          | {{"mail.sent.title" | translate}}
+        .btn-table-group
+          .btn-table-action(ng-click="load()" uib-tooltip="{{'mail.sent.refresh' | translate}}" tooltip-append-to-body="true")
+            i.fas.fa-sync-alt(ng-class="{'fa-spin': loading}")
+          .btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'common.refine' | translate}}" tooltip-append-to-body="true")
+            i.fas.fa-filter
+
+    .filter-collapse(ng-show="showFilter" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 1.5rem;")
+      .row
+        .col-md-3.mb-2
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"mail.sent.subject" | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-envelope
+            input.form-control.form-control-sm(type='text' placeholder='{{"mail.sent.subject" | translate}}' ng-model='refineSubject')
+        .col-md-2.mb-2
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"common.teamCode" | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-hashtag
+            input.form-control.form-control-sm(type='text' placeholder='{{"common.teamCode" | translate}}' ng-model='refineCode')
+        .col-md-2.mb-2
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"common.team" | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-users
+            input.form-control.form-control-sm(type='text' placeholder='{{"common.team" | translate}}' ng-model='refineName')
+        .col-md-2.mb-2
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"common.region" | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-globe-asia
+            input.form-control.form-control-sm(type='text' placeholder='{{"common.region" | translate}}' ng-model='refineRegion')
+        .col-md-3.mb-2
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"common.league" | translate}}
+          .filter-container
+            span.filter-badge(ng-repeat='(key, value) in Rleagues track by key' ng-class="{'active': Rleagues[key]}" ng-click="Rleagues[key] = !Rleagues[key]") {{key}}
+
+    .modern-card-body.p-0
+      .empty-state.m-4(ng-if="mails && mails.length == 0")
+        i.fas.fa-paper-plane.d-block
+        | {{"mail.sent.none" | translate}}
+        div.mt-3
+          a.btn.btn-sm.btn-premium-primary(ng-href="/admin/{{competitionId}}/mails")
+            i.fas.fa-pen.mr-1
+            | {{"mail.home.newMail" | translate}}
+      .table-responsive(ng-if="mails.length > 0" style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto(no-animate)
+          thead
             tr
               th {{"mail.sent.time" | translate}}
               th {{"mail.sent.subject" | translate}}
@@ -72,20 +122,31 @@ block content
               th {{"common.region" | translate}}
               th {{"common.league" | translate}}
               th {{"mail.sent.status" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
-            tr(ng-repeat='mail in mails | filter:list_filter | orderBy:"[name]"')
-              td(ng-style="{'background-color':statusColour(mail.status)}")
-                i.fas.fa-clock(ng-if="mail.reservation") &nbsp;
-                | {{time(mail.time)}}
-              td(ng-style="{'background-color':statusColour(mail.status)}")
-                a(ng-click="mailView(mail)", ng-bind="mail.subject", style="text-decoration: underline; color: blue;") 
-              td(ng-bind='mail.team.teamCode', ng-style="{'background-color':statusColour(mail.status)}")
-              td(ng-bind='mail.team.name', ng-style="{'background-color':statusColour(mail.status)}")
-              td(ng-bind='mail.team.country', ng-style="{'background-color':statusColour(mail.status)}")
-              td(ng-bind='mail.team.league', ng-style="{'background-color':statusColour(mail.status)}")
-              td(ng-style="{'background-color':statusColour(mail.status)}") {{'mail.status.' + mail.status | translate}}
-              td(ng-style="{'background-color':statusColour(mail.status)}")
-                button.btn.btn-sm.btn-secondary(type='button', ng-click="detail(mail)")
-                  i.fas.fa-envelope-open-text &nbsp;
-                  | {{"mail.sent.detail" | translate}}
+              th(style="width: 90px;") {{"common.operation" | translate}}
+          tbody
+            //- What a row shows is bound once: the rows are made again when the mails are reloaded
+            tr(ng-repeat='mail in shown | limitTo:limit')
+              td.text-nowrap
+                i.fas.fa-clock.mr-1.text-muted(ng-if="::mail.reservation")
+                | {{::mail.timeText}}
+              td
+                a(href="" ng-click="mailView(mail)" ng-bind="::mail.subject")
+              td(ng-bind='::mail.team.teamCode')
+              td.font-weight-bold(ng-if='::mail.team' ng-bind='::mail.team.name')
+              td.font-weight-bold(ng-if='::!mail.team')
+                i.fas.fa-user-tie.mr-1.text-muted(title='{{::"mail.home.toStaff" | translate}}')
+                | {{::mail.user.username}}
+              td(ng-bind='::mail.team.country')
+              td(ng-bind='::mail.team.league')
+              td.text-nowrap
+                span.status-dot(ng-style="::{'background-color': mail.colour}")
+                | {{statusLabel[mail.status]}}
+              td
+                .btn-table-group
+                  .btn-table-action(ng-click="detail(mail)" title='{{::"mail.sent.detail" | translate}}')
+                    i.fas.fa-envelope-open-text
+        .text-center.mt-3(ng-if="shown.length > limit")
+          button.btn.btn-sm.btn-light(type='button' ng-click="showMore()")
+            i.fas.fa-chevron-down.mr-1
+            | {{"mail.sent.showMore" | translate:{n: shown.length - limit} }}
+        p.text-center.text-muted.small.mt-3(ng-if="shown.length == 0") {{"mail.sent.noneMatch" | translate}}

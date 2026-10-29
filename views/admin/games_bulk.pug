@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'RunAdmin'
@@ -8,90 +8,270 @@ append scripts
   script.
     var competitionId = "#{competitionId}"
     var leagueId = "#{leagueId}"
-  script(src='/javascripts/admin/games_bulk.js')
+  script(src='/javascripts/admin/games_bulk.js?v=' + assetVersion)
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId+'/' + leagueId + '/games')") {{leagueId}} Games
-    span.breadcrumb-item.active Bulk Registration
+append css
+    style.
+        .dropdown-submenu {
+            position: relative;
+        }
 
+        .dropdown-submenu a::after {
+            transform: rotate(-90deg);
+            position: absolute;
+            right: 6px;
+            top: .8em;
+        }
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h3 {{competition.name}}
-      h2 {{league.name}} - {{"admin.lineRunBulk.title" | translate}}
-      br
-      br
-      h3 {{"admin.lineRunBulk.s1T" | translate}}
-      p {{"admin.lineRunBulk.s1D" | translate}}
-      a(href="/tmp/run_bulk.csv") Download!
-      br
-      br
-      h3 {{"admin.lineRunBulk.s2T" | translate}}
-      p {{"admin.lineRunBulk.s2D1" | translate}}
-      p {{"admin.lineRunBulk.s2D2" | translate}}
-      table.custom
-        thead
-            tr
-              th {{"common.round" | translate}}
-        tbody
-            tr(ng-repeat='round in rounds')
-              td(ng-bind='round.name')
-      hr
-      p {{"admin.lineRunBulk.s2D3" | translate}}
-      table.custom
-        thead
-            tr
-              th {{"common.team" | translate}}
-        tbody
-            tr(ng-repeat='team in teams')
-              td(ng-bind='team.name')
-      hr
-      div(ng-hide="league.type == 'simulation'")
-        p {{"admin.lineRunBulk.s2D4" | translate}}
-        table.custom
-          thead
-              tr
-                th {{"common.map" | translate}}
-          tbody
-              tr(ng-repeat='map in maps')
-                td(ng-bind='map.name')
-        hr
-      p {{"admin.lineRunBulk.s2D5" | translate}}
-      table.custom
-        thead
-            tr
-              th {{"common.field" | translate}}
-        tbody
-            tr(ng-repeat='field in fields')
-              td(ng-bind='field.name')
-      hr
-      p {{"admin.lineRunBulk.s2D6" | translate}}
-      p yyyy/mm/dd hh:ss
-      | ex) 2017/07/27 10:35
-      hr
-      br
-      h3 {{"admin.lineRunBulk.s3T" | translate}}
-      input#select(type="file" name="select")
-      p {{"admin.lineRunBulk.s3D" | translate}}
-      #result
-      br
-      br
-      center(ng-if="processing")
+        .dropdown-submenu .dropdown-menu {
+            top: 0;
+            left: 100%;
+            margin-left: .1rem;
+            margin-right: .1rem;
+        }
+        .ui-select-bootstrap .dropdown-menu {
+            display: initial;
+        }
+        .btn-default {
+            background-color: #3498db;
+            color: #fff;
+            font-size: 10px;
+        }
+        .ui-select-bootstrap .ui-select-choices-row.active>span {
+            color: initial;
+            text-decoration: none;
+            outline: 0;
+            background-color: initial;
+        }
+        .ui-select-bootstrap .ui-select-choices-row > span {
+          color: black !important;
+          display: block;
+          padding: 5px;
+        }
+
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId+'/' + leagueId + '/games')") {{leagueId}} Games
+  span.breadcrumb-item.active Bulk Registration
+
+block hero_title
+  | {{competition.name}}
+
+block hero_subtitle
+  | {{league.name}} - {{"admin.lineRunBulk.title" | translate}}
+
+block main_content
+  .premium-btn-group.mb-4(style="max-width: 420px;")
+    .btn(ng-click="mode='csv'" ng-class="{'active': mode == 'csv'}")
+      i.fas.fa-file-csv.mr-2
+      | CSV Import
+    .btn(ng-click="mode='generator'" ng-class="{'active': mode == 'generator'}")
+      i.fas.fa-magic.mr-2
+      | Generator
+
+  //- CSV import
+  .modern-card.mb-4(ng-show="mode == 'csv'")
+    .modern-card-body
+      .step-block
+        .step-number 1
+        .step-content
+          h6 {{"admin.lineRunBulk.s1T" | translate}}
+          p {{"admin.lineRunBulk.s1D" | translate}}
+          a.btn.btn-sm.btn-outline-primary(href="/tmp/run_bulk.csv")
+            i.fas.fa-download.mr-2
+            | Download
+      .step-block
+        .step-number 2
+        .step-content.flex-grow-1
+          h6 {{"admin.lineRunBulk.s2T" | translate}}
+          p {{"admin.lineRunBulk.s2D1" | translate}}
+          p.small.text-primary
+            i.fas.fa-copy.mr-1
+            | {{"admin.lineRunBulk.clickToCopy" | translate}}
+          .row.mt-3
+            .col-md-3.mb-3
+              p.small {{"admin.lineRunBulk.s2D2" | translate}}
+              table.table-modern.table-auto
+                thead
+                  tr
+                    th {{"common.round" | translate}}
+                tbody
+                  tr(ng-repeat='round in rounds')
+                    td.copy-cell(ng-click='copyName(round.name)' title='{{"admin.lineRunBulk.clickToCopy" | translate}}')
+                      span(ng-bind='round.name')
+                      i.fas.fa-copy
+            .col-md-3.mb-3
+              p.small {{"admin.lineRunBulk.s2D3" | translate}}
+              table.table-modern.table-auto
+                thead
+                  tr
+                    th {{"common.team" | translate}}
+                tbody
+                  tr(ng-repeat='team in teams')
+                    td.copy-cell(ng-click='copyName(team.name)' title='{{"admin.lineRunBulk.clickToCopy" | translate}}')
+                      span(ng-bind='team.name')
+                      i.fas.fa-copy
+            .col-md-3.mb-3(ng-hide="league.type == 'simulation'")
+              p.small {{"admin.lineRunBulk.s2D4" | translate}}
+              table.table-modern.table-auto
+                thead
+                  tr
+                    th {{"common.map" | translate}}
+                tbody
+                  tr(ng-repeat='map in maps')
+                    td.copy-cell(ng-click='copyName(map.name)' title='{{"admin.lineRunBulk.clickToCopy" | translate}}')
+                      span(ng-bind='map.name')
+                      i.fas.fa-copy
+            .col-md-3.mb-3
+              p.small {{"admin.lineRunBulk.s2D5" | translate}}
+              table.table-modern.table-auto
+                thead
+                  tr
+                    th {{"common.field" | translate}}
+                tbody
+                  tr(ng-repeat='field in fields')
+                    td.copy-cell(ng-click='copyName(field.name)' title='{{"admin.lineRunBulk.clickToCopy" | translate}}')
+                      span(ng-bind='field.name')
+                      i.fas.fa-copy
+          p.mb-1 {{"admin.lineRunBulk.s2D6" | translate}}
+          p.mb-0
+            code yyyy/mm/dd hh:ss
+            |  ex) 2017/07/27 10:35
+      .step-block.mb-0
+        .step-number 3
+        .step-content
+          h6 {{"admin.lineRunBulk.s3T" | translate}}
+          input#select.form-control-file.mb-2(type="file" name="select")
+          p.mb-0 {{"admin.lineRunBulk.s3D" | translate}}
+
+  //- Schedule generator
+  .modern-card.mb-4(ng-show="mode == 'generator'")
+    .modern-card-header
+      i.fas.fa-magic.mr-2
+      | {{'admin.lineRunBulk.generatorTitle' | translate}}
+    .modern-card-body
+      .alert.alert-info
+        strong {{'admin.lineRunBulk.generatorInfoTitle' | translate}}
+        br
+        | {{'admin.lineRunBulk.generatorInfo1' | translate}}
+        br
+        | {{'admin.lineRunBulk.generatorInfo2' | translate}}
+        br
+        | {{'admin.lineRunBulk.generatorInfo3' | translate}}
+        br
+        | {{'admin.lineRunBulk.generatorInfo4' | translate}}
+        br
+        | {{'admin.lineRunBulk.generatorInfo5' | translate}}
+        br
+        | {{'admin.lineRunBulk.generatorInfo6' | translate}}
+        br
+        | {{'admin.lineRunBulk.generatorInfo7' | translate}}
+        br
+        | {{'admin.lineRunBulk.generatorInfo8' | translate}}
+        br
+        | {{'admin.lineRunBulk.generatorInfo9' | translate}}
+      p.text-muted
+        strong {{'admin.lineRunBulk.generatorExampleTitle' | translate}}
+        |  {{'admin.lineRunBulk.generatorExampleText' | translate}}
+
+      .form-group
+        label {{'admin.lineRunBulk.generatorTeams' | translate}}
+        ui-select(multiple='' ng-model='generator.selectedTeams' theme='bootstrap' sortable='true' close-on-select='false' reset-search-input='false' style='width:100%;')
+          ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchTeams' | translate}}")
+            | {{$item.name}}
+          ui-select-choices(repeat='team in teams | filter: $select.search')
+            span {{team.name}}
+
+      .form-group
+        label {{'admin.lineRunBulk.generatorRounds' | translate}}
+        ui-select(multiple='' ng-model='generator.selectedRounds' theme='bootstrap' sortable='true' close-on-select='false' reset-search-input='false' style='width:100%;')
+          ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchRounds' | translate}}")
+            | {{$item.name}}
+          ui-select-choices(repeat='round in rounds | filter: $select.search')
+            span {{round.name}}
+
+      .form-group
+        label {{'admin.lineRunBulk.generatorFields' | translate}}
+        ui-select(multiple='' ng-model='generator.selectedFields' theme='bootstrap' sortable='true' close-on-select='false' reset-search-input='false' style='width:100%;')
+          ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchFields' | translate}}")
+            | {{$item.name}}
+          ui-select-choices(repeat='field in fields | filter: $select.search')
+            span {{field.name}}
+
+      .form-group
+        label {{'admin.lineRunBulk.generatorMaps' | translate}}
+        ui-select(multiple='' ng-model='generator.selectedMaps' theme='bootstrap' sortable='true' close-on-select='false' reset-search-input='false' style='width:100%;')
+          ui-select-match(placeholder="{{'admin.lineRunBulk.generatorSearchMaps' | translate}}")
+            | {{$item.name}}
+          ui-select-choices(repeat='map in maps | filter: $select.search')
+            span {{map.name}}
+
+      .row
+        .col-md-2
+          .form-group
+            label {{'admin.lineRunBulk.generatorDays' | translate}}
+            input.form-control(type='number' ng-model='generator.totalDays')
+        .col-md-2
+          .form-group
+            label {{'admin.lineRunBulk.generatorSlotMinutes' | translate}}
+            input.form-control(type='number' ng-model='generator.slotMinutes')
+        .col-md-2
+          .form-group
+            label {{'admin.lineRunBulk.generatorSmallBreakMultiplier' | translate}}
+            input.form-control(type='number' ng-model='generator.smallBreakMultiplier')
+        .col-md-2
+          .form-group
+            label {{'admin.lineRunBulk.generatorLunchMinutes' | translate}}
+            input.form-control(type='number' ng-model='generator.lunchBreakMinutes')
+        .col-md-4
+          .form-group
+            label {{'admin.lineRunBulk.generatorStartTime' | translate}}
+            input.form-control(type='datetime-local' ng-model='generator.startTime')
+
+      .form-group
+        label {{'admin.lineRunBulk.generatorScheduleMode' | translate}}
+        select.form-control(ng-model='generator.scheduleMode')
+          option(value='scrambled') {{'admin.lineRunBulk.generatorModeScrambled' | translate}}
+          option(value='fixedMap') {{'admin.lineRunBulk.generatorModeFixed' | translate}}
+        small.form-text.text-muted(ng-if="generator.scheduleMode == 'fixedMap'")
+          | {{'admin.lineRunBulk.generatorModeFixedDesc1' | translate}}
+          br
+          | {{'admin.lineRunBulk.generatorModeFixedDesc2' | translate}}
+        small.form-text.text-muted(ng-if="generator.scheduleMode == 'scrambled'")
+          | {{'admin.lineRunBulk.generatorModeScrambledDesc' | translate}}
+
+      button.btn.btn-premium-primary.mb-3(ng-click='generateSchedule()')
+        i.fas.fa-magic.mr-2
+        | {{'admin.lineRunBulk.generatorButton' | translate}}
+
+      .alert.alert-warning.mb-0
+        strong {{'admin.lineRunBulk.generatorDisclaimerTitle' | translate}}
+        |  {{'admin.lineRunBulk.generatorDisclaimerText' | translate}}
+
+  //- Preview and registration
+  .modern-card
+    .modern-card-header
+      i.fas.fa-table.mr-2
+      | Preview
+    .modern-card-body
+      .table-responsive
+        #result
+
+      .result-state(ng-if="processing")
         img(src="/images/loader2.gif")
         p {{now}} / {{total}} {{"admin.lineRunBulk.inpro" | translate}}
-      center(ng-if="completed" style="color:#2ecc71;")
-        i.far.fa-check-circle.fa-5x(aria-hidden="true")
+      .result-state.success(ng-if="completed")
+        i.far.fa-check-circle
         p {{total}} {{"admin.lineRunBulk.complete" | translate}}
-      center(ng-if="error" style="color:#e74c3c;")
-        i.fas.fa-exclamation-circle.fa-5x(aria-hidden="true")
+      .result-state.error(ng-if="error")
+        i.fas.fa-exclamation-circle
         p {{now}} / {{total}} ERROR
-      br
-      br
-      button(ng-click="addRun()" class='btn btn-primary') {{"admin.lineRunBulk.exe" | translate}}
-      
-      
+
+      .text-right.mt-3
+        button.btn.btn-premium-primary(ng-click="addRun()")
+          i.fas.fa-upload.mr-2
+          | {{"admin.lineRunBulk.exe" | translate}}

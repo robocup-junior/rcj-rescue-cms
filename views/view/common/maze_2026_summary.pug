@@ -1,0 +1,52 @@
+//- The score of a maze run and how it adds up: the score is the left side of the equation, then
+//- the time and the run's details. The view page shows it first; the sign page after the parts it
+//- adds up, so they are reviewed before the total. See line_view.css.
+section.rv-summary
+  .rv-summary-item.is-score
+    .rv-summary-label
+      i.fas.fa-trophy
+      |  {{'common.score' | translate}}
+    .rv-summary-value
+      | {{score}}
+      small {{'common.point' | translate}}
+    //- Same format as the ranking: two decimals, a plain 1 for the best run
+    .rv-summary-sub(ng-if="normalizedScore != null")
+      | {{'common.normalizedScore' | translate}}: {{normalizedScore === 1 ? '1' : (normalizedScore | number:2)}}
+  .rv-breakdown
+    span.rv-op.rv-equals =
+    a.rv-chip(href='#rv-items' data-jump)
+      .rv-chip-label {{'maze.sign.item' | translate}}
+      .rv-chip-value {{allItemScore()}}
+    span.rv-op +
+    a.rv-chip(href='#rv-reliability' data-jump)
+      .rv-chip-label {{'maze.sign.reliability' | translate}}
+      .rv-chip-value {{reliability()}}
+    span.rv-op +
+    a.rv-chip(href='#rv-exit' data-jump)
+      .rv-chip-label {{'maze.sign.exit' | translate}}
+      .rv-chip-value {{exitBonusPoints()}}
+    span.rv-op −
+    a.rv-chip(href='#rv-misident' data-jump)
+      .rv-chip-label {{'maze.sign.misidentification' | translate}}
+      .rv-chip-value {{misIdentPoints()}}
+  .rv-summary-item.is-time
+    .rv-summary-label
+      i.fas.fa-stopwatch
+      |  {{'common.time' | translate}}
+    .rv-summary-value {{minutes*60*1000+seconds*1000 | date:'m:ss'}}
+  ul.rv-meta
+    li(title="{{'common.competition' | translate}}")
+      i.fas.fa-trophy
+      | {{competition}}
+    li(title="{{'common.round' | translate}}")
+      i.fas.fa-redo-alt
+      | {{round}}
+    li(title="{{'common.field' | translate}}")
+      i.fas.fa-map-marker-alt
+      | {{field}}
+    li(title="{{'common.league' | translate}}")
+      i.fas.fa-route
+      | {{league}}
+    li(title="{{'common.rule' | translate}}")
+      i.fas.fa-book
+      | #{rule}

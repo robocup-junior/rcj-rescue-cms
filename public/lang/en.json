@@ -4,19 +4,34 @@
     "home": {
         "login": "Login",
         "logout": "Logout",
-        "about": "The RoboCupJunior Competition Management System is designed for help the referees of RoboCupJunior Rescue Line / Maze.  In this system, it is very easy to do everything related to competition management, from course map creation to score calculation and ranking.  If you are a judge of a competition that adopts this system, please login from the button below. The competition OC knows the ID and password.  If you are a player, you can check the detailed results and ranking of the competition by choosing the competition you participated from the list below.",
+        "about": "Comprehensive management system for RoboCupJunior Rescue. Facilitates map creation, scoring, and ranking. Judges can log in to access scoring tools. Participants can browse results by selecting a competition.",
         "management": "Settings / Competition Management",
         "access_level": "The you logged in account, {{account}}, does not have permission to access Competition Management.",
-        "goScanner": "Manual input of score sheet"
+        "goScanner": "Manual input of score sheet",
+        "staffWorkspace": "Staff Workspace",
+        "adminCommand": "Admin Command Center",
+        "enterLeague": "Enter League",
+        "manageTeamsDesc": "Manage teams and registrations",
+        "scannerDesc": "Scan score sheets via QR",
+        "reviewsDesc": "Grade technical documents",
+        "runsMonitor": "Runs Monitor",
+        "runsMonitorDesc": "Real-time competition status",
+        "signageOnly": "Signage Only",
+        "signageDesc": "Pure signage display",
+        "dualView": "Signage + Monitor",
+        "dualViewDesc": "Signage and runs monitor dual view"
     },
-    "team_home":{
+    "team_home": {
         "title": "Team List",
         "document": "Document",
         "review": "Review",
         "result": "Review List"
     },
     "service_home": {
-        "about": "The RCJ Scoring System was designed to assist the RoboCup Junior Rescue Line/Maze referees. The system makes it very easy to do everything involved in running a competition, from creating course maps to calculating and ranking scores. From this page, you can create a field map of your line/maze and download it as an image without having to log into the system. You can also generate world files for the Erebus platform(simulation)."
+        "about": "Design field maps, generate images and scoresheets for RoboCupJunior Rescue Line/Maze, or create world files for the Erebus simulation platform.",
+        "line_editor_desc": "Design and simulate challenge-ready Line Rescue maps for the 2026 ruleset.",
+        "maze_editor_desc": "Create intricate Maze Rescue fields with dynamic victim placement and multi-floor support.",
+        "sim_editor_desc": "Build and export high-fidelity worlds for the Erebus simulation platform."
     },
     "scanner": {
         "description": "Please scan the barcode / QR code on the score sheet",
@@ -26,11 +41,11 @@
         "check": "Check / Review"
     },
     "login": {
-        "title" : "Staff Login",
+        "title": "Staff Login",
         "description": "Please enter the username and password notified by the OC/TC and login.",
-        "login" : "Login",
-        "failed" : "Sorry, your username or password cannot be recognized.",
-        "return" : "When login is successful, it returns to the you tried access page."
+        "login": "Login",
+        "failed": "Sorry, your username or password cannot be recognized.",
+        "return": "When login is successful, it returns to the you tried access page."
     },
     "signage": {
         "create": "Create",
@@ -79,7 +94,7 @@
         "score": "Score",
         "mean": "Mean",
         "sum": "Sum",
-        "weightedSum": "Weighted sum",
+        "weightedSum": "Weighted\nsum",
         "gamesScore": "Games score",
         "documentScore": "Normalized score for document",
         "normalizedScore": "Normalized score",
@@ -138,22 +153,29 @@
         "totalScore": "Total score",
         "sort": "Sorting",
         "deleted": "Successfully deleted!",
-        "mypage": "Personal page"
+        "mypage": "Personal page",
+        "backHome": "Back to Home",
+        "from": "From",
+        "to": "To"
+    },
+    "error": {
+        "title": "Oops! Something went wrong",
+        "description": "The robot tripped over a logic bug..."
     },
     "technicalChallenge": {
         "technicalChallenge": "Technical Challenge"
     },
-    "accessDenied":{
-        "title" : "Access denied",
-        "description1" : "You do not have permission to access this page. Please login with authorized account.",
-        "description2" : "If you suspect this screen is displayed due to any problem, please contact system administrator."
+    "accessDenied": {
+        "title": "Access denied",
+        "description1": "You do not have permission to access this page. Please login with authorized account.",
+        "description2": "If you suspect this screen is displayed due to any problem, please contact system administrator."
     },
-    "shortURL404":{
-        "title" : "Page Not Found",
-        "description1" : "The page corresponding to the specified short link was not found.",
-        "description2" : "The link's validity period may have passed."
+    "shortURL404": {
+        "title": "Page Not Found",
+        "description1": "The page corresponding to the specified short link was not found.",
+        "description2": "The link's validity period may have passed."
     },
-    "registration":{
+    "registration": {
         "title": "Registration",
         "description": "This page is used to set whether or not teams can register themselves.",
         "error": "Authentication error",
@@ -183,7 +205,7 @@
         "authButton": "Submit",
         "authSent": "An authentication email has been sent to you. Please follow the link in the email to continue the registration process. If you do not receive the email, please check your spam mail box. If you still can't find it, please try a different email address. Hotmail and some institutional email addresses have been reported to fail to deliver emails."
     },
-    "reservation":{
+    "reservation": {
         "title": "Booking",
         "start": "Start time",
         "duration": "Duration(minutes)",
@@ -209,7 +231,7 @@
         "open": "Open",
         "noResv": "No Record",
         "noResvDesc": "There is no record of your booking.",
-        "js":{
+        "js": {
             "booked": "Booking completed!",
             "bookedMes": "You have successfully booked!",
             "cancel": "Booking cancellation?",
@@ -220,7 +242,7 @@
             "cancelKeep": "Keep this booking"
         }
     },
-    "survey":{
+    "survey": {
         "title": "Questionnaire",
         "new": "Create a new questionnaire",
         "editor": "Questionnaire Editor",
@@ -240,7 +262,7 @@
         "onlyOnce": "This form can be submitted only once before this deadline. No changes can be made to the response after submission.",
         "submit": "Submit",
         "readOnly": "Displays the response in read-only mode.",
-        "js":{
+        "js": {
             "multiple": "Do you want to submit your response? You can revise your response after this submission until the deadline.",
             "onlyOnce": "This form can only be submitted once. It is not possible to modify the response after this submission.",
             "submit": "Submit",
@@ -249,7 +271,7 @@
             "complete": "Submission completed"
         }
     },
-    "cabinet":{
+    "cabinet": {
         "title": "Cabinets",
         "description": "You can distribute various materials to your team.",
         "description2": "This page will contain the files distributed by the organisers.",
@@ -258,7 +280,7 @@
         "empty": "It seems that no files have been stored yet...",
         "delete": "Delete",
         "upload": "Upload",
-        "js":{
+        "js": {
             "delAsk": "Delete?",
             "delConfirm": "Are you sure you want to delete this file? This operation cannot be undone.",
             "delComplete": "Deleted",
@@ -267,12 +289,23 @@
             "delCancelButton": "Keep"
         }
     },
-    "mypage":{
+    "mypage": {
+        "locked": "Acceptance ended",
         "message": "Message",
         "document": "Submit your documentation and other files.",
-        "cabinet": "Contain the files distributed by the organisers."
+        "cabinet": "Contain the files distributed by the organisers.",
+        "profile": "Profile",
+        "changePassword": "Change Password",
+        "currentPassword": "Current Password",
+        "newPassword": "New Password",
+        "confirmPassword": "Confirm New Password",
+        "passwordRule": "Must be at least 8 characters long and include at least two of the following: uppercase letters, lowercase letters, numbers, or symbols.",
+        "passwordChanged": "Successfully changed password.",
+        "passwordError": "Failed to change password. Please check if your current password is correct.",
+        "passwordMismatch": "New passwords do not match.",
+        "passwordInvalid": "Password does not meet the requirements."
     },
-    "interview":{
+    "interview": {
         "runs": "All runs",
         "ad_pic": "Additional pictures",
         "me_pic": "Member's picture",
@@ -304,7 +337,7 @@
                 "filter": "Filter",
                 "round": "Round",
                 "field": "Field",
-                "team" : "Team name"
+                "team": "Team name"
             },
             "endedrun": "Display ended runs",
             "js": {
@@ -344,7 +377,23 @@
             "checkpoint": "Checkpoint",
             "m_score": "Direction scored",
             "m_score_d": "Please tap the tile of the direction the team scored.",
-            "rescuedVictims": "Rescued Victims"
+            "rescuedVictims": "Rescued Victims",
+            "exitBase": "Base points",
+            "passTitle": "Points on each pass",
+            "seesaw": "Seesaw",
+            "tileDone": "All items scored",
+            "tilePartial": "Partly scored",
+            "tileNone": "Not scored",
+            "exitDone": "Exited",
+            "exitNotDone": "Did not exit",
+            "exitDeduction": "LoP deduction",
+            "evacuationShort": "Evac Zone",
+            "perVictim": "/ victim",
+            "found": "Found",
+            "identified": "Identified",
+            "exitFixed": "{{points}} points for exiting",
+            "cpAndLops": "Checkpoints and LoPs",
+            "perTile": "Points per tile"
         },
         "judge": {
             "before": "Before the start of the run record, please confirm that the following information is correct.",
@@ -385,10 +434,29 @@
             "networkErrorDescription": "Failed to save the scoring-run data on the server. Check the network connection.  The record of scoring run can be continued as it is, but it is not stored in the server.  Please call system manager ASAP!",
             "reSend": "ReSend",
             "rescuedVictims": "@:line.view.rescuedVictims",
-            "rescuedVictimsMes" : "To delete a rescued victim, double click or swipe left (Mobile Device)",
+            "rescuedVictimsMes": "To delete a rescued victim, double click or swipe left (Mobile Device)",
             "noShow": "Start timer when team no show",
             "search": "Level 2",
             "noSearch": "Level 1",
+            "staged": "Taken to a zone together (tap one to remove)",
+            "toZone": "Placed in",
+            "victimsLeft": "{{n}} left",
+            "tapToggle": "Tap to switch",
+            "saving": "Saving",
+            "saved": "Saved",
+            "finish": "End of the run",
+            "stopTimer": "Stop the timer",
+            "stopConfirm": "Stop the timer?",
+            "keepRunning": "Keep running",
+            "stopAt": "Stop at {{t}}",
+            "recordedTime": "Time to record",
+            "timeUp": "Time is up",
+            "reviewRun": "Look over the run",
+            "reviewRunNote": "Close to check or correct the score",
+            "runTime": "Time of the run",
+            "maySkip": "The team may skip to {{cp}}",
+            "close": "Close",
+            "notFound": "Not found",
             "js": {
                 "score_element": "Place checkpoint markers on tiles without scoring elements (rule 3.3.5)",
                 "cantvisit": "Cannot place checkpoint markers on tile that robot can't visit.",
@@ -440,11 +508,24 @@
             "calc": "Score calculation",
             "item": "Item points",
             "rescuedVictims": "@:line.view.rescuedVictims",
-            "rescuedVictimsMes" : "@:line.judge.rescuedVictimsMes",
+            "rescuedVictimsMes": "@:line.judge.rescuedVictimsMes",
             "kit": "Rescue kit",
             "write": "Write signature",
             "clear": "Clear",
-            "comp": "Complete"
+            "comp": "Complete",
+            "undo": "Undo",
+            "erase": "Erase all",
+            "padHint": "Sign large, using the whole box",
+            "padRotate": "Turn the phone sideways for more room",
+            "needSigns": "{{n}} more signature(s) needed",
+            "confirmTitle": "Send the run data?",
+            "sendNote": "Once sent, the run data is final and can no longer be corrected.",
+            "send": "Send",
+            "sending": "Sending...",
+            "retry": "Send again",
+            "sendError": "Could not reach the server. Check the connection and send again.",
+            "sent": "Sent",
+            "backToList": "Back to the list"
         }
     },
     "maze": {
@@ -489,6 +570,15 @@
             "m_flash": "Flash within 15cm from victim:",
             "m_identified": "Successfully identified victim type",
             "m_kit": "Delivered rescue kits:",
+            "m_found": "Discovery",
+            "m_victim": "Victims and Targets",
+            "m_required": "Required",
+            "victimStatus": {
+                "Harmed": "Harmed",
+                "Stable": "Stable",
+                "Unharmed": "Unharmed",
+                "Dummy": "Dummy"
+            },
             "misidentification": "Misidentification"
         },
         "judge": {
@@ -514,9 +604,16 @@
             "m_bump": "@:maze.view.m_bump",
             "m_ramp": "@:maze.view.m_ramp",
             "m_steps": "@:maze.view.m_steps",
+            "blue": "Blue tile",
+            "m_blue_tile": "Blue Tile",
+            "m_blue_visits": "Number of visits to this blue tile:",
             "m_flash": "@:maze.view.m_flash",
             "m_identified": "@:maze.view.m_identified",
             "m_kit": "@:maze.view.m_kit",
+            "m_found": "@:maze.view.m_found",
+            "m_victim": "@:maze.view.m_victim",
+            "m_required": "@:maze.view.m_required",
+            "m_identified": "@:maze.view.m_identified",
             "pat": "@:admin.mazeMapEditor.pattern",
             "random": "Random drawing",
             "networkError": "@:line.judge.networkError",
@@ -529,7 +626,6 @@
                     "title": "@:line.judge.js.timeup.title",
                     "content": "@:line.judge.js.timeup.content"
                 }
-
             }
         },
         "sign": {
@@ -555,7 +651,11 @@
             "misidentification": "@:maze.view.misidentification",
             "write": "@:line.sign.write",
             "clear": "@:line.sign.clear",
-            "comp": "@:line.sign.comp"
+            "comp": "@:line.sign.comp",
+            "blue": "Blue tiles visited once",
+            "exit": "Exit bonus",
+            "stairs": "Successful stair navigation",
+            "ramp": "Successful ramp navigation"
         }
     },
     "admin": {
@@ -564,9 +664,14 @@
         },
         "home": {
             "competitions": "Competitions",
+            "description": "Manage your competitions and system settings from this central dashboard.",
             "c_item": "Tool / Settings",
             "line_tSet": "Line tilesets",
             "add_c": "Add competition",
+            "add_c_placeholder": "Enter competition name...",
+            "remove_c": "Remove competition",
+            "remove_c_msg": "Are you sure you want to remove the competition",
+            "remove_c_confirm": "To confirm, please type 'DELETE' below:",
             "user": "User management",
             "access_level": "The you logged in account, {{account}}, does not have permission to access User management / URL Shortening.",
             "signage": "Signage setting",
@@ -601,7 +706,7 @@
             "import": "Import from file",
             "addAll": "Add all types at once"
         },
-        "users":{
+        "users": {
             "title": "User management",
             "name": "User name",
             "super": "Super Admin role",
@@ -628,7 +733,21 @@
             "maps": "Maps",
             "runs": "Runs",
             "backup": "Backup",
-            "tools": "Tools"
+            "tools": "Tools",
+            "leagues": "Leagues",
+            "teams_desc": "Register, edit, and manage participating teams and member info.",
+            "rounds_desc": "Create competition rounds, set up groups, and manage schedules.",
+            "fields_desc": "Set up competition fields (arenas) and their specific names.",
+            "settings_desc": "Configure core settings: name, logo, rules, and ranking logic.",
+            "backup_desc": "Create backups and restore competition data for safety.",
+            "maps_short": "Maps",
+            "runs_short": "Runs",
+            "tools_doc_desc": "Review and score submitted technical documents.",
+            "tools_mail_desc": "Email communication and bulk messaging to all teams.",
+            "tools_reg_desc": "Manage self-registration and info correction by teams.",
+            "tools_res_desc": "Manage time-slot bookings for interviews and practice.",
+            "tools_cab_desc": "Distribute files and bulk-upload materials to teams.",
+            "tools_sur_desc": "Create participant surveys and review response results."
         },
         "teams": {
             "title": "Teams",
@@ -648,6 +767,27 @@
             "title": "Map",
             "create": "Create a new map"
         },
+        "print": {
+            "back": "Back to runs",
+            "filter": "Filter",
+            "columns": "Columns",
+            "all": "All",
+            "none": "None",
+            "sheetTitle": "Sheet title",
+            "runs": "runs",
+            "excel": "Excel",
+            "chromeHint": "Please use Google Chrome to print this page.",
+            "runList": "Run List",
+            "originalScore": "Original score",
+            "adjustment": "Adjustment",
+            "teams": "teams",
+            "format": "Format",
+            "decimalsFinal": "Final score decimals",
+            "decimalsNormalized": "Normalized score decimals",
+            "teamWidth": "Team column width (px)",
+            "note": "Note below the table",
+            "rankingNote": "The scores are based on the sum of all the run (the minimum score is not subtracted yet)."
+        },
         "lineRun": {
             "title": "Games",
             "add": "Add run",
@@ -665,7 +805,8 @@
             "delS": "Delete selected runs",
             "statusReset": "Reset Status",
             "printRuns": "Print all runs",
-            "printRanking": "Print ranking"
+            "printRanking": "Print ranking",
+            "scoresheetTitle": "Scoresheets Generation"
         },
         "lineRunBulk": {
             "title": "Line Run Bulk Registration",
@@ -678,16 +819,62 @@
             "s2D4": "For Map name, select one from the following and enter.",
             "s2D5": "For Field name, select one from the following and enter. ",
             "s2D6": "Enter start time in the following format ",
+            "clickToCopy": "Click a name to copy it to the clipboard",
+            "copied": "Copied",
+            "complete": "runs registered",
             "s3T": "STEP3 Upload the file",
             "s3D": "After selecting the file, please check the contents displayed below.",
             "exe": "Execution",
             "inpro": "Registration in progress ...",
-            "complete": "Registration completed"
+
+            "generatorTitle": "Schedule Generator",
+            "generatorInfoTitle": "Information",
+            "generatorInfo1": "This generator is intended to create an initial competition schedule and bulk registration without CSV.",
+            "generatorInfo2": "There are two modes for schedule generation:",
+            "generatorInfo3": "1. Teams are rotated through normalization groups (maps) so that every team should receive each selected map exactly once. Every field hosts a different map.",
+            "generatorInfo4": "2. All fields host the same map and normalization group in each round. All teams compete on the same map in each round and fields are just for parallel execution.",
+            "generatorInfo5": "The number of selected rounds must match the number of selected maps.",
+            "generatorInfo6": "Maps define normalization groups.",
+            "generatorInfo7": "Fields only define how many runs can take place in parallel, as they are physical locations.",
+            "generatorInfo8": "Teams, rounds, fields and maps are preselected automatically and can be adjusted before generation.",
+            "generatorInfo9": "Always verify the generated schedule before importing it into the competition!",
+            "generatorExampleTitle": "Example:",
+            "generatorExampleText": "8 rounds + 8 maps = 8 normalization groups. The number of fields only affects throughput and schedule duration.",
+
+            "generatorTeams": "Teams",
+            "generatorRounds": "Rounds",
+            "generatorFields": "Fields",
+            "generatorMaps": "Maps",
+
+            "generatorSearchTeams": "Search and select teams...",
+            "generatorSearchRounds": "Search and select rounds...",
+            "generatorSearchFields": "Search and select fields...",
+            "generatorSearchMaps": "Search and select maps...",
+
+            "generatorDays": "Days",
+            "generatorSlotMinutes": "Slot Minutes",
+            "generatorSmallBreakMultiplier": "Small Break Multiplier",
+            "generatorLunchMinutes": "Lunch Minutes",
+            "generatorStartTime": "Start Time",
+
+            "generatorScheduleMode": "Schedule Mode",
+            "generatorModeScrambled": "Scrambled / Rotating Normalization Groups",
+            "generatorModeFixed": "Fixed Map / Fixed Normalization Group",
+
+            "generatorModeFixedDesc1": "Fixed Map Mode: Each round corresponds to exactly one map and normalization group. Teams stay on the same challenge for the entire round and fields are only used as parallel execution locations.",
+            "generatorModeFixedDesc2": "Fields need to be physically rebuilt after every round.",
+
+            "generatorModeScrambledDesc": "Scrambled Mode: Maps are assigned to normalization groups hosted on different fields. Teams rotate between fields and normalization groups across rounds so that each team visits every selected map exactly once.",
+
+            "generatorButton": "Generate Schedule",
+
+            "generatorDisclaimerTitle": "Disclaimer:",
+            "generatorDisclaimerText": "The generated schedule is based on the selected configuration and available teams. Organizers are responsible for reviewing the final schedule, map assignments, field assignments, timing and normalization groups before importing runs into the competition."
         },
         "lineMapEditor": {
             "title": "Map Editor",
             "desc": "Drag and drop tiles from the tile set area on the left onto the map area on the right. Right-click on a tile in the map area to set score item such as gaps and obstacles and ramps etc...",
-            "save": "Save map",
+            "save": "Save",
             "saveAs": "Save map as",
             "name": "Name of design: ",
             "height": "Max height: ",
@@ -695,6 +882,7 @@
             "length": "Max length",
             "check": "Number of checkpoint markers:",
             "finished": "Finished for using in runs",
+            "finishedTooltip": "Marks the map as complete and ready to use. Please check this when map creation is finished.",
             "tileset": "Select tile set",
             "item": "Change items",
             "bump": "Speedbumps: ",
@@ -712,12 +900,21 @@
             "export": "Export this map to Json file",
             "import": "Import map from Json file",
             "liveVictim": "Number of the live victims",
-            "deadVictim" : "Number of the dead victims",
+            "deadVictim": "Number of the dead victims",
             "rampPoint": "Ramp points",
             "setCheckpoint": "Set this tile as a checkpoint",
             "cantset": "You can't set this element in some reasons.",
             "generateImage": "Generate map image",
-            "prepareScoresheets": "Prepare for generate score sheets"
+            "prepareScoresheets": "Prepare for generate score sheets",
+            "properties": "Tile Properties",
+            "checkpoint": "Checkpoint",
+            "courseStart": "Start",
+            "evacRestart": "Restart",
+            "simulator3d": "Floor Transitions",
+            "clickToCycle": "Cycle on click",
+            "ascend": "Ascend",
+            "descend": "Descend",
+            "duration": "Duration"
         },
         "teamBulk": {
             "title": "Teams Bulk Registration",
@@ -735,11 +932,50 @@
         },
         "mazeMapAdmin": {
             "title": "Map",
-            "create": "@:admin.lineMapAdmin.create"
+            "create": "@:admin.lineMapAdmin.create",
+            "selectAll": "Select All",
+            "unselectAll": "Unselect All",
+            "printSelected": "Print Selected",
+            "print": {
+                "title": "Print Options",
+                "outputContent": "Output Content",
+                "victimsTargets": "Victims / Targets",
+                "scoreSheets": "Score Sheets",
+                "mapImages": "Map Images",
+                "fileFormat": "File Format",
+                "paperSize": "Paper Size",
+                "targetTypes": "Target Types",
+                "cognitiveTargets": "Cognitive Targets",
+                "letterVictims": "Letter Victims",
+                "scoreSheetInfo": "Each selected map will generate a blank score sheet with competition details.",
+                "generatePDF": "Generate PDF",
+                "generatePNG": "Download PNG"
+            }
         },
         "mazeMapEditor": {
+            "dimensions": "DIMENSIONS",
+            "time": "TIME",
+            "finishedTooltip": "Marks the map as complete and ready to use. Please check this when map creation is finished.",
+            "mapName": "Map Name",
+            "advancedTools": "ADVANCED TOOLS AND OUTPUT",
+            "scoreSheetPreparation": "SCORE SHEET PREPARATION",
+            "scoreSheetPreparationDesc": "Prepare files required for score sheet printing (e.g., generate map image).",
+            "downloadImage": "Download Image",
+            "prepareSheets": "Generate Score Sheet",
+            "printPDF": "Print PDF",
+            "includeLetterVictims": "Include Letter Victims",
+            "targetsPDF": "Target Printing",
+            "cognitiveTargets": "Cognitive Target",
+            "letterVictims": "Letter Victim",
+            "back": "Back",
+            "map": "Map Editor",
             "title": "Map Editor",
             "desc": "Click on the wall to create a maze. Click on the floor of the maze to set items such as victims, checkpoints, bumps and others.",
+            "tour": {
+                "teamInfo": "Confirm your team information here.",
+                "save": "Please click the Save button regularly. You can re-edit as many times as you like until the deadline.",
+                "charLimit": "If there is a character limit, you can check the current character count here."
+            },
             "save": "@:admin.lineMapEditor.save",
             "saveAs": "@:admin.lineMapEditor.saveAs",
             "name": "@:admin.lineMapEditor.name",
@@ -751,8 +987,8 @@
             "bump": "Speed bumps",
             "step": "Steps",
             "ramp": "Ramp",
-            "cp" : "Check point",
-            "black" : "Black tile",
+            "cp": "Check point",
+            "black": "Black tile",
             "blue": "Blue tile",
             "red": "Red tile",
             "down": "Bottom horizontal tile at ramp",
@@ -764,21 +1000,67 @@
             "floor": "Floor",
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
-            "placement" : "Placement of victims:",
+            "placement": "Placement of victims:",
+            "victimRestricted": "Victims cannot be placed while elements are set on the tile.",
+            "propertyRestricted": "Tile elements cannot be changed when victims are placed.",
             "changeF": "Change floor to",
-            "noEle": "(No elevator)",
+            "noEle": "No elevator",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "parent": "This map is one of parent's dice pattern",
             "backToParent": "Back to parent editing",
             "pattern": "Map pattern setting",
             "patSave": "To set the pattern, save the map before once.",
+            "saveAsModal": {
+                "newName": "New Name",
+                "targetCompetition": "Target Competition",
+                "createCopy": "Create Copy",
+                "successTitle": "Map Created!",
+                "successText": "Your new map has been successfully created. Would you like to switch to the new map editor or stay on this page?",
+                "goToNew": "Go to New Map",
+                "stayHere": "Stay Here"
+            },
             "create": "Create New",
-            "edit" : "Edit",
+            "edit": "Edit",
             "patYet": "The map creation can not be completed because the dice pattern setting has not been done.",
             "entryLeague": "Entry(JP)",
             "standardLeague": "Normal",
-            "leagueType": "League type"
+            "leagueType": "League type",
+            "cognitiveTarget": "Cognitive Target",
+            "cognitive": "Cognitive",
+            "cognitiveAbbr": "C",
+            "settings": "Settings",
+            "none": "None",
+            "cognitiveTargetSettings": "Cognitive Target Settings",
+            "ring": "Ring",
+            "diameter": "Diameter",
+            "color": "Color",
+            "yellow": "Yellow",
+            "green": "Green",
+            "cyan": "Blue",
+            "cBlack": "Black",
+            "cRed": "Red",
+            "totalValue": "Total Value",
+            "victimStatus": "Victim Status",
+            "harmedVictim": "Harmed Victim",
+            "stableVictim": "Stable Victim",
+            "unharmedVictim": "Unharmed Victim",
+            "dummyVictim": "Dummy Victim",
+            "tileProperties": "Tile Properties",
+            "ringConfiguration": "Ring Configuration",
+            "calculation": "Calculation",
+            "cognitiveTargetsPDF": "Cognitive Targets PDF",
+            "cognitiveTargetsPDFDesc": "Printable targets for competition setup",
+            "includeLetterVictims": "Include Letter Victims",
+            "printCognitiveTargets": "Print",
+            "paperSize": "Paper Size",
+            "a4Description": "Standard international size",
+            "letterDescription": "US/Canada standard size",
+            "autoConfigure": "Auto Configure",
+            "stableAbbr": "S",
+            "harmedAbbr": "H",
+            "unharmedAbbr": "U",
+            "dummyAbbr": "D"
         },
         "mazeRun": {
             "title": "Games",
@@ -881,7 +1163,7 @@
             "exe": "Backup!",
             "time": "Backup time",
             "queue": "Backup queue",
-            "js":{
+            "js": {
                 "complete": "Your backup job is now complete. You can download it from the list below."
             }
         },
@@ -903,6 +1185,7 @@
             "unset": "Remove"
         },
         "simMapEditor": {
+            "newEditor": "Switch to Erebus Editor 2026: draw straight on the map",
             "title": "Rescue Simulation World Editor",
             "desc": "Click on the wall to create a maze. Click on the floor of the maze to set items such as victims, checkpoints, swamps and others.",
             "save": "@:admin.lineMapEditor.save",
@@ -914,16 +1197,319 @@
             "finished": "Finished for using in runs",
             "item": "@:admin.lineMapEditor.item",
             "swamp": "Swamp",
-            "cp" : "Check point",
-            "black" : "Black hole",
-            "curve" : "Curved Wall",
+            "cp": "Check point",
+            "black": "Black hole",
+            "curve": "Curved Wall",
             "top": "@:admin.lineMapEditor.top",
             "right": "@:admin.lineMapEditor.right",
             "left": "@:admin.lineMapEditor.left",
             "bottom": "@:admin.lineMapEditor.bottom",
             "noStart": "@:admin.lineMapEditor.noStart",
             "start": "@:admin.lineMapEditor.start",
-            "placement" : "Placement of victims:",
+            "placement": "Placement of victims:",
+            "victimIsFake": "Victim is fake:",
+            "cognitives": "Cognitives",
+            "rotDialHint": "Drag to rotate (hold Shift for 1° steps). Arrow keys also work.",
+            "rotRandom": "Random angle",
+            "rotHelp": "Turns clockwise as seen from the robot. 0° is upright. Drag the dial, or use the buttons.",
+            "fakeHint": "Exported as a decoy worth 0 points",
+            "area4Check": {
+                "title": "Preset placement check",
+                "ok": "Fits the room 4 area",
+                "needSize": "Needs a {{size}} room 4 area",
+                "now": "(now: {{now}})",
+                "current": "now",
+                "none": "not selected",
+                "check": "Check the passages",
+                "mapHint": "On the map, the dashed frame is where the preset goes and the green / red frames are where its passages must be. A and B are alternatives: use green A with red A, or green B with red B.",
+                "mapHintOk": "The striped area on the map is where the preset will be placed.",
+                "noRegion": "No room 4 area is selected.",
+                "notRect": "The room 4 area is not a rectangle.",
+                "wrongSize": "The room 4 area is not the size of this preset.",
+                "noRoomForPassages": "There is no room on the map for the passages. Move the room 4 area away from the edge.",
+                "noGreen": "There is no room 1 ⇄ room 4 (green) passage.",
+                "manyGreen": "There is more than one room 1 ⇄ room 4 (green) passage.",
+                "noRed": "There is no room 3 ⇄ room 4 (red) passage.",
+                "manyRed": "There is more than one room 3 ⇄ room 4 (red) passage.",
+                "passageMismatch": "The passages are not where the preset has its entrances. Put them on the frames shown on the map.",
+                "exportTitle": "The room 4 preset cannot be placed"
+            },
+            "connCheck": {
+                "offNote": "Not checked. Passage colours are not restricted, and the Erebus world can be exported as it is.",
+                "switchHint": "Room connection check on / off (saved with the map)",
+                "off": "Off",
+                "on": "On",
+                "title": "Room connection check",
+                "ok": "Every room is connected to room 1 by passages",
+                "room": "Room {{room}}",
+                "linked": "Connected by",
+                "notLinked": "Not connected yet. Put one of these passage tiles (floor colour) on the room border:",
+                "notReached": "Not connected to room 1. Also put one of these passage tiles:",
+                "isolated": "It does not touch any other room. Check the room's tiles.",
+                "option": "Room {{from}} ⇄ room {{to}} ({{name}})",
+                "presetNote": "Place the room 4 passages on the frames of the preset placement check.",
+                "passageNoRoom": "There is a {{name}} passage (room {{from}} ⇄ room {{to}}), but there is no room {{room}}.",
+                "passageMisplaced": "The {{name}} passage (room {{from}} ⇄ room {{to}}) cannot be passed through to both room {{from}} and room {{to}}. Put the passage tile in one of the rooms and leave it open to both.",
+                "mapHint": "On the map, coloured dashed frames are where a passage tile can go. Frames marked \"!\" are gaps between rooms without a passage tile (make one side a passage tile or close it with a wall), and \"×\" marks passage tiles in the wrong place. A gap counts when the robot (7.4 cm across) fits between the walls, half walls and curved walls (a half-tile gap is too narrow).",
+                "unmarkedGap": "There are {{count}} gap(s) between room {{from}} and room {{to}} without a {{name}} passage tile. Every gap a robot could get through must be a {{name}} passage tile or be closed with a wall.",
+                "notConnected": "Room {{room}} is not connected to room 1 by passages.",
+                "exportTitle": "The world cannot be exported: the rooms are not connected correctly",
+                "exportNote": "The Erebus world cannot be exported like this (this check can be switched off)."
+            },
+            "noWall": "no wall",
+            "passageCtx": {
+                "ownClosed": "It is closed off on the room {{room}} side, so it cannot be a passage",
+                "here": "This tile: room {{room}}",
+                "borders": "Opens onto",
+                "noBorder": "Walls or holes keep the robot from getting to another room, so it cannot be a passage",
+                "only": "Only where room {{from}} and room {{to}} meet with a way through"
+            },
+            "victimsGroup": "Victims",
+            "hazmatGroup": "Hazmat signs",
+            "tokenSettings": "Wall token settings",
+            "noTokenPlaced": "Place a victim or hazmat sign to set its rotation.",
+            "insertColumn": "Insert a column here",
+            "removeColumn": "Remove this column",
+            "insertRow": "Insert a row here",
+            "removeRow": "Remove this row",
+            "room4Creator": {
+                "ctRings": "Cognitive target",
+                "ctFake": "Fake",
+                "ctSum": "Sum",
+                "ctHint": "Click a ring on the target, then a colour below (now ring {{n}} from the outside)",
+                "rot": "Turn (degrees)",
+                "rotFixed": "Fixed turn",
+                "rotRandom": "Random",
+                "rotRandomNote": "Each one gets a random turn",
+                "remove": "Remove",
+                "zoomIn": "Zoom in",
+                "zoomOut": "Zoom out",
+                "zoomFit": "Fit",
+                "zoomHint": "Ctrl (⌘) + wheel to zoom, Space + drag to pan",
+                "randomNoteShort": "Picked from all types on export",
+                "viewReach": "Out of reach",
+                "viewGuides": "Entrances / CP",
+                "unreachableShort": "Out of reach {{count}}",
+                "farShort": "Off the wall {{count}}",
+                "missingShort": "Missing CP {{count}}",
+                "noEntranceShort": "No entrance",
+                "reachOff": "Reach not worked out",
+                "legendMapWallShort": "Map walls",
+                "legendCheckpointShort": "Checkpoint",
+                "sel": {
+                    "ccw": "Turn left 90°",
+                    "cw": "Turn right 90°",
+                    "h": "Flip left / right",
+                    "v": "Flip top / bottom",
+                    "duplicate": "Duplicate",
+                    "copy": "Copy",
+                    "paste": "Paste",
+                    "delete": "Delete",
+                    "drop": "Done"
+                },
+                "randomPlace": "Place at random",
+                "randomModes": {
+                    "current": "Chosen type",
+                    "mixed": "Mixed types"
+                },
+                "randomGo": "Place",
+                "randomNote2": "Along walls the robot can get within half a tile of, at least half a tile apart.",
+                "templates": {
+                    "maze": "Maze",
+                    "pillars": "Pillars",
+                    "diagonal": "Diagonals",
+                    "zigzag": "Zigzag",
+                    "rings": "Rings",
+                    "obstacles": "Obstacles"
+                },
+                "templateHints": {
+                    "maze": "A maze of one-tile corridors (with a few short cuts).",
+                    "pillars": "Round pillars on the tile corners.",
+                    "diagonal": "Short diagonal walls inside tiles.",
+                    "zigzag": "One path turning at the ends.",
+                    "rings": "Rings round the middle, each with a gap.",
+                    "obstacles": "Scattered circles, boxes and triangles."
+                },
+                "templateClear": "Clear the walls and victims first",
+                "templateApply": "Place",
+                "showGuides": "Show entrances and checkpoints",
+                "legendEntrance": "Entrance (passage colour, {{count}})",
+                "legendCheckpoint": "Checkpoint (set in the main editor)",
+                "missingCheckpoints": "{{count}} tile(s) just inside a passage are not checkpoints (rule 3.5.3). Set them in the main editor (dashed \"CP?\").",
+                "noEntrance": "Room 4 has no entrance. Open a wall towards a passage outside in the main editor.",
+                "rows": {
+                    "real": "Real",
+                    "fake": "Fake (3D)"
+                },
+                "curveMode": "Line",
+                "curveSmooth": "Smooth",
+                "curveStraight": "Straight",
+                "sides": "Sides",
+                "shapeIcon": "Icon",
+                "shapePicture": "Picture",
+                "iconSearch": "Search (e.g. star, car, tree)",
+                "iconAll": "Suggested (pick a category to narrow)",
+                "iconLoading": "Loading icons…",
+                "iconUnavailable": "The icon list could not be loaded.",
+                "iconNone": "Nothing found.",
+                "pictureChoose": "Choose a picture",
+                "pictureNote": "A PNG or SVG with transparency uses its opaque part; other pictures use their dark part.",
+                "shapeStyle": "Draw as",
+                "shapeStyles": {
+                    "fill": "Filled",
+                    "outline": "Outline"
+                },
+                "shapeRotate": "Rotate",
+                "mirror": "Mirror",
+                "mirrors": {
+                    "none": "Off",
+                    "x": "Left / right",
+                    "y": "Top / bottom",
+                    "xy": "Both"
+                },
+                "tipCurve": "Click: add a point   Double-click / Enter: finish",
+                "tipArc": "Move to bend   Click: done",
+                "unreachable": "{{count}} the robot cannot get within half a tile of (cannot be identified)",
+                "showReach": "Show where the robot cannot go",
+                "legendReach": "Where the robot cannot go",
+                "legendMapWall": "Map walls (set in the main editor)",
+                "reach": {
+                    "noSeed": "The robot cannot move from the start tile, so where it cannot go is not worked out (check the start tile and the walls around it).",
+                    "noStart": "There is no start tile, so where the robot cannot go is not worked out.",
+                    "unavailable": "Where the robot cannot go could not be worked out."
+                },
+                "eraseTarget": "Erase",
+                "eraseTargets": {
+                    "all": "Everything",
+                    "tokens": "Victims only"
+                },
+                "tipStamp": "Click: select (turn, rings) or change type   Right-click: remove",
+                "tipOther": "Right-click: remove",
+                "title": "Custom room 4",
+                "open": "Create custom room 4",
+                "tools": {
+                    "pen": "Pen",
+                    "line": "Line",
+                    "rect": "Rectangle",
+                    "circle": "Circle",
+                    "stamp": "Victim",
+                    "erase": "Eraser",
+                    "curve": "Curve",
+                    "arc": "Arc",
+                    "ellipse": "Ellipse",
+                    "polygon": "Polygon",
+                    "shape": "Shape",
+                    "select": "Select",
+                    "template": "Template"
+                },
+                "undo": "Undo",
+                "redo": "Redo",
+                "clear": "Clear all",
+                "groups": {
+                    "victim": "Letter victims",
+                    "ct": "Cognitive targets",
+                    "hazmat": "Hazmat signs",
+                    "fake": "Fake victims",
+                    "random": "Undecided"
+                },
+                "types": {
+                    "harmed": "Harmed",
+                    "stable": "Stable",
+                    "unharmed": "Unharmed",
+                    "fakeHarmed": "Harmed",
+                    "fakeStable": "Stable",
+                    "fakeUnharmed": "Unharmed"
+                },
+                "random": "Random",
+                "randomNote": "The export picks one of all the types above at random",
+                "eraserSize": "Size",
+                "size": {
+                    "s": "S",
+                    "m": "M",
+                    "l": "L"
+                },
+                "snap": "Snap to grid (1/4 tile)",
+                "hints": {
+                    "pen": "Drag to draw walls freely.",
+                    "line": "Drag to draw a straight wall. Hold Shift for 45° steps.",
+                    "rect": "Drag to draw a rectangle of walls. Hold Shift for a square.",
+                    "circle": "Drag from the centre to draw a circular wall.",
+                    "stamp": "Click near a wall to attach a victim to the nearest wall. Click a placed victim to change its turn or rings (with another type chosen, it takes that type). Right-click removes it.",
+                    "erase": "Drag to erase walls and victims. A victim can also be removed with a right-click, whatever the tool.",
+                    "eraseTokens": "Removes every victim the eraser touches. Walls stay.",
+                    "curve": "Click points and the curve passes through them. Double-click, Enter or right-click to finish; click the first point to close it. Backspace removes a point, Esc cancels.",
+                    "arc": "Drag to set both ends, move the mouse to bend it, then click.",
+                    "ellipse": "Draws the ellipse that fits the dragged box. Hold Shift for a circle.",
+                    "polygon": "Drag from the centre to draw a regular polygon. It turns in 15° steps (free with Shift).",
+                    "shape": "Choose an icon or a picture, then drag on the canvas to size it (keeps its proportions; free with Shift).",
+                    "select": "Drag to select a box, then drag inside it to move it (hold Alt to copy). Arrow keys nudge it, [ ] turn it, Enter puts it down, Delete removes it.",
+                    "template": "Choose a template and press Place. Layouts that shut the robot out are made again automatically."
+                },
+                "messages": {
+                    "outside": "It cannot go outside room 4.",
+                    "needWall": "Victims go on walls only. Click near a wall.",
+                    "noSpace": "There is no free space next to that wall. Try a little further along.",
+                    "pickShape": "Choose an icon or a picture first.",
+                    "iconFailed": "The icon could not be loaded.",
+                    "imageFailed": "The picture could not be loaded.",
+                    "randomDone": "Placed {{placed}}.",
+                    "randomShort": "Placed only {{placed}} of {{asked}} (not enough walls to put them on).",
+                    "templateBlocked": "Every layout tried leaves part of the room out of reach. Check the light red parts.",
+                    "wallEnd": "Not on the end of a wall. Click a wall face at least as wide as a victim (2 cm)."
+                },
+                "tokens": "Wall tokens: {{count}}",
+                "farFromWall": "{{count}} away from any wall (red dashed circle)",
+                "import": "Import image",
+                "download": "Save as image",
+                "hint": "Import a PNG / JPEG picture or draw here. Victim types are stored in the picture, so a saved picture brings them back.",
+                "selectedStamp": "Selected victim",
+                "selectDone": "Done"
+            },
+            "maxScore": {
+                "tokens": "Wall tokens",
+                "checkpoints": "Checkpoints",
+                "exitBonus": "Exit bonus",
+                "mapBonus": "Mapping bonus (max.)",
+                "total": "Maximum score",
+                "note": "Score when every wall token and checkpoint is found, the robot exits, and the mapping bonus is at its maximum."
+            },
+            "room4Hint": "Choose how the tiles selected as room 4 are filled",
+            "room4None": "None",
+            "room4NoneHint": "No room 4",
+            "room4Custom": "Custom",
+            "room4CustomHint": "Draw it or load an image",
+            "room4Preset": "Preset",
+            "room4CustomSteps": "Select the room 4 tiles first, then open the creator.",
+            "passageTitle": "Area passage (floor colour)",
+            "passageHint": "Colour the one-tile passage that connects two areas",
+            "passageNone": "None",
+            "areaShort": "Area ",
+            "passageBlue": "Blue",
+            "passageYellow": "Yellow",
+            "passageGreen": "Green",
+            "passagePurple": "Purple",
+            "passageOrange": "Orange",
+            "passageRed": "Red",
+            "ctGroup": "Cognitive targets",
+            "ctGroupHint": "type from the ring colours",
+            "ctSum": "Sum",
+            "letterVictims": "Letter victims",
+            "letterOnlyHint": "rotation and fake can be set",
+            "letterSettings": "Letter victim settings",
+            "noLetterVictim": "Place Φ, Ψ or Ω to set its rotation and whether it is fake.",
+            "ctNoLetterSettings": "Cognitive targets have no rotation or fake setting. A target is fake when its ring sum is not 0 to 3.",
+            "fakeLegend": "Fake victim",
+            "fakeLegendMixed": "Real and fake victims of this symbol on the same side (see the tile dialog)",
+            "ctType": "Target type",
+            "ctF": "F: Flammable Gas",
+            "ctP": "P: Poison",
+            "ctC": "C: Corrosive",
+            "ctO": "O: Organic Peroxide",
+            "ctFake": "Fake target",
+            "ctFakeAbbr": "Fake",
+            "ctRemove": "Remove",
+            "ctRule": "Ring 1 is the centre and ring 5 the outside. The type is decided by the sum of the ring values (Black -2, Red -1, Yellow 0, Green +1, Blue +2): 0 = F, 1 = P, 2 = C, 3 = O, anything else is a fake target.",
+            "extWalls": "Create ext walls",
             "export": "@:admin.lineMapEditor.export",
             "import": "@:admin.lineMapEditor.import",
             "exportW": "Export this map as a world file for Erebus",
@@ -935,9 +1521,34 @@
             "select3": "Select Room 3 Tiles (Curved Walls)",
             "select4": "Select Room 4 Tiles (Anything)",
             "pick4": "Select Room 4 Configuration",
+            "rooms": "Rooms",
             "innerTile": "Inner Tile Walls",
-
-            "js":{
+            "inner": {
+                "armTitle": "Half walls",
+                "armHint": "Click a dotted line in the diagram (centre to the middle of a side, 6 cm) to place a wall; click it again to remove it. The buttons below do the same.",
+                "armAdd": "Click to place a half wall",
+                "armRemove": "Click to remove the half wall",
+                "curveTitle": "Curved walls",
+                "curveHint": "Click a quarter tile in the diagram to step through no curve → top right → bottom right → bottom left → top left, or pick one directly with the buttons below.",
+                "curveCycle": "Click to change the curved wall",
+                "curveNone": "No curved wall",
+                "curve1": "Curve bulging to the top right",
+                "curve2": "Curve bulging to the bottom right",
+                "curve3": "Curve bulging to the bottom left",
+                "curve4": "Curve bulging to the top left",
+                "curveRoom2": "Room 2 tiles cannot have curved walls (curved walls belong in room 3).",
+                "curveRoom2Found": "This tile still has curved walls.",
+                "curveRemove": "Remove curved walls",
+                "nw": "Top left",
+                "ne": "Top right",
+                "sw": "Bottom left",
+                "se": "Bottom right",
+                "keyOuter": "Walls around the tile (edit on the map)",
+                "keyArm": "Click for a half wall",
+                "keySlot": "Victim place (number in the table below)"
+            },
+            "victimRotation": "Victim Rotation",
+            "js": {
                 "startTileError": "Please set the start tile."
             }
         },
@@ -948,7 +1559,10 @@
             "delete": "Delete",
             "edit": "Edit",
             "4duplicate": "To duplicate a template, go to the edit page of the original template, change the subject, and save it.",
+            "unsaved": "Unsaved changes",
+            "back": "Back to the templates",
             "js": {
+                "savedAs": "Saved as \"{{name}}\"",
                 "complete": "Successfully saved",
                 "completeMes": "You have saved the template",
                 "deleted": "Successfully deleted"
@@ -959,7 +1573,7 @@
         "deadline": "Submission deadline",
         "saved": "Saved successfully",
         "uploaded": "Successfully uploaded!",
-        "admin":{
+        "admin": {
             "title": "Document Submission",
             "overall": "General settings",
             "access": "Access activation",
@@ -968,7 +1582,7 @@
             "review": "Review setting",
             "result": "Review results"
         },
-        "teamAdmin":{
+        "teamAdmin": {
             "title": "Individual team settings",
             "access": "Accessible",
             "log": "Log",
@@ -1033,11 +1647,24 @@
             "assignedTeams": "Assigned teams",
             "emptyAssignment": "Since there is no assignment information, following users can evaluate: "
         },
-        "form":{
+        "form": {
             "languageError": "This form is not available in your language, so it will be displayed in an alternative language.",
             "editDeadline": "You can edit this form as many times as you wish until the submission deadline above.",
             "basicInformation": "Basic Team Information",
             "teamName": "Team Code / Team Name",
+            "editable": "Editable",
+            "tour": {
+                "help": "Tour",
+                "deadline": "The submission deadline is shown here. Please make sure to submit before this time.",
+                "notification": "If there are notifications from the organizers, they will be displayed here. Please make sure to read them first as they contain important information.",
+                "teamInfo": "Confirm your team information here.",
+                "questions": "Answer the questions in each section. Your progress is not saved until you click the Save button.",
+                "save": "Please click the Save button regularly. You can still re-edit as many times as you like until the deadline. Note that there is no separate 'Submit' button; the latest saved data at the deadline will be your final submission.",
+                "charLimit": "This question has a character limit. Keep an eye on this counter. Please note that you cannot save if the limit is exceeded.",
+                "next": "Next",
+                "prev": "Back",
+                "done": "Got it!"
+            },
             "required": "@:document.editor.required",
             "optional": "@:document.editor.optional",
             "max5": "The maximum size is 5MB.",
@@ -1060,7 +1687,7 @@
             "currentLength": "The current number of characters",
             "lengthLimitExceed": "You have exceeded the character limit."
         },
-        "review":{
+        "review": {
             "reviewer": "Logged in reviewer: ",
             "comments": "Review Comments",
             "user": "Reviewer",
@@ -1073,11 +1700,17 @@
             "deletePartMes": "Partial deletion of this review. This operation cannot be undone.",
             "deleteWholeMes": "Whole deletion of this review. This operation cannot be undone."
         },
-        "inspection":{
+        "inspection": {
             "do": "Inspections carried out",
-            "cancel": "Inspection cancellation"
+            "cancel": "Inspection cancellation",
+            "noPhoto": "No photo yet",
+            "notInspected": "Not inspected",
+            "swipeToInspect": "Slide to complete the inspection",
+            "swipeToCancel": "Slide to cancel the inspection",
+            "completed": "Inspected",
+            "canceled": "Canceled"
         }
-    },  
+    },
     "mail": {
         "status": {
             "-2": "Error",
@@ -1086,7 +1719,7 @@
             "1": "Opend",
             "2": "Clicked"
         },
-        "home":{
+        "home": {
             "title": "Email Delivery",
             "error": "To use this function, please add a mail setting to the configuration file.",
             "newMailBulk": "Create a new email to the selected teams",
@@ -1107,19 +1740,121 @@
             "reservation": "Delivery Reservation",
             "sendTime": "Delivery Time",
             "now": "Now!",
+            "systemTemplate": "System",
+            "draftFound": "An unsent draft is kept ({{time}})",
+            "restoreDraft": "Restore",
+            "discardDraft": "Discard",
+            "fromTemplate": "Start from a template",
+            "saveAsTemplate": "Save as a template",
+            "searchTemplates": "Search templates",
+            "noTemplates": "No template",
+            "devInbox": "Open the development inbox",
+            "noSmtp": "No mail server is set (the pages can be looked at only)",
+            "selected": "{{n}} selected",
+            "withoutEmail": "({{n}} without an email address)",
+            "noTeams": "No team is registered in this competition",
+            "noStaff": "No user has an access level or a role in this competition. Give them one on the competition's settings.",
+            "recipients": "{{n}} recipients",
+            "showAll": "Show all",
+            "showLess": "Show less",
+            "andMore": "and {{n}} more",
+            "subjectRequired": "Enter a subject",
+            "contentRequired": "Enter the content",
+            "variableHint": "Click to insert at the cursor (subject or content); replaced for each recipient",
+            "reservationHint": "Left empty, the mails are sent now",
+            "testSend": "Send this mail to myself as a test",
+            "sendN": "Send {{n}}",
+            "reserveN": "Reserve {{n}}",
+            "toTeams": "To teams",
+            "toStaff": "To staff",
+            "staffDescription": "The users with an access level or a role in this competition. Only those with an email address registered can be mailed.",
+            "role": "Role",
+            "noEmail": "Not registered",
             "js": {
                 "sending": "In the process of delivery",
                 "wait": "Please wait for a while.",
                 "complete": "Queued",
+                "overwrite": "Replace the subject and content written with the template?",
+                "testSent": "A test mail to {{to}} has been queued",
+                "confirmSend": "Send {{n}} mails now?",
+                "confirmReserve": "Reserve {{n}} mails?",
+                "writeAnother": "Write another",
+                "templateName": "Enter the template's name",
+                "templateExists": "Overwrite the template \"{{name}}\"?",
+                "templateSaved": "The template \"{{name}}\" has been saved",
+                "withIssues": "{{n}} issues found",
                 "completeMes": "Emails have been queued."
             }
         },
-        "sent":{
+        "editor": {
+            "heading": "Heading",
+            "bold": "Bold",
+            "italic": "Italic",
+            "underline": "Underline",
+            "strike": "Strikethrough",
+            "color": "Text colour",
+            "background": "Background colour",
+            "orderedList": "Numbered list",
+            "bulletList": "Bulleted list",
+            "align": "Alignment",
+            "link": "Insert a link",
+            "editLink": "Edit the link",
+            "button": "Insert a button",
+            "buttonDefault": "Learn more",
+            "image": "Insert a picture",
+            "clean": "Clear formatting",
+            "placeholder": "Write the content…",
+            "text": "Text shown",
+            "urlVariables": "URLs of each recipient",
+            "removeLink": "Remove the link",
+            "badUrl": "Check the URL (https://… or mailto:…)",
+            "subjectPlaceholder": "Enter a subject",
+            "shortcuts": "⌘/Ctrl+K for a link; click a button to edit it",
+            "livePreview": "Preview",
+            "desktop": "Desktop",
+            "mobile": "Phone",
+            "noSubject": "(no subject)"
+        },
+        "var": {
+            "teamName": "Team name",
+            "teamId": "Team ID",
+            "competitionName": "Competition name",
+            "competitionId": "Competition ID",
+            "leagueId": "League ID",
+            "league": "League name",
+            "deadlineUNIX": "Deadline (UNIX time)",
+            "deadlineLocal": "Deadline (local time)",
+            "deadlineUTC": "Deadline (UTC)",
+            "documentUrl": "Document page",
+            "mypageUrl": "My page",
+            "userName": "User name",
+            "accessLevel": "Access level",
+            "role": "Roles",
+            "loginUrl": "Login page"
+        },
+        "check": {
+            "title": "Checks before sending",
+            "ok": "No issue found",
+            "noSubject": "No subject",
+            "noContent": "No content",
+            "unknownVariable": "Unknown variables (left empty): {{names}}",
+            "badLink": "Links to nowhere: {{links}}",
+            "insecureLink": "Links not on https: {{links}}",
+            "localLink": "Links to localhost (recipients cannot open them): {{links}}",
+            "largeImages": "The pictures are large ({{size}} MB in all); the mails may not arrive",
+            "longSubject": "The subject is long; mail readers may cut it short"
+        },
+        "sent": {
             "title": "Email Delivery Status",
             "time": "Time",
             "subject": "@:mail.home.subject",
             "status": "Status",
             "detail": "Detail",
+            "all": "All",
+            "refresh": "Reload",
+            "none": "No mail has been sent yet",
+            "showMore": "Show more ({{n}} left)",
+            "noneMatch": "No mail matches",
             "js": {
                 "eventLog": "Event Log",
                 "user": "User",

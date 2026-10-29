@@ -236,7 +236,7 @@ app.controller('SignEditorController', ['$scope', '$uibModal', '$log', '$http', 
     }
     
     $scope.refresh = function (){
-        $http.get("/api/signage/" + sigId + "/refresh").then(function (response) {
+        $http.post("/api/signage/" + sigId + "/refresh").then(function (response) {
                 alert("OK");
                 console.log(response.data);
         }, function (response) {

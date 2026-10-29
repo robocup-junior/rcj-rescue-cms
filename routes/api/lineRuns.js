@@ -15,6 +15,8 @@ const competitiondb = require('../../models/competition');
 const initRunData = require('../../helper/initRunData');
 const { leagues } = require('../../leagues');
 const Decimal = require('decimal.js');
+const access = require('../../helper/access');
+const { lineMap } = require('../../models/lineMap');
 
 let socketIo;
 
@@ -48,7 +50,7 @@ module.exports.connectSocketIo = function (io) {
  *
  * @apiError (400) {String} msg The error message
  */
-publicRouter.get('/competition/:competitionId', function (req, res, next) {
+publicRouter.get('/competition/:competitionId', access.anyone('shown as their status and the ranking settings let them be, by the handler'), function (req, res, next) {
   const competition = req.params.competitionId;
   const normalized = req.query.normalized;
   const minimum = req.query.minimum;
@@ -134,7 +136,7 @@ publicRouter.get('/competition/:competitionId', function (req, res, next) {
 
         // Apply score adjustment
         if (run.adjustment != null) {
-          run.score = new Decimal(run.score).times((run.adjustment + 100) / 100);
+          run.score = new Decimal(run.score).times((run.adjustment + 100) / 100).toNumber();
         }
       })
 
@@ -158,6 +160,17 @@ publicRouter.get('/competition/:competitionId', function (req, res, next) {
   });
 });
 
+/** Whether anything of the run has been recorded: points, a tile scored, a LoP, a rescue (which
+ *  scores only as a multiplier), a victim found or the exit bonus. */
+function isRecorded(run) {
+  if (run.score > 0 || run.exitBonus) return true;
+  if ((run.LoPs || []).some((n) => n > 0)) return true;
+  if ((run.rescueOrder || []).length) return true;
+  const victims = [...((run.nl && run.nl.liveVictim) || []), ...((run.nl && run.nl.deadVictim) || [])];
+  if (victims.some((v) => v.found || v.identified)) return true;
+  return (run.tiles || []).some((tile) => (tile.scoredItems || []).some((item) => item.scored));
+}
+
 function getMaxScoreWithCache(runs, league, normalizationGroup, cache) {
   if (cache[league+normalizationGroup] != null) {
     return cache[league+normalizationGroup];
@@ -169,7 +182,7 @@ function getMaxScoreWithCache(runs, league, normalizationGroup, cache) {
 
 privateRouter.get(
   '/find/team_status/:competitionid/:teamid/:status',
-  function (req, res, next) {
+  access.competition(ACCESSLEVELS.JUDGE, 'params.competitionid'), function (req, res, next) {
     const id = req.params.competitionid;
     const teamId = req.params.teamid;
     const { status } = req.params;
@@ -224,7 +237,7 @@ privateRouter.get(
 
 publicRouter.get(
   '/find/:competitionid/:field/:status',
-  function (req, res, next) {
+  access.loggedIn('the runs of a field, for the signage displays'), function (req, res, next) {
     const id = req.params.competitionid;
     const field_id = req.params.field;
     const { status } = req.params;
@@ -295,7 +308,7 @@ publicRouter.get(
  * @apiError (400) {String} err The error message
  * @apiError (400) {String} msg The error message
  */
-publicRouter.get('/:runid', async function (req, res, next) {
+publicRouter.get('/:runid', access.anyone('shown as their status and the ranking settings let them be, by the handler'), async function (req, res, next) {
   const id = req.params.runid;
   const normalized = req.query.normalized
 
@@ -333,15 +346,15 @@ publicRouter.get('/:runid', async function (req, res, next) {
         dbRun.tiles = initDbRun.tiles;
         dbRun.LoPs = initDbRun.LoPs;
         dbRun.nl = initDbRun.nl;
-        await dbRun.save(function (err) {
-          if (err) {
-            logger.error(err);
-            return res.status(400).send({
-              err: err.message,
-              msg: 'Could not get run',
-            });
-          }
-        });
+        try {
+          await dbRun.save();
+        } catch (err) {
+          logger.error(err);
+          return res.status(400).send({
+            err: err.message,
+            msg: 'Could not get run',
+          });
+        }
       }
       
       dbRun = dbRun.toObject();
@@ -380,10 +393,13 @@ publicRouter.get('/:runid', async function (req, res, next) {
       }
       return res.status(200).send(dbRun);
     }
+    return res.status(404).send({
+      msg: 'Run not found',
+    });
   });
 });
 
-adminRouter.put('/bulk', function (req, res) {
+adminRouter.put('/bulk', access.of(lineRun, 'body[]._id', ACCESSLEVELS.ADMIN), function (req, res) {
   const updates = req.body;
   const totalCount = updates.length;
   let processed = 0;
@@ -472,7 +488,7 @@ adminRouter.put('/bulk', function (req, res) {
  * @apiError (400) {String} err The error message
  * @apiError (400) {String} msg The error message
  */
-privateRouter.put('/:runid', function (req, res, next) {
+privateRouter.put('/:runid', access.of(lineRun, 'params.runid', ACCESSLEVELS.JUDGE), function (req, res, next) {
   const id = req.params.runid;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -491,142 +507,104 @@ privateRouter.put('/:runid', function (req, res, next) {
   delete run.field;
   delete run.score;
 
-  lineRun
-    .findById(id)
-    // .select("-_id -__v -competition -round -team -field -score")
-    .populate([
-      {
-        path: 'map',
-        populate: {
-          select: 'indexCount, victims',
-          path: 'tiles.tileType',
-        }
-      }
-    ])
-    .populate(['competition', 'team'])
-    .exec(function (err, dbRun) {
-      if (err) {
-        logger.error(err);
-        res.status(400).send({
-          msg: 'Could not get run',
-          err: err.message,
-        });
-      } else if (dbRun) {
-        if (
-          !auth.authCompetition(
-            req.user,
-            dbRun.competition._id,
-            ACCESSLEVELS.JUDGE
-          )
-        ) {
-          return res.status(401).send({
-            msg: 'You have no authority to access this api!!',
-          });
-        }
-        if (run.tiles != null && run.tiles.constructor === Object) {
-          // Handle dict as "sparse" array
-          const { tiles } = run;
-          run.tiles = [];
-          Object.keys(tiles).forEach(function (key) {
-            if (!isNaN(key)) {
-              run.tiles[key] = tiles[key];
-            }
-          });
-        }
-
-        if (run.LoPs != null && run.LoPs.length != dbRun.LoPs.length) {
-          dbRun.LoPs.length = run.LoPs.length;
-        }
-
-        if (run.rescueOrder != null) {
-          dbRun.rescueOrder = run.rescueOrder;
-        }
-
-        if (run.nl != null) {
-          if (run.nl.liveVictim != null) {
-            dbRun.nl.liveVictim = run.nl.liveVictim ;
-          }
-
-          if (run.nl.deadVictim != null) {
-            dbRun.nl.deadVictim = run.nl.deadVictim ;
+  // Read, change and save the run, again if another request saved it in between
+  const update = function (retries) {
+    lineRun
+      .findById(id)
+      // .select("-_id -__v -competition -round -team -field -score")
+      .populate([
+        {
+          path: 'map',
+          populate: {
+            select: 'indexCount, victims',
+            path: 'tiles.tileType',
           }
         }
-
-        if (run.status) {
-          if (dbRun.status > run.status && dbRun.status != 6) delete run.status;
-        }
-
-        const prevStatus = dbRun.status;
-
-        // Recursively updates properties in "dbObj" from "obj"
-        const copyProperties = function (obj, dbObj) {
-          for (const prop in obj) {
-            if (
-              obj.constructor == Array ||
-              (obj.hasOwnProperty(prop) &&
-                (dbObj.hasOwnProperty(prop) ||
-                  (dbObj.get !== undefined && dbObj.get(prop) !== undefined)))
-            ) {
-              // Mongoose objects don't have hasOwnProperty
-              if (typeof obj[prop] === 'object' && dbObj[prop] != null) {
-                // Catches object and array
-                copyProperties(obj[prop], dbObj[prop]);
-
-                if (dbObj.markModified !== undefined) {
-                  dbObj.markModified(prop);
-                }
-              } else if (obj[prop] !== undefined) {
-                // logger.debug("copy " + prop)
-                dbObj[prop] = obj[prop];
-              }
-            } else {
-              return new Error(`Illegal key: ${prop}`);
-            }
-          }
-        };
-
-        err = copyProperties(run, dbRun);
-
+      ])
+      .populate(['competition', 'team'])
+      .exec(function (err, dbRun) {
         if (err) {
           logger.error(err);
-          return res.status(400).send({
+          res.status(400).send({
+            msg: 'Could not get run',
             err: err.message,
-            msg: 'Could not save run',
           });
-        }
-
-        if (prevStatus != dbRun.status) statusUpdate = 1;
-
-        const cal = scoreCalculator.calculateScore(dbRun);
-        if (!cal) {
-          logger.error('Value Error');
-          return res.status(202).send({
-            msg: 'Try again later',
-          });
-        }
-
-        dbRun.score = cal.score;
-        dbRun.raw_score = cal.raw_score;
-        dbRun.multiplier = cal.multiplier;
-
-        if (!dbRun.started) {
-          if (dbRun.score > 0) {
-            dbRun.started = true;
-          } else {
-            if (run.tiles) {
-              scoredCheck : for (let tile of run.tiles) {
-                for (let item of tile.scoredItems) {
-                  if (item.scored) {
-                    dbRun.started = true;
-                    break scoredCheck;
-                  }
-                }
+        } else if (dbRun) {
+          if (
+            !auth.authCompetition(
+              req.user,
+              dbRun.competition._id,
+              ACCESSLEVELS.JUDGE
+            )
+          ) {
+            return res.status(401).send({
+              msg: 'You have no authority to access this api!!',
+            });
+          }
+          if (run.tiles != null && run.tiles.constructor === Object) {
+            // Handle dict as "sparse" array
+            const { tiles } = run;
+            run.tiles = [];
+            Object.keys(tiles).forEach(function (key) {
+              if (!isNaN(key)) {
+                run.tiles[key] = tiles[key];
               }
+            });
+          }
+
+          if (run.LoPs != null && run.LoPs.length != dbRun.LoPs.length) {
+            dbRun.LoPs.length = run.LoPs.length;
+          }
+
+          if (run.rescueOrder != null) {
+            dbRun.rescueOrder = run.rescueOrder;
+          }
+
+          if (run.nl != null) {
+            if (run.nl.liveVictim != null) {
+              dbRun.nl.liveVictim = run.nl.liveVictim ;
+            }
+
+            if (run.nl.deadVictim != null) {
+              dbRun.nl.deadVictim = run.nl.deadVictim ;
             }
           }
-        }
-        
-        dbRun.save(function (err) {
+
+          if (run.status) {
+            if (dbRun.status > run.status && dbRun.status != 6) delete run.status;
+          }
+
+          const prevStatus = dbRun.status;
+
+          // Recursively updates properties in "dbObj" from "obj"
+          const copyProperties = function (obj, dbObj) {
+            for (const prop in obj) {
+              if (
+                obj.constructor == Array ||
+                (obj.hasOwnProperty(prop) &&
+                  (dbObj.hasOwnProperty(prop) ||
+                    (dbObj.get !== undefined && dbObj.get(prop) !== undefined)))
+              ) {
+                // Mongoose objects don't have hasOwnProperty
+                if (typeof obj[prop] === 'object' && dbObj[prop] != null) {
+                  // Catches object and array
+                  copyProperties(obj[prop], dbObj[prop]);
+
+                  if (dbObj.markModified !== undefined) {
+                    dbObj.markModified(prop);
+                  }
+                } else if (obj[prop] !== undefined) {
+                  // logger.debug("copy " + prop)
+                  dbObj[prop] = obj[prop];
+                }
+              } else {
+                return new Error(`Illegal key: ${prop}`);
+              }
+            }
+          };
+
+          err = copyProperties(run, dbRun);
+
           if (err) {
             logger.error(err);
             return res.status(400).send({
@@ -634,33 +612,69 @@ privateRouter.put('/:runid', function (req, res, next) {
               msg: 'Could not save run',
             });
           }
-          if (socketIo !== undefined) {
-            socketIo.sockets.in('runs/line').emit('changed');
-            socketIo.sockets
-              .in(`runs/line/${dbRun.competition._id}`)
-              .emit('changed');
-            socketIo.sockets.in(`runs/${dbRun._id}`).emit('data', dbRun);
-            socketIo.sockets
-              .in(`fields/${dbRun.field}`)
-              .emit('data', { newRun: dbRun._id });
-            if (statusUpdate) {
-              socketIo.sockets
-                .in(`runs/line/${dbRun.competition._id}/status`)
-                .emit('LChanged');
-            }
+
+          if (prevStatus != dbRun.status) statusUpdate = 1;
+
+          const cal = scoreCalculator.calculateScore(dbRun);
+          if (!cal) {
+            logger.error('Value Error');
+            return res.status(202).send({
+              msg: 'Try again later',
+            });
           }
-          return res.status(200).send({
-            msg: 'Saved run',
-            score: dbRun.score,
-            raw_score: dbRun.raw_score,
-            multiplier: dbRun.multiplier,
+
+          dbRun.score = cal.score;
+          dbRun.raw_score = cal.raw_score;
+          dbRun.multiplier = cal.multiplier;
+
+          // Started once anything of the run is recorded: until then, reading the run starts it
+          // afresh for its map (initRunData.initLine), which would drop what was recorded
+          if (!dbRun.started && isRecorded(dbRun)) dbRun.started = true;
+          
+          dbRun.save(function (err) {
+            // Saved by another request since it was read (the judge page sends one at a time, but
+            // two devices may not): read it again and apply this one over that
+            if (err && err.name == 'VersionError' && retries > 0) {
+              // After a moment, which varies so that requests that clashed do not clash again
+              return setTimeout(update, 5 + Math.random() * 20, retries - 1);
+            }
+            if (err) {
+              logger.error(err);
+              return res.status(400).send({
+                err: err.message,
+                msg: 'Could not save run',
+              });
+            }
+            if (socketIo !== undefined) {
+              socketIo.sockets.in('runs/line').emit('changed');
+              socketIo.sockets
+                .in(`runs/line/${dbRun.competition._id}`)
+                .emit('changed');
+              // Only that it changed: anyone may be in the room, the run is had as they may see it (GET)
+              socketIo.sockets.in(`runs/${dbRun._id}`).emit('changed');
+              socketIo.sockets
+                .in(`fields/${dbRun.field}`)
+                .emit('data', { newRun: dbRun._id });
+              if (statusUpdate) {
+                socketIo.sockets
+                  .in(`runs/line/${dbRun.competition._id}/status`)
+                  .emit('LChanged');
+              }
+            }
+            return res.status(200).send({
+              msg: 'Saved run',
+              score: dbRun.score,
+              raw_score: dbRun.raw_score,
+              multiplier: dbRun.multiplier,
+            });
           });
-        });
-      }
-    });
+        }
+      });
+  };
+  update(10);
 });
 
-adminRouter.get('/scoresheet2', function (req, res, next) {
+adminRouter.get('/scoresheet2', access.competition(ACCESSLEVELS.ADMIN, ['query.competition', access.competitionsOf(lineRun, 'query.run')]), function (req, res, next) {
   const run = req.query.run || req.params.run;
   const competition = req.query.competition || req.params.competition;
   const field = req.query.field || req.params.field;
@@ -729,7 +743,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
     },
   ]);
 
-  query.lean().exec(function (err, dbRuns) {
+  query.lean().exec(async function (err, dbRuns) {
     if (err) {
       logger.error(err);
       res.status(400).send({
@@ -739,7 +753,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
       dbRuns.map(run => {
         run.startTime += parseInt(offset)*60*1000;
       })
-      scoreSheetLinePDF2.generateScoreSheet(res, dbRuns);
+      await scoreSheetLinePDF2.generateScoreSheet(res, dbRuns);
     }
   });
 });
@@ -768,7 +782,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
  *
  * @apiError (400) {String} err The error message
  */
-adminRouter.delete('/:runids', function (req, res) {
+adminRouter.delete('/:runids', access.of(lineRun, 'params.runids', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const ids = req.params.runids.split(',');
   if (!ObjectId.isValid(ids[0])) {
     return next();
@@ -779,7 +793,7 @@ adminRouter.delete('/:runids', function (req, res) {
     .exec(function (err, dbRun) {
       if (err) {
         logger.error(err);
-        res.status(400).send({
+        return res.status(400).send({
           msg: 'Could not get run',
           err: err.message,
         });
@@ -791,6 +805,10 @@ adminRouter.delete('/:runids', function (req, res) {
             msg: 'You have no authority to access this api',
           });
         }
+      } else {
+        return res.status(404).send({
+          msg: 'Run not found',
+        });
       }
       lineRun.deleteMany(
         {
@@ -832,8 +850,14 @@ adminRouter.delete('/:runids', function (req, res) {
  *
  * @apiError (400) {String} err The error message
  */
-adminRouter.post('/', function (req, res) {
+adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition'), access.of(competitiondb.team, 'body.team', ACCESSLEVELS.ADMIN), access.of(competitiondb.round, 'body.round', ACCESSLEVELS.ADMIN), access.of(competitiondb.field, 'body.field', ACCESSLEVELS.ADMIN), access.of(lineMap, 'body.map', ACCESSLEVELS.ADMIN), function (req, res) {
   const run = req.body;
+
+  if (!auth.authCompetition(req.user, run.competition, ACCESSLEVELS.ADMIN)) {
+    return res.status(401).send({
+      msg: 'You have no authority to access this api',
+    });
+  }
 
   new lineRun({
     competition: run.competition,
@@ -860,7 +884,7 @@ adminRouter.post('/', function (req, res) {
   });
 });
 
-privateRouter.post('/pre_recorded', function (req, res) {
+privateRouter.post('/pre_recorded', access.of(competitiondb.team, 'body.team', ACCESSLEVELS.JUDGE), function (req, res) {
   const data = req.body;
   competitiondb.team
   .findById(data.team)

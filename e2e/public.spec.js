@@ -1,0 +1,101 @@
+// Finding one's way as the public and as a judge: from the home page to a competition, a league and
+// its runs, a run's view page and the ranking; the judges also go to a run's judge page from there.
+const { test, expect, open } = require('./fixtures');
+const ids = require('./ids');
+
+test('the public goes from the home page to a finished run and the ranking', async ({ page }) => {
+  await open(page, '/home');
+  await page.locator('.comp-card', { hasText: 'E2E Open' }).click();
+  await page.waitForURL(new RegExp(`/home/${ids.competition}$`));
+  await page.locator('.league-card-premium', { hasText: /Rescue Maze(?! Entry)/ }).click();
+  await page.waitForURL(new RegExp(`/maze/${ids.competition}/Maze$`));
+  await page.waitForLoadState('networkidle');
+
+  // Not judges: nothing to judge from here
+  await expect(page.locator('.btn-run-judge')).toHaveCount(0);
+  // The finished runs are what the public sees first
+  // (a run not finished nor signed yet is not the public's to see: its view says so)
+  const finished = page.locator('tr[ng-repeat]', { hasText: 'Maze Team' })
+    .filter({ has: page.locator(`.btn-run-view[ng-click="go('/maze/view/' + run._id)"]`) });
+  await expect(page.locator(`.btn-run-view[ng-click="go('/home/access_denied')"]`).first()).toBeVisible();
+  await expect(page.locator('[ng-click^="show_ended = !show_ended"]')).toHaveClass(/active-green/);
+  await expect(finished.first()).toBeVisible();
+  await finished.first().locator('.btn-run-view').click();
+  await page.waitForURL(/\/maze\/view\/[0-9a-f]{24}$/);
+  await page.waitForLoadState('networkidle');
+  await expect(page.locator('.rv-summary-item.is-score')).toBeVisible();
+
+  await open(page, `/maze/${ids.competition}/Maze`);
+  await page.locator('.ranking-card').click();
+  await page.waitForURL(new RegExp(`/maze/${ids.competition}/Maze/ranking$`));
+  await expect(page.locator('tr[ng-repeat^="team in ranking"]', { hasText: 'Maze Team' })).toBeVisible();
+});
+
+// The runs of a league are those of the latest request: the ended runs hidden and shown again at
+// once, the answer of the first (without them) coming last is not shown over the second's.
+test('the runs shown are those of the latest request, whatever comes back last', async ({ page }) => {
+  await page.route(/\/api\/runs\/maze\/competition\/.*ended=false/, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await route.continue();
+  });
+  await open(page, `/maze/${ids.competition}/Maze`);
+  await page.waitForLoadState('networkidle');
+  const finished = page.locator('tr[ng-repeat]', { hasText: 'Maze Team' })
+    .filter({ has: page.locator(`.btn-run-view[ng-click="go('/maze/view/' + run._id)"]`) });
+  await expect(finished.first()).toBeVisible();
+
+  const toggle = page.locator('[ng-click^="show_ended = !show_ended"]');
+  const slow = page.waitForResponse(/ended=false/);
+  await toggle.click();
+  await toggle.click();
+  await expect(toggle).toHaveClass(/active-green/);
+  await slow;
+  await page.waitForTimeout(300);
+  await expect(finished.first()).toBeVisible();
+});
+
+test.describe('as a judge', () => {
+  test.use({ user: 'judge' });
+
+  test('the runs waiting are judged from the league page, asked first', async ({ page }) => {
+    await open(page, `/maze/${ids.competition}/Maze`);
+    const judge = page.locator('tr[ng-repeat]', { hasText: 'Maze Team' }).locator('.btn-run-judge').first();
+    await expect(judge).toBeVisible();
+    await judge.click();
+    const dialog = page.locator('.swal2-popup');
+    await expect(dialog).toContainText('Maze Team');
+    await dialog.locator('.swal2-confirm').click();
+    await page.waitForURL(/\/maze\/judge\/[0-9a-f]{24}/);
+    await page.waitForLoadState('networkidle');
+    await expect(page.locator('.rv-check').first()).toBeVisible();
+  });
+});
+
+test.describe('a course', () => {
+  test.use({ user: 'admin' });
+
+  test('is kept from the public until a run on it can be seen', async ({ page, playwright, baseURL }) => {
+    const api = require('./api');
+    const { request } = page;
+    const competition = await api.competition(request);
+    const [round, field, team] = await Promise.all([
+      api.round(request, competition, 'R1'), api.field(request, competition, 'F1'), api.team(request, competition, 'Maze', 'T1'),
+    ]);
+    const map = await api.mazeMap(request, competition, 'Maze', 'Secret Course', [{}, { checkpoint: true }]);
+    const run = await api.run(request, 'maze', { competition, round, field, team, map });
+    const visitor = await playwright.request.newContext({ baseURL });
+    // Before the run, the course and the competition's courses are not to be had
+    expect((await visitor.get(`/api/maps/maze/${map}`)).status()).toBe(401);
+    expect((await visitor.get(`/api/maps/maze/image/${map}`)).status()).toBe(401);
+    expect((await visitor.get('/api/maps/maze/', { params: { competition } })).status()).toBe(401);
+    // Run and approved: still kept while the competition is in preparation (its runs are too)
+    expect((await request.put(`/api/runs/maze/${run}`, { data: { status: 6 } })).ok()).toBeTruthy();
+    expect((await visitor.get(`/api/maps/maze/${map}`)).status()).toBe(401);
+    // Then as the public may see the run, so its course
+    expect((await request.put(`/api/competitions/${competition}`, { data: { preparation: false } })).ok()).toBeTruthy();
+    const shown = await visitor.get(`/api/maps/maze/${map}`);
+    expect(shown.status()).toBe(200);
+    expect((await shown.json()).name).toBe('Secret Course');
+    await visitor.dispose();
+  });
+});

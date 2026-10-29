@@ -12,7 +12,7 @@ const { LEAGUES } = competitiondb;
 
 /* GET home page. */
 router.get('/', function (req, res) {
-  res.render('admin/home', { user: req.user });
+  res.render('admin/home', { user: req.user, mongoExpress: process.env.MONGO_EXPRESS === 'true' });
 });
 
 router.get('/user', function (req, res) {
@@ -29,16 +29,19 @@ router.get('/restore', function (req, res) {
   res.render('admin_restore', { user: req.user });
 });
 
+// The templates of the mails to the teams, or (?kind=staff) of those to the staff
+const templateKind = (req) => (req.query.kind === 'staff' ? 'staff' : 'team');
+
 router.get('/mailTemplates', function (req, res) {
-  res.render('mail_templates', { user: req.user });
+  res.render('mail_templates', { user: req.user, kind: templateKind(req) });
 });
 
 router.get('/mailTemplates/editor', function (req, res) {
-  res.render('mail_template_editor', { user: req.user, subject: ""});
+  res.render('mail_template_editor', { user: req.user, subject: "", kind: templateKind(req) });
 });
 
 router.get('/mailTemplates/editor/:subject', function (req, res) {
-  res.render('mail_template_editor', { user: req.user, subject: req.params.subject});
+  res.render('mail_template_editor', { user: req.user, subject: req.params.subject, kind: templateKind(req) });
 });
 
 router.get('/:competitionid', function (req, res, next) {
@@ -62,14 +65,14 @@ router.get('/:competitionid/mails', function (req, res, next) {
   if (!ObjectId.isValid(id)) {
     return next();
   }
-  if (
-    auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN) &&
-    process.env.MAIL_SMTP
-  )
+  // Shown without a mail server too, saying so: for the pages to be seen (and worked on) before one
+  // is set
+  if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
     res.render('mail_home', {
       id,
       user: req.user,
       mailEnable: process.env.MAIL_SMTP,
+      mailWebUi: process.env.MAIL_WEB_UI,
     });
   else res.render('access_denied', { user: req.user });
 });
@@ -80,14 +83,14 @@ router.get('/:competitionid/mails/sent', function (req, res, next) {
   if (!ObjectId.isValid(id)) {
     return next();
   }
-  if (
-    auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN) &&
-    process.env.MAIL_SMTP
-  )
+  // Shown without a mail server too, saying so: for the pages to be seen (and worked on) before one
+  // is set
+  if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
     res.render('mail_sent', {
       id,
       user: req.user,
       mailEnable: process.env.MAIL_SMTP,
+      mailWebUi: process.env.MAIL_WEB_UI,
     });
   else res.render('access_denied', { user: req.user });
 });
@@ -154,7 +157,7 @@ router.get('/:competitionid/documents', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('documents_admin', { id, user: req.user });
+    res.render('document/admin', { id, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 
@@ -166,7 +169,7 @@ router.get('/:competitionid/documents/teams', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('documents_team_admin', { id, user: req.user });
+    res.render('document/team_admin', { id, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 
@@ -199,7 +202,7 @@ router.get('/:competitionid/documents/:lid/results', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('documents_result', { id, lid, user: req.user });
+    res.render('document/result', { id, lid, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 
@@ -220,7 +223,7 @@ router.get('/:competitionid/documents/:lid/form', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('documents_form_editor', { id, lid, user: req.user });
+    res.render('document/form_editor', { id, lid, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 
@@ -241,7 +244,7 @@ router.get('/:competitionid/documents/:lid/review', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('documents_review_editor', { id, lid, user: req.user });
+    res.render('document/review_editor', { id, lid, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 
@@ -262,7 +265,7 @@ router.get('/:competitionid/documents/:lid/preview', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
-    res.render('documents_form_preview', { id, lid, user: req.user });
+    res.render('document/form_preview', { id, lid, user: req.user });
   else res.render('access_denied', { user: req.user });
 });
 

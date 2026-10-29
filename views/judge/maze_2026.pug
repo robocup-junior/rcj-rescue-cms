@@ -1,0 +1,284 @@
+html(ng-app="ddApp")
+  head
+    title Rescue Maze Judge
+    script.
+      var runId = "#{id}"
+      var movie = ""
+
+    include ../includes/common_component
+    script(src="/javascripts/cognitive_target.js?v=" + assetVersion)
+    script(src="/javascripts/judge/maze_2026.js?v=" + assetVersion)
+
+    script(src="/javascripts/deflate.js?v=" + assetVersion)
+    script(src="/components/jquery-qrcode/jquery.qrcode.min.js?v=" + assetVersion)
+    script(src="/javascripts/makeQR.js?v=" + assetVersion)
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
+    script(src='/components/lightbox2/dist/js/lightbox.min.js?v=' + assetVersion)
+
+    link(rel='stylesheet',href='/components/lightbox2/dist/css/lightbox.min.css?v=' + assetVersion)
+    link(href="/stylesheets/fredrik.css?v=" + assetVersion rel="stylesheet")
+    link(href="/stylesheets/line_view.css?v=" + assetVersion rel="stylesheet")
+
+    meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
+
+  //- The Maze judge page, as the Line one (judge/line_2026.pug): the run is checked with the team,
+  //- then scored on the map, the LoPs, the misidentifications and the exit. Only what the judge
+  //- operates is shown, not the points; the timer runs from the start to the end of the run
+  body.run-view.is-judge.rv-is-loading(ng-controller="ddController")
+    include ../includes/maze_loading
+    header.rv-topbar
+      button.rv-back(type='button' title="{{'common.back' | translate}}" ng-click="getParam('return')? go(getParam('return')):go('/maze/' + competition._id + '/' + league)")
+        i.fas.fa-arrow-left
+      .rv-team
+        //- Whether what was scored is on the server
+        span.rv-sync(ng-class="networkError ? 'is-error' : (sync > 0 ? 'is-saving' : 'is-saved')" title="{{(networkError ? 'line.judge.networkError' : (sync > 0 ? 'line.judge.saving' : 'line.judge.saved')) | translate}}")
+          i.fas(ng-class="networkError ? 'fa-exclamation-triangle' : (sync > 0 ? 'fa-sync fa-spin' : 'fa-cloud')")
+        span.rv-team-name {{team.name}}
+      .rv-topbar-stats
+        .rv-stat.rv-stat-score
+          i.fas.fa-calculator
+          span.rv-stat-value {{score}}
+          span.rv-stat-unit {{'common.point' | translate}}
+        //- Before the run is checked, only the time (a team that does not come is timed below)
+        .rv-stat(ng-if='!startedTime && !checked')
+          i.fas.fa-stopwatch
+          span.rv-stat-value {{time | date:'m:ss'}}
+        //- The time is what starts and stops the timer: in reach without scrolling, away from the
+        //- scoring. Stopping is asked once more (the sheet below)
+        button.rv-stat.rv-stat-start(type='button' ng-if='!startedTime && checked' ng-click='toggleTime()' ng-class="{'is-blink': minutes < 8 && !fromSign}" title="{{'maze.judge.tim_start' | translate}}")
+          span.rv-stat-value {{time | date:'m:ss'}}
+          span.rv-start-label
+            i.fas.fa-play
+            | {{'maze.judge.tim_start' | translate}}
+        button.rv-stat.rv-stat-stop(type='button' ng-if='startedTime' ng-click='askStop(true)' title="{{'line.judge.stopTimer' | translate}}")
+          span.rv-live
+          span.rv-stat-value {{time | date:'m:ss'}}
+          span.rv-stop-label
+            i.fas.fa-stop
+            | {{'maze.judge.tim_stop' | translate}}
+
+    //- Before the run: the team, the round and the photos, checked one by one with the team
+    main.rv-page.rv-judge-check(ng-if='!checked')
+      p.rv-lead
+        i.far.fa-check-circle
+        |  {{'maze.judge.before' | translate}}
+      section.rv-card
+        .rv-card-header
+          i.fas.fa-info-circle
+          | {{'maze.judge.info' | translate}}
+        .rv-checks
+          button.rv-check(type='button' ng-class="{'is-ok': checkTeam}" ng-click='toggleCheckTeam()' aria-pressed='{{!!checkTeam}}')
+            span.rv-check-mark
+              i.fas(ng-class="checkTeam ? 'fa-check' : 'fa-question'")
+            span.rv-check-label {{'common.team' | translate}}
+            span.rv-check-value {{team.name}}
+          button.rv-check(type='button' ng-class="{'is-ok': checkRound}" ng-click='toggleCheckRound()' aria-pressed='{{!!checkRound}}')
+            span.rv-check-mark
+              i.fas(ng-class="checkRound ? 'fa-check' : 'fa-question'")
+            span.rv-check-label {{'common.round' | translate}}
+            span.rv-check-value {{round}}
+        dl.rv-facts
+          div
+            dt {{'common.competition' | translate}}
+            dd {{competition.name}}
+          div
+            dt {{'common.field' | translate}}
+            dd {{field}}
+          div
+            dt {{'common.league' | translate}}
+            dd {{league}}
+          div
+            dt {{'common.rule' | translate}}
+            dd #{rule}
+      .rv-two-col
+        button.rv-card.rv-photo-check(type='button' ng-class="{'is-ok': checkMember}" ng-click='toggleCheckMember()' aria-pressed='{{!!checkMember}}')
+          .rv-card-header
+            i.far.fa-images
+            | {{'interview.me_pic' | translate}}
+            span.rv-check-mark
+              i.fas(ng-class="checkMember ? 'fa-check' : 'fa-question'")
+          img(ng-src='/api/document/inspection/files/{{team._id}}/teamPhoto' alt='')
+        button.rv-card.rv-photo-check(type='button' ng-class="{'is-ok': checkMachine}" ng-click='toggleCheckMachine()' aria-pressed='{{!!checkMachine}}')
+          .rv-card-header
+            i.far.fa-images
+            | {{'interview.ma_pic' | translate}}
+            span.rv-check-mark
+              i.fas(ng-class="checkMachine ? 'fa-check' : 'fa-question'")
+          img(ng-src='/api/document/inspection/files/{{team._id}}/robotPhoto' alt='')
+      p.rv-note.rv-note-center(ng-show='!checks()') {{'maze.judge.tap_red' | translate}}
+      button.rv-submit(type='button' ng-click='infochecked()' ng-disabled='!checks()' ng-class="{'is-ready': checks()}")
+        i.fas.fa-check-circle
+        | {{'maze.judge.confirm' | translate}}
+      //- A team that does not come: its time runs from here
+      section.rv-card.rv-noshow
+        .rv-card-body
+          p {{'maze.judge.noShow' | translate}}
+          button.rv-timer-btn(type='button' ng-click='toggleTime()' ng-class="{'is-running': startedTime}")
+            i.fas(ng-class="startedTime ? 'fa-stop' : 'fa-play'")
+            | {{(startedTime ? 'maze.judge.tim_stop' : 'maze.judge.tim_start') | translate}}
+
+    //- The run: the map beside the LoPs, the misidentifications and the exit
+    main.rv-page.rv-judge(ng-show='checked')
+      .rv-alert(ng-show='networkError' role='alert')
+        i.fas.fa-exclamation-triangle
+        .rv-alert-body
+          b {{'maze.judge.networkError' | translate}}
+          p {{'maze.judge.networkErrorDescription' | translate}}
+        button.rv-alert-action(type='button' ng-click='saveEverything()')
+          i.fas.fa-redo
+          |  {{'maze.judge.reSend' | translate}}
+
+      .rv-judge-grid
+        section.rv-card.rv-map.rv-judge-map#rv-items
+          .rv-card-header
+            i.fas.fa-map
+            | {{'common.map' | translate}}
+            .rv-map-tools
+              .btn-group(ng-show='height > 1')
+                //- The floors, after an icon that says what they are
+                span.rv-tool.rv-tool-label(aria-hidden='true')
+                  i.fas.fa-layer-group
+                button.rv-tool(type='button' ng-repeat='zz in range(height)' ng-class='{active: zz == z}' ng-click='changeFloor(zz)')
+                  | {{zz}}
+              .btn-group
+                button.rv-tool(type='button' title='-90°' ng-click='tileRot(-90)')
+                  i.fas.fa-undo
+                button.rv-tool(type='button' title='+90°' ng-click='tileRot(90)')
+                  i.fas.fa-redo
+          .rv-map-legend
+            span.rv-key.is-done {{'line.view.tileDone' | translate}}
+            span.rv-key.is-halfdone {{'line.view.tilePartial' | translate}}
+            span.rv-key.is-undone {{'line.view.tileNone' | translate}}
+          - var mazeJudge = true
+          include ../view/common/maze_map
+
+        .rv-judge-side
+          //- The map's pattern, drawn before the run (only while nothing is scored): one of the six,
+          //- or one at random
+          section.rv-card#rv-pattern(ng-if='dice && score == 0 && LoPs == 0 && !MisIdent')
+            .rv-card-header
+              i.fas.fa-dice
+              | {{'maze.judge.pat' | translate}}
+              button.rv-pattern-random(type='button' ng-click='randomDice()')
+                i.fas.fa-random
+                |  {{'maze.judge.random' | translate}}
+            .rv-pattern-picks
+              button.rv-pattern-pick(type='button' ng-repeat='i in range(6)' ng-class='{active: diceSelect == i}' ng-click='changeMap(i)' aria-pressed='{{diceSelect == i}}')
+                img(ng-src='/images/dice/{{i+1}}.png' alt='{{i+1}}')
+
+          //- LoPs and misidentifications: a counter each
+          section.rv-card#rv-lops
+            ul.rv-lop-list
+              li.rv-lop-row
+                span.rv-count-label
+                  i.fas.fa-step-forward
+                  | {{'common.lops' | translate}}
+                .rv-stepper
+                  button.rv-step.is-minus(type='button' ng-click='decrement()' ng-disabled='!LoPs' title='−1')
+                    i.fas.fa-minus
+                  span.rv-step-count(ng-class="{'is-zero': !LoPs}") {{LoPs || 0}}
+                  button.rv-step.is-plus(type='button' ng-click='increment()' title='+1')
+                    i.fas.fa-plus
+              li.rv-lop-row#rv-misident
+                span.rv-count-label
+                  i.fas.fa-exclamation-triangle
+                  | {{'maze.judge.misidentification' | translate}}
+                .rv-stepper
+                  button.rv-step.is-minus(type='button' ng-click='decrementMis()' ng-disabled='!MisIdent' title='−1')
+                    i.fas.fa-minus
+                  span.rv-step-count(ng-class="{'is-zero': !MisIdent}") {{MisIdent || 0}}
+                  button.rv-step.is-plus(type='button' ng-click='incrementMis()' title='+1')
+                    i.fas.fa-plus
+
+          //- Exit bonus: one tap to switch
+          section.rv-card#rv-exit
+            .rv-card-header
+              i.fas.fa-door-open
+              | {{'maze.judge.return' | translate}}
+            button.rv-exit.rv-exit-toggle(type='button' ng-click='changeExitBonus()' ng-class="{'is-ng': !exitBonus}" aria-pressed='{{!!exitBonus}}')
+              .rv-exit-head
+                .rv-exit-image(ng-class="exitBonus ? 'is-ok' : 'is-ng'")
+                  img(src='/images/maze_bonus.png', alt='')
+                  span.rv-exit-mark
+                    i.fas(ng-class="exitBonus ? 'fa-check' : 'fa-times'")
+                .rv-exit-status
+                  .rv-exit-title(ng-class="exitBonus ? 'is-ok' : 'is-ng'")
+                    | {{(exitBonus ? 'line.view.exitDone' : 'line.view.exitNotDone') | translate}}
+                  .rv-exit-formula
+                    i.fas.fa-hand-pointer
+                    |  {{'line.judge.tapToggle' | translate}}
+
+      //- The end: the time as the referee timed it (or reset), then on to the sign page
+      section.rv-card#rv-finish
+        .rv-card-header
+          i.fas.fa-flag-checkered
+          | {{'line.judge.finish' | translate}}
+        .rv-card-body
+          //- The time as the referee timed it, a clock, m:ss, with an arrow above and below each part
+          //- (as a phone's time picker); typed or stepped, locked while the timer runs. Beside it,
+          //- room allowing, on to the sign page
+          .rv-finish-row
+            .rv-time-edit(title="{{'line.judge.runTime' | translate}}" ng-class="{'is-locked': startedTime}")
+              .rv-time-field
+                button.rv-time-step(type='button' ng-click="stepTime(60)" ng-disabled='startedTime' aria-label='+1 min')
+                  i.fas.fa-chevron-up
+                input.rv-time-input(type='text' inputmode='numeric' aria-label='min' ng-model='minutes' ng-class="{'is-one': ('' + minutes).length < 2}" ng-blur='tidyTime()' ng-disabled='startedTime' maxlength='2')
+                button.rv-time-step(type='button' ng-click="stepTime(-60)" ng-disabled='startedTime' aria-label='−1 min')
+                  i.fas.fa-chevron-down
+              span.rv-time-colon :
+              .rv-time-field
+                button.rv-time-step(type='button' ng-click="stepTime(1)" ng-disabled='startedTime' aria-label='+1 sec')
+                  i.fas.fa-chevron-up
+                input.rv-time-input(type='text' inputmode='numeric' aria-label='sec' ng-model='seconds' rv-two-digits ng-blur='tidyTime()' ng-disabled='startedTime' maxlength='2')
+                button.rv-time-step(type='button' ng-click="stepTime(-1)" ng-disabled='startedTime' aria-label='−1 sec')
+                  i.fas.fa-chevron-down
+            //- Back to 0:00, while the timer is stopped
+            button.rv-time-reset(type='button' ng-show='!startedTime && time != 0' ng-click='timeReset()')
+              i.fas.fa-undo
+              span {{'maze.judge.tim_reset' | translate}}
+            button.rv-submit(type='button' ng-click='confirm()' ng-disabled='startedTime || networkError' ng-class="{'is-ready': !startedTime && !networkError}")
+              i.fas.fa-arrow-right
+              | {{'maze.judge.toSign' | translate}}
+
+    //- Stopping the timer: the time of the first tap is what is recorded; kept running, the timer
+    //- goes on
+    .rv-overlay.is-send(ng-cloak ng-show='stopAsked' role='alertdialog' aria-modal='true' aria-labelledby='rv-stop-title')
+      .rv-send-sheet
+        .rv-pad-head
+          i.fas.fa-stopwatch
+          span#rv-stop-title {{'line.judge.stopConfirm' | translate}}
+        .rv-stop-actions
+          button.rv-stop-keep(type='button' ng-click='askStop(false)')
+            span.rv-stop-choice {{'line.judge.keepRunning' | translate}}
+            span.rv-stop-clock
+              span.rv-live
+              | {{time | date:'m:ss'}}
+          button.rv-stop-now(type='button' ng-click='confirmStop()')
+            span.rv-stop-choice
+              i.fas.fa-stop
+              |  {{'line.judge.stopAt' | translate:{t: (stopAt | date:'m:ss')} }}
+            span.rv-stop-caption {{'line.judge.recordedTime' | translate}}
+
+    //- The time of the run is up: the time recorded, then on to the sign page, or closed to look
+    //- over the run first
+    .rv-overlay.is-send(ng-cloak ng-show='timeUp' role='alertdialog' aria-modal='true' aria-labelledby='rv-timeup-title')
+      .rv-send-sheet.rv-timeup-sheet
+        .rv-pad-head
+          i.fas.fa-flag-checkered
+          span#rv-timeup-title {{'line.judge.timeUp' | translate}}
+        .rv-timeup
+          span.rv-timeup-clock {{time | date:'m:ss'}}
+          span.rv-timeup-caption {{'line.judge.recordedTime' | translate}}
+        .rv-stop-actions
+          button.rv-stop-keep.rv-timeup-review(type='button' ng-click='closeTimeUp()')
+            span.rv-stop-choice
+              i.fas.fa-search
+              |  {{'line.judge.reviewRun' | translate}}
+            span.rv-stop-caption {{'line.judge.reviewRunNote' | translate}}
+          button.rv-stop-now.rv-timeup-go(type='button' ng-click='confirm()' ng-disabled='networkError')
+            span.rv-stop-choice
+              | {{'maze.judge.toSign' | translate}}
+              |
+              i.fas.fa-arrow-right
+
+    script(src="/javascripts/line_view.js?v=" + assetVersion)

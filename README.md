@@ -85,6 +85,24 @@ This docker image supports the following architectures.
 
 For detail, please check [helper files](https://github.com/robocup-junior/rcj-cms-docker-helper) to set-up your environment.
 
+#### Using Docker Compose (self-host)
+This repository can also be run using Docker Compose (app + MongoDB + Redis). This is suitable for local testing and self-hosting.
+
+1) Create/update `process.env` (SMTP / mail settings, hostnames, etc.) if needed.
+2) Start the stack:
+   `docker compose up -d --build`
+3) Now you can open the app under `localhost:3000`
+4) Everytime you modify something, you'll need to rebuild the docker container as in step #2.
+
+Docker Compose also starts [Mailpit](https://mailpit.axllent.org/), a mail server for development: where `process.env` sets no `MAIL_SMTP`, the mails the app sends are kept there, not delivered, and shown at `localhost:8025`.
+
+**Note about configuration changes (`process.env`):**  
+When using `env_file:` in `docker-compose.yml`, environment variables are read when the container is created.  
+After updating `process.env`, recreate only the app container:
+`docker compose up -d --force-recreate app`
+
+
+
 ### Without using docker
 #### Dependent software
 * [Node.js](https://nodejs.org/en/)

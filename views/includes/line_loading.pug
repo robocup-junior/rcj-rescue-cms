@@ -1,0 +1,63 @@
+//- Covers the Rescue Line view and sign pages until the run and its map are drawn: the controller
+//- removes rv-is-loading from the body. Plain markup and script, since it shows before Angular
+//- has started. A robot follows the line across a tile in the page's colour; each time it reaches
+//- the end, the next tile comes.
+//- The tiles are drawn like the rules' tiles: the tile is 4..116 with its middle at 60, the line
+//- (7 wide) enters and leaves at the middle of an edge. route is the way the robot takes when it
+//- is not the whole line; under and over are drawn below and above the line. Entry pages set
+//- loadingEntry, since their courses have no intersections and no seesaws.
+-
+  var marker = function (x, y) { return '<rect class="rv-loading-green" x="' + x + '" y="' + y + '" width="16" height="16"/>'; };
+  var tracks = [
+    { line: 'M60 116 L60 4' },
+    { line: 'M4 60 L116 60' },
+    { line: 'M60 116 A56 56 0 0 1 116 60' },
+    { line: 'M60 116 L60 60 L4 60' },
+    { line: 'M60 116 L60 100 L32 84 L88 60 L32 36 L60 20 L60 4' },
+    { line: 'M60 116 L60 104 C24 98 24 70 60 60 C96 50 96 22 60 16 L60 4' },
+    { line: 'M60 116 L60 76 M60 44 L60 4', route: 'M60 116 L60 4' },
+    { line: 'M60 116 L60 4', over: '<rect class="rv-loading-bump" x="38" y="55" width="44" height="10" rx="3"/>' },
+    { line: 'M60 116 L60 4', route: 'M60 116 L60 88 C60 76 92 80 92 60 C92 40 60 44 60 32 L60 4', over: '<rect class="rv-loading-obstacle" x="47" y="47" width="26" height="26" rx="4"/>' },
+    { line: 'M60 116 L60 4', under: '<rect class="rv-loading-seesaw" x="40" y="24" width="40" height="72" rx="4"/><rect class="rv-loading-pivot" x="40" y="57" width="40" height="6"/>', entry: false },
+    { line: 'M60 116 L60 4 M4 60 L116 60', route: 'M60 116 L60 60 L116 60', under: marker(63.5, 63.5), entry: false },
+    { line: 'M60 116 L60 60 M4 60 L116 60', route: 'M60 116 L60 60 L4 60', under: marker(40.5, 63.5), entry: false }
+  ];
+  if (typeof loadingEntry !== 'undefined' && loadingEntry) tracks = tracks.filter(function (t) { return t.entry !== false; });
+  tracks.forEach(function (t) { t.route = t.route || t.line; t.under = t.under || ''; t.over = t.over || ''; delete t.entry; });
+  var first = Math.floor(Math.random() * tracks.length);
+  var track = tracks[first];
+.rv-loading(role='status' aria-label='Loading' data-tracks=JSON.stringify(tracks) data-track=first)
+  .rv-loading-art
+    svg(viewBox='0 0 120 120' aria-hidden='true')
+      rect.rv-loading-tile(x='4' y='4' width='112' height='112' rx='20')
+      g.rv-loading-under!= track.under
+      path.rv-loading-line(d=track.line)
+      g.rv-loading-over!= track.over
+      path.rv-loading-trail(d=track.route pathLength='100')
+      circle.rv-loading-robot(r='7' style="offset-path: path('" + track.route + "')")
+    .rv-loading-label Rescue Line
+    .rv-loading-dots
+      span
+      span
+      span
+script.
+  (function () {
+    var loading = document.querySelector('.rv-loading');
+    var tracks = JSON.parse(loading.dataset.tracks);
+    var index = Number(loading.dataset.track);
+    var line = loading.querySelector('.rv-loading-line');
+    var under = loading.querySelector('.rv-loading-under');
+    var over = loading.querySelector('.rv-loading-over');
+    var trail = loading.querySelector('.rv-loading-trail');
+    var robot = loading.querySelector('.rv-loading-robot');
+    // At the end of a run along the tile, where the robot has faded out: the next tile
+    trail.addEventListener('animationiteration', function () {
+      index = (index + 1) % tracks.length;
+      var track = tracks[index];
+      line.setAttribute('d', track.line);
+      under.innerHTML = track.under;
+      over.innerHTML = track.over;
+      trail.setAttribute('d', track.route);
+      robot.style.offsetPath = "path('" + track.route + "')";
+    });
+  })();

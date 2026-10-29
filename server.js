@@ -28,6 +28,18 @@ logger.info(`#######################################`);
  
  if(isExistFile("mail.env")) env('mail.env');
 
+// The mail server for development (Mailpit, set by docker-compose.override.yml), only where none is
+// set: the mails of a real one are not caught
+if (!process.env.MAIL_SMTP && process.env.MAIL_DEV_SMTP) {
+  process.env.MAIL_SMTP = process.env.MAIL_DEV_SMTP;
+  process.env.MAIL_PORT = process.env.MAIL_DEV_PORT;
+  process.env.MAIL_FROM = process.env.MAIL_FROM || 'cms@localhost';
+  delete process.env.MAIL_USER;
+  delete process.env.MAIL_PASS;
+  if (process.env.MAIL_DEV_WEB_UI) process.env.MAIL_WEB_UI = process.env.MAIL_DEV_WEB_UI;
+  logger.info(`Mails go to the development mail server ${process.env.MAIL_SMTP}:${process.env.MAIL_PORT}`);
+}
+
  const app = require('./app')
 
  let numProcess = 1;
@@ -43,6 +55,9 @@ logger.info(`#######################################`);
 
 //Queue
 require("./queue/mailQueue")
+
+// The system's templates of the mails to the staff, where they are now (once, before the workers)
+if (cluster.isMaster) require('./helper/mailSender').moveStaffTemplates();
  
  cluster.schedulingPolicy = cluster.SCHED_RR;
  if (cluster.isMaster && numProcess > 1) {
@@ -84,6 +99,7 @@ require("./queue/mailQueue")
  
    require('./routes/api/lineRuns').connectSocketIo(io)
    require('./routes/api/mazeRuns').connectSocketIo(io)
+   require('./routes/api/simRuns').connectSocketIo(io)
    require('./routes/api/signage').connectSocketIo(io)
    require('./routes/api/reservation').connectSocketIo(io)
  

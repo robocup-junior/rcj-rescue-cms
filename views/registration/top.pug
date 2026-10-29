@@ -1,64 +1,64 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
+  - var contentContainerStyle = 'max-width: 760px;'
   - var ngAppDef = 'top'
 
 append scripts
   script.
     var competitionId = "#{id}"
     var leagueId = "#{leagueId}"
-  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js')
-  script(src='/javascripts/registration/top.js')
+  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js?v=' + assetVersion)
+  script(src='/javascripts/registration/top.js?v=' + assetVersion)
 
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  span.breadcrumb-item.active Registration
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    span.breadcrumb-item.active Registration
-block content
-  .row
-    .col-md-2.col-sm-1
-    .col-md-8.col-sm-10
-      h2 
-      .card(style='width: 100%; margin-bottom:50px;')
-          .card-body
-            .text-center
-                h1.card-title {{competition.name}}
-                h5 {{leagueName}}
-                
-            hr
-            div(ng-show="isProcessing" style="text-align:center;")
-                i.fas.fa-spinner.fa-10x.fa-spin(style="color:#3498db;margin-bottom:20px;")
-                p {{"registration.processing" | translate}}
+block hero_title
+  | {{competition.name}}
 
-            div(ng-hide="isSuccess || isProcessing")
-                h6.card-subtitle.mb-2.text-muted {{"registration.auth" | translate}}
-                
-                .alert.alert-danger(role='alert' ng-if="isFailed")
-                    | {{"registration.authError" | translate}}
-                form(class="login-container" ng-submit="submit()")
-                    .input-group.input-group-lg.mb-3
-                        .input-group-prepend
-                            span.input-group-text
-                                i.fas.fa-key.fa-lg(aria-hidden='true')
-                        input.form-control(type='password' autocorrect="off" autocapitalize="off" placeholder='Registration Code' aria-label='passCode' ng-model="passCode" ng-class="isFailed?'is-invalid':''")
-                    
-                    .input-group.input-group-lg.mb-3
-                        .input-group-prepend
-                            span.input-group-text
-                                i.fas.fa-at.fa-lg(aria-hidden='true')
-                        input.form-control(type='email', placeholder='Mail Address', aria-label='Mail', aria-describedby='sizing-addon1' ng-model="mail" ng-class="isFailed?'is-invalid':''")
-                    .alert.alert-info(role='alert')
-                        p {{"registration.authDesc1" | translate}}
-                        p(style="text-align:center;")
-                            strong #{fromAddress}
-                        p {{"registration.authDesc2" | translate}}
-                    .text-center
-                        button.btn.btn-success.btn-lg(type='submit')
-                            i.far.fa-paper-plane(aria-hidden='true') &nbsp;{{"registration.authButton" | translate}}
-            div(ng-if="isSuccess && !isProcessing" style="text-align:center;")
-                i.far.fa-paper-plane.fa-10x(style="color:#2ecc71;margin-bottom:30px;")
-                p.card-subtitle.mb-2.text-muted {{"registration.authSent" | translate}}
+block hero_subtitle
+  | {{leagueName}}
 
+block main_content
+  .modern-card.mb-5
+    .modern-card-header
+      i.fas.fa-key.mr-2
+      | {{"registration.auth" | translate}}
+    .modern-card-body
+      .result-state(ng-show="isProcessing")
+        i.fas.fa-spinner.fa-spin.text-primary
+        p {{"registration.processing" | translate}}
 
+      div(ng-hide="isSuccess || isProcessing")
+        .alert.alert-danger(role='alert' ng-if="isFailed") {{"registration.authError" | translate}}
+        form(ng-submit="submit()")
+          .form-group
+            .input-group.input-group-lg
+              .input-group-prepend
+                span.input-group-text
+                  i.fas.fa-key
+              input.form-control(type='password' autocorrect="off" autocapitalize="off" placeholder='Registration Code' aria-label='passCode' ng-model="passCode" ng-class="isFailed?'is-invalid':''")
+          .form-group
+            .input-group.input-group-lg
+              .input-group-prepend
+                span.input-group-text
+                  i.fas.fa-at
+              input.form-control(type='email' placeholder='Mail Address' aria-label='Mail' ng-model="mail" ng-class="isFailed?'is-invalid':''")
+          .alert.alert-info(role='alert')
+            p {{"registration.authDesc1" | translate}}
+            p.text-center
+              strong #{fromAddress}
+            p.mb-0 {{"registration.authDesc2" | translate}}
+          .text-center
+            button.btn.btn-premium-primary.btn-lg(type='submit')
+              i.far.fa-paper-plane.mr-2
+              | {{"registration.authButton" | translate}}
 
+      .result-state.success(ng-if="isSuccess && !isProcessing")
+        i.far.fa-paper-plane
+        p.text-muted {{"registration.authSent" | translate}}

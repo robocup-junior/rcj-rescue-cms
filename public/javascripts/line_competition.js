@@ -1,4 +1,4 @@
-var app = angular.module("LineCompetition", ['ngTouch','pascalprecht.translate', 'ngCookies','ngSanitize']);
+var app = angular.module("LineCompetition", ['ngTouch','pascalprecht.translate', 'ngCookies','ngSanitize', 'ui.bootstrap']);
 var socket;
 app.controller("LineCompetitionController", ['$scope', '$http', '$translate', function ($scope, $http, $translate) {
     $scope.competitionId = competitionId
@@ -47,14 +47,24 @@ app.controller("LineCompetitionController", ['$scope', '$http', '$translate', fu
     $http.get("/api/competitions/leagues/" + league).then(function (response) {
         $scope.league = response.data
     })
+
+    // Manual input is not prepared for the Entry 2026 rules
+    $scope.manualInputEnabled = function () {
+        if (!$scope.competition) return false;
+        const leagueSetting = $scope.competition.leagues.find((l) => l.league == league);
+        return !!leagueSetting && leagueSetting.rule != '2026E';
+    };
     
     // launch socket.io
     socket = io(window.location.origin, {
         transports: ['websocket']
     });
     if (typeof competitionId !== 'undefined') {
-        socket.emit('subscribe', 'runs/line/' + competitionId + '/status');
-        socket.on('StatusChanged', function (data) {
+        // (again on reconnecting: the server forgets the rooms of a lost connection)
+        socket.on('connect', function () {
+            socket.emit('subscribe', 'runs/line/' + competitionId + '/status');
+        });
+        socket.on('LChanged', function (data) {
             $scope.update_list();
             $scope.$apply();
         });
@@ -77,8 +87,13 @@ app.controller("LineCompetitionController", ['$scope', '$http', '$translate', fu
         return sorted;
     }
 
+    // The runs of the league, by the latest request only: one answered after a later one (the ended
+    // runs shown or not, a run changed meanwhile) would put back what it had
+    let listRequest = 0;
     $scope.update_list = function () {
+        const request = ++listRequest;
         $http.get(`/api/runs/line/competition/${competitionId}?populate=true&minimum=true&ended=${$scope.show_ended}`).then(function (response) {
+            if (request != listRequest) return;
             var runs = response.data.filter(r => r.team.league == league);
             
             for (let run of runs) {

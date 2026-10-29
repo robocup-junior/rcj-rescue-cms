@@ -29,13 +29,13 @@ html
     meta(http-equiv='Content-Language', content='ja')
     meta(http-equiv='Content-Style-Type', content='text/css')
     meta(http-equiv='Content-Script-Type', content='text/javascript')
-    script(type='text/javascript', src='/components/jquery/dist/jquery.min.js')
-    script(src="/components/socket.io-client/dist/socket.io.js")
+    script(type='text/javascript', src='/components/jquery/dist/jquery.min.js?v=' + assetVersion)
+    script(src="/components/socket.io-client/dist/socket.io.js?v=" + assetVersion)
     script.
         var sigId = "#{sigId}"
         var group = "#{group}"
         var competition = "#{competition}"
-    script(src="/javascripts/main_signage.js")
+    script(src="/javascripts/main_signage.js?v=" + assetVersion)
     
     //if IE
       script(src='http://html5shiv.googlecode.com/svn/trunk/html5.js')

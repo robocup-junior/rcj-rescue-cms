@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'TemplateEditor'
@@ -7,108 +7,57 @@ block vars
 append scripts
   script.
     var subject = "#{subject}"
-  script(src='/javascripts/mail_template_editor.js')
-  script(src='/components/quill/index.js')
-  script(src='/components/ngQuill/src/ng-quill.js')
-  script(src='/components/quill-image-resize-module/image-resize.min.js')
-  script(src='/components/quill-image-drop-and-paste/dist/quill-image-drop-and-paste.min.js')
+    var kind = "#{kind}"
+  script(src='/javascripts/mail_template_editor.js?v=' + assetVersion)
+  script(src='/javascripts/mail_compose.js?v=' + assetVersion)
+  script(src='/components/quill-dist/index.js?v=' + assetVersion)
+  script(src='/components/ngQuill/src/ng-quill.js?v=' + assetVersion)
+  script(src='/components/quill-image-resize-module/image-resize.min.js?v=' + assetVersion)
+  script(src='/components/quill-image-drop-and-paste/dist/quill-image-drop-and-paste.min.js?v=' + assetVersion)
 
 append css
-  link(rel='stylesheet', href='/components/quill.snow/index.css')
+  link(rel='stylesheet', href='/components/quill.snow/index.css?v=' + assetVersion)
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/mailTemplates')") Mail Templates
-    span.breadcrumb-item.active Editor
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/mailTemplates' + (kind == 'staff' ? '?kind=staff' : ''))") Mail Templates
+  span.breadcrumb-item.active Editor
 
+block hero_title
+  | {{"admin.mailTemplates.title" | translate}}
 
+block hero_subtitle
+  span.badge.badge-light.mr-2
+    i.fas.mr-1(ng-class="kind == 'staff' ? 'fa-user-tie' : 'fa-users'")
+    | {{(kind == 'staff' ? 'mail.home.toStaff' : 'mail.home.toTeams') | translate}}
+  | {{subject}}
 
-block content
-  .row
-    .col-12
-      div(ng-show="mode=='write'")
-        h2 {{"admin.mailTemplates.title" | translate}} - {{subject}}
-        span {{"mail.home.deliveredTo" | translate}}
-        div(style="max-height:200px;overflow: auto;")
-          table.custom(style="margin-bottom:20px;")
-            thead
-              tr
-                th {{"common.team" | translate}}
-                th {{"common.league" | translate}}
-                th {{"mail.home.deliveredTo" | translate}}
-                th {{"mail.home.variable" | translate}}
-            tbody
-              tr(ng-repeat="team in toTeam track by $index")
-                td(ng-bind="team.name")
-                td(ng-bind="team.league")
-                td
-                  div(ng-repeat="em in team.email track by $index")
-                    span(ng-bind="em")
-                    br
-                td
-                  button.btn.btn-sm.btn-secondary(type='button', ng-click="showVariable(team.variable)")
-                    i.fas.fa-box-open &nbsp;
-                    | {{"mail.home.variable" | translate}}
+block main_content
+  .modern-card
+    .modern-card-header
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-pen.mr-2
+          | {{"admin.mailTemplates.edit" | translate}}
+        span.small.text-muted(ng-if="dirty()")
+          i.fas.fa-circle.mr-1(style="font-size: 0.5rem; color: #f59e0b; vertical-align: middle;")
+          | {{"admin.mailTemplates.unsaved" | translate}}
+    .modern-card-body
+      mail-composer(subject="subject" content="mailContent" recipients="toTeam" show-errors="triedSave")
 
-        .input-group(style="margin-bottom:10px;")
-          .input-group-prepend
-              span.input-group-text {{"mail.home.subject" | translate}}
-          input.form-control(type='text', ng-model='subject')
-        
-        ng-quill-editor(ng-model="mailContent" on-editor-created="quillHeight(editor)")
-        br
-        div(style="text-align:center;margin-bottom:20px;")
-          button.btn.btn-primary(type='button', ng-click="preview()")
-            | {{"mail.home.preview" | translate}} / {{"common.save" | translate}}&nbsp;
-            i.fas.fa-arrow-right &nbsp;
+      //- What may be wrong with it, as it is written
+      ul.mail-checks.mt-3(ng-if="checks.length > 0")
+        li(ng-repeat="c in checks")
+          i.fas.mt-1(ng-class="c.level == 'danger' ? 'fa-times-circle text-danger' : 'fa-exclamation-triangle text-warning'")
+          span {{'mail.check.' + c.key | translate:c.params}}
 
-      div(ng-show="mode=='preview'")
-        h2 {{"admin.mailTemplates.title" | translate}} - {{subject}}
-        .row
-          .col-md-4
-            span {{"mail.home.deliverNo" | translate}}
-            .input-group.mb-3(style='width:100%; height:40px;position:absolute;margin: auto;')
-              .input-group-prepend
-                button.btn.btn-info(type='button', ng-click="changePreviewNo(-1)", ng-disabled="previewNo<=0")
-                  i.fas.fa-chevron-left(aria-hidden='true')
-              div(style='background-color: #F2F2F2; width:40%; text-align: center;')
-                span(style="font-size:40px;", ng-bind="previewNo")
-              .input-group-append
-                button.btn.btn-info(type='button', ng-click="changePreviewNo(1)", ng-disabled="(previewNo+1)>=toTeam.length")
-                  i.fas.fa-chevron-right(aria-hidden='true')
-          .col-md-8
-            span {{"mail.home.deliveredTo" | translate}}
-            div(style="max-height:200px;overflow: auto;")
-              table.custom(style="margin-bottom:20px;")
-                thead
-                  tr
-                    th {{"common.team" | translate}}
-                    th {{"common.league" | translate}}
-                    th {{"mail.home.deliveredTo" | translate}}
-                tbody
-                  tr
-                    td(ng-bind="toTeam[previewNo].name")
-                    td(ng-bind="toTeam[previewNo].league")
-                    td
-                      div(ng-repeat="em in toTeam[previewNo].email track by $index")
-                        span(ng-bind="em")
-                        br
-        
-        .input-group(style="margin-bottom:10px;")
-          .input-group-prepend
-              span.input-group-text {{"mail.home.subject" | translate}}
-          input.form-control(type='text', ng-model='toTeam[previewNo].mailData.title', disabled)
-
-        div(style="border: 1px solid #444;padding:5px;" ng-bind-html="trust(toTeam[previewNo].mailData.content)")
-      
-        br
-        div(style="text-align:center;margin-bottom:20px;")
-          button.btn.btn-secondary(type='button', ng-click="back2Edit()", style="margin-right:10px;")
-            i.fas.fa-arrow-left &nbsp;
-            | {{"mail.home.back2Edit" | translate}}
-          button.btn.btn-primary(type='button', ng-click="save()")
-            | {{"common.save" | translate}}&nbsp;
-            i.fas.fa-arrow-right &nbsp;
-            
-        
+      .d-flex.justify-content-between.align-items-center.mt-4
+        a.btn.btn-light(ng-href="/admin/mailTemplates{{kind == 'staff' ? '?kind=staff' : ''}}")
+          i.fas.fa-arrow-left.mr-2
+          | {{"admin.mailTemplates.back" | translate}}
+        button.btn.btn-premium-primary(type='button' ng-click="save()" ng-disabled="saving")
+          i.fas.fa-save.mr-2
+          | {{"common.save" | translate}}

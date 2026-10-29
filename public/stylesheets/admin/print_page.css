@@ -1,0 +1,323 @@
+/* Games print page: config panel on screen, then the sheet that gets printed (header + table) */
+
+/* navbar_premium.css reserves room for a navbar this page doesn't have */
+body {
+  padding-top: 0;
+  background: #f4f6f9;
+}
+
+.print-page {
+  padding-bottom: 30px;
+}
+
+/* Toolbar: page title and the two actions, kept in reach while scrolling */
+.print-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 -15px 16px;
+  padding: 10px 15px;
+  background: #fff;
+  border-bottom: 1px solid #e3e8ef;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.06);
+}
+
+.print-toolbar-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.print-toolbar-title h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.print-toolbar-sub {
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.print-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.run-count {
+  margin-right: 6px;
+  color: #6b7280;
+}
+
+.run-count b {
+  color: #111827;
+  font-size: 1.1rem;
+}
+
+/* Config panel: filters on the left, columns on the right */
+.config-panel {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.config-section {
+  padding: 16px 18px;
+  background: #fff;
+  border: 1px solid #e3e8ef;
+  border-radius: 10px;
+}
+
+.config-panel .config-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 0;
+  color: #1f4e79;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+.config-section-actions {
+  margin-left: auto;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.config-section-actions .btn {
+  padding: 0 6px;
+  font-size: 0.8rem;
+}
+
+.config-field + .config-field {
+  margin-top: 14px;
+}
+
+.config-label {
+  margin-bottom: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  color: #374151;
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.chip:hover {
+  border-color: #1f4e79;
+}
+
+.chip:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(31, 78, 121, 0.25);
+}
+
+.chip .fa-check {
+  display: none;
+  font-size: 0.7rem;
+}
+
+.chip.active {
+  color: #fff;
+  background: #1f4e79;
+  border-color: #1f4e79;
+}
+
+.chip.active .fa-check {
+  display: inline-block;
+}
+
+.team-search {
+  max-width: 320px;
+}
+
+.format-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.format-grid label {
+  margin: 0;
+}
+
+.format-grid .config-label {
+  display: block;
+}
+
+/* Note printed under the ranking table */
+.sheet-note {
+  margin-top: 10px;
+  text-align: center;
+  color: #4b5563;
+}
+
+/* Header of the printed sheet: a thead row, so it is not styled as a column header */
+table.custom thead tr.sheet-header-row th {
+  padding: 0 0 10px;
+  color: inherit;
+  font-weight: normal;
+  text-align: left;
+  background: #f4f6f9;
+  border: none;
+}
+
+/* Column header rows keep their dark-to-light shades below the sheet header row */
+table.custom thead tr.sheet-header-row + tr th {
+  background: #1f4e79;
+}
+
+table.custom thead tr.sheet-header-row + tr + tr th {
+  background: #2f75b5;
+}
+
+table.custom thead tr.sheet-header-row + tr + tr + tr th {
+  background: #5b9bd5;
+}
+
+/* The table now includes the header row, so drop its card shadow and outer border */
+table.custom {
+  border: 0;
+  box-shadow: none;
+}
+
+.ranking-header {
+  border-bottom: 3px solid #1f4e79;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.ranking-header h2 {
+  font-size: 2.2em;
+}
+
+.ranking-header .competition-logo {
+  max-height: 70px;
+}
+
+/* Values stay on one line; headers and team names wrap so wide tables still fit */
+table.custom {
+  font-size: 14px;
+}
+
+table.custom td {
+  white-space: nowrap;
+}
+
+table.custom td.team-name {
+  min-width: 10em;
+  white-space: normal;
+}
+
+.loader {
+  text-align: center;
+  padding: 40px 0;
+}
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 10mm;
+  }
+
+  .no_print {
+    display: none !important;
+  }
+
+  body {
+    overflow: visible;
+    background: #fff;
+  }
+
+  .print-page {
+    padding: 0;
+  }
+
+  .ranking-header {
+    break-after: avoid;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  table.custom thead tr.sheet-header-row th {
+    padding-bottom: 6px;
+    background: #fff;
+  }
+
+  .ranking-header h2 {
+    font-size: 20pt;
+  }
+
+  .ranking-header h3 {
+    font-size: 12pt;
+  }
+
+  .ranking-header .competition-logo {
+    max-height: 50px;
+  }
+
+  /* Repeat the sheet header and column headers on every page, never split a row */
+  table.custom thead {
+    display: table-header-group;
+  }
+
+  table.custom tr {
+    break-inside: avoid;
+  }
+
+  table.custom {
+    font-size: 9pt;
+  }
+
+  table.custom thead th {
+    padding: 3px 4px;
+  }
+
+  table.custom tbody td {
+    padding: 2px 4px;
+  }
+
+  /* Don't print the hover highlight of the row under the mouse */
+  table.custom tbody tr:hover {
+    background: #ffffff;
+  }
+
+  table.custom tbody tr:nth-child(even):hover {
+    background: #f7fbff;
+  }
+
+  table.custom tbody tr,
+  table.custom .img-thumbnail {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

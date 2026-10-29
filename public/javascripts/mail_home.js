@@ -1,4 +1,4 @@
-var app = angular.module("MailHome", ['ngTouch','ngAnimate', 'ui.bootstrap', 'pascalprecht.translate', 'ngCookies', 'ngQuill']);
+var app = angular.module("MailHome", ['ngTouch','ngAnimate', 'ui.bootstrap', 'pascalprecht.translate', 'ngCookies', 'ngQuill', 'mailCompose']);
 app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$translate', '$sce', function ($scope, $uibModal, $log, $http, $translate, $sce) {
 
     const Toast = Swal.mixin({
@@ -48,6 +48,7 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
     }
 
     $scope.competitionId = competitionId;
+    $scope.mailEnable = mailEnable;
 
     $scope.mode = "select";
 
@@ -81,18 +82,142 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
     })
 
 
-    $scope.selectedTemplate = null;
-    $http.get("/api/mail/templates").then(function (response) {
-        $scope.templates = response.data
+    // The competition's staff: the users with a level or a role in it
+    $http.get("/api/mail/staff/" + competitionId).then(function (response) {
+        $scope.staff = response.data;
     })
 
-    $scope.changeTemplate = function(){
-        if(!$scope.selectedTemplate) return;
-        $http.get(`/api/mail/templates/${$scope.selectedTemplate}`).then(function (response) {
-            $scope.mailContent = response.data;
-            $scope.mailTitle = $scope.selectedTemplate.replace(".html","");
+    let levelName = {};
+    for (let level of [0, 1, 5, 10]) {
+        $translate('admin.authority.level' + level).then(function (val) {
+            levelName[level] = val;
+        }, function (translationId) {
+            levelName[level] = translationId;
+        });
+    }
+    $scope.levelName = function (accessLevel) {
+        if (accessLevel >= 10) return levelName[10];
+        if (accessLevel >= 5) return levelName[5];
+        if (accessLevel >= 1) return levelName[1];
+        return levelName[0];
+    }
+
+    // To the teams or to the staff
+    $scope.target = "team";
+    $scope.switchTarget = function (target) {
+        if ($scope.target == target) return;
+        angular.forEach($scope.teams, function (team) { team.checked = false; });
+        angular.forEach($scope.staff, function (user) { user.checked = false; });
+        $scope.selectedAll = false;
+        $scope.target = target;
+        loadTemplates();
+    }
+
+    // The templates of the mails to the teams, or of those to the staff (mails of their own): each a
+    // card with the beginning of its text, to start a mail from
+    $scope.templates = [];
+    const templateQuery = () => $scope.target == "staff" ? "?kind=staff" : "";
+    function loadTemplates(){
+        const query = templateQuery();
+        return $http.get("/api/mail/templates" + query).then(function (response) {
+            // Not those of the other kind, switched from meanwhile
+            if (query != templateQuery()) return;
+            // The system's own (named _...) after the others
+            $scope.templates = response.data.map((template) => Object.assign(template, {system: template.name.startsWith('_')}))
+                .sort((a, b) => (a.system - b.system) || a.name.localeCompare(b.name));
+            for (let template of $scope.templates) {
+                $http.get(`/api/mail/templates/${encodeURIComponent(template.path)}${query}`).then(function (res) {
+                    template.content = MailCompose.clean(res.data);
+                    const html = String(res.data).replace(/<\/(p|div|h\d|li)>|<br\s*\/?>/gi, '$& ');
+                    template.snippet = new DOMParser().parseFromString(html, 'text/html').body.textContent.replace(/\s+/g, ' ').trim().slice(0, 160);
+                })
+            }
         })
     }
+    loadTemplates();
+
+    $scope.templateQuery = "";
+    $scope.showGallery = false;
+    $scope.templateFilter = function (template) {
+        const q = $scope.templateQuery.toLowerCase();
+        return !q || template.name.toLowerCase().includes(q) || (template.snippet || "").toLowerCase().includes(q);
+    }
+
+    $scope.useTemplate = async function(template){
+        if($scope.hasContent() || $scope.mailTitle){
+            const result = await Swal({
+                type: 'warning',
+                title: $translate.instant('mail.home.js.overwrite'),
+                showCancelButton: true,
+            });
+            if(!result.value) return;
+        }
+        $scope.$evalAsync(function(){
+            $scope.mailContent = template.content || "";
+            $scope.mailTitle = template.name;
+            $scope.showGallery = false;
+        });
+    }
+
+    // What is written kept as a template, named by the subject unless said otherwise
+    $scope.saveAsTemplate = async function(){
+        const result = await Swal({
+            title: $translate.instant('mail.home.saveAsTemplate'),
+            input: 'text',
+            inputValue: $scope.mailTitle || "",
+            inputPlaceholder: $translate.instant('admin.mailTemplates.subject'),
+            showCancelButton: true,
+            inputValidator: (value) => !value.trim() && $translate.instant('mail.home.js.templateName'),
+        });
+        if(!result.value) return;
+        const name = result.value.trim();
+        if($scope.templates.some((t) => t.name == name)){
+            const overwrite = await Swal({
+                type: 'warning',
+                title: $translate.instant('mail.home.js.templateExists', {name: name}),
+                showCancelButton: true,
+            });
+            if(!overwrite.value) return;
+        }
+        $http.post(`/api/mail/templates/${encodeURIComponent(name)}.html${templateQuery()}`, {content: $scope.mailContent}).then(function () {
+            Toast.fire({type: 'success', title: $translate.instant('mail.home.js.templateSaved', {name: name})});
+            loadTemplates();
+        }, function (error) {
+            Swal({type: 'error', title: "ERROR", text: error.data.msg});
+        })
+    }
+
+    // The mail being written kept in the browser, offered again when a mail is next written
+    const draftKey = () => `mailDraft:${competitionId}:${$scope.target}`;
+    function readDraft(){
+        try {
+            const draft = JSON.parse(localStorage.getItem(draftKey()));
+            return draft && (draft.title || MailCompose.hasContent(draft.content)) ? draft : null;
+        } catch (e) {
+            return null;
+        }
+    }
+    function clearDraft(){
+        try { localStorage.removeItem(draftKey()); } catch (e) { /* not kept */ }
+        $scope.draft = null;
+    }
+    let draftTimer = null;
+    $scope.$watchGroup(['mailTitle', 'mailContent'], function () {
+        if ($scope.mode != "write" || $scope.draft) return;
+        clearTimeout(draftTimer);
+        draftTimer = setTimeout(function () {
+            if (!$scope.mailTitle && !$scope.hasContent()) return;
+            try {
+                localStorage.setItem(draftKey(), JSON.stringify({title: $scope.mailTitle, content: $scope.mailContent, time: Date.now()}));
+            } catch (e) { /* not kept */ }
+        }, 800);
+    });
+    $scope.restoreDraft = function(){
+        $scope.mailTitle = $scope.draft.title;
+        $scope.mailContent = MailCompose.clean($scope.draft.content);
+        $scope.draft = null;
+    }
+    $scope.discardDraft = clearDraft;
 
     $scope.go = function (path) {
         window.location = path
@@ -102,8 +227,24 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
         window.open(path, "_blank");
     }
 
+    $scope.selectedCount = function () {
+        let list = $scope.target == "staff" ? $scope.staff : $scope.teams;
+        return (list || []).filter((r) => r.checked).length;
+    }
+
+    $scope.withoutEmail = function (list) {
+        return (list || []).filter((r) => (r.hasEmail === undefined ? !$scope.validEmail(r.email) : !r.hasEmail)).length;
+    }
+
     $scope.selectedAll = false;
     $scope.selectAll = function () {
+        if($scope.target == "staff"){
+            angular.forEach($scope.staff, function (user) {
+                user.checked = !$scope.selectedAll && user.hasEmail && !!$scope.staff_filter(user);
+            });
+            $scope.selectedAll = !$scope.selectedAll;
+            return;
+        }
         if($scope.selectedAll){
             angular.forEach($scope.teams, function (team) {
                 team.checked = false;
@@ -122,7 +263,7 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
 
     $scope.newEmail2SelectedTeam = function () {
         let chk = [];
-        angular.forEach($scope.teams, function (team) {
+        angular.forEach($scope.target == "staff" ? $scope.staff : $scope.teams, function (team) {
             if (team.checked) chk.push(team);
         });
         $scope.toTeam = chk;
@@ -130,6 +271,24 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
     }
 
     function prepareVariable(){
+        $scope.triedPreview = false;
+        $scope.showAllRecipients = false;
+        $scope.draft = !$scope.mailTitle && !$scope.hasContent() ? readDraft() : null;
+        if($scope.target == "staff"){
+            for(let user of $scope.toTeam){
+                user.variable = {
+                    "userName": user.username,
+                    "competitionName": $scope.competition.name,
+                    "competitionId": $scope.competition._id,
+                    "accessLevel": $scope.levelName(user.accessLevel),
+                    "role": user.role.join(", "),
+                    "loginUrl": `${location.protocol}//${location.host}/login`
+                };
+            }
+            $scope.mode = "write";
+            window.scrollTo(0,0);
+            return;
+        }
         for(let i=0; i<$scope.toTeam.length; i++){
             let teamDeadline = $scope.toTeam[i].document.deadline;
             let deadline = $scope.competition.documents.deadline;
@@ -158,8 +317,9 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
 
     $scope.validEmail = function(mail){
         function MailCheck(mail) {
-            var mail_regex1 = new RegExp( '(?:[-!#-\'*+/-9=?A-Z^-~]+\.?(?:\.[-!#-\'*+/-9=?A-Z^-~]+)*|"(?:[!#-\[\]-~]|\\\\[\x09 -~])*")@[-!#-\'*+/-9=?A-Z^-~]+(?:\.[-!#-\'*+/-9=?A-Z^-~]+)*' );
-            var mail_regex2 = new RegExp( '^[^\@]+\@[^\@]+$' );
+            // Literals: in a string, \. was only . (any letter) and \[\] only []
+            var mail_regex1 = /(?:[-!#-'*+\/-9=?A-Z^-~]+\.?(?:\.[-!#-'*+\/-9=?A-Z^-~]+)*|"(?:[!#-\[\]-~]|\\[\x09 -~])*")@[-!#-'*+\/-9=?A-Z^-~]+(?:\.[-!#-'*+\/-9=?A-Z^-~]+)*/;
+            var mail_regex2 = /^[^@]+@[^@]+$/;
             if( mail.match( mail_regex1 ) && mail.match( mail_regex2 ) ) {
                 if( mail.match( /[^a-zA-Z0-9\!\"\#\$\%\&\'\(\)\=\~\|\-\^\\\@\[\;\:\]\,\.\/\\\<\>\?\_\`\{\+\*\} ]/ ) ) { return false; }
                 if( !mail.match( /\.[a-z]+$/ ) ) { return false; }
@@ -189,21 +349,21 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
     $scope.mailContent = "";
     $scope.mailTitle = "";
 
-    function template(string, values){
-        return string.replace(/\$\{(.*?)\}/g, function(all, key){
-            return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : "";
-        });
-    }
 
     $scope.previewNo = 0;
+    $scope.hasContent = function(){
+        return MailCompose.hasContent($scope.mailContent);
+    }
+
     $scope.preview = function(){
-        console.log($scope.mailContent);
+        $scope.triedPreview = true;
+        if(!$scope.mailTitle || !$scope.hasContent()) return;
+        $scope.previewNo = 0;
         for(let team of $scope.toTeam){
-            team.mailData = {
-                "title": template($scope.mailTitle, team.variable),
-                "content": template($scope.mailContent, team.variable).replace(/<p><br><\/p>/g,"<br>").replace(/<\/p><p>/g,"<br>")
-            }
+            team.mailData = MailCompose.renderMail($scope.mailTitle, $scope.mailContent, team.variable);
         }
+        // What may be wrong with it, before it is sent
+        $scope.checks = MailCompose.check($scope.mailTitle, $scope.mailContent, $scope.toTeam[0].variable);
         $scope.mode = "preview";
         window.scrollTo(0,0);
     }
@@ -217,50 +377,79 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
         window.scrollTo(0,0);
     }
 
-    $scope.showVariable = function(variable){
-        let html = `<div style="max-height:calc(100vh - 200px);overflow:auto;"><table class='custom'><thead><tr><th>変数名</th><th>内容</th></tr></thead><tbody>`;
-        Object.keys(variable).forEach((key) => {
-            html += `<tr><td>\${${key}}</td><td>${variable[key]}</td></tr>`;
-        })
-        html += "</tbody></table></div>";
-
-        Swal.fire({
-            title: 'Variables',
-            html: html,
-            width: "100%",
-            height: "100%",
-            showCloseButton: true, 
-        })
-    }
 
     $scope.time = function(time){
         let options = {year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric"};
         return(new Intl.DateTimeFormat(navigator.language, options).format(time));
     }
 
+    // The mail being previewed, sent to the user who writes it
+    $scope.testSend = function(){
+        const mail = $scope.toTeam[$scope.previewNo];
+        $scope.sending = true;
+        $http.post(`/api/mail/test/${competitionId}`, {mailData: mail.mailData}).then(function (response) {
+            $scope.sending = false;
+            Toast.fire({
+                type: 'success',
+                title: $translate.instant('mail.home.js.testSent', {to: response.data.to})
+            })
+        }, function (error) {
+            $scope.sending = false;
+            Swal({
+                type: 'error',
+                title: "ERROR",
+                text: error.data.msg
+            })
+        })
+    }
+
     $scope.sending = false;
-    $scope.mailSend = function(){
+    $scope.mailSend = async function(){
+        const n = $scope.toTeam.length;
+        const issues = ($scope.checks || []).filter((c) => c.level == 'danger').length;
+        const confirmed = await Swal({
+            type: issues ? 'warning' : 'question',
+            title: $translate.instant($scope.reservation ? 'mail.home.js.confirmReserve' : 'mail.home.js.confirmSend', {n: n}),
+            text: [$scope.reservation ? $scope.time($scope.reservation) : '', issues ? $translate.instant('mail.home.js.withIssues', {n: issues}) : ''].filter((x) => x).join(' / '),
+            showCancelButton: true,
+            confirmButtonText: $translate.instant($scope.reservation ? 'mail.home.reservation' : 'mail.home.send'),
+        });
+        if (!confirmed.value) return;
+        $scope.$apply(function(){ send(); });
+    }
+
+    function send(){
         $scope.sending = true;
         Swal({
             title: sending_mes,
             html: wait_mes,
             onBeforeOpen: () => {
                 Swal.showLoading()
-                $http.post(`/api/mail/send`, {data: $scope.toTeam, reservation: $scope.reservation}).then(function (response) {
+                let url = $scope.target == "staff" ? `/api/mail/staff/${competitionId}` : `/api/mail/send`;
+                $http.post(url, {data: $scope.toTeam, reservation: $scope.reservation}).then(function (response) {
                     Swal.close()
                     Swal({
                         type: 'success',
                         title: complete_mes,
-                        html: completeMes_mes
+                        text: completeMes_mes,
+                        showCancelButton: true,
+                        confirmButtonText: $translate.instant('mail.home.deliveryStatus'),
+                        cancelButtonText: $translate.instant('mail.home.js.writeAnother'),
+                    }).then(function (result) {
+                        if (result.value) $scope.go('/admin/' + competitionId + '/mails/sent');
                     })
                     $scope.toTeam = [];
+                    angular.forEach($scope.teams, function (team) { team.checked = false; });
+                    angular.forEach($scope.staff, function (user) { user.checked = false; });
+                    $scope.selectedAll = false;
                     $scope.mailContent = "";
                     $scope.mailTitle = "";
                     $scope.previewNo = 0;
                     $scope.mode = "select";
-                    $scope.selectedTemplate = null;
+                    clearDraft();
                     $scope.sending = false;
                     $scope.reservation = undefined;
+                    $scope.triedPreview = false;
                     
                 }, function (error) {
                     console.log(error)
@@ -269,7 +458,7 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
                     Swal({
                         type: 'error',
                         title: "ERROR",
-                        html: error.data.msg
+                        text: error.data.msg
                     })
                 })
             }
@@ -298,55 +487,17 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
         return (showAllLeagues || $scope.Rleagues[value.league])  && (~value.name.indexOf($scope.refineName)) && (~value.teamCode.indexOf($scope.refineCode)) && (~value.country.indexOf($scope.refineRegion))
     }
 
-    $scope.quillHeight = function (editor) {
-        editor.container.style.height = '500px';
-    };
-}]);
-
-app.constant('NG_QUILL_CONFIG', {
-    /*
-     * @NOTE: this config/output is not localizable.
-     */
-    modules: {
-      toolbar: [
-        ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
-        ['blockquote', 'code-block'],
-  
-        [{ 'header': 1 }, { 'header': 2 }],               // custom button values
-        [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-        [{ 'script': 'sub' }, { 'script': 'super' }],     // superscript/subscript
-        [{ 'indent': '-1' }, { 'indent': '+1' }],         // outdent/indent
-        [{ 'direction': 'rtl' }],                         // text direction
-  
-        [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
-        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-  
-        [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
-        [{ 'font': [] }],
-        [{ 'align': [] }],
-  
-        ['clean'],                                         // remove formatting button
-  
-        ['link', 'image', 'video']                         // link and image, video
-      ],
-      imageResize: {
-      },
-      imageDropAndPaste: {
-      }
-    },
-    theme: 'snow',
-    debug: 'warn',
-    placeholder: '',
-    readOnly: false,
-    bounds: document.body,
-    scrollContainer: null
-})
-  
-app.config([
-    'ngQuillConfigProvider',
-    'NG_QUILL_CONFIG',
-
-    function (ngQuillConfigProvider, NG_QUILL_CONFIG) {
-        ngQuillConfigProvider.set(NG_QUILL_CONFIG)
+    $scope.refineUser = "";
+    $scope.staff_filter = function (value, index, array) {
+        return ~value.username.indexOf($scope.refineUser)
     }
-])
+
+
+    // What was written is not lost by leaving the page unasked
+    window.addEventListener('beforeunload', function (e) {
+        if ($scope.mode != "select" && ($scope.hasContent() || $scope.mailTitle) && !$scope.sending) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
+}]);

@@ -15,6 +15,15 @@ app.controller("MailTemplatesController",['$scope', '$http', '$translate', funct
   // = translationId;
   });
 
+  // The templates of the mails to the teams, or to the staff
+  $scope.kind = kind;
+  $scope.switchKind = function (k) {
+    window.location = '/admin/mailTemplates' + (k == 'staff' ? '?kind=staff' : '');
+  }
+  $scope.editorUrl = function (name) {
+    return '/admin/mailTemplates/editor' + (name != null ? '/' + encodeURIComponent(name) : '') + (kind == 'staff' ? '?kind=staff' : '');
+  }
+
   updateTemplatesList()
 
   $scope.deleteable = function(name){
@@ -40,7 +49,7 @@ app.controller("MailTemplatesController",['$scope', '$http', '$translate', funct
     })
 
     if (operation) {
-      $http.delete("/api/mail/templates/" + mail.path).then(function (response) {
+      $http.delete("/api/mail/templates/" + encodeURIComponent(mail.path) + "?kind=" + kind).then(function (response) {
         console.log(response)
         updateTemplatesList()
         Toast.fire({
@@ -59,8 +68,7 @@ app.controller("MailTemplatesController",['$scope', '$http', '$translate', funct
 }
   
   function updateTemplatesList() {
-    $http.get("/api/mail/templates").then(function (response) {
-      console.log(response)
+    $http.get("/api/mail/templates?kind=" + kind).then(function (response) {
       $scope.mails = response.data
     })
   }

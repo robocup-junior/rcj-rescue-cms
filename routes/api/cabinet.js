@@ -11,6 +11,7 @@ const { ObjectId } = require('mongoose').Types;
 const multer = require('multer');
 const auth = require('../../helper/authLevels');
 var fs = require('fs-extra');
+const sanitize = require('sanitize-filename');
 const gracefulFs = require('graceful-fs');
 
 var fs = gracefulFs.gracefulify(fs);
@@ -25,6 +26,8 @@ let read = require('fs-readdir-recursive');
 const logger = require('../../config/logger').mainLogger;
 const escape = require('escape-html');
 const mkdirp = require('mkdirp');
+const access = require('../../helper/access');
+const safePath = require('../../helper/safePath');
 
 read = gracefulFs.gracefulify(read);
 
@@ -52,7 +55,7 @@ function writeLog(req, competitionId, teamId, message) {
     req
   )} : ${message}\n`;
   fs.appendFile(
-    `${__dirname}/../../documents/${competitionId}/${teamId}/log.txt`,
+    safePath('documents', competitionId, teamId, 'log.txt'),
     output,
     (err) => {
       if (err) logger.error(err.message);
@@ -61,8 +64,10 @@ function writeLog(req, competitionId, teamId, message) {
 }
 
 function returnFiles(res, competition, folder){
-  let path = `${__dirname}/../../cabinet/${competition}/${folder}`;
+  let path = safePath('cabinet', competition, folder);
   fs.readdir(path, { withFileTypes: true }, (err, dirents) => {
+    // A cabinet nothing was put in yet may have no folder
+    if (err && err.code == 'ENOENT') return res.send([]);
     if (err) {
       res.status(500).send({
         msg: 'Could not get file list'
@@ -83,7 +88,7 @@ function returnFiles(res, competition, folder){
   });
 }
 
-publicRouter.get('/:competitionId/files/:teamId/:token/:folder', function (req, res, next) {
+publicRouter.get('/:competitionId/files/:teamId/:token/:folder', access.team({ staff: ACCESSLEVELS.ADMIN, inCompetition: 'params.competitionId' }), function (req, res, next) {
   const { competitionId } = req.params;
   const { teamId } = req.params;
   const { token } = req.params;
@@ -96,7 +101,7 @@ publicRouter.get('/:competitionId/files/:teamId/:token/:folder', function (req, 
   if (ObjectId.isValid(folder)) {
     isTeam = true;
   }else{
-    if (LEAGUES.filter(function (elm) {return elm.indexOf(folder) != -1;}).length == 0) {
+    if (!LEAGUES.includes(folder)) {
       return next();
     }
   }
@@ -128,7 +133,7 @@ publicRouter.get('/:competitionId/files/:teamId/:token/:folder', function (req, 
 });
 
 function returnFile(req, res, competition, folder, fileName){
-  let path = `${__dirname}/../../cabinet/${competition}/${folder}/${fileName}`;
+  let path = safePath('cabinet', competition, folder, sanitize(fileName));
   fs.stat(path, (err, stat) => {
     // Handle file not found
     if (err !== null) {
@@ -198,7 +203,7 @@ function returnFile(req, res, competition, folder, fileName){
   });
 }
 
-publicRouter.get('/:competitionId/file/:teamId/:token/:folder/:file', function (req, res, next) {
+publicRouter.get('/:competitionId/file/:teamId/:token/:folder/:file', access.team({ staff: ACCESSLEVELS.ADMIN, inCompetition: 'params.competitionId' }), function (req, res, next) {
   const { competitionId } = req.params;
   const { teamId } = req.params;
   const { token } = req.params;
@@ -214,7 +219,7 @@ publicRouter.get('/:competitionId/file/:teamId/:token/:folder/:file', function (
   if (ObjectId.isValid(folder)) {
     isTeam = true;
   }else{
-    if (LEAGUES.filter(function (elm) {return elm.indexOf(folder) != -1;}).length == 0) {
+    if (!LEAGUES.includes(folder)) {
       return next();
     }
   }
@@ -245,7 +250,7 @@ publicRouter.get('/:competitionId/file/:teamId/:token/:folder/:file', function (
   }
 });
 
-adminRouter.post('/:competitionId/upload/:folder', function (req, res, next) {
+adminRouter.post('/:competitionId/upload/:folder', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const { competitionId } = req.params;
   const { folder } = req.params;
 
@@ -256,13 +261,13 @@ adminRouter.post('/:competitionId/upload/:folder', function (req, res, next) {
   if (ObjectId.isValid(folder)) {
     isTeam = true;
   }else{
-    if (LEAGUES.filter(function (elm) {return elm.indexOf(folder) != -1;}).length == 0) {
+    if (!LEAGUES.includes(folder)) {
       return next();
     }
   }
 
   if (auth.authCompetition(req.user,competitionId,ACCESSLEVELS.ADMIN)){ // Admin check
-    const destination = `${__dirname}/../../cabinet/${competitionId}/${folder}`;
+    const destination = safePath('cabinet', competitionId, folder);
     if (!fs.existsSync(destination)) {
       mkdirp.sync(destination);
     }
@@ -270,7 +275,7 @@ adminRouter.post('/:competitionId/upload/:folder', function (req, res, next) {
       destination(req, file, callback) {
         callback(
           null,
-          `${__dirname}/../../cabinet/${competitionId}/${folder}`
+          safePath('cabinet', competitionId, folder)
         );
       },
       filename(req, file, callback) {
@@ -292,7 +297,7 @@ adminRouter.post('/:competitionId/upload/:folder', function (req, res, next) {
 });
 
 
-adminRouter.delete('/:competitionId/file/:folder/:file', function (req, res, next) {
+adminRouter.delete('/:competitionId/file/:folder/:file', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const { competitionId } = req.params;
   let { folder } = req.params;
   let { file } = req.params;
@@ -306,13 +311,13 @@ adminRouter.delete('/:competitionId/file/:folder/:file', function (req, res, nex
   if (ObjectId.isValid(folder)) {
     isTeam = true;
   }else{
-    if (LEAGUES.filter(function (elm) {return elm.indexOf(folder) != -1;}).length == 0) {
+    if (!LEAGUES.includes(folder)) {
       return next();
     }
   }
 
   if (auth.authCompetition(req.user,competitionId,ACCESSLEVELS.ADMIN)){ // Admin check
-    let path = `${__dirname}/../../cabinet/${competitionId}/${folder}/${file}`;
+    let path = safePath('cabinet', competitionId, folder, sanitize(file));
     fs.unlink(path, (err) => {
       if (err){
         return res.status(500).send({

@@ -14,12 +14,13 @@ const competitiondb = require('../../models/competition');
 const { review } = require('../../models/document');
 const { VICTIMS } = require('../../models/mazeMap');
 const Decimal = require('decimal.js');
+const access = require('../../helper/access');
 
 const MINIMUM_REVIEWER = 5
 
 
 // For line
-publicRouter.get('/:competitionId/:leagueId', async function (req, res, next) {
+publicRouter.get('/:competitionId/:leagueId', access.anyone('kept to the staff until the league discloses it, by the handler'), async function (req, res, next) {
   const competition = req.params.competitionId;
   const league = req.params.leagueId;
 
@@ -228,7 +229,7 @@ publicRouter.get('/:competitionId/:leagueId', async function (req, res, next) {
 });
 
 // For maze
-publicRouter.get('/:competitionId/:leagueId', async function (req, res, next) {
+publicRouter.get('/:competitionId/:leagueId', access.anyone('kept to the staff until the league discloses it, by the handler'), async function (req, res, next) {
   const competition = req.params.competitionId;
   const league = req.params.leagueId;
 
@@ -272,7 +273,7 @@ publicRouter.get('/:competitionId/:leagueId', async function (req, res, next) {
   // Apply score adjustment
   allRunsLeague.map(run => {
     if (run.adjustment != null) {
-      run.score = new Decimal(run.score).times((run.adjustment + 100) / 100);
+      run.score = new Decimal(run.score).times((run.adjustment + 100) / 100).toNumber();
     }
   });
 
@@ -326,7 +327,7 @@ publicRouter.get('/:competitionId/:leagueId', async function (req, res, next) {
     teamRuns[e].gameSum.victims = bestRuns.flatMap(run => run.foundVictims).reduce(function (result, current) {
       var element = result.find(p => p.type == current.type);
       if (element) {
-        element.count ++;
+        element.count += current.count;
       } else {
         result.push({
           type: current.type,
@@ -430,7 +431,7 @@ publicRouter.get('/:competitionId/:leagueId', async function (req, res, next) {
 });
 
 // For simulation
-publicRouter.get('/:competitionId/:leagueId', async function (req, res, next) {
+publicRouter.get('/:competitionId/:leagueId', access.anyone('kept to the staff until the league discloses it, by the handler'), async function (req, res, next) {
   const competition = req.params.competitionId;
   const league = req.params.leagueId;
 
@@ -474,7 +475,7 @@ publicRouter.get('/:competitionId/:leagueId', async function (req, res, next) {
   // Apply score adjustment
   allRunsLeague.map(run => {
     if (run.adjustment != null) {
-      run.score = new Decimal(run.score).times((run.adjustment + 100) / 100);
+      run.score = new Decimal(run.score).times((run.adjustment + 100) / 100).toNumber();
     }
   });
 
@@ -665,7 +666,7 @@ function sum(array) {
   }, 0);
 }
 
-adminRouter.get('/:competitionId/:leagueId/document', async function (req, res, next) {
+adminRouter.get('/:competitionId/:leagueId/document', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), async function (req, res, next) {
   const competition = req.params.competitionId;
   const league = req.params.leagueId;
 

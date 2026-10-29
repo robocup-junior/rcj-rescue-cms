@@ -1,0 +1,67 @@
+//- -*- tab-width: 2 -*-
+html(ng-app="MazeScore")
+  head
+    title Rescue Maze Score Print
+
+    include ../../includes/common_component
+    script.
+      var competitionId = "#{competitionId}"
+      var leagueId = "#{leagueId}"
+
+    script(src='/javascripts/ranking/maze_2026E.js?v=' + assetVersion)
+    script(src='/components/exceljs/index.js?v=' + assetVersion)
+    script(src='/javascripts/admin/xlsx_export.js?v=' + assetVersion)
+    link(rel='stylesheet', href='/stylesheets/admin/final_ranking.css?v=' + assetVersion)
+    link(rel='stylesheet', href='/stylesheets/admin/print_page.css?v=' + assetVersion)
+    script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.js')
+    script(src = '/components/angular-bootstrap-datetimepicker/src/js/datetimepicker.templates.js')
+    script(src = '/components/datatables/media/js/jquery.dataTables.min.js')
+    script(src = '/components/angular-datatables/demo/src/archives/dist/angular-datatables.min.js')
+    script(src='/components/ng-file-upload/ng-file-upload-all.min.js?v=' + assetVersion)
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
+
+  body(ng-controller="MazeScoreController")
+    include ../../includes/print_page
+    .container-fluid.print-page
+      +printToolbar(`/admin/${competitionId}/${leagueId}/games`, 'ranking.length', 'admin.print.teams', '#rank table.custom')
+
+      .config-panel.no_print
+        section.config-section
+          h2.config-section-title
+            i.fas.fa-columns
+            |  {{'admin.print.columns' | translate}}
+          .config-field
+            .chips
+              +chip('showCode', "{{'common.teamCode' | translate}}")(ng-show='showMode.teamCode')
+              +chip('showTeam', "{{'common.team' | translate}}")
+              +chip('showTime', "{{'common.time' | translate}}", 'updateGameRowSpan()')
+              +chip('showVictims', "{{'common.rescued' | translate}}", 'updateGameRowSpan()')
+              +chip('showLops', "{{'common.lops' | translate}}", 'updateGameRowSpan()')
+          .config-field
+            .config-label {{'admin.print.sheetTitle' | translate}}
+            input.form-control.form-control-sm(type='text' aria-label="{{'admin.print.sheetTitle' | translate}}" ng-model='comment.top')
+
+        section.config-section
+          h2.config-section-title
+            i.fas.fa-sliders-h
+            |  {{'admin.print.format' | translate}}
+          .config-field.format-grid
+            label
+              span.config-label {{'admin.print.decimalsFinal' | translate}}
+              input.form-control.form-control-sm(type="number" min="0" max="10" ng-model="finalScoreDecimals")
+            label
+              span.config-label {{'admin.print.decimalsNormalized' | translate}}
+              input.form-control.form-control-sm(type="number" min="0" max="10" ng-model="normalScoreDecimals")
+            label
+              span.config-label {{'admin.print.teamWidth' | translate}}
+              input.form-control.form-control-sm(type="number" min="50" max="1000" ng-model="teamWidth")
+          .config-field
+            .config-label {{'admin.print.note' | translate}}
+            input.form-control.form-control-sm(type='text' aria-label="{{'admin.print.note' | translate}}" ng-model='comment.bottom')
+
+      - var printSheet = true
+      include ../../ranking/include/maze_2026E
+
+      p.sheet-note(ng-if="ranking != null && comment.bottom")
+        i.fas.fa-info-circle
+        |  {{comment.bottom}}

@@ -1,8 +1,28 @@
+// Tell the browser which language the page is in. Without it, kanji may be drawn with
+// Chinese glyph shapes. Set right away from the saved choice to avoid a flash, then kept
+// in sync with angular-translate.
+(function () {
+    var lang;
+    try {
+        lang = window.localStorage.getItem('NG_TRANSLATE_LANG_KEY');
+    } catch (e) {}
+    if (lang !== 'en' && lang !== 'ja') {
+        lang = /^ja\b/i.test(navigator.language || '') ? 'ja' : 'en';
+    }
+    document.documentElement.lang = lang;
+})();
+
+// Reuse the ?v= this script was loaded with so the lang files are not served stale from cache.
+var langVersionQuery = (function () {
+    var m = document.currentScript && /[?&]v=([^&#]+)/.exec(document.currentScript.src);
+    return m ? '?v=' + m[1] : '';
+})();
+
 app.config(['$translateProvider', function ($translateProvider) {
     $translateProvider
         .useStaticFilesLoader({
             prefix: '/lang/',
-            suffix: '.json'
+            suffix: '.json' + langVersionQuery
         })
 
         .registerAvailableLanguageKeys(['en', 'ja'], {
@@ -15,4 +35,10 @@ app.config(['$translateProvider', function ($translateProvider) {
         .useMissingTranslationHandlerLog()
         .useLocalStorage();
 
+}]);
+
+app.run(['$rootScope', function ($rootScope) {
+    $rootScope.$on('$translateChangeSuccess', function (event, data) {
+        if (data && data.language) document.documentElement.lang = data.language;
+    });
 }]);

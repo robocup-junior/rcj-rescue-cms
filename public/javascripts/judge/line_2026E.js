@@ -1,0 +1,1639 @@
+/*********************************************************************************/
+// This file is a RoboCup Junior Rescue 2024 rule correspondence version. //
+/*********************************************************************************/
+// register the directive with your app module
+
+var app = angular.module('ddApp', ['ngTouch', 'ngAnimate', 'ui.bootstrap', 'pascalprecht.translate', 'ngCookies']);
+var marker = {};
+var txt_multi;
+var txt_gap;
+var txt_obstacle;
+var txt_ramp;
+var txt_intersection;
+var txt_bump;
+var txt_checkpoint;
+
+// Intersections are not scoring elements in the Entry rules
+function removeIntersections(tiles) {
+  for (let i in tiles) {
+    if (tiles[i] && tiles[i].scoredItems) {
+      tiles[i].scoredItems = tiles[i].scoredItems.filter(item => item.item != 'intersection');
+    }
+  }
+  return tiles;
+}
+
+// function referenced by the drop target
+app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$http', '$translate', '$cookies', function ($scope, $uibModal, $log, $timeout, $http, $translate, $cookies) {
+
+  var db_mtile;
+  var txt_score_element, txt_not_yet, txt_cantvisit, txt_start,
+    txt_implicit;
+  $translate('line.judge.js.score_element').then(function (val) {
+    txt_score_element = val;
+  }, function (translationId) {
+    // = translationId;
+  });
+  $translate('line.judge.js.not_yet').then(function (val) {
+    txt_not_yet = val;
+  }, function (translationId) {
+    // = translationId;
+  });
+  $translate('line.judge.js.cantvisit').then(function (val) {
+    txt_cantvisit = val;
+  }, function (translationId) {
+    // = translationId;
+  });
+  $translate('line.judge.js.start').then(function (val) {
+    txt_start = val;
+  }, function (translationId) {
+    // = translationId;
+  });
+  $translate('line.judge.js.implicit').then(function (val) {
+    txt_implicit = val;
+  }, function (translationId) {
+    // = translationId;
+  });
+
+
+  $translate('line.judge.js.multi').then(function (val) {
+    txt_multi = val;
+  }, function (translationId) {
+    // = translationId;
+  });
+  $translate('line.judge.js.gap').then(function (val) {
+    txt_gap = val;
+  }, function (translationId) {
+    // = translationId;
+  });
+  $translate('line.judge.js.obstacle').then(function (val) {
+    txt_obstacle = val;
+  }, function (translationId) {
+    // = translationId;
+  });
+  $translate('line.judge.js.ramp').then(function (val) {
+    txt_ramp = val;
+  }, function (translationId) {
+    // = translationId;
+  });
+  $translate('line.judge.js.intersection').then(function (val) {
+    txt_intersection = val;
+  }, function (translationId) {
+    // = translationId;
+  });
+  $translate('line.judge.js.bump').then(function (val) {
+    txt_bump = val;
+  }, function (translationId) {
+    // = translationId;
+  });
+  $translate('line.judge.js.checkpoint').then(function (val) {
+    txt_checkpoint = val;
+  }, function (translationId) {
+    // = translationId;
+  });
+
+
+  $scope.sync = 0;
+  $scope.runIds = runId.split(',');
+  $scope.runNum = $scope.runIds.length;
+  $scope.nowRun = 0;
+
+  $scope.startedScoring = false;
+  function setRunId(index){
+    $scope.runId = $scope.runIds[index];
+    runId = $scope.runIds[index];
+    $scope.nowRun = index;
+
+    $scope.z = 0;
+    
+    $scope.startedTime = false;
+    $scope.time = 0;
+    $scope.startUnixTime = 0;
+    $scope.EvacuationAreaLoPIndex = 0;
+
+
+    $scope.victim_list = [];
+    $scope.victim_tmp = [];
+    $scope.LoPs = [];
+    $scope.victimNL_Dead = [];
+    $scope.victimNL_Live = [];
+
+    $scope.checkTeam = $scope.checkRound = $scope.checkMember = $scope.checkMachine = false;
+    loadNewRun();
+    $(window).scrollTop(0);
+  }
+  
+
+  
+  $scope.toggleCheckTeam = function () {
+    $scope.checkTeam = !$scope.checkTeam;
+    playSound(sClick);
+  };
+  $scope.toggleCheckRound = function () {
+    $scope.checkRound = !$scope.checkRound;
+    playSound(sClick);
+  };
+  $scope.toggleCheckMember = function () {
+    $scope.checkMember = !$scope.checkMember;
+    playSound(sClick);
+  };
+  $scope.toggleCheckMachine = function () {
+    $scope.checkMachine = !$scope.checkMachine;
+    playSound(sClick);
+  };
+  $scope.checks = function () {
+    return ($scope.checkTeam & $scope.checkRound & $scope.checkMember & $scope.checkMachine)
+  };
+
+  const http_config = {
+    timeout: 10000
+  };
+
+  // Saving the run. Requests go one at a time, in order: what changes while one is on its way waits,
+  // merged into the next (each part with its latest value). Two at once were refused by the server
+  // (VersionError), and one overtaking another could save an older value. `done` is called once
+  // what it came with is saved; what failed is kept for the next save or the resend
+  var unsent = null;
+  var unsentDone = [];
+  var sending = false;
+
+  function save(data, done) {
+    unsent = Object.assign(unsent || {}, data);
+    if (done) unsentDone.push(done);
+    if (!sending) sendNext();
+  }
+
+  function keepUnsent(data, done) {
+    unsent = Object.assign(data, unsent || {});
+    unsentDone = done.concat(unsentDone);
+  }
+
+  function sendNext() {
+    if (!unsent) return;
+    var data = unsent;
+    var done = unsentDone;
+    unsent = null;
+    unsentDone = [];
+    sending = true;
+    $scope.sync++;
+    $http.put("/api/runs/line/" + runId, data, http_config).then(function (response) {
+      sending = false;
+      $scope.sync--;
+      // The score could not be worked out yet: again in a moment
+      if (response.status == 202) {
+        keepUnsent(data, done);
+        $timeout(sendNext, 100);
+        return;
+      }
+      $scope.score = response.data.score;
+      $scope.networkError = false;
+      done.forEach(function (f) {
+        f();
+      });
+      sendNext();
+    }, function (response) {
+      sending = false;
+      $scope.sync--;
+      if (response.status == 401) {
+        $scope.go('/home/access_denied');
+      }
+      keepUnsent(data, done);
+      $scope.networkError = true;
+    });
+  }
+
+  function upload_run(data) {
+    if ($scope.networkError) {
+      $scope.saveEverything();
+      return;
+    }
+    save(Object.assign(data, {
+      time: {
+        minutes: Math.floor($scope.time / 60000),
+        seconds: Math.floor(($scope.time % 60000) / 1000)
+      }
+    }));
+  }
+
+  var date = new Date();
+  var prevTime = 0;
+
+  if ($cookies.get('sRotate')) {
+    $scope.sRotate = Number($cookies.get('sRotate'));
+  } else $scope.sRotate = 0;
+
+
+  // Scoring elements of the tiles
+  $scope.stiles = [];
+  // Map (images etc.) for the tiles
+  $scope.mtiles = [];
+
+  if (document.referrer.indexOf('sign') != -1) {
+    $scope.checked = true;
+    $scope.startedScoring = true;
+    $scope.fromSign = true;
+    $timeout($scope.tile_size, 10);
+    $timeout($scope.tile_size, 200);
+  } else {
+
+  }
+
+  if(movie){
+    $scope.movie = movie;
+    $scope.token = token;
+    $http.get("/api/document/files/" + teamId + '/' + token).then(function (response) {
+      $scope.uploaded = response.data;
+    })
+  
+    $scope.checkUploaded = function(name){
+        return($scope.uploaded.some((n) => new RegExp('^' + name + '\\.*').test(n)));
+    }
+  
+    $scope.getVideoLink = function(path){
+        return("/api/document/files/" + teamId + "/" + token + "/" + path);
+    }
+  
+    $scope.getVideoList = function(name){
+        let res = $scope.uploaded.filter(function(value) {
+            return new RegExp('^' + name + '\\.*').test(value);
+        });
+        res.sort(function(first, second){
+            if ( first.match(/.mp4/)) {
+                return -1;
+            }
+            if ( second.match(/.mp4/)) {
+                return -1;
+            }
+        });
+        return res;
+    }
+  }
+  
+
+  function loadNewRun() {
+    $http.get("/api/runs/line/" + runId + "?populate=true").then(function (response) {
+      $scope.LoPs = response.data.LoPs;
+      
+      if($scope.nowRun == 0){
+        $scope.kitLevel = response.data.kitLevel;
+        $scope.evacuationLevel = response.data.evacuationLevel;
+      }
+      $scope.exitBonus = response.data.exitBonus;
+      $scope.field = response.data.field.name;
+      $scope.score = response.data.score;
+      $scope.showedUp = response.data.showedUp;
+      $scope.started = response.data.started;
+      $scope.round = response.data.round.name;
+      $scope.team = response.data.team;
+      $scope.league = response.data.team.league;
+      $scope.competition = response.data.competition;
+      // Verified time by timekeeper
+      $scope.minutes = response.data.time.minutes;
+      $scope.seconds = response.data.time.seconds;
+      $scope.time = ($scope.minutes * 60 + $scope.seconds) * 1000;
+      $scope.status = response.data.status;
+
+      $scope.isNL = response.data.isNL;
+      if($scope.isNL) $scope.startedScoring = true;
+
+
+      prevTime = $scope.time;
+
+      $scope.victim_list = response.data.rescueOrder;
+
+      $scope.victimNL_Dead = response.data.nl.deadVictim;
+      $scope.victimNL_Live = response.data.nl.liveVictim;
+
+
+      // Scoring elements of the tiles
+      $scope.stiles = removeIntersections(response.data.tiles);
+      let checkPointNumber = 1;
+      checkPointAt = {};
+      for(let i in $scope.stiles){
+        if ($scope.isCheckPoint($scope.stiles[i])) {
+            marker[i] = checkPointNumber;
+            checkPointAt[checkPointNumber] = Number(i);
+            checkPointNumber++;
+        }
+      }
+
+      // Get the map
+      $http.get("/api/maps/line/" + response.data.map + "?populate=true").then(function (response) {
+        console.log(response);
+        $scope.height = response.data.height;
+
+        $scope.width = response.data.width;
+        $scope.length = response.data.length;
+        $scope.duration = response.data.duration || 480;
+        width = response.data.width;
+        length = response.data.length;
+        $scope.startTile = response.data.startTile;
+        $scope.startTile2 = response.data.startTile2;
+        //$scope.numberOfDropTiles = response.data.numberOfDropTiles;
+        $scope.mtiles = {};
+
+        // Get max victim count
+        $scope.maxLiveVictims = response.data.victims.live;
+        $scope.maxDeadVictims = response.data.victims.dead;
+
+
+        $scope.mapIndexCount = response.data.indexCount;
+        if($scope.maxLiveVictims == 0 && $scope.maxDeadVictims == 0){
+          $scope.EvacuationAreaLoPIndex = -1;
+        }else{
+          $scope.EvacuationAreaLoPIndex = response.data.EvacuationAreaLoPIndex;
+        }
+
+        db_mtile = response.data.tiles;
+        for (var i = 0; i < response.data.tiles.length; i++) {
+          // Intersections are not scoring elements in the Entry rules
+          response.data.tiles[i].tileType.intersections = 0;
+          $scope.mtiles[response.data.tiles[i].x + ',' +
+          response.data.tiles[i].y + ',' +
+          response.data.tiles[i].z] = response.data.tiles[i];
+        }
+
+        $timeout($scope.tile_size, 0);
+        $timeout($scope.tile_size, 500);
+        //$timeout($scope.tile_size, 1000);
+        $timeout($scope.tile_size, 1500);
+        $timeout($scope.tile_size, 3000);
+        $timeout(pageLoaded, 0);
+
+
+      }, function (response) {
+        console.log("Error: " + response.statusText);
+        pageLoaded();
+      });
+    }, function (response) {
+      console.log("Error: " + response.statusText);
+      pageLoaded();
+      if (response.status == 401) {
+        $scope.go('/home/access_denied');
+      }
+    });
+  }
+
+  // Takes the loading screen away once the map is drawn (line_view.js)
+  function pageLoaded() {
+    if (typeof revealRunPage === 'function') revealRunPage($scope.tile_size);
+  }
+
+  setRunId(0);
+
+  $scope.range = function (n) {
+    arr = [];
+    for (var i = 0; i < n; i++) {
+      arr.push(i);
+    }
+    return arr;
+  };
+
+  $scope.sum = function (list) {
+    var total = 0;
+    for (var i = 0; i < (list || []).length; i++) total += list[i] || 0;
+    return total;
+  };
+
+  // Setting the time by hand (the time of the run, on the judge page): in seconds, kept from 0 to
+  // the run's duration, shown as minutes and seconds and used when the timer starts again
+  function setTime(total) {
+    total = Math.max(0, Math.min($scope.duration || 480, total));
+    $scope.minutes = Math.floor(total / 60);
+    $scope.seconds = total % 60;
+    $scope.time = total * 1000;
+    prevTime = $scope.time;
+  }
+
+  $scope.stepTime = function (seconds) {
+    if ($scope.startedTime) return;
+    playSound(sClick);
+    setTime(($scope.minutes || 0) * 60 + ($scope.seconds || 0) + seconds);
+  };
+
+  // After typing: numbers only, seconds over 59 carried into the minutes
+  $scope.tidyTime = function () {
+    if ($scope.startedTime) return;
+    setTime((parseInt($scope.minutes, 10) || 0) * 60 + (parseInt($scope.seconds, 10) || 0));
+  };
+
+  $scope.TimeReset = function () {
+    playSound(sClick);
+    prevTime = 0;
+    $scope.time = 0;
+    $scope.saveEverything();
+  };
+
+  $scope.toggleScoring = function () {
+    playSound(sClick);
+    // Start/stop scoring
+    $scope.startedScoring = !$scope.startedScoring;
+    $scope.saveEverything();
+  };
+
+  $scope.infochecked = function () {
+    playSound(sClick);
+    $scope.checked = true;
+    //$timeout($scope.tile_size, 10);
+    $timeout($scope.tile_size, 200);
+    $timeout($scope.tile_size, 2000);
+    scrollTo(0, 0);
+  };
+
+  $scope.changeFloor = function (z) {
+    playSound(sClick);
+    $scope.z = z;
+    $timeout($scope.tile_size, 100);
+    $timeout($scope.tile_size, 2000);
+  };
+
+  $scope.tileRot = function (r) {
+    playSound(sClick);
+    $scope.sRotate += r;
+    if ($scope.sRotate >= 360) $scope.sRotate -= 360;
+    else if ($scope.sRotate < 0) $scope.sRotate += 360;
+    $timeout($scope.tile_size, 0);
+
+    $cookies.put('sRotate', $scope.sRotate, {
+      path: '/'
+    });
+  };
+
+  $scope.decrement = function (index) {
+    playSound(sClick);
+    if ($scope.LoPs[index])
+      $scope.LoPs[index]--;
+    else
+      $scope.LoPs[index] = 0;
+    if ($scope.LoPs[index] < 0)
+      $scope.LoPs[index] = 0;
+
+    upload_run({
+      LoPs: $scope.LoPs
+    });
+  };
+  $scope.increment = function (index, last) {
+    playSound(sClick);
+    if ($scope.LoPs[index])
+      $scope.LoPs[index]++;
+    else
+      $scope.LoPs[index] = 1;
+
+    upload_run({
+      LoPs: $scope.LoPs
+    });
+    // From the third, the team may skip to the next checkpoint: the row says so (no dialog, which
+    // would stop the judge during the run), with a sound when it first does
+    if ($scope.LoPs[index] == 3 && !last && !$scope.pastSection(index)) {
+      playSound(sInfo);
+    }
+
+  };
+
+  // Where each checkpoint is on the course (its number to the index of its pass in stiles)
+  var checkPointAt = {};
+
+  // Whether the run is past section `index` (to checkpoint index + 1): that checkpoint or anything
+  // after it scored, or LoPs in a later section. Then the team has moved on, skipping or not, and
+  // three LoPs there no longer mean it may skip
+  $scope.pastSection = function (index) {
+    for (var j = index + 1; j < $scope.LoPs.length; j++) {
+      if ($scope.LoPs[j] > 0) return true;
+    }
+    var end = checkPointAt[index + 1];
+    if (end == null) return false;
+    for (var i = end; i < $scope.stiles.length; i++) {
+      var stile = $scope.stiles[i];
+      if (stile && stile.scoredItems.some(function (item) { return item.scored; })) return true;
+    }
+    return false;
+  };
+
+  $scope.victimNL = function (type, number, found, identified) {
+    playSound(sClick);
+    if(type == "D"){ // dead
+      if ($scope.victimNL_Dead.length <= number) return;
+      $scope.victimNL_Dead[number].found = found;
+      $scope.victimNL_Dead[number].identified = identified;
+    }else{ // live
+      if ($scope.victimNL_Live.length <= number) return;
+      $scope.victimNL_Live[number].found = found;
+      $scope.victimNL_Live[number].identified = identified;
+    }
+    upload_run({
+      nl:{
+        liveVictim: $scope.victimNL_Live,
+        deadVictim: $scope.victimNL_Dead
+      }
+    });
+  };
+
+  // The run's victims, live then dead, for the rescue sheet and the map; the same list until the
+  // map's numbers change, so that it can be repeated over
+  var nlList = [];
+  $scope.$watchGroup(['maxLiveVictims', 'maxDeadVictims'], function (max) {
+    nlList = [];
+    for (let i = 0; i < (max[0] || 0); i++) nlList.push({ type: 'L', number: i });
+    for (let i = 0; i < (max[1] || 0); i++) nlList.push({ type: 'D', number: i });
+  });
+  $scope.nlVictims = function () {
+    return nlList;
+  };
+  $scope.nlState = function (v) {
+    let victim = ((v.type == 'D' ? $scope.victimNL_Dead : $scope.victimNL_Live) || [])[v.number];
+    if (!victim || !victim.found) return 'none';
+    return victim.identified ? 'identified' : 'found';
+  };
+
+  $scope.victimNLActivate = function (type, number, found, identified) {
+    if(type == "D"){ // dead
+      if ($scope.victimNL_Dead.length <= number) return false;
+      return $scope.victimNL_Dead[number].found == found && $scope.victimNL_Dead[number].identified == identified; 
+    }else{ // live
+      if ($scope.victimNL_Live.length <= number) return false;
+      return $scope.victimNL_Live[number].found == found && $scope.victimNL_Live[number].identified == identified;
+    }
+  }
+
+  $scope.misidentNL = function (num) {
+    playSound(sClick);
+    $scope.misidentNL_C += num;
+    if($scope.misidentNL_C < 0) $scope.misidentNL_C = 0;
+    upload_run({
+      nl:{
+        misidentification: $scope.misidentNL_C
+      }
+    });
+  };
+
+
+  $scope.calc_victim_type_lop_multiplier = function (type, lop=-1){
+    if(lop == -1) lop = $scope.LoPs[$scope.EvacuationAreaLoPIndex];
+    let multiplier;
+    if(type == "KIT"){
+        if($scope.evacuationLevel == 1){
+            if($scope.kitLevel == 1) return 1.1;
+            else return 1.3;
+        }else{
+            if($scope.kitLevel == 1) return 1.2;
+            else return 1.6;
+        }
+    }
+    else if ($scope.evacuationLevel == 1) { // Low Level
+        multiplier = 1200;
+    } else { // High Level
+        multiplier = 1400;
+    }
+
+    if($scope.evacuationLevel == 1) multiplier = Math.max(multiplier - 25*lop,1000);
+    else multiplier = Math.max(multiplier - 50*lop,1000);
+    return multiplier/1000;
+  };
+
+  $scope.calc_victim_multipliers = function (index){
+    let victim = $scope.victim_list[index];
+    if (victim == undefined) return 0;
+
+    // Effective check
+    if(victim.victimType == "LIVE" && victim.zoneType == "RED") return 1.0;
+    if(victim.victimType == "DEAD" && victim.zoneType == "GREEN") return 1.0;
+    if(victim.victimType == "KIT" && victim.zoneType == "RED") return 1.0;
+
+    // Effective check for dead victim
+    if (victim.victimType == "DEAD") {
+      let liveCount = 0;
+      for (i of $scope.range(index)) {
+        let v = $scope.victim_list[i]
+        if (v.victimType == "LIVE") liveCount ++;
+      }
+      if (liveCount != $scope.maxLiveVictims) return 1.0;
+    }
+    
+    return $scope.calc_victim_type_lop_multiplier(victim.victimType, $scope.LoPs[$scope.EvacuationAreaLoPIndex]);    
+  };
+
+  $scope.victim_bk_color = function (index, zoneType) {
+    let m = $scope.calc_victim_multipliers(index);
+    if (m == 0 || zoneType != $scope.victim_list[index].zoneType) return '#fff';
+    if (m == 1) return '#ccc';
+    if (zoneType == "RED") return '#ffc1ff';
+    return '#e0ffc1';
+  }
+
+  $scope.count_victim_list = function (type) {
+    let count = 0;
+    for (victiml of $scope.victim_list) {
+      if (!victiml.victimType.indexOf(type)) {
+        count++;
+      }
+    }
+    return count;
+  };
+
+  $scope.count_victim_tmp = function (type) {
+    let count = 0;
+    for (victiml of $scope.victim_tmp) {
+      if (!victiml.indexOf(type)) {
+        count++;
+      }
+    }
+    return count;
+  };
+
+  $scope.addVictimTmp = function (type) {
+    playSound(sClick);
+    if (type == "LIVE") {
+      if ($scope.count_victim_list("LIVE") + $scope.count_victim_tmp("LIVE") >= $scope.maxLiveVictims) return;
+    } else if(type == "DEAD") {
+      if ($scope.count_victim_list("DEAD") + $scope.count_victim_tmp("DEAD") >= $scope.maxDeadVictims) return;
+    } else{ //Rescue Kit
+      if ($scope.count_victim_list("KIT") + $scope.count_victim_tmp("KKIT") >= 1) return;
+    }
+    $scope.victim_tmp.push(type);
+  };
+
+  $scope.addVictim = function (victimType, zoneType) {
+    let tmp = {};
+    tmp.zoneType = zoneType;
+    if (victimType == "LIVE") {
+      tmp.victimType = "LIVE";
+      if ($scope.count_victim_list("LIVE") >= $scope.maxLiveVictims) return;
+    } else if(victimType == "DEAD") {
+      tmp.victimType = "DEAD";
+      if ($scope.count_victim_list("DEAD") >= $scope.maxDeadVictims) return;
+    } else { //Rescue Kit
+      tmp.victimType = "KIT";
+      if ($scope.count_victim_list("KIT") >= 1) return;
+    }
+    $scope.victim_list.push(tmp);
+    console.log(tmp);
+  };
+
+  $scope.delete_victim = function (index) {
+    playSound(sClick);
+    $scope.victim_list.splice(index, 1);
+
+    upload_run({
+      rescueOrder: $scope.victim_list
+    });
+
+  };
+  $scope.delete_victim_tmp = function (index) {
+    playSound(sClick);
+    $scope.victim_tmp.splice(index, 1);
+  };
+
+  $scope.victimRegist = function (zoneType) {
+    playSound(sClick);
+    let live = 0;
+    let dead = 0;
+    let kit = 0;
+    for (victiml of $scope.victim_tmp) {
+      if (!victiml.indexOf("LIVE")) {
+        live++;
+      } else if (!victiml.indexOf("DEAD")) {
+        dead++;
+      } else{
+        kit ++;
+      }
+    }
+    for (let i = 0; i < live; i++) {
+      $scope.addVictim("LIVE", zoneType);
+    }
+    for (let i = 0; i < dead; i++) {
+      $scope.addVictim("DEAD", zoneType);
+    }
+
+    if(kit) $scope.addVictim("KIT", zoneType);
+
+    $scope.victim_tmp_clear();
+    $scope.rescueOpen = false;
+
+    upload_run({
+      rescueOrder: $scope.victim_list
+    });
+  };
+
+  $scope.victim_tmp_clear = function () {
+    playSound(sClick);
+    $scope.victim_tmp = [];
+  };
+
+  var tick = function () {
+    if ($scope.startedTime) {
+      date = new Date();
+      $scope.time = prevTime + (date.getTime() - $scope.startUnixTime);
+      $scope.minutes = Math.floor($scope.time / 60000);
+      $scope.seconds = Math.floor(($scope.time % 60000) / 1000);
+      if ($scope.time >= $scope.duration*1000) {
+        playSound(sTimeup);
+        $scope.startedTime = !$scope.startedTime;
+        $scope.time = $scope.duration*1000;
+        prevTime = $scope.time;
+        $scope.saveEverything();
+        // The stop asked is moot: the run is over, which the sheet says
+        $scope.stopAsked = false;
+        $scope.timeUp = true;
+      }
+      $timeout(tick, 1000);
+    }
+  };
+
+
+  // Stopping the timer is asked twice, as it runs to the end of the run. The time of the first
+  // tap is the one recorded when the stop is confirmed; kept running, the timer just goes on
+  $scope.stopAsked = false;
+  $scope.askStop = function (asked) {
+    playSound(sClick);
+    if (asked) $scope.stopAt = prevTime + (new Date().getTime() - $scope.startUnixTime);
+    $scope.stopAsked = asked;
+  };
+
+  // Registering a rescue, on a sheet opened from the evacuation zone on the map or the rescue
+  // card; the victims picked and not taken to a zone are dropped when it closes
+  $scope.rescueOpen = false;
+  $scope.openRescue = function () {
+    playSound(sClick);
+    $scope.rescueOpen = true;
+  };
+  $scope.closeRescue = function () {
+    playSound(sClick);
+    $scope.victim_tmp = [];
+    $scope.rescueOpen = false;
+  };
+
+  // The time of the run is up: the sheet says so, with the time recorded, and goes on to the sign
+  // page or is closed to look over the run first (the finish card goes on from there too)
+  $scope.timeUp = false;
+  $scope.closeTimeUp = function () {
+    playSound(sClick);
+    $scope.timeUp = false;
+  };
+
+  // The page behind a sheet stays still; Escape closes the sheet (and keeps the timer running)
+  $scope.$watchGroup(['stopAsked', 'rescueOpen', 'timeUp'], function (open) {
+    document.documentElement.classList.toggle('rv-overlay-open', !!(open[0] || open[1] || open[2]));
+  });
+  document.addEventListener('keydown', function (event) {
+    if (event.key != 'Escape') return;
+    if ($scope.timeUp) $scope.$apply($scope.closeTimeUp);
+    else if ($scope.stopAsked) $scope.$apply(function () {
+      $scope.askStop(false);
+    });
+    else if ($scope.rescueOpen) $scope.$apply($scope.closeRescue);
+  });
+
+  $scope.confirmStop = function () {
+    playSound(sClick);
+    $scope.stopAsked = false;
+    $scope.startedTime = false;
+    $scope.time = $scope.stopAt;
+    prevTime = $scope.time;
+    $scope.saveEverything();
+  };
+
+  $scope.toggleTime = function () {
+    playSound(sClick);
+    // Start/stop timer
+    $scope.startedTime = !$scope.startedTime;
+    $scope.stopAsked = false;
+    if ($scope.startedTime) {
+      // Start the timer
+      $timeout(tick, 0);
+      date = new Date();
+      $scope.startUnixTime = date.getTime();
+
+      upload_run({
+        status: 2
+      });
+
+    } else {
+      // Save everything when you stop the time
+      date = new Date();
+      $scope.time = prevTime + (date.getTime() - $scope.startUnixTime);
+      prevTime = $scope.time;
+      $scope.saveEverything();
+    }
+  };
+
+
+  $scope.changeShowedUp = function () {
+    playSound(sClick);
+
+    upload_run({
+      showedUp: $scope.showedUp
+    });
+
+
+  };
+  $scope.changeExitBonus = function () {
+    playSound(sClick);
+    $scope.exitBonus = !$scope.exitBonus;
+    if ($scope.exitBonus && $scope.startedTime) {
+      $scope.startedTime = false;
+      date = new Date();
+      $scope.time = prevTime + (date.getTime() - $scope.startUnixTime);
+      prevTime = $scope.time;
+      $scope.minutes = Math.floor($scope.time / 60000);
+      $scope.seconds = Math.floor(($scope.time % 60000) / 1000)
+    }
+
+    $scope.saveEverything();
+  };
+  $scope.changeLevel = function (n) {
+    playSound(sClick);
+    $scope.evacuationLevel = n;
+
+    upload_run({
+      evacuationLevel: $scope.evacuationLevel
+    });
+
+  };
+
+  $scope.changeLevelK = function (n) {
+    playSound(sClick);
+    $scope.kitLevel = n;
+
+    upload_run({
+      kitLevel: $scope.kitLevel
+    });
+
+  };
+
+  function findItem(item,tile) {
+    for(let i=0;i<tile.length;i++){
+        if(tile[i].item == item) return i;
+    }
+    return null;
+  }
+
+  $scope.isCheckPoint = function(tile) {
+    return findItem("checkpoint", tile.scoredItems) != null;
+  }
+
+  $scope.doScoring = function (x, y, z) {
+    var mtile = $scope.mtiles[x + ',' + y + ',' + z];
+    var stile = [];
+    var stileIndex = [];
+    var isCheckpointTile = false;
+    var httpdata = {
+      tiles: {}
+    };
+
+    // If this is not a created tile
+    if (!mtile || mtile.index.length == 0)
+      return;
+    playSound(sClick);
+    for (var i = 0; i < mtile.index.length; i++) {
+      stile.push($scope.stiles[mtile.index[i]]);
+      stileIndex.push(mtile.index[i]);
+      if ($scope.isCheckPoint($scope.stiles[mtile.index[i]])) {
+        isCheckpointTile = true;
+      }
+    }
+
+
+    // If the run is not started, we can place drop pucks on this tile
+    if ($scope.startedScoring) {
+      var total = (mtile.items.obstacles > 0 ||
+        mtile.items.speedbumps > 0 ||
+        mtile.tileType.gaps > 0 ||
+        mtile.tileType.seesaw > 0 ||
+        undefined2false(mtile.items.rampPoints)) * mtile.index.length;
+
+      // Add the number of possible passes for drop tiles
+      if (isCheckpointTile) {
+        total = 0;
+        for (let i = 0; i < stile.length; i++) {
+          if (stileIndex[i] < $scope.mapIndexCount) {
+            total++;
+          }
+        }
+      }
+
+
+      if (isStart(mtile)) {
+        $scope.showedUp = !$scope.showedUp;
+        $scope.changeShowedUp();
+        return;
+      }
+
+
+      if (total > 1) {
+        // Show modal
+        $scope.open(x, y, z);
+        // Save data from modal when closing it
+      } else if (total == 1) {
+        console.log(stile);
+        for(let i=0;i<stile[0].scoredItems.length;i++) {
+          stile[0].scoredItems[i].scored = !stile[0].scoredItems[i].scored;
+        }
+        httpdata.tiles[mtile.index[0]] = stile[0];
+        $scope.stiles[mtile.index[0]] = stile[0];
+        upload_run(httpdata);
+      }
+    }
+  };
+
+
+  $scope.open = function (x, y, z) {
+    var modalInstance = $uibModal.open({
+      animation: true,
+      // The judge page in the run pages' design has its own (views/judge/line_2026.pug)
+      templateUrl: document.body.classList.contains('run-view') ? '/templates/line_judge_modal_passes.html' : '/templates/line_judge_modal.html',
+      windowClass: 'rv-judge-modal',
+      controller: 'ModalInstanceCtrl',
+      size: 'lm',
+      resolve: {
+        mtile: function () {
+          return $scope.mtiles[x + ',' + y + ',' + z];
+        },
+        mtiles: function () {
+          return $scope.mtiles;
+        },
+        stiles: function () {
+          return $scope.stiles;
+        },
+        sRotate: function () {
+          return $scope.sRotate;
+        },
+        startTile: function () {
+          return $scope.startTile;
+        },
+        nineTile: function () {
+          var nine = [];
+          if ($scope.sRotate == 0) {
+            nine[0] = $scope.mtiles[(x - 1) + ',' + (y - 1) + ',' + z];
+            nine[1] = $scope.mtiles[(x) + ',' + (y - 1) + ',' + z];
+            nine[2] = $scope.mtiles[(x + 1) + ',' + (y - 1) + ',' + z];
+            nine[3] = $scope.mtiles[(x - 1) + ',' + (y) + ',' + z];
+            nine[4] = $scope.mtiles[(x) + ',' + (y) + ',' + z];
+            nine[5] = $scope.mtiles[(x + 1) + ',' + (y) + ',' + z];
+            nine[6] = $scope.mtiles[(x - 1) + ',' + (y + 1) + ',' + z];
+            nine[7] = $scope.mtiles[(x) + ',' + (y + 1) + ',' + z];
+            nine[8] = $scope.mtiles[(x + 1) + ',' + (y + 1) + ',' + z];
+          } else if ($scope.sRotate == 180) {
+            nine[8] = $scope.mtiles[(x - 1) + ',' + (y - 1) + ',' + z];
+            nine[7] = $scope.mtiles[(x) + ',' + (y - 1) + ',' + z];
+            nine[6] = $scope.mtiles[(x + 1) + ',' + (y - 1) + ',' + z];
+            nine[5] = $scope.mtiles[(x - 1) + ',' + (y) + ',' + z];
+            nine[4] = $scope.mtiles[(x) + ',' + (y) + ',' + z];
+            nine[3] = $scope.mtiles[(x + 1) + ',' + (y) + ',' + z];
+            nine[2] = $scope.mtiles[(x - 1) + ',' + (y + 1) + ',' + z];
+            nine[1] = $scope.mtiles[(x) + ',' + (y + 1) + ',' + z];
+            nine[0] = $scope.mtiles[(x + 1) + ',' + (y + 1) + ',' + z];
+          } else if ($scope.sRotate == 90) {
+            nine[2] = $scope.mtiles[(x - 1) + ',' + (y - 1) + ',' + z];
+            nine[5] = $scope.mtiles[(x) + ',' + (y - 1) + ',' + z];
+            nine[8] = $scope.mtiles[(x + 1) + ',' + (y - 1) + ',' + z];
+            nine[1] = $scope.mtiles[(x - 1) + ',' + (y) + ',' + z];
+            nine[4] = $scope.mtiles[(x) + ',' + (y) + ',' + z];
+            nine[7] = $scope.mtiles[(x + 1) + ',' + (y) + ',' + z];
+            nine[0] = $scope.mtiles[(x - 1) + ',' + (y + 1) + ',' + z];
+            nine[3] = $scope.mtiles[(x) + ',' + (y + 1) + ',' + z];
+            nine[6] = $scope.mtiles[(x + 1) + ',' + (y + 1) + ',' + z];
+          } else if ($scope.sRotate == 270) {
+            nine[6] = $scope.mtiles[(x - 1) + ',' + (y - 1) + ',' + z];
+            nine[3] = $scope.mtiles[(x) + ',' + (y - 1) + ',' + z];
+            nine[0] = $scope.mtiles[(x + 1) + ',' + (y - 1) + ',' + z];
+            nine[7] = $scope.mtiles[(x - 1) + ',' + (y) + ',' + z];
+            nine[4] = $scope.mtiles[(x) + ',' + (y) + ',' + z];
+            nine[1] = $scope.mtiles[(x + 1) + ',' + (y) + ',' + z];
+            nine[8] = $scope.mtiles[(x - 1) + ',' + (y + 1) + ',' + z];
+            nine[5] = $scope.mtiles[(x) + ',' + (y + 1) + ',' + z];
+            nine[2] = $scope.mtiles[(x + 1) + ',' + (y + 1) + ',' + z];
+          }
+          return nine;
+        },
+        startTile2: function(){
+            return $scope.startTile2;
+        },
+        isCheckPoint: function () {
+          return $scope.isCheckPoint;
+        }
+      }
+    }).closed.then(function (result) {
+      console.log("Closed modal");
+      upload_run({
+        tiles: $scope.stiles
+      });
+    });
+  };
+
+  $scope.saveEverything = function () {
+    var run = {};
+    run.LoPs = $scope.LoPs;
+    run.evacuationLevel = $scope.evacuationLevel;
+    run.kitLevel = $scope.kitLevel;
+    run.exitBonus = $scope.exitBonus;
+    run.rescueOrder = $scope.victim_list;
+    run.showedUp = $scope.showedUp;
+    run.started = $scope.started;
+    run.tiles = $scope.stiles;
+    $scope.minutes = Math.floor($scope.time / 60000);
+    $scope.seconds = Math.floor(($scope.time % 60000) / 1000);
+    run.time = {
+      minutes: $scope.minutes,
+      seconds: $scope.seconds
+    };
+    save(run);
+  };
+
+  $scope.confirm = function () {
+    if ((!$scope.showedUp || $scope.showedUp == null) && $scope.score > 0) {
+      playSound(sError);
+      swal("Oops!", txt_implicit, "error");
+    } else {
+      playSound(sClick);
+      var run = {};
+      run.LoPs = $scope.LoPs;
+      run.evacuationLevel = $scope.evacuationLevel;
+      run.kitLevel = $scope.kitLevel;
+      run.exitBonus = $scope.exitBonus;
+      run.rescueOrder = $scope.victim_list;
+      run.showedUp = $scope.showedUp;
+      run.started = $scope.started;
+      run.tiles = $scope.stiles;
+      //$scope.minutes = Math.floor($scope.time / 60000)
+      //$scope.seconds = Math.floor(($scope.time % 60000) / 1000)
+      run.time = {
+        minutes: $scope.minutes,
+        seconds: $scope.seconds
+      };
+      run.status = 3;
+
+      // On to the sign page once this, after all before it, is saved
+      save(run, function () {
+        $scope.go('/line/sign/' + runId + '?return=' + $scope.getParam('return'));
+      });
+    }
+  };
+
+  $scope.nextRun = function(flag){
+    if ((!$scope.showedUp || $scope.showedUp == null) && $scope.score > 0) {
+      playSound(sError);
+      swal("Oops!", txt_implicit, "error");
+    } else {
+      playSound(sClick);
+      var run = {};
+      run.LoPs = $scope.LoPs;
+      run.evacuationLevel = $scope.evacuationLevel;
+      run.kitLevel = $scope.kitLevel;
+      run.exitBonus = $scope.exitBonus;
+      run.rescueOrder = $scope.victim_list;
+      run.showedUp = $scope.showedUp;
+      run.started = $scope.started;
+      run.tiles = $scope.stiles;
+      //$scope.minutes = Math.floor($scope.time / 60000)
+      //$scope.seconds = Math.floor(($scope.time % 60000) / 1000)
+      run.time = {
+        minutes: $scope.minutes,
+        seconds: $scope.seconds
+      };
+      run.status = 3;
+
+
+      // On to the next run, or done, once this, after all before it, is saved
+      save(run, function () {
+        if(flag){
+          setRunId($scope.nowRun+1);
+          $(window).scrollTop(0);
+        }
+        else{
+          Swal.fire({
+            title: 'Complete!',
+            html: 'Scoring completed! Please close this tab.',
+            type: 'success'
+          }).then((result) => {
+            window.close();
+          })
+        }
+      });
+    }
+  }
+
+  $scope.getParam = function (key) {
+    var str = location.search.split("?");
+    if (str.length < 2) {
+      return "";
+    }
+
+    var params = str[1].split("&");
+    for (var i = 0; i < params.length; i++) {
+      var keyVal = params[i].split("=");
+      if (keyVal[0] == key && keyVal.length == 2) {
+        return decodeURIComponent(keyVal[1]);
+      }
+    }
+    return "";
+  };
+
+  $scope.go = function (path) {
+    playSound(sClick);
+    // Only to a page of this site: the path may be the ?return= of a link anyone could have made
+    var url = new URL(path, location.href);
+    if (url.origin !== location.origin) return;
+    window.location = url.pathname + url.search + url.hash;
+  };
+
+  function isStart(tile) {
+    if (!tile)
+      return;
+    return tile.x == $scope.startTile.x &&
+      tile.y == $scope.startTile.y &&
+      tile.z == $scope.startTile.z;
+  }
+
+  function undefined2false(tmp) {
+    if (tmp) return true;
+    return false;
+  }
+
+  $scope.tile_size = function () {
+    try {
+      var b = $('.tilearea');
+      //console.log('コンテンツ本体：' + b.height() + '×' + b.width());
+      //console.log('window：' + window.innerHeight);
+      // The map card, kept in view under the bar (its sticky top), fits the window beside the
+      // side column; on narrow screens it is above the rest and fits the width only
+      var area = $('.tilearea');
+      var mapHeight = window.matchMedia('(max-width: 991.98px)').matches ? Infinity :
+        window.innerHeight - parseFloat($('.rv-judge-map').css('top')) -
+        (area.offset().top - $('.rv-judge-map').offset().top) - (area.innerHeight() - area.height()) - 20;
+      if ($scope.sRotate % 180 == 0) {
+        var tilesize_w = ($('.tilearea').width() - 2 * width) / width;
+        var tilesize_h = mapHeight / length;
+      } else {
+        var tilesize_w = ($('.tilearea').width() - 2 * length) / length;
+        var tilesize_h = mapHeight / width;
+      }
+
+      //console.log('tilesize_w:' + tilesize_w);
+      //console.log('tilesize_h:' + tilesize_h);
+      if (tilesize_h > tilesize_w) var tilesize = tilesize_w;
+      else var tilesize = tilesize_h;
+      $('tile').css('height', tilesize);
+      $('tile').css('width', tilesize);
+      $('.tile-image').css('height', tilesize);
+      $('.tile-image').css('width', tilesize);
+      $('.tile-font').css('font-size', tilesize - 10);
+      $('.tile-font-1-25').css('font-size', tilesize / 3);
+      $('.slot').css('height', tilesize);
+      $('.slot').css('width', tilesize);
+      $('.chnumtxt').css('font-size', tilesize / 6);
+
+      if ($scope.sRotate % 180 == 0) {
+        $('#wrapTile').css('width', (tilesize + 3) * width);
+      } else {
+        $('#wrapTile').css('width', (tilesize + 3) * length);
+      }
+
+      // The evacuation zone on the map, a button over the box around its tiles
+      var evac = $('#wrapTile tile.is-evac');
+      if (evac.length) {
+        var wrap = $('#wrapTile')[0].getBoundingClientRect();
+        var box = { left: Infinity, top: Infinity, right: -Infinity, bottom: -Infinity };
+        evac.each(function () {
+          var r = this.getBoundingClientRect();
+          box.left = Math.min(box.left, r.left);
+          box.top = Math.min(box.top, r.top);
+          box.right = Math.max(box.right, r.right);
+          box.bottom = Math.max(box.bottom, r.bottom);
+        });
+        $scope.evacBox = {
+          left: (box.left - wrap.left) + 'px',
+          top: (box.top - wrap.top) + 'px',
+          width: (box.right - box.left) + 'px',
+          height: (box.bottom - box.top) + 'px'
+        };
+      } else {
+        $scope.evacBox = null;
+      }
+      $scope.$evalAsync();
+
+      if(movie){
+        $('#card_area').css('height', (window.innerHeight - 130 - $('#video_area').height()));
+      }else{
+        $('#card_area').css('height', (window.innerHeight - 130));
+      }
+      
+      //if (b.height() == 0) $timeout($scope.tile_size, 500);
+    } catch (e) {
+      $timeout($scope.tile_size, 500);
+    }
+  };
+
+  var currentWidth = -1;
+
+
+  $(window).on('load resize', function () {
+    if (currentWidth == window.innerWidth) {
+      return;
+    }
+    currentWidth = window.innerWidth;
+
+    $scope.tile_size();
+
+  });
+
+}]);
+
+
+// Please note that $uibModalInstance represents a modal window (instance) dependency.
+// It is not the same as the $uibModal service used above.
+
+app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', '$timeout', 'mtile', 'mtiles', 'stiles', 'nineTile', 'sRotate', 'startTile', 'startTile2', 'isCheckPoint', function ($scope, $uibModalInstance, $timeout, mtile, mtiles, stiles, nineTile, sRotate, startTile, startTile2, isCheckPoint) {
+  $scope.mtile = mtile;
+  $scope.sRotate = sRotate;
+  $scope.stiles = stiles;
+  $scope.nineTile = nineTile;
+  $scope.isCheckPoint = isCheckPoint;
+  $scope.words = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth"];
+  $scope.evacTapeRot = function (tile) {
+    let rot = 0;
+    if(tile.evacEntrance>=0){
+        rot = tile.evacEntrance;
+    }else if(tile.evacExit>=0){
+        rot = tile.evacExit;
+    }                
+    rot += sRotate;
+    return rot%360;
+  }
+  function dir2num(dir){
+    switch (dir) {
+      case "top":
+        return 0;
+      case "right":
+        return 90;
+      case "bottom":
+        return 180;
+      case "left":
+        return 270;
+    }
+  }
+  $scope.next = [];
+  for(let i in mtile.next_dir){
+    let nd = (dir2num(mtile.next_dir[i]) + sRotate) % 360;
+    switch (nd) {
+      case 0:
+        $scope.next.top = mtile.index[i];
+        break;
+      case 90:
+        $scope.next.right = mtile.index[i];
+        break;
+      case 180:
+        $scope.next.bottom = mtile.index[i];
+        break;
+      case 270:
+        $scope.next.left = mtile.index[i];
+        break;
+    }
+  }
+
+  // For the passes in the run pages' design (line_judge_modal_passes.html): the screen direction
+  // (0 top, 90 right, ...) the robot left the tile by on each pass, and the passes leaving through
+  // each neighbour of the 3x3 grid (1 top, 3 left, 5 right, 7 bottom)
+  $scope.passDir = (mtile.next_dir || []).map(function (dir) {
+    return (dir2num(dir) + sRotate) % 360;
+  });
+  $scope.passesTo = { 1: [], 3: [], 5: [], 7: [] };
+  $scope.passDir.forEach(function (deg, pass) {
+    var cell = { 0: 1, 90: 5, 180: 7, 270: 3 }[deg];
+    if (cell) $scope.passesTo[cell].push(pass);
+  });
+  $scope.dirStatus = function (tile) {
+    if (tile.scoredItems.length == 0) return;
+
+    // Number of successfully passed times
+    var successfully = 0;
+    // Number of times it is possible to pass this tile
+    var possible = 0;
+    for (let i = 0; i < tile.scoredItems.length; i++) {
+        possible++;
+        if (tile.scoredItems[i].scored) {
+          successfully++;
+        }
+    }
+
+    if (possible > 0 && successfully == possible)
+      return "done";
+    else if (successfully > 0)
+      return "halfdone";
+    else if (possible > 0)
+      return "undone";
+    else
+      return "";
+  };
+
+  $scope.toggle_scored = function (num) {
+    playSound(sClick);
+    try {
+      for(let i=0;i<$scope.stiles[num].scoredItems.length;i++) {
+        $scope.stiles[num].scoredItems[i].scored = !$scope.stiles[num].scoredItems[i].scored;
+      }
+      $timeout($uibModalInstance.close, 300);
+    } catch (e) {
+      console.log(e);
+    }
+
+  };
+
+
+  $scope.tilerotate = function (tilerot) {
+    //console.log(tilerot);
+    if (!tilerot) return $scope.sRotate;
+    var ro = tilerot + $scope.sRotate;
+    if (ro >= 360) ro -= 360;
+    else if (ro < 0) ro += 360;
+    //console.log(ro);
+    return ro;
+  };
+
+  $scope.isCheckPointTile = function (tile) {
+    if (!tile || tile.index.length == 0)
+        return;
+    return $scope.isCheckPoint($scope.stiles[tile.index[0]]);
+  }
+
+  $scope.isStart = function (tile) {
+    if (!tile)
+      return;
+    return tile.x == startTile.x &&
+      tile.y == startTile.y &&
+      tile.z == startTile.z;
+  };
+
+  $scope.rotateRamp = function (direction) {
+    var ro;
+    switch (direction) {
+      case "bottom":
+        ro = 0;
+        break;
+      case "top":
+        ro = 180;
+        break;
+      case "left":
+        ro = 90;
+        break;
+      case "right":
+        ro = 270;
+        break;
+    }
+    ro += $scope.sRotate;
+    if (ro >= 360) ro -= 360;
+    else if (ro < 0) ro += 360;
+    switch (ro) {
+      case 0:
+        return;
+      case 180:
+        return "fa-rotate-180";
+      case 90:
+        return "fa-rotate-90";
+      case 270:
+        return "fa-rotate-270";
+    }
+  };
+
+  $scope.ok = function () {
+    playSound(sClick);
+    $uibModalInstance.close();
+  };
+}]);
+
+
+// A number shown in two digits (the seconds of the time of the run: 0:05), read back as a number
+app.directive('rvTwoDigits', function () {
+  return {
+    require: 'ngModel',
+    link: function ($scope, element, attrs, ngModel) {
+      ngModel.$formatters.push(function (value) {
+        return value == null || value === '' ? value : ('0' + value).slice(-2);
+      });
+      ngModel.$parsers.push(function (value) {
+        return value === '' ? value : parseInt(value, 10);
+      });
+    }
+  };
+});
+
+app.directive('tile', function () {
+  return {
+    scope: {
+      tile: '='
+    },
+    restrict: 'E',
+    // The judge page draws the tiles like the run view (template="judge")
+    templateUrl: function (element, attrs) {
+      return attrs.template == 'judge' ? '/templates/tile_judge.html' : '/templates/tile.html';
+    },
+    link: function ($scope, element, attrs) {
+      // A tile of the evacuation zone, for the button over it (tile_size)
+      $scope.$watch('tile', function (tile) {
+        element.toggleClass('is-evac', !!(tile && tile.tileType && /^ev\d+\.png$/.test(tile.tileType.image)));
+      });
+
+      $scope.tilerotate = function (tilerot) {
+        if (!tilerot) return $scope.$parent.sRotate;
+        var ro = tilerot + $scope.$parent.sRotate;
+        if (ro >= 360) ro -= 360;
+        else if (ro < 0) ro += 360;
+        return ro;
+      };
+      $scope.tileNumber = function (tile) {
+        $scope.tileN = 1;
+        var ret_txt = "";
+        if (!tile) return;
+
+        var possible = 0;
+
+        var count = function (list) {
+          for (var i = 0; i < list.length; i++) {
+            possible++;
+          }
+        };
+        count(tile.scoredItems.gaps);
+        count(tile.scoredItems.seesaw);
+        count(tile.scoredItems.speedbumps);
+        count(tile.scoredItems.obstacles);
+        if (possible != 0) return;
+
+        for (var i = 0; i < tile.index.length; i++) {
+          if (i != 0) ret_txt += ',';
+          ret_txt += tile.index[i] + 1;
+        }
+        return ret_txt;
+      };
+
+      $scope.checkpointNumber = function (tile) {
+        var ret_txt = "";
+        if (!tile) return;
+        for (var i = 0; i < tile.index.length; i++) {
+            if (marker[tile.index[i]]) {
+                if (ret_txt != "") ret_txt += '&'
+                ret_txt += marker[tile.index[i]];
+            } else {
+                return ret_txt;
+            }
+        }
+        return ret_txt;
+      }
+
+      $scope.isCheckPointTile = function (tile) {
+          if (!tile || tile.index.length == 0)
+              return;
+          return $scope.$parent.isCheckPoint($scope.$parent.stiles[tile.index[0]]);
+      }
+
+      function isStart(tile) {
+        if (!tile)
+          return;
+        return tile.x == $scope.$parent.startTile.x &&
+          tile.y == $scope.$parent.startTile.y &&
+          tile.z == $scope.$parent.startTile.z;
+      }
+
+      $scope.isStart = function (tile) {
+        return isStart(tile);
+      };
+
+      $scope.evacTapeRot = function (tile) {
+        let rot = 0;
+        if(tile.evacEntrance>=0){
+            rot = tile.evacEntrance;
+        }else if(tile.evacExit>=0){
+            rot = tile.evacExit;
+        }                
+        rot += $scope.$parent.sRotate;
+        return rot%360;
+      }
+
+      $scope.tileStatus = function (tile) {
+        // If this is a non-existent tile
+        if ((!tile || tile.index.length == 0) && !isStart(tile))
+          return;
+
+        // If this tile has no scoring elements we should just return empty string
+        if (tile.items.obstacles == 0 &&
+          tile.items.speedbumps == 0 &&
+          !tile.items.rampPoints &&
+          tile.tileType.gaps == 0 &&
+          tile.tileType.seesaw == 0 &&
+          !$scope.isCheckPointTile(tile) && !isStart(tile)
+        ) {
+          return;
+        }
+
+        // Number of successfully passed times
+        var successfully = 0;
+        // Number of times it is possible to pass this tile
+        var possible = 0;
+
+        for (let i = 0; i < tile.index.length; i++) {
+          for (let j = 0; j < $scope.$parent.stiles[tile.index[i]].scoredItems.length; j++) {
+            possible++;
+            if ($scope.$parent.stiles[tile.index[i]].scoredItems[j].scored) {
+              successfully++;
+            }
+          }
+        }
+
+        if ((possible > 0 && successfully == possible) ||
+          (isStart(tile) && $scope.$parent.showedUp))
+          return "done";
+        else if (successfully > 0)
+          return "halfdone";
+        else if (possible > 0 || (isStart(tile) && !$scope.$parent.showedUp))
+          return "undone";
+        else
+          return "";
+      };
+
+      $scope.rotateRamp = function (direction) {
+        var ro;
+        switch (direction) {
+          case "bottom":
+            ro = 0;
+            break;
+          case "top":
+            ro = 180;
+            break;
+          case "left":
+            ro = 90;
+            break;
+          case "right":
+            ro = 270;
+            break;
+        }
+        ro += $scope.$parent.sRotate;
+        if (ro >= 360) ro -= 360;
+        else if (ro < 0) ro += 360;
+        switch (ro) {
+          case 0:
+            return;
+          case 180:
+            return "fa-rotate-180";
+          case 90:
+            return "fa-rotate-90";
+          case 270:
+            return "fa-rotate-270";
+        }
+      }
+
+    }
+  };
+});
+
+
+let lastTouch = 0;
+document.addEventListener('touchend', event => {
+  const now = window.performance.now();
+  if (now - lastTouch <= 500) {
+    event.preventDefault();
+  }
+  lastTouch = now;
+}, true);
+
+
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+var context = new AudioContext();
+
+var getAudioBuffer = function (url, fn) {
+  var req = new XMLHttpRequest();
+  req.responseType = 'arraybuffer';
+
+  req.onreadystatechange = function () {
+    if (req.readyState === 4) {
+      if (req.status === 0 || req.status === 200) {
+        context.decodeAudioData(req.response, function (buffer) {
+          fn(buffer);
+        });
+      }
+    }
+  };
+
+  req.open('GET', url, true);
+  req.send('');
+};
+
+var playSound = function (buffer) {
+  var source = context.createBufferSource();
+  source.buffer = buffer;
+  source.connect(context.destination);
+  source.start(0);
+};
+
+var sClick, sInfo, sError, sTimeup;
+window.onload = function () {
+  getAudioBuffer('/sounds/click.mp3', function (buffer) {
+    sClick = buffer;
+  });
+  getAudioBuffer('/sounds/info.mp3', function (buffer) {
+    sInfo = buffer;
+  });
+  getAudioBuffer('/sounds/error.mp3', function (buffer) {
+    sError = buffer;
+  });
+  getAudioBuffer('/sounds/timeup.mp3', function (buffer) {
+    sTimeup = buffer;
+  });
+};

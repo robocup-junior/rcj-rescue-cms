@@ -164,6 +164,17 @@ MAIL_PASS=smtp_password
 MAIL_FROM=fromAddress@example.com  
 MAIL_SENDER=RoboCupJunior Japan  
 
+### 開発環境でのメール確認
+`docker compose up` で起動した場合は，開発用のメールサーバ [Mailpit](https://mailpit.axllent.org/) も起動します．`process.env` でメールサーバ（`MAIL_SMTP`）を設定していなければ，システムから送信したメールは外部に配信されず http://localhost:8025 で確認できます（設定していれば，そのサーバから配信されます）．
+Dockerを使わない場合は `brew install mailpit && mailpit` などでMailpitを起動し，`process.env` に次を設定してください．
+
+MAIL_SMTP=localhost  
+MAIL_PORT=1025  
+MAIL_FROM=cms@localhost  
+MAIL_WEB_UI=http://localhost:8025  
+
+メールサーバを設定していなくても，メール配信画面は（送信できない旨の表示とともに）開けます．
+
 ## 詳しい使用方法
 [RCJ Scoring System Community Forum](https://ask.rcj.cloud)をご覧ください．  
 現時点では，原則として，本フォーラムへのアクセスを各地の大会実行委員に相当する方に限定しています．  

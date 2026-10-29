@@ -7,6 +7,8 @@ const express = require('express');
 const adminRouter = express.Router();
 const multer = require('multer');
 const fs = require('fs-extra');
+const sanitize = require('sanitize-filename');
+const safePath = require('../../helper/safePath');
 const glob = require('glob');
 const path = require('path');
 const { ObjectId } = require('mongoose').Types;
@@ -15,11 +17,12 @@ const auth = require('../../helper/authLevels');
 
 const { ACCESSLEVELS } = require('../../models/user');
 
-const base_tmp_path = `${__dirname}/../../tmp/`;
+const base_tmp_path = `${safePath('tmp')}/`;
 
 const {backupQueue} = require("../../queue/backupQueue")
+const access = require('../../helper/access');
 
-adminRouter.post('/restore', function (req, res) {
+adminRouter.post('/restore', access.anyAdmin("the backup's competition is checked as it is restored (queue/backupQueue.js)"), function (req, res) {
   const folder = Math.random().toString(32).substring(2);
   fs.mkdirsSync(`${base_tmp_path}uploads/`);
 
@@ -46,7 +49,7 @@ adminRouter.post('/restore', function (req, res) {
   });
 });
 
-adminRouter.post('/:competition', function (req, res) {
+adminRouter.post('/:competition', access.competition(ACCESSLEVELS.ADMIN, 'params.competition'), function (req, res) {
   const competitionId = req.params.competition;
   const fullBackup = req.body.fullBackup;
 
@@ -65,7 +68,7 @@ adminRouter.post('/:competition', function (req, res) {
 });
 
 
-adminRouter.get('/list/:competitionId', function (req, res, next) {
+adminRouter.get('/list/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const { competitionId } = req.params;
 
   if (!ObjectId.isValid(competitionId)) {
@@ -97,7 +100,7 @@ adminRouter.get('/list/:competitionId', function (req, res, next) {
   }
 });
 
-adminRouter.get('/archive/:competitionId/:fileName', function (req, res, next) {
+adminRouter.get('/archive/:competitionId/:fileName', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const { competitionId } = req.params;
   const { fileName } = req.params;
 
@@ -106,7 +109,7 @@ adminRouter.get('/archive/:competitionId/:fileName', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user,competitionId,ACCESSLEVELS.ADMIN)){ // Admin check
-    let path = `${__dirname}/../../backup/${competitionId}/${fileName}`;
+    let path = safePath('backup', competitionId, sanitize(fileName));
     fs.stat(path, (err, stat) => {
       // Handle file not found
       if (err !== null) {
@@ -137,7 +140,7 @@ adminRouter.get('/archive/:competitionId/:fileName', function (req, res, next) {
   }
 });
 
-adminRouter.delete('/archive/:competitionId/:fileName', function (req, res, next) {
+adminRouter.delete('/archive/:competitionId/:fileName', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const { competitionId } = req.params;
   const { fileName } = req.params;
 
@@ -146,7 +149,7 @@ adminRouter.delete('/archive/:competitionId/:fileName', function (req, res, next
   }
 
   if (auth.authCompetition(req.user,competitionId,ACCESSLEVELS.ADMIN)){ // Admin check
-    let path = `${__dirname}/../../backup/${competitionId}/${fileName}`;
+    let path = safePath('backup', competitionId, sanitize(fileName));
     fs.unlink(path, (err) => {
       if (err){
         return res.status(500).send({
@@ -166,7 +169,7 @@ adminRouter.delete('/archive/:competitionId/:fileName', function (req, res, next
   }
 });
 
-adminRouter.get('/job/:jobId', async function (req, res, next) {
+adminRouter.get('/job/:jobId', access.anyAdmin('the state of a job'), async function (req, res, next) {
   const { jobId } = req.params;
   let job = await backupQueue.getJob(jobId);
   if (job === null) {

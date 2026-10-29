@@ -19,10 +19,13 @@ const mime = require('mime');
 const { ACCESSLEVELS } = require('../../models/user');
 const glob = require('glob');
 const ffmpeg = require('fluent-ffmpeg');
+// The containers of videos ffmpeg opens to make the thumbnails of those uploaded: not playlists
+// (HLS, concat...) put in as videos, which would have it read the server's files or other URLs
+const VIDEO_FORMATS = 'mov,mp4,m4a,3gp,3g2,mj2,matroska,webm,avi,mpegts,mpeg,mpegvideo,m4v,h264,hevc,flv,asf,ogg,dv,mxf,rm';
 
 const competitiondb = require('../../models/competition');
 const { LEAGUES_JSON } = competitiondb;
-const {sendMail} = require('../../helper/mailSender');
+const {sendMail, STAFF} = require('../../helper/mailSender');
 
 const dateformat = require('dateformat');
 let read = require('fs-readdir-recursive');
@@ -31,6 +34,8 @@ const documentDb = require('../../models/document');
 const userdb = require('../../models/user');
 const escape = require('escape-html');
 const sanitize = require("sanitize-filename");
+const access = require('../../helper/access');
+const safePath = require('../../helper/safePath');
 read = gracefulFs.gracefulify(read);
 
 const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -58,7 +63,7 @@ function writeLog(req, competitionId, teamId, message) {
   else user = user.username;
   const output = `[${dateformat(new Date(), 'mm/dd/yy HH:MM:ss')}] ${user} : ${message}\n`;
   fs.appendFile(
-    `${__dirname}/../../documents/${competitionId}/${teamId}/log.txt`,
+    safePath('documents', competitionId, teamId, 'log.txt'),
     output,
     (err) => {
       if (err) logger.error(err.message);
@@ -70,7 +75,7 @@ function GetleagueType(leagueId){
   return LEAGUES_JSON.find(l=>l.id == leagueId).type;
 }
 
-publicRouter.get('/answer/:teamId/:token', function (req, res, next) {
+publicRouter.get('/answer/:teamId/:token', access.team({ publicDocuments: true }), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
 
@@ -111,7 +116,7 @@ publicRouter.get('/answer/:teamId/:token', function (req, res, next) {
     });
 });
 
-publicRouter.put('/answer/:teamId/:token', function (req, res, next) {
+publicRouter.put('/answer/:teamId/:token', access.team(), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
   const answer = req.body;
@@ -203,10 +208,12 @@ publicRouter.put('/answer/:teamId/:token', function (req, res, next) {
     });
 });
 
-publicRouter.post('/files/:teamId/:token/:fileName', function (req, res, next) {
+publicRouter.post('/files/:teamId/:token/:fileName', access.team(), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
-  const { fileName } = req.params;
+  // The name of the file in the folder: no path of its own (../ would take the upload out of it)
+  const fileName = sanitize(req.params.fileName);
+  if (fileName == '') return res.status(400).send({ msg: 'Invalid file name' });
 
   if (!ObjectId.isValid(teamId)) {
     return next();
@@ -253,7 +260,7 @@ publicRouter.post('/files/:teamId/:token/:fileName', function (req, res, next) {
                   return;
                 }
                 fs.mkdir(
-                  `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/trash`,
+                  safePath('documents', dbTeam.competition._id, teamId, 'trash'),
                   (err) => {
                     files.forEach(function (file) {
                       fs.rename(
@@ -279,7 +286,7 @@ publicRouter.post('/files/:teamId/:token/:fileName', function (req, res, next) {
                     destination(req, file, callback) {
                       callback(
                         null,
-                        `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}`
+                        safePath('documents', dbTeam.competition._id, teamId)
                       );
                     },
                     filename(req, file, callback) {
@@ -298,18 +305,18 @@ publicRouter.post('/files/:teamId/:token/:fileName', function (req, res, next) {
                     });
                     const ft = mime.getType(originalname);
 
-                    if (ft.includes('video')) {
-                      const filepath = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/${sanitize(fileName)}`;
+                    if (ft != null && ft.includes('video')) {
+                      const filepath = safePath('documents', dbTeam.competition._id, teamId, sanitize(fileName));
                       fs.unlink(`${filepath}-thumbnail.png`, function (err) {
                         try {
                           const original = ffmpeg(
                             filepath + path.extname(originalname)
-                          );
+                          ).inputOptions(['-format_whitelist', VIDEO_FORMATS]);
 
                           original
                             .screenshots({
                               count: 1,
-                              folder: `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}`,
+                              folder: safePath('documents', dbTeam.competition._id, teamId),
                               filename: `${sanitize(fileName)}-thumbnail.png`,
                               size: '640x?',
                             })
@@ -356,7 +363,7 @@ publicRouter.post('/files/:teamId/:token/:fileName', function (req, res, next) {
     });
 });
 
-publicRouter.get('/files/:teamId/:token', function (req, res, next) {
+publicRouter.get('/files/:teamId/:token', access.team({ publicDocuments: true }), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
 
@@ -387,7 +394,7 @@ publicRouter.get('/files/:teamId/:token', function (req, res, next) {
             ACCESSLEVELS.VIEW
           )
         ) {
-          const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}`;
+          const path = safePath('documents', dbTeam.competition._id, teamId);
           fs.readdir(path, { withFileTypes: true }, (err, dirents) => {
             if (err) {
               console.error(err);
@@ -411,7 +418,7 @@ publicRouter.get('/files/:teamId/:token', function (req, res, next) {
     });
 });
 
-publicRouter.get('/files/:teamId/:token/:fileName', function (req, res, next) {
+publicRouter.get('/files/:teamId/:token/:fileName', access.team({ publicDocuments: true, competitionToken: true }), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
   const { fileName } = req.params;
@@ -454,7 +461,7 @@ publicRouter.get('/files/:teamId/:token/:fileName', function (req, res, next) {
             dbTeam.competition._id,
             ACCESSLEVELS.VIEW
           )) && (dbTeam.document.token === token || dbTeam.document.public || (question.public && token === dbTeam.competition.publicToken ))) {
-          const dataPath = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/${sanitize(fileName)}`;
+          const dataPath = safePath('documents', dbTeam.competition._id, teamId, sanitize(fileName));
           fs.stat(dataPath, (err, stat) => {
             // Handle file not found
             if (err !== null && err.code === 'ENOENT') {
@@ -535,7 +542,7 @@ publicRouter.get('/files/:teamId/:token/:fileName', function (req, res, next) {
     });
 });
 
-publicRouter.post('/files/usercontent/:teamId/:token', function (req, res, next) {
+publicRouter.post('/files/usercontent/:teamId/:token', access.team(), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
 
@@ -575,13 +582,13 @@ publicRouter.post('/files/usercontent/:teamId/:token', function (req, res, next)
           const timestamp = Math.floor(now.getTime() / 1000);
 
           if (deadline >= timestamp || userAuth) {
-            fs.mkdirs(`${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/usercontent`, (err) => {
+            fs.mkdirs(safePath('documents', dbTeam.competition._id, teamId, 'usercontent'), (err) => {
               let fileName = new Date().getTime();
               const storage = multer.diskStorage({
                 destination(req, file, callback) {
                   callback(
                     null,
-                    `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/usercontent`
+                    safePath('documents', dbTeam.competition._id, teamId, 'usercontent')
                   );
                 },
                 filename(req, file, callback) {
@@ -634,7 +641,7 @@ publicRouter.post('/files/usercontent/:teamId/:token', function (req, res, next)
     });
 });
 
-publicRouter.get('/files/usercontent/:teamId/:token/:fileName', function (req, res, next) {
+publicRouter.get('/files/usercontent/:teamId/:token/:fileName', access.team({ publicDocuments: true }), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
   const { fileName } = req.params;
@@ -666,7 +673,7 @@ publicRouter.get('/files/usercontent/:teamId/:token/:fileName', function (req, r
             ACCESSLEVELS.VIEW
           )
         ) {
-          const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/usercontent/${sanitize(fileName)}`;
+          const path = safePath('documents', dbTeam.competition._id, teamId, 'usercontent', sanitize(fileName));
           fs.stat(path, (err, stat) => {
             // Handle file not found
             if (err !== null && err.code === 'ENOENT') {
@@ -700,7 +707,7 @@ publicRouter.get('/files/usercontent/:teamId/:token/:fileName', function (req, r
 
 /// / for reviwer & admin
 
-privateRouter.get('/review/:teamId', function (req, res, next) {
+privateRouter.get('/review/:teamId', access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.VIEW, { orRole: 'INTERVIEW' }), function (req, res, next) {
   const { teamId } = req.params;
 
   if (!ObjectId.isValid(teamId)) {
@@ -749,7 +756,7 @@ privateRouter.get('/review/:teamId', function (req, res, next) {
   });
 });
 
-privateRouter.get('/review/:teamId/myComments', function (req, res, next) {
+privateRouter.get('/review/:teamId/myComments', access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.VIEW, { orRole: 'INTERVIEW' }), function (req, res, next) {
   const { teamId } = req.params;
 
   if (!ObjectId.isValid(teamId)) {
@@ -797,7 +804,7 @@ privateRouter.get('/review/:teamId/myComments', function (req, res, next) {
   });
 });
 
-adminRouter.delete('/review/:reviewId/:questionId', function (req, res, next) {
+adminRouter.delete('/review/:reviewId/:questionId', access.of(documentDb.review, 'params.reviewId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const { reviewId, questionId } = req.params;
 
   if (!ObjectId.isValid(reviewId)) {
@@ -838,7 +845,7 @@ adminRouter.delete('/review/:reviewId/:questionId', function (req, res, next) {
     });
 });
 
-adminRouter.delete('/review/:reviewId', function (req, res, next) {
+adminRouter.delete('/review/:reviewId', access.of(documentDb.review, 'params.reviewId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const { reviewId } = req.params;
 
   if (!ObjectId.isValid(reviewId)) {
@@ -877,7 +884,7 @@ adminRouter.delete('/review/:reviewId', function (req, res, next) {
     });
 });
 
-adminRouter.get('/reviews/:competition', function (req, res, next) {
+adminRouter.get('/reviews/:competition', access.competition(ACCESSLEVELS.ADMIN, 'params.competition'), function (req, res, next) {
   const { competition } = req.params;
 
   if (!ObjectId.isValid(competition)) {
@@ -910,7 +917,7 @@ adminRouter.get('/reviews/:competition', function (req, res, next) {
   }
 });
 
-privateRouter.put('/review/:teamId', function (req, res, next) {
+privateRouter.put('/review/:teamId', access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.SUPERADMIN, { orRole: 'INTERVIEW' }), function (req, res, next) {
   const { teamId } = req.params;
   const comments = req.body;
 
@@ -1009,9 +1016,11 @@ privateRouter.put('/review/:teamId', function (req, res, next) {
 
 privateRouter.post(
   '/review/files/:teamId/:fileName',
-  function (req, res, next) {
+  access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.SUPERADMIN, { orRole: 'INTERVIEW' }), function (req, res, next) {
     const { teamId } = req.params;
-    const { fileName } = req.params;
+    // The name of the file in the folder: no path of its own (../ would take the upload out of it)
+    const fileName = sanitize(req.params.fileName);
+    if (fileName == '') return res.status(400).send({ msg: 'Invalid file name' });
 
     if (!ObjectId.isValid(teamId)) {
       return next();
@@ -1031,7 +1040,7 @@ privateRouter.post(
           const userAuth = await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
           if (userAuth) {
             fs.mkdirs(
-              `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}`,
+              safePath('documents', dbTeam.competition._id, teamId, 'review', req.user.username),
               (err) => {
                 glob.glob(
                   `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}/${sanitize(fileName)}.*`,
@@ -1042,7 +1051,7 @@ privateRouter.post(
                       return;
                     }
                     fs.mkdir(
-                      `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/trash`,
+                      safePath('documents', dbTeam.competition._id, teamId, 'trash'),
                       (err) => {
                         files.forEach(function (file) {
                           fs.rename(
@@ -1068,7 +1077,7 @@ privateRouter.post(
                         destination(req, file, callback) {
                           callback(
                             null,
-                            `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}`
+                            safePath('documents', dbTeam.competition._id, teamId, 'review', req.user.username)
                           );
                         },
                         filename(req, file, callback) {
@@ -1088,19 +1097,19 @@ privateRouter.post(
                         const ft = mime.getType(originalname);
 
                         if (ft != null && ft.includes('video')) {
-                          const filepath = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}/${sanitize(fileName)}`;
+                          const filepath = safePath('documents', dbTeam.competition._id, teamId, 'review', req.user.username, sanitize(fileName));
                           fs.unlink(
                             `${filepath}-thumbnail.png`,
                             function (err) {
                               try {
                                 const original = ffmpeg(
                                   filepath + path.extname(originalname)
-                                );
+                                ).inputOptions(['-format_whitelist', VIDEO_FORMATS]);
 
                                 original
                                   .screenshots({
                                     count: 1,
-                                    folder: `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}`,
+                                    folder: safePath('documents', dbTeam.competition._id, teamId, 'review', req.user.username),
                                     filename: `${sanitize(fileName)}-thumbnail.png`,
                                     size: '640x?',
                                   })
@@ -1137,7 +1146,7 @@ privateRouter.post(
   }
 );
 
-privateRouter.get('/review/files/:teamId', function (req, res, next) {
+privateRouter.get('/review/files/:teamId', access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.VIEW, { orRole: 'INTERVIEW' }), function (req, res, next) {
   const { teamId } = req.params;
 
   if (!ObjectId.isValid(teamId)) {
@@ -1158,11 +1167,11 @@ privateRouter.get('/review/files/:teamId', function (req, res, next) {
         if (
           auth.authCompetition(req.user, dbTeam.competition, ACCESSLEVELS.VIEW) || await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
         ) {
-          const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review`;
+          const path = safePath('documents', dbTeam.competition._id, teamId, 'review');
 
           const files = read(path);
           for (let i = 0; i < files.length; i++) {
-            files[i] = files[i].replace('\\', '/');
+            files[i] = files[i].replace(/\\/g, '/');
           }
           res.send(files);
         } else {
@@ -1176,7 +1185,7 @@ privateRouter.get('/review/files/:teamId', function (req, res, next) {
 
 privateRouter.get(
   '/review/files/:teamId/:userName/:fileName',
-  function (req, res, next) {
+  access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.VIEW, { orRole: 'INTERVIEW' }), function (req, res, next) {
     const { teamId } = req.params;
     const { userName } = req.params;
     const { fileName } = req.params;
@@ -1203,7 +1212,7 @@ privateRouter.get(
               ACCESSLEVELS.VIEW
             ) || await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
           ) {
-            const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${userName}/${sanitize(fileName)}`;
+            const path = safePath('documents', dbTeam.competition._id, teamId, 'review', sanitize(userName), sanitize(fileName));
             fs.stat(path, (err, stat) => {
               // Handle file not found
               if (err !== null && err.code === 'ENOENT') {
@@ -1281,7 +1290,7 @@ privateRouter.get(
 
 privateRouter.post(
   '/review/files/usercontent/:teamId',
-  function (req, res, next) {
+  access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.SUPERADMIN, { orRole: 'INTERVIEW' }), function (req, res, next) {
     const { teamId } = req.params;
 
     if (!ObjectId.isValid(teamId)) {
@@ -1302,14 +1311,14 @@ privateRouter.post(
           const userAuth =  await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
           if (userAuth) {
             fs.mkdirs(
-              `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}/usercontent`,
+              safePath('documents', dbTeam.competition._id, teamId, 'review', req.user.username, 'usercontent'),
               (err) => {
                 let fileName = new Date().getTime();
                 const storage = multer.diskStorage({
                   destination(req, file, callback) {
                     callback(
                       null,
-                      `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}/usercontent`
+                      safePath('documents', dbTeam.competition._id, teamId, 'review', req.user.username, 'usercontent')
                     );
                   },
                   filename(req, file, callback) {
@@ -1349,7 +1358,7 @@ privateRouter.post(
 
 privateRouter.get(
   '/review/files/usercontent/:teamId/:userName/:fileName',
-  function (req, res, next) {
+  access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.VIEW, { orRole: 'INTERVIEW' }), function (req, res, next) {
     const { teamId } = req.params;
     const { userName } = req.params;
     const { fileName } = req.params;
@@ -1376,7 +1385,7 @@ privateRouter.get(
               ACCESSLEVELS.VIEW
             ) || await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
           ) {
-            const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${userName}/usercontent/${sanitize(fileName)}`;
+            const path = safePath('documents', dbTeam.competition._id, teamId, 'review', sanitize(userName), 'usercontent', sanitize(fileName));
             fs.stat(path, (err, stat) => {
               // Handle file not found
               if (err !== null && err.code === 'ENOENT') {
@@ -1412,9 +1421,11 @@ privateRouter.get(
 // Inspection
 privateRouter.post(
   '/inspection/files/:teamId/:fileName',
-  function (req, res, next) {
+  access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.JUDGE), function (req, res, next) {
     const { teamId } = req.params;
-    const { fileName } = req.params;
+    // The name of the file in the folder: no path of its own (../ would take the upload out of it)
+    const fileName = sanitize(req.params.fileName);
+    if (fileName == '') return res.status(400).send({ msg: 'Invalid file name' });
 
     if (!ObjectId.isValid(teamId)) {
       return next();
@@ -1438,7 +1449,7 @@ privateRouter.post(
           );
           if (userAuth) {
             fs.mkdirs(
-              `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/inspection`,
+              safePath('documents', dbTeam.competition._id, teamId, 'review', 'inspection'),
               (err) => {
                 glob.glob(
                   `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/inspection/${sanitize(fileName)}.*`,
@@ -1449,7 +1460,7 @@ privateRouter.post(
                       return;
                     }
                     fs.mkdir(
-                      `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/trash`,
+                      safePath('documents', dbTeam.competition._id, teamId, 'trash'),
                       (err) => {
                         files.forEach(function (file) {
                           fs.rename(
@@ -1475,7 +1486,7 @@ privateRouter.post(
                         destination(req, file, callback) {
                           callback(
                             null,
-                            `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/inspection`
+                            safePath('documents', dbTeam.competition._id, teamId, 'review', 'inspection')
                           );
                         },
                         filename(req, file, callback) {
@@ -1510,7 +1521,7 @@ privateRouter.post(
 
 privateRouter.get(
   '/inspection/files/:teamId/:fileName',
-  function (req, res, next) {
+  access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.JUDGE), function (req, res, next) {
     const { teamId } = req.params;
     const { fileName } = req.params;
 
@@ -1555,7 +1566,7 @@ privateRouter.get(
                   stream.pipe(res);
                 } else {
                   // Handle file not found
-                  const path = `${__dirname}/../../public/images/NoImage.png`;
+                  const path = safePath('public', 'images', 'NoImage.png');
                   const stream = fs.createReadStream(path)
                   stream.on('error', (error) => {
                       res.statusCode = 500
@@ -1582,8 +1593,8 @@ privateRouter.get(
 );
 
 // Templates
-adminRouter.get('/templates/documentForm', function (req, res, next) {
-  const dir_path = `${__dirname}/../../templates/documentForm/`;
+adminRouter.get('/templates/documentForm', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
+  const dir_path = `${safePath('templates', 'documentForm')}/`;
   fs.readdir(dir_path, { withFileTypes: true }, (err, dirents) => {
     if (err) {
       console.error(err);
@@ -1604,10 +1615,10 @@ adminRouter.get('/templates/documentForm', function (req, res, next) {
   });
 });
 
-adminRouter.get('/templates/documentForm/:fileName', function (req, res, next) {
+adminRouter.get('/templates/documentForm/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
-  const dir_path = `${__dirname}/../../templates/documentForm/${sanitize(fileName)}`;
+  const dir_path = safePath('templates', 'documentForm', sanitize(fileName));
   fs.stat(dir_path, (err, stat) => {
     // Handle file not found
     if (err !== null && err.code === 'ENOENT') {
@@ -1632,8 +1643,8 @@ adminRouter.get('/templates/documentForm/:fileName', function (req, res, next) {
   });
 });
 
-adminRouter.get('/templates/reviewForm', function (req, res, next) {
-  const dir_path = `${__dirname}/../../templates/reviewForm/`;
+adminRouter.get('/templates/reviewForm', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
+  const dir_path = `${safePath('templates', 'reviewForm')}/`;
   fs.readdir(dir_path, { withFileTypes: true }, (err, dirents) => {
     if (err) {
       console.error(err);
@@ -1654,10 +1665,10 @@ adminRouter.get('/templates/reviewForm', function (req, res, next) {
   });
 });
 
-adminRouter.get('/templates/reviewForm/:fileName', function (req, res, next) {
+adminRouter.get('/templates/reviewForm/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
-  const dir_path = `${__dirname}/../../templates/reviewForm/${sanitize(fileName)}`;
+  const dir_path = safePath('templates', 'reviewForm', sanitize(fileName));
   fs.stat(dir_path, (err, stat) => {
     // Handle file not found
     if (err !== null && err.code === 'ENOENT') {
@@ -1683,7 +1694,7 @@ adminRouter.get('/templates/reviewForm/:fileName', function (req, res, next) {
 });
 
 privateRouter.get('/map/:fileName',
-  function (req, res, next) {
+  access.loggedIn('the pictures of the maps made for the review forms'), function (req, res, next) {
     const { fileName } = req.params;
 
     glob.glob(
@@ -1705,7 +1716,7 @@ privateRouter.get('/map/:fileName',
           stream.pipe(res);
         } else {
           // Handle file not found
-          const path = `${__dirname}/../../public/images/NoImage.png`;
+          const path = safePath('public', 'images', 'NoImage.png');
           const stream = fs.createReadStream(path)
           stream.on('error', (error) => {
               res.statusCode = 500
@@ -1837,7 +1848,7 @@ async function extractReviewAssignInfo(data, teamData, userId) {
   return assignResult;
 }
 
-privateRouter.get('/:competitionId/assigned', async function (req, res, next) {
+privateRouter.get('/:competitionId/assigned', access.competition(ACCESSLEVELS.SUPERADMIN, 'params.competitionId', { orRole: 'INTERVIEW' }), async function (req, res, next) {
   const { competitionId } = req.params;
   if (!ObjectId.isValid(competitionId)) {
     return next();
@@ -1885,7 +1896,7 @@ privateRouter.get('/:competitionId/assigned', async function (req, res, next) {
   }
 });
 
-adminRouter.get('/:competitionId/reviewStatus', async function (req, res, next) {
+adminRouter.get('/:competitionId/reviewStatus', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), async function (req, res, next) {
   const { competitionId } = req.params;
   const { sendReminder } = req.query;
 
@@ -1959,7 +1970,7 @@ adminRouter.get('/:competitionId/reviewStatus', async function (req, res, next) 
                           let pendingList = "";
                           let completedList = "";
                           for (let team of Object.values(assignResult).flat()) {
-                            let txt = `<li>[${team.league}] ${team.code} ${team.name} &nbsp;&nbsp;&nbsp;| ${team.reviewItems.join(" / ")} | Review Progress: ${team.answeredQuestionsNum}/${team.assienedQuestionsNum}</li>`;
+                            let txt = `<li>[${escape(team.league)}] ${escape(team.code)} ${escape(team.name)} &nbsp;&nbsp;&nbsp;| ${escape(team.reviewItems.join(" / "))} | Review Progress: ${team.answeredQuestionsNum}/${team.assienedQuestionsNum}</li>`;
                             if (team.assienedQuestionsNum != team.answeredQuestionsNum) {
                               pendingList += txt;
                             } else {
@@ -1967,15 +1978,15 @@ adminRouter.get('/:competitionId/reviewStatus', async function (req, res, next) 
                             }
                           }
                           const variables = {
-                            userName: user.userName,
-                            competitionName: data.name,
+                            userName: escape(user.userName),
+                            competitionName: escape(data.name),
                             evaluationHome: `${process.env.CMS_PROTOCOL}://${process.env.CMS_HOSTNAME}/document/assigned/${competitionId}`,
                             pendingList: `<ul>${pendingList}</ul>`,
                             completedList: `<ul>${completedList}</ul>`
                           };
                           const subject = "Document Evaluation Reminder & Status Update";
                           const templateName = "_Document Evaluation Reminder and Status Update";
-                          sendMail(subject, templateName, "", variables, user.email);
+                          sendMail(subject, templateName, "", variables, user.email, STAFF);
                         }
                       }
                       

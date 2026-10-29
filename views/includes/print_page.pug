@@ -1,0 +1,42 @@
+//- Building blocks shared by the admin print pages (run list, ranking).
+//- Styles live in /stylesheets/admin/print_page.css, the Excel export in /javascripts/admin/xlsx_export.js.
+
+//- Sticky toolbar: back link, item count, Excel export of `tableSelector` and Print
+mixin printToolbar(backHref, count, countLabelKey, tableSelector)
+  .print-toolbar.no_print
+    .print-toolbar-title
+      a.btn.btn-light.btn-sm(href=backHref title="{{'admin.print.back' | translate}}")
+        i.fas.fa-arrow-left
+      div
+        .print-toolbar-sub {{competition.name}}
+        h1 {{league.name}}
+    .print-toolbar-actions
+      span.run-count
+        b= `{{(${count}) || 0}}`
+        = ` {{'${countLabelKey}' | translate}}`
+      button.btn.btn-outline-success(type='button' onclick=`exportTableXlsx(document.querySelector('${tableSelector}'))` ng-disabled=`!(${count})`)
+        i.fas.fa-file-excel
+        |  {{'admin.print.excel' | translate}}
+      button.btn.btn-primary(type='button' onclick='window.print()' title="{{'admin.print.chromeHint' | translate}}")
+        i.fas.fa-print
+        |  {{"common.print" | translate}}
+
+//- Toggle chip bound to a scope flag; `after` runs after the flag flips
+mixin chip(model, label, after)
+  button.chip(type='button' ng-class=`{active: ${model}}` ng-click=`${model} = !${model}${after ? '; ' + after : ''}`)&attributes(attributes)
+    i.fas.fa-check
+    = label
+
+//- Sheet header, used as the first thead row so print repeats it on every page
+mixin sheetHeader(title)
+  tr.sheet-header-row
+    th(colspan='100')
+      .ranking-header
+        .ranking-title
+          h3 {{competition.name}}
+          h2= `{{${title}}}`
+        img.competition-logo(
+          ng-if="competition.logo"
+          ng-src="{{competition.logo}}"
+          alt="Competition Logo"
+        )

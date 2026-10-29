@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'AdminBackup'
@@ -7,77 +7,89 @@ block vars
 append scripts
   script.
     var competitionId = "#{competition_id}"
-  script(src='/javascripts/admin/competition_backup.js')
+  script(src='/javascripts/admin/competition_backup.js?v=' + assetVersion)
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-    span.breadcrumb-item.active Backup
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+  span.breadcrumb-item.active Backup
 
+block hero_title
+  | {{competition.name}}
 
-block content
+block hero_subtitle
+  | {{"admin.backup.title" | translate}}
+
+block hero_actions
+  if user.superDuperAdmin
+    button.btn-action-icon(type='button' ng-click="open('/admin/queues/queue/backup')" uib-tooltip='{{"admin.backup.queue" | translate}}' tooltip-placement="bottom")
+      i.fas.fa-bullseye
+
+block main_content
   .row
-    .col-md-1
-    .col-md-10
-      h1 {{"admin.backup.title" | translate}}
-      p {{"admin.backup.description" | translate}}
-      ul
-        li {{"admin.backup.item1" | translate}}
-        li {{"admin.backup.item2" | translate}}
-        li {{"admin.backup.item3" | translate}}
-        li {{"admin.backup.item4" | translate}}
-        li {{"admin.backup.item5" | translate}}
-        li {{"admin.backup.item6" | translate}}
-        li {{"admin.backup.item7" | translate}}
-        li {{"admin.backup.item8" | translate}}
-        li {{"admin.backup.item9" | translate}}
-        li {{"admin.backup.item10" | translate}}
-        li {{"admin.backup.item11" | translate}}
-        li {{"admin.backup.item12" | translate}}
-      p {{"admin.backup.notInclude" | translate}}
-      br
-      .text-center(ng-if="!job.state")
-        button.btn.btn-info.btn-lg(ng-click='exeBackup(false)' type="button" style="margin: 0 5px;")
-          i.fas.fa-archive &nbsp;
-          | {{"admin.backup.exe" | translate}}
-        button.btn.btn-success.btn-lg(ng-click='exeBackup(true)' type="button")
-          i.fas.fa-archive &nbsp;
-          | FULL {{"admin.backup.exe" | translate}}
-      .text-center
-        h1(ng-if="job.state")
-          span.badge(ng-class="statusColour(job.state)")
-            i.fas(ng-class="statusIcon(job.state)")
-            | &nbsp;{{firstUpper(job.state)}}
-        .flex-fill(style="margin:10px 0px 0px 10px;", ng-if="job.progress > 0")
-          .progress
-            .progress-bar(role='progressbar' style='width: {{job.progress}}%;' aria-valuenow='{{job.progress}}' aria-valuemin='0' aria-valuemax='100') {{job.progress}}%
-        div(style="color:#e74c3c;margin-top:10px;", ng-if="job.reason")
-          span {{job.reason}}
-      br
-      hr
-      .row 
-        .col-md-8
-          h2 {{"admin.backup.backedup" | translate}}
-        if user.superDuperAdmin
-          .col-md-4(style="text-align:right;")
-            button.btn.btn-danger(type='button', ng-click="open('/admin/queues/queue/backup')" style="margin: 5px;")
-                i.fas.fa-bullseye &nbsp;
-                | {{"admin.backup.queue" | translate}}
-      table.custom
-        thead
-            tr
-              th {{"admin.backup.time" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
-            tr(ng-repeat='back in backedup | orderBy: "time"')
-              td
-                i.fas.fa-sync(ng-show="back.auto", style="margin-right: 10px;")
-                span.badge.badge-success(ng-show="back.full", style="margin-right: 10px;") FULL
-                a(ng-bind='time(back.time)')
-              td
-                button.btn.btn-primary.btn-sm(type='button', ng-click="download(back.name)", style="margin:0 5px;")
-                  i.fas.fa-download
-                button.btn.btn-danger.btn-sm(type='button', ng-click='delete(back.name)', style="margin:0 5px;")
-                  i.fas.fa-trash-alt
-      br
+    .col-lg-7
+      .modern-card.mb-4
+        .modern-card-header
+          i.fas.fa-archive.mr-2
+          | {{"admin.backup.title" | translate}}
+        .modern-card-body
+          p {{"admin.backup.description" | translate}}
+          ul.text-muted.small
+            li {{"admin.backup.item1" | translate}}
+            li {{"admin.backup.item2" | translate}}
+            li {{"admin.backup.item3" | translate}}
+            li {{"admin.backup.item4" | translate}}
+            li {{"admin.backup.item5" | translate}}
+            li {{"admin.backup.item6" | translate}}
+            li {{"admin.backup.item7" | translate}}
+            li {{"admin.backup.item8" | translate}}
+            li {{"admin.backup.item9" | translate}}
+            li {{"admin.backup.item10" | translate}}
+            li {{"admin.backup.item11" | translate}}
+            li {{"admin.backup.item12" | translate}}
+          p.small.text-muted {{"admin.backup.notInclude" | translate}}
+
+          .d-flex.flex-wrap.justify-content-center.mt-4(ng-if="!job.state" style="gap: 0.75rem;")
+            button.btn.btn-premium-dark(ng-click='exeBackup(false)' type="button")
+              i.fas.fa-archive.mr-2
+              | {{"admin.backup.exe" | translate}}
+            button.btn.btn-premium-primary(ng-click='exeBackup(true)' type="button")
+              i.fas.fa-archive.mr-2
+              | FULL {{"admin.backup.exe" | translate}}
+
+          .text-center.mt-4(ng-if="job.state")
+            h4
+              span.badge.badge-pill(ng-class="statusColour(job.state)")
+                i.fas.mr-1(ng-class="statusIcon(job.state)")
+                | {{firstUpper(job.state)}}
+            .progress.mt-3(ng-if="job.progress > 0")
+              .progress-bar(role='progressbar' style='width: {{job.progress}}%;' aria-valuenow='{{job.progress}}' aria-valuemin='0' aria-valuemax='100') {{job.progress}}%
+            .text-danger.mt-2(ng-if="job.reason") {{job.reason}}
+
+    .col-lg-5
+      .modern-card.mb-4
+        .modern-card-header
+          i.fas.fa-history.mr-2
+          | {{"admin.backup.backedup" | translate}}
+        .modern-card-body.p-0
+          .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+            table.table-modern.table-auto
+              thead
+                tr
+                  th {{"admin.backup.time" | translate}}
+                  th(style="width: 140px;") {{"common.operation" | translate}}
+              tbody
+                tr(ng-repeat='back in backedup | orderBy: "time"')
+                  td
+                    i.fas.fa-sync.mr-2.text-muted(ng-show="back.auto")
+                    span.badge.badge-success.mr-2(ng-show="back.full") FULL
+                    span(ng-bind='time(back.time)')
+                  td
+                    .btn-table-group
+                      .btn-table-action.primary(ng-click="download(back.name)" uib-tooltip='Download')
+                        i.fas.fa-download
+                      .btn-table-action.danger(ng-click='delete(back.name)' uib-tooltip='{{"common.delete" | translate}}')
+                        i.fas.fa-trash-alt

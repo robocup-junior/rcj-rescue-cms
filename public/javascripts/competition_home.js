@@ -5,9 +5,12 @@ app.controller("CompetitionHomeController", ['$scope', '$http', '$translate', fu
     $http.get("/api/competitions/" + competitionId).then(function (response) {
         $scope.competition = response.data
     })
-    $http.get("/api/signage").then(function (response) {
-        $scope.signs = response.data
-    })
+    // Signage is only listed for logged-in users
+    if (loggedIn) {
+        $http.get("/api/signage").then(function (response) {
+            $scope.signs = response.data
+        })
+    }
 
     $http.get("/api/teams/leagues/all/" + competitionId).then(function (response) {
         $scope.leagues = response.data.filter(l => SUPPORTED_LEAGUE_TYPES.includes(l.type));

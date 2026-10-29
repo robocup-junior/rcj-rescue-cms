@@ -111,10 +111,11 @@ var userSchema = new Schema({
 userSchema.pre('save', function (next) {
   if (this.isNew || this.isModified("password")) {
     var user = this;
-    crypto.generateHashWithSalt(user.password, function (err, hashedString, saltUsed) {
-      user.salt = saltUsed;
+    crypto.hashPassword(user.password, function (err, hashedString) {
+      if (err) return next(err);
+      // The salt is in the hash
+      user.salt = undefined;
       user.password = hashedString;
-      
       return next();
     })
   } else {
@@ -132,20 +133,8 @@ userSchema.pre('save', function (next) {
  * @param {updatePasswordCb} cb - The callback function
  */
 userSchema.methods.updatePassword = function (password, cb) {
-  var user = this;
-  
-  crypto.generateHashWithSalt(password, function (err, hashedString, saltUsed) {
-    console.log(err);
-    if (err) {
-      return cb(err);
-    }
-    
-    user.salt = saltUsed;
-    user.password = hashedString;
-    user.save();
-    
-    return cb(null);
-  })
+  this.password = password;
+  this.save(cb);
 }
 
 /**
@@ -157,8 +146,18 @@ userSchema.methods.updatePassword = function (password, cb) {
  * @param {comparePassword} cb - The callback function
  */
 userSchema.methods.comparePassword = function (candidatePassword, cb) {
-  crypto.compareHash(this.password, candidatePassword, this.salt, function (res) {
-    return cb(res);
+  const user = this;
+  crypto.verifyPassword(user.password, user.salt, candidatePassword, function (match, old) {
+    // A password kept as a hash of before is hashed anew, now that it is known
+    if (match && old) {
+      user.password = candidatePassword;
+      user.save(function (err) {
+        if (err) logger.error(err);
+        return cb(true);
+      });
+      return;
+    }
+    return cb(match);
   })
 }
 
@@ -178,9 +177,13 @@ var DefaultUser = new User({
   email: process.env.dEmail
 });
 
+// The password published with the app in process.env: it makes the account the first time, to be
+// changed then; it never sets the password of the account again
+const PUBLISHED_PASSWORD = 'adminpass';
+
 User.findOne({username: DefaultUser.username}, function (err, dbUser) {
   if (dbUser) {
-    if (DefaultUser.password != null) {
+    if (DefaultUser.password != null && DefaultUser.password !== PUBLISHED_PASSWORD) {
       dbUser.password = DefaultUser.password
     }
     dbUser.admin = DefaultUser.admin
@@ -195,6 +198,9 @@ User.findOne({username: DefaultUser.username}, function (err, dbUser) {
       }
     })
   } else {
+    if (DefaultUser.password === PUBLISHED_PASSWORD) {
+      logger.warn(`The account ${DefaultUser.username} is made with the password published with the app: change it on its page`)
+    }
     DefaultUser.save(function (err) {
       if (err) {
         logger.error(err)

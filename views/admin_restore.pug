@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends includes/layout
+extends includes/modern_layout
 
 block vars
   - var ngAppDef = 'AdminRestore'
@@ -7,44 +7,45 @@ block vars
 append scripts
   script.
     var competitionId = "#{competition_id}"
-  script(src='/javascripts/admin_restore.js')
-  script(src="/components/bootstrap-fileinput/js/fileinput.min.js")
-  script(src="/components/bootstrap-fileinput/themes/fa/theme.min.js")
-  script(src="/components/bootstrap-fileinput/js/locales/ja.js")
-  script(src="/components/ng-file-upload/ng-file-upload.min.js")
+  script(src='/javascripts/admin_restore.js?v=' + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/fileinput.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/themes/fa5/theme.min.js?v=" + assetVersion)
+  script(src="/components/bootstrap-fileinput/js/locales/ja.js?v=" + assetVersion)
+  script(src="/components/ng-file-upload/ng-file-upload.min.js?v=" + assetVersion)
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    span.breadcrumb-item.active Restore
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  span.breadcrumb-item.active Restore
 
+block hero_title
+  | {{"admin.restore.title" | translate}}
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{"admin.restore.title" | translate}}
+block hero_subtitle
+  | Admin
+
+block main_content
+  .modern-card
+    .modern-card-header
+      i.fas.fa-file-upload.mr-2
+      | {{"admin.restore.title" | translate}}
+    .modern-card-body
       p {{"admin.restore.description" | translate}}
-      br
-      button(class='btn btn-success btn-lg btn-block' type='file' ngf-select='upload($file, $invalidFiles)' accept='*' ngf-max-size='5000MB' ng-hide="job")
+      button.btn.btn-premium-primary.btn-block.py-4(type='file' ngf-select='upload($file, $invalidFiles)' accept='*' ngf-max-size='5000MB' ng-hide="job")
         i.fas.fa-2x.fa-file-upload
-        br
-        span {{'cabinet.upload' | translate}}
-        div(style="color:#e74c3c;margin-left:10px;", ng-if="errFile.$error")
-            span ERROR: {{errFile.$error}}
-        .flex-fill(style="margin:10px 0px 0px 10px;", ng-show="f.progress > 0")
-            .progress
-                .progress-bar(role='progressbar' style='width: {{f.progress}}%;' aria-valuenow='{{f.progress}}' aria-valuemin='0' aria-valuemax='100') {{f.progress}}%
-        div(style="color:#e74c3c;margin-top:10px;", ng-if="errorMsg")
-            span {{errorMsg}}
-      hr
-      .text-center(ng-if="job.state")
-        h1
-          span.badge(ng-class="statusColour(job.state)")
-            i.fas(ng-class="statusIcon(job.state)")
-            | &nbsp;{{firstUpper(job.state)}}
-        .flex-fill(style="margin:10px 0px 0px 10px;")
-          .progress
-            .progress-bar(role='progressbar' style='width: {{job.progress}}%;' aria-valuenow='{{job.progress}}' aria-valuemin='0' aria-valuemax='100') {{job.progress}}%
-      div(style="color:#e74c3c;margin-top:10px;", ng-if="job.reason")
-        span {{job.reason}}
+        div.mt-2 {{'cabinet.upload' | translate}}
+      .text-danger.mt-2(ng-if="errFile.$error") ERROR: {{errFile.$error}}
+      .progress.mt-3(ng-show="f.progress > 0")
+        .progress-bar(role='progressbar' style='width: {{f.progress}}%;' aria-valuenow='{{f.progress}}' aria-valuemin='0' aria-valuemax='100') {{f.progress}}%
+      .text-danger.mt-2(ng-if="errorMsg") {{errorMsg}}
+
+      .text-center.mt-4(ng-if="job.state")
+        h4
+          span.badge.badge-pill(ng-class="statusColour(job.state)")
+            i.fas.mr-1(ng-class="statusIcon(job.state)")
+            | {{firstUpper(job.state)}}
+        .progress.mt-3
+          .progress-bar(role='progressbar' style='width: {{job.progress}}%;' aria-valuenow='{{job.progress}}' aria-valuemin='0' aria-valuemax='100') {{job.progress}}%
+      .text-danger.mt-2(ng-if="job.reason") {{job.reason}}

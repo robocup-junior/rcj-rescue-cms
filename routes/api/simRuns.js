@@ -12,6 +12,7 @@ const competitiondb = require('../../models/competition');
 const initRunData = require('../../helper/initRunData');
 const { leagues } = require('../../leagues');
 const Decimal = require('decimal.js');
+const access = require('../../helper/access');
 
 let socketIo;
 
@@ -25,7 +26,7 @@ module.exports.connectSocketIo = function (io) {
  * @apiGroup Run
  * @apiVersion 1.0.1
  */
-publicRouter.get('/competition/:competitionId', function (req, res, next) {
+publicRouter.get('/competition/:competitionId', access.anyone('shown as their status and the ranking settings let them be, by the handler'), function (req, res, next) {
   const competition = req.params.competitionId;
   const normalized = req.query.normalized;
 
@@ -93,7 +94,7 @@ publicRouter.get('/competition/:competitionId', function (req, res, next) {
 
         // Apply score adjustment
         if (run.adjustment != null) {
-          run.score = new Decimal(run.score).times((run.adjustment + 100) / 100);
+          run.score = new Decimal(run.score).times((run.adjustment + 100) / 100).toNumber();
         }
       })
 
@@ -132,7 +133,7 @@ function getMaxScoreWithCache(runs, league, normalizationGroup, cache) {
  * @apiGroup Run
  * @apiVersion 1.0.0
  */
-publicRouter.get('/:runid', async function (req, res, next) {
+publicRouter.get('/:runid', access.anyone('shown as their status and the ranking settings let them be, by the handler'), async function (req, res, next) {
   const id = req.params.runid;
   const normalized = req.query.normalized
 
@@ -192,10 +193,13 @@ publicRouter.get('/:runid', async function (req, res, next) {
       }
       return res.status(200).send(dbRun);
     }
+    return res.status(404).send({
+      msg: 'Run not found',
+    });
   });
 });
 
-adminRouter.put('/bulk', function (req, res) {
+adminRouter.put('/bulk', access.of(simRun, 'body[]._id', ACCESSLEVELS.ADMIN), function (req, res) {
   const updates = req.body;
   const totalCount = updates.length;
   let processed = 0;
@@ -258,7 +262,7 @@ adminRouter.put('/bulk', function (req, res) {
  * @apiGroup Run
  * @apiVersion 1.0.0
  */
-privateRouter.put('/:runid', function (req, res, next) {
+privateRouter.put('/:runid', access.of(simRun, 'params.runid', ACCESSLEVELS.JUDGE), function (req, res, next) {
   const id = req.params.runid;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -361,7 +365,8 @@ privateRouter.put('/:runid', function (req, res, next) {
             socketIo.sockets
               .in(`runs/simulation/${dbRun.competition._id}`)
               .emit('changed');
-            socketIo.sockets.in(`runs/${dbRun._id}`).emit('data', dbRun);
+            // Only that it changed: anyone may be in the room, the run is had as they may see it (GET)
+              socketIo.sockets.in(`runs/${dbRun._id}`).emit('changed');
             socketIo.sockets
               .in(`fields/${dbRun.field}`)
               .emit('data', { newRun: dbRun._id });
@@ -386,7 +391,7 @@ privateRouter.put('/:runid', function (req, res, next) {
  * @apiGroup Run
  * @apiVersion 1.0.0
  */
-adminRouter.delete('/:runids', function (req, res) {
+adminRouter.delete('/:runids', access.of(simRun, 'params.runids', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const ids = req.params.runids.split(',');
   if (ids.some(id => !ObjectId.isValid(id))) {
     return next();
@@ -397,7 +402,7 @@ adminRouter.delete('/:runids', function (req, res) {
     .exec(function (err, dbRun) {
       if (err) {
         logger.error(err);
-        res.status(400).send({
+        return res.status(400).send({
           msg: 'Could not get run',
           err: err.message,
         });
@@ -409,6 +414,10 @@ adminRouter.delete('/:runids', function (req, res) {
             msg: 'You have no authority to access this api',
           });
         }
+      } else {
+        return res.status(404).send({
+          msg: 'Run not found',
+        });
       }
       simRun.deleteMany(
         {
@@ -438,7 +447,7 @@ adminRouter.delete('/:runids', function (req, res) {
  * @apiGroup Run
  * @apiVersion 1.0.0
  */
-adminRouter.post('/', function (req, res) {
+adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition'), access.of(competitiondb.team, 'body.team', ACCESSLEVELS.ADMIN), access.of(competitiondb.round, 'body.round', ACCESSLEVELS.ADMIN), access.of(competitiondb.field, 'body.field', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const run = req.body;
   if (!ObjectId.isValid(run.competition)) {
     return next();
@@ -452,6 +461,7 @@ adminRouter.post('/', function (req, res) {
   if (!ObjectId.isValid(run.field)) {
     return next();
   }
+  if (!auth.authCompetition(req.user, run.competition, ACCESSLEVELS.ADMIN)) return res.status(401).send(auth.NO_AUTHORITY);
   new simRun({
     competition: run.competition,
     round: run.round,
