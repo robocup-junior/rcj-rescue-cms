@@ -15,6 +15,7 @@ const logger = require('../../config/logger').mainLogger;
 const surveyDb = require('../../models/survey');
 const competitiondb = require('../../models/competition');
 let fs = require('fs-extra');
+const sanitize = require('sanitize-filename');
 const gracefulFs = require('graceful-fs');
 fs = gracefulFs.gracefulify(fs);
 const multer = require('multer');
@@ -910,7 +911,7 @@ publicRouter.get('/answer/:teamId/:token/:survId/file/:questionId', function (re
             let questionAnswer = dbAnswer.answer.find(a => a.questionId == questionId);
             if (questionAnswer) {
               let originalFileName = questionAnswer.answer;
-              let path = `${__dirname}/../../survey/${dbTeam.competition}/${survId}/${dbTeam._id}/${questionId}`;
+              let path = `${__dirname}/../../survey/${dbTeam.competition}/${survId}/${dbTeam._id}/${sanitize(questionId)}`;
               fs.stat(path, (err, stat) => {
                 // Handle file not found
                 if (err !== null) {

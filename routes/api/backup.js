@@ -7,6 +7,7 @@ const express = require('express');
 const adminRouter = express.Router();
 const multer = require('multer');
 const fs = require('fs-extra');
+const sanitize = require('sanitize-filename');
 const glob = require('glob');
 const path = require('path');
 const { ObjectId } = require('mongoose').Types;
@@ -106,7 +107,7 @@ adminRouter.get('/archive/:competitionId/:fileName', function (req, res, next) {
   }
 
   if (auth.authCompetition(req.user,competitionId,ACCESSLEVELS.ADMIN)){ // Admin check
-    let path = `${__dirname}/../../backup/${competitionId}/${fileName}`;
+    let path = `${__dirname}/../../backup/${competitionId}/${sanitize(fileName)}`;
     fs.stat(path, (err, stat) => {
       // Handle file not found
       if (err !== null) {
@@ -146,7 +147,7 @@ adminRouter.delete('/archive/:competitionId/:fileName', function (req, res, next
   }
 
   if (auth.authCompetition(req.user,competitionId,ACCESSLEVELS.ADMIN)){ // Admin check
-    let path = `${__dirname}/../../backup/${competitionId}/${fileName}`;
+    let path = `${__dirname}/../../backup/${competitionId}/${sanitize(fileName)}`;
     fs.unlink(path, (err) => {
       if (err){
         return res.status(500).send({

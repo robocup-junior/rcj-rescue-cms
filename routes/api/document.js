@@ -1203,7 +1203,7 @@ privateRouter.get(
               ACCESSLEVELS.VIEW
             ) || await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
           ) {
-            const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${userName}/${sanitize(fileName)}`;
+            const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${sanitize(userName)}/${sanitize(fileName)}`;
             fs.stat(path, (err, stat) => {
               // Handle file not found
               if (err !== null && err.code === 'ENOENT') {
@@ -1376,7 +1376,7 @@ privateRouter.get(
               ACCESSLEVELS.VIEW
             ) || await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
           ) {
-            const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${userName}/usercontent/${sanitize(fileName)}`;
+            const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${sanitize(userName)}/usercontent/${sanitize(fileName)}`;
             fs.stat(path, (err, stat) => {
               // Handle file not found
               if (err !== null && err.code === 'ENOENT') {

@@ -11,6 +11,7 @@ const { ObjectId } = require('mongoose').Types;
 const multer = require('multer');
 const auth = require('../../helper/authLevels');
 var fs = require('fs-extra');
+const sanitize = require('sanitize-filename');
 const gracefulFs = require('graceful-fs');
 
 var fs = gracefulFs.gracefulify(fs);
@@ -98,7 +99,7 @@ publicRouter.get('/:competitionId/files/:teamId/:token/:folder', function (req, 
   if (ObjectId.isValid(folder)) {
     isTeam = true;
   }else{
-    if (LEAGUES.filter(function (elm) {return elm.indexOf(folder) != -1;}).length == 0) {
+    if (!LEAGUES.includes(folder)) {
       return next();
     }
   }
@@ -130,7 +131,7 @@ publicRouter.get('/:competitionId/files/:teamId/:token/:folder', function (req, 
 });
 
 function returnFile(req, res, competition, folder, fileName){
-  let path = `${__dirname}/../../cabinet/${competition}/${folder}/${fileName}`;
+  let path = `${__dirname}/../../cabinet/${competition}/${folder}/${sanitize(fileName)}`;
   fs.stat(path, (err, stat) => {
     // Handle file not found
     if (err !== null) {
@@ -216,7 +217,7 @@ publicRouter.get('/:competitionId/file/:teamId/:token/:folder/:file', function (
   if (ObjectId.isValid(folder)) {
     isTeam = true;
   }else{
-    if (LEAGUES.filter(function (elm) {return elm.indexOf(folder) != -1;}).length == 0) {
+    if (!LEAGUES.includes(folder)) {
       return next();
     }
   }
@@ -258,7 +259,7 @@ adminRouter.post('/:competitionId/upload/:folder', function (req, res, next) {
   if (ObjectId.isValid(folder)) {
     isTeam = true;
   }else{
-    if (LEAGUES.filter(function (elm) {return elm.indexOf(folder) != -1;}).length == 0) {
+    if (!LEAGUES.includes(folder)) {
       return next();
     }
   }
@@ -308,13 +309,13 @@ adminRouter.delete('/:competitionId/file/:folder/:file', function (req, res, nex
   if (ObjectId.isValid(folder)) {
     isTeam = true;
   }else{
-    if (LEAGUES.filter(function (elm) {return elm.indexOf(folder) != -1;}).length == 0) {
+    if (!LEAGUES.includes(folder)) {
       return next();
     }
   }
 
   if (auth.authCompetition(req.user,competitionId,ACCESSLEVELS.ADMIN)){ // Admin check
-    let path = `${__dirname}/../../cabinet/${competitionId}/${folder}/${file}`;
+    let path = `${__dirname}/../../cabinet/${competitionId}/${folder}/${sanitize(file)}`;
     fs.unlink(path, (err) => {
       if (err){
         return res.status(500).send({
