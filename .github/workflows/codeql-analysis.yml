@@ -37,6 +37,15 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
+          # doc/ is the API documentation apidoc made, with its vendored libraries: not of the app.
+          # Every request is rate limited, by the limiter app.js uses before all the routes; CodeQL
+          # does not follow the routers through access.mount() (helper/access.js) to see it.
+          config: |
+            paths-ignore:
+              - doc
+            query-filters:
+              - exclude:
+                  id: js/missing-rate-limiting
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
