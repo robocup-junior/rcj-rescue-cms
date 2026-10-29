@@ -111,23 +111,3 @@ module.exports.competitionLevel = competitionLevel;
 
 const NO_AUTHORITY = { msg: 'You have no authority to access this api' };
 module.exports.NO_AUTHORITY = NO_AUTHORITY;
-
-/**
- * Express middleware for the routes of a thing of a competition (a round, a map, ...) by its id in
- * req.params[param]: only those with the level in the thing's competition go on. An id that is not
- * one, or of nothing, goes on to the route, which deals with it.
- */
-function ensureCompetitionOf(model, param, level = ACCESSLEVELS.ADMIN) {
-  return async function (req, res, next) {
-    const id = req.params[param];
-    if (!require('mongoose').Types.ObjectId.isValid(id)) return next();
-    try {
-      const thing = await model.findById(id).select('competition').lean().exec();
-      if (thing && !authCompetition(req.user, thing.competition, level)) return res.status(401).send(NO_AUTHORITY);
-      next();
-    } catch (err) {
-      next(err);
-    }
-  };
-}
-module.exports.ensureCompetitionOf = ensureCompetitionOf;

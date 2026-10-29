@@ -12,8 +12,9 @@ const logger = require('../../config/logger').mainLogger;
 const auth = require('../../helper/authLevels');
 const { ACCESSLEVELS } = require('../../models/user');
 const {sendMail} = require('../../helper/mailSender');
+const access = require('../../helper/access');
 
-adminRouter.get('/', function (req, res) {
+adminRouter.get('/', access.anyAdmin('the users, to give them rights in a competition; their addresses for the super admins only'), function (req, res) {
   userdb.user
     .find({})
     // The addresses are for the super admins (who manage the users) only
@@ -32,7 +33,7 @@ adminRouter.get('/', function (req, res) {
     });
 });
 
-superRouter.delete('/:userid', function (req, res, next) {
+superRouter.delete('/:userid', access.superAdmin(), function (req, res, next) {
   const id = req.params.userid;
 
   if (!ObjectId.isValid(id)) {
@@ -59,7 +60,7 @@ superRouter.delete('/:userid', function (req, res, next) {
   );
 });
 
-superRouter.post('/', function (req, res) {
+superRouter.post('/', access.superAdmin(), function (req, res) {
   const user = req.body;
 
   const newUser = new userdb.user({
@@ -130,7 +131,7 @@ superRouter.post('/', function (req, res) {
   }
 });
 
-adminRouter.put('/:userid/:competitionid/role', function (req, res, next) {
+adminRouter.put('/:userid/:competitionid/role', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionid'), function (req, res, next) {
   const { userid } = req.params;
   const { competitionid } = req.params;
   const role = Array.from(new Set(req.body));
@@ -182,7 +183,7 @@ adminRouter.put('/:userid/:competitionid/role', function (req, res, next) {
   });
 });
 
-adminRouter.put('/:userid/:competitionid/:aLevel', function (req, res, next) {
+adminRouter.put('/:userid/:competitionid/:aLevel', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionid'), function (req, res, next) {
   const { userid } = req.params;
   const { competitionid } = req.params;
   const { aLevel } = req.params;
@@ -234,7 +235,7 @@ adminRouter.put('/:userid/:competitionid/:aLevel', function (req, res, next) {
 });
 
 // not good at security
-superRouter.put('/:userid', function (req, res, next) {
+superRouter.put('/:userid', access.superAdmin(), function (req, res, next) {
   const id = req.params.userid;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -315,7 +316,7 @@ superRouter.put('/:userid', function (req, res, next) {
 
 const privateRouter = express.Router();
 
-privateRouter.post('/me/password', function (req, res) {
+privateRouter.post('/me/password', access.loggedIn("the user's own password"), function (req, res) {
   const { current, new: newPass, confirm } = req.body;
 
   if (newPass !== confirm) {

@@ -13,12 +13,13 @@ const logger = require('../../config/logger').mainLogger;
 const competitiondb = require('../../models/competition');
 const auth = require('../../helper/authLevels');
 const { ACCESSLEVELS } = require('../../models/user');
+const access = require('../../helper/access');
 
-publicRouter.get('/', function (req, res) {
+publicRouter.get('/', access.anyone('the rounds are public'), function (req, res) {
   query.doFindResultSortQuery(req, res, null, null, competitiondb.round);
 });
 
-publicRouter.get('/:roundid', function (req, res, next) {
+publicRouter.get('/:roundid', access.anyone('the rounds are public'), function (req, res, next) {
   const id = req.params.roundid;
 
   if (!ObjectId.isValid(id)) {
@@ -28,7 +29,7 @@ publicRouter.get('/:roundid', function (req, res, next) {
   query.doIdQuery(req, res, id, '', competitiondb.round);
 });
 
-publicRouter.get('/:roundid/runs', function (req, res, next) {
+publicRouter.get('/:roundid/runs', access.anyone('shown as their status and the ranking settings let them be, by the handler'), function (req, res, next) {
   const id = req.params.roundid;
 
   if (!ObjectId.isValid(id)) {
@@ -45,7 +46,7 @@ publicRouter.get('/:roundid/runs', function (req, res, next) {
   });
 });
 
-adminRouter.delete('/:roundid', auth.ensureCompetitionOf(competitiondb.round, 'roundid'), function (req, res, next) {
+adminRouter.delete('/:roundid', access.of(competitiondb.round, 'params.roundid', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const id = req.params.roundid;
 
   if (!ObjectId.isValid(id)) {
@@ -62,7 +63,7 @@ adminRouter.delete('/:roundid', auth.ensureCompetitionOf(competitiondb.round, 'r
   });
 });
 
-adminRouter.post('/', function (req, res) {
+adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition'), function (req, res) {
   const round = req.body;
   if (!auth.authCompetition(req.user, round.competition, ACCESSLEVELS.ADMIN)) return res.status(401).send(auth.NO_AUTHORITY);
 

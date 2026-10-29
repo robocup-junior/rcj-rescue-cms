@@ -31,6 +31,7 @@ const documentDb = require('../../models/document');
 const userdb = require('../../models/user');
 const escape = require('escape-html');
 const sanitize = require("sanitize-filename");
+const access = require('../../helper/access');
 read = gracefulFs.gracefulify(read);
 
 const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -70,7 +71,7 @@ function GetleagueType(leagueId){
   return LEAGUES_JSON.find(l=>l.id == leagueId).type;
 }
 
-publicRouter.get('/answer/:teamId/:token', function (req, res, next) {
+publicRouter.get('/answer/:teamId/:token', access.team({ publicDocuments: true }), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
 
@@ -111,7 +112,7 @@ publicRouter.get('/answer/:teamId/:token', function (req, res, next) {
     });
 });
 
-publicRouter.put('/answer/:teamId/:token', function (req, res, next) {
+publicRouter.put('/answer/:teamId/:token', access.team(), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
   const answer = req.body;
@@ -203,7 +204,7 @@ publicRouter.put('/answer/:teamId/:token', function (req, res, next) {
     });
 });
 
-publicRouter.post('/files/:teamId/:token/:fileName', function (req, res, next) {
+publicRouter.post('/files/:teamId/:token/:fileName', access.team(), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
   const { fileName } = req.params;
@@ -356,7 +357,7 @@ publicRouter.post('/files/:teamId/:token/:fileName', function (req, res, next) {
     });
 });
 
-publicRouter.get('/files/:teamId/:token', function (req, res, next) {
+publicRouter.get('/files/:teamId/:token', access.team({ publicDocuments: true }), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
 
@@ -411,7 +412,7 @@ publicRouter.get('/files/:teamId/:token', function (req, res, next) {
     });
 });
 
-publicRouter.get('/files/:teamId/:token/:fileName', function (req, res, next) {
+publicRouter.get('/files/:teamId/:token/:fileName', access.team({ publicDocuments: true, competitionToken: true }), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
   const { fileName } = req.params;
@@ -535,7 +536,7 @@ publicRouter.get('/files/:teamId/:token/:fileName', function (req, res, next) {
     });
 });
 
-publicRouter.post('/files/usercontent/:teamId/:token', function (req, res, next) {
+publicRouter.post('/files/usercontent/:teamId/:token', access.team(), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
 
@@ -634,7 +635,7 @@ publicRouter.post('/files/usercontent/:teamId/:token', function (req, res, next)
     });
 });
 
-publicRouter.get('/files/usercontent/:teamId/:token/:fileName', function (req, res, next) {
+publicRouter.get('/files/usercontent/:teamId/:token/:fileName', access.team({ publicDocuments: true }), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
   const { fileName } = req.params;
@@ -700,7 +701,7 @@ publicRouter.get('/files/usercontent/:teamId/:token/:fileName', function (req, r
 
 /// / for reviwer & admin
 
-privateRouter.get('/review/:teamId', function (req, res, next) {
+privateRouter.get('/review/:teamId', access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.VIEW, { orRole: 'INTERVIEW' }), function (req, res, next) {
   const { teamId } = req.params;
 
   if (!ObjectId.isValid(teamId)) {
@@ -749,7 +750,7 @@ privateRouter.get('/review/:teamId', function (req, res, next) {
   });
 });
 
-privateRouter.get('/review/:teamId/myComments', function (req, res, next) {
+privateRouter.get('/review/:teamId/myComments', access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.VIEW, { orRole: 'INTERVIEW' }), function (req, res, next) {
   const { teamId } = req.params;
 
   if (!ObjectId.isValid(teamId)) {
@@ -797,7 +798,7 @@ privateRouter.get('/review/:teamId/myComments', function (req, res, next) {
   });
 });
 
-adminRouter.delete('/review/:reviewId/:questionId', function (req, res, next) {
+adminRouter.delete('/review/:reviewId/:questionId', access.of(documentDb.review, 'params.reviewId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const { reviewId, questionId } = req.params;
 
   if (!ObjectId.isValid(reviewId)) {
@@ -838,7 +839,7 @@ adminRouter.delete('/review/:reviewId/:questionId', function (req, res, next) {
     });
 });
 
-adminRouter.delete('/review/:reviewId', function (req, res, next) {
+adminRouter.delete('/review/:reviewId', access.of(documentDb.review, 'params.reviewId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const { reviewId } = req.params;
 
   if (!ObjectId.isValid(reviewId)) {
@@ -877,7 +878,7 @@ adminRouter.delete('/review/:reviewId', function (req, res, next) {
     });
 });
 
-adminRouter.get('/reviews/:competition', function (req, res, next) {
+adminRouter.get('/reviews/:competition', access.competition(ACCESSLEVELS.ADMIN, 'params.competition'), function (req, res, next) {
   const { competition } = req.params;
 
   if (!ObjectId.isValid(competition)) {
@@ -910,7 +911,7 @@ adminRouter.get('/reviews/:competition', function (req, res, next) {
   }
 });
 
-privateRouter.put('/review/:teamId', function (req, res, next) {
+privateRouter.put('/review/:teamId', access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.SUPERADMIN, { orRole: 'INTERVIEW' }), function (req, res, next) {
   const { teamId } = req.params;
   const comments = req.body;
 
@@ -1009,7 +1010,7 @@ privateRouter.put('/review/:teamId', function (req, res, next) {
 
 privateRouter.post(
   '/review/files/:teamId/:fileName',
-  function (req, res, next) {
+  access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.SUPERADMIN, { orRole: 'INTERVIEW' }), function (req, res, next) {
     const { teamId } = req.params;
     const { fileName } = req.params;
 
@@ -1137,7 +1138,7 @@ privateRouter.post(
   }
 );
 
-privateRouter.get('/review/files/:teamId', function (req, res, next) {
+privateRouter.get('/review/files/:teamId', access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.VIEW, { orRole: 'INTERVIEW' }), function (req, res, next) {
   const { teamId } = req.params;
 
   if (!ObjectId.isValid(teamId)) {
@@ -1176,7 +1177,7 @@ privateRouter.get('/review/files/:teamId', function (req, res, next) {
 
 privateRouter.get(
   '/review/files/:teamId/:userName/:fileName',
-  function (req, res, next) {
+  access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.VIEW, { orRole: 'INTERVIEW' }), function (req, res, next) {
     const { teamId } = req.params;
     const { userName } = req.params;
     const { fileName } = req.params;
@@ -1281,7 +1282,7 @@ privateRouter.get(
 
 privateRouter.post(
   '/review/files/usercontent/:teamId',
-  function (req, res, next) {
+  access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.SUPERADMIN, { orRole: 'INTERVIEW' }), function (req, res, next) {
     const { teamId } = req.params;
 
     if (!ObjectId.isValid(teamId)) {
@@ -1349,7 +1350,7 @@ privateRouter.post(
 
 privateRouter.get(
   '/review/files/usercontent/:teamId/:userName/:fileName',
-  function (req, res, next) {
+  access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.VIEW, { orRole: 'INTERVIEW' }), function (req, res, next) {
     const { teamId } = req.params;
     const { userName } = req.params;
     const { fileName } = req.params;
@@ -1412,7 +1413,7 @@ privateRouter.get(
 // Inspection
 privateRouter.post(
   '/inspection/files/:teamId/:fileName',
-  function (req, res, next) {
+  access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.JUDGE), function (req, res, next) {
     const { teamId } = req.params;
     const { fileName } = req.params;
 
@@ -1510,7 +1511,7 @@ privateRouter.post(
 
 privateRouter.get(
   '/inspection/files/:teamId/:fileName',
-  function (req, res, next) {
+  access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.JUDGE), function (req, res, next) {
     const { teamId } = req.params;
     const { fileName } = req.params;
 
@@ -1582,7 +1583,7 @@ privateRouter.get(
 );
 
 // Templates
-adminRouter.get('/templates/documentForm', function (req, res, next) {
+adminRouter.get('/templates/documentForm', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const dir_path = `${__dirname}/../../templates/documentForm/`;
   fs.readdir(dir_path, { withFileTypes: true }, (err, dirents) => {
     if (err) {
@@ -1604,7 +1605,7 @@ adminRouter.get('/templates/documentForm', function (req, res, next) {
   });
 });
 
-adminRouter.get('/templates/documentForm/:fileName', function (req, res, next) {
+adminRouter.get('/templates/documentForm/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
   const dir_path = `${__dirname}/../../templates/documentForm/${sanitize(fileName)}`;
@@ -1632,7 +1633,7 @@ adminRouter.get('/templates/documentForm/:fileName', function (req, res, next) {
   });
 });
 
-adminRouter.get('/templates/reviewForm', function (req, res, next) {
+adminRouter.get('/templates/reviewForm', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const dir_path = `${__dirname}/../../templates/reviewForm/`;
   fs.readdir(dir_path, { withFileTypes: true }, (err, dirents) => {
     if (err) {
@@ -1654,7 +1655,7 @@ adminRouter.get('/templates/reviewForm', function (req, res, next) {
   });
 });
 
-adminRouter.get('/templates/reviewForm/:fileName', function (req, res, next) {
+adminRouter.get('/templates/reviewForm/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
   const dir_path = `${__dirname}/../../templates/reviewForm/${sanitize(fileName)}`;
@@ -1683,7 +1684,7 @@ adminRouter.get('/templates/reviewForm/:fileName', function (req, res, next) {
 });
 
 privateRouter.get('/map/:fileName',
-  function (req, res, next) {
+  access.loggedIn('the pictures of the maps made for the review forms'), function (req, res, next) {
     const { fileName } = req.params;
 
     glob.glob(
@@ -1837,7 +1838,7 @@ async function extractReviewAssignInfo(data, teamData, userId) {
   return assignResult;
 }
 
-privateRouter.get('/:competitionId/assigned', async function (req, res, next) {
+privateRouter.get('/:competitionId/assigned', access.competition(ACCESSLEVELS.SUPERADMIN, 'params.competitionId', { orRole: 'INTERVIEW' }), async function (req, res, next) {
   const { competitionId } = req.params;
   if (!ObjectId.isValid(competitionId)) {
     return next();
@@ -1885,7 +1886,7 @@ privateRouter.get('/:competitionId/assigned', async function (req, res, next) {
   }
 });
 
-adminRouter.get('/:competitionId/reviewStatus', async function (req, res, next) {
+adminRouter.get('/:competitionId/reviewStatus', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), async function (req, res, next) {
   const { competitionId } = req.params;
   const { sendReminder } = req.query;
 

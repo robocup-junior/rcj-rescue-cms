@@ -16,6 +16,7 @@ const logger = require('../../config/logger').mainLogger;
 const competitiondb = require('../../models/competition');
 const auth = require('../../helper/authLevels');
 const { type } = require('os');
+const access = require('../../helper/access');
 
 const { LEAGUES_JSON } = competitiondb;
 
@@ -26,11 +27,11 @@ const N = 32;
 //    query.doFindResultSortQuery(req, res, null, null, competitiondb.team)
 // })
 
-publicRouter.get('/leagues', function (req, res) {
+publicRouter.get('/leagues', access.anyone('of no competition'), function (req, res) {
   res.send(competitiondb.team.schema.path('league').enumValues);
 });
 
-publicRouter.get('/leagues/:league/:competitionId', async function (req, res) {
+publicRouter.get('/leagues/:league/:competitionId', access.anyone('the teams of a league, as the public pages list them'), async function (req, res) {
   const id = req.params.competitionId;
   const { league } = req.params;
 
@@ -64,7 +65,7 @@ publicRouter.get('/leagues/:league/:competitionId', async function (req, res) {
   res.send(ret);
 });
 
-privateRouter.get('/code/:teamId/:code', function (req, res, next) {
+privateRouter.get('/code/:teamId/:code', access.loggedIn('the team of the code given'), function (req, res, next) {
   const id = req.params.teamId;
   const { code } = req.params;
 
@@ -92,7 +93,7 @@ privateRouter.get('/code/:teamId/:code', function (req, res, next) {
     });
 });
 
-publicRouter.get('/:teamid', function (req, res, next) {
+publicRouter.get('/:teamid', access.anyone('a team, as the public pages show it'), function (req, res, next) {
   const id = req.params.teamid;
 
   if (!ObjectId.isValid(id)) {
@@ -118,7 +119,7 @@ publicRouter.get('/:teamid', function (req, res, next) {
     });
 });
 
-privateRouter.put('/:competitionid/:teamid', function (req, res, next) {
+privateRouter.put('/:competitionid/:teamid', access.competition(ACCESSLEVELS.JUDGE, 'params.competitionid'), access.of(competitiondb.team, 'params.teamid', ACCESSLEVELS.JUDGE), function (req, res, next) {
   const id = req.params.teamid;
   const { competitionid } = req.params;
   if (!ObjectId.isValid(id)) {
@@ -178,7 +179,7 @@ privateRouter.put('/:competitionid/:teamid', function (req, res, next) {
     });
 });
 
-publicRouter.get('/:teamid/runs', function (req, res, next) {
+publicRouter.get('/:teamid/runs', access.anyone('shown as their status and the ranking settings let them be, by the handler'), function (req, res, next) {
   const id = req.params.teamid;
 
   if (!ObjectId.isValid(id)) {
@@ -202,7 +203,7 @@ publicRouter.get('/:teamid/runs', function (req, res, next) {
   );
 });
 
-adminRouter.delete('/:teamid', function (req, res, next) {
+adminRouter.delete('/:teamid', access.of(competitiondb.team, 'params.teamid', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const ids = req.params.teamid.split(',');
   if (!ObjectId.isValid(ids[0])) {
     return next();
@@ -264,7 +265,7 @@ adminRouter.delete('/:teamid', function (req, res, next) {
     });
 });
 
-adminRouter.post('/', function (req, res) {
+adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition'), function (req, res) {
   const team = req.body;
   if (!auth.authCompetition(req.user, team.competition, ACCESSLEVELS.ADMIN)) {
     return res.status(401).send({ msg: 'You have no authority to access this api' });
@@ -332,7 +333,7 @@ adminRouter.post('/', function (req, res) {
     });
 });
 
-adminRouter.post('/bulk', function (req, res) {
+adminRouter.post('/bulk', access.competition(ACCESSLEVELS.ADMIN, 'body[].competition'), function (req, res) {
   const teams = req.body;
   if (typeof(teams) != "object") {
     res.status(400).send("Bad request");

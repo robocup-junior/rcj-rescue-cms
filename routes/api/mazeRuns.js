@@ -13,6 +13,8 @@ const { ACCESSLEVELS } = require('../../models/user');
 const competitiondb = require('../../models/competition');
 const { VICTIMS } = require('../../models/mazeMap');
 const Decimal = require('decimal.js');
+const access = require('../../helper/access');
+const { mazeMap } = require('../../models/mazeMap');
 
 let socketIo;
 
@@ -42,7 +44,7 @@ module.exports.connectSocketIo = function (io) {
  *
  * @apiError (400) {String} msg The error message
  */
-publicRouter.get('/competition/:competitionId', function (req, res, next) {
+publicRouter.get('/competition/:competitionId', access.anyone('shown as their status and the ranking settings let them be, by the handler'), function (req, res, next) {
   const competition = req.params.competitionId;
   const normalized = req.query.normalized;
 
@@ -168,7 +170,7 @@ function getMaxScoreWithCache(runs, league, normalizationGroup, cache) {
 
 privateRouter.get(
   '/find/team_status/:competitionid/:teamid/:status',
-  function (req, res, next) {
+  access.competition(ACCESSLEVELS.JUDGE, 'params.competitionid'), function (req, res, next) {
     const id = req.params.competitionid;
     const teamId = req.params.teamid;
     const { status } = req.params;
@@ -223,7 +225,7 @@ privateRouter.get(
 
 publicRouter.get(
   '/find/:competitionid/:field/:status',
-  function (req, res, next) {
+  access.anyone('the runs of a field, for the signage'), function (req, res, next) {
     const id = req.params.competitionid;
     const field_id = req.params.field;
     const { status } = req.params;
@@ -294,7 +296,7 @@ publicRouter.get(
  * @apiError (400) {String} err The error message
  * @apiError (400) {String} msg The error message
  */
-publicRouter.get('/:runid', function (req, res, next) {
+publicRouter.get('/:runid', access.anyone('shown as their status and the ranking settings let them be, by the handler'), function (req, res, next) {
   const id = req.params.runid;
   const normalized = req.query.normalized
 
@@ -359,7 +361,7 @@ publicRouter.get('/:runid', function (req, res, next) {
   });
 });
 
-adminRouter.put('/bulk', function (req, res) {
+adminRouter.put('/bulk', access.of(mazeRun, 'body[]._id', ACCESSLEVELS.ADMIN), function (req, res) {
   const updates = req.body;
   const totalCount = updates.length;
   let processed = 0;
@@ -448,7 +450,7 @@ adminRouter.put('/bulk', function (req, res) {
  * @apiError (400) {String} err The error message
  * @apiError (400) {String} msg The error message
  */
-privateRouter.put('/:runid', function (req, res, next) {
+privateRouter.put('/:runid', access.of(mazeRun, 'params.runid', ACCESSLEVELS.JUDGE), function (req, res, next) {
   const id = req.params.runid;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -650,7 +652,7 @@ privateRouter.put('/:runid', function (req, res, next) {
   update(10);
 });
 
-adminRouter.get('/scoresheet2', function (req, res, next) {
+adminRouter.get('/scoresheet2', access.competition(ACCESSLEVELS.ADMIN, ['query.competition', access.competitionsOf(mazeRun, 'query.run')]), function (req, res, next) {
   const run = req.query.run || req.params.run;
   const competition = req.query.competition || req.params.competition;
   const field = req.query.field || req.params.field;
@@ -765,7 +767,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
   });
 });
 
-privateRouter.put('/map/:runid', function (req, res, next) {
+privateRouter.put('/map/:runid', access.of(mazeRun, 'params.runid', ACCESSLEVELS.JUDGE), function (req, res, next) {
   const id = req.params.runid;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -845,7 +847,7 @@ privateRouter.put('/map/:runid', function (req, res, next) {
  *
  * @apiError (400) {String} err The error message
  */
-adminRouter.delete('/:runids', function (req, res, next) {
+adminRouter.delete('/:runids', access.of(mazeRun, 'params.runids', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const ids = req.params.runids.split(',');
   if (!ObjectId.isValid(ids[0])) {
     return next();
@@ -912,7 +914,7 @@ adminRouter.delete('/:runids', function (req, res, next) {
  *
  * @apiError (400) {String} err The error message
  */
-adminRouter.post('/', function (req, res) {
+adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition'), access.of(competitiondb.team, 'body.team', ACCESSLEVELS.ADMIN), access.of(competitiondb.round, 'body.round', ACCESSLEVELS.ADMIN), access.of(competitiondb.field, 'body.field', ACCESSLEVELS.ADMIN), access.of(mazeMap, 'body.map', ACCESSLEVELS.ADMIN), function (req, res) {
   const run = req.body;
 
   if (!auth.authCompetition(req.user, run.competition, ACCESSLEVELS.ADMIN)) {
@@ -957,7 +959,7 @@ adminRouter.post('/', function (req, res) {
   });
 });
 
-privateRouter.post('/pre_recorded', function (req, res) {
+privateRouter.post('/pre_recorded', access.of(competitiondb.team, 'body.team', ACCESSLEVELS.JUDGE), function (req, res) {
   const data = req.body;
   competitiondb.team
   .findById(data.team)

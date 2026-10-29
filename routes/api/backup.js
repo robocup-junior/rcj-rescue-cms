@@ -19,8 +19,9 @@ const { ACCESSLEVELS } = require('../../models/user');
 const base_tmp_path = `${__dirname}/../../tmp/`;
 
 const {backupQueue} = require("../../queue/backupQueue")
+const access = require('../../helper/access');
 
-adminRouter.post('/restore', function (req, res) {
+adminRouter.post('/restore', access.anyAdmin("the backup's competition is checked as it is restored (queue/backupQueue.js)"), function (req, res) {
   const folder = Math.random().toString(32).substring(2);
   fs.mkdirsSync(`${base_tmp_path}uploads/`);
 
@@ -47,7 +48,7 @@ adminRouter.post('/restore', function (req, res) {
   });
 });
 
-adminRouter.post('/:competition', function (req, res) {
+adminRouter.post('/:competition', access.competition(ACCESSLEVELS.ADMIN, 'params.competition'), function (req, res) {
   const competitionId = req.params.competition;
   const fullBackup = req.body.fullBackup;
 
@@ -66,7 +67,7 @@ adminRouter.post('/:competition', function (req, res) {
 });
 
 
-adminRouter.get('/list/:competitionId', function (req, res, next) {
+adminRouter.get('/list/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const { competitionId } = req.params;
 
   if (!ObjectId.isValid(competitionId)) {
@@ -98,7 +99,7 @@ adminRouter.get('/list/:competitionId', function (req, res, next) {
   }
 });
 
-adminRouter.get('/archive/:competitionId/:fileName', function (req, res, next) {
+adminRouter.get('/archive/:competitionId/:fileName', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const { competitionId } = req.params;
   const { fileName } = req.params;
 
@@ -138,7 +139,7 @@ adminRouter.get('/archive/:competitionId/:fileName', function (req, res, next) {
   }
 });
 
-adminRouter.delete('/archive/:competitionId/:fileName', function (req, res, next) {
+adminRouter.delete('/archive/:competitionId/:fileName', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const { competitionId } = req.params;
   const { fileName } = req.params;
 
@@ -167,7 +168,7 @@ adminRouter.delete('/archive/:competitionId/:fileName', function (req, res, next
   }
 });
 
-adminRouter.get('/job/:jobId', async function (req, res, next) {
+adminRouter.get('/job/:jobId', access.anyAdmin('the state of a job'), async function (req, res, next) {
   const { jobId } = req.params;
   let job = await backupQueue.getJob(jobId);
   if (job === null) {

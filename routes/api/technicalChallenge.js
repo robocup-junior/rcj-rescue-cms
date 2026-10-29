@@ -11,6 +11,7 @@ const { ACCESSLEVELS } = require('../../models/user');
 const competitiondb = require('../../models/competition');
 const initRunData = require('../../helper/initRunData');
 const { leagues } = require('../../leagues');
+const access = require('../../helper/access');
 
 let socketIo;
 
@@ -19,7 +20,7 @@ module.exports.connectSocketIo = function (io) {
 };
 
 
-privateRouter.put('/:id', function (req, res, next) {
+privateRouter.put('/:id', access.of(technicalChallenge, 'params.id', ACCESSLEVELS.JUDGE), function (req, res, next) {
   const id = req.params.id;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -66,7 +67,7 @@ privateRouter.put('/:id', function (req, res, next) {
     });
 });
 
-privateRouter.get('/:competitionId/:leagueId', function (req, res, next) {
+privateRouter.get('/:competitionId/:leagueId', access.competition(ACCESSLEVELS.VIEW, 'params.competitionId'), function (req, res, next) {
   const competitionId = req.params.competitionId;
   if (!ObjectId.isValid(competitionId)) {
     return next();
@@ -107,7 +108,7 @@ privateRouter.get('/:competitionId/:leagueId', function (req, res, next) {
     });
 });
 
-adminRouter.post('/recovery/:competitionId', function (req, res) {
+adminRouter.post('/recovery/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res) {
   const competitionId = req.params.competitionId;
   if (!auth.authCompetition(req.user, competitionId, ACCESSLEVELS.ADMIN)) return res.status(401).send(auth.NO_AUTHORITY);
 

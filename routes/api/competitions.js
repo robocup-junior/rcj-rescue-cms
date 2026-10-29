@@ -21,8 +21,9 @@ const auth = require('../../helper/authLevels');
 const { LEAGUES, LEAGUES_JSON, LINE_LEAGUES, MAZE_LEAGUES, SIM_LEAGUES } = competitiondb;
 
 const { ACCESSLEVELS } = require('../../models/user');
+const access = require('../../helper/access');
 
-publicRouter.get('/', function (req, res) {
+publicRouter.get('/', access.anyone('the competitions are public'), function (req, res) {
   competitiondb.competition
     .find({})
     .lean()
@@ -51,11 +52,11 @@ publicRouter.get('/', function (req, res) {
     });
 });
 
-publicRouter.get('/leagues', async function (req, res, next) {
+publicRouter.get('/leagues', access.anyone('of no competition'), async function (req, res, next) {
   res.send(LEAGUES_JSON);
 });
 
-publicRouter.get('/leagues/:league', async function (req, res, next) {
+publicRouter.get('/leagues/:league', access.anyone('of no competition'), async function (req, res, next) {
   const { league } = req.params;
 
   if (
@@ -79,7 +80,7 @@ publicRouter.get('/leagues/:league', async function (req, res, next) {
   }
 });
 
-publicRouter.get('/:competition', function (req, res, next) {
+publicRouter.get('/:competition', access.anyone('the competitions are public'), function (req, res, next) {
   const id = req.params.competition;
 
   if (!ObjectId.isValid(id)) {
@@ -114,7 +115,7 @@ publicRouter.get('/:competition', function (req, res, next) {
 
 publicRouter.get(
   '/:competition/documents/:leagueId',
-  function (req, res, next) {
+  access.anyone('the documents asked of a league, for the teams'), function (req, res, next) {
     const id = req.params.competition;
     const lid = req.params.leagueId;
 
@@ -153,7 +154,7 @@ publicRouter.get(
 
 privateRouter.get(
   '/:competition/documents/:leagueId/review',
-  async function (req, res, next) {
+  access.competition(ACCESSLEVELS.VIEW, 'params.competition', { orRole: 'INTERVIEW' }), async function (req, res, next) {
     const id = req.params.competition;
     const lid = req.params.leagueId;
 
@@ -199,7 +200,7 @@ privateRouter.get(
   }
 );
 
-adminRouter.put('/:competitionid', function (req, res, next) {
+adminRouter.put('/:competitionid', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionid'), function (req, res, next) {
   const id = req.params.competitionid;
   const data = req.body;
 
@@ -292,7 +293,7 @@ adminRouter.put('/:competitionid', function (req, res, next) {
   update(10);
 });
 
-adminRouter.get('/:competition/teams/documents', function (req, res, next) {
+adminRouter.get('/:competition/teams/documents', access.competition(ACCESSLEVELS.ADMIN, 'params.competition'), function (req, res, next) {
   const id = req.params.competition;
 
   if (!ObjectId.isValid(id)) {
@@ -326,7 +327,7 @@ adminRouter.get('/:competition/teams/documents', function (req, res, next) {
     });
 });
 
-adminRouter.put('/:competition/teams/documents', function (req, res, next) {
+adminRouter.put('/:competition/teams/documents', access.competition(ACCESSLEVELS.ADMIN, 'params.competition'), access.competition(ACCESSLEVELS.ADMIN, 'body.competition'), access.of(competitiondb.team, 'body._id', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const id = req.params.competition;
   const team = req.body;
 
@@ -375,7 +376,7 @@ adminRouter.put('/:competition/teams/documents', function (req, res, next) {
     });
 });
 
-adminRouter.get('/:competition/registration', function (req, res, next) {
+adminRouter.get('/:competition/registration', access.competition(ACCESSLEVELS.ADMIN, 'params.competition'), function (req, res, next) {
   const id = req.params.competition;
 
   if (!ObjectId.isValid(id)) {
@@ -407,7 +408,7 @@ adminRouter.get('/:competition/registration', function (req, res, next) {
     });
 });
 
-adminRouter.put('/:competition/registration', function (req, res, next) {
+adminRouter.put('/:competition/registration', access.competition(ACCESSLEVELS.ADMIN, 'params.competition'), function (req, res, next) {
   const id = req.params.competition;
   const {registration} = req.body;
   const {consentForm} = req.body;
@@ -461,7 +462,7 @@ adminRouter.put('/:competition/registration', function (req, res, next) {
     });
 });
 
-adminRouter.get('/:competition/adminTeams', function (req, res, next) {
+adminRouter.get('/:competition/adminTeams', access.competition(ACCESSLEVELS.ADMIN, 'params.competition'), function (req, res, next) {
   const id = req.params.competition;
 
   if (!ObjectId.isValid(id)) {
@@ -493,7 +494,7 @@ adminRouter.get('/:competition/adminTeams', function (req, res, next) {
     });
 });
 
-privateRouter.get('/:competition/teams', function (req, res, next) {
+privateRouter.get('/:competition/teams', access.loggedIn('the teams, as the public pages list them'), function (req, res, next) {
   const id = req.params.competition;
 
   if (!ObjectId.isValid(id)) {
@@ -521,7 +522,7 @@ privateRouter.get('/:competition/teams', function (req, res, next) {
     });
 });
 
-publicRouter.get('/:competition/teams/:teamid', function (req, res, next) {
+publicRouter.get('/:competition/teams/:teamid', access.anyone('a team, as the public pages show it'), function (req, res, next) {
   const id = req.params.competition;
   const tid = req.params.teamid;
 
@@ -551,7 +552,7 @@ publicRouter.get('/:competition/teams/:teamid', function (req, res, next) {
     });
 });
 
-privateRouter.get('/:competition/:league/teams', function (req, res, next) {
+privateRouter.get('/:competition/:league/teams', access.loggedIn('the teams, as the public pages list them'), function (req, res, next) {
   const id = req.params.competition;
   const { league } = req.params;
 
@@ -598,7 +599,7 @@ privateRouter.get('/:competition/:league/teams', function (req, res, next) {
     });
 });
 
-privateRouter.get('/:competition/:league/maps', function (req, res, next) {
+privateRouter.get('/:competition/:league/maps', access.loggedIn('the maps, each public'), function (req, res, next) {
   const id = req.params.competition;
   const { league } = req.params;
 
@@ -625,7 +626,7 @@ privateRouter.get('/:competition/:league/maps', function (req, res, next) {
   return next();
 });
 
-publicRouter.get('/:competition/fields', function (req, res, next) {
+publicRouter.get('/:competition/fields', access.anyone('the fields are public'), function (req, res, next) {
   const id = req.params.competition;
 
   if (!ObjectId.isValid(id)) {
@@ -650,7 +651,7 @@ publicRouter.get('/:competition/fields', function (req, res, next) {
     });
 });
 
-publicRouter.get('/:competitionid/fields/:name', function (req, res, next) {
+publicRouter.get('/:competitionid/fields/:name', access.anyone('the fields are public'), function (req, res, next) {
   const id = req.params.competitionid;
   const { name } = req.params;
 
@@ -678,7 +679,7 @@ publicRouter.get('/:competitionid/fields/:name', function (req, res, next) {
     .select('_id');
 });
 
-publicRouter.get('/:competition/rounds', function (req, res, next) {
+publicRouter.get('/:competition/rounds', access.anyone('the rounds are public'), function (req, res, next) {
   const id = req.params.competition;
 
   if (!ObjectId.isValid(id)) {
@@ -703,7 +704,7 @@ publicRouter.get('/:competition/rounds', function (req, res, next) {
     });
 });
 
-publicRouter.get('/:competitionid/rounds/:name', function (req, res, next) {
+publicRouter.get('/:competitionid/rounds/:name', access.anyone('the rounds are public'), function (req, res, next) {
   const id = req.params.competitionid;
   const { name } = req.params;
 
@@ -731,7 +732,7 @@ publicRouter.get('/:competitionid/rounds/:name', function (req, res, next) {
     .select('_id');
 });
 
-adminRouter.post('/', function (req, res) {
+adminRouter.post('/', access.anyAdmin('a new competition, of which the user is made the admin'), function (req, res) {
   const competition = req.body;
   let leagues = [];
   LEAGUES_JSON.forEach((e) => {
@@ -806,7 +807,7 @@ adminRouter.post('/', function (req, res) {
   });
 });
 
-adminRouter.delete('/:competitionid', function (req, res, next) {
+adminRouter.delete('/:competitionid', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionid'), function (req, res, next) {
   const id = req.params.competitionid;
 
   if (!ObjectId.isValid(id)) {

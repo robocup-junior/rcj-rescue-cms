@@ -12,6 +12,7 @@ const competitiondb = require('../../models/competition');
 const initRunData = require('../../helper/initRunData');
 const { leagues } = require('../../leagues');
 const Decimal = require('decimal.js');
+const access = require('../../helper/access');
 
 let socketIo;
 
@@ -25,7 +26,7 @@ module.exports.connectSocketIo = function (io) {
  * @apiGroup Run
  * @apiVersion 1.0.1
  */
-publicRouter.get('/competition/:competitionId', function (req, res, next) {
+publicRouter.get('/competition/:competitionId', access.anyone('shown as their status and the ranking settings let them be, by the handler'), function (req, res, next) {
   const competition = req.params.competitionId;
   const normalized = req.query.normalized;
 
@@ -132,7 +133,7 @@ function getMaxScoreWithCache(runs, league, normalizationGroup, cache) {
  * @apiGroup Run
  * @apiVersion 1.0.0
  */
-publicRouter.get('/:runid', async function (req, res, next) {
+publicRouter.get('/:runid', access.anyone('shown as their status and the ranking settings let them be, by the handler'), async function (req, res, next) {
   const id = req.params.runid;
   const normalized = req.query.normalized
 
@@ -198,7 +199,7 @@ publicRouter.get('/:runid', async function (req, res, next) {
   });
 });
 
-adminRouter.put('/bulk', function (req, res) {
+adminRouter.put('/bulk', access.of(simRun, 'body[]._id', ACCESSLEVELS.ADMIN), function (req, res) {
   const updates = req.body;
   const totalCount = updates.length;
   let processed = 0;
@@ -261,7 +262,7 @@ adminRouter.put('/bulk', function (req, res) {
  * @apiGroup Run
  * @apiVersion 1.0.0
  */
-privateRouter.put('/:runid', function (req, res, next) {
+privateRouter.put('/:runid', access.of(simRun, 'params.runid', ACCESSLEVELS.JUDGE), function (req, res, next) {
   const id = req.params.runid;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -389,7 +390,7 @@ privateRouter.put('/:runid', function (req, res, next) {
  * @apiGroup Run
  * @apiVersion 1.0.0
  */
-adminRouter.delete('/:runids', function (req, res, next) {
+adminRouter.delete('/:runids', access.of(simRun, 'params.runids', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const ids = req.params.runids.split(',');
   if (ids.some(id => !ObjectId.isValid(id))) {
     return next();
@@ -445,7 +446,7 @@ adminRouter.delete('/:runids', function (req, res, next) {
  * @apiGroup Run
  * @apiVersion 1.0.0
  */
-adminRouter.post('/', function (req, res, next) {
+adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition'), access.of(competitiondb.team, 'body.team', ACCESSLEVELS.ADMIN), access.of(competitiondb.round, 'body.round', ACCESSLEVELS.ADMIN), access.of(competitiondb.field, 'body.field', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const run = req.body;
   if (!ObjectId.isValid(run.competition)) {
     return next();

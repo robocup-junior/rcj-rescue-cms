@@ -13,6 +13,7 @@ const competitiondb = require('../../models/competition');
 const logger = require('../../config/logger').mainLogger;
 const mime = require('mime');
 const multer = require('multer');
+const access = require('../../helper/access');
 
 const signagedb = competitiondb.signage;
 
@@ -22,7 +23,7 @@ module.exports.connectSocketIo = function (io) {
   socketIo = io;
 };
 
-privateRouter.get('/', function (req, res) {
+privateRouter.get('/', access.loggedIn('the signage is of no competition'), function (req, res) {
   signagedb
     .find({})
     .lean()
@@ -39,7 +40,7 @@ privateRouter.get('/', function (req, res) {
     });
 });
 
-adminRouter.get('/contentList', function (req, res, next) {
+adminRouter.get('/contentList', access.anyAdmin('the signage is of no competition'), function (req, res, next) {
   let path = `${process.cwd()}/public/signage_content`;
   fs.readdir(path, { withFileTypes: true }, (err, dirents) => {
     if (err) {
@@ -65,7 +66,7 @@ adminRouter.get('/contentList', function (req, res, next) {
   });
 });
 
-adminRouter.get('/contentList/img', function (req, res, next) {
+adminRouter.get('/contentList/img', access.anyAdmin('the signage is of no competition'), function (req, res, next) {
   fs.readdir(`${process.cwd()}/public/signage_content`, function (err, files) {
     if (err) throw err;
     const fileList = files.filter(function (file) {
@@ -82,7 +83,7 @@ adminRouter.get('/contentList/img', function (req, res, next) {
   });
 });
 
-adminRouter.get('/contentList/mov', function (req, res, next) {
+adminRouter.get('/contentList/mov', access.anyAdmin('the signage is of no competition'), function (req, res, next) {
   fs.readdir(`${process.cwd()}/public/signage_content`, function (err, files) {
     if (err) throw err;
     const fileList = files.filter(function (file) {
@@ -99,7 +100,7 @@ adminRouter.get('/contentList/mov', function (req, res, next) {
   });
 });
 
-adminRouter.post('/contentList/upload', function (req, res, next) {
+adminRouter.post('/contentList/upload', access.anyAdmin('the signage is of no competition'), function (req, res, next) {
   const destination = `${process.cwd()}/public/signage_content`;
   if (!fs.existsSync(destination)) {
     mkdirp.sync(destination);
@@ -129,7 +130,7 @@ adminRouter.post('/contentList/upload', function (req, res, next) {
 });
 
 
-adminRouter.delete('/contentList/:file', function (req, res, next) {
+adminRouter.delete('/contentList/:file', access.anyAdmin('the signage is of no competition'), function (req, res, next) {
   let { file } = req.params;
   file = decodeURIComponent(file);
 
@@ -149,7 +150,7 @@ adminRouter.delete('/contentList/:file', function (req, res, next) {
   });
 });
 
-privateRouter.get('/:id', function (req, res, next) {
+privateRouter.get('/:id', access.loggedIn('the signage is of no competition'), function (req, res, next) {
   const { id } = req.params;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -170,7 +171,7 @@ privateRouter.get('/:id', function (req, res, next) {
     });
 });
 
-privateRouter.post('/:id/refresh', function (req, res, next) {
+privateRouter.post('/:id/refresh', access.loggedIn('the signage is of no competition'), function (req, res, next) {
   const { id } = req.params;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -190,7 +191,7 @@ privateRouter.post('/:id/refresh', function (req, res, next) {
   });
 });
 
-privateRouter.get('/:id/:cont', function (req, res, next) {
+privateRouter.get('/:id/:cont', access.loggedIn('the signage is of no competition'), function (req, res, next) {
   const { id } = req.params;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -222,7 +223,7 @@ privateRouter.get('/:id/:cont', function (req, res, next) {
     });
 });
 
-adminRouter.post('/', function (req, res, next) {
+adminRouter.post('/', access.anyAdmin('the signage is of no competition'), function (req, res, next) {
   const sig = req.body;
 
   new signagedb({
@@ -245,7 +246,7 @@ adminRouter.post('/', function (req, res, next) {
   });
 });
 
-adminRouter.put('/:id', function (req, res, next) {
+adminRouter.put('/:id', access.anyAdmin('the signage is of no competition'), function (req, res, next) {
   const { id } = req.params;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -281,7 +282,7 @@ adminRouter.put('/:id', function (req, res, next) {
   });
 });
 
-adminRouter.delete('/:id', function (req, res, next) {
+adminRouter.delete('/:id', access.anyAdmin('the signage is of no competition'), function (req, res, next) {
   const { id } = req.params;
 
   if (!ObjectId.isValid(id)) {

@@ -10,6 +10,7 @@ const passport = require('passport');
 const userdb = require('../../models/user');
 const logger = require('../../config/logger').mainLogger;
 const guessLimits = require('../../helper/guessLimits');
+const access = require('../../helper/access');
 
 //= =======================================================================
 //                          auth(mixed) Api endpoints
@@ -30,7 +31,7 @@ const guessLimits = require('../../helper/guessLimits');
  *
  * @apiSuccess (400) {String}   msg Bottled message
  */
-router.post('/login', guessLimits.login, function (req, res) {
+router.post('/login', access.anyone('logging in, the guesses limited'), guessLimits.login, function (req, res) {
   const { username } = req.body;
   const { password } = req.body;
 
@@ -71,7 +72,7 @@ router.post('/login', guessLimits.login, function (req, res) {
  * though the cookie is left it doesnt know you.
  *
  */
-router.get('/logout', function (req, res) {
+router.get('/logout', access.anyone('logging out'), function (req, res) {
   req.logout();
   res.send({ msg: 'Logout successful', status: true });
 });

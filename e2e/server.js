@@ -37,7 +37,14 @@ async function main() {
   await require('./seed').seed();
 
   // Same socket.io setup as server.js, without the Redis adapter (there is only one process)
-  const server = http.createServer(app);
+  // The API's routes and who may call them (helper/access.js), for the tests to call each of them
+  const server = http.createServer((req, res) => {
+    if (req.url === '/__e2e/routes') {
+      res.setHeader('Content-Type', 'application/json');
+      return res.end(JSON.stringify(require('../helper/access').routes()));
+    }
+    return app(req, res);
+  });
   const io = require('socket.io')(server);
   io.on('connection', (socket) => {
     socket.on('subscribe', (room) => socket.join(room));

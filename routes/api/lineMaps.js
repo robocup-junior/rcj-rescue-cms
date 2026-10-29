@@ -19,14 +19,15 @@ const lineMapPDF = require('../../helper/lineMapPDF');
 const auth = require('../../helper/authLevels');
 const scoreSheetPDFLine2 = require('../../helper/scoreSheetPDFLine2');
 const { ACCESSLEVELS } = require('../../models/user');
+const access = require('../../helper/access');
 
-privateRouter.get('/', getLineMaps);
-publicRouter.get('/image/:mapid', getMapImage);
-publicRouter.post('/map-image-pdf', handlePublicMapImagePDF);
-publicRouter.post('/map-image-png', handlePublicMapImagePNG);
-publicRouter.post('/scoresheet', handleScoresheet);
+privateRouter.get('/', access.loggedIn('the maps, each public'), getLineMaps);
+publicRouter.get('/image/:mapid', access.anyone('the maps are public'), getMapImage);
+publicRouter.post('/map-image-pdf', access.anyone('made of the map the request gives'), handlePublicMapImagePDF);
+publicRouter.post('/map-image-png', access.anyone('made of the map the request gives'), handlePublicMapImagePNG);
+publicRouter.post('/scoresheet', access.anyone('made of the map the request gives'), handleScoresheet);
 
-adminRouter.get('/export', handleExport);
+adminRouter.get('/export', access.competition(ACCESSLEVELS.ADMIN, ['query.competition', access.competitionsOf(lineMap, 'query.ids')]), handleExport);
 
 function getLineMaps(req, res) {
   const competition = req.query.competition || req.params.competition;
@@ -62,7 +63,7 @@ function getLineMaps(req, res) {
 }
 module.exports.getLineMaps = getLineMaps;
 
-adminRouter.post('/', function (req, res) {
+adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition'), function (req, res) {
   const map = req.body;
   if (typeof(map) != "object") {
     res.status(400).send("Bad request");
@@ -148,7 +149,7 @@ adminRouter.post('/', function (req, res) {
   });
 });
 
-publicRouter.get('/:map', function (req, res, next) {
+publicRouter.get('/:map', access.anyone('the maps are public'), function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {
@@ -174,7 +175,7 @@ publicRouter.get('/:map', function (req, res, next) {
   });
 });
 
-adminRouter.get('/:map/maxScore', auth.ensureCompetitionOf(lineMap, 'map'), async function (req, res, next) {
+adminRouter.get('/:map/maxScore', access.of(lineMap, 'params.map', ACCESSLEVELS.ADMIN), async function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {
@@ -243,7 +244,7 @@ const copyProperties = function (obj, dbObj) {
   }
 };
 
-adminRouter.put('/:map', auth.ensureCompetitionOf(lineMap, 'map'), function (req, res, next) {
+adminRouter.put('/:map', access.of(lineMap, 'params.map', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {
@@ -335,7 +336,7 @@ adminRouter.put('/:map', auth.ensureCompetitionOf(lineMap, 'map'), function (req
 
 
 
-adminRouter.delete('/:map', auth.ensureCompetitionOf(lineMap, 'map'), function (req, res, next) {
+adminRouter.delete('/:map', access.of(lineMap, 'params.map', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {
@@ -372,9 +373,9 @@ adminRouter.delete('/:map', auth.ensureCompetitionOf(lineMap, 'map'), function (
   });
 });
 
-publicRouter.get('/tiletypes', getTileTypes);
+publicRouter.get('/tiletypes', access.anyone('of no competition'), getTileTypes);
 
-publicRouter.get('/tiletypes/:tiletype', function (req, res, next) {
+publicRouter.get('/tiletypes/:tiletype', access.anyone('of no competition'), function (req, res, next) {
   const id = req.params.tiletype;
 
   if (!ObjectId.isValid(id)) {
@@ -418,7 +419,7 @@ function getTileTypes(req, res) {
   });
 }
 
-publicRouter.get('/tilesets', getTileSets);
+publicRouter.get('/tilesets', access.anyone('of no competition'), getTileSets);
 
 function getTileSets(req, res, next) {
   // Get all
@@ -447,7 +448,7 @@ module.exports.getTileSets = getTileSets;
 
 adminRouter.get(
   '/tileCount/:expectMapId/:tileSetId/:tileId',
-  async function (req, res, next) {
+  access.anyAdmin('the tile sets are of no competition'), async function (req, res, next) {
     // Count number of used tiles in the tile set you specified expect specified mapId
     let { expectMapId } = req.params;
     if (!ObjectId.isValid(expectMapId)) {
@@ -480,7 +481,7 @@ adminRouter.get(
 
 adminRouter.get(
   '/tileCount/:expectMapId/:tileSetId',
-  async function (req, res, next) {
+  access.anyAdmin('the tile sets are of no competition'), async function (req, res, next) {
     // Count number of used tiles in the tile set you specified expect specified mapId
     let { expectMapId } = req.params;
     if (!ObjectId.isValid(expectMapId)) {
@@ -511,7 +512,7 @@ adminRouter.get(
   }
 );
 
-adminRouter.post('/tilesets', function (req, res, next) {
+adminRouter.post('/tilesets', access.anyAdmin('the tile sets are of no competition'), function (req, res, next) {
   const tileset = req.body;
   let newset;
   if (tileset.tiles) {
@@ -541,7 +542,7 @@ adminRouter.post('/tilesets', function (req, res, next) {
   });
 });
 
-publicRouter.get('/tilesets/:tileset', function (req, res, next) {
+publicRouter.get('/tilesets/:tileset', access.anyone('of no competition'), function (req, res, next) {
   const id = req.params.tileset;
 
   if (!ObjectId.isValid(id)) {
@@ -566,7 +567,7 @@ publicRouter.get('/tilesets/:tileset', function (req, res, next) {
     });
 });
 
-adminRouter.put('/tilesets/:tileset', function (req, res, next) {
+adminRouter.put('/tilesets/:tileset', access.anyAdmin('the tile sets are of no competition'), function (req, res, next) {
   const id = req.params.tileset;
 
   if (!ObjectId.isValid(id)) {
@@ -601,7 +602,7 @@ adminRouter.put('/tilesets/:tileset', function (req, res, next) {
   });
 });
 
-adminRouter.delete('/tilesets/:tileset', function (req, res, next) {
+adminRouter.delete('/tilesets/:tileset', access.anyAdmin('the tile sets are of no competition'), function (req, res, next) {
   const id = req.params.tileset;
 
   if (!ObjectId.isValid(id)) {
@@ -628,7 +629,7 @@ adminRouter.delete('/tilesets/:tileset', function (req, res, next) {
   );
 });
 
-privateRouter.get('/name/:competitionid/:name', function (req, res, next) {
+privateRouter.get('/name/:competitionid/:name', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionid'), function (req, res, next) {
   const { name } = req.params;
   const id = req.params.competitionid;
 

@@ -26,6 +26,7 @@ let read = require('fs-readdir-recursive');
 const logger = require('../../config/logger').mainLogger;
 const escape = require('escape-html');
 const mkdirp = require('mkdirp');
+const access = require('../../helper/access');
 
 read = gracefulFs.gracefulify(read);
 
@@ -86,7 +87,7 @@ function returnFiles(res, competition, folder){
   });
 }
 
-publicRouter.get('/:competitionId/files/:teamId/:token/:folder', function (req, res, next) {
+publicRouter.get('/:competitionId/files/:teamId/:token/:folder', access.team({ staff: ACCESSLEVELS.ADMIN, inCompetition: 'params.competitionId' }), function (req, res, next) {
   const { competitionId } = req.params;
   const { teamId } = req.params;
   const { token } = req.params;
@@ -201,7 +202,7 @@ function returnFile(req, res, competition, folder, fileName){
   });
 }
 
-publicRouter.get('/:competitionId/file/:teamId/:token/:folder/:file', function (req, res, next) {
+publicRouter.get('/:competitionId/file/:teamId/:token/:folder/:file', access.team({ staff: ACCESSLEVELS.ADMIN, inCompetition: 'params.competitionId' }), function (req, res, next) {
   const { competitionId } = req.params;
   const { teamId } = req.params;
   const { token } = req.params;
@@ -248,7 +249,7 @@ publicRouter.get('/:competitionId/file/:teamId/:token/:folder/:file', function (
   }
 });
 
-adminRouter.post('/:competitionId/upload/:folder', function (req, res, next) {
+adminRouter.post('/:competitionId/upload/:folder', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const { competitionId } = req.params;
   const { folder } = req.params;
 
@@ -295,7 +296,7 @@ adminRouter.post('/:competitionId/upload/:folder', function (req, res, next) {
 });
 
 
-adminRouter.delete('/:competitionId/file/:folder/:file', function (req, res, next) {
+adminRouter.delete('/:competitionId/file/:folder/:file', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const { competitionId } = req.params;
   let { folder } = req.params;
   let { file } = req.params;

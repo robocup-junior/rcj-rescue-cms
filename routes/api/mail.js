@@ -25,6 +25,7 @@ const {mailQueue} = require("../../queue/mailQueue")
 const mkdirp = require("mkdirp");
 const { match } = require('assert');
 const getDirName = require("path").dirname
+const access = require('../../helper/access');
 
 
 
@@ -81,7 +82,7 @@ if (process.env.MAIL_SMTP &&process.env.MAIL_PORT &&process.env.MAIL_FROM) {
   smtp = null;
 }
 
-adminRouter.get('/templates', function (req, res, next) {
+adminRouter.get('/templates', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const path = `${__dirname}/../../templates/mail/`;
   fs.readdir(path, { withFileTypes: true }, (err, dirents) => {
     if (err) {
@@ -103,7 +104,7 @@ adminRouter.get('/templates', function (req, res, next) {
   });
 });
 
-adminRouter.get('/templates/:fileName', function (req, res, next) {
+adminRouter.get('/templates/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
   const path = `${__dirname}/../../templates/mail/${sanitizeFilename(fileName)}`;
@@ -131,7 +132,7 @@ adminRouter.get('/templates/:fileName', function (req, res, next) {
   });
 });
 
-adminRouter.post('/templates/:fileName', function (req, res, next) {
+adminRouter.post('/templates/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
   const path = `${__dirname}/../../templates/mail/${sanitizeFilename(fileName)}`;
@@ -150,7 +151,7 @@ adminRouter.post('/templates/:fileName', function (req, res, next) {
   });
 });
 
-adminRouter.delete('/templates/:fileName', function (req, res, next) {
+adminRouter.delete('/templates/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
   const path = `${__dirname}/../../templates/mail/${sanitizeFilename(fileName)}`;
@@ -174,7 +175,7 @@ function writeFile (path, contents, cb) {
   fs.writeFile(path, contents, cb);
 }
 
-adminRouter.post('/send', async function (req, res, next) {
+adminRouter.post('/send', access.of(competitiondb.team, 'body.data[]._id', ACCESSLEVELS.ADMIN), async function (req, res, next) {
   const teams = req.body.data;
   let reservation = req.body.reservation;
   
@@ -345,7 +346,7 @@ adminRouter.post('/send', async function (req, res, next) {
   }
 });
 
-adminRouter.get('/sent/:competitionId', function (req, res, next) {
+adminRouter.get('/sent/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const id = req.params.competitionId;
 
   if (!ObjectId.isValid(id)) {
@@ -376,7 +377,7 @@ adminRouter.get('/sent/:competitionId', function (req, res, next) {
     });
 });
 
-adminRouter.get('/sent/:competitionId/:mailId', function (req, res, next) {
+adminRouter.get('/sent/:competitionId/:mailId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const id = req.params.competitionId;
   const { mailId } = req.params;
 
@@ -418,7 +419,7 @@ adminRouter.get('/sent/:competitionId/:mailId', function (req, res, next) {
     });
 });
 
-adminRouter.get('/event/:competitionId/:mailId', function (req, res, next) {
+adminRouter.get('/event/:competitionId/:mailId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const id = req.params.competitionId;
   const { mailId } = req.params;
 
@@ -450,7 +451,7 @@ adminRouter.get('/event/:competitionId/:mailId', function (req, res, next) {
     });
 });
 
-publicRouter.get('/click/:mailId/:token', function (req, res, next) {
+publicRouter.get('/click/:mailId/:token', access.anyone('the tracking of the mails sent'), function (req, res, next) {
   const { mailId } = req.params;
   const { token } = req.params;
 
@@ -497,7 +498,7 @@ publicRouter.get('/click/:mailId/:token', function (req, res, next) {
     });
 });
 
-publicRouter.get('/open/:mailId', function (req, res, next) {
+publicRouter.get('/open/:mailId', access.anyone('the tracking of the mails sent'), function (req, res, next) {
   const { mailId } = req.params;
 
   mailDb.mail
@@ -534,7 +535,7 @@ publicRouter.get('/open/:mailId', function (req, res, next) {
 });
 
 
-adminRouter.get('/mailAuth', function (req, res, next) {
+adminRouter.get('/mailAuth', access.superAdmin("the registrations' addresses and tokens"), function (req, res, next) {
 
   mailDb.mailAuth
     .find()
@@ -550,7 +551,7 @@ adminRouter.get('/mailAuth', function (req, res, next) {
     });
 });
 
-publicRouter.get('/my/:teamId/:token', function (req, res, next) {
+publicRouter.get('/my/:teamId/:token', access.team(), function (req, res, next) {
   const teamId = req.params.teamId;
   const token = req.params.token;
 
@@ -591,7 +592,7 @@ publicRouter.get('/my/:teamId/:token', function (req, res, next) {
     });
 });
 
-publicRouter.get('/get/:teamId/:token/:mailId', function (req, res, next) {
+publicRouter.get('/get/:teamId/:token/:mailId', access.team(), function (req, res, next) {
   const teamId = req.params.teamId;
   const token = req.params.token;
   const mailId = req.params.mailId;

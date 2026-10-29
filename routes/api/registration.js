@@ -17,6 +17,7 @@ const competitiondb = require('../../models/competition');
 const {escapeRegExp, toLength} = require('lodash');
 const mkdirp = require('mkdirp');
 const {mailQueue} = require("../../queue/mailQueue")
+const access = require('../../helper/access');
 
 
 const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -78,7 +79,7 @@ if (process.env.MAIL_SMTP &&process.env.MAIL_PORT &&process.env.MAIL_FROM) {
   smtp = null;
 }
 
-publicRouter.post('/auth/:competitionId/:leagueId/:lang', require('../../helper/guessLimits').registrationCode, function (req, res, next) {
+publicRouter.post('/auth/:competitionId/:leagueId/:lang', access.anyone("the league's code checked, its guesses limited"), require('../../helper/guessLimits').registrationCode, function (req, res, next) {
   const { competitionId } = req.params;
   const { leagueId } = req.params;
   const { lang } = req.params;
@@ -190,7 +191,7 @@ publicRouter.post('/auth/:competitionId/:leagueId/:lang', require('../../helper/
 
 
 
-publicRouter.post('/reg/:authId/:token/:lang', function (req, res, next) {
+publicRouter.post('/reg/:authId/:token/:lang', access.anyone('the token mailed checked'), function (req, res, next) {
   const { authId } = req.params;
   const { token } = req.params;
   const { lang } = req.params;

@@ -16,15 +16,16 @@ const scoreSheetPDFMaze2 = require('../../helper/scoreSheetPDFMaze2');
 const mazeSSR = require('../../helper/mazeSSR');
 const auth = require('../../helper/authLevels');
 const { ACCESSLEVELS } = require('../../models/user');
+const access = require('../../helper/access');
 
-publicRouter.get('/', getMazeMaps);
-publicRouter.get('/image/:mapid', getMapImage);
-publicRouter.post('/scoresheet', handlePublicScoreSheet);
-publicRouter.post('/competition-targets-pdf', handlePublicCompetitionTargets);
-publicRouter.post('/map-image-pdf', handlePublicMapImagePDF);
-publicRouter.post('/map-image-png', handlePublicMapImagePNG);
+publicRouter.get('/', access.anyone('the maps are public'), getMazeMaps);
+publicRouter.get('/image/:mapid', access.anyone('the maps are public'), getMapImage);
+publicRouter.post('/scoresheet', access.anyone('made of the map the request gives'), handlePublicScoreSheet);
+publicRouter.post('/competition-targets-pdf', access.anyone('made of the map the request gives'), handlePublicCompetitionTargets);
+publicRouter.post('/map-image-pdf', access.anyone('made of the map the request gives'), handlePublicMapImagePDF);
+publicRouter.post('/map-image-png', access.anyone('made of the map the request gives'), handlePublicMapImagePNG);
 
-adminRouter.get('/export', handleExport);
+adminRouter.get('/export', access.competition(ACCESSLEVELS.ADMIN, ['query.competition', access.competitionsOf(mazeMap, 'query.ids')]), handleExport);
 
 function getMazeMaps(req, res) {
   const competition = req.query.competition || req.params.competition;
@@ -61,7 +62,7 @@ function getMazeMaps(req, res) {
 }
 module.exports.getMazeMaps = getMazeMaps;
 
-adminRouter.post('/', function (req, res) {
+adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition'), function (req, res) {
   const map = req.body;
   if (typeof (map) != "object") {
     res.status(400).send("Bad request");
@@ -171,7 +172,7 @@ adminRouter.post('/', function (req, res) {
   });
 });
 
-publicRouter.get('/:map', function (req, res, next) {
+publicRouter.get('/:map', access.anyone('the maps are public'), function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {
@@ -195,7 +196,7 @@ publicRouter.get('/:map', function (req, res, next) {
   });
 });
 
-adminRouter.get('/:map/maxScore', auth.ensureCompetitionOf(mazeMap, 'map'), async function (req, res, next) {
+adminRouter.get('/:map/maxScore', access.of(mazeMap, 'params.map', ACCESSLEVELS.ADMIN), async function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {
@@ -289,7 +290,7 @@ const copyProperties = function (obj, dbObj) {
   }
 };
 
-adminRouter.put('/:map', auth.ensureCompetitionOf(mazeMap, 'map'), function (req, res, next) {
+adminRouter.put('/:map', access.of(mazeMap, 'params.map', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {
@@ -388,7 +389,7 @@ adminRouter.put('/:map', auth.ensureCompetitionOf(mazeMap, 'map'), function (req
   });
 });
 
-adminRouter.delete('/:map', auth.ensureCompetitionOf(mazeMap, 'map'), function (req, res, next) {
+adminRouter.delete('/:map', access.of(mazeMap, 'params.map', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {
@@ -449,7 +450,7 @@ adminRouter.delete('/:map', auth.ensureCompetitionOf(mazeMap, 'map'), function (
   );
 });
 
-adminRouter.get('/name/:competitionid/:name', function (req, res, next) {
+adminRouter.get('/name/:competitionid/:name', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionid'), function (req, res, next) {
   const { name } = req.params;
   const id = req.params.competitionid;
   if (!auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN)) return res.status(401).send(auth.NO_AUTHORITY);
