@@ -63,9 +63,9 @@ block main_content
           i.fas.fa-mail-bulk.mr-2
           | {{"mail.sent.title" | translate}}
         .btn-table-group
-          .btn-table-action(ng-click="load()" uib-tooltip="{{'mail.sent.refresh' | translate}}")
+          .btn-table-action(ng-click="load()" uib-tooltip="{{'mail.sent.refresh' | translate}}" tooltip-append-to-body="true")
             i.fas.fa-sync-alt(ng-class="{'fa-spin': loading}")
-          .btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'common.refine' | translate}}")
+          .btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'common.refine' | translate}}" tooltip-append-to-body="true")
             i.fas.fa-filter
 
     .filter-collapse(ng-show="showFilter" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 1.5rem;")
@@ -133,7 +133,7 @@ block main_content
               td(ng-bind='mail.team.teamCode')
               td.font-weight-bold(ng-if='mail.team' ng-bind='mail.team.name')
               td.font-weight-bold(ng-if='!mail.team')
-                i.fas.fa-user-tie.mr-1.text-muted(uib-tooltip='{{"mail.home.toStaff" | translate}}')
+                i.fas.fa-user-tie.mr-1.text-muted(uib-tooltip='{{"mail.home.toStaff" | translate}}' tooltip-append-to-body="true")
                 | {{mail.user.username}}
               td(ng-bind='mail.team.country')
               td(ng-bind='mail.team.league')
@@ -142,5 +142,5 @@ block main_content
                 | {{'mail.status.' + mail.status | translate}}
               td
                 .btn-table-group
-                  .btn-table-action(ng-click="detail(mail)" uib-tooltip='{{"mail.sent.detail" | translate}}')
+                  .btn-table-action(ng-click="detail(mail)" uib-tooltip='{{"mail.sent.detail" | translate}}' tooltip-append-to-body="true")
                     i.fas.fa-envelope-open-text

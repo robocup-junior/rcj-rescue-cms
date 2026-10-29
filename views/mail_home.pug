@@ -94,9 +94,9 @@ block main_content
           | {{"mail.home.toTeams" | translate}}
           span.small.text-muted.ml-2(ng-if="withoutEmail(teams) > 0" ng-bind="'mail.home.withoutEmail' | translate:{n: withoutEmail(teams)}")
         .btn-table-group
-          .btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'common.refine' | translate}}")
+          .btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'common.refine' | translate}}" tooltip-append-to-body="true")
             i.fas.fa-filter
-          .btn-table-action(ng-click="selectAll()" ng-class="selectedAll ? 'active-blue' : ''" uib-tooltip="{{'common.selectAll' | translate}}")
+          .btn-table-action(ng-click="selectAll()" ng-class="selectedAll ? 'active-blue' : ''" uib-tooltip="{{'common.selectAll' | translate}}" tooltip-append-to-body="true")
             i.fas.fa-check-double
 
     .filter-collapse(ng-show="showFilter" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 1.5rem;")
@@ -156,7 +156,7 @@ block main_content
                 span.small(ng-if="!validEmail(team.email)") {{"mail.home.noEmail" | translate}}
               td
                 .btn-table-group(ng-if="validEmail(team.email)")
-                  .btn-table-action.primary(ng-click="newMail(team)" uib-tooltip='{{"mail.home.newMail" | translate}}')
+                  .btn-table-action.primary(ng-click="newMail(team)" uib-tooltip='{{"mail.home.newMail" | translate}}' tooltip-append-to-body="true")
                     i.fas.fa-envelope-open-text
 
   .modern-card(ng-show="mode=='select' && target=='staff'")
@@ -167,9 +167,9 @@ block main_content
           | {{"mail.home.toStaff" | translate}}
           span.small.text-muted.ml-2(ng-if="withoutEmail(staff) > 0" ng-bind="'mail.home.withoutEmail' | translate:{n: withoutEmail(staff)}")
         .btn-table-group
-          .btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'common.refine' | translate}}")
+          .btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'common.refine' | translate}}" tooltip-append-to-body="true")
             i.fas.fa-filter
-          .btn-table-action(ng-click="selectAll()" ng-class="selectedAll ? 'active-blue' : ''" uib-tooltip="{{'common.selectAll' | translate}}")
+          .btn-table-action(ng-click="selectAll()" ng-class="selectedAll ? 'active-blue' : ''" uib-tooltip="{{'common.selectAll' | translate}}" tooltip-append-to-body="true")
             i.fas.fa-check-double
 
     .filter-collapse(ng-show="showFilter" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 1.5rem;")
@@ -216,7 +216,7 @@ block main_content
                 span.small(ng-if="!user.hasEmail") {{"mail.home.noEmail" | translate}}
               td
                 .btn-table-group(ng-if="user.hasEmail")
-                  .btn-table-action.primary(ng-click="newMail(user)" uib-tooltip='{{"mail.home.newMail" | translate}}')
+                  .btn-table-action.primary(ng-click="newMail(user)" uib-tooltip='{{"mail.home.newMail" | translate}}' tooltip-append-to-body="true")
                     i.fas.fa-envelope-open-text
 
   //- Step 2: write
@@ -268,7 +268,7 @@ block main_content
         label.small.text-muted.d-block.mb-1
           | {{"mail.home.variable" | translate}}
           span.ml-1 — {{"mail.home.variableHint" | translate}}
-        span.var-chip(ng-repeat="key in variableKeys()" ng-mousedown="$event.preventDefault()" ng-click="insertVariable(key)" uib-tooltip="{{toTeam[0].variable[key]}}" ng-bind="'${' + key + '}'")
+        span.var-chip(ng-repeat="key in variableKeys()" ng-mousedown="$event.preventDefault()" ng-click="insertVariable(key)" uib-tooltip="{{toTeam[0].variable[key]}}" tooltip-append-to-body="true" ng-bind="'${' + key + '}'")
 
       ng-quill-editor(ng-model="mailContent" on-editor-created="editorCreated(editor)" on-selection-changed="contentSelected(range)")
       .invalid-feedback.d-block(ng-if="triedPreview && !hasContent()") {{"mail.home.contentRequired" | translate}}

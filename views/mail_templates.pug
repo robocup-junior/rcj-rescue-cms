@@ -42,7 +42,7 @@ block main_content
               td.font-weight-bold(ng-bind='mail.name')
               td
                 .btn-table-group
-                  .btn-table-action.primary(ng-click='go("/admin/mailTemplates/editor/"+mail.name)' uib-tooltip='{{"admin.mailTemplates.edit" | translate}}')
+                  .btn-table-action.primary(ng-click='go("/admin/mailTemplates/editor/"+mail.name)' uib-tooltip='{{"admin.mailTemplates.edit" | translate}}' tooltip-append-to-body="true")
                     i.fas.fa-edit
-                  .btn-table-action.danger(ng-click='removeTemplate(mail)' ng-if="deleteable(mail.name)" uib-tooltip='{{"common.delete" | translate}}')
+                  .btn-table-action.danger(ng-click='removeTemplate(mail)' ng-if="deleteable(mail.name)" uib-tooltip='{{"common.delete" | translate}}' tooltip-append-to-body="true")
                     i.fas.fa-trash-alt
