@@ -161,7 +161,9 @@ async function bootstrap(){
         resave: false,
         saveUninitialized: false,
         cookie: {
-        maxAge: 10 * 60 * 60 * 1000
+        maxAge: 10 * 60 * 60 * 1000,
+        // Not sent with requests other sites make (forms posted to the API from them)
+        sameSite: 'lax'
         }
     }))
     app.use(passport.initialize())
