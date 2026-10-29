@@ -1970,7 +1970,7 @@ adminRouter.get('/:competitionId/reviewStatus', access.competition(ACCESSLEVELS.
                           let pendingList = "";
                           let completedList = "";
                           for (let team of Object.values(assignResult).flat()) {
-                            let txt = `<li>[${team.league}] ${team.code} ${team.name} &nbsp;&nbsp;&nbsp;| ${team.reviewItems.join(" / ")} | Review Progress: ${team.answeredQuestionsNum}/${team.assienedQuestionsNum}</li>`;
+                            let txt = `<li>[${escape(team.league)}] ${escape(team.code)} ${escape(team.name)} &nbsp;&nbsp;&nbsp;| ${escape(team.reviewItems.join(" / "))} | Review Progress: ${team.answeredQuestionsNum}/${team.assienedQuestionsNum}</li>`;
                             if (team.assienedQuestionsNum != team.answeredQuestionsNum) {
                               pendingList += txt;
                             } else {
@@ -1978,8 +1978,8 @@ adminRouter.get('/:competitionId/reviewStatus', access.competition(ACCESSLEVELS.
                             }
                           }
                           const variables = {
-                            userName: user.userName,
-                            competitionName: data.name,
+                            userName: escape(user.userName),
+                            competitionName: escape(data.name),
                             evaluationHome: `${process.env.CMS_PROTOCOL}://${process.env.CMS_HOSTNAME}/document/assigned/${competitionId}`,
                             pendingList: `<ul>${pendingList}</ul>`,
                             completedList: `<ul>${completedList}</ul>`

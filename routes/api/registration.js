@@ -14,7 +14,7 @@ const { randomToken } = require('../../helper/crypto');
 const logger = require('../../config/logger').mainLogger;
 const mailDb = require('../../models/mail');
 const competitiondb = require('../../models/competition');
-const {escapeRegExp, toLength} = require('lodash');
+const {escapeRegExp, toLength, escape} = require('lodash');
 const mkdirp = require('mkdirp');
 const {mailQueue} = require("../../queue/mailQueue")
 const access = require('../../helper/access');
@@ -44,9 +44,10 @@ function getIP(req) {
   return '0.0.0.0';
 }
 
+// The values in the HTML of the mail as text (the team's name is the one it gave): escaped
 function template(string, values){
   return string.replace(/\$\{(.*?)\}/g, function(all, key){
-      return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : "";
+      return Object.prototype.hasOwnProperty.call(values, key) ? escape(values[key]) : "";
   });
 }
 

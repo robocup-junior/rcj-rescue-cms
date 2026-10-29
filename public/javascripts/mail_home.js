@@ -190,9 +190,18 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
     $scope.mailContent = "";
     $scope.mailTitle = "";
 
-    function template(string, values){
+    // In the HTML of the content, the values (a team's name, which the team may have given) as
+    // text: escaped, not taken as HTML
+    function escapeHtml(value){
+        return String(value).replace(/[&<>"']/g, function(c){
+            return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c];
+        });
+    }
+
+    function template(string, values, html){
         return string.replace(/\$\{(.*?)\}/g, function(all, key){
-            return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : "";
+            if (!Object.prototype.hasOwnProperty.call(values, key)) return "";
+            return html ? escapeHtml(values[key]) : values[key];
         });
     }
 
@@ -202,7 +211,7 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
         for(let team of $scope.toTeam){
             team.mailData = {
                 "title": template($scope.mailTitle, team.variable),
-                "content": template($scope.mailContent, team.variable).replace(/<p><br><\/p>/g,"<br>").replace(/<\/p><p>/g,"<br>")
+                "content": template($scope.mailContent, team.variable, true).replace(/<p><br><\/p>/g,"<br>").replace(/<\/p><p>/g,"<br>")
             }
         }
         $scope.mode = "preview";
