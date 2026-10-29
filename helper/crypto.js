@@ -108,6 +108,42 @@ const generateUniqueToken = function (cb) {
   });
 };
 
+/**
+ * Passwords are kept as scrypt hashes: "scrypt$N$r$p$salt$hash" (salt and hash in base64), slow to
+ * try one guess after another on, should the database be read. Those kept before as one round of
+ * salted SHA-512 still match, and are hashed anew once they have (see models/user.js).
+ */
+const SCRYPT = { N: 16384, r: 8, p: 1, keylen: 64 };
+
+/** The hash of the password, to keep. */
+function hashPassword(password, cb) {
+  const salt = crypto.randomBytes(cryptoSettings.saltLength);
+  const { N, r, p, keylen } = SCRYPT;
+  crypto.scrypt(String(password), salt, keylen, { N, r, p }, function (err, hash) {
+    if (err) return cb(err);
+    cb(null, ['scrypt', N, r, p, salt.toString('base64'), hash.toString('base64')].join('$'));
+  });
+}
+
+/**
+ * Whether the password matches the hash kept (with its salt, for a hash of before); old: the hash
+ * is of before, to be made anew.
+ */
+function verifyPassword(stored, salt, candidate, cb) {
+  if (typeof stored !== 'string' || typeof candidate !== 'string') return cb(false, false);
+  if (!stored.startsWith('scrypt$')) {
+    return compareHash(stored, candidate, salt, (match) => cb(match, true));
+  }
+  const [, N, r, p, saltB64, hashB64] = stored.split('$');
+  const expected = Buffer.from(hashB64, 'base64');
+  crypto.scrypt(candidate, Buffer.from(saltB64, 'base64'), expected.length, { N: +N, r: +r, p: +p }, function (err, hash) {
+    if (err) return cb(false, false);
+    cb(crypto.timingSafeEqual(hash, expected), false);
+  });
+}
+
+module.exports.hashPassword = hashPassword;
+module.exports.verifyPassword = verifyPassword;
 module.exports.generateHashWithSalt = generateHashWithSalt;
 module.exports.generateUniqueToken = generateUniqueToken;
 module.exports.compareHash = compareHash;
