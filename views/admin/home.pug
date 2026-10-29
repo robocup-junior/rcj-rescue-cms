@@ -79,10 +79,11 @@ block main_content
                 .icon-wrapper
                   i.fas.fa-bullseye
                 span {{"admin.home.queue" | translate}}
-              div.action-card-premium(ng-click="open('/admin/mongo')")
-                .icon-wrapper
-                  i.fas.fa-database
-                span {{"admin.home.mongo" | translate}}
+              if mongoExpress
+                div.action-card-premium(ng-click="open('/admin/mongo')")
+                  .icon-wrapper
+                    i.fas.fa-database
+                  span {{"admin.home.mongo" | translate}}
               div.action-card-premium(ng-click="go('/admin/short')")
                 .icon-wrapper
                   i.fas.fa-link

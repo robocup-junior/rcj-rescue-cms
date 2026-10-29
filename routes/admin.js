@@ -12,7 +12,7 @@ const { LEAGUES } = competitiondb;
 
 /* GET home page. */
 router.get('/', function (req, res) {
-  res.render('admin/home', { user: req.user });
+  res.render('admin/home', { user: req.user, mongoExpress: process.env.MONGO_EXPRESS === 'true' });
 });
 
 router.get('/user', function (req, res) {

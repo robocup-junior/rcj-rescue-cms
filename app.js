@@ -17,8 +17,6 @@ var favicon = require('serve-favicon')
 var logger = require('./config/logger').mainLogger
 var cookieParser = require('cookie-parser')
 var bodyParser = require('body-parser')
-const mongo_express = require('mongo-express/lib/middleware')
-const mongo_express_config = require('./mongo_express_config')
 
 // db
 var db = require('./config/db')
@@ -242,7 +240,12 @@ async function bootstrap(){
     app.use('/admin', pass.ensureAdmin, adminRoute)
     bullAdapter.setBasePath('/admin/queues')
     app.use('/admin/queues', pass.ensureSuper, bullAdapter.getRouter())
-    app.use('/admin/mongo', pass.ensureSuper, await mongo_express(mongo_express_config))
+    // The database's own editor, for the super admins: only when it is asked for (MONGO_EXPRESS),
+    // as it is a way into all of the database, of packages with vulnerabilities of their own
+    if (process.env.MONGO_EXPRESS === 'true') {
+        const mongo_express = require('mongo-express/lib/middleware')
+        app.use('/admin/mongo', pass.ensureSuper, await mongo_express(require('./mongo_express_config')))
+    }
     app.use('/document', [documentRoute.public, pass.ensureAuthenticated, documentRoute.private, pass.ensureAdmin, documentRoute.admin])
     app.use('/registration', [registrationRoute.public, pass.ensureAuthenticated, registrationRoute.private, pass.ensureAdmin, registrationRoute.admin])
     app.use('/mypage', [myPageRoute.public, pass.ensureAuthenticated, myPageRoute.private, pass.ensureAdmin, myPageRoute.admin])
