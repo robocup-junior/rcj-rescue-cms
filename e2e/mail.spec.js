@@ -148,3 +148,30 @@ test('a test mail is sent to the admin who writes it', async ({ page, browser, b
   expect(mail.html).not.toContain('/api/mail/open/');
   expect(await (await request.get(`/api/mail/sent/${competition}`)).json()).toEqual([]);
 });
+
+// Hundreds of sent mails: shown a hundred at a time, the others on asking, and refined at once (the
+// rows of before not left shown).
+test('the sent mails are shown a hundred at a time, and refined at once', async ({ page }) => {
+  const { request } = page;
+  const competition = await api.competition(request);
+  const res = await request.post('/api/teams', { data: { competition, league: 'Maze', name: 'Many Mails', teamCode: 'MM', email: [`many${Date.now()}@example.com`] } });
+  const team = (await res.json()).id;
+  const data = Array.from({ length: 120 }, (_, i) => ({ _id: team, mailData: { title: `Bulk ${i}`, content: '<p>x</p>' } }));
+  // Reserved for later: kept in the queue, not sent meanwhile
+  expect((await request.post('/api/mail/send', { data: { data, reservation: Date.now() + 3600 * 1000 } })).ok()).toBeTruthy();
+
+  await open(page, `/admin/${competition}/mails/sent`);
+  const rows = page.locator('tr[ng-repeat^="mail in"]');
+  await expect(rows).toHaveCount(100);
+  await page.locator('button[ng-click="showMore()"]').click();
+  await expect(rows).toHaveCount(120);
+  await expect(page.locator('button[ng-click="showMore()"]')).toHaveCount(0);
+
+  // Refined to the mails delivered: none yet
+  await page.locator('.mail-stat').nth(1).click();
+  await expect(rows).toHaveCount(0);
+  await page.locator('.mail-stat').nth(1).click();
+  await page.locator('[ng-click="showFilter = !showFilter"]').click();
+  await page.locator('input[ng-model="refineSubject"]').fill('Bulk 11');
+  await expect(rows).toHaveCount(11);
+});

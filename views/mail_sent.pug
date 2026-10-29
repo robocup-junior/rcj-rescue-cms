@@ -45,8 +45,8 @@ block main_content
     div
       span.mail-stat(ng-repeat="s in STATUSES" ng-click="toggleStatus(s)" ng-class="{'active': refineStatus === s}")
         span.status-dot(ng-style="{'background-color': statusColour(s)}")
-        | {{'mail.status.' + s | translate}}
-        b(ng-bind="countOf(s)")
+        | {{statusLabel[s]}}
+        b(ng-bind="counts[s] || 0")
     .segmented.mb-2
       button(type='button' ng-click="refineType='all'" ng-class="{'active': refineType=='all'}") {{"mail.sent.all" | translate}}
       button(type='button' ng-click="refineType='team'" ng-class="{'active': refineType=='team'}")
@@ -112,7 +112,7 @@ block main_content
             i.fas.fa-pen.mr-1
             | {{"mail.home.newMail" | translate}}
       .table-responsive(ng-if="mails.length > 0" style="padding: 0 1.5rem 1.5rem;")
-        table.table-modern.table-auto
+        table.table-modern.table-auto(no-animate)
           thead
             tr
               th {{"mail.sent.time" | translate}}
@@ -124,23 +124,29 @@ block main_content
               th {{"mail.sent.status" | translate}}
               th(style="width: 90px;") {{"common.operation" | translate}}
           tbody
-            tr(ng-repeat='mail in mails | filter:list_filter')
+            //- What a row shows is bound once: the rows are made again when the mails are reloaded
+            tr(ng-repeat='mail in shown | limitTo:limit')
               td.text-nowrap
-                i.fas.fa-clock.mr-1.text-muted(ng-if="mail.reservation")
-                | {{time(mail.time)}}
+                i.fas.fa-clock.mr-1.text-muted(ng-if="::mail.reservation")
+                | {{::mail.timeText}}
               td
-                a(href="" ng-click="mailView(mail)" ng-bind="mail.subject")
-              td(ng-bind='mail.team.teamCode')
-              td.font-weight-bold(ng-if='mail.team' ng-bind='mail.team.name')
-              td.font-weight-bold(ng-if='!mail.team')
-                i.fas.fa-user-tie.mr-1.text-muted(uib-tooltip='{{"mail.home.toStaff" | translate}}' tooltip-append-to-body="true")
-                | {{mail.user.username}}
-              td(ng-bind='mail.team.country')
-              td(ng-bind='mail.team.league')
+                a(href="" ng-click="mailView(mail)" ng-bind="::mail.subject")
+              td(ng-bind='::mail.team.teamCode')
+              td.font-weight-bold(ng-if='::mail.team' ng-bind='::mail.team.name')
+              td.font-weight-bold(ng-if='::!mail.team')
+                i.fas.fa-user-tie.mr-1.text-muted(title='{{::"mail.home.toStaff" | translate}}')
+                | {{::mail.user.username}}
+              td(ng-bind='::mail.team.country')
+              td(ng-bind='::mail.team.league')
               td.text-nowrap
-                span.status-dot(ng-style="{'background-color': statusColour(mail.status)}")
-                | {{'mail.status.' + mail.status | translate}}
+                span.status-dot(ng-style="::{'background-color': mail.colour}")
+                | {{statusLabel[mail.status]}}
               td
                 .btn-table-group
-                  .btn-table-action(ng-click="detail(mail)" uib-tooltip='{{"mail.sent.detail" | translate}}' tooltip-append-to-body="true")
+                  .btn-table-action(ng-click="detail(mail)" title='{{::"mail.sent.detail" | translate}}')
                     i.fas.fa-envelope-open-text
+        .text-center.mt-3(ng-if="shown.length > limit")
+          button.btn.btn-sm.btn-light(type='button' ng-click="showMore()")
+            i.fas.fa-chevron-down.mr-1
+            | {{"mail.sent.showMore" | translate:{n: shown.length - limit} }}
+        p.text-center.text-muted.small.mt-3(ng-if="shown.length == 0") {{"mail.sent.noneMatch" | translate}}

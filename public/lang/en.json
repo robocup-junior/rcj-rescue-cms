@@ -1780,6 +1780,8 @@
             "all": "All",
             "refresh": "Reload",
             "none": "No mail has been sent yet",
+            "showMore": "Show more ({{n}} left)",
+            "noneMatch": "No mail matches",
             "js": {
                 "eventLog": "Event Log",
                 "user": "User",

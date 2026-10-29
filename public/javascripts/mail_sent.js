@@ -1,4 +1,15 @@
 var app = angular.module("MailSent", ['ngTouch','ngAnimate', 'ui.bootstrap', 'pascalprecht.translate', 'ngCookies']);
+// Rows of the element not animated in or out: hundreds of them refined at once would be animated
+// one by one, slowly, the ones leaving left shown meanwhile
+app.directive('noAnimate', ['$animate', function ($animate) {
+    return {
+        restrict: 'A',
+        link: function (scope, element) {
+            $animate.enabled(element, false);
+        }
+    };
+}]);
+
 app.controller('MailSentController', ['$scope', '$uibModal', '$log', '$http', '$translate', '$sce', function ($scope, $uibModal, $log, $http, $translate, $sce) {
 
     let eventLog_mes;
@@ -72,6 +83,31 @@ app.controller('MailSentController', ['$scope', '$uibModal', '$log', '$http', '$
     })
 
 
+    // The states, each with its name and the number of the mails in it, and the one the list is
+    // refined to
+    $scope.STATUSES = [-1, 0, 1, 2, -2];
+    $scope.statusLabel = {};
+    for (let s of $scope.STATUSES) {
+        $translate('mail.status.' + s).then(function (val) {
+            $scope.statusLabel[s] = val;
+        }, function (translationId) {
+            $scope.statusLabel[s] = translationId;
+        });
+    }
+    $scope.counts = {};
+    $scope.refineStatus = null;
+    $scope.toggleStatus = function (status) {
+        $scope.refineStatus = $scope.refineStatus === status ? null : status;
+    }
+
+    // The mails (hundreds of them): what each row shows made once, when they are loaded, not at
+    // each digest; the rows shown a page at a time
+    const PAGE = 100;
+    $scope.limit = PAGE;
+    $scope.showMore = function () {
+        $scope.limit += PAGE;
+    }
+
     $scope.mailEnable = mailEnable;
     $scope.loading = false;
     $scope.load = function () {
@@ -79,21 +115,17 @@ app.controller('MailSentController', ['$scope', '$uibModal', '$log', '$http', '$
         $http.get("/api/mail/sent/" + competitionId).then(function (response) {
             // To a team, or to a user of the staff
             $scope.mails = response.data.filter(m=>m.team != null || m.user != null);
+            $scope.counts = {};
+            for (let m of $scope.mails) {
+                m.timeText = $scope.time(m.time);
+                m.colour = $scope.statusColour(m.status);
+                $scope.counts[m.status] = ($scope.counts[m.status] || 0) + 1;
+            }
+            applyFilter();
             $scope.loading = false;
         }, function () {
             $scope.loading = false;
         })
-    }
-    $scope.load();
-
-    // The states, each with the number of the mails in it, and the one the list is refined to
-    $scope.STATUSES = [-1, 0, 1, 2, -2];
-    $scope.refineStatus = null;
-    $scope.countOf = function (status) {
-        return ($scope.mails || []).filter((m) => m.status == status).length;
-    }
-    $scope.toggleStatus = function (status) {
-        $scope.refineStatus = $scope.refineStatus === status ? null : status;
     }
 
     // To the teams, the staff, or both
@@ -108,9 +140,10 @@ app.controller('MailSentController', ['$scope', '$uibModal', '$log', '$http', '$
         window.open(path, "_blank");
     }
 
+    // One formatter for every mail: making one is slow
+    const timeFormat = new Intl.DateTimeFormat(navigator.language, {year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric"});
     $scope.time = function(time){
-        let options = {year: "numeric", month: "short", day: "numeric", hour: "numeric", minute: "numeric", second: "numeric"};
-        return(new Intl.DateTimeFormat(navigator.language, options).format(time*1000));
+        return timeFormat.format(time*1000);
     }
 
     $scope.mailView = function(mail){
@@ -194,16 +227,21 @@ app.controller('MailSentController', ['$scope', '$uibModal', '$log', '$http', '$
 
     $scope.$watch('Rleagues', function (newValue, oldValue) {
         showAllLeagues = true
-        //console.log(newValue)
         for (let league in newValue) {
-            if (newValue.hasOwnProperty(league)) {
-                if (newValue[league]) {
-                    showAllLeagues = false
-                    return
-                }
+            if (newValue.hasOwnProperty(league) && newValue[league]) {
+                showAllLeagues = false
+                break
             }
         }
+        applyFilter();
     }, true);
+
+    // The mails shown, refined again only when the refinements (or the mails) change
+    function applyFilter() {
+        $scope.shown = ($scope.mails || []).filter((m) => $scope.list_filter(m));
+        $scope.limit = PAGE;
+    }
+    $scope.$watchGroup(['refineStatus', 'refineType', 'refineSubject', 'refineName', 'refineCode', 'refineRegion'], applyFilter);
 
     $scope.list_filter = function (value, index, array) {
         if($scope.refineStatus !== null && value.status != $scope.refineStatus) return false;
@@ -216,5 +254,6 @@ app.controller('MailSentController', ['$scope', '$uibModal', '$log', '$http', '$
         return (showAllLeagues || $scope.Rleagues[value.team.league]) && (~value.subject.indexOf($scope.refineSubject))  && (~value.team.name.indexOf($scope.refineName)) && (~value.team.teamCode.indexOf($scope.refineCode)) && (~value.team.country.indexOf($scope.refineRegion))
     }
 
+    $scope.load();
 }]);
 

@@ -42,6 +42,10 @@ const mailSchema = new Schema({
 })
 
 
+// A competition's sent mails listed, and a mail found by its id when it is opened or its link clicked
+mailSchema.index({ competition: 1 })
+mailSchema.index({ mailId: 1 })
+
 const mailAuthSchema = new Schema({
   competition: {type: ObjectId, ref: 'Competition'},
   token: {type: String},
