@@ -147,6 +147,8 @@ async function bootstrap(){
         extended: false
     }))
     app.use(cookieParser())
+    // The signage contents are put in by admins: not run as pages either (helper/servedFiles.js)
+    app.use('/signage_content', require('./helper/servedFiles'))
     app.use(express.static(path.join(__dirname, 'public')))
 
     /*
@@ -177,6 +179,8 @@ async function bootstrap(){
     //                          API Calls
     //========================================================================
 
+    // Files people put in are never run as pages from here (helper/servedFiles.js)
+    app.use('/api', require('./helper/servedFiles'))
     app.use('/api/auth', apiAuthRoute)
     app.use('/api/maps/line', [apiLineMapsRoute.public, pass.ensureLoginApi, apiLineMapsRoute.private, pass.ensureAdminApi, apiLineMapsRoute.admin])
     app.use('/api/maps/maze', [apiMazeMapsRoute.public, pass.ensureLoginApi, apiMazeMapsRoute.private, pass.ensureAdminApi, apiMazeMapsRoute.admin])

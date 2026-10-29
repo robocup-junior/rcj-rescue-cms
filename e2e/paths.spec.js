@@ -1,6 +1,7 @@
-// File names in the API's paths stay in their folders: a name that climbs out (../) reads or
-// removes nothing outside, whether given by a team with its token, a reviewer, or an admin. The
-// folders the names would climb out of are made as the app makes them.
+// Files people put in: their names in the API's paths stay in their folders (a name that climbs
+// out with ../ reads or removes nothing outside, whether given by a team with its token, a
+// reviewer, or an admin; the folders it would climb out of are made as the app makes them), and a
+// file that a browser would run as a page is not run from the app's origin.
 const fs = require('fs');
 const path = require('path');
 const { test, expect } = require('./fixtures');
@@ -66,4 +67,25 @@ test('files are not removed from outside their folders', async ({ page }) => {
   } finally {
     fs.rmSync(canary, { force: true });
   }
+});
+
+test('a page put in by a team is given to be saved, not shown as a page of the app', async ({ page }) => {
+  const upload = async (name, mimeType, content) => {
+    const res = await page.request.post(`/api/document/files/usercontent/${TEAM}/tokenM01`, {
+      multipart: { image: { name, mimeType, buffer: Buffer.from(content) } },
+    });
+    expect(res.ok()).toBeTruthy();
+    return (await res.json()).url;
+  };
+  for (const [name, type] of [['page.html', 'text/html'], ['drawing.svg', 'image/svg+xml']]) {
+    const res = await page.request.get(await upload(name, type, '<script>parent.hacked = true</script>'));
+    expect(res.headers()['content-disposition'], name).toMatch(/^attachment/);
+    expect(res.headers()['content-security-policy'], name).toBe('sandbox');
+    expect(res.headers()['x-content-type-options'], name).toBe('nosniff');
+  }
+  // A picture is shown as it is
+  const picture = await page.request.get(await upload('photo.png', 'image/png', '\x89PNG'));
+  expect(picture.headers()['content-type']).toBe('image/png');
+  expect(picture.headers()['content-disposition']).toBeUndefined();
+  fs.rmSync(path.join(ROOT, 'documents', C, TEAM, 'usercontent'), { recursive: true, force: true });
 });
