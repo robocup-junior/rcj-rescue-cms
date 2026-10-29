@@ -72,15 +72,40 @@ app.controller('MailSentController', ['$scope', '$uibModal', '$log', '$http', '$
     })
 
 
-    $http.get("/api/mail/sent/" + competitionId).then(function (response) {
-        // To a team, or to a user of the staff
-        $scope.mails = response.data.filter(m=>m.team != null || m.user != null);
-        console.log($scope.mails);
-    })
+    $scope.mailEnable = mailEnable;
+    $scope.loading = false;
+    $scope.load = function () {
+        $scope.loading = true;
+        $http.get("/api/mail/sent/" + competitionId).then(function (response) {
+            // To a team, or to a user of the staff
+            $scope.mails = response.data.filter(m=>m.team != null || m.user != null);
+            $scope.loading = false;
+        }, function () {
+            $scope.loading = false;
+        })
+    }
+    $scope.load();
+
+    // The states, each with the number of the mails in it, and the one the list is refined to
+    $scope.STATUSES = [-1, 0, 1, 2, -2];
+    $scope.refineStatus = null;
+    $scope.countOf = function (status) {
+        return ($scope.mails || []).filter((m) => m.status == status).length;
+    }
+    $scope.toggleStatus = function (status) {
+        $scope.refineStatus = $scope.refineStatus === status ? null : status;
+    }
+
+    // To the teams, the staff, or both
+    $scope.refineType = "all";
 
 
     $scope.go = function (path) {
         window.location = path
+    }
+
+    $scope.open = function (path){
+        window.open(path, "_blank");
     }
 
     $scope.time = function(time){
@@ -117,6 +142,8 @@ app.controller('MailSentController', ['$scope', '$uibModal', '$log', '$http', '$
         switch(status){
             case -2:
               return "#ffadad";
+            case -1:
+              return "#e2e8f0";
             case 0:
               return "#b2ffff";
             case 1:
@@ -179,6 +206,9 @@ app.controller('MailSentController', ['$scope', '$uibModal', '$log', '$http', '$
     }, true);
 
     $scope.list_filter = function (value, index, array) {
+        if($scope.refineStatus !== null && value.status != $scope.refineStatus) return false;
+        if($scope.refineType == "team" && value.team == null) return false;
+        if($scope.refineType == "staff" && value.user == null) return false;
         if(value.team == null){
             // To the staff: of no team, nor league
             return value.user != null && showAllLeagues && (~value.subject.indexOf($scope.refineSubject)) && (~value.user.username.indexOf($scope.refineName)) && $scope.refineCode == "" && $scope.refineRegion == "";

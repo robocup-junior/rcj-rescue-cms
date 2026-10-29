@@ -179,9 +179,10 @@ function writeFile (path, contents, cb) {
 
 /**
  * A mail queued for the mail server and kept with the competition's sent mails: to a team, or to a
- * user of the competition's staff (recipient: {competition, team} or {competition, user}).
+ * user of the competition's staff (recipient: {competition, team} or {competition, user}). With
+ * test, a mail for the sender to see how it reads: neither kept nor tracked.
  */
-async function queueMail(req, recipient, to, mailData, reservation) {
+async function queueMail(req, recipient, to, mailData, reservation, { test = false } = {}) {
   let html = mailData.content
     .replace(/\r?\n/g, '')
     .replace(/<p><br><\/p>/g, '<br>')
@@ -210,7 +211,7 @@ async function queueMail(req, recipient, to, mailData, reservation) {
       'cid': cid
     })
     html = html.replace(match[1], `cid:${cid}`);
-    writeFile(`${destination}/${cid}`,match[1],function(err){
+    if (!test) writeFile(`${destination}/${cid}`,match[1],function(err){
       if(err) throw err;
     });
   }
@@ -218,7 +219,7 @@ async function queueMail(req, recipient, to, mailData, reservation) {
   let html4text = html;
 
   const replacedURL = [];
-  while ((match = regexpHref.exec(html)) !== null) {
+  while (!test && (match = regexpHref.exec(html)) !== null) {
     if (match[2].indexOf('/api/mail/click/') == -1) {
       const token = randomToken(N / 4);
 
@@ -243,9 +244,10 @@ async function queueMail(req, recipient, to, mailData, reservation) {
     tags: { a: { options: { hideLinkHrefIfSameAsText: true } } },
   });
 
-  html = `<style type="text/css">p {margin:0; padding:0; margin-bottom:0;}</style>${html}<img src="${req.headers.origin}/api/mail/open/${mailId}"/>`;
+  html = `<style type="text/css">p {margin:0; padding:0; margin-bottom:0;}</style>${html}`;
+  if (!test) html += `<img src="${req.headers.origin}/api/mail/open/${mailId}"/>`;
 
-  const subject = mailData.title.replace("_", "");
+  const subject = (test ? '[TEST] ' : '') + mailData.title.replace("_", "");
   const message = {
     from: {
       name: process.env.MAIL_SENDER || 'RoboCupJunior CMS',
@@ -261,6 +263,11 @@ async function queueMail(req, recipient, to, mailData, reservation) {
     disableFileAccess: true,
     disableUrlAccess: true,
   };
+
+  if (test) {
+    mailQueue.add('send', { message }, { attempts: 3, backoff: 60000 });
+    return;
+  }
 
   const now = Math.floor(new Date().getTime() / 1000);
   const data = await new mailDb.mail({
@@ -421,6 +428,32 @@ adminRouter.post('/staff/:competitionId', access.competition(ACCESSLEVELS.ADMIN,
   });
 });
 
+// A mail of the competition sent to the user who writes it, to see how it reads
+adminRouter.post('/test/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), async function (req, res, next) {
+  if(smtp == null){
+    res.status(500).send({
+      msg: 'Please check smtp parameters',
+    });
+    return;
+  }
+
+  const [mail] = mailsOf({ data: [{ _id: req.params.competitionId, mailData: req.body.mailData }] }) || [];
+  if (!mail) return res.status(400).send({ msg: 'Bad request' });
+
+  const dbUser = await userdb.user.findById(req.user._id).select('email').lean();
+  if (!dbUser || typeof dbUser.email !== 'string' || !validator.isEmail(dbUser.email)) {
+    return res.status(400).send({ msg: 'No email address is registered for you' });
+  }
+
+  try {
+    await queueMail(req, { competition: req.params.competitionId }, [dbUser.email], mail.mailData, undefined, { test: true });
+  } catch (e) {
+    logger.error(e);
+    return res.status(500).send({ msg: e.message });
+  }
+  res.status(200).send({ msg: 'A test email has been added to the queue!', to: dbUser.email });
+});
+
 adminRouter.get('/sent/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const id = req.params.competitionId;
 
@@ -481,7 +514,9 @@ adminRouter.get('/sent/:competitionId/:mailId', access.competition(ACCESSLEVELS.
           err: err.message,
         });
       }
-      let htmlMail = dbMail.html;
+      // Without the picture that tells the mail was opened: the admin reading it here is not the
+      // recipient
+      let htmlMail = dbMail.html.replace(/<img src="[^"]*\/api\/mail\/open\/[^"]*"\/>/g, '');
       const regexpSrc = /<img src=["|']cid:(.*?)["|']+/g;
       const destination = safePath('mailAttachment', id, mailId);
       let match;

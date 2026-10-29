@@ -5,8 +5,22 @@ services:
       - .:/opt/rcj-cms
       - app_node_modules:/opt/rcj-cms/node_modules
       - app_components:/opt/rcj-cms/public/components
+    depends_on:
+      - mailpit
     environment:
       NODE_ENV: development
+      # Where process.env sets no mail server, the mails go to Mailpit, not out: see them at
+      # http://localhost:8025 (server.js)
+      MAIL_DEV_SMTP: "mailpit"
+      MAIL_DEV_PORT: "1025"
+      MAIL_DEV_WEB_UI: "http://localhost:8025"
+
+  # A mail server for development: it keeps every mail it is given and shows them on its web page
+  mailpit:
+    image: axllent/mailpit:v1.32
+    ports:
+      - "8025:8025"
+    restart: unless-stopped
 
 volumes:
   app_node_modules:

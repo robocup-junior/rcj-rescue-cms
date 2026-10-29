@@ -297,3 +297,134 @@
 .modern-card-header .btn i:only-child {
   margin-right: 0;
 }
+
+/* ---- Mails ---- */
+/* The steps of writing a mail: recipients, writing, preview */
+.mail-steps {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.mail-steps .mail-step {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.mail-steps .mail-step .step-number {
+  width: 26px;
+  height: 26px;
+  font-size: 0.8rem;
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+.mail-steps .mail-step.active {
+  color: #1e293b;
+}
+
+.mail-steps .mail-step.active .step-number {
+  background: #3b82f6;
+  color: white;
+}
+
+.mail-steps .mail-step.done .step-number {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.mail-steps .mail-step-line {
+  width: 2rem;
+  height: 2px;
+  background: #e2e8f0;
+}
+
+/* Switch between the teams and the staff */
+.segmented {
+  display: inline-flex;
+  background: #f1f5f9;
+  border-radius: 10px;
+  padding: 0.25rem;
+  gap: 0.25rem;
+}
+
+.segmented button {
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0.4rem 1rem;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.segmented button.active {
+  background: white;
+  color: #1e293b;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.segmented .count {
+  display: inline-block;
+  min-width: 1.5rem;
+  margin-left: 0.4rem;
+  padding: 0 0.4rem;
+  border-radius: 1rem;
+  background: #e2e8f0;
+  font-size: 0.75rem;
+}
+
+.segmented button.active .count {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+/* A variable, put in the subject or the content where it is clicked */
+.var-chip {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  margin: 0 0.35rem 0.35rem 0;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-family: SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.8rem;
+  cursor: pointer;
+  border: 1px solid #dbeafe;
+}
+
+.var-chip:hover {
+  background: #dbeafe;
+}
+
+/* The numbers of the sent mails in each state, each a filter */
+.mail-stat {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.85rem;
+  margin: 0 0.5rem 0.5rem 0;
+  border-radius: 2rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.mail-stat b {
+  margin-left: 0.4rem;
+}
+
+.mail-stat.active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+tr.no-email td {
+  color: #94a3b8;
+}

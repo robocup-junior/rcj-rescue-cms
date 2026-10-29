@@ -62,14 +62,14 @@ router.get('/:competitionid/mails', function (req, res, next) {
   if (!ObjectId.isValid(id)) {
     return next();
   }
-  if (
-    auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN) &&
-    process.env.MAIL_SMTP
-  )
+  // Shown without a mail server too, saying so: for the pages to be seen (and worked on) before one
+  // is set
+  if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
     res.render('mail_home', {
       id,
       user: req.user,
       mailEnable: process.env.MAIL_SMTP,
+      mailWebUi: process.env.MAIL_WEB_UI,
     });
   else res.render('access_denied', { user: req.user });
 });
@@ -80,14 +80,14 @@ router.get('/:competitionid/mails/sent', function (req, res, next) {
   if (!ObjectId.isValid(id)) {
     return next();
   }
-  if (
-    auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN) &&
-    process.env.MAIL_SMTP
-  )
+  // Shown without a mail server too, saying so: for the pages to be seen (and worked on) before one
+  // is set
+  if (auth.authCompetition(req.user, id, ACCESSLEVELS.ADMIN))
     res.render('mail_sent', {
       id,
       user: req.user,
       mailEnable: process.env.MAIL_SMTP,
+      mailWebUi: process.env.MAIL_WEB_UI,
     });
   else res.render('access_denied', { user: req.user });
 });

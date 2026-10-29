@@ -155,6 +155,19 @@ We use GitHub Issues for tracking bugs, enhancements, and feature requests:
    yarn dev
    ```
 
+### Mails
+
+`docker compose up` also starts [Mailpit](https://mailpit.axllent.org/), a mail server for development: where `process.env` sets no `MAIL_SMTP`, the mails the app sends are kept there, not delivered, and shown at http://localhost:8025 (linked from the mail pages). Without Docker, run Mailpit yourself (`brew install mailpit && mailpit`) and set in `process.env`:
+
+```
+MAIL_SMTP=localhost
+MAIL_PORT=1025
+MAIL_FROM=cms@localhost
+MAIL_WEB_UI=http://localhost:8025
+```
+
+Without any mail server set, the mail pages still open, saying that mails cannot be sent.
+
 ### Database Setup
 
 1. Ensure MongoDB is running on your system

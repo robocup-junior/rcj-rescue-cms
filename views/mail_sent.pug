@@ -7,6 +7,7 @@ block vars
 append scripts
   script.
     var competitionId = "#{id}"
+    var mailEnable = #{!!mailEnable}
   script(src='/javascripts/mail_sent.js?v=' + assetVersion)
 
 block hero_breadcrumb
@@ -24,7 +25,37 @@ block hero_title
 block hero_subtitle
   | {{"mail.sent.title" | translate}}
 
+block hero_actions
+  if mailWebUi
+    button.btn-action-icon(type='button' ng-click="open('" + mailWebUi + "')" uib-tooltip='{{"mail.home.devInbox" | translate}}' tooltip-placement="bottom")
+      i.fas.fa-inbox
+  button.btn-action-icon(type='button' ng-click="go('/admin/' + competition._id + '/mails')" uib-tooltip='{{"mail.home.newMail" | translate}}' tooltip-placement="bottom")
+    i.fas.fa-pen
+
 block main_content
+  if !mailEnable
+    .alert.alert-warning.d-flex.align-items-start
+      i.fas.fa-exclamation-triangle.mr-3.mt-1
+      div
+        b {{"mail.home.noSmtp" | translate}}
+        div.small {{"mail.home.error" | translate}}
+
+  //- The numbers in each state, each a filter
+  .d-flex.justify-content-between.align-items-center.flex-wrap.mb-2(style="gap: 0.75rem;")
+    div
+      span.mail-stat(ng-repeat="s in STATUSES" ng-click="toggleStatus(s)" ng-class="{'active': refineStatus === s}")
+        span.status-dot(ng-style="{'background-color': statusColour(s)}")
+        | {{'mail.status.' + s | translate}}
+        b(ng-bind="countOf(s)")
+    .segmented.mb-2
+      button(type='button' ng-click="refineType='all'" ng-class="{'active': refineType=='all'}") {{"mail.sent.all" | translate}}
+      button(type='button' ng-click="refineType='team'" ng-class="{'active': refineType=='team'}")
+        i.fas.fa-users.mr-1
+        | {{"mail.home.toTeams" | translate}}
+      button(type='button' ng-click="refineType='staff'" ng-class="{'active': refineType=='staff'}")
+        i.fas.fa-user-tie.mr-1
+        | {{"mail.home.toStaff" | translate}}
+
   .modern-card
     .modern-card-header
       .d-flex.justify-content-between.align-items-center.w-100
@@ -32,6 +63,8 @@ block main_content
           i.fas.fa-mail-bulk.mr-2
           | {{"mail.sent.title" | translate}}
         .btn-table-group
+          .btn-table-action(ng-click="load()" uib-tooltip="{{'mail.sent.refresh' | translate}}")
+            i.fas.fa-sync-alt(ng-class="{'fa-spin': loading}")
           .btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'common.refine' | translate}}")
             i.fas.fa-filter
 
@@ -71,7 +104,14 @@ block main_content
             span.filter-badge(ng-repeat='(key, value) in Rleagues track by key' ng-class="{'active': Rleagues[key]}" ng-click="Rleagues[key] = !Rleagues[key]") {{key}}
 
     .modern-card-body.p-0
-      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+      .empty-state.m-4(ng-if="mails && mails.length == 0")
+        i.fas.fa-paper-plane.d-block
+        | {{"mail.sent.none" | translate}}
+        div.mt-3
+          a.btn.btn-sm.btn-premium-primary(ng-href="/admin/{{competitionId}}/mails")
+            i.fas.fa-pen.mr-1
+            | {{"mail.home.newMail" | translate}}
+      .table-responsive(ng-if="mails.length > 0" style="padding: 0 1.5rem 1.5rem;")
         table.table-modern.table-auto
           thead
             tr
@@ -84,7 +124,7 @@ block main_content
               th {{"mail.sent.status" | translate}}
               th(style="width: 90px;") {{"common.operation" | translate}}
           tbody
-            tr(ng-repeat='mail in mails | filter:list_filter | orderBy:"[name]"')
+            tr(ng-repeat='mail in mails | filter:list_filter')
               td.text-nowrap
                 i.fas.fa-clock.mr-1.text-muted(ng-if="mail.reservation")
                 | {{time(mail.time)}}

@@ -40,12 +40,19 @@ test('a mail is written from a template, previewed for the team, and sent', asyn
     await expect(page.getByText('Hello Mailed Team, see you at').first()).toBeVisible();
     const sent = page.waitForResponse((r) => r.request().method() === 'POST' && r.url().includes('/api/mail/'));
     await page.locator('button[ng-click="mailSend()"]').first().click();
+    // once the sending is confirmed
+    await page.locator('.swal2-confirm').click();
     expect((await sent).ok()).toBeTruthy();
 
     // Queued for the mail server, and among the competition's sent mails
     await expect.poll(async () => (await api.mailsTo(address)).map((m) => m.subject)).toContain('Welcome Mailed Team');
     await open(page, `/admin/${competition}/mails/sent`);
     await expect(page.getByText('Welcome Mailed Team').first()).toBeVisible();
+    // Read there by the admin, without the picture that would have it opened by its team
+    const [kept] = await (await request.get(`/api/mail/sent/${competition}`)).json();
+    const { html } = await (await request.get(`/api/mail/sent/${competition}/${kept.mailId}`)).json();
+    expect(html).toContain('Hello Mailed Team');
+    expect(html).not.toContain('/api/mail/open/');
 
     // The template removed from the list
     await open(page, '/admin/mailTemplates');
@@ -88,11 +95,16 @@ test('a mail is sent to the staff of the competition', async ({ page }) => {
   await row(judge).locator('[ng-click="newMail(user)"]').click();
   await page.locator('input[ng-model="mailTitle"]').fill('Shift for ${userName}');
   await page.locator('.ql-editor').click();
-  await page.keyboard.type('Thanks for judging at ${competitionName}.');
+  // A variable put where the cursor is, by its chip
+  await page.keyboard.type('Thanks for judging at ');
+  await page.locator('.var-chip', { hasText: 'competitionName' }).click();
+  await page.keyboard.type('.');
   await page.locator('button[ng-click="preview()"]').click();
   await expect(page.locator('input[ng-model="toTeam[previewNo].mailData.title"]')).toHaveValue(`Shift for ${judge}`);
+  await expect(page.locator('.mail-preview-box')).toContainText(/Thanks for judging at E2E .+\./);
   const sent = page.waitForResponse((r) => r.request().method() === 'POST' && r.url().includes('/api/mail/staff/'));
   await page.locator('button[ng-click="mailSend()"]').first().click();
+  await page.locator('.swal2-confirm').click();
   expect((await sent).ok()).toBeTruthy();
 
   await expect.poll(async () => (await api.mailsTo(address)).map((m) => m.subject)).toContain(`Shift for ${judge}`);
@@ -104,4 +116,35 @@ test('a mail is sent to the staff of the competition', async ({ page }) => {
   const ids = Object.fromEntries(staff.map((u) => [u.username, u._id]));
   const mailData = { title: 'x', content: 'x' };
   expect((await request.post(`/api/mail/staff/${competition}`, { data: { data: [{ _id: ids[`noaddress${stamp}`], mailData }] } })).status()).toBe(400);
+});
+
+// A mail sent to the admin who writes it, to see how it reads: to the admin's own address, neither
+// kept with the competition's sent mails nor tracked; refused to an admin without an address.
+test('a test mail is sent to the admin who writes it', async ({ page, browser, baseURL }) => {
+  const { request } = page;
+  const competition = await api.competition(request);
+  const stamp = Date.now();
+  const writer = `writer${stamp}`;
+  const address = `${writer}@example.com`;
+  expect((await request.post('/api/users', { data: { username: writer, password: 'writerpass', email: address, admin: true, competitions: [{ id: competition, accessLevel: 10 }] } })).ok()).toBeTruthy();
+  const mailData = { title: `Draft ${stamp}`, content: '<p>See <a href="https://example.com/">this</a></p>' };
+
+  // The admin of the seed has no address
+  expect((await request.post(`/api/mail/test/${competition}`, { data: { mailData } })).status()).toBe(400);
+
+  const context = await browser.newContext({ baseURL });
+  try {
+    expect((await context.request.post('/api/auth/login', { data: { username: writer, password: 'writerpass' } })).ok()).toBeTruthy();
+    const res = await context.request.post(`/api/mail/test/${competition}`, { data: { mailData } });
+    expect(res.ok(), await res.text()).toBeTruthy();
+    expect((await res.json()).to).toBe(address);
+  } finally {
+    await context.close();
+  }
+
+  await expect.poll(async () => (await api.mailsTo(address)).map((m) => m.subject)).toContain(`[TEST] Draft ${stamp}`);
+  const [mail] = (await api.mailsTo(address)).filter((m) => m.subject === `[TEST] Draft ${stamp}`);
+  expect(mail.html).toContain('href="https://example.com/"');
+  expect(mail.html).not.toContain('/api/mail/open/');
+  expect(await (await request.get(`/api/mail/sent/${competition}`)).json()).toEqual([]);
 });

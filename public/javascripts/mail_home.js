@@ -48,6 +48,7 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
     }
 
     $scope.competitionId = competitionId;
+    $scope.mailEnable = mailEnable;
 
     $scope.mode = "select";
 
@@ -116,8 +117,19 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
         $scope.templates = response.data
     })
 
-    $scope.changeTemplate = function(){
+    $scope.changeTemplate = async function(){
         if(!$scope.selectedTemplate) return;
+        if($scope.hasContent() || $scope.mailTitle){
+            const result = await Swal({
+                type: 'warning',
+                title: $translate.instant('mail.home.js.overwrite'),
+                showCancelButton: true,
+            });
+            if(!result.value){
+                $scope.$apply(function(){ $scope.selectedTemplate = null; });
+                return;
+            }
+        }
         $http.get(`/api/mail/templates/${$scope.selectedTemplate}`).then(function (response) {
             $scope.mailContent = response.data;
             $scope.mailTitle = $scope.selectedTemplate.replace(".html","");
@@ -130,6 +142,15 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
 
     $scope.open = function (path){
         window.open(path, "_blank");
+    }
+
+    $scope.selectedCount = function () {
+        let list = $scope.target == "staff" ? $scope.staff : $scope.teams;
+        return (list || []).filter((r) => r.checked).length;
+    }
+
+    $scope.withoutEmail = function (list) {
+        return (list || []).filter((r) => (r.hasEmail === undefined ? !$scope.validEmail(r.email) : !r.hasEmail)).length;
     }
 
     $scope.selectedAll = false;
@@ -167,6 +188,8 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
     }
 
     function prepareVariable(){
+        $scope.triedPreview = false;
+        $scope.showAllRecipients = false;
         if($scope.target == "staff"){
             for(let user of $scope.toTeam){
                 user.variable = {
@@ -258,8 +281,14 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
     }
 
     $scope.previewNo = 0;
+    $scope.hasContent = function(){
+        return !!$scope.mailContent && $scope.mailContent.replace(/<[^>]*>/g, '').trim() != "" || /<img/.test($scope.mailContent || "");
+    }
+
     $scope.preview = function(){
-        console.log($scope.mailContent);
+        $scope.triedPreview = true;
+        if(!$scope.mailTitle || !$scope.hasContent()) return;
+        $scope.previewNo = 0;
         for(let team of $scope.toTeam){
             team.mailData = {
                 "title": template($scope.mailTitle, team.variable),
@@ -300,8 +329,41 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
         return(new Intl.DateTimeFormat(navigator.language, options).format(time));
     }
 
+    // The mail being previewed, sent to the user who writes it
+    $scope.testSend = function(){
+        const mail = $scope.toTeam[$scope.previewNo];
+        $scope.sending = true;
+        $http.post(`/api/mail/test/${competitionId}`, {mailData: mail.mailData}).then(function (response) {
+            $scope.sending = false;
+            Toast.fire({
+                type: 'success',
+                title: $translate.instant('mail.home.js.testSent', {to: response.data.to})
+            })
+        }, function (error) {
+            $scope.sending = false;
+            Swal({
+                type: 'error',
+                title: "ERROR",
+                text: error.data.msg
+            })
+        })
+    }
+
     $scope.sending = false;
-    $scope.mailSend = function(){
+    $scope.mailSend = async function(){
+        const n = $scope.toTeam.length;
+        const confirmed = await Swal({
+            type: 'question',
+            title: $translate.instant($scope.reservation ? 'mail.home.js.confirmReserve' : 'mail.home.js.confirmSend', {n: n}),
+            text: $scope.reservation ? $scope.time($scope.reservation) : '',
+            showCancelButton: true,
+            confirmButtonText: $translate.instant($scope.reservation ? 'mail.home.reservation' : 'mail.home.send'),
+        });
+        if (!confirmed.value) return;
+        $scope.$apply(function(){ send(); });
+    }
+
+    function send(){
         $scope.sending = true;
         Swal({
             title: sending_mes,
@@ -314,7 +376,12 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
                     Swal({
                         type: 'success',
                         title: complete_mes,
-                        html: completeMes_mes
+                        text: completeMes_mes,
+                        showCancelButton: true,
+                        confirmButtonText: $translate.instant('mail.home.deliveryStatus'),
+                        cancelButtonText: $translate.instant('mail.home.js.writeAnother'),
+                    }).then(function (result) {
+                        if (result.value) $scope.go('/admin/' + competitionId + '/mails/sent');
                     })
                     $scope.toTeam = [];
                     angular.forEach($scope.teams, function (team) { team.checked = false; });
@@ -327,6 +394,7 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
                     $scope.selectedTemplate = null;
                     $scope.sending = false;
                     $scope.reservation = undefined;
+                    $scope.triedPreview = false;
                     
                 }, function (error) {
                     console.log(error)
@@ -335,7 +403,7 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
                     Swal({
                         type: 'error',
                         title: "ERROR",
-                        html: error.data.msg
+                        text: error.data.msg
                     })
                 })
             }
@@ -369,9 +437,55 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
         return ~value.username.indexOf($scope.refineUser)
     }
 
-    $scope.quillHeight = function (editor) {
-        editor.container.style.height = '500px';
+    let quill = null;
+    let lastField = "content";
+    $scope.editorCreated = function (editor) {
+        editor.container.style.height = '420px';
+        quill = editor;
     };
+
+    $scope.focusField = function (field) {
+        lastField = field;
+    }
+
+    $scope.contentSelected = function (range) {
+        if (range) lastField = "content";
+    }
+
+    $scope.variableKeys = function () {
+        if (!$scope.toTeam || !$scope.toTeam[0] || !$scope.toTeam[0].variable) return [];
+        return Object.keys($scope.toTeam[0].variable);
+    }
+
+    $scope.insertVariable = function (key) {
+        const text = '${' + key + '}';
+        if (lastField == "subject") {
+            const input = document.getElementById("mailTitle");
+            const title = $scope.mailTitle || "";
+            const start = input.selectionStart == null ? title.length : input.selectionStart;
+            const end = input.selectionEnd == null ? title.length : input.selectionEnd;
+            $scope.mailTitle = title.slice(0, start) + text + title.slice(end);
+            setTimeout(function () {
+                input.focus();
+                input.setSelectionRange(start + text.length, start + text.length);
+            });
+            return;
+        }
+        if (!quill) return;
+        // Where the cursor was (kept by the editor), or at the end
+        const range = quill.getSelection(true);
+        const index = range ? range.index : Math.max(quill.getLength() - 1, 0);
+        quill.insertText(index, text, 'user');
+        quill.setSelection(index + text.length, 0, 'user');
+    }
+
+    // What was written is not lost by leaving the page unasked
+    window.addEventListener('beforeunload', function (e) {
+        if ($scope.mode != "select" && ($scope.hasContent() || $scope.mailTitle) && !$scope.sending) {
+            e.preventDefault();
+            e.returnValue = '';
+        }
+    });
 }]);
 
 app.constant('NG_QUILL_CONFIG', {

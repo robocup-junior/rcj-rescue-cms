@@ -164,6 +164,7 @@ DELETE /api/mail/templates/:fileName (admin): any admin
 POST /api/mail/send (admin): ADMIN in the competition of the Team at body.data[]._id
 GET /api/mail/staff/:competitionId (admin): ADMIN in the competition at params.competitionId
 POST /api/mail/staff/:competitionId (admin): ADMIN in the competition at params.competitionId
+POST /api/mail/test/:competitionId (admin): ADMIN in the competition at params.competitionId
 GET /api/mail/sent/:competitionId (admin): ADMIN in the competition at params.competitionId
 GET /api/mail/sent/:competitionId/:mailId (admin): ADMIN in the competition at params.competitionId
 GET /api/mail/event/:competitionId/:mailId (admin): ADMIN in the competition at params.competitionId
