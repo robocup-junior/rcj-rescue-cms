@@ -79,28 +79,31 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         });
         if (typeof runId !== 'undefined') {
             socket.emit('subscribe', 'runs/' + runId);
-            socket.on('data', function (data) {
-                $scope.status = data.status;
-                $scope.exitBonus = data.exitBonus;
-                $scope.score = data.score;
-                $scope.normalizedScore = data.normalizedScore;
-                $scope.LoPs = data.LoPs;
-                $scope.foundVictims = sum(data.foundVictims.map(v => v.count));
-                $scope.distKits = data.distKits;
-                $scope.MisIdent = data.misidentification;
-
-                // Verified time by timekeeper
-                $scope.minutes = data.time.minutes;
-                $scope.seconds = data.time.seconds;
-
-                // Scoring elements of the tiles
-                for (var i = 0; i < data.tiles.length; i++) {
-                    $scope.tiles[data.tiles[i].x + ',' +
-                        data.tiles[i].y + ',' +
-                        data.tiles[i].z] = data.tiles[i];
-                }
-                $scope.$apply();
-                console.log("Updated view from socket.io");
+            socket.on('changed', function () {
+                // Told the run changed: taken again, as this page may see it
+                $http.get("/api/runs/maze/" + runId + "?normalized=true").then(function (response) {
+                    const data = response.data;
+                    $scope.status = data.status;
+                    $scope.exitBonus = data.exitBonus;
+                    $scope.score = data.score;
+                    $scope.normalizedScore = data.normalizedScore;
+                    $scope.LoPs = data.LoPs;
+                    $scope.foundVictims = sum(data.foundVictims.map(v => v.count));
+                    $scope.distKits = data.distKits;
+                    $scope.MisIdent = data.misidentification;
+    
+                    // Verified time by timekeeper
+                    $scope.minutes = data.time.minutes;
+                    $scope.seconds = data.time.seconds;
+    
+                    // Scoring elements of the tiles
+                    for (var i = 0; i < data.tiles.length; i++) {
+                        $scope.tiles[data.tiles[i].x + ',' +
+                            data.tiles[i].y + ',' +
+                            data.tiles[i].z] = data.tiles[i];
+                    }
+                    console.log("Updated view from socket.io");
+                });
             });
         }
 

@@ -634,7 +634,8 @@ privateRouter.put('/:runid', access.of(mazeRun, 'params.runid', ACCESSLEVELS.JUD
               socketIo.sockets
                 .in(`runs/maze/${dbRun.competition._id}`)
                 .emit('changed');
-              socketIo.sockets.in(`runs/${dbRun._id}`).emit('data', dbRun);
+              // Only that it changed: anyone may be in the room, the run is had as they may see it (GET)
+              socketIo.sockets.in(`runs/${dbRun._id}`).emit('changed');
               if (statusUpdate) {
                 socketIo.sockets
                   .in(`runs/maze/${dbRun.competition._id}/status`)

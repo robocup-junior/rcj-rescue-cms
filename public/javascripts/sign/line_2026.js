@@ -123,55 +123,58 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         if (typeof runId !== 'undefined') {
             socket.emit('subscribe', 'runs/' + runId);
 
-            socket.on('data', function (data) {
-                //console.log(data);
-                $scope.status = data.status;
-                $scope.exitBonus = data.exitBonus;
-                $scope.stiles = data.tiles;
-                $scope.score = data.score;
-                $scope.raw_score = data.raw_score;
-                $scope.normalizedScore = data.normalizedScore;
-                $scope.multiplier = data.multiplier;
-                $scope.showedUp = data.showedUp;
-                $scope.LoPs = data.LoPs;
-                $scope.LoPs_total = 0;
-                for (var i = 0; i < $scope.LoPs.length; i++) {
-                    $scope.LoPs_total += $scope.LoPs[i];
-                }
-                $scope.minutes = data.time.minutes;
-                $scope.seconds = data.time.seconds;
-
-                $scope.victim_list = data.rescueOrder;
-
-                $scope.checkPointDistance = [];
-                let tmp = {
-                    dis: 1,
-                    status: $scope.showedUp,
-                    point: 5 * $scope.showedUp
-                }
-                $scope.checkPointDistance.push(tmp);
-                let prevCheckPoint = 0;
-                let j = 0;
-                for (let i in $scope.stiles) {
-                    if ($scope.isCheckPoint($scope.stiles[i])) {
-                        let tmp = {
-                            dis: i - prevCheckPoint,
-                            status: $scope.stiles[i].scoredItems[findItem("checkpoint", $scope.stiles[i].scoredItems)].scored,
-                            point: (i - prevCheckPoint) * $scope.stiles[i].scoredItems[findItem("checkpoint", $scope.stiles[i].scoredItems)].scored * $scope.LoPsCountPoint($scope.LoPs[j])
-                        }
-                        $scope.checkPointDistance.push(tmp);
-                        prevCheckPoint = i;
-                        j++;
+            socket.on('changed', function () {
+                // Told the run changed: taken again, as this page may see it
+                $http.get("/api/runs/line/" + runId + "?normalized=true").then(function (response) {
+                    const data = response.data;
+                    //console.log(data);
+                    $scope.status = data.status;
+                    $scope.exitBonus = data.exitBonus;
+                    $scope.stiles = data.tiles;
+                    $scope.score = data.score;
+                    $scope.raw_score = data.raw_score;
+                    $scope.normalizedScore = data.normalizedScore;
+                    $scope.multiplier = data.multiplier;
+                    $scope.showedUp = data.showedUp;
+                    $scope.LoPs = data.LoPs;
+                    $scope.LoPs_total = 0;
+                    for (var i = 0; i < $scope.LoPs.length; i++) {
+                        $scope.LoPs_total += $scope.LoPs[i];
                     }
-                }
-                let finalDis = $scope.stiles.length - 1 - prevCheckPoint;
-                $scope.checkPointDistance.push({
-                    dis: finalDis,
-                    status: $scope.exitBonus,
-                    point: finalDis * $scope.exitBonus * $scope.LoPsCountPoint($scope.LoPs[j])
+                    $scope.minutes = data.time.minutes;
+                    $scope.seconds = data.time.seconds;
+    
+                    $scope.victim_list = data.rescueOrder;
+    
+                    $scope.checkPointDistance = [];
+                    let tmp = {
+                        dis: 1,
+                        status: $scope.showedUp,
+                        point: 5 * $scope.showedUp
+                    }
+                    $scope.checkPointDistance.push(tmp);
+                    let prevCheckPoint = 0;
+                    let j = 0;
+                    for (let i in $scope.stiles) {
+                        if ($scope.isCheckPoint($scope.stiles[i])) {
+                            let tmp = {
+                                dis: i - prevCheckPoint,
+                                status: $scope.stiles[i].scoredItems[findItem("checkpoint", $scope.stiles[i].scoredItems)].scored,
+                                point: (i - prevCheckPoint) * $scope.stiles[i].scoredItems[findItem("checkpoint", $scope.stiles[i].scoredItems)].scored * $scope.LoPsCountPoint($scope.LoPs[j])
+                            }
+                            $scope.checkPointDistance.push(tmp);
+                            prevCheckPoint = i;
+                            j++;
+                        }
+                    }
+                    let finalDis = $scope.stiles.length - 1 - prevCheckPoint;
+                    $scope.checkPointDistance.push({
+                        dis: finalDis,
+                        status: $scope.exitBonus,
+                        point: finalDis * $scope.exitBonus * $scope.LoPsCountPoint($scope.LoPs[j])
+                    });
+                    console.log("Updated view from socket.io");
                 });
-                $scope.$apply();
-                console.log("Updated view from socket.io");
             });
         }
 

@@ -650,7 +650,8 @@ privateRouter.put('/:runid', access.of(lineRun, 'params.runid', ACCESSLEVELS.JUD
               socketIo.sockets
                 .in(`runs/line/${dbRun.competition._id}`)
                 .emit('changed');
-              socketIo.sockets.in(`runs/${dbRun._id}`).emit('data', dbRun);
+              // Only that it changed: anyone may be in the room, the run is had as they may see it (GET)
+              socketIo.sockets.in(`runs/${dbRun._id}`).emit('changed');
               socketIo.sockets
                 .in(`fields/${dbRun.field}`)
                 .emit('data', { newRun: dbRun._id });

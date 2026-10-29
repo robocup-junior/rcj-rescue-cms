@@ -52,14 +52,16 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         });
         if (typeof runId !== 'undefined') {
             socket.emit('subscribe', 'runs/' + runId);
-            socket.on('data', function (data) {
-                $scope.score = data.score;
-                // Verified time by timekeeper
-                $scope.minutes = data.time.minutes;
-                $scope.seconds = data.time.seconds;
-
-                $scope.$apply();
-                console.log("Updated view from socket.io");
+            socket.on('changed', function () {
+                // Told the run changed: taken again, as this page may see it
+                $http.get("/api/runs/simulation/" + runId + "?normalized=true").then(function (response) {
+                    const data = response.data;
+                    $scope.score = data.score;
+                    // Verified time by timekeeper
+                    $scope.minutes = data.time.minutes;
+                    $scope.seconds = data.time.seconds;
+                    console.log("Updated view from socket.io");
+                });
             });
         }
 

@@ -365,7 +365,8 @@ privateRouter.put('/:runid', access.of(simRun, 'params.runid', ACCESSLEVELS.JUDG
             socketIo.sockets
               .in(`runs/simulation/${dbRun.competition._id}`)
               .emit('changed');
-            socketIo.sockets.in(`runs/${dbRun._id}`).emit('data', dbRun);
+            // Only that it changed: anyone may be in the room, the run is had as they may see it (GET)
+              socketIo.sockets.in(`runs/${dbRun._id}`).emit('changed');
             socketIo.sockets
               .in(`fields/${dbRun.field}`)
               .emit('data', { newRun: dbRun._id });
