@@ -15,11 +15,11 @@ const auth = require('../../helper/authLevels');
 const { ACCESSLEVELS } = require('../../models/user');
 const access = require('../../helper/access');
 
-publicRouter.get('/', access.anyone('the rounds are public'), function (req, res) {
+publicRouter.get('/', access.superAdmin('the rounds of every competition'), function (req, res) {
   query.doFindResultSortQuery(req, res, null, null, competitiondb.round);
 });
 
-publicRouter.get('/:roundid', access.anyone('the rounds are public'), function (req, res, next) {
+publicRouter.get('/:roundid', access.of(competitiondb.round, 'params.roundid', ACCESSLEVELS.VIEW), function (req, res, next) {
   const id = req.params.roundid;
 
   if (!ObjectId.isValid(id)) {
@@ -27,23 +27,6 @@ publicRouter.get('/:roundid', access.anyone('the rounds are public'), function (
   }
 
   query.doIdQuery(req, res, id, '', competitiondb.round);
-});
-
-publicRouter.get('/:roundid/runs', access.anyone('shown as their status and the ranking settings let them be, by the handler'), function (req, res, next) {
-  const id = req.params.roundid;
-
-  if (!ObjectId.isValid(id)) {
-    return next();
-  }
-
-  competitiondb.run.find({ round: id }, function (err, data) {
-    if (err) {
-      logger.error(err);
-      res.status(400).send({ msg: 'Could not get runs', err: err.message });
-    } else {
-      res.status(200).send(data);
-    }
-  });
 });
 
 adminRouter.delete('/:roundid', access.of(competitiondb.round, 'params.roundid', ACCESSLEVELS.ADMIN), function (req, res, next) {

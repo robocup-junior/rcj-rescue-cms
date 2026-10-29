@@ -63,18 +63,4 @@ router.post('/login', access.anyone('logging in, the guesses limited'), guessLim
   })(req, res);
 });
 
-/**
- * @api {get} /auth/logout Request logout
- * @apiName GetLogout
- * @apiGroup Auth
- * @apiVersion 1.0.0
- * @apiDescription This function is used for logging out. This means you are cleared from the server, so even
- * though the cookie is left it doesnt know you.
- *
- */
-router.get('/logout', access.anyone('logging out'), function (req, res) {
-  req.logout();
-  res.send({ msg: 'Logout successful', status: true });
-});
-
 module.exports = router;

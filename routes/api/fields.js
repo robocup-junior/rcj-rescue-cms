@@ -18,11 +18,11 @@ const access = require('../../helper/access');
 //                          /maps Api endpoints
 //= =======================================================================
 
-publicRouter.get('/', access.anyone('the fields are public'), function (req, res) {
+publicRouter.get('/', access.superAdmin('the fields of every competition'), function (req, res) {
   query.doFindResultSortQuery(req, res, null, null, competitiondb.field);
 });
 
-publicRouter.get('/:fieldid', access.anyone('the fields are public'), function (req, res, next) {
+publicRouter.get('/:fieldid', access.loggedIn('a field, for the signage displays'), function (req, res, next) {
   const id = req.params.fieldid;
 
   if (!ObjectId.isValid(id)) {
@@ -30,23 +30,6 @@ publicRouter.get('/:fieldid', access.anyone('the fields are public'), function (
   }
 
   query.doIdQuery(req, res, id, '', competitiondb.field);
-});
-
-publicRouter.get('/:fieldid/runs', access.anyone('shown as their status and the ranking settings let them be, by the handler'), function (req, res, next) {
-  const id = req.params.fieldid;
-
-  if (!ObjectId.isValid(id)) {
-    return next();
-  }
-
-  competitiondb.run.find({ field: id }, function (err, data) {
-    if (err) {
-      logger.error(err);
-      res.status(400).send({ msg: 'Could not get runs', err: err.message });
-    } else {
-      res.status(200).send(data);
-    }
-  });
 });
 
 adminRouter.delete('/:fieldid', access.of(competitiondb.field, 'params.fieldid', ACCESSLEVELS.ADMIN), function (req, res, next) {

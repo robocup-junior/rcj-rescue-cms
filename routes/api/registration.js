@@ -18,6 +18,7 @@ const {escapeRegExp, toLength} = require('lodash');
 const mkdirp = require('mkdirp');
 const {mailQueue} = require("../../queue/mailQueue")
 const access = require('../../helper/access');
+const safePath = require('../../helper/safePath');
 
 
 const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -120,7 +121,7 @@ publicRouter.post('/auth/:competitionId/:leagueId/:lang', access.anyone("the lea
               if (err) {
                 logger.error(err);
               } else {
-                const templateDir = `${__dirname}/../../templates/mail/`
+                const templateDir = `${safePath('templates', 'mail')}/`
                 let fileName = "_Email Verification.html";
                 if(lang == 'ja' && fs.existsSync(`${templateDir}_メール認証.html`)) fileName = "_メール認証.html";
                 const path = `${templateDir}${fileName}`;
@@ -237,9 +238,9 @@ publicRouter.post('/reg/:authId/:token/:lang', access.anyone('the token mailed c
                   err: err.message,
                 });
               } else {
-                let path = `${__dirname}/../../documents/${authInfo.competition._id}/${teamData._id}`;
+                let path = safePath('documents', authInfo.competition._id, teamData._id);
                 mkdirp.sync(path);
-                path = `${__dirname}/../../cabinet/${authInfo.competition._id}/${teamData._id}`;
+                path = safePath('cabinet', authInfo.competition._id, teamData._id);
                 mkdirp.sync(path);
 
                 //Send mail
@@ -249,7 +250,7 @@ publicRouter.post('/reg/:authId/:token/:lang', access.anyone('the token mailed c
                   });
                   return;
                 }
-                const templateDir = `${__dirname}/../../templates/mail/`
+                const templateDir = `${safePath('templates', 'mail')}/`
                 let fileName = "_Team registration completed.html";
                 if(lang == 'ja' && fs.existsSync(`${templateDir}_チーム登録完了.html`)) fileName = "_チーム登録完了.html";
                 path = `${templateDir}${fileName}`;

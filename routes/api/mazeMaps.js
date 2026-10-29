@@ -17,13 +17,14 @@ const mazeSSR = require('../../helper/mazeSSR');
 const auth = require('../../helper/authLevels');
 const { ACCESSLEVELS } = require('../../models/user');
 const access = require('../../helper/access');
+const workLimits = require('../../helper/workLimits');
 
-publicRouter.get('/', access.anyone('the maps are public'), getMazeMaps);
-publicRouter.get('/image/:mapid', access.anyone('the maps are public'), getMapImage);
-publicRouter.post('/scoresheet', access.anyone('made of the map the request gives'), handlePublicScoreSheet);
-publicRouter.post('/competition-targets-pdf', access.anyone('made of the map the request gives'), handlePublicCompetitionTargets);
-publicRouter.post('/map-image-pdf', access.anyone('made of the map the request gives'), handlePublicMapImagePDF);
-publicRouter.post('/map-image-png', access.anyone('made of the map the request gives'), handlePublicMapImagePNG);
+publicRouter.get('/', access.competition(ACCESSLEVELS.VIEW, 'query.competition'), getMazeMaps);
+publicRouter.get('/image/:mapid', access.of(mazeMap, 'params.mapid', ACCESSLEVELS.VIEW, { orIf: access.mapOfRunShown(mazeRun, 'params.mapid') }), getMapImage);
+publicRouter.post('/scoresheet', access.anyone('made of the map the request gives'), workLimits.makingFiles, handlePublicScoreSheet);
+publicRouter.post('/competition-targets-pdf', access.anyone('made of the map the request gives'), workLimits.makingFiles, handlePublicCompetitionTargets);
+publicRouter.post('/map-image-pdf', access.anyone('made of the map the request gives'), workLimits.makingFiles, handlePublicMapImagePDF);
+publicRouter.post('/map-image-png', access.anyone('made of the map the request gives'), workLimits.makingFiles, handlePublicMapImagePNG);
 
 adminRouter.get('/export', access.competition(ACCESSLEVELS.ADMIN, ['query.competition', access.competitionsOf(mazeMap, 'query.ids')]), handleExport);
 
@@ -172,7 +173,7 @@ adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition')
   });
 });
 
-publicRouter.get('/:map', access.anyone('the maps are public'), function (req, res, next) {
+publicRouter.get('/:map', access.of(mazeMap, 'params.map', ACCESSLEVELS.VIEW, { orIf: access.mapOfRunShown(mazeRun, 'params.map') }), function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {

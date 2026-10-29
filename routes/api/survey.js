@@ -23,6 +23,7 @@ const path = require('path');
 const mkdirp = require('mkdirp');
 var crypto = require("crypto");
 const access = require('../../helper/access');
+const safePath = require('../../helper/safePath');
 
 const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const N = 32;
@@ -221,7 +222,7 @@ adminRouter.delete('/delete/:competitionId/:surveyId', access.competition(ACCESS
             err: err.message,
           });
         }
-        fs.rmdir(`${__dirname}/../../survey/${competitionId}/${surveyId}`, { recursive: true }, (err) => {
+        fs.rmdir(safePath('survey', competitionId, surveyId), { recursive: true }, (err) => {
           if (err) {
             logger.error(err.message);
           }
@@ -290,7 +291,7 @@ adminRouter.put('/edit/:competitionId/:surveyId', access.competition(ACCESSLEVEL
     });
 });
 
-publicRouter.get('/list/:competitionId/:leagueId/:teamId', access.anyone('the surveys open to a league: their names and deadlines'), function (req, res, next) {
+publicRouter.get('/list/:competitionId/:leagueId/:teamId', access.team({ tokenAt: 'query.token', inCompetition: 'params.competitionId' }), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const leagueId = req.params.leagueId;
   const teamId = req.params.teamId;
@@ -696,7 +697,7 @@ adminRouter.get('/answer/:competitionId/:survId', access.competition(ACCESSLEVEL
           dbAnswer.map(team => {
             team.answer.map(ans => {
               if (questionTypes[ans.questionId] == 'file') {
-                let path = `${__dirname}/../../survey/${team.competition}/${dbSurvey._id}/${team.team._id}/${ans.questionId}`;
+                let path = safePath('survey', team.competition, dbSurvey._id, team.team._id, ans.questionId);
                 let hash = md5(path);
                 if (hash == '') ans.answer = "";
                 else ans.hash = hash;
@@ -800,7 +801,7 @@ publicRouter.post('/answer/:teamId/:token/:survId/file/:questionId', access.team
                 });
               }
 
-              const destination = `${__dirname}/../../survey/${team.competition}/${survey._id}/${team._id}`;
+              const destination = safePath('survey', team.competition, survey._id, team._id);
               if (!fs.existsSync(destination)) {
                 mkdirp.sync(destination);
               }
@@ -912,7 +913,7 @@ publicRouter.get('/answer/:teamId/:token/:survId/file/:questionId', access.team(
             let questionAnswer = dbAnswer.answer.find(a => a.questionId == questionId);
             if (questionAnswer) {
               let originalFileName = questionAnswer.answer;
-              let path = `${__dirname}/../../survey/${dbTeam.competition}/${survId}/${dbTeam._id}/${sanitize(questionId)}`;
+              let path = safePath('survey', dbTeam.competition, survId, dbTeam._id, sanitize(questionId));
               fs.stat(path, (err, stat) => {
                 // Handle file not found
                 if (err !== null) {

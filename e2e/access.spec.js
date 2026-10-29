@@ -115,6 +115,14 @@ function requestFor(route) {
   const query = {};
   let body = {};
   for (const access of route.access) {
+    // A team's, by its token at the places the declaration says
+    if (access.kind === 'team') {
+      for (const [at, value] of [[access.teamAt, fx.Team], [access.tokenAt, 'not-the-token']]) {
+        const [source, key] = at.split('.');
+        if (source === 'body' && !Array.isArray(body)) body[key] = value;
+        if (source === 'query') query[key] = value;
+      }
+    }
     for (const from of String(access.from || '').split(/ and |, /)) {
       const at = from.match(/(params|query|body)((?:\.\w+(?:\[\])?)+)|(params|query|body)(\[\])\.(\w+)/);
       if (!at) continue;
@@ -176,8 +184,8 @@ function describe(access) {
     case 'anyAdmin': return 'any admin';
     case 'superAdmin': return 'super admin';
     case 'competition': return `${access.level}${role} in the competition at ${access.from}`;
-    case 'of': return `${access.level}${role} in the competition of the ${access.model} at ${access.from}`;
-    case 'team': return ['the team by its token', access.staff && `${access.staff} in its competition`, access.publicDocuments && 'its public documents',
+    case 'of': return `${access.level}${role} in the competition of the ${access.model} at ${access.from}${access.orIf ? `, or ${access.orIf}` : ''}`;
+    case 'team': return [`the team${access.teamAt !== 'params.teamId' ? ` at ${access.teamAt}` : ''} by its token${access.tokenAt !== 'params.token' ? ` at ${access.tokenAt}` : ''}`, access.staff && `${access.staff} in its competition`, access.publicDocuments && 'its public documents',
       access.competitionToken && "its competition's public token"].filter(Boolean).join(' or ') + (access.inCompetition ? `, of the competition at ${access.inCompetition}` : '');
     default: return JSON.stringify(access);
   }

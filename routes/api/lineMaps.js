@@ -20,12 +20,13 @@ const auth = require('../../helper/authLevels');
 const scoreSheetPDFLine2 = require('../../helper/scoreSheetPDFLine2');
 const { ACCESSLEVELS } = require('../../models/user');
 const access = require('../../helper/access');
+const workLimits = require('../../helper/workLimits');
 
-privateRouter.get('/', access.loggedIn('the maps, each public'), getLineMaps);
-publicRouter.get('/image/:mapid', access.anyone('the maps are public'), getMapImage);
-publicRouter.post('/map-image-pdf', access.anyone('made of the map the request gives'), handlePublicMapImagePDF);
-publicRouter.post('/map-image-png', access.anyone('made of the map the request gives'), handlePublicMapImagePNG);
-publicRouter.post('/scoresheet', access.anyone('made of the map the request gives'), handleScoresheet);
+privateRouter.get('/', access.competition(ACCESSLEVELS.VIEW, 'query.competition'), getLineMaps);
+publicRouter.get('/image/:mapid', access.of(lineMap, 'params.mapid', ACCESSLEVELS.VIEW, { orIf: access.mapOfRunShown(lineRun, 'params.mapid') }), getMapImage);
+publicRouter.post('/map-image-pdf', access.anyone('made of the map the request gives'), workLimits.makingFiles, handlePublicMapImagePDF);
+publicRouter.post('/map-image-png', access.anyone('made of the map the request gives'), workLimits.makingFiles, handlePublicMapImagePNG);
+publicRouter.post('/scoresheet', access.anyone('made of the map the request gives'), workLimits.makingFiles, handleScoresheet);
 
 adminRouter.get('/export', access.competition(ACCESSLEVELS.ADMIN, ['query.competition', access.competitionsOf(lineMap, 'query.ids')]), handleExport);
 
@@ -149,7 +150,7 @@ adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition')
   });
 });
 
-publicRouter.get('/:map', access.anyone('the maps are public'), function (req, res, next) {
+publicRouter.get('/:map', access.of(lineMap, 'params.map', ACCESSLEVELS.VIEW, { orIf: access.mapOfRunShown(lineRun, 'params.map') }), function (req, res, next) {
   const id = req.params.map;
 
   if (!ObjectId.isValid(id)) {
@@ -373,9 +374,9 @@ adminRouter.delete('/:map', access.of(lineMap, 'params.map', ACCESSLEVELS.ADMIN)
   });
 });
 
-publicRouter.get('/tiletypes', access.anyone('of no competition'), getTileTypes);
+publicRouter.get('/tiletypes', access.anyAdmin('the tile types, for the tile sets'), getTileTypes);
 
-publicRouter.get('/tiletypes/:tiletype', access.anyone('of no competition'), function (req, res, next) {
+publicRouter.get('/tiletypes/:tiletype', access.anyAdmin('the tile types, for the tile sets'), function (req, res, next) {
   const id = req.params.tiletype;
 
   if (!ObjectId.isValid(id)) {

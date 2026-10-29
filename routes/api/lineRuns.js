@@ -237,7 +237,7 @@ privateRouter.get(
 
 publicRouter.get(
   '/find/:competitionid/:field/:status',
-  access.anyone('the runs of a field, for the signage'), function (req, res, next) {
+  access.loggedIn('the runs of a field, for the signage displays'), function (req, res, next) {
     const id = req.params.competitionid;
     const field_id = req.params.field;
     const { status } = req.params;

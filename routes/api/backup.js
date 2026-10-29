@@ -8,6 +8,7 @@ const adminRouter = express.Router();
 const multer = require('multer');
 const fs = require('fs-extra');
 const sanitize = require('sanitize-filename');
+const safePath = require('../../helper/safePath');
 const glob = require('glob');
 const path = require('path');
 const { ObjectId } = require('mongoose').Types;
@@ -16,7 +17,7 @@ const auth = require('../../helper/authLevels');
 
 const { ACCESSLEVELS } = require('../../models/user');
 
-const base_tmp_path = `${__dirname}/../../tmp/`;
+const base_tmp_path = `${safePath('tmp')}/`;
 
 const {backupQueue} = require("../../queue/backupQueue")
 const access = require('../../helper/access');
@@ -108,7 +109,7 @@ adminRouter.get('/archive/:competitionId/:fileName', access.competition(ACCESSLE
   }
 
   if (auth.authCompetition(req.user,competitionId,ACCESSLEVELS.ADMIN)){ // Admin check
-    let path = `${__dirname}/../../backup/${competitionId}/${sanitize(fileName)}`;
+    let path = safePath('backup', competitionId, sanitize(fileName));
     fs.stat(path, (err, stat) => {
       // Handle file not found
       if (err !== null) {
@@ -148,7 +149,7 @@ adminRouter.delete('/archive/:competitionId/:fileName', access.competition(ACCES
   }
 
   if (auth.authCompetition(req.user,competitionId,ACCESSLEVELS.ADMIN)){ // Admin check
-    let path = `${__dirname}/../../backup/${competitionId}/${sanitize(fileName)}`;
+    let path = safePath('backup', competitionId, sanitize(fileName));
     fs.unlink(path, (err) => {
       if (err){
         return res.status(500).send({

@@ -26,6 +26,7 @@ const mkdirp = require("mkdirp");
 const { match } = require('assert');
 const getDirName = require("path").dirname
 const access = require('../../helper/access');
+const safePath = require('../../helper/safePath');
 
 
 
@@ -83,7 +84,7 @@ if (process.env.MAIL_SMTP &&process.env.MAIL_PORT &&process.env.MAIL_FROM) {
 }
 
 adminRouter.get('/templates', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
-  const path = `${__dirname}/../../templates/mail/`;
+  const path = `${safePath('templates', 'mail')}/`;
   fs.readdir(path, { withFileTypes: true }, (err, dirents) => {
     if (err) {
       console.error(err);
@@ -107,7 +108,7 @@ adminRouter.get('/templates', access.anyAdmin('the templates are of no competiti
 adminRouter.get('/templates/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
-  const path = `${__dirname}/../../templates/mail/${sanitizeFilename(fileName)}`;
+  const path = safePath('templates', 'mail', sanitizeFilename(fileName));
   fs.stat(path, (err, stat) => {
     // Handle file not found
     if (err !== null && err.code === 'ENOENT') {
@@ -135,7 +136,7 @@ adminRouter.get('/templates/:fileName', access.anyAdmin('the templates are of no
 adminRouter.post('/templates/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
-  const path = `${__dirname}/../../templates/mail/${sanitizeFilename(fileName)}`;
+  const path = safePath('templates', 'mail', sanitizeFilename(fileName));
   fs.writeFile(path, req.body.content, function (err) {
     if (err) {
       res.status(404).send({
@@ -154,7 +155,7 @@ adminRouter.post('/templates/:fileName', access.anyAdmin('the templates are of n
 adminRouter.delete('/templates/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
-  const path = `${__dirname}/../../templates/mail/${sanitizeFilename(fileName)}`;
+  const path = safePath('templates', 'mail', sanitizeFilename(fileName));
   fs.unlink(path, function (err) {
     if (err) {
       res.status(404).send({
@@ -227,7 +228,7 @@ adminRouter.post('/send', access.of(competitiondb.team, 'body.data[]._id', ACCES
     const regexpSrc = /<img src=["|'](.*?)["|']+/g;
     let attachments = [];
     const htmlB = html
-    const destination = `${__dirname}/../../mailAttachment/${team.competition}/${mailId}`;
+    const destination = safePath('mailAttachment', team.competition, mailId);
     while (match = regexpSrc.exec(htmlB)) {
       let cid = `${mailId}-${attachments.length}`;
       attachments.push({
@@ -407,7 +408,7 @@ adminRouter.get('/sent/:competitionId/:mailId', access.competition(ACCESSLEVELS.
       }
       let htmlMail = dbMail.html;
       const regexpSrc = /<img src=["|']cid:(.*?)["|']+/g;
-      const destination = `${__dirname}/../../mailAttachment/${id}/${mailId}`;
+      const destination = safePath('mailAttachment', id, mailId);
       let match;
       while (match = regexpSrc.exec(dbMail.html)) {
         let cid = match[1]
@@ -630,7 +631,7 @@ publicRouter.get('/get/:teamId/:token/:mailId', access.team(), function (req, re
             }
             let htmlMail = dbMail.html;
             const regexpSrc = /<img src=["|']cid:(.*?)["|']+/g;
-            const destination = `${__dirname}/../../mailAttachment/${team.competition}/${mailId}`;
+            const destination = safePath('mailAttachment', team.competition, mailId);
             let match;
             while (match = regexpSrc.exec(dbMail.html)) {
               let cid = match[1]

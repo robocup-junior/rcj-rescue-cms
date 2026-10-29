@@ -27,6 +27,7 @@ const logger = require('../../config/logger').mainLogger;
 const escape = require('escape-html');
 const mkdirp = require('mkdirp');
 const access = require('../../helper/access');
+const safePath = require('../../helper/safePath');
 
 read = gracefulFs.gracefulify(read);
 
@@ -54,7 +55,7 @@ function writeLog(req, competitionId, teamId, message) {
     req
   )} : ${message}\n`;
   fs.appendFile(
-    `${__dirname}/../../documents/${competitionId}/${teamId}/log.txt`,
+    safePath('documents', competitionId, teamId, 'log.txt'),
     output,
     (err) => {
       if (err) logger.error(err.message);
@@ -63,7 +64,7 @@ function writeLog(req, competitionId, teamId, message) {
 }
 
 function returnFiles(res, competition, folder){
-  let path = `${__dirname}/../../cabinet/${competition}/${folder}`;
+  let path = safePath('cabinet', competition, folder);
   fs.readdir(path, { withFileTypes: true }, (err, dirents) => {
     // A cabinet nothing was put in yet may have no folder
     if (err && err.code == 'ENOENT') return res.send([]);
@@ -132,7 +133,7 @@ publicRouter.get('/:competitionId/files/:teamId/:token/:folder', access.team({ s
 });
 
 function returnFile(req, res, competition, folder, fileName){
-  let path = `${__dirname}/../../cabinet/${competition}/${folder}/${sanitize(fileName)}`;
+  let path = safePath('cabinet', competition, folder, sanitize(fileName));
   fs.stat(path, (err, stat) => {
     // Handle file not found
     if (err !== null) {
@@ -266,7 +267,7 @@ adminRouter.post('/:competitionId/upload/:folder', access.competition(ACCESSLEVE
   }
 
   if (auth.authCompetition(req.user,competitionId,ACCESSLEVELS.ADMIN)){ // Admin check
-    const destination = `${__dirname}/../../cabinet/${competitionId}/${folder}`;
+    const destination = safePath('cabinet', competitionId, folder);
     if (!fs.existsSync(destination)) {
       mkdirp.sync(destination);
     }
@@ -274,7 +275,7 @@ adminRouter.post('/:competitionId/upload/:folder', access.competition(ACCESSLEVE
       destination(req, file, callback) {
         callback(
           null,
-          `${__dirname}/../../cabinet/${competitionId}/${folder}`
+          safePath('cabinet', competitionId, folder)
         );
       },
       filename(req, file, callback) {
@@ -316,7 +317,7 @@ adminRouter.delete('/:competitionId/file/:folder/:file', access.competition(ACCE
   }
 
   if (auth.authCompetition(req.user,competitionId,ACCESSLEVELS.ADMIN)){ // Admin check
-    let path = `${__dirname}/../../cabinet/${competitionId}/${folder}/${sanitize(file)}`;
+    let path = safePath('cabinet', competitionId, folder, sanitize(file));
     fs.unlink(path, (err) => {
       if (err){
         return res.status(500).send({

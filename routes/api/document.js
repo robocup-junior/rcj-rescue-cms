@@ -32,6 +32,7 @@ const userdb = require('../../models/user');
 const escape = require('escape-html');
 const sanitize = require("sanitize-filename");
 const access = require('../../helper/access');
+const safePath = require('../../helper/safePath');
 read = gracefulFs.gracefulify(read);
 
 const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -59,7 +60,7 @@ function writeLog(req, competitionId, teamId, message) {
   else user = user.username;
   const output = `[${dateformat(new Date(), 'mm/dd/yy HH:MM:ss')}] ${user} : ${message}\n`;
   fs.appendFile(
-    `${__dirname}/../../documents/${competitionId}/${teamId}/log.txt`,
+    safePath('documents', competitionId, teamId, 'log.txt'),
     output,
     (err) => {
       if (err) logger.error(err.message);
@@ -254,7 +255,7 @@ publicRouter.post('/files/:teamId/:token/:fileName', access.team(), function (re
                   return;
                 }
                 fs.mkdir(
-                  `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/trash`,
+                  safePath('documents', dbTeam.competition._id, teamId, 'trash'),
                   (err) => {
                     files.forEach(function (file) {
                       fs.rename(
@@ -280,7 +281,7 @@ publicRouter.post('/files/:teamId/:token/:fileName', access.team(), function (re
                     destination(req, file, callback) {
                       callback(
                         null,
-                        `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}`
+                        safePath('documents', dbTeam.competition._id, teamId)
                       );
                     },
                     filename(req, file, callback) {
@@ -300,7 +301,7 @@ publicRouter.post('/files/:teamId/:token/:fileName', access.team(), function (re
                     const ft = mime.getType(originalname);
 
                     if (ft.includes('video')) {
-                      const filepath = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/${sanitize(fileName)}`;
+                      const filepath = safePath('documents', dbTeam.competition._id, teamId, sanitize(fileName));
                       fs.unlink(`${filepath}-thumbnail.png`, function (err) {
                         try {
                           const original = ffmpeg(
@@ -310,7 +311,7 @@ publicRouter.post('/files/:teamId/:token/:fileName', access.team(), function (re
                           original
                             .screenshots({
                               count: 1,
-                              folder: `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}`,
+                              folder: safePath('documents', dbTeam.competition._id, teamId),
                               filename: `${sanitize(fileName)}-thumbnail.png`,
                               size: '640x?',
                             })
@@ -388,7 +389,7 @@ publicRouter.get('/files/:teamId/:token', access.team({ publicDocuments: true })
             ACCESSLEVELS.VIEW
           )
         ) {
-          const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}`;
+          const path = safePath('documents', dbTeam.competition._id, teamId);
           fs.readdir(path, { withFileTypes: true }, (err, dirents) => {
             if (err) {
               console.error(err);
@@ -455,7 +456,7 @@ publicRouter.get('/files/:teamId/:token/:fileName', access.team({ publicDocument
             dbTeam.competition._id,
             ACCESSLEVELS.VIEW
           )) && (dbTeam.document.token === token || dbTeam.document.public || (question.public && token === dbTeam.competition.publicToken ))) {
-          const dataPath = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/${sanitize(fileName)}`;
+          const dataPath = safePath('documents', dbTeam.competition._id, teamId, sanitize(fileName));
           fs.stat(dataPath, (err, stat) => {
             // Handle file not found
             if (err !== null && err.code === 'ENOENT') {
@@ -576,13 +577,13 @@ publicRouter.post('/files/usercontent/:teamId/:token', access.team(), function (
           const timestamp = Math.floor(now.getTime() / 1000);
 
           if (deadline >= timestamp || userAuth) {
-            fs.mkdirs(`${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/usercontent`, (err) => {
+            fs.mkdirs(safePath('documents', dbTeam.competition._id, teamId, 'usercontent'), (err) => {
               let fileName = new Date().getTime();
               const storage = multer.diskStorage({
                 destination(req, file, callback) {
                   callback(
                     null,
-                    `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/usercontent`
+                    safePath('documents', dbTeam.competition._id, teamId, 'usercontent')
                   );
                 },
                 filename(req, file, callback) {
@@ -667,7 +668,7 @@ publicRouter.get('/files/usercontent/:teamId/:token/:fileName', access.team({ pu
             ACCESSLEVELS.VIEW
           )
         ) {
-          const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/usercontent/${sanitize(fileName)}`;
+          const path = safePath('documents', dbTeam.competition._id, teamId, 'usercontent', sanitize(fileName));
           fs.stat(path, (err, stat) => {
             // Handle file not found
             if (err !== null && err.code === 'ENOENT') {
@@ -1032,7 +1033,7 @@ privateRouter.post(
           const userAuth = await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
           if (userAuth) {
             fs.mkdirs(
-              `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}`,
+              safePath('documents', dbTeam.competition._id, teamId, 'review', req.user.username),
               (err) => {
                 glob.glob(
                   `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}/${sanitize(fileName)}.*`,
@@ -1043,7 +1044,7 @@ privateRouter.post(
                       return;
                     }
                     fs.mkdir(
-                      `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/trash`,
+                      safePath('documents', dbTeam.competition._id, teamId, 'trash'),
                       (err) => {
                         files.forEach(function (file) {
                           fs.rename(
@@ -1069,7 +1070,7 @@ privateRouter.post(
                         destination(req, file, callback) {
                           callback(
                             null,
-                            `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}`
+                            safePath('documents', dbTeam.competition._id, teamId, 'review', req.user.username)
                           );
                         },
                         filename(req, file, callback) {
@@ -1089,7 +1090,7 @@ privateRouter.post(
                         const ft = mime.getType(originalname);
 
                         if (ft != null && ft.includes('video')) {
-                          const filepath = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}/${sanitize(fileName)}`;
+                          const filepath = safePath('documents', dbTeam.competition._id, teamId, 'review', req.user.username, sanitize(fileName));
                           fs.unlink(
                             `${filepath}-thumbnail.png`,
                             function (err) {
@@ -1101,7 +1102,7 @@ privateRouter.post(
                                 original
                                   .screenshots({
                                     count: 1,
-                                    folder: `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}`,
+                                    folder: safePath('documents', dbTeam.competition._id, teamId, 'review', req.user.username),
                                     filename: `${sanitize(fileName)}-thumbnail.png`,
                                     size: '640x?',
                                   })
@@ -1159,7 +1160,7 @@ privateRouter.get('/review/files/:teamId', access.of(competitiondb.team, 'params
         if (
           auth.authCompetition(req.user, dbTeam.competition, ACCESSLEVELS.VIEW) || await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
         ) {
-          const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review`;
+          const path = safePath('documents', dbTeam.competition._id, teamId, 'review');
 
           const files = read(path);
           for (let i = 0; i < files.length; i++) {
@@ -1204,7 +1205,7 @@ privateRouter.get(
               ACCESSLEVELS.VIEW
             ) || await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
           ) {
-            const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${sanitize(userName)}/${sanitize(fileName)}`;
+            const path = safePath('documents', dbTeam.competition._id, teamId, 'review', sanitize(userName), sanitize(fileName));
             fs.stat(path, (err, stat) => {
               // Handle file not found
               if (err !== null && err.code === 'ENOENT') {
@@ -1303,14 +1304,14 @@ privateRouter.post(
           const userAuth =  await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
           if (userAuth) {
             fs.mkdirs(
-              `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}/usercontent`,
+              safePath('documents', dbTeam.competition._id, teamId, 'review', req.user.username, 'usercontent'),
               (err) => {
                 let fileName = new Date().getTime();
                 const storage = multer.diskStorage({
                   destination(req, file, callback) {
                     callback(
                       null,
-                      `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${req.user.username}/usercontent`
+                      safePath('documents', dbTeam.competition._id, teamId, 'review', req.user.username, 'usercontent')
                     );
                   },
                   filename(req, file, callback) {
@@ -1377,7 +1378,7 @@ privateRouter.get(
               ACCESSLEVELS.VIEW
             ) || await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
           ) {
-            const path = `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/${sanitize(userName)}/usercontent/${sanitize(fileName)}`;
+            const path = safePath('documents', dbTeam.competition._id, teamId, 'review', sanitize(userName), 'usercontent', sanitize(fileName));
             fs.stat(path, (err, stat) => {
               // Handle file not found
               if (err !== null && err.code === 'ENOENT') {
@@ -1439,7 +1440,7 @@ privateRouter.post(
           );
           if (userAuth) {
             fs.mkdirs(
-              `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/inspection`,
+              safePath('documents', dbTeam.competition._id, teamId, 'review', 'inspection'),
               (err) => {
                 glob.glob(
                   `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/inspection/${sanitize(fileName)}.*`,
@@ -1450,7 +1451,7 @@ privateRouter.post(
                       return;
                     }
                     fs.mkdir(
-                      `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/trash`,
+                      safePath('documents', dbTeam.competition._id, teamId, 'trash'),
                       (err) => {
                         files.forEach(function (file) {
                           fs.rename(
@@ -1476,7 +1477,7 @@ privateRouter.post(
                         destination(req, file, callback) {
                           callback(
                             null,
-                            `${__dirname}/../../documents/${dbTeam.competition._id}/${teamId}/review/inspection`
+                            safePath('documents', dbTeam.competition._id, teamId, 'review', 'inspection')
                           );
                         },
                         filename(req, file, callback) {
@@ -1556,7 +1557,7 @@ privateRouter.get(
                   stream.pipe(res);
                 } else {
                   // Handle file not found
-                  const path = `${__dirname}/../../public/images/NoImage.png`;
+                  const path = safePath('public', 'images', 'NoImage.png');
                   const stream = fs.createReadStream(path)
                   stream.on('error', (error) => {
                       res.statusCode = 500
@@ -1584,7 +1585,7 @@ privateRouter.get(
 
 // Templates
 adminRouter.get('/templates/documentForm', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
-  const dir_path = `${__dirname}/../../templates/documentForm/`;
+  const dir_path = `${safePath('templates', 'documentForm')}/`;
   fs.readdir(dir_path, { withFileTypes: true }, (err, dirents) => {
     if (err) {
       console.error(err);
@@ -1608,7 +1609,7 @@ adminRouter.get('/templates/documentForm', access.anyAdmin('the templates are of
 adminRouter.get('/templates/documentForm/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
-  const dir_path = `${__dirname}/../../templates/documentForm/${sanitize(fileName)}`;
+  const dir_path = safePath('templates', 'documentForm', sanitize(fileName));
   fs.stat(dir_path, (err, stat) => {
     // Handle file not found
     if (err !== null && err.code === 'ENOENT') {
@@ -1634,7 +1635,7 @@ adminRouter.get('/templates/documentForm/:fileName', access.anyAdmin('the templa
 });
 
 adminRouter.get('/templates/reviewForm', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
-  const dir_path = `${__dirname}/../../templates/reviewForm/`;
+  const dir_path = `${safePath('templates', 'reviewForm')}/`;
   fs.readdir(dir_path, { withFileTypes: true }, (err, dirents) => {
     if (err) {
       console.error(err);
@@ -1658,7 +1659,7 @@ adminRouter.get('/templates/reviewForm', access.anyAdmin('the templates are of n
 adminRouter.get('/templates/reviewForm/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
-  const dir_path = `${__dirname}/../../templates/reviewForm/${sanitize(fileName)}`;
+  const dir_path = safePath('templates', 'reviewForm', sanitize(fileName));
   fs.stat(dir_path, (err, stat) => {
     // Handle file not found
     if (err !== null && err.code === 'ENOENT') {
@@ -1706,7 +1707,7 @@ privateRouter.get('/map/:fileName',
           stream.pipe(res);
         } else {
           // Handle file not found
-          const path = `${__dirname}/../../public/images/NoImage.png`;
+          const path = safePath('public', 'images', 'NoImage.png');
           const stream = fs.createReadStream(path)
           stream.on('error', (error) => {
               res.statusCode = 500

@@ -17,6 +17,7 @@ const competitiondb = require('../../models/competition');
 const auth = require('../../helper/authLevels');
 const { type } = require('os');
 const access = require('../../helper/access');
+const safePath = require('../../helper/safePath');
 
 const { LEAGUES_JSON } = competitiondb;
 
@@ -179,30 +180,6 @@ privateRouter.put('/:competitionid/:teamid', access.competition(ACCESSLEVELS.JUD
     });
 });
 
-publicRouter.get('/:teamid/runs', access.anyone('shown as their status and the ranking settings let them be, by the handler'), function (req, res, next) {
-  const id = req.params.teamid;
-
-  if (!ObjectId.isValid(id)) {
-    return next();
-  }
-
-  competitiondb.run.find(
-    {
-      team: id,
-    },
-    function (err, data) {
-      if (err) {
-        logger.error(err);
-        return res.status(400).send({
-          msg: 'Could not get runs',
-          err: err.message,
-        });
-      }
-      return res.status(200).send(data);
-    }
-  );
-});
-
 adminRouter.delete('/:teamid', access.of(competitiondb.team, 'params.teamid', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const ids = req.params.teamid.split(',');
   if (!ObjectId.isValid(ids[0])) {
@@ -250,11 +227,11 @@ adminRouter.delete('/:teamid', access.of(competitiondb.team, 'params.teamid', AC
               msg: 'Team has been removed!',
             });
             for (const id of ids) {
-              let path = `${__dirname}/../../documents/${dbTeam.competition}/${id}`;
+              let path = safePath('documents', dbTeam.competition, id);
               fs.rmdir(path, { recursive: true }, (err) => {
                 if (err) throw err;
               });
-              path = `${__dirname}/../../cabinet/${dbTeam.competition}/${id}`;
+              path = safePath('cabinet', dbTeam.competition, id);
               fs.rmdir(path, { recursive: true }, (err) => {
                 if (err) throw err;
               });
@@ -321,9 +298,9 @@ adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition')
                   msg: 'New team has been saved',
                   id: createdTeam._id,
                 });
-                let path = `${__dirname}/../../documents/${dbComp._id}/${createdTeam._id}`;
+                let path = safePath('documents', dbComp._id, createdTeam._id);
                 mkdirp.sync(path);
-                path = `${__dirname}/../../cabinet/${dbComp._id}/${createdTeam._id}`;
+                path = safePath('cabinet', dbComp._id, createdTeam._id);
                 mkdirp.sync(path);
               }
             });
@@ -392,9 +369,9 @@ adminRouter.post('/bulk', access.competition(ACCESSLEVELS.ADMIN, 'body[].competi
                 if (err) {
                   logger.error(err);
                 } else {
-                  path = `${__dirname}/../../cabinet/${dbComp._id}/${createdTeam._id}`;
+                  path = safePath('cabinet', dbComp._id, createdTeam._id);
                   mkdirp.sync(path);
-                  path = `${__dirname}/../../documents/${dbComp._id}/${createdTeam._id}`;
+                  path = safePath('documents', dbComp._id, createdTeam._id);
                   mkdirp.sync(path);
                   count--;
                   if (count <= 0) {

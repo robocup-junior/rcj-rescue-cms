@@ -53,7 +53,10 @@ const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
 })
 
 var app = express();
-app.set('trust proxy', true);
+// The addresses of the clients are taken from X-Forwarded-For only as the proxies before the app
+// give it: those of the machine and of private networks (as nginx beside the app in Docker), or
+// those TRUST_PROXY says. Anyone else could give any address there.
+app.set('trust proxy', process.env.TRUST_PROXY || 'loopback, linklocal, uniquelocal');
 async function bootstrap(){
     //========================================================================
     //                          Routes require

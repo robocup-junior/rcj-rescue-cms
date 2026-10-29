@@ -51,6 +51,7 @@ app.controller("MyPageController", ['$scope', '$http', '$translate', function ($
 
     $http.post(`/api/reservation/list/${competitionId}`,{
         team: teamId,
+        token: token,
         league: leagueId
     }).then(function (response) {
         $scope.reservations = response.data;
@@ -72,7 +73,7 @@ app.controller("MyPageController", ['$scope', '$http', '$translate', function ($
         }
     })
 
-    $http.get(`/api/survey/list/${competitionId}/${leagueId}/${teamId}`).then(function (response) {
+    $http.get(`/api/survey/list/${competitionId}/${leagueId}/${teamId}`, { params: { token } }).then(function (response) {
         $scope.survey = response.data;
         for(let suvr of $scope.survey){
             let name = suvr.i18n.filter(i => i.language == currentLang && suvr.languages.some( l => l.language == i.language && l.enable));

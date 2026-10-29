@@ -565,7 +565,7 @@ publicRouter.post('/cancel/:teamId/:token/:resvId', access.team(), function (req
   });
 });
 
-publicRouter.post('/list/:competitionId', access.anyone('the bookings open to a league: their names and deadlines'), function (req, res, next) {
+publicRouter.post('/list/:competitionId', access.team({ teamAt: 'body.team', tokenAt: 'body.token', inCompetition: 'params.competitionId' }), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const teamId = req.body.team;
   const leagueId = req.body.league;

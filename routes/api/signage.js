@@ -9,6 +9,7 @@ const adminRouter = express.Router();
 const { ObjectId } = require('mongoose').Types;
 const fs = require('fs');
 const sanitize = require('sanitize-filename');
+const safePath = require('../../helper/safePath');
 const competitiondb = require('../../models/competition');
 const logger = require('../../config/logger').mainLogger;
 const mime = require('mime');
@@ -134,7 +135,7 @@ adminRouter.delete('/contentList/:file', access.anyAdmin('the signage is of no c
   let { file } = req.params;
   file = decodeURIComponent(file);
 
-  let path = `${process.cwd()}/public/signage_content/${sanitize(file)}`;
+  let path = safePath('public/signage_content', sanitize(file));
   fs.unlink(path, (err) => {
     if (err){
       return res.status(500).send({

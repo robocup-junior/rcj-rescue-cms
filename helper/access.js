@@ -51,6 +51,23 @@ function competitionsOf(model, from) {
   return resolve;
 }
 
+/**
+ * For of()'s orIf: the map at from is of a run that anyone may see (signed by its team, or
+ * approved) in a competition not in preparation, as authViewRun has it. Maps are kept from anyone
+ * else until then: the courses are not known before they are run.
+ */
+function mapOfRunShown(runModel, from) {
+  const shown = async (req) => {
+    const [id] = await valuesAt(req, from);
+    if (!ObjectId.isValid(String(id))) return false;
+    const runs = await runModel.find({ map: id, $or: [{ status: 6 }, { 'sign.captain': { $nin: ['', null] } }] })
+      .select('competition').populate('competition', 'preparation').lean().exec();
+    return runs.some((run) => run.competition && !run.competition.preparation);
+  };
+  shown.toString = () => 'it is the map of a run anyone may see';
+  return shown;
+}
+
 /** The level in the competition, or one of the roles there (orRole: a role or a list of them). */
 async function allowedIn(user, competitionId, level, orRole) {
   if (authCompetition(user, String(competitionId), level)) return true;
@@ -116,10 +133,11 @@ function competition(level, from, { orRole, note } = {}) {
  * The level in the competition of the stored thing (or things, by ids joined with commas) the
  * request names at from. Ids that are not ones, or of nothing, go on to the handler, which says so.
  */
-function of(model, from, level, { orRole, note } = {}) {
-  return declare({ kind: 'of', model: model.modelName, level: LEVEL_NAMES[level], orRole, from: String(from), note }, async (req) => {
+function of(model, from, level, { orRole, orIf, note } = {}) {
+  return declare({ kind: 'of', model: model.modelName, level: LEVEL_NAMES[level], orRole, orIf: orIf && String(orIf), from: String(from), note }, async (req) => {
     const ids = (await valuesAt(req, from)).flatMap((id) => String(id).split(',')).filter((id) => ObjectId.isValid(id));
     if (ids.length == 0) return true;
+    if (orIf && (await orIf(req))) return true;
     const things = await model.find({ _id: { $in: ids } }).select('competition').lean().exec();
     for (const thing of things) {
       if (!(await allowedIn(req.user, thing.competition, level, orRole))) return false;
@@ -129,16 +147,18 @@ function of(model, from, level, { orRole, note } = {}) {
 }
 
 /**
- * A team by the token of its own pages (params.teamId, params.token), or the staff of its
- * competition at the level given; publicDocuments: also anyone when the team made its documents
- * public; competitionToken: also the public token of its competition (for what its questions make
- * public). With inCompetition, the team must be of the competition the request names there.
+ * A team by the token of its own pages (at teamAt and tokenAt: params.teamId and params.token if
+ * not said), or the staff of its competition at the level given; publicDocuments: also anyone when
+ * the team made its documents public; competitionToken: also the public token of its competition
+ * (for what its questions make public). With inCompetition, the team must be of the competition
+ * the request names there.
  */
-function team({ staff, publicDocuments = false, competitionToken = false, inCompetition, note } = {}) {
+function team({ teamAt = 'params.teamId', tokenAt = 'params.token', staff, publicDocuments = false, competitionToken = false, inCompetition, note } = {}) {
   const competitionDb = require('../models/competition');
-  return declare({ kind: 'team', staff: staff && LEVEL_NAMES[staff], publicDocuments, competitionToken, inCompetition, note }, async (req) => {
-    const { teamId, token } = req.params;
-    if (!ObjectId.isValid(teamId)) return true;
+  return declare({ kind: 'team', teamAt, tokenAt, staff: staff && LEVEL_NAMES[staff], publicDocuments, competitionToken, inCompetition, note }, async (req) => {
+    const [teamId] = await valuesAt(req, teamAt);
+    const [token] = await valuesAt(req, tokenAt);
+    if (!ObjectId.isValid(String(teamId))) return true;
     const dbTeam = await competitionDb.team.findById(teamId).select('competition document.token document.public').lean().exec();
     if (!dbTeam) return true;
     if (competitionToken && typeof token === 'string' && token.length > 0) {
@@ -199,4 +219,4 @@ function routes() {
   return table.slice();
 }
 
-module.exports = { anyone, loggedIn, anyAdmin, superAdmin, competition, of, team, competitionsOf, mount, routes, ACCESS };
+module.exports = { anyone, loggedIn, anyAdmin, superAdmin, competition, of, team, competitionsOf, mapOfRunShown, mount, routes, ACCESS };

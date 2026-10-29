@@ -47,3 +47,32 @@ test.describe('as a judge', () => {
     await expect(page.locator('.rv-check').first()).toBeVisible();
   });
 });
+
+test.describe('a course', () => {
+  test.use({ user: 'admin' });
+
+  test('is kept from the public until a run on it can be seen', async ({ page, playwright, baseURL }) => {
+    const api = require('./api');
+    const { request } = page;
+    const competition = await api.competition(request);
+    const [round, field, team] = await Promise.all([
+      api.round(request, competition, 'R1'), api.field(request, competition, 'F1'), api.team(request, competition, 'Maze', 'T1'),
+    ]);
+    const map = await api.mazeMap(request, competition, 'Maze', 'Secret Course', [{}, { checkpoint: true }]);
+    const run = await api.run(request, 'maze', { competition, round, field, team, map });
+    const visitor = await playwright.request.newContext({ baseURL });
+    // Before the run, the course and the competition's courses are not to be had
+    expect((await visitor.get(`/api/maps/maze/${map}`)).status()).toBe(401);
+    expect((await visitor.get(`/api/maps/maze/image/${map}`)).status()).toBe(401);
+    expect((await visitor.get('/api/maps/maze/', { params: { competition } })).status()).toBe(401);
+    // Run and approved: still kept while the competition is in preparation (its runs are too)
+    expect((await request.put(`/api/runs/maze/${run}`, { data: { status: 6 } })).ok()).toBeTruthy();
+    expect((await visitor.get(`/api/maps/maze/${map}`)).status()).toBe(401);
+    // Then as the public may see the run, so its course
+    expect((await request.put(`/api/competitions/${competition}`, { data: { preparation: false } })).ok()).toBeTruthy();
+    const shown = await visitor.get(`/api/maps/maze/${map}`);
+    expect(shown.status()).toBe(200);
+    expect((await shown.json()).name).toBe('Secret Course');
+    await visitor.dispose();
+  });
+});

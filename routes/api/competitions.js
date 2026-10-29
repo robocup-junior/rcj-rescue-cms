@@ -22,6 +22,7 @@ const { LEAGUES, LEAGUES_JSON, LINE_LEAGUES, MAZE_LEAGUES, SIM_LEAGUES } = compe
 
 const { ACCESSLEVELS } = require('../../models/user');
 const access = require('../../helper/access');
+const safePath = require('../../helper/safePath');
 
 publicRouter.get('/', access.anyone('the competitions are public'), function (req, res) {
   competitiondb.competition
@@ -522,7 +523,7 @@ privateRouter.get('/:competition/teams', access.loggedIn('the teams, as the publ
     });
 });
 
-publicRouter.get('/:competition/teams/:teamid', access.anyone('a team, as the public pages show it'), function (req, res, next) {
+publicRouter.get('/:competition/teams/:teamid', access.competition(ACCESSLEVELS.VIEW, 'params.competition'), function (req, res, next) {
   const id = req.params.competition;
   const tid = req.params.teamid;
 
@@ -599,7 +600,7 @@ privateRouter.get('/:competition/:league/teams', access.loggedIn('the teams, as 
     });
 });
 
-privateRouter.get('/:competition/:league/maps', access.loggedIn('the maps, each public'), function (req, res, next) {
+privateRouter.get('/:competition/:league/maps', access.competition(ACCESSLEVELS.VIEW, 'params.competition'), function (req, res, next) {
   const id = req.params.competition;
   const { league } = req.params;
 
@@ -651,7 +652,7 @@ publicRouter.get('/:competition/fields', access.anyone('the fields are public'),
     });
 });
 
-publicRouter.get('/:competitionid/fields/:name', access.anyone('the fields are public'), function (req, res, next) {
+publicRouter.get('/:competitionid/fields/:name', access.competition(ACCESSLEVELS.VIEW, 'params.competitionid'), function (req, res, next) {
   const id = req.params.competitionid;
   const { name } = req.params;
 
@@ -704,7 +705,7 @@ publicRouter.get('/:competition/rounds', access.anyone('the rounds are public'),
     });
 });
 
-publicRouter.get('/:competitionid/rounds/:name', access.anyone('the rounds are public'), function (req, res, next) {
+publicRouter.get('/:competitionid/rounds/:name', access.competition(ACCESSLEVELS.VIEW, 'params.competitionid'), function (req, res, next) {
   const id = req.params.competitionid;
   const { name } = req.params;
 
@@ -757,21 +758,21 @@ adminRouter.post('/', access.anyAdmin('a new competition, of which the user is m
       const competitionid = data._id;
       const aLevel = ACCESSLEVELS.ADMIN;
 
-      let path = `${__dirname}/../../documents/${competitionid}`;
+      let path = safePath('documents', competitionid);
       mkdirp.sync(path);
 
-      path = `${__dirname}/../../survey/${competitionid}`;
+      path = safePath('survey', competitionid);
       mkdirp.sync(path);
 
       for(let l of LEAGUES){
-        path = `${__dirname}/../../cabinet/${competitionid}/${l}`;
+        path = safePath('cabinet', competitionid, l);
         mkdirp.sync(path);
       }
 
-      path = `${__dirname}/../../backup/${competitionid}`;
+      path = safePath('backup', competitionid);
       mkdirp.sync(path);
 
-      path = `${__dirname}/../../mailAttachment/${competitionid}`;
+      path = safePath('mailAttachment', competitionid);
       mkdirp.sync(path);
 
       userdb.user.findById(userid).exec(function (err, dbUser) {
@@ -835,30 +836,30 @@ adminRouter.delete('/:competitionid', access.competition(ACCESSLEVELS.ADMIN, 'pa
           msg: 'Competition has been removed!',
         });
         
-        fs.rm(`${__dirname}/../../documents/${id}`, { recursive: true, force: true }, (err) => {
+        fs.rm(safePath('documents', id), { recursive: true, force: true }, (err) => {
           if (err) {
             logger.error(err.message);
           }
         });
 
-        fs.rm(`${__dirname}/../../cabinet/${id}`, { recursive: true, force: true }, (err) => {
+        fs.rm(safePath('cabinet', id), { recursive: true, force: true }, (err) => {
           if (err) {
             logger.error(err.message);
           }
         });
 
-        fs.rm(`${__dirname}/../../survey/${id}`, { recursive: true, force: true }, (err) => {
+        fs.rm(safePath('survey', id), { recursive: true, force: true }, (err) => {
           if (err) {
             logger.error(err.message);
           }
         });
-        fs.rm(`${__dirname}/../../mailAttachment/${id}`, { recursive: true, force: true }, (err) => {
+        fs.rm(safePath('mailAttachment', id), { recursive: true, force: true }, (err) => {
           if (err) {
             logger.error(err.message);
           }
         });
 
-        // fs.rmdir(`${__dirname}/../../backup/${id}`, { recursive: true }, (err) => {
+        // fs.rmdir(safePath('backup', id), { recursive: true }, (err) => {
         //   if (err) {
         //     logger.error(err.message);
         //   }
