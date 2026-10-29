@@ -116,6 +116,9 @@ async function bootstrap(){
     
 
     app.use(compression())
+    app.disable('x-powered-by')
+    // (helper/securityHeaders.js)
+    app.use(require('./helper/securityHeaders'))
 
     app.use(function (req, res, next) {
         res.header("Access-Control-Allow-Origin", "*");
@@ -169,7 +172,9 @@ async function bootstrap(){
         cookie: {
         maxAge: 10 * 60 * 60 * 1000,
         // Not sent with requests other sites make (forms posted to the API from them)
-        sameSite: 'lax'
+        sameSite: 'lax',
+        // Over https only, when the request came so (through a proxy the app trusts)
+        secure: 'auto'
         }
     }))
     app.use(passport.initialize())
