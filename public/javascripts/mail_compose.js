@@ -85,8 +85,12 @@
         return doc.body.innerHTML;
     };
 
+    // Some text, a picture or a button: read in a document of its own (nothing of it runs or loads),
+    // not by taking the tags out of the HTML
     MailCompose.hasContent = function (content) {
-        return !!content && (content.replace(/<[^>]*>/g, '').trim() != '' || /<img|mail-button/.test(content));
+        if (!content) return false;
+        const body = new DOMParser().parseFromString(String(content), 'text/html').body;
+        return body.textContent.trim() != '' || body.querySelector('img, .mail-button') != null;
     };
 
     // A URL as it is linked: a variable (${documentUrl}), http(s) or mailto; an address taken as
