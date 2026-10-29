@@ -16,7 +16,8 @@ const {sendMail} = require('../../helper/mailSender');
 adminRouter.get('/', function (req, res) {
   userdb.user
     .find({})
-    .select("_id username email admin superDuperAdmin competitions")
+    // The addresses are for the super admins (who manage the users) only
+    .select(`_id username ${req.user.superDuperAdmin ? 'email ' : ''}admin superDuperAdmin competitions`)
     .lean()
     .exec(function (err, data) {
       if (err) {

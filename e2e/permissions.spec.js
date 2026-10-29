@@ -37,9 +37,9 @@ test.beforeAll(async ({ playwright, baseURL }) => {
 
   // The people, each logged in on a context of their own
   const stamp = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
-  const user = async (name, admin, competitions) => {
+  const user = async (name, admin, competitions, email) => {
     const username = `${name}${stamp}`;
-    const res = await root.post('/api/users', { data: { username, password: 'pass1234', admin, competitions } });
+    const res = await root.post('/api/users', { data: { username, password: 'pass1234', admin, competitions, email } });
     expect(res.ok(), `user ${name}`).toBeTruthy();
     const users = await (await root.get('/api/users')).json();
     return { username, password: 'pass1234', id: users.find((u) => u.username === username)._id };
@@ -50,7 +50,7 @@ test.beforeAll(async ({ playwright, baseURL }) => {
     otherAdmin: await user('otheradmin', true, [{ id: fx.other, accessLevel: ADMIN, role: ['ADMIN'] }]),
     admin: await user('admin', true, [{ id: c, accessLevel: ADMIN, role: ['ADMIN'] }]),
     // Whose rights are changed by the requests that change them
-    subject: await user('subject', false, []),
+    subject: await user('subject', false, [], `subject${stamp}@example.com`),
   };
   fx.users = people;
   for (const role of ROLES) {
@@ -205,6 +205,13 @@ const cases = [
   },
   { name: 'list the short URLs', allow: [], make: () => ['get', '/api/short'] },
 
+  // Users' mail addresses: for the super admin only, not for the admins of competitions
+  {
+    name: 'read the users\' mail addresses', allow: [],
+    make: () => ['get', '/api/users'],
+    refused: (body) => !JSON.parse(body).some((u) => 'email' in u),
+  },
+
   // Backups, mails, bookings, surveys, reviews
   { name: 'back the competition up', allow: ['admin'], make: () => ['post', `/api/backup/${fx.competition}`, { fullBackup: false }] },
   { name: 'list its backups', allow: ['admin'], make: () => ['get', `/api/backup/list/${fx.competition}`] },
@@ -249,7 +256,7 @@ async function levelOf(userId) {
 
 async function send(role, [method, path, data]) {
   const res = await as[role][method](path, data === undefined ? {} : { data });
-  return { status: res.status(), body: (await res.text()).slice(0, 200) };
+  return { status: res.status(), body: await res.text() };
 }
 
 for (const c of cases) {
@@ -258,11 +265,14 @@ for (const c of cases) {
     const allowed = new Set(['super', ...c.allow]);
     for (const role of ROLES.filter((r) => !allowed.has(r))) {
       const { status, body } = await send(role, request);
-      expect([400, 401, 403, 404], `${role}: ${status} ${body}`).toContain(status);
+      // Refused, or answered without what the role may not see
+      if (c.refused && status < 300) expect(c.refused(body), `${role}: ${body.slice(0, 200)}`).toBeTruthy();
+      else expect([400, 401, 403, 404], `${role}: ${status} ${body.slice(0, 200)}`).toContain(status);
     }
     if (c.kept) await c.kept();
     // Allowed, the request goes through (once: the first allowed is enough for a removal)
     const { status, body } = await send(c.allow[0] || 'super', request);
-    expect(status, `${c.allow[0] || 'super'}: ${body}`).toBeLessThan(300);
+    expect(status, `${c.allow[0] || 'super'}: ${body.slice(0, 200)}`).toBeLessThan(300);
+    if (c.refused) expect(c.refused(body), 'what the allowed may see').toBeFalsy();
   });
 }
