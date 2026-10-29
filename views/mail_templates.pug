@@ -5,6 +5,8 @@ block vars
   - var ngAppDef = 'MailTemplates'
 
 append scripts
+  script.
+    var kind = "#{kind}"
   script(src='/javascripts/mail_templates.js?v=' + assetVersion)
 
 block hero_breadcrumb
@@ -21,11 +23,20 @@ block hero_subtitle
   | {{"admin.mailTemplates.4duplicate" | translate}}
 
 block hero_actions
-  a.btn-create-map(href='/admin/mailTemplates/editor')
+  a.btn-create-map(ng-href="{{editorUrl()}}")
     i.fas.fa-plus-circle
     span {{"admin.mailTemplates.create" | translate}}
 
 block main_content
+  //- The mails to the teams and those to the staff: templates of their own
+  .segmented.mb-3(role="group")
+    button(type='button' ng-click="switchKind('team')" ng-class="{'active': kind=='team'}")
+      i.fas.fa-users.mr-1
+      | {{"mail.home.toTeams" | translate}}
+    button(type='button' ng-click="switchKind('staff')" ng-class="{'active': kind=='staff'}")
+      i.fas.fa-user-tie.mr-1
+      | {{"mail.home.toStaff" | translate}}
+
   .modern-card
     .modern-card-header
       i.fas.fa-envelope.mr-2
@@ -42,7 +53,7 @@ block main_content
               td.font-weight-bold(ng-bind='mail.name')
               td
                 .btn-table-group
-                  .btn-table-action.primary(ng-click='go("/admin/mailTemplates/editor/"+mail.name)' uib-tooltip='{{"admin.mailTemplates.edit" | translate}}' tooltip-append-to-body="true")
+                  .btn-table-action.primary(ng-click='go(editorUrl(mail.name))' uib-tooltip='{{"admin.mailTemplates.edit" | translate}}' tooltip-append-to-body="true")
                     i.fas.fa-edit
                   .btn-table-action.danger(ng-click='removeTemplate(mail)' ng-if="deleteable(mail.name)" uib-tooltip='{{"common.delete" | translate}}' tooltip-append-to-body="true")
                     i.fas.fa-trash-alt

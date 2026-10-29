@@ -84,12 +84,20 @@ if (process.env.MAIL_SMTP &&process.env.MAIL_PORT &&process.env.MAIL_FROM) {
   smtp = null;
 }
 
+// The templates of the mails to the teams (templates/mail), or with ?kind=staff of those to the
+// staff (templates/mail/staff): mails of their own, not to be mixed
+function templateFolder(req) {
+  return req.query.kind === 'staff' ? ['mail', 'staff'] : ['mail'];
+}
+
 adminRouter.get('/templates', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
-  const path = `${safePath('templates', 'mail')}/`;
+  const path = `${safePath('templates', ...templateFolder(req))}/`;
   fs.readdir(path, { withFileTypes: true }, (err, dirents) => {
     if (err) {
-      console.error(err);
-      return;
+      // None written yet
+      if (err.code === 'ENOENT') return res.send([]);
+      logger.error(err);
+      return res.status(500).send({ msg: 'Could not list the templates' });
     }
 
     const d = [];
@@ -109,7 +117,7 @@ adminRouter.get('/templates', access.anyAdmin('the templates are of no competiti
 adminRouter.get('/templates/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
-  const path = safePath('templates', 'mail', sanitizeFilename(fileName));
+  const path = safePath('templates', ...templateFolder(req), sanitizeFilename(fileName));
   fs.stat(path, (err, stat) => {
     // Handle file not found
     if (err !== null && err.code === 'ENOENT') {
@@ -137,7 +145,8 @@ adminRouter.get('/templates/:fileName', access.anyAdmin('the templates are of no
 adminRouter.post('/templates/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
-  const path = safePath('templates', 'mail', sanitizeFilename(fileName));
+  const path = safePath('templates', ...templateFolder(req), sanitizeFilename(fileName));
+  mkdirp.sync(getDirName(path));
   fs.writeFile(path, req.body.content, function (err) {
     if (err) {
       res.status(404).send({
@@ -156,7 +165,7 @@ adminRouter.post('/templates/:fileName', access.anyAdmin('the templates are of n
 adminRouter.delete('/templates/:fileName', access.anyAdmin('the templates are of no competition'), function (req, res, next) {
   const { fileName } = req.params;
 
-  const path = safePath('templates', 'mail', sanitizeFilename(fileName));
+  const path = safePath('templates', ...templateFolder(req), sanitizeFilename(fileName));
   fs.unlink(path, function (err) {
     if (err) {
       res.status(404).send({

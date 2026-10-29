@@ -9,6 +9,7 @@ append scripts
     var competitionId = "#{id}"
     var mailEnable = #{!!mailEnable}
   script(src='/javascripts/mail_home.js?v=' + assetVersion)
+  script(src='/javascripts/mail_compose.js?v=' + assetVersion)
   script(src='/components/quill-dist/index.js?v=' + assetVersion)
   script(src='/components/ngQuill/src/ng-quill.js?v=' + assetVersion)
   script(src='/components/quill-image-resize-module/image-resize.min.js?v=' + assetVersion)
@@ -254,24 +255,43 @@ block main_content
             tr(ng-if="!showAllRecipients && toTeam.length > 3")
               td.text-muted.small(colspan=3 ng-bind="'mail.home.andMore' | translate:{n: toTeam.length - 3}")
 
-      .form-group.mt-3
-        label.small.text-muted {{"mail.home.loadTemplate" | translate}}
-        select.custom-select(ng-model='selectedTemplate' ng-options='template.path as template.name for template in templates' ng-change="changeTemplate()")
-          option(value="") {{"mail.home.selectTemplate" | translate}}
-      .form-group
-        label.small.text-muted {{"mail.home.subject" | translate}}
-        input.form-control(type='text' ng-model='mailTitle' ng-trim="false" ng-focus="focusField('subject')" id="mailTitle" ng-class="{'is-invalid': triedPreview && !mailTitle}")
-        .invalid-feedback {{"mail.home.subjectRequired" | translate}}
+      //- The draft kept from before, offered
+      .alert.alert-info.d-flex.justify-content-between.align-items-center.flex-wrap.mt-3(ng-if="draft" style="gap: 0.5rem;")
+        span
+          i.fas.fa-history.mr-2
+          | {{"mail.home.draftFound" | translate:{time: time(draft.time)} }}
+        span
+          button.btn.btn-sm.btn-premium-primary.mr-2(type='button' ng-click="restoreDraft()") {{"mail.home.restoreDraft" | translate}}
+          button.btn.btn-sm.btn-light(type='button' ng-click="discardDraft()") {{"mail.home.discardDraft" | translate}}
 
-      //- The variables, put where the cursor is (in the subject or the content)
-      .mb-2
-        label.small.text-muted.d-block.mb-1
-          | {{"mail.home.variable" | translate}}
-          span.ml-1 — {{"mail.home.variableHint" | translate}}
-        span.var-chip(ng-repeat="key in variableKeys()" ng-mousedown="$event.preventDefault()" ng-click="insertVariable(key)" uib-tooltip="{{toTeam[0].variable[key]}}" tooltip-append-to-body="true" ng-bind="'${' + key + '}'")
+      //- Templates: to start from one, or to keep what is written as one
+      .d-flex.flex-wrap.mt-3.mb-2(style="gap: 0.5rem;")
+        button.btn.btn-sm(type='button' ng-click="showGallery = !showGallery" ng-class="showGallery ? 'btn-premium-primary' : 'btn-light'")
+          i.fas.fa-th-large.mr-1
+          | {{"mail.home.fromTemplate" | translate}}
+        button.btn.btn-sm.btn-light(type='button' ng-click="saveAsTemplate()" ng-disabled="!hasContent()")
+          i.fas.fa-save.mr-1
+          | {{"mail.home.saveAsTemplate" | translate}}
+      .template-gallery(ng-if="showGallery")
+        .d-flex.justify-content-between.align-items-center.mb-3(style="gap: 0.5rem;")
+          .input-group.input-group-sm(style="max-width: 320px;")
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-search
+            input.form-control(type='text' ng-model='$parent.templateQuery' placeholder='{{"mail.home.searchTemplates" | translate}}')
+          a.small(ng-href="/admin/mailTemplates{{target == 'staff' ? '?kind=staff' : ''}}" target="_blank")
+            i.fas.fa-external-link-alt.mr-1
+            | {{"admin.mailTemplates.title" | translate}}
+        .row
+          .col-md-6.col-xl-4.mb-3(ng-repeat="template in templates | filter:templateFilter")
+            .template-card(ng-click="useTemplate(template)")
+              .template-name
+                span.badge.badge-light.mr-1(ng-if="template.system") {{"mail.home.systemTemplate" | translate}}
+                span(ng-bind="template.name")
+              .template-snippet(ng-bind="template.snippet")
+          .col-12.text-muted.small(ng-if="(templates | filter:templateFilter).length == 0") {{"mail.home.noTemplates" | translate}}
 
-      ng-quill-editor(ng-model="mailContent" on-editor-created="editorCreated(editor)" on-selection-changed="contentSelected(range)")
-      .invalid-feedback.d-block(ng-if="triedPreview && !hasContent()") {{"mail.home.contentRequired" | translate}}
+      mail-composer(subject="mailTitle" content="mailContent" recipients="toTeam" show-errors="triedPreview")
 
       .form-group.mt-3
         label.small.text-muted
@@ -328,7 +348,19 @@ block main_content
       .form-group
         label.small.text-muted {{"mail.home.subject" | translate}}
         input.form-control(type='text' ng-model='toTeam[previewNo].mailData.title' disabled)
-      .mail-preview-box(ng-bind-html="trust(toTeam[previewNo].mailData.content)")
+      .mail-preview-box.p-0
+        mail-frame(html="toTeam[previewNo].mailData.content")
+
+      //- What may be wrong with the mail, before it is sent
+      .mt-4
+        label.small.text-muted.d-block {{"mail.check.title" | translate}}
+        ul.mail-checks
+          li(ng-repeat="c in checks")
+            i.fas.mt-1(ng-class="c.level == 'danger' ? 'fa-times-circle text-danger' : 'fa-exclamation-triangle text-warning'")
+            span {{'mail.check.' + c.key | translate:c.params}}
+          li(ng-if="checks.length == 0")
+            i.fas.fa-check-circle.text-success.mt-1
+            span {{"mail.check.ok" | translate}}
       .d-flex.justify-content-between.align-items-center.flex-wrap.mt-4(style="gap: 0.75rem;")
         h5.mb-0
           i.fas.fa-clock.mr-2.text-muted

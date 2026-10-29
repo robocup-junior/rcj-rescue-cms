@@ -29,16 +29,19 @@ router.get('/restore', function (req, res) {
   res.render('admin_restore', { user: req.user });
 });
 
+// The templates of the mails to the teams, or (?kind=staff) of those to the staff
+const templateKind = (req) => (req.query.kind === 'staff' ? 'staff' : 'team');
+
 router.get('/mailTemplates', function (req, res) {
-  res.render('mail_templates', { user: req.user });
+  res.render('mail_templates', { user: req.user, kind: templateKind(req) });
 });
 
 router.get('/mailTemplates/editor', function (req, res) {
-  res.render('mail_template_editor', { user: req.user, subject: ""});
+  res.render('mail_template_editor', { user: req.user, subject: "", kind: templateKind(req) });
 });
 
 router.get('/mailTemplates/editor/:subject', function (req, res) {
-  res.render('mail_template_editor', { user: req.user, subject: req.params.subject});
+  res.render('mail_template_editor', { user: req.user, subject: req.params.subject, kind: templateKind(req) });
 });
 
 router.get('/:competitionid', function (req, res, next) {

@@ -428,3 +428,117 @@
 tr.no-email td {
   color: #94a3b8;
 }
+
+/* The mail beside its editor, as a recipient gets it */
+.mail-live-preview {
+  position: sticky;
+  top: 80px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem;
+}
+
+.mail-preview-subject {
+  font-weight: 700;
+  color: #1e293b;
+  padding: 0.5rem 0.75rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px 8px 0 0;
+  border-bottom: none;
+  overflow-wrap: anywhere;
+}
+
+.mail-preview-frame {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 0 0 8px 8px;
+  max-height: 70vh;
+  overflow: auto;
+}
+
+.mail-preview-frame.mobile {
+  background: #e2e8f0;
+  padding: 0.75rem 0;
+  text-align: center;
+}
+
+.mail-frame {
+  display: block;
+  border: none;
+  width: 100%;
+  min-height: 120px;
+  margin: 0 auto;
+  background: white;
+}
+
+.segmented.segmented-sm button {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+}
+
+button.var-chip {
+  font-family: SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* The templates, each a card with the beginning of its text */
+.template-gallery {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.template-card {
+  height: 100%;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.template-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.template-card .template-name {
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+  overflow-wrap: anywhere;
+}
+
+.template-card .template-snippet {
+  font-size: 0.8rem;
+  color: #64748b;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* What is checked before the mails are sent */
+.mail-checks {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.mail-checks li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 0.4rem 0;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+/* The button of a mail in its editor: written again when clicked */
+.ql-editor .mail-button a {
+  cursor: pointer;
+}
