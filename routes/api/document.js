@@ -208,7 +208,9 @@ publicRouter.put('/answer/:teamId/:token', access.team(), function (req, res, ne
 publicRouter.post('/files/:teamId/:token/:fileName', access.team(), function (req, res, next) {
   const { teamId } = req.params;
   const { token } = req.params;
-  const { fileName } = req.params;
+  // The name of the file in the folder: no path of its own (../ would take the upload out of it)
+  const fileName = sanitize(req.params.fileName);
+  if (fileName == '') return res.status(400).send({ msg: 'Invalid file name' });
 
   if (!ObjectId.isValid(teamId)) {
     return next();
@@ -300,7 +302,7 @@ publicRouter.post('/files/:teamId/:token/:fileName', access.team(), function (re
                     });
                     const ft = mime.getType(originalname);
 
-                    if (ft.includes('video')) {
+                    if (ft != null && ft.includes('video')) {
                       const filepath = safePath('documents', dbTeam.competition._id, teamId, sanitize(fileName));
                       fs.unlink(`${filepath}-thumbnail.png`, function (err) {
                         try {
@@ -1013,7 +1015,9 @@ privateRouter.post(
   '/review/files/:teamId/:fileName',
   access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.SUPERADMIN, { orRole: 'INTERVIEW' }), function (req, res, next) {
     const { teamId } = req.params;
-    const { fileName } = req.params;
+    // The name of the file in the folder: no path of its own (../ would take the upload out of it)
+    const fileName = sanitize(req.params.fileName);
+    if (fileName == '') return res.status(400).send({ msg: 'Invalid file name' });
 
     if (!ObjectId.isValid(teamId)) {
       return next();
@@ -1416,7 +1420,9 @@ privateRouter.post(
   '/inspection/files/:teamId/:fileName',
   access.of(competitiondb.team, 'params.teamId', ACCESSLEVELS.JUDGE), function (req, res, next) {
     const { teamId } = req.params;
-    const { fileName } = req.params;
+    // The name of the file in the folder: no path of its own (../ would take the upload out of it)
+    const fileName = sanitize(req.params.fileName);
+    if (fileName == '') return res.status(400).send({ msg: 'Invalid file name' });
 
     if (!ObjectId.isValid(teamId)) {
       return next();

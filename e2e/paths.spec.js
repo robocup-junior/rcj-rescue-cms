@@ -69,6 +69,34 @@ test('files are not removed from outside their folders', async ({ page }) => {
   }
 });
 
+test('files are not written outside their folders', async ({ page, browser, baseURL }) => {
+  // Into the app's public pages, from the team's folder documents/<competition>/<team>, and from
+  // the reviewers' and the inspection's folders under it
+  const name = `e2e-written-${Date.now()}`;
+  const written = path.join(ROOT, 'public', `${name}.html`);
+  const file = { file: { name: 'page.html', mimeType: 'text/html', buffer: Buffer.from('<script>alert(1)</script>') } };
+  const team = await browser.newContext({ baseURL });
+  try {
+    for (const [request, url] of [
+      [team.request, `/api/document/files/${TEAM}/tokenM01/${up(3, '%2F')}public%2F${name}`],
+      [page.request, `/api/document/review/files/${TEAM}/${up(5, '%2F')}public%2F${name}`],
+      [page.request, `/api/document/inspection/files/${TEAM}/${up(5, '%2F')}public%2F${name}`],
+    ]) {
+      await request.post(url, { multipart: file });
+      expect(fs.existsSync(written), url).toBeFalsy();
+    }
+  } finally {
+    fs.rmSync(written, { force: true });
+    // The files written in the folders, under the names made of the ones given
+    const teamFolder = path.join(ROOT, 'documents', C, TEAM);
+    for (const file of fs.readdirSync(teamFolder, { recursive: true })) {
+      if (file.includes(name)) fs.rmSync(path.join(teamFolder, file), { force: true });
+    }
+    await team.close();
+  }
+  page.allowErrors(/HTTP 40\d/);
+});
+
 test('a page put in by a team is given to be saved, not shown as a page of the app', async ({ page }) => {
   const upload = async (name, mimeType, content) => {
     const res = await page.request.post(`/api/document/files/usercontent/${TEAM}/tokenM01`, {
