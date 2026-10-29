@@ -19,6 +19,9 @@ const mime = require('mime');
 const { ACCESSLEVELS } = require('../../models/user');
 const glob = require('glob');
 const ffmpeg = require('fluent-ffmpeg');
+// The containers of videos ffmpeg opens to make the thumbnails of those uploaded: not playlists
+// (HLS, concat...) put in as videos, which would have it read the server's files or other URLs
+const VIDEO_FORMATS = 'mov,mp4,m4a,3gp,3g2,mj2,matroska,webm,avi,mpegts,mpeg,mpegvideo,m4v,h264,hevc,flv,asf,ogg,dv,mxf,rm';
 
 const competitiondb = require('../../models/competition');
 const { LEAGUES_JSON } = competitiondb;
@@ -308,7 +311,7 @@ publicRouter.post('/files/:teamId/:token/:fileName', access.team(), function (re
                         try {
                           const original = ffmpeg(
                             filepath + path.extname(originalname)
-                          );
+                          ).inputOptions(['-format_whitelist', VIDEO_FORMATS]);
 
                           original
                             .screenshots({
@@ -1101,7 +1104,7 @@ privateRouter.post(
                               try {
                                 const original = ffmpeg(
                                   filepath + path.extname(originalname)
-                                );
+                                ).inputOptions(['-format_whitelist', VIDEO_FORMATS]);
 
                                 original
                                   .screenshots({
