@@ -227,6 +227,10 @@ adminRouter.post('/send', access.of(competitiondb.team, 'body.data[]._id', ACCES
     const htmlB = html
     const destination = safePath('mailAttachment', team.competition, mailId);
     while (match = regexpSrc.exec(htmlB)) {
+      // Only the pictures put in the mail (data: URIs) are attached: a path or a URL there would
+      // have the server attach its own files, or what it is given at the URL. The others are left
+      // to the mail readers to fetch.
+      if (!/^data:image\//i.test(match[1])) continue;
       let cid = `${mailId}-${attachments.length}`;
       attachments.push({
         'path': match[1],
@@ -278,7 +282,10 @@ adminRouter.post('/send', access.of(competitiondb.team, 'body.data[]._id', ACCES
       html,
       text,
       replyTo: process.env.MAIL_REPLY || process.env.MAIL_FROM,
-      attachments
+      attachments,
+      // (nothing of the message read from the server's files or fetched from URLs)
+      disableFileAccess: true,
+      disableUrlAccess: true,
     };
 
     try {
