@@ -33,7 +33,7 @@ function getMazeMaps(req, res) {
   const league = req.params.league;
 
   let query;
-  if (competition != null && competition.constructor === String) {
+  if (typeof competition === 'string') {
     query = mazeMap.find({
       competition,
     });
@@ -614,7 +614,8 @@ async function handlePublicMapImagePNG(req, res, next) {
 
 function getMapsFromRequest(req, callback) {
   const competitionId = req.query.competition;
-  const leagueId = req.query.league;
+  // A name, not an object (stripOperators takes the operators out of it, but not the rest)
+  const leagueId = typeof req.query.league === 'string' ? req.query.league : undefined;
   const mapIds = req.query.ids ? req.query.ids.split(',') : (req.params.map ? [req.params.map] : null);
 
   let mapQuery;

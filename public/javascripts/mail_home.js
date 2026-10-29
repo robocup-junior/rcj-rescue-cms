@@ -158,8 +158,9 @@ app.controller('MailHomeController', ['$scope', '$uibModal', '$log', '$http', '$
 
     $scope.validEmail = function(mail){
         function MailCheck(mail) {
-            var mail_regex1 = new RegExp( '(?:[-!#-\'*+/-9=?A-Z^-~]+\.?(?:\.[-!#-\'*+/-9=?A-Z^-~]+)*|"(?:[!#-\[\]-~]|\\\\[\x09 -~])*")@[-!#-\'*+/-9=?A-Z^-~]+(?:\.[-!#-\'*+/-9=?A-Z^-~]+)*' );
-            var mail_regex2 = new RegExp( '^[^\@]+\@[^\@]+$' );
+            // Literals: in a string, \. was only . (any letter) and \[\] only []
+            var mail_regex1 = /(?:[-!#-'*+\/-9=?A-Z^-~]+\.?(?:\.[-!#-'*+\/-9=?A-Z^-~]+)*|"(?:[!#-\[\]-~]|\\[\x09 -~])*")@[-!#-'*+\/-9=?A-Z^-~]+(?:\.[-!#-'*+\/-9=?A-Z^-~]+)*/;
+            var mail_regex2 = /^[^@]+@[^@]+$/;
             if( mail.match( mail_regex1 ) && mail.match( mail_regex2 ) ) {
                 if( mail.match( /[^a-zA-Z0-9\!\"\#\$\%\&\'\(\)\=\~\|\-\^\\\@\[\;\:\]\,\.\/\\\<\>\?\_\`\{\+\*\} ]/ ) ) { return false; }
                 if( !mail.match( /\.[a-z]+$/ ) ) { return false; }

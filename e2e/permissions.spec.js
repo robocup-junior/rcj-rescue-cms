@@ -3,6 +3,7 @@
 // and a judge of the competition, the admin of another competition — and must be refused, leaving the
 // data as it was; then by those who are, which it must not refuse (so that the refusals are not down
 // to a request the API would not take anyway).
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { test, expect } = require('./fixtures');
@@ -36,7 +37,7 @@ test.beforeAll(async ({ playwright, baseURL }) => {
   fx.simRun = await api.run(root, 'simulation', { ...refs, team: fx.simTeam });
 
   // The people, each logged in on a context of their own
-  const stamp = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
+  const stamp = `${Date.now()}${crypto.randomInt(1000)}`;
   const user = async (name, admin, competitions, email) => {
     const username = `${name}${stamp}`;
     const res = await root.post('/api/users', { data: { username, password: 'pass1234', admin, competitions, email } });
@@ -196,7 +197,7 @@ const cases = [
   },
   {
     name: 'make a user', allow: [],
-    make: () => ['post', '/api/users', { username: `made${Math.random()}`, password: 'pass1234', superDuperAdmin: true }],
+    make: () => ['post', '/api/users', { username: `made${crypto.randomUUID()}`, password: 'pass1234', superDuperAdmin: true }],
   },
   {
     name: 'change a user', allow: [],

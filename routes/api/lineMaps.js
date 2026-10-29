@@ -35,7 +35,7 @@ function getLineMaps(req, res) {
   const league = req.params.league;
 
   let query;
-  if (competition != null && competition.constructor === String) {
+  if (typeof competition === 'string') {
     query = lineMap.find({
       competition,
     });
@@ -390,7 +390,7 @@ function getTileTypes(req, res) {
   const tileTypes = req.query.id || req.body.id || req.params.tiletype;
 
   let query;
-  if (tileTypes != null && tileTypes.constructor === String) {
+  if (typeof tileTypes === 'string') {
     // String with single id
     query = tileType.findById(tileTypes);
   } else if (Array.isArray(tileTypes)) {
@@ -726,7 +726,8 @@ async function handlePublicMapImagePNG(req, res, next) {
 
 function getMapsFromRequest(req, callback) {
   const competitionId = req.query.competition;
-  const leagueId = req.query.league;
+  // A name, not an object (stripOperators takes the operators out of it, but not the rest)
+  const leagueId = typeof req.query.league === 'string' ? req.query.league : undefined;
   const mapIds = req.query.ids ? req.query.ids.split(',') : (req.params.map ? [req.params.map] : null);
 
   let mapQuery;
