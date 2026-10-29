@@ -170,7 +170,7 @@ privateRouter.get('/:id', function (req, res, next) {
     });
 });
 
-privateRouter.get('/:id/refresh', function (req, res, next) {
+privateRouter.post('/:id/refresh', function (req, res, next) {
   const { id } = req.params;
   if (!ObjectId.isValid(id)) {
     return next();

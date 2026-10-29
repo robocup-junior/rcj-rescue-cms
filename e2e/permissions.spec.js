@@ -117,7 +117,6 @@ const cases = [
     name: 'remove a team', allow: ['admin'],
     make: async () => ['delete', `/api/teams/${await api.team(as.root, fx.competition, 'Maze', `Gone ${Math.random()}`)}`],
   },
-  { name: 'set a team\'s code', allow: ['admin'], make: () => ['get', `/api/teams/set/${fx.mazeTeam}/NEW1`] },
 
   // Maps
   {
@@ -234,7 +233,7 @@ const cases = [
   { name: 'read its surveys', allow: ['admin'], make: () => ['get', `/api/survey/list/${fx.competition}`] },
   { name: 'read its reviews', allow: ['admin'], make: () => ['get', `/api/document/reviews/${fx.competition}`] },
   { name: 'read its review status', allow: ['admin'], make: () => ['get', `/api/document/${fx.competition}/reviewStatus`] },
-  { name: 'read its technical challenge recovery', allow: ['admin'], make: () => ['get', `/api/technicalChallenge/recovery/${fx.competition}`] },
+  { name: 'read its technical challenge recovery', allow: ['admin'], make: () => ['post', `/api/technicalChallenge/recovery/${fx.competition}`] },
   { name: 'read its documents ranking', allow: ['admin'], make: () => ['get', `/api/ranking/${fx.competition}/Maze/document`] },
 
   // Last: the competition itself removed

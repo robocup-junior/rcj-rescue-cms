@@ -92,43 +92,6 @@ privateRouter.get('/code/:teamId/:code', function (req, res, next) {
     });
 });
 
-adminRouter.get('/set/:teamId/:teamCode', function (req, res, next) {
-  const team = req.params.teamId;
-  const code = req.params.teamCode;
-
-  if (!ObjectId.isValid(team)) {
-    return next();
-  }
-
-  competitiondb.team.findById(team).exec(function (err, dbTeam) {
-    if (err) {
-      logger.error(err);
-      res.status(400).send({
-        msg: 'Could not get user',
-        err: err.message,
-      });
-    } else if (dbTeam) {
-      if (!auth.authCompetition(req.user, dbTeam.competition, ACCESSLEVELS.ADMIN)) {
-        return res.status(401).send({ msg: 'You have no authority to access this api' });
-      }
-      dbTeam.teamCode = code;
-
-      dbTeam.save(function (err) {
-        if (err) {
-          logger.error(err);
-          return res.status(400).send({
-            err: err.message,
-            msg: 'Could not save changes',
-          });
-        }
-        res.status(200).send({
-          msg: 'Saved changes',
-        });
-      });
-    }
-  });
-});
-
 publicRouter.get('/:teamid', function (req, res, next) {
   const id = req.params.teamid;
 

@@ -78,7 +78,7 @@ test('a signage display refreshes when it is told to', async ({ page, context })
   await display.evaluate(() => { window.notReloaded = true; });
 
   // Told on the setting page; it reloads a few seconds later, all together with the other displays
-  expect((await page.request.get(`/api/signage/${id}/refresh`)).ok()).toBeTruthy();
+  expect((await page.request.post(`/api/signage/${id}/refresh`)).ok()).toBeTruthy();
   await expect.poll(() => display.evaluate(() => window.notReloaded === undefined).catch(() => false), { timeout: 15000 }).toBeTruthy();
   await page.request.delete(`/api/signage/${id}`);
 });
