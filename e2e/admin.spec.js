@@ -109,8 +109,11 @@ test('a competition is set up from nothing, a run added, judged and taken back, 
   const runRequest = async () => (await page.request.get(`/api/runs/maze/${runId}`)).json();
   await open(page, `/admin/${id}/Maze/games`);
   async function action(name, typed) {
-    await row.getByRole('button', { name: 'Action', exact: true }).click();
-    await row.locator(`button[ng-click^="${name}"]`).click();
+    // (the list may be taken again as the run changes, closing the menu: opened again then)
+    await expect(async () => {
+      await row.getByRole('button', { name: 'Action', exact: true }).click();
+      await row.locator(`button[ng-click^="${name}"]`).click({ timeout: 2000 });
+    }).toPass();
     const dialog = page.locator('.swal2-popup');
     await dialog.locator('.swal2-input').fill('wrong');
     await dialog.locator('.swal2-confirm').click();
@@ -120,6 +123,7 @@ test('a competition is set up from nothing, a run added, judged and taken back, 
     await expect(dialog).toBeHidden();
   }
   await page.request.put(`/api/runs/maze/${runId}`, { data: { status: 3 } });
+  await expect(row.locator('td[data-label="Status"]')).toContainText('3.');
   await action('statusReset', 'RESET');
   await expect.poll(async () => (await runRequest()).status).toBe(0);
   await action('removeRun', 'DELETE');

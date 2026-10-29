@@ -67,10 +67,12 @@ async function seed() {
     { _id: oid(ids.teams.MazeNL), competition: compId, name: 'Maze Entry Team', league: 'MazeNL', teamCode: 'E02', ...own('E02') },
   ]);
 
-  // Saved through the model so the path finder numbers the tiles, as the map editor does
+  // Saved through the model so the path finder numbers the tiles, as the map editor does. The tiles
+  // by their ids: straight from the left to the right, a plain one and one with a gap (tile types
+  // found by what they have came in no order, some with no line through them)
   const [plain, gap] = await Promise.all([
-    tileType.findOne({ gaps: 0, intersections: 0, seesaw: 0 }).lean(),
-    tileType.findOne({ gaps: { $gt: 0 }, intersections: 0 }).lean(),
+    tileType.findById('570c27c3f5a9dabe23f3af90').lean(),
+    tileType.findById('58cfe0d457501b50da7afa62').lean(),
   ]);
   const lineMapData = {
     competition: compId, tileSet: compId, finished: true,
