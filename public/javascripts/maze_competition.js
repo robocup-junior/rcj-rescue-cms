@@ -30,10 +30,6 @@ app.controller("MazeCompetitionController", ['$scope', '$http', '$translate', fu
         $scope.teamName = ""
 
         
-        $http.get(`/api/runs/maze/competition/${competitionId}?populate=true&minimum=true&ended=false`).then(function (response) {
-            $scope.runs = response.data
-        })
-
         $http.get("/api/competitions/" + competitionId).then(function (response) {
             $scope.competition = response.data;
             $scope.rankingOpen = $scope.competition.leagues.reduce((result, current) => {
@@ -93,9 +89,13 @@ app.controller("MazeCompetitionController", ['$scope', '$http', '$translate', fu
             return sorted;
         }
 
+        // The runs of the league, by the latest request only: one answered after a later one (the
+        // ended runs shown or not, a run changed meanwhile) would put back what it had
+        let listRequest = 0;
         $scope.update_list = function () {
-            
+            const request = ++listRequest;
             $http.get(`/api/runs/maze/competition/${competitionId}?populate=true&minimum=true&ended=${$scope.show_ended}`).then(function (response) {
+                if (request != listRequest) return;
                 var runs = response.data.filter(r => r.team.league == league);
 
                 for (let run of runs) {

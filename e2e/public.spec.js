@@ -31,6 +31,29 @@ test('the public goes from the home page to a finished run and the ranking', asy
   await expect(page.locator('tr[ng-repeat^="team in ranking"]', { hasText: 'Maze Team' })).toBeVisible();
 });
 
+// The runs of a league are those of the latest request: the ended runs hidden and shown again at
+// once, the answer of the first (without them) coming last is not shown over the second's.
+test('the runs shown are those of the latest request, whatever comes back last', async ({ page }) => {
+  await page.route(/\/api\/runs\/maze\/competition\/.*ended=false/, async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await route.continue();
+  });
+  await open(page, `/maze/${ids.competition}/Maze`);
+  await page.waitForLoadState('networkidle');
+  const finished = page.locator('tr[ng-repeat]', { hasText: 'Maze Team' })
+    .filter({ has: page.locator(`.btn-run-view[ng-click="go('/maze/view/' + run._id)"]`) });
+  await expect(finished.first()).toBeVisible();
+
+  const toggle = page.locator('[ng-click^="show_ended = !show_ended"]');
+  const slow = page.waitForResponse(/ended=false/);
+  await toggle.click();
+  await toggle.click();
+  await expect(toggle).toHaveClass(/active-green/);
+  await slow;
+  await page.waitForTimeout(300);
+  await expect(finished.first()).toBeVisible();
+});
+
 test.describe('as a judge', () => {
   test.use({ user: 'judge' });
 
