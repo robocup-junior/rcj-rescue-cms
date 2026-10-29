@@ -68,3 +68,44 @@ test('a user is added, made a judge of a competition, kept to that, and removed'
   expect((await again.request.post('/api/auth/login', { data: { username, password: 'refereepass' } })).ok()).toBeFalsy();
   await again.close();
 });
+
+test('the admin of a competition, not a super admin, gives rights on its settings and picks its interviewers', async ({ page, browser, baseURL }) => {
+  const { request } = page;
+  const competition = await api.competition(request);
+  const stamp = Date.now();
+  const made = async (username, data) => {
+    expect((await request.post('/api/users', { data: { username, password: 'pass1234', ...data } })).ok()).toBeTruthy();
+  };
+  await made(`chief${stamp}`, { admin: true, competitions: [{ id: competition, accessLevel: 10, role: ['ADMIN'] }] });
+  await made(`helper${stamp}`, { email: `helper${stamp}@example.com`, competitions: [{ id: competition, accessLevel: 1, role: ['INTERVIEW'] }] });
+
+  const chief = await browser.newContext({ baseURL });
+  expect((await chief.request.post('/api/auth/login', { data: { username: `chief${stamp}`, password: 'pass1234' } })).ok()).toBeTruthy();
+  // (the fixture's checks of the page: no errors, no refused requests)
+  const settings = await chief.newPage();
+  const errors = [];
+  settings.on('response', (res) => { if (res.status() >= 400) errors.push(`${res.status()} ${res.url()}`); });
+  settings.on('pageerror', (err) => errors.push(err.message));
+
+  // The users listed, without their addresses; the helper made a judge
+  await open(settings, `/admin/${competition}/settings`);
+  const row = settings.locator('tr[ng-repeat="user in users"]', { hasText: `helper${stamp}` });
+  await expect(row).toBeVisible();
+  await expect(settings.getByText(`helper${stamp}@example.com`)).toHaveCount(0);
+  const saved = settings.waitForResponse((res) => res.request().method() === 'PUT' && res.url().includes('/api/users/'));
+  await row.locator('button[ng-click="updateAuthority(user._id , 5)"]').click();
+  expect((await saved).ok()).toBeTruthy();
+
+  // The interviewers of the competition, to be given teams on the review form's editor
+  const editor = await chief.newPage();
+  editor.on('response', (res) => { if (res.status() >= 400) errors.push(`${res.status()} ${res.url()}`); });
+  editor.on('pageerror', (err) => errors.push(err.message));
+  await open(editor, `/admin/${competition}/documents/Maze/review`);
+  await expect.poll(() => editor.evaluate(() => angular.element(document.body).scope().users?.map((u) => u.username)))
+    .toEqual([`helper${stamp}`]);
+  expect(errors).toEqual([]);
+  await chief.close();
+
+  const users = await (await request.get('/api/users')).json();
+  expect(users.find((u) => u.username === `helper${stamp}`).competitions[0].accessLevel).toBe(5);
+});

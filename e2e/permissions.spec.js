@@ -205,6 +205,13 @@ const cases = [
   },
   { name: 'list the short URLs', allow: [], make: () => ['get', '/api/short'] },
 
+  // The users, for the admins (to give them rights in their competitions); not their mail
+  // addresses, for the super admin only
+  { name: 'list the users', allow: ['otherAdmin', 'admin'], make: () => ['get', '/api/users'] },
+  {
+    name: 'change their own password', allow: ['viewer', 'judge', 'otherAdmin', 'admin'],
+    make: () => ['post', '/api/users/me/password', { current: 'pass1234', new: 'pass1234', confirm: 'pass1234' }],
+  },
   // Users' mail addresses: for the super admin only, not for the admins of competitions
   {
     name: 'read the users\' mail addresses', allow: [],
