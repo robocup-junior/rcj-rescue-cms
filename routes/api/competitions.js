@@ -234,6 +234,7 @@ adminRouter.put('/:competitionid', access.competition(ACCESSLEVELS.ADMIN, 'param
         if (data.description != null)
           dbCompetition.description = data.description;
         if (data.preparation != null) dbCompetition.preparation = data.preparation;
+        if (data.manualInput != null) dbCompetition.manualInput = data.manualInput;
 
         if (data.leagues != null) dbCompetition.leagues = data.leagues;
         if (data.documents != null) {

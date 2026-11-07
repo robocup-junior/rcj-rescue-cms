@@ -12,6 +12,8 @@ app.controller("AdminSettingsController", ['$scope', '$http', function ($scope, 
     $scope.logo = response.data.logo;
     $scope.competitonUseRule = response.data.rule;
     $scope.preparation = response.data.preparation;
+    // (not stored for the competitions from before it could be turned on: off for them)
+    $scope.manualInput = response.data.manualInput === true;
     $scope.leagues  = response.data.leagues;
   })
 
@@ -72,7 +74,8 @@ app.controller("AdminSettingsController", ['$scope', '$http', function ($scope, 
       message: $scope.message,
       description: $scope.description,
       leagues: $scope.leagues,
-      preparation: $scope.preparation
+      preparation: $scope.preparation,
+      manualInput: $scope.manualInput
     }
 
     $http.put("/api/competitions/" + $scope.competitionId, data).then(function (response) {

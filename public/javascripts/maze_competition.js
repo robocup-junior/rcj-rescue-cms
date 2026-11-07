@@ -47,9 +47,11 @@ app.controller("MazeCompetitionController", ['$scope', '$http', '$translate', fu
             $scope.league = response.data
         })
 
-        // Manual input is not prepared for the Entry 2026 rules
+        // Manual input is not prepared for the Entry 2026 rules, and is shown only where the
+        // competition has it turned on
         $scope.manualInputEnabled = function () {
             if (!$scope.competition) return false;
+            if ($scope.competition.manualInput !== true) return false;
             const leagueSetting = $scope.competition.leagues.find((l) => l.league == league);
             return !!leagueSetting && leagueSetting.rule != '2026E';
         };

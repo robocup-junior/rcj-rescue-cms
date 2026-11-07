@@ -699,7 +699,8 @@
             "num": "使用競技数",
             "discloseRanking": "順位を公開",
             "rankingMode": "順位付けモード",
-            "preparation": "準備モード（競技結果非公開）"
+            "preparation": "準備モード（競技結果非公開）",
+            "manualInput": "審判による採点用紙の手入力（Manual Input）"
         },
         "line_tSet": {
             "new_tSet": "タイルセット名を入力 ",

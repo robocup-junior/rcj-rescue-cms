@@ -88,6 +88,8 @@ const competitionSchema = new Schema({
   message: {type: String, default: ""},
   description: {type: String, default: ""},
   preparation: {type: Boolean, default: true},
+  // Whether the judges are led to the manual input of score sheets (only where it is turned on)
+  manualInput: {type: Boolean, default: false},
   leagues: [{
     'league': {type: String, enum: LEAGUES},
     'num': {type: Number, default: 20},

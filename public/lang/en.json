@@ -699,7 +699,8 @@
             "num": "Number of games",
             "discloseRanking": "Make rankings public",
             "rankingMode": "Ranking Mode",
-            "preparation": "Preparation mode(hide game results)"
+            "preparation": "Preparation mode(hide game results)",
+            "manualInput": "Manual input of score sheets by the judges"
         },
         "line_tSet": {
             "new_tSet": "Input tile set name",

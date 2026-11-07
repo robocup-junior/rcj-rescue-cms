@@ -67,6 +67,11 @@ block main_content
                 div
                   label.toggle-button-001
                     input(type='checkbox' ng-model="preparation")
+              .form-group
+                label {{"admin.settings.manualInput" | translate}}
+                div
+                  label.toggle-button-001
+                    input(type='checkbox' ng-model="manualInput")
           .form-group.mb-0
             label {{"admin.settings.mes" | translate}}
             textarea.form-control(ng-model="message" rows=5)

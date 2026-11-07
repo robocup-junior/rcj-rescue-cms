@@ -145,3 +145,40 @@ test('a competition is set up from nothing, a run added, judged and taken back, 
   // Its backups' folder is kept, for it to be restored; not the test's to leave behind
   require('fs').rmSync(require('path').join(__dirname, '..', 'backup', id), { recursive: true, force: true });
 });
+
+test('the judges are led to the manual input only where the competition has it turned on', async ({ page }) => {
+  const api = require('./api');
+  const competition = await api.competition(page.request);
+  const [round, field] = await Promise.all([api.round(page.request, competition, 'R1'), api.field(page.request, competition, 'F1')]);
+  const [mazeTeam, lineTeam] = await Promise.all([
+    api.team(page.request, competition, 'Maze', 'Maze Manual'), api.team(page.request, competition, 'Line', 'Line Manual'),
+  ]);
+  const refs = { competition, round, field };
+  await api.run(page.request, 'maze', { ...refs, team: mazeTeam, map: await api.mazeMap(page.request, competition, 'Maze', 'Manual Map', [{}]) });
+  await api.run(page.request, 'line', { ...refs, team: lineTeam, map: await api.lineMap(page.request, competition, 'Line', 'Manual Line Map') });
+  const leagues = [['maze', 'Maze', 'Maze Manual'], ['line', 'Line', 'Line Manual']];
+  const row = (team) => page.locator('tr[ng-repeat^="run in runs"]', { hasText: team });
+
+  // Off at first: the runs are judged, only not by hand
+  for (const [kind, league, team] of leagues) {
+    await open(page, `/${kind}/${competition}/${league}`);
+    await expect(row(team).locator('.btn-run-judge'), kind).toBeVisible();
+    await expect(row(team).locator('.btn-run-input'), kind).toHaveCount(0);
+  }
+
+  // Turned on in the settings
+  await open(page, `/admin/${competition}/settings`);
+  const toggle = page.locator('input[ng-model="manualInput"]');
+  await expect(toggle).not.toBeChecked();
+  // (the box itself is hidden behind the switch drawn for it)
+  await page.locator('label.toggle-button-001', { has: toggle }).click();
+  await expect(toggle).toBeChecked();
+  await Promise.all([page.waitForEvent('load'), page.locator('button.btn-hero-action[ng-click="set()"]').click()]);
+  await expect(page.locator('input[ng-model="manualInput"]')).toBeChecked();
+  expect((await (await page.request.get(`/api/competitions/${competition}`)).json()).manualInput).toBe(true);
+
+  for (const [kind, league, team] of leagues) {
+    await open(page, `/${kind}/${competition}/${league}`);
+    await expect(row(team).locator('.btn-run-input'), kind).toBeVisible();
+  }
+});
