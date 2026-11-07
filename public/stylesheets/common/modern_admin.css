@@ -431,6 +431,7 @@ tr.no-email td {
 
 /* The mail beside its editor, as a recipient gets it */
 .mail-live-preview {
+  position: -webkit-sticky;
   position: sticky;
   top: 80px;
   background: #f8fafc;

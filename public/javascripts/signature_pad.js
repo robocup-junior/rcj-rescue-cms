@@ -1,6 +1,7 @@
 // A signature pad for the sign pages (views/includes/line_sign_parts.pug).
-// Pointer events take a finger, a pen or a mouse; the canvas follows the screen's pixel density so
-// the strokes stay sharp; a second finger (a palm, a pinch) is ignored while one is drawing.
+// Pointer events take a finger, a pen or a mouse (touch and mouse events where there are none, as
+// on iOS 12); the canvas follows the screen's pixel density so the strokes stay sharp; a second
+// finger (a palm, a pinch) is ignored while one is drawing.
 // The signature is saved as an SVG cropped to the strokes, like jSignature's "svgbase64" before.
 function SignaturePad(canvas, onChange) {
     var LINE_WIDTH = 3;
@@ -51,35 +52,92 @@ function SignaturePad(canvas, onChange) {
         if (onChange) onChange();
     }
 
-    canvas.addEventListener('pointerdown', function (event) {
-        if (pointerId !== null || event.button > 0) return;
-        event.preventDefault();
-        pointerId = event.pointerId;
-        canvas.setPointerCapture(pointerId);
-        current = [point(event)];
+    function begin(p) {
+        current = [p];
         strokes.push(current);
         redraw();
-    });
+    }
 
-    canvas.addEventListener('pointermove', function (event) {
-        if (event.pointerId !== pointerId) return;
-        event.preventDefault();
-        // All the points since the last frame, for smooth fast strokes
-        var events = event.getCoalescedEvents ? event.getCoalescedEvents() : [event];
-        (events.length ? events : [event]).forEach(function (e) {
-            current.push(point(e));
-        });
-        redraw();
-    });
-
-    function end(event) {
-        if (event.pointerId !== pointerId) return;
+    function finish() {
         pointerId = null;
         current = null;
         changed();
     }
-    canvas.addEventListener('pointerup', end);
-    canvas.addEventListener('pointercancel', end);
+
+    if (window.PointerEvent) {
+        canvas.addEventListener('pointerdown', function (event) {
+            if (pointerId !== null || event.button > 0) return;
+            event.preventDefault();
+            pointerId = event.pointerId;
+            canvas.setPointerCapture(pointerId);
+            begin(point(event));
+        });
+
+        canvas.addEventListener('pointermove', function (event) {
+            if (event.pointerId !== pointerId) return;
+            event.preventDefault();
+            // All the points since the last frame, for smooth fast strokes
+            var events = event.getCoalescedEvents ? event.getCoalescedEvents() : [event];
+            (events.length ? events : [event]).forEach(function (e) {
+                current.push(point(e));
+            });
+            redraw();
+        });
+
+        var end = function (event) {
+            if (event.pointerId !== pointerId) return;
+            finish();
+        };
+        canvas.addEventListener('pointerup', end);
+        canvas.addEventListener('pointercancel', end);
+    } else {
+        // No pointer events (Safari before iOS 13): touches, and the mouse. The page must not
+        // scroll under the finger, which touch-action does not stop there
+        var touchOf = function (event) {
+            for (var i = 0; i < event.changedTouches.length; i++) {
+                if (event.changedTouches[i].identifier === pointerId) return event.changedTouches[i];
+            }
+            return null;
+        };
+        canvas.addEventListener('touchstart', function (event) {
+            event.preventDefault();
+            if (pointerId !== null) return;
+            var touch = event.changedTouches[0];
+            pointerId = touch.identifier;
+            begin(point(touch));
+        }, { passive: false });
+        canvas.addEventListener('touchmove', function (event) {
+            event.preventDefault();
+            var touch = touchOf(event);
+            if (!touch) return;
+            current.push(point(touch));
+            redraw();
+        }, { passive: false });
+        var touchEnd = function (event) {
+            if (touchOf(event)) finish();
+        };
+        canvas.addEventListener('touchend', touchEnd);
+        canvas.addEventListener('touchcancel', touchEnd);
+
+        var mouseDown = false;
+        canvas.addEventListener('mousedown', function (event) {
+            if (pointerId !== null || event.button > 0) return;
+            event.preventDefault();
+            mouseDown = true;
+            pointerId = 'mouse';
+            begin(point(event));
+        });
+        window.addEventListener('mousemove', function (event) {
+            if (!mouseDown) return;
+            current.push(point(event));
+            redraw();
+        });
+        window.addEventListener('mouseup', function () {
+            if (!mouseDown) return;
+            mouseDown = false;
+            finish();
+        });
+    }
 
     // Fit the canvas to its box (after opening, turning the phone or resizing the window)
     this.resize = function () {

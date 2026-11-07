@@ -127,6 +127,7 @@ body {
 }
 
 .hero-vertical .hero-title {
+  font-size: max(1.2rem, min(3.5vw, 2.2rem)); /* clamp() for iOS 12 */
   font-size: clamp(1.2rem, 3.5vw, 2.2rem);
   line-height: 1.2;
   white-space: nowrap;

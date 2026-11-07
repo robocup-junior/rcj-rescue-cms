@@ -29,6 +29,7 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  width: -webkit-fit-content;
   width: fit-content;
   max-width: 90%;
   min-height: auto; /* Tightly wraps the logo */
@@ -47,6 +48,7 @@
 }
 
 .comp-name-title {
+  font-size: max(1.2rem, min(3.5vw, 2.2rem)); /* clamp() for iOS 12 */
   font-size: clamp(1.2rem, 3.5vw, 2.2rem); /* Significantly smaller title */
   font-weight: 900;
   letter-spacing: -0.02em;
@@ -61,6 +63,7 @@
 
 .comp-message-box {
   background: rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   padding: 1.25rem 2.5rem;
   border-radius: 1rem;

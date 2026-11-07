@@ -56,7 +56,10 @@
 
 .rv-loading {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 2000;
   display: grid;
   place-items: center;
@@ -178,6 +181,7 @@ html:has(.rv-is-loading) { overflow: hidden; }
 
 /* ---- Top bar ---- */
 .rv-topbar {
+  position: -webkit-sticky;
   position: sticky;
   top: 0;
   z-index: 50;
@@ -235,7 +239,10 @@ html:has(.rv-is-loading) { overflow: hidden; }
 .rv-live::after {
   content: "";
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   border-radius: 50%;
   background: #4ade80;
   animation: rv-pulse 2s ease-out infinite;
@@ -594,7 +601,10 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 
 .rv-tile-frame {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 4;
   border: 3px solid;
   pointer-events: none;
@@ -615,6 +625,7 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   padding: 0.05em 0.4em;
   border-radius: 999px;
   color: #fff;
+  font-size: max(9px, calc(var(--rv-cqw, 1px) * 17));
   font-size: max(9px, 17cqw);
   font-weight: 800;
   line-height: 1.25;
@@ -627,7 +638,10 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
    over in orange with the number - a shape no other badge on the map has */
 .rv-tile-cp-ring {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 4;
   box-shadow: 0 0 0 3px #f97316;
   pointer-events: none;
@@ -642,11 +656,13 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   height: 56%;
   padding: 3% 0 0 7%;
   background: #f97316;
+  -webkit-clip-path: polygon(0 0, 100% 0, 0 100%);
   clip-path: polygon(0 0, 100% 0, 0 100%);
   color: #fff;
   /* In the corner, whatever the rows of tiles align (the unturned map centres its rows) */
   text-align: left;
   /* In proportion to the tile, so the number always stays inside the fold */
+  font-size: calc(var(--rv-cqw, 1px) * 26);
   font-size: 26cqw;
   font-weight: 800;
   line-height: 1;
@@ -655,7 +671,7 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 }
 
 /* Checkpoints 10 and up: smaller, so they stay clear of the points in the top right corner */
-.rv-tile-cp.is-long { font-size: 19cqw; }
+.rv-tile-cp.is-long { font-size: calc(var(--rv-cqw, 1px) * 19); font-size: 19cqw; }
 
 /* The second checkpoint of a tile passed twice: the same fold in the bottom left corner */
 .rv-tile-cp.is-second {
@@ -664,6 +680,7 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   display: flex;
   align-items: flex-end;
   padding: 0 0 3% 7%;
+  -webkit-clip-path: polygon(0 0, 100% 100%, 0 100%);
   clip-path: polygon(0 0, 100% 100%, 0 100%);
 }
 
@@ -673,15 +690,23 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   .rv-tile-cp.is-long { font-size: 23cqw; }
 }
 
+/* The same where container queries are not known (iOS 12): legacy_browsers.js marks such tiles */
+.rv-cq-small .rv-tile-cp { width: 68%; height: 68%; font-size: calc(var(--rv-cqw, 1px) * 32); }
+.rv-cq-small .rv-tile-cp.is-long { font-size: calc(var(--rv-cqw, 1px) * 23); }
+
 /* A large faint flag over the tile, like a watermark */
 .rv-tile-cp-mark {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 3;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #f97316;
+  font-size: calc(var(--rv-cqw, 1px) * 52);
   font-size: 52cqw;
   opacity: 0.22;
   pointer-events: none;
@@ -727,7 +752,10 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rv-mz-items img,
 .rv-mz-mark {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   width: 100%;
   height: 100%;
 }
@@ -752,9 +780,18 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 
 .rv-mz-frame {
   position: absolute;
-  inset: 7cqw;
+  top: calc(var(--rv-cqw, 1px) * 7);
+  top: 7cqw;
+  right: calc(var(--rv-cqw, 1px) * 7);
+  right: 7cqw;
+  bottom: calc(var(--rv-cqw, 1px) * 7);
+  bottom: 7cqw;
+  left: calc(var(--rv-cqw, 1px) * 7);
+  left: 7cqw;
   z-index: 1;
+  border: calc(var(--rv-cqw, 1px) * 5) solid;
   border: 5cqw solid;
+  border-radius: calc(var(--rv-cqw, 1px) * 9);
   border-radius: 9cqw;
   pointer-events: none;
 }
@@ -769,12 +806,16 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
 .rv-mz-points {
   position: absolute;
   /* Clear of the walls, half of whose width (5% of a tile) lies over the tile */
+  right: calc(var(--rv-cqw, 1px) * 5);
   right: 5cqw;
+  top: calc(var(--rv-cqw, 1px) * 5);
   top: 5cqw;
   z-index: 2;
+  padding: calc(var(--rv-cqw, 1px) * 0.5) calc(var(--rv-cqw, 1px) * 3.5);
   padding: 0.5cqw 3.5cqw;
   border-radius: 999px;
   color: #fff;
+  font-size: max(8px, calc(var(--rv-cqw, 1px) * 13.5));
   font-size: max(8px, 13.5cqw);
   font-weight: 800;
   line-height: 1.25;
@@ -1292,9 +1333,9 @@ a.rv-chip { color: inherit; text-decoration: none; transition: background 0.15s 
   overflow: hidden;
 }
 
-.rvm-cell img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.rvm-cell img { position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%; }
 /* The tile that was tapped: a blue frame drawn over its image */
-.rvm-cell.is-center::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 3px var(--rv-accent); }
+.rvm-cell.is-center::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; left: 0; box-shadow: inset 0 0 0 3px var(--rv-accent); }
 
 /* Exit badges sit on the sides of the middle tile, pointing the way the robot left */
 .rvm-map { position: relative; }
@@ -1685,7 +1726,10 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 
 .rv-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   z-index: 1060;
   display: flex;
   align-items: center;
@@ -1741,7 +1785,10 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 /* The canvas takes every touch: no scrolling or zooming while writing */
 .rv-pad-area canvas {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   touch-action: none;
@@ -1770,7 +1817,10 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 
 .rv-pad-hint {
   position: absolute;
-  inset: 0 0 auto;
+  top: 0;
+  right: 0;
+  bottom: auto;
+  left: 0;
   padding-top: 18%;
   color: #cbd5e1;
   font-size: 1.1rem;
@@ -2177,7 +2227,10 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-stat-stop::after {
   content: "";
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: inherit;
   pointer-events: none;
@@ -2197,7 +2250,10 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-stat-start.is-blink::after {
   content: "";
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
   border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: inherit;
   pointer-events: none;
@@ -2276,6 +2332,9 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 .rv-timeup-caption { font-size: 0.8rem; font-weight: 700; color: var(--rv-muted); }
 .rv-stop-now:disabled { background: #94a3b8; box-shadow: none; cursor: default; }
 
+/* Leaving once the run has started: what it means, above the two answers */
+.rv-leave-note { margin: 0; padding: 1.1rem 1.1rem 0; font-size: 0.95rem; font-weight: 600; line-height: 1.6; color: var(--rv-text); }
+
 .rv-alert {
   display: flex;
   align-items: flex-start;
@@ -2309,7 +2368,7 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 
 @media (min-width: 992px) {
   .rv-judge-grid { grid-template-columns: minmax(340px, 420px) minmax(0, 1fr); grid-template-areas: "side map"; }
-  .rv-judge-map { grid-area: map; position: sticky; top: 4.75rem; }
+  .rv-judge-map { grid-area: map; position: -webkit-sticky; position: sticky; top: 4.75rem; }
   .rv-judge-side { grid-area: side; }
 }
 
@@ -2332,9 +2391,6 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 
 /* The maze's pattern: the six as dice, the one picked dark; or one at random */
 .rv-pattern-random {
-/* Leaving once the run has started: what it means, above the two answers */
-.rv-leave-note { margin: 0; padding: 1.1rem 1.1rem 0; font-size: 0.95rem; font-weight: 600; line-height: 1.6; color: var(--rv-text); }
-
   margin-left: auto;
   padding: 0.3rem 0.7rem;
   border: 1px solid var(--rv-border);
@@ -2768,4 +2824,32 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
   .is-judge .rv-stat-score { display: none; }
   /* The stop question comes up from the bottom, clear of the home bar */
   .rv-stop-actions { padding-bottom: calc(1.1rem + env(safe-area-inset-bottom)); }
+}
+
+/* ---- Browsers from before 2021 (the iPad mini 2's iOS 12) ----
+   What they do not know, done the old way: legacy_browsers.js stands in for the gaps of flex boxes
+   and the sizes in parts of a tile (cqw); here, square cells and the columns rows share (subgrid) */
+/* The gap after a mark drawn before the text, which the script cannot give (html.rv-legacy: it is
+   standing in for the gaps) */
+.rv-legacy .rv-key::before { margin-right: 0.4rem; }
+
+@supports not (aspect-ratio: 1) {
+  .rvm-cell { height: 0; padding-top: 100%; }
+}
+
+@supports not (grid-template-columns: subgrid) {
+  /* The same columns on every row; with widths of their own, near enough to line up */
+  .rv-rescue-item { grid-template-columns: 1.6rem auto auto auto 1fr; }
+  .rv-nl-item { grid-template-columns: auto auto auto 1fr; }
+  /* The course: dot | label | points in rows the height of a dot and of the section details
+     (three lines), apart as the track's rows are */
+  .rv-track-node,
+  .rv-track-seg { grid-template-rows: 40px minmax(4.5rem, auto) auto; row-gap: 0.6rem; align-content: start; }
+}
+
+@media (max-width: 575.98px) {
+  @supports not (grid-template-columns: subgrid) {
+    .rv-track-node,
+    .rv-track-seg { grid-template-rows: none; grid-template-columns: 40px 1fr auto; row-gap: 0; column-gap: 0.75rem; }
+  }
 }

@@ -970,7 +970,10 @@ img.sim-fake-victim-mixed {
 
 .sim-rot-arm {
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     pointer-events: none;
 }
 
@@ -2008,7 +2011,10 @@ img.sim-fake-victim-mixed {
 /* Map overlay on a tile */
 .sim-area4-mark {
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     z-index: 4;
     pointer-events: none;
     display: flex;
@@ -2216,7 +2222,10 @@ img.sim-fake-victim-mixed {
 /* Map marks for passage tiles */
 .sim-conn-mark {
     position: absolute;
-    inset: 3px;
+    top: 3px;
+    right: 3px;
+    bottom: 3px;
+    left: 3px;
     z-index: 3;
     pointer-events: none;
     border-radius: 4px;
@@ -2595,7 +2604,10 @@ img.sim-fake-victim-mixed {
 
 .sim-r4-stage canvas.r4-over {
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     width: 100%;
     height: 100%;
     touch-action: none;
