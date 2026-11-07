@@ -214,6 +214,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             $scope.team = response.data.team;
             $scope.league = response.data.team.league;
             $scope.competition = response.data.competition;
+            $scope.status = response.data.status;
             $scope.LoPs = response.data.LoPs;
             $scope.MisIdent = response.data.misidentification;
             $scope.diceSelect = response.data.diceNumber;
@@ -568,13 +569,50 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         $scope.timeUp = false;
     };
 
+    // Leaving the page once the timer has been started: the run is under way (status 2), so the run
+    // list no longer offers its judge page. The judge is asked first; left, the timer stops and the
+    // page goes once all is saved (when it cannot be, once the resend has saved it)
+    $scope.leaveAsked = false;
+    function leave() {
+        var back = $scope.getParam('return');
+        $scope.go(back ? back : '/maze/' + $scope.competition._id + '/' + $scope.league);
+    }
+    $scope.back = function () {
+        if ($scope.startedTime || $scope.status >= 2) {
+            playSound(sClick);
+            $scope.leaveAsked = true;
+            return;
+        }
+        leave();
+    };
+    $scope.stayHere = function () {
+        playSound(sClick);
+        $scope.leaveAsked = false;
+    };
+    $scope.confirmLeave = function () {
+        playSound(sClick);
+        $scope.leaveAsked = false;
+        if ($scope.startedTime) {
+            $scope.startedTime = false;
+            $scope.time = prevTime + (new Date().getTime() - $scope.startUnixTime);
+            prevTime = $scope.time;
+        }
+        save({
+            time: {
+                minutes: Math.floor($scope.time / 60000),
+                seconds: Math.floor(($scope.time % 60000) / 1000)
+            }
+        }, leave);
+    };
+
     // The page behind a sheet stays still; Escape closes the sheet (and keeps the timer running)
-    $scope.$watchGroup(['stopAsked', 'timeUp'], function (open) {
-        document.documentElement.classList.toggle('rv-overlay-open', !!(open[0] || open[1]));
+    $scope.$watchGroup(['leaveAsked', 'stopAsked', 'timeUp'], function (open) {
+        document.documentElement.classList.toggle('rv-overlay-open', open.some(Boolean));
     });
     document.addEventListener('keydown', function (event) {
         if (event.key != 'Escape') return;
-        if ($scope.timeUp) $scope.$apply($scope.closeTimeUp);
+        if ($scope.leaveAsked) $scope.$apply($scope.stayHere);
+        else if ($scope.timeUp) $scope.$apply($scope.closeTimeUp);
         else if ($scope.stopAsked) $scope.$apply(function () {
             $scope.askStop(false);
         });
@@ -599,6 +637,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
             upload_run({
               status: 2
             });
+            $scope.status = 2;
         } else {
             // Save everything when you stop the time
             date = new Date();

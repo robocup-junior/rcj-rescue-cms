@@ -2332,6 +2332,9 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
 
 /* The maze's pattern: the six as dice, the one picked dark; or one at random */
 .rv-pattern-random {
+/* Leaving once the run has started: what it means, above the two answers */
+.rv-leave-note { margin: 0; padding: 1.1rem 1.1rem 0; font-size: 0.95rem; font-weight: 600; line-height: 1.6; color: var(--rv-text); }
+
   margin-left: auto;
   padding: 0.3rem 0.7rem;
   border: 1px solid var(--rv-border);

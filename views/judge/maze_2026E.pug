@@ -25,7 +25,7 @@ html(ng-app="ddApp")
   body.run-view.is-judge.rv-is-loading(ng-controller="ddController")
     include ../includes/maze_loading
     header.rv-topbar
-      button.rv-back(type='button' title="{{'common.back' | translate}}" ng-click="getParam('return')? go(getParam('return')):go('/maze/' + competition._id + '/' + league)")
+      button.rv-back(type='button' title="{{'common.back' | translate}}" ng-click="back()")
         i.fas.fa-arrow-left
       .rv-team
         //- Whether what was scored is on the server
@@ -237,6 +237,22 @@ html(ng-app="ddApp")
             button.rv-submit(type='button' ng-click='confirm()' ng-disabled='startedTime || networkError' ng-class="{'is-ready': !startedTime && !networkError}")
               i.fas.fa-arrow-right
               | {{'maze.judge.toSign' | translate}}
+
+    //- Leaving once the run has started: the run list no longer offers its judge page, so the judge
+    //- is asked first
+    .rv-overlay.is-send(ng-cloak ng-show='leaveAsked' role='alertdialog' aria-modal='true' aria-labelledby='rv-leave-title')
+      .rv-send-sheet
+        .rv-pad-head
+          i.fas.fa-exclamation-triangle
+          span#rv-leave-title {{'line.judge.leaveConfirm' | translate}}
+        p.rv-leave-note {{'line.judge.leaveNote' | translate}}
+        .rv-stop-actions
+          button.rv-stop-keep(type='button' ng-click='stayHere()')
+            span.rv-stop-choice {{'line.judge.stayHere' | translate}}
+          button.rv-stop-now(type='button' ng-click='confirmLeave()' ng-disabled='networkError')
+            span.rv-stop-choice
+              i.fas.fa-arrow-left
+              |  {{'line.judge.leaveAnyway' | translate}}
 
     //- Stopping the timer: the time of the first tap is what is recorded; kept running, the timer
     //- goes on

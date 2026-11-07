@@ -28,7 +28,7 @@ html(ng-app="ddApp")
   body.run-view.is-judge.rv-is-loading(ng-controller="ddController")
     include ../includes/line_loading
     header.rv-topbar
-      button.rv-back(type='button' title="{{'common.back' | translate}}" ng-click="getParam('return')? go(getParam('return')):go('/line/' + competition._id + '/' + league)")
+      button.rv-back(type='button' title="{{'common.back' | translate}}" ng-click="back()")
         i.fas.fa-arrow-left
       .rv-team
         //- Whether what was scored is on the server
@@ -321,6 +321,22 @@ html(ng-app="ddApp")
                   img(ng-src="{{v.zoneType == 'RED' ? '/images/evacZone/red_lv2.png' : '/images/evacZone/green_lv2.png'}}" alt="{{v.zoneType}}")
                 button.rv-rescue-del(type='button' ng-click='delete_victim($index)' title="{{'common.delete' | translate}}")
                   i.fas.fa-times
+
+    //- Leaving once the run has started: the run list no longer offers its judge page, so the judge
+    //- is asked first
+    .rv-overlay.is-send(ng-cloak ng-show='leaveAsked' role='alertdialog' aria-modal='true' aria-labelledby='rv-leave-title')
+      .rv-send-sheet
+        .rv-pad-head
+          i.fas.fa-exclamation-triangle
+          span#rv-leave-title {{'line.judge.leaveConfirm' | translate}}
+        p.rv-leave-note {{'line.judge.leaveNote' | translate}}
+        .rv-stop-actions
+          button.rv-stop-keep(type='button' ng-click='stayHere()')
+            span.rv-stop-choice {{'line.judge.stayHere' | translate}}
+          button.rv-stop-now(type='button' ng-click='confirmLeave()' ng-disabled='networkError')
+            span.rv-stop-choice
+              i.fas.fa-arrow-left
+              |  {{'line.judge.leaveAnyway' | translate}}
 
     //- Stopping the timer: the time of the first tap is what is recorded; kept running, the timer
     //- goes on
