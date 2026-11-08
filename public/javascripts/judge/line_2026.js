@@ -668,6 +668,12 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     }
     leave();
   };
+  // The browser's back asked first as well, where the page's is (history_guard.js)
+  guardHistory(function () {
+    if (!($scope.startedTime || $scope.status >= 2)) return false;
+    $scope.$apply($scope.back);
+    return true;
+  });
   $scope.stayHere = function () {
     playSound(sClick);
     $scope.leaveAsked = false;
