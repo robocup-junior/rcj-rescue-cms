@@ -271,6 +271,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
   
 
   function loadNewRun() {
+    var loadedRun = runId;
     $http.get("/api/runs/line/" + runId + "?populate=true").then(function (response) {
       $scope.LoPs = response.data.LoPs;
       
@@ -325,6 +326,7 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
         $scope.width = response.data.width;
         $scope.length = response.data.length;
         $scope.duration = response.data.duration || 480;
+        resumeTimer(loadedRun);
         width = response.data.width;
         length = response.data.length;
         $scope.startTile = response.data.startTile;
@@ -723,6 +725,8 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     if ($scope.startedTime) {
       date = new Date();
       $scope.time = prevTime + (date.getTime() - $scope.startUnixTime);
+      judgeTimer.keep('line', runId, $scope.startUnixTime, prevTime);
+      timedRun = runId;
       $scope.minutes = Math.floor($scope.time / 60000);
       $scope.seconds = Math.floor(($scope.time % 60000) / 1000);
       if ($scope.time >= $scope.duration*1000) {
@@ -786,6 +790,31 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
     }
     leave();
   };
+  // The timer kept on the device while it runs (timer_keeper.js), for a reload or the page opened
+  // again: dropped when it stops, for whatever reason (stopped, time up, left, another run)
+  var timedRun = null;
+  $scope.$watch('startedTime', function (running, was) {
+    if (running || running === was) return;
+    judgeTimer.drop('line', timedRun);
+    timedRun = null;
+  });
+  // Run on, once the run is loaded, where it was kept running for this very run (still the one
+  // on the page, and still under way): its team has been checked already
+  function resumeTimer(run) {
+    if (run !== runId || $scope.startedTime) return;
+    var kept = $scope.status == 2 ? judgeTimer.kept('line', run, $scope.duration * 1000, $scope.time) : null;
+    if (!kept) {
+      judgeTimer.drop('line', run);
+      return;
+    }
+    prevTime = kept.prev;
+    $scope.startUnixTime = kept.start;
+    $scope.startedTime = true;
+    $scope.checked = true;
+    $timeout($scope.tile_size, 200);
+    $timeout(tick, 0);
+  }
+
   // The browser's back asked first as well, where the page's is (history_guard.js)
   guardHistory(function () {
     if (!($scope.startedTime || $scope.status >= 2)) return false;
