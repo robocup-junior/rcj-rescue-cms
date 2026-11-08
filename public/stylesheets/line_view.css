@@ -2833,8 +2833,12 @@ html.rv-overlay-open body { overflow: hidden; overscroll-behavior: none; }
    standing in for the gaps) */
 .rv-legacy .rv-key::before { margin-right: 0.4rem; }
 
+/* The maze map as tall as its tiles across and down (the sizer's padding, from buildMazeMap) */
+.rv-mz-sizer { display: none; }
+
 @supports not (aspect-ratio: 1) {
   .rvm-cell { height: 0; padding-top: 100%; }
+  .rv-mz-sizer { display: block; }
 }
 
 @supports not (grid-template-columns: subgrid) {

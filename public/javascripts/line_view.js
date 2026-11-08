@@ -142,7 +142,9 @@ function buildMazeMap(cells, width, length, z, rotate) {
     style: {
       'aspect-ratio': across + ' / ' + down,
       'max-width': 'min(100%, calc(70vh * ' + across + ' / ' + down + '))'
-    }
+    },
+    // Its height where aspect-ratio is unknown (Safari before iOS 15): a padding in % of the width
+    sizer: { 'padding-top': down / across * 100 + '%' }
   };
 }
 

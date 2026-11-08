@@ -5,6 +5,8 @@
 //- the rest of each tile, each in a layer of its own over the whole map. See line_view.css.
 .tilearea.rv-mz-area
   .rv-mz-map(ng-if='mazeView' ng-style='mazeView.style')
+    //- The map's height where aspect-ratio is unknown (iOS 12); see line_view.css
+    .rv-mz-sizer(ng-style='mazeView.sizer')
     //- The tile pointed at, whose points step aside (they are in the layer over it)
     .rv-mz-tile(ng-repeat='t in mazeView.tiles track by t.key' ng-class='t.cls' ng-style='t.style' ng-click='cellClick(t.x, t.y, z, false, true)' ng-mouseenter='mazeView.hover = t.key' ng-mouseleave='mazeView.hover = null')
     .rv-mz-wall(ng-repeat='w in mazeView.walls track by w.key' ng-class="'is-' + w.kind" ng-style='w.style')
