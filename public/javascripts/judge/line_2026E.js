@@ -1193,10 +1193,12 @@ app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$htt
       //console.log('コンテンツ本体：' + b.height() + '×' + b.width());
       //console.log('window：' + window.innerHeight);
       // The map card, kept in view under the bar (its sticky top), fits the window beside the
-      // side column; on narrow screens it is above the rest and fits the width only
+      // side column; on narrow screens (a tablet held upright) it is above the rest, and fits the
+      // window under the bar once scrolled to, so that the whole field is in view
       var area = $('.tilearea');
-      var mapHeight = window.matchMedia('(max-width: 991.98px)').matches ? Infinity :
-        window.innerHeight - parseFloat($('.rv-judge-map').css('top')) -
+      var under = window.matchMedia('(max-width: 991.98px)').matches ?
+        $('.rv-topbar').outerHeight() : parseFloat($('.rv-judge-map').css('top'));
+      var mapHeight = window.innerHeight - under -
         (area.offset().top - $('.rv-judge-map').offset().top) - (area.innerHeight() - area.height()) - 20;
       if ($scope.sRotate % 180 == 0) {
         var tilesize_w = ($('.tilearea').width() - 2 * width) / width;
