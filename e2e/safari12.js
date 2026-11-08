@@ -5,7 +5,7 @@
 //   it drops it: properties (inset, aspect-ratio...), values (cqw, subgrid, clamp()...), rules
 //   whose selectors it cannot read (:focus-visible, :is()...), @container rules, and the
 //   unprefixed spellings of what it knows only prefixed (position: -webkit-sticky...); and
-//   @supports is answered as Safari 12 would
+//   @supports is answered as Safari 12 would; so are the styles the scripts set (ng-style)
 // - the gaps of flex boxes, which it does not know either but Chromium cannot be kept from
 //   drawing, are taken away by legacy_browsers.js, told it is on such a browser
 //   (RV_LEGACY_BROWSER), which then puts them back as margins as it does on iOS 12
@@ -99,10 +99,32 @@ function downgradeHtml(html) {
  * the screen). Requests the test routes itself after this go to its own handlers first.
  */
 async function emulateSafari12(page) {
-  await page.addInitScript(() => {
+  await page.addInitScript(({ properties, values }) => {
     window.RV_LEGACY_BROWSER = true;
     delete window.PointerEvent;
-  });
+    // Styles set by the page's scripts (ng-style...) are dropped as the stylesheets' are: taken
+    // out of the element as soon as they are set, before the page is laid out again
+    const unknownProperty = new RegExp(properties);
+    const unknownValue = new RegExp(values);
+    const clean = (e) => {
+      const style = e.style;
+      if (!style) return;
+      for (let i = style.length - 1; i >= 0; i--) {
+        const name = style[i];
+        if (unknownProperty.test(name) || unknownValue.test(style.getPropertyValue(name))) style.removeProperty(name);
+      }
+    };
+    new MutationObserver((records) => {
+      for (const r of records) {
+        if (r.type === 'attributes') clean(r.target);
+        for (const n of r.addedNodes || []) {
+          if (n.nodeType !== 1) continue;
+          clean(n);
+          for (const e of n.querySelectorAll('[style]')) clean(e);
+        }
+      }
+    }).observe(document, { subtree: true, childList: true, attributes: true, attributeFilter: ['style'] });
+  }, { properties: UNKNOWN_PROPERTIES.source, values: UNKNOWN_VALUES.source });
   await page.route('**/*', async (route) => {
     const request = route.request();
     const type = request.resourceType();

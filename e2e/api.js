@@ -91,4 +91,4 @@ async function mailsTo(address) {
   }
 }
 
-module.exports = { login, competition, round, field, team, mazeMap, lineMap, run, mailsTo, NO_VICTIMS };
+module.exports = { login, post, competition, round, field, team, mazeMap, lineMap, run, mailsTo, NO_VICTIMS, PLAIN_LINE };

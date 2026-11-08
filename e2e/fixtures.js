@@ -1,6 +1,7 @@
 // Playwright fixtures: every page records script errors, console errors and failed requests,
 // and the test fails if any were recorded. Tests that expect some call page.allowErrors().
 const base = require('@playwright/test');
+const { emulateSafari12 } = require('./safari12');
 
 const USERS = {
   admin: { username: 'admin', password: 'adminpass' },
@@ -10,8 +11,11 @@ const USERS = {
 const test = base.test.extend({
   // Log in through the API before the test when set, e.g. test.use({ user: 'admin' })
   user: [null, { option: true }],
+  // Pages on the stand-in for Safari 12 (e2e/safari12.js), as in the ios12 project
+  safari12: [false, { option: true }],
 
-  page: async ({ page, user, baseURL }, use, testInfo) => {
+  page: async ({ page, user, safari12, baseURL }, use, testInfo) => {
+    if (safari12) await emulateSafari12(page);
     const errors = [];
     const allowed = [];
     const isAllowed = (text) => allowed.some((re) => re.test(text));
