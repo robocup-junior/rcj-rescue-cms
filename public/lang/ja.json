@@ -343,7 +343,6 @@
             "js": {
                 "go_judge": "審判ページに移動しますか？",
                 "no_judge": "選択した競技は，既に終了しています．この競技を編集する必要がある場合は，OCまでお問い合わせください．",
-                "no_view_title": "まだ公開されていません",
                 "no_view": "この走行は，終了してチームの署名が済むと閲覧できるようになります．"
             }
         },
@@ -547,7 +546,6 @@
             "js": {
                 "go_judge": "@:line.competition.js.go_judge",
                 "no_judge": "@:line.competition.js.no_judge",
-                "no_view_title": "@:line.competition.js.no_view_title",
                 "no_view": "@:line.competition.js.no_view"
             }
         },

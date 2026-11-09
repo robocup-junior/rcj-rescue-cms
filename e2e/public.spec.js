@@ -14,17 +14,12 @@ test('the public goes from the home page to a finished run and the ranking', asy
   // Not judges: nothing to judge from here
   await expect(page.locator('.btn-run-judge')).toHaveCount(0);
   // The finished runs are what the public sees first
-  // (a run not finished nor signed yet is not the public's to see: its view says so where it is)
+  // (a run not finished nor signed yet is not the public's to see: its view cannot be pressed)
   const finished = page.locator('tr[ng-repeat]', { hasText: 'Maze Team' })
     .filter({ has: page.locator(`.btn-run-view[ng-click="go('/maze/view/' + run._id)"]`) });
-  const notYet = page.locator('.btn-run-view[ng-click="no_view()"]').first();
+  const notYet = page.locator('.btn-run-view:disabled').first();
   await expect(notYet).toBeVisible();
-  // Told so on the list, not sent away from it
-  await notYet.click();
-  await expect(page.locator('.swal2-popup')).toBeVisible();
-  await expect(page).toHaveURL(new RegExp(`/maze/${ids.competition}/Maze$`));
-  await page.locator('.swal2-confirm').click();
-  await expect(page.locator('.swal2-popup')).toHaveCount(0);
+  await expect(notYet).toHaveAttribute('title', /signed/);
   await expect(page.locator('[ng-click^="show_ended = !show_ended"]')).toHaveClass(/active-green/);
   await expect(finished.first()).toBeVisible();
   await finished.first().locator('.btn-run-view').click();

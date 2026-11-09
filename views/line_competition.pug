@@ -38,6 +38,7 @@ block page_css
     .btn-run-action:focus-visible { outline:3px solid rgba(59,130,246,0.45); outline-offset:2px; }
     .btn-run-view { background:#eff6ff; color:#2563eb; border-color:#bfdbfe; }
     .btn-run-view:hover, .btn-run-view:active { background:#dbeafe; }
+    .btn-run-view:disabled, .btn-run-view:disabled:hover, .btn-run-view:disabled:active { background:#f1f5f9; color:#94a3b8; border-color:#e2e8f0; cursor:not-allowed; transform:none; }
     .btn-run-judge { background:#ef4444; color:#ffffff; box-shadow:0 4px 10px rgba(239,68,68,0.25); }
     .btn-run-judge:hover, .btn-run-judge:active { background:#dc2626; }
     .btn-run-input { background:#fffbeb; color:#b45309; border-color:#fde68a; }
@@ -162,8 +163,9 @@ block main_content
                     button.btn-run-action.btn-run-view(ng-if="run.field != null" ng-click="go('/line/view/' + run._id)")
                       i.fas.fa-eye
                       | {{'common.view' | translate}}
-                    button.btn-run-action.btn-run-view(ng-if="run.field == null" ng-click="no_view()")
-                      i.fas.fa-eye
+                    //- A run not ended and signed yet is not the public's to see
+                    button.btn-run-action.btn-run-view(ng-if="run.field == null" disabled title="{{'line.competition.js.no_view' | translate}}")
+                      i.fas.fa-eye-slash
                       | {{'common.view' | translate}}
                     button.btn-run-action.btn-run-judge(ng-click="go_judge('/line/judge/' + run._id , run.team.name)" ng-if="run.status<2 && isJudge == 1")
                       i.fas.fa-gavel

@@ -203,11 +203,6 @@ app.controller("MazeCompetitionController", ['$scope', '$http', '$translate', fu
         $scope.no_judge = function () {
             swal("Oops!", val_no_judge, "error");
         }
-
-        // A run not ended and signed yet is not the public's to see: said here, on the list
-        $scope.no_view = function () {
-            swal($translate.instant('maze.competition.js.no_view_title'), $translate.instant('maze.competition.js.no_view'), 'info');
-        }
     }])
     .directive("runsReadFinished", ['$timeout', function ($timeout) {
         return function (scope, element, attrs) {
