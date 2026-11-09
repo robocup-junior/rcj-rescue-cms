@@ -342,8 +342,7 @@
             "endedrun": "終了した競技を表示",
             "js": {
                 "go_judge": "審判ページに移動しますか？",
-                "no_judge": "選択した競技は，既に終了しています．この競技を編集する必要がある場合は，OCまでお問い合わせください．",
-                "no_view": "この走行は，終了してチームの署名が済むと閲覧できるようになります．"
+                "no_judge": "選択した競技は，既に終了しています．この競技を編集する必要がある場合は，OCまでお問い合わせください．"
             }
         },
         "score": {
@@ -545,8 +544,7 @@
             "endedrun": "@:line.competition.endedrun",
             "js": {
                 "go_judge": "@:line.competition.js.go_judge",
-                "no_judge": "@:line.competition.js.no_judge",
-                "no_view": "@:line.competition.js.no_view"
+                "no_judge": "@:line.competition.js.no_judge"
             }
         },
         "score": {

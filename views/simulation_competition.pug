@@ -164,7 +164,7 @@ block main_content
                       i.fas.fa-eye
                       | {{'common.view' | translate}}
                     //- A run not ended and signed yet is not the public's to see
-                    button.btn-run-action.btn-run-view(ng-if="run.field == null" disabled title="{{'maze.competition.js.no_view' | translate}}")
+                    button.btn-run-action.btn-run-view(ng-if="run.field == null" disabled)
                       i.fas.fa-eye-slash
                       | {{'common.view' | translate}}
                     button.btn-run-action.btn-run-judge(ng-click="go_judge('/simulation/judge/' + run._id , run.team.name)" ng-if="run.status<2 && isJudge == 1")

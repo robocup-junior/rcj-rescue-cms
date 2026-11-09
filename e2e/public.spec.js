@@ -19,7 +19,6 @@ test('the public goes from the home page to a finished run and the ranking', asy
     .filter({ has: page.locator(`.btn-run-view[ng-click="go('/maze/view/' + run._id)"]`) });
   const notYet = page.locator('.btn-run-view:disabled').first();
   await expect(notYet).toBeVisible();
-  await expect(notYet).toHaveAttribute('title', /signed/);
   await expect(page.locator('[ng-click^="show_ended = !show_ended"]')).toHaveClass(/active-green/);
   await expect(finished.first()).toBeVisible();
   await finished.first().locator('.btn-run-view').click();
