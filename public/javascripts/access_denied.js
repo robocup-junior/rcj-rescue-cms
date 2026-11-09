@@ -5,4 +5,10 @@ app.controller("ADController", ['$scope', '$http', '$translate', function ($scop
         window.location = path
     }
 
+    // Back to where the visitor came from; with no page to go back to, home.
+    $scope.back = function () {
+        if (document.referrer && window.history.length > 1) window.history.back();
+        else window.location = '/home';
+    }
+
 }]);
