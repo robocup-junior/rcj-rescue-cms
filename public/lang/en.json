@@ -342,7 +342,9 @@
             "endedrun": "Display ended runs",
             "js": {
                 "go_judge": "Are you sure to move Judge Page?",
-                "no_judge": "The run you selected was already ended! If you need to edit, please contact OC."
+                "no_judge": "The run you selected was already ended! If you need to edit, please contact OC.",
+                "no_view_title": "Not public yet",
+                "no_view": "This run can be viewed once it has ended and the team has signed it."
             }
         },
         "score": {
@@ -544,7 +546,9 @@
             "endedrun": "@:line.competition.endedrun",
             "js": {
                 "go_judge": "@:line.competition.js.go_judge",
-                "no_judge": "@:line.competition.js.no_judge"
+                "no_judge": "@:line.competition.js.no_judge",
+                "no_view_title": "@:line.competition.js.no_view_title",
+                "no_view": "@:line.competition.js.no_view"
             }
         },
         "score": {

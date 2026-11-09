@@ -162,7 +162,7 @@ block main_content
                     button.btn-run-action.btn-run-view(ng-if="run.field != null" ng-click="go('/maze/view/' + run._id)")
                       i.fas.fa-eye
                       | {{'common.view' | translate}}
-                    button.btn-run-action.btn-run-view(ng-if="run.field == null" ng-click="go('/home/access_denied')")
+                    button.btn-run-action.btn-run-view(ng-if="run.field == null" ng-click="no_view()")
                       i.fas.fa-eye
                       | {{'common.view' | translate}}
                     button.btn-run-action.btn-run-judge(ng-click="go_judge('/maze/judge/' + run._id , run.team.name)" ng-if="run.status<2 && isJudge == 1")
