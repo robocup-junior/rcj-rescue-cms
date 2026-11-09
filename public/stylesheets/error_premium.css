@@ -342,3 +342,53 @@
   .denied-robot .arm-right { animation: none; }
   .denied-robot .arm-right { transform: rotate(-155deg); }
 }
+
+/* ---------- Short link not found (404) ---------- */
+/* The guard robot again, searching with a magnifier for the page that is not there. */
+.lost-robot .robot-head {
+  animation: lostLookAround 4s ease-in-out infinite;
+}
+
+.lost-robot .robot-body {
+  background: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%);
+}
+
+.lost-robot .robot-lock {
+  color: white;
+  font-size: 1.4rem;
+}
+
+.lost-robot .stop-sign {
+  background: transparent;
+  color: #334155;
+  font-size: 34px;
+  box-shadow: none;
+}
+
+.robot-question {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -50px;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #f1c40f;
+  animation: lostQuestion 4s ease-in-out infinite;
+}
+
+@keyframes lostLookAround {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(-4px) rotate(-8deg); }
+  50% { transform: translateX(0) rotate(0deg); }
+  75% { transform: translateX(4px) rotate(8deg); }
+}
+
+@keyframes lostQuestion {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(-6px); opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lost-robot .robot-head,
+  .robot-question { animation: none; }
+}
