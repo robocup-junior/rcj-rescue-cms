@@ -1,0 +1,37 @@
+<div class="sim-rot" ng-class="{'disabled': isDisabled}">
+  <div class="sim-rot-dial" role="slider" tabindex="{{isDisabled ? -1 : 0}}"
+       aria-valuemin="0" aria-valuemax="359" aria-valuenow="{{angle}}"
+       title="{{'admin.simMapEditor.rotDialHint' | translate}}">
+    <span class="sim-rot-tick t0">0°</span>
+    <span class="sim-rot-tick t90">90°</span>
+    <span class="sim-rot-tick t180">180°</span>
+    <span class="sim-rot-tick t270">270°</span>
+    <div class="sim-rot-arm" ng-style="{'transform': 'rotate(' + angle + 'deg)'}"><span class="sim-rot-knob"></span></div>
+    <div class="sim-rot-card" ng-class="{'has-image': image}" ng-style="{'transform': 'translate(-50%, -50%) rotate(' + angle + 'deg)'}">
+      <img class="sim-rot-image" ng-if="image" ng-src="{{image}}" alt="{{symbol}}">
+      <span class="sim-rot-symbol" ng-if="!image" ng-class="{'placeholder': !symbol}">{{symbol || 'Φ'}}</span>
+    </div>
+  </div>
+
+  <div class="sim-rot-controls">
+    <div class="sim-rot-value">
+      <button type="button" class="sim-rot-step" ng-click="step(-15)" ng-disabled="isDisabled" title="-15°">
+        <i class="fas fa-undo-alt"></i>
+      </button>
+      <span class="sim-rot-input">
+        <input type="number" min="0" max="359" ng-model="angleInput" ng-change="typed()" ng-blur="angleInput = angle" ng-disabled="isDisabled">
+        <span class="sim-rot-unit">°</span>
+      </span>
+      <button type="button" class="sim-rot-step" ng-click="step(15)" ng-disabled="isDisabled" title="+15°">
+        <i class="fas fa-redo-alt"></i>
+      </button>
+    </div>
+    <div class="sim-rot-presets">
+      <button type="button" ng-repeat="p in [0, 90, 180, 270]" ng-class="{'active': angle === p}" ng-click="set(p)" ng-disabled="isDisabled"><span class="sim-rot-num">{{p}}<span class="sim-rot-deg">°</span></span></button>
+      <button type="button" class="sim-rot-random" ng-click="random()" ng-disabled="isDisabled" title="{{'admin.simMapEditor.rotRandom' | translate}}">
+        <i class="fas fa-dice"></i>
+      </button>
+    </div>
+    <div class="sim-rot-help">{{"admin.simMapEditor.rotHelp" | translate}}</div>
+  </div>
+</div>

@@ -1,0 +1,30 @@
+html(ng-app="ddApp")
+  head
+    title Rescue Line Sign
+    script.
+      var runId = "#{id}"
+      var timeIncrement = false
+      var iframe = "#{iframe}"
+
+    include ../includes/common_component
+    script(src="/javascripts/sign/line_2026.js?v=" + assetVersion)
+
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
+    script(src="/javascripts/signature_pad.js?v=" + assetVersion)
+    link(href="/stylesheets/fredrik.css?v=" + assetVersion rel="stylesheet")
+    link(href="/stylesheets/line_view.css?v=" + assetVersion rel="stylesheet")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
+
+  body.run-view.is-sign.rv-is-loading(ng-controller="ddController")
+    include ../includes/line_loading
+    include ../includes/line_sign_parts
+    //- Sticky bar: back to the judge page to correct the run, team and time
+    +signTopbar
+
+    main.rv-page
+      //- The parts first, then their sum: the score is reviewed after what it adds up
+      include ../view/common/line_2026
+      include ../view/common/line_2026_summary
+      +signForm
+    include ../includes/footer
+    script(src="/javascripts/line_view.js?v=" + assetVersion)

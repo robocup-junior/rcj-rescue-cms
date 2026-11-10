@@ -1,0 +1,52 @@
+//- Covers the Rescue Maze view and sign pages until the run and its map are drawn, like
+//- line_loading.pug: a robot drives through a small maze of 3 × 3 tiles in the page's colour, and
+//- each time it reaches the end, the next maze comes. The field is 4..116, its tile edges at
+//- 41.3 and 78.7 and the tile middles at 22.7, 60 and 97.3; walls stand on the tile edges, and
+//- under holds the tiles that are not plain (black, blue, checkpoint).
+-
+  var tile = function (cls, col, row) { return '<rect class="' + cls + '" x="' + (4 + col * 37.33) + '" y="' + (4 + row * 37.33) + '" width="37.33" height="37.33"/>'; };
+  var tracks = [
+    { walls: 'M41.3 41.3 V116 M78.7 4 V78.7', route: 'M22.7 97.3 V22.7 H60 V97.3 H97.3 V22.7' },
+    { walls: 'M4 78.7 H78.7 M41.3 41.3 H116', route: 'M22.7 97.3 H97.3 V60 H22.7 V22.7 H97.3' },
+    { walls: 'M41.3 4 V41.3 M41.3 78.7 H78.7', route: 'M22.7 97.3 H97.3 V22.7 H60', under: tile('rv-loading-black', 1, 1) + tile('rv-loading-cp', 2, 1) + tile('rv-loading-blue', 0, 0) },
+    { walls: 'M41.3 4 V78.7 M78.7 41.3 V116 M78.7 41.3 H116', route: 'M22.7 22.7 V97.3 H60 V22.7 H97.3', under: tile('rv-loading-blue', 1, 2) + tile('rv-loading-cp', 1, 0) }
+  ];
+  tracks.forEach(function (t) { t.under = t.under || ''; });
+  var first = Math.floor(Math.random() * tracks.length);
+  var track = tracks[first];
+.rv-loading.is-maze(role='status' aria-label='Loading' data-tracks=JSON.stringify(tracks) data-track=first)
+  .rv-loading-art
+    svg(viewBox='0 0 120 120' aria-hidden='true')
+      rect.rv-loading-tile(x='4' y='4' width='112' height='112' rx='6')
+      g.rv-loading-under!= track.under
+      path.rv-loading-route(d=track.route)
+      path.rv-loading-walls(d=track.walls)
+      rect.rv-loading-outer(x='4' y='4' width='112' height='112' rx='6')
+      path.rv-loading-trail(d=track.route pathLength='100')
+      circle.rv-loading-robot(r='8' style="offset-path: path('" + track.route + "')")
+    .rv-loading-label Rescue Maze
+    .rv-loading-dots
+      span
+      span
+      span
+script.
+  (function () {
+    var loading = document.querySelector('.rv-loading');
+    var tracks = JSON.parse(loading.dataset.tracks);
+    var index = Number(loading.dataset.track);
+    var under = loading.querySelector('.rv-loading-under');
+    var route = loading.querySelector('.rv-loading-route');
+    var walls = loading.querySelector('.rv-loading-walls');
+    var trail = loading.querySelector('.rv-loading-trail');
+    var robot = loading.querySelector('.rv-loading-robot');
+    // At the end of a drive through the maze, where the robot has faded out: the next maze
+    trail.addEventListener('animationiteration', function () {
+      index = (index + 1) % tracks.length;
+      var track = tracks[index];
+      under.innerHTML = track.under;
+      route.setAttribute('d', track.route);
+      walls.setAttribute('d', track.walls);
+      trail.setAttribute('d', track.route);
+      robot.style.offsetPath = "path('" + track.route + "')";
+    });
+  })();

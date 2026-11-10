@@ -1,7 +1,8 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
+  - var contentContainerStyle = 'max-width: 760px;'
   - var ngAppDef = 'form'
 
 append scripts
@@ -10,75 +11,77 @@ append scripts
     var leagueId = "#{leagueId}"
     var authId = "#{authId}"
     var token = "#{token}"
-  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js')
-  script(src='/javascripts/registration/form.js')
+  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js?v=' + assetVersion)
+  script(src='/javascripts/registration/form.js?v=' + assetVersion)
 
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  span.breadcrumb-item.active Registration
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    span.breadcrumb-item.active Registration
-block content
-  .row
-    .col-md-2.col-sm-1
-    .col-md-8.col-sm-10
-      h2 
-      .card(style='width: 100%; margin-bottom:50px;')
-          .card-body
-            .text-center
-                h1.card-title {{competition.name}}
-                h5 {{leagueName}}
-                
+block hero_title
+  | {{competition.name}}
+
+block hero_subtitle
+  | {{leagueName}}
+
+block main_content
+  .modern-card.mb-5
+    .modern-card-header
+      i.fas.fa-pen-fancy.mr-2
+      | {{"registration.register" | translate}}
+    .modern-card-body
+      .result-state(ng-show="isProcessing")
+        i.fas.fa-spinner.fa-spin.text-primary
+        p {{"registration.processing" | translate}}
+
+      div(ng-hide="isSuccess || isProcessing")
+        p.small.text-muted {{"registration.timelimit" | translate}}
+        .alert.alert-danger(role='alert' ng-if="isEmpty") {{"registration.validation" | translate}}
+        .alert.alert-danger(role='alert' ng-if="isFailed") {{"registration.timeError" | translate}}
+        form(ng-submit="submit()")
+          .form-group
+            label.small.text-muted {{"common.team" | translate}}
+            .input-group.input-group-lg
+              .input-group-prepend
+                span.input-group-text
+                  i.fas.fa-user-friends
+              input.form-control(type='text' autocorrect="off" autocapitalize="off" placeholder='Team Name' aria-label='teamName' ng-model="teamName")
+          .form-group
+            label.small.text-muted {{"common.region" | translate}}
+            .input-group.input-group-lg
+              .input-group-prepend
+                span.input-group-text
+                  i.fas.fa-globe-asia
+              input.form-control(type='text' placeholder='Region' aria-label='Region' ng-model="region")
+          .form-group
+            label.small.text-muted {{"registration.email" | translate}}
+            .input-group.input-group-lg
+              .input-group-prepend
+                span.input-group-text
+                  i.fas.fa-at
+              input.form-control(type='text' placeholder='Mail address' aria-label='Address1' value=`${mail}` disabled)
+          if consentForm != ""
             hr
-            div(ng-show="isProcessing" style="text-align:center;")
-                i.fas.fa-spinner.fa-10x.fa-spin(style="color:#3498db;margin-bottom:20px;")
-                p {{"registration.processing" | translate}}
+            label.small.text-muted.d-block {{"registration.consent" | translate}}
+            a.btn.btn-sm.btn-outline-primary.mb-2(href=`${consentForm}` target="_blank")
+              i.fas.fa-file-pdf.mr-1
+              | {{"registration.viewConsent" | translate}}
+            p.small {{"registration.consentMes" | translate}}
+            input(type='checkbox' ng-model='consent' id="check_consent")
+            label.checkbox(for="check_consent") {{"registration.allConsent" | translate}}
+            hr
+            .text-center
+              button.btn.btn-premium-primary.btn-lg(type='submit' ng-disabled="!consent")
+                i.fas.fa-sign-in-alt.mr-2
+                | {{"registration.register" | translate}}
+          else
+            .text-center.mt-4
+              button.btn.btn-premium-primary.btn-lg(type='submit')
+                i.fas.fa-sign-in-alt.mr-2
+                | {{"registration.register" | translate}}
 
-            div(ng-hide="isSuccess || isProcessing")
-                h6.card-subtitle.mb-2.text-muted {{"registration.timelimit" | translate}}
-                
-                .alert.alert-danger(role='alert' ng-if="isEmpty")
-                    | {{"registration.validation" | translate}}
-                .alert.alert-danger(role='alert' ng-if="isFailed")
-                    | {{"registration.timeError" | translate}}
-                form(class="login-container" ng-submit="submit()")
-                    h6 {{"common.team" | translate}}
-                    .input-group.input-group-lg.mb-3
-                        .input-group-prepend
-                            span.input-group-text
-                                i.fas.fa-user-friends.fa-lg(aria-hidden='true')
-                        input.form-control(type='text' autocorrect="off" autocapitalize="off" placeholder='Team Name' aria-label='teamName' ng-model="teamName")
-                    
-                    h6 {{"common.region" | translate}}
-                    .input-group.input-group-lg.mb-3
-                        .input-group-prepend
-                            span.input-group-text
-                                i.fas.fa-globe-asia.fa-lg(aria-hidden='true')
-                        input.form-control(type='text', placeholder='Region', aria-label='Region', aria-describedby='sizing-addon1' ng-model="region")
-                    
-                    h6 {{"registration.email" | translate}}
-                    .input-group.input-group-lg.mb-3
-                        .input-group-prepend
-                            span.input-group-text
-                                i.fas.fa-at.fa-lg(aria-hidden='true')
-                        input.form-control(type='text', placeholder='Mail address', aria-label='Address1', aria-describedby='sizing-addon1' value=`${mail}` disabled)
-                    hr
-                    if consentForm != ""
-                        h6 {{"registration.consent" | translate}}
-                        a.btn.btn-primary.btn-sm(style="color:#fff;margin-bottom:10px;", href=`${consentForm}`, target="_blank")
-                            i.fas.fa-file-pdf(aria-hidden='true') &nbsp;{{"registration.viewConsent" | translate}}
-                        p {{"registration.consentMes" | translate}}
-                        input(type='checkbox' ng-model='consent' id="check_consent")
-                        label.checkbox(for="check_consent") {{"registration.allConsent" | translate}}
-                        hr
-                        .text-center
-                            button.btn.btn-success.btn-lg(type='submit', ng-disabled="!consent")
-                                i.fas.fa-sign-in-alt(aria-hidden='true') &nbsp;{{"registration.register" | translate}}
-                    else 
-                        .text-center
-                            button.btn.btn-success.btn-lg(type='submit')
-                                i.fas.fa-sign-in-alt(aria-hidden='true') &nbsp;{{"registration.register" | translate}}
-            div(ng-if="isSuccess && !isProcessing" style="text-align:center;")
-                i.far.fa-check-circle.fa-10x(style="color:#2ecc71;margin-bottom:30px;")
-                p.card-subtitle.mb-2.text-muted {{"registration.registered" | translate}}
-
-
+      .result-state.success(ng-if="isSuccess && !isProcessing")
+        i.far.fa-check-circle
+        p.text-muted {{"registration.registered" | translate}}

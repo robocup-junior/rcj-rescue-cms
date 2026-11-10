@@ -90,7 +90,7 @@ privateRouter.get('/judge/:runid', async function (req, res, next) {
   }
 
   const rule = await ruleDetector.getRuleFromLineRunId(id);
-  res.render(`judge/${rule.type}_${rule.rule}`, { id });
+  res.render(`judge/${rule.type}_${rule.rule}`, { id, rule: rule.rule });
 });
 
 privateRouter.get('/input/:runid', async function (req, res, next) {
@@ -120,7 +120,7 @@ privateRouter.get('/sign/:runid', async function (req, res) {
   }
 
   const rule = await ruleDetector.getRuleFromLineRunId(id);
-  res.render(`sign/${rule.type}_${rule.rule}`, { id });
+  res.render(`sign/${rule.type}_${rule.rule}`, { id, rule: rule.rule });
 });
 
 publicRouter.all('*', function (req, res, next) {

@@ -10,16 +10,17 @@ const adminRouter = express.Router();
 const fs = require('fs');
 const nodemailer = require('nodemailer');
 const { htmlToText } = require('html-to-text');
-const crypto = require('crypto');
+const { randomToken } = require('../../helper/crypto');
 const logger = require('../../config/logger').mainLogger;
 const mailDb = require('../../models/mail');
 const competitiondb = require('../../models/competition');
-const {escapeRegExp, toLength} = require('lodash');
+const {escapeRegExp, toLength, escape} = require('lodash');
 const mkdirp = require('mkdirp');
 const {mailQueue} = require("../../queue/mailQueue")
+const access = require('../../helper/access');
+const safePath = require('../../helper/safePath');
 
 
-const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const N = 32;
 
 const TRANSPARENT_GIF_BUFFER = Buffer.from(
@@ -43,9 +44,10 @@ function getIP(req) {
   return '0.0.0.0';
 }
 
+// The values in the HTML of the mail as text (the team's name is the one it gave): escaped
 function template(string, values){
   return string.replace(/\$\{(.*?)\}/g, function(all, key){
-      return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : "";
+      return Object.prototype.hasOwnProperty.call(values, key) ? escape(values[key]) : "";
   });
 }
 
@@ -78,7 +80,7 @@ if (process.env.MAIL_SMTP &&process.env.MAIL_PORT &&process.env.MAIL_FROM) {
   smtp = null;
 }
 
-publicRouter.post('/auth/:competitionId/:leagueId/:lang', function (req, res, next) {
+publicRouter.post('/auth/:competitionId/:leagueId/:lang', access.anyone("the league's code checked, its guesses limited"), require('../../helper/guessLimits').registrationCode, function (req, res, next) {
   const { competitionId } = req.params;
   const { leagueId } = req.params;
   const { lang } = req.params;
@@ -98,7 +100,7 @@ publicRouter.post('/auth/:competitionId/:leagueId/:lang', function (req, res, ne
         } else if (dbCompetition) {
           const now = new Date();
           const timestamp = Math.floor(now.getTime() / 1000);
-          let l = dbCompetition.registration.filter(r => r.league == leagueId && r.enable &&  r.deadline >= timestamp && r.passCode == passCode);
+          let l = dbCompetition.registration.filter(r => r.league == leagueId && r.enable &&  r.deadline >= timestamp && r.passCode === String(passCode));
           if(l.length == 1){
             if(smtp == null){
               res.status(500).send({
@@ -107,7 +109,7 @@ publicRouter.post('/auth/:competitionId/:leagueId/:lang', function (req, res, ne
               return;
             }
             
-            const token = Array.from(crypto.randomFillSync(new Uint8Array(N))).map((n) => S[n % S.length]).join('');
+            const token = randomToken(N);
             const newMailAuth = new mailDb.mailAuth({
               competition: dbCompetition._id,
               league: leagueId,
@@ -119,7 +121,7 @@ publicRouter.post('/auth/:competitionId/:leagueId/:lang', function (req, res, ne
               if (err) {
                 logger.error(err);
               } else {
-                const templateDir = `${__dirname}/../../templates/mail/`
+                const templateDir = `${safePath('templates', 'mail')}/`
                 let fileName = "_Email Verification.html";
                 if(lang == 'ja' && fs.existsSync(`${templateDir}_メール認証.html`)) fileName = "_メール認証.html";
                 const path = `${templateDir}${fileName}`;
@@ -190,7 +192,7 @@ publicRouter.post('/auth/:competitionId/:leagueId/:lang', function (req, res, ne
 
 
 
-publicRouter.post('/reg/:authId/:token/:lang', function (req, res, next) {
+publicRouter.post('/reg/:authId/:token/:lang', access.anyone('the token mailed checked'), function (req, res, next) {
   const { authId } = req.params;
   const { token } = req.params;
   const { lang } = req.params;
@@ -214,7 +216,7 @@ publicRouter.post('/reg/:authId/:token/:lang', function (req, res, next) {
           if (err) {
             logger.error(err);
           } else {
-            const team_token = Array.from(crypto.randomFillSync(new Uint8Array(N))).map((n) => S[n % S.length]).join('');
+            const team_token = randomToken(N);
             const newTeam = new competitiondb.team({
               name: teamName,
               league: authInfo.league,
@@ -236,9 +238,9 @@ publicRouter.post('/reg/:authId/:token/:lang', function (req, res, next) {
                   err: err.message,
                 });
               } else {
-                let path = `${__dirname}/../../documents/${authInfo.competition._id}/${teamData._id}`;
+                let path = safePath('documents', authInfo.competition._id, teamData._id);
                 mkdirp.sync(path);
-                path = `${__dirname}/../../cabinet/${authInfo.competition._id}/${teamData._id}`;
+                path = safePath('cabinet', authInfo.competition._id, teamData._id);
                 mkdirp.sync(path);
 
                 //Send mail
@@ -248,7 +250,7 @@ publicRouter.post('/reg/:authId/:token/:lang', function (req, res, next) {
                   });
                   return;
                 }
-                const templateDir = `${__dirname}/../../templates/mail/`
+                const templateDir = `${safePath('templates', 'mail')}/`
                 let fileName = "_Team registration completed.html";
                 if(lang == 'ja' && fs.existsSync(`${templateDir}_チーム登録完了.html`)) fileName = "_チーム登録完了.html";
                 path = `${templateDir}${fileName}`;
@@ -277,15 +279,13 @@ publicRouter.post('/reg/:authId/:token/:lang', function (req, res, next) {
                     let html4text = html;
                     const regexpHref = /(href=)["|'](.*?)["|']+/g;
 
-                    const mailId = Array.from(crypto.randomFillSync(new Uint8Array(N)))
-                      .map((n) => S[n % S.length])
-                      .join('');
+                    const mailId = randomToken(N);
 
                     let match;
                     let replacedURL = [];
                     while ((match = regexpHref.exec(html)) !== null) {
                       if (match[2].indexOf('/api/mail/click/') == -1) {
-                        let Mtoken = Array.from(crypto.randomFillSync(new Uint8Array(N / 4))).map((n) => S[n % S.length]).join('');
+                        let Mtoken = randomToken(N / 4);
                 
                         html = html.replace(
                           new RegExp(escapeRegExp(match[0]), 'g'),

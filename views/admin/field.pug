@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'FieldAdmin'
@@ -7,43 +7,53 @@ block vars
 append scripts
   script.
     var competitionId = "#{id}"
-  script(src='/javascripts/admin/field.js')
+  script(src='/javascripts/admin/field.js?v=' + assetVersion)
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
-    span.breadcrumb-item.active Fields
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/'+competitionId)") {{competition.name}}
+  span.breadcrumb-item.active Fields
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{competition.name}} - {{"admin.fields.title" | translate}}
-      table.custom
-        thead
-            tr
-                th {{"common.name" | translate}}
-                th {{"common.operation" | translate}}
-        tbody
-            tr
-                td
-                    input(ng-model='fieldName' style="width:100%;")
-                td
-                    button(ng-click='addField()' style="width:100%;") {{"admin.fields.add" | translate}}
-      
-      
-      
-      br
-      hr
-      br
-      table.custom
-        thead
+block hero_title
+  | {{competition.name}}
+
+block hero_subtitle
+  | {{"admin.fields.title" | translate}}
+
+block main_content
+  .modern-card.mb-4
+    .modern-card-header
+      i.fas.fa-plus-circle.mr-2
+      | {{"admin.fields.add" | translate}}
+    .modern-card-body
+      .row
+        .col-md-9
+          .form-group.mb-md-0
+            label {{"common.name" | translate}}
+            input.form-control(ng-model='fieldName' ng-keyup="$event.keyCode == 13 && addField()")
+        .col-md-3.d-flex.align-items-end
+          button.btn.btn-premium-primary.w-100(ng-click='addField()')
+            i.fas.fa-plus.mr-2
+            | {{"admin.fields.add" | translate}}
+
+  .modern-card
+    .modern-card-header
+      i.fas.fa-map-marker-alt.mr-2
+      | {{"admin.fields.title" | translate}}
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern
+          thead
             tr
               th {{"common.name" | translate}}
-              th {{"common.operation" | translate}}
-        tbody
+              th(style="width: 120px;") {{"common.operation" | translate}}
+          tbody
             tr(ng-repeat='field in fields')
               td(ng-bind='field.name')
               td
-                a(href="" ng-click='removeField(field)') {{"common.delete" | translate}}
+                .btn-table-group
+                  .btn-table-action.danger(ng-click='removeField(field)' uib-tooltip='{{"common.delete" | translate}}')
+                    i.fas.fa-trash-alt

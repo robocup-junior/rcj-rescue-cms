@@ -1,0 +1,127 @@
+html(ng-app="ddApp")
+  head
+    title Rescue Maze View Iframe
+    //- Rows with no container around them: without their gutters, so that they stay in the frame;
+    //- and the map scaled to the frame (tile_size), whose box scales past it with it
+    style.
+      body > .row, #bottomBox > .row { margin-left: 0; margin-right: 0; }
+      .tilearea { overflow: hidden; }
+    script.
+      var runId = "#{id}"
+      var timeIncrement = true;
+
+    include ../includes/common_component
+    script(src="/javascripts/cognitive_target.js?v=" + assetVersion)
+    script(src="/javascripts/sign/maze_2026.js?v=" + assetVersion)
+    script.
+      document.cookie = 'sRotate=0';
+      function tile_size() {
+        $(function () {
+            try {
+                var mapTable = $('#mapTable');
+                let bottomBox = $('#bottomBox')
+
+                let areaTopLeftX = document.getElementById("mapTopLeft").getBoundingClientRect().left + window.pageXOffset;
+                let areaTopLeftY = document.getElementById("mapTopLeft").getBoundingClientRect().top + window.pageYOffset;
+
+                let scaleX = (window.innerWidth - areaTopLeftX - 10) / mapTable.width();
+                let scaleY = (window.innerHeight - areaTopLeftY - bottomBox.outerHeight(true) - 10) / mapTable.height();
+                let scale = Math.min(scaleX, scaleY);
+
+                if (scaleX > scaleY) {
+                    $('#wrapTile').css('transform-origin', 'top center');
+                } else {
+                    $('#wrapTile').css('transform-origin', 'top left');
+                }
+
+                $('#wrapTile').css('transform', `scale(${scale})`);
+                $('.tilearea').css('height', mapTable.height() * scale + 10);
+            } catch (e) {
+                setTimeout("tile_size()", 500);
+            }
+        });
+      }
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
+    link(href="/stylesheets/fredrik.css?v=" + assetVersion rel="stylesheet")
+
+    link(href="/stylesheets/maze.css?v=" + assetVersion rel="stylesheet")
+
+    meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
+
+  body(ng-controller="ddController")
+    nav.navbar(style='color: #ecf0f1; position: fixed; top: 0; z-index:10 ;  width: 100%', ng-style='{backgroundColor: navColor(status)}')
+      // Navbar content
+      .col-md-6.col-sm4.col-12
+        li.navbar-brand(href='#')
+          i.fas.fa-spinner.fa-spin.fa-fw
+          | &nbsp;{{team}}
+      .col-md-3.col-sm4.col-7
+        i.fas.fa-calculator.fa-2x(aria-hidden='true') &nbsp;
+        li.navbar-brand(href='#')  {{score}} points
+      .col-md-3.col-sm4.col-5
+        i.fas.fa-stopwatch.fa-2x(aria-hidden='true') &nbsp;
+        li.navbar-brand(href='#')  {{minutes*60*1000+seconds*1000 | date:'m:ss'}}
+    .row
+      .col-md-12.tilearea.mx-auto(style="text-align:center;height:80vh;")
+        div(ng-repeat='z in range(height) track by $index', style='display: inline-block;width:100%;')
+          div(style='clear:both;')#mapTopLeft
+          #wrapTile(style='transform-origin: top left;')
+            table.map.mx-auto#mapTable
+              tbody
+                tr(ng-repeat='r in range(2*length + 1)')
+                  td.cell(ng-repeat='c in range(2*width + 1)', ng-class="{'tile': $odd && $parent.$odd, 'wall': cells[c+','+r+','+z].isWall, 'checkpoint': cells[c+','+r+','+z].tile.checkpoint, 'black': cells[c+','+r+','+z].tile.black, 'blue': cells[c+','+r+','+z].tile.blue, 'red': cells[c+','+r+','+z].tile.red, 'linear': cells[c+','+r+','+z].tile.reachable && cells[c+','+r+','+z].isLinear, 'floating': cells[c+','+r+','+z].tile.reachable && !cells[c+','+r+','+z].isLinear}", ng-click='cellClick(c, r, z, $odd != $parent.$odd, $odd && $parent.$odd)', ng-style="wallColor(c,r,z)")
+                    .tile-image-container(ng-show="$odd && $parent.$odd")
+                      img.tile-image(ng-src='/images/log.png', ng-show="cells[c+','+r+','+z].tile.speedbump")
+                      img.tile-image(ng-src='/images/start.png', ng-show='startTile.x == c && startTile.y == r && startTile.z == z')
+                      img.tile-image(ng-src='/images/ramp.png', ng-show="cells[c+','+r+','+z].tile.ramp")
+                      img.tile-image(ng-src='/images/steps.png', ng-show="cells[c+','+r+','+z].tile.steps")
+                      img.tile-image(ng-src='/images/phi_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'PHI'")
+                      img.tile-image(ng-src='/images/phi_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'PHI'")
+                      img.tile-image(ng-src='/images/phi_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'PHI'")
+                      img.tile-image(ng-src='/images/phi_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'PHI'")
+                      img.tile-image(ng-src='/images/psi_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'PSI'")
+                      img.tile-image(ng-src='/images/psi_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'PSI'")
+                      img.tile-image(ng-src='/images/psi_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'PSI'")
+                      img.tile-image(ng-src='/images/psi_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'PSI'")
+                      img.tile-image(ng-src='/images/omega_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'OMEGA'")
+                      img.tile-image(ng-src='/images/omega_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'OMEGA'")
+                      img.tile-image(ng-src='/images/omega_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'OMEGA'")
+                      img.tile-image(ng-src='/images/omega_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'OMEGA'")
+                      p.tile-point(ng-if='tileStatus(c,r,z,$odd && $parent.$odd)', style='color:#000; opacity:1;z-index:50;position: relative;text-align:center;') {{tilePoint(c,r,z,$odd && $parent.$odd)}}
+                      img.tile-image(ng-src='/images/red_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'Red'")
+                      img.tile-image(ng-src='/images/red_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'Red'")
+                      img.tile-image(ng-src='/images/red_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'Red'")
+                      img.tile-image(ng-src='/images/red_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'Red'")
+                      img.tile-image(ng-src='/images/yellow_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'Yellow'")
+                      img.tile-image(ng-src='/images/yellow_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'Yellow'")
+                      img.tile-image(ng-src='/images/yellow_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'Yellow'")
+                      img.tile-image(ng-src='/images/yellow_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'Yellow'")
+                      img.tile-image(ng-src='/images/green_top.png', ng-show="cells[c+','+r+','+z].tile.victims.top == 'Green'")
+                      img.tile-image(ng-src='/images/green_right.png', ng-show="cells[c+','+r+','+z].tile.victims.right == 'Green'")
+                      img.tile-image(ng-src='/images/green_bottom.png', ng-show="cells[c+','+r+','+z].tile.victims.bottom == 'Green'")
+                      img.tile-image(ng-src='/images/green_left.png', ng-show="cells[c+','+r+','+z].tile.victims.left == 'Green'")
+                      //- Cognitive targets, drawn by CSS (cognitive_target.js)
+                      span(ng-if="cells[c+','+r+','+z].tile.victims.top == 'Cognitive' && cells[c+','+r+','+z].tile.cognitiveTargets && cells[c+','+r+','+z].tile.cognitiveTargets.top && cells[c+','+r+','+z].tile.cognitiveTargets.top.rings" ng-style="cognitiveSideStyle(cells[c+','+r+','+z].tile.cognitiveTargets.top.rings, 'top')")
+                      span(ng-if="cells[c+','+r+','+z].tile.victims.right == 'Cognitive' && cells[c+','+r+','+z].tile.cognitiveTargets && cells[c+','+r+','+z].tile.cognitiveTargets.right && cells[c+','+r+','+z].tile.cognitiveTargets.right.rings" ng-style="cognitiveSideStyle(cells[c+','+r+','+z].tile.cognitiveTargets.right.rings, 'right')")
+                      span(ng-if="cells[c+','+r+','+z].tile.victims.bottom == 'Cognitive' && cells[c+','+r+','+z].tile.cognitiveTargets && cells[c+','+r+','+z].tile.cognitiveTargets.bottom && cells[c+','+r+','+z].tile.cognitiveTargets.bottom.rings" ng-style="cognitiveSideStyle(cells[c+','+r+','+z].tile.cognitiveTargets.bottom.rings, 'bottom')")
+                      span(ng-if="cells[c+','+r+','+z].tile.victims.left == 'Cognitive' && cells[c+','+r+','+z].tile.cognitiveTargets && cells[c+','+r+','+z].tile.cognitiveTargets.left && cells[c+','+r+','+z].tile.cognitiveTargets.left.rings" ng-style="cognitiveSideStyle(cells[c+','+r+','+z].tile.cognitiveTargets.left.rings, 'left')")
+                      i.fas.fa-check.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'done'", style='padding-top:4px; color:#27ae60; opacity:0.9; z-index: 10;')
+                      i.fas.fa-play.fa-fw.fa-rotate-270.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'halfdone'", style='padding-top:4px; color:#f4d03f; opacity:0.9; z-index: 10;')
+                      i.fas.fa-times.fa-fw.tile-image.tile-font(ng-show="tileStatus(c,r,z,$odd && $parent.$odd) == 'undone'", style='padding-top:6px; color:#e74c3c; opacity:0.9; z-index: 10;')
+    .alert.alert-info(role='alert', style="margin-bottom: 0; padding: 5px;")#bottomBox
+      .row.text-center
+        .col
+          i.fas.fa-step-forward(title="{{'maze.sign.total_lops' | translate}}")
+          |  {{LoPs}}
+        .col
+          i.fas.fa-exclamation-triangle(title="{{'maze.judge.misidentification' | translate}}")
+          |  {{MisIdent}}
+        .col
+          i.fas.fa-square(style="color: #2980b9;", title="{{'maze.sign.blue' | translate}}")
+          |  {{blueTilesVisited()}}
+        .col
+          i.fas.fa-child(title="{{'maze.sign.rescue' | translate}}")
+          |  {{foundVictims}}
+        .col
+          i.fas.fa-home(title="{{'maze.sign.exit' | translate}}")
+          |  {{exitBonus}}

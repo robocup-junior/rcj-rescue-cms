@@ -24,7 +24,7 @@ const reservationSchema = new Schema({
   deadline: {type: Date, default: Date.now},
   enable: {type: Boolean, default: false},
   slot: [{
-    slotId: {type: String, unique: true},
+    slotId: {type: String, unique: true, sparse: true},
     start: {type: Date},
     duration: {type: Number, default: 15},
     max: {type: Number, default: 1},

@@ -1,6 +1,9 @@
 var socket;
 var app = angular.module("RunAdmin", ['ngTouch','ngAnimate', 'ui.bootstrap', 'ui.bootstrap.datetimepicker', 'pascalprecht.translate', 'ngCookies', 'ngFileUpload']);
-app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'Upload', function ($scope, $http, $log, $location, Upload) {
+app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'Upload', '$uibModal', function ($scope, $http, $log, $location, Upload, $uibModal) {
+        $scope.runsReadFinished = false;
+        $scope.showAddRun = false;
+        $scope.showFilter = false;
         $scope.competitionId = competitionId
         $scope.showTeam = true;
 
@@ -104,6 +107,14 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
                 console.log(error)
                 swal("Oops!", error.data.err, "error");
             })
+        }
+
+        $scope.allChecked = false;
+        $scope.toggleAll = function () {
+            $scope.allChecked = !$scope.allChecked;
+            angular.forEach($scope.runs, function (run) {
+                if($scope.list_filter(run)) run.checked = $scope.allChecked;
+            });
         }
 
         $scope.selectAll = function () {
@@ -309,6 +320,7 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
                     $scope.Rrounds = objectSort(rounds)
                     $scope.Rfields = objectSort(fields)
                 }
+                $scope.runsReadFinished = true;
                 $('.loader').remove();
             })
         }
@@ -377,8 +389,12 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
 
         $scope.format = "yyyy-MM-dd"
 
+        $scope.startDateOptions = {
+            showWeeks: false
+        };
 
         var start = new Date(Date.now() + 1000 * 60 * 5)
+
         start.setMinutes(start.getMinutes() - start.getMinutes() % 5)
         start.setSeconds(0)
         start.setMilliseconds(0)
@@ -438,10 +454,160 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
         };
 
 
+        $scope.openScoreSheetModal = function () {
+          var modalInstance = $uibModal.open({
+            templateUrl: 'scoreSheetModal.html',
+            controller: 'ScoreSheetModalController',
+            size: 'md',
+            resolve: {
+              data: function () {
+                return {
+                  competitionId: $scope.competitionId,
+                  league: $scope.league,
+                  scoreSheetStartDateTime: $scope.scoreSheetStartDateTime,
+                  scoreSheetEndDateTime: $scope.scoreSheetEndDateTime,
+                  startDateOptions: $scope.startDateOptions
+                };
+              }
+            }
+          });
+
+          modalInstance.result.then(function (result) {
+            $scope.scoreSheetStartDateTime = result.start;
+            $scope.scoreSheetEndDateTime = result.end;
+            $scope.go_scoreSheetInTimeRange2();
+          }, function () {
+            // Cancelled
+          });
+        };
+
         $scope.go_scoreSheetInTimeRange2 = function () {
           window.open(`/api/runs/${$scope.league.type}/scoresheet2?competition=${$scope.competitionId}&startTime=${$scope.scoreSheetStartDateTime.getTime()}&endTime=${ $scope.scoreSheetEndDateTime.getTime()}&offset=${timeOffset}`, "_blank")
         };
         
+        $scope.exportScheduleXlsx = function () {
+            const filtered = $scope.runs
+                .filter(r => $scope.list_filter(r))
+                .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+
+            if (filtered.length === 0) return;
+
+            // Unique fields sorted
+            const fields = [...new Set(filtered.map(r => r.field.name))].sort();
+
+            // Group runs by start time slot
+            const slotMap = new Map();
+            filtered.forEach(r => {
+                if (!slotMap.has(r.startTime)) slotMap.set(r.startTime, {});
+                slotMap.get(r.startTime)[r.field.name] = r;
+            });
+            const allTimes = [...slotMap.keys()].sort((a, b) => new Date(a) - new Date(b));
+
+            // Split time slots by calendar day → up to 2 side-by-side panels
+            function dateKey(t) {
+                const d = new Date(t);
+                return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+            }
+            const dayMap = new Map();
+            allTimes.forEach(t => {
+                const dk = dateKey(t);
+                if (!dayMap.has(dk)) dayMap.set(dk, []);
+                dayMap.get(dk).push(t);
+            });
+            const panels = [...dayMap.values()].slice(0, 2);
+
+            // Detect typical slot interval (mode of inter-slot gaps) for break detection
+            function typicalInterval(times) {
+                if (times.length < 2) return Infinity;
+                const freq = {};
+                for (let i = 1; i < times.length; i++) {
+                    const g = new Date(times[i]) - new Date(times[i - 1]);
+                    freq[g] = (freq[g] || 0) + 1;
+                }
+                return parseInt(Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0]);
+            }
+
+            function fmtTime(ms) {
+                const d = new Date(ms);
+                return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+            }
+
+            // Build rows for one panel, inserting break rows at detected time gaps
+            function buildRows(times) {
+                const typical = typicalInterval(times);
+                const rows = [];
+                times.forEach((t, i) => {
+                    const slot = slotMap.get(t);
+                    rows.push({
+                        time: fmtTime(new Date(t).getTime()),
+                        cells: fields.map(f => {
+                            const run = slot[f];
+                            if (!run) return '';
+                            return run.team.name;
+                        }),
+                        isBreak: false
+                    });
+                    if (i < times.length - 1) {
+                        const gap = new Date(times[i + 1]) - new Date(t);
+                        if (gap > typical * 1.4) {
+                            const label = gap >= 3600000 ? 'Lunch Break' : 'Small Break';
+                            rows.push({
+                                time: fmtTime(new Date(t).getTime() + typical),
+                                cells: fields.map(() => label),
+                                isBreak: true,
+                                label
+                            });
+                        }
+                    }
+                });
+                return rows;
+            }
+
+            const panelRows = panels.map(buildRows);
+            const numPanels = panelRows.length;
+            const maxLen = Math.max(...panelRows.map(p => p.length));
+
+            const workbook = new ExcelJS.Workbook();
+            const sheet = workbook.addWorksheet('Schedule');
+
+            // Column layout: [time, f1..fN] [gap] [time, f1..fN]
+            const totalCols = numPanels > 1 ? 3 + 2 * fields.length : 1 + fields.length;
+            sheet.getColumn(1).width = 8;
+            fields.forEach((_, i) => { sheet.getColumn(2 + i).width = 18; });
+            if (numPanels > 1) {
+                sheet.getColumn(2 + fields.length).width = 3;
+                sheet.getColumn(3 + fields.length).width = 8;
+                fields.forEach((_, i) => { sheet.getColumn(4 + fields.length + i).width = 18; });
+            }
+
+            for (let i = 0; i < maxLen; i++) {
+                const rowVals = new Array(totalCols).fill('');
+
+                if (panelRows[0] && panelRows[0][i]) {
+                    const r = panelRows[0][i];
+                    rowVals[0] = r.time;
+                    r.cells.forEach((c, j) => { rowVals[1 + j] = c; });
+                }
+                if (panelRows[1] && panelRows[1][i]) {
+                    const r = panelRows[1][i];
+                    rowVals[2 + fields.length] = r.time;
+                    r.cells.forEach((c, j) => { rowVals[3 + fields.length + j] = c; });
+                }
+
+                sheet.addRow(rowVals).alignment = { vertical: 'middle', horizontal: 'center' };
+            }
+
+            workbook.xlsx.writeBuffer().then(buffer => {
+                const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `schedule_${($scope.competition.name || 'export')}_${($scope.league.name || '')}.xlsx`.replace(/[^\w._-]/g, '_');
+                a.click();
+                URL.revokeObjectURL(url);
+            });
+        };
+
         $scope.total = function (lops) {
           let count = 0;
           for(let i=0,l=lops.length;i<l;i++){
@@ -458,6 +624,39 @@ app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', 'U
             }
         }
     }]);
+
+app.controller('ScoreSheetModalController', ['$scope', '$uibModalInstance', 'data', function ($scope, $uibModalInstance, data) {
+  $scope.competitionId = data.competitionId;
+  $scope.league = data.league;
+  $scope.scoreSheetStartDateTime = data.scoreSheetStartDateTime;
+  $scope.scoreSheetEndDateTime = data.scoreSheetEndDateTime;
+  $scope.startDateOptions = data.startDateOptions;
+
+  $scope.scoreSheetStartDatePopup = {
+    opened: false
+  }
+  $scope.openScoreSheetStartDate = function () {
+    $scope.scoreSheetStartDatePopup.opened = true
+  }
+
+  $scope.scoreSheetEndDatePopup = {
+    opened: false
+  }
+  $scope.openScoreSheetEndDate = function () {
+    $scope.scoreSheetEndDatePopup.opened = true
+  };
+
+  $scope.ok = function () {
+    $uibModalInstance.close({
+      start: $scope.scoreSheetStartDateTime,
+      end: $scope.scoreSheetEndDateTime
+    });
+  };
+
+  $scope.cancel = function () {
+    $uibModalInstance.dismiss('cancel');
+  };
+}]);
 
 
 $(window).on('beforeunload', function () {

@@ -14,6 +14,7 @@ const auth = require('../../helper/authLevels');
 const logger = require('../../config/logger').mainLogger;
 const reservationDb = require('../../models/reservation');
 const competitiondb = require('../../models/competition');
+const access = require('../../helper/access');
 
 
 const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -76,7 +77,7 @@ module.exports.connectSocketIo = function (io) {
 };
 
 
-adminRouter.post('/config/:competitionId', function (req, res, next) {
+adminRouter.post('/config/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const competitionId = req.params.competitionId;
   let resvData = req.body;
 
@@ -107,7 +108,7 @@ adminRouter.post('/config/:competitionId', function (req, res, next) {
   });
 });
 
-adminRouter.get('/config/:competitionId', function (req, res, next) {
+adminRouter.get('/config/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const competitionId = req.params.competitionId;
 
   if (!ObjectId.isValid(competitionId)) {
@@ -136,7 +137,7 @@ adminRouter.get('/config/:competitionId', function (req, res, next) {
     });
 });
 
-adminRouter.get('/config/:competitionId/:resvId', function (req, res, next) {
+adminRouter.get('/config/:competitionId/:resvId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), access.of(reservationDb.reservation, 'params.resvId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const resvId = req.params.resvId;
 
@@ -171,7 +172,7 @@ adminRouter.get('/config/:competitionId/:resvId', function (req, res, next) {
     });
 });
 
-adminRouter.delete('/config/:competitionId/:resvId', function (req, res, next) {
+adminRouter.delete('/config/:competitionId/:resvId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), access.of(reservationDb.reservation, 'params.resvId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const resvId = req.params.resvId;
 
@@ -210,7 +211,7 @@ adminRouter.delete('/config/:competitionId/:resvId', function (req, res, next) {
     });
 });
 
-adminRouter.put('/config/:competitionId/:resvId', function (req, res, next) {
+adminRouter.put('/config/:competitionId/:resvId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), access.of(reservationDb.reservation, 'params.resvId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const resvId = req.params.resvId;
   let resvData = req.body;
@@ -274,7 +275,7 @@ adminRouter.put('/config/:competitionId/:resvId', function (req, res, next) {
     });
 });
 
-adminRouter.put('/admin/:competitionId/:resvId', function (req, res, next) {
+adminRouter.put('/admin/:competitionId/:resvId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), access.of(reservationDb.reservation, 'params.resvId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const resvId = req.params.resvId;
   let resvData = req.body;
@@ -330,7 +331,7 @@ adminRouter.put('/admin/:competitionId/:resvId', function (req, res, next) {
     });
 });
 
-publicRouter.get('/book/:teamId/:token/:resvId', function (req, res, next) {
+publicRouter.get('/book/:teamId/:token/:resvId', access.team(), function (req, res, next) {
   const teamId = req.params.teamId;
   const token = req.params.token;
   const resvId = req.params.resvId;
@@ -396,7 +397,7 @@ publicRouter.get('/book/:teamId/:token/:resvId', function (req, res, next) {
   });
 });
 
-publicRouter.post('/book/:teamId/:token/:resvId', function (req, res, next) {
+publicRouter.post('/book/:teamId/:token/:resvId', access.team(), function (req, res, next) {
   const teamId = req.params.teamId;
   const token = req.params.token;
   const resvId = req.params.resvId;
@@ -485,7 +486,7 @@ publicRouter.post('/book/:teamId/:token/:resvId', function (req, res, next) {
   });
 });
 
-publicRouter.post('/cancel/:teamId/:token/:resvId', function (req, res, next) {
+publicRouter.post('/cancel/:teamId/:token/:resvId', access.team(), function (req, res, next) {
   const teamId = req.params.teamId;
   const token = req.params.token;
   const resvId = req.params.resvId;
@@ -564,7 +565,7 @@ publicRouter.post('/cancel/:teamId/:token/:resvId', function (req, res, next) {
   });
 });
 
-publicRouter.post('/list/:competitionId', function (req, res, next) {
+publicRouter.post('/list/:competitionId', access.team({ teamAt: 'body.team', tokenAt: 'body.token', inCompetition: 'params.competitionId' }), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const teamId = req.body.team;
   const leagueId = req.body.league;

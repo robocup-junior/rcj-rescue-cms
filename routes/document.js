@@ -87,7 +87,7 @@ privateRouter.get('/review/:teamId', function (req, res, next) {
         if (
           await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
         ) {
-          res.render('document_review', {
+          res.render('document/review', {
             competition: dbTeam.competition,
             team: teamId,
             user: req.user,
@@ -122,7 +122,7 @@ privateRouter.get('/reviewed/:teamId', function (req, res, next) {
         if (
           auth.authCompetition(req.user, dbTeam.competition, ACCESSLEVELS.VIEW) || await auth.authCompetitionRole(req.user, dbTeam.competition, "INTERVIEW")
         ) {
-          res.render('document_reviewed', {
+          res.render('document/reviewed', {
             competition: dbTeam.competition,
             team: teamId,
             user: req.user,
@@ -188,7 +188,7 @@ publicRouter.get('/public/:teamId', function (req, res, next) {
         if (!err) err = { message: 'No team found' };
         res.render('access_denied', { user: req.user });
       } else if (dbTeam) {
-        res.render('document_form', {
+        res.render('document/form', {
           public: true,
           editable: false,
           competition: dbTeam.competition,
@@ -230,7 +230,7 @@ privateRouter.get('/:teamId', function (req, res, next) {
             const teamDeadline = dbTeam.document.deadline;
             let { deadline } = dbTeam.competition.documents;
             if (teamDeadline != null) deadline = teamDeadline;
-            res.render('document_form', {
+            res.render('document/form', {
               deadline,
               editable: true,
               competition: dbTeam.competition._id,
@@ -277,7 +277,7 @@ publicRouter.get('/:teamId/:token', function (req, res, next) {
             const now = new Date();
             const timestamp = Math.floor(now.getTime() / 1000);
 
-            res.render('document_form', {
+            res.render('document/form', {
               deadline,
               editable: deadline >= timestamp,
               competition: dbTeam.competition._id,

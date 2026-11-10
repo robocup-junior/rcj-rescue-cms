@@ -3,12 +3,13 @@ head
     title RoboCupJunior CMS
 
     include ./common_component
-    script(src="/javascripts/translate_config.js")
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
 
     meta(name='viewport', content='width=device-width, initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no')
     meta(name="apple-mobile-web-app-capable" content="yes")
     meta(name="theme-color", content="#043C78")
-    
+    meta(name="charset", content="UTF-8")
+
     link(rel='icon', type='image/vnd.microsoft.icon', sizes='16x16', href='/images/favicon-16.ico')
     link(rel='icon', type='image/vnd.microsoft.icon', sizes='32x32', href='/images/favicon-32.ico')
     link(rel='icon', type='image/vnd.microsoft.icon', sizes='96x96', href='/images/favicon-96.ico')
@@ -19,6 +20,7 @@ head
     link(rel='icon', type='image/png', sizes='32x32', href='/images/favicon-32.png')
     link(rel='icon', type='image/png', sizes='128x128', href='/images/favicon-128.png')
     link(rel='manifest', href='/manifest.json')
+    link(href="/stylesheets/fonts.css?v=" + assetVersion rel="stylesheet")
 
     
     script.

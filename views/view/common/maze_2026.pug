@@ -1,0 +1,124 @@
+//- The parts of a run's score as the maze view and sign pages show them: the map with the item
+//- points, the reliability bonus, the exit bonus and the misidentifications. Their sum is
+//- common/maze_2026_summary.pug. See line_view.css.
+//- The map with the item points
+section.rv-card.rv-map#rv-items
+  .rv-card-header
+    i.fas.fa-map
+    | {{'maze.sign.item' | translate}}
+    //- Floor and rotation in the header row, before the total
+    .rv-map-tools
+      .btn-group(ng-show='height > 1')
+        //- The floors, after an icon that says what they are
+        span.rv-tool.rv-tool-label(aria-hidden='true')
+          i.fas.fa-layer-group
+        button.rv-tool(type='button' ng-repeat='zz in range(height)' ng-class='{active: zz == z}' ng-click='changeFloor(zz)')
+          | {{zz}}
+      .btn-group
+        button.rv-tool(type='button' title='-90°' ng-click='tileRot(-90)')
+          i.fas.fa-undo
+        button.rv-tool(type='button' title='+90°' ng-click='tileRot(90)')
+          i.fas.fa-redo
+    span.rv-header-total {{allItemScore()}} {{'common.point' | translate}}
+  //- What the colours on the tiles mean
+  .rv-map-legend
+    span.rv-key.is-done {{'line.view.tileDone' | translate}}
+    span.rv-key.is-halfdone {{'line.view.tilePartial' | translate}}
+    span.rv-key.is-undone {{'line.view.tileNone' | translate}}
+  include maze_map
+
+//- Then the bonuses and the deduction, side by side where there is room
+.rv-grid-3
+  //- The reliability bonus: what the run achieved, less the LoPs (never below 0)
+  section.rv-card#rv-reliability
+    .rv-card-header
+      i.fas.fa-shield-alt
+      | {{'maze.sign.reliability' | translate}}
+      span.rv-header-total {{reliability()}} {{'common.point' | translate}}
+    ul.rv-calc
+      li.rv-calc-row
+        span.rv-calc-label
+          i.fas.fa-child
+          |  {{'maze.sign.rescue' | translate}}
+        span.rv-calc-expr {{foundVictims}} × 10
+        span.rv-calc-value {{foundVictims * 10}}
+      li.rv-calc-row(ng-if="leagueType != 'entry'")
+        span.rv-calc-label
+          i.fas.fa-medkit
+          |  {{'maze.sign.kits' | translate}}
+        span.rv-calc-expr {{rescueDeploymentPoints() / 10}} × 10
+        span.rv-calc-value {{rescueDeploymentPoints()}}
+      li.rv-calc-row(ng-if="leagueType != 'entry'")
+        span.rv-calc-label
+          i.fas.fa-square
+          |  {{'maze.sign.blue' | translate}}
+        span.rv-calc-expr {{blueTilesVisited()}} × 10
+        span.rv-calc-value {{blueTilesVisited() * 10}}
+      li.rv-calc-row.is-minus
+        span.rv-calc-label
+          i.fas.fa-step-forward
+          |  {{'maze.sign.total_lops' | translate}}
+        span.rv-calc-expr {{LoPs}} × {{leagueType == 'entry' ? 5 : 15}}
+        span.rv-calc-value −{{reliabilityLoPs()}}
+      li.rv-calc-row.is-total
+        span.rv-calc-label {{'maze.sign.reliability' | translate}}
+        span.rv-calc-value {{reliability()}}
+
+  //- The exit bonus: earned by returning to the start, from what the run achieved
+  section.rv-card#rv-exit
+    .rv-card-header
+      i.fas.fa-sign-out-alt
+      | {{'maze.sign.exit' | translate}}
+      span.rv-header-total {{exitBonusPoints()}} {{'common.point' | translate}}
+    .rv-exit(ng-class="{'is-ng': !exitBonus}")
+      .rv-exit-head
+        .rv-exit-image(ng-class="exitBonus ? 'is-ok' : 'is-ng'")
+          img(src='/images/maze_bonus.png', alt='')
+          span.rv-exit-mark
+            i.fas(ng-class="exitBonus ? 'fa-check' : 'fa-times'")
+        .rv-exit-status
+          .rv-exit-title(ng-class="exitBonus ? 'is-ok' : 'is-ng'")
+            | {{(exitBonus ? 'line.view.exitDone' : 'line.view.exitNotDone') | translate}}
+    ul.rv-calc(ng-if='exitBonus')
+      li.rv-calc-row
+        span.rv-calc-label
+          i.fas.fa-child
+          |  {{'maze.sign.rescue' | translate}}
+        span.rv-calc-expr {{foundVictims}} × 10
+        span.rv-calc-value {{foundVictims * 10}}
+      li.rv-calc-row
+        span.rv-calc-label
+          i.fas.fa-square
+          |  {{'maze.sign.blue' | translate}}
+        span.rv-calc-expr {{blueTilesVisited()}} × 10
+        span.rv-calc-value {{blueTilesVisited() * 10}}
+      li.rv-calc-row
+        span.rv-calc-label
+          i.fas.fa-stream
+          |  {{'maze.sign.stairs' | translate}}
+        span.rv-calc-expr {{stairsNavigation()}} × 5
+        span.rv-calc-value {{stairsNavigation() * 5}}
+      li.rv-calc-row
+        span.rv-calc-label
+          i.fas.fa-mountain
+          |  {{'maze.sign.ramp' | translate}}
+        span.rv-calc-expr {{rampNavigation()}} × 5
+        span.rv-calc-value {{rampNavigation() * 5}}
+      li.rv-calc-row.is-total
+        span.rv-calc-label {{'maze.sign.exit' | translate}}
+        span.rv-calc-value {{exitBonusPoints()}}
+
+  //- Misidentifications: 5 points each, taken from the rest
+  section.rv-card#rv-misident
+    .rv-card-header
+      i.fas.fa-exclamation-triangle
+      | {{'maze.sign.misidentification' | translate}}
+      span.rv-header-total {{misIdentPoints() ? '−' + misIdentPoints() : 0}} {{'common.point' | translate}}
+    ul.rv-calc
+      li.rv-calc-row.is-minus
+        span.rv-calc-label
+          i.fas.fa-times-circle
+          |  {{'maze.sign.misidentification' | translate}}
+        span.rv-calc-expr {{MisIdent}} × 5
+        span.rv-calc-value {{misIdentPoints() ? '−' + misIdentPoints() : 0}}
+

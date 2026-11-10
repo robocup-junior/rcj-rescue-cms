@@ -1,0 +1,35 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rcj-cms:local
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+      - redis
+    env_file:
+      - ./process.env
+    environment:
+      REDIS_HOST: "redis"
+      REDIS_PORT: "6379"
+      DB_CONNECT_STR: "mongodb://mongo:27017/rcj-cms"
+
+  mongo:
+    image: mongo:6
+    container_name: rcj-mongo
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: rcj-redis
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+  redis_data:

@@ -1,35 +1,32 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
+  - var contentContainerStyle = 'max-width: 760px;'
   - var ngAppDef = 'top'
 
 append scripts
   script.
     var competitionId = "#{id}"
     var leagueId = "#{leagueId}"
-  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js')
-  script(src='/javascripts/registration/top.js')
+  script(src='/components/angular-toastr/dist/angular-toastr.tpls.min.js?v=' + assetVersion)
+  script(src='/javascripts/registration/top.js?v=' + assetVersion)
 
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  span.breadcrumb-item.active Registration
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    span.breadcrumb-item.active Registration
-block content
-  .row
-    .col-md-2.col-sm-1
-    .col-md-8.col-sm-10
-      h2 
-      .card(style='width: 100%; margin-bottom:50px;')
-          .card-body
-            .text-center
-                h1.card-title {{competition.name}}
-                h5 {{leagueName}}
-                
-            hr
-            div(style="text-align:center;")
-                i.fas.fa-ban.fa-10x(style="color:#e74c3c;margin-bottom:30px;")
-                p.card-subtitle.mb-2.text-muted {{"registration.close" | translate}}
+block hero_title
+  | {{competition.name}}
 
+block hero_subtitle
+  | {{leagueName}}
 
-
+block main_content
+  .modern-card.mb-5
+    .modern-card-body
+      .result-state.error
+        i.fas.fa-ban
+        p.text-muted {{"registration.close" | translate}}

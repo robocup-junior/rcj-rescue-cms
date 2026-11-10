@@ -1,0 +1,150 @@
+table {
+    border-collapse: collapse;
+}
+
+td {
+    border: 1px solid grey;
+}
+
+table tr:nth-child(odd) {
+    height: 10px;
+}
+
+table tr:nth-child(even) {
+    height: 40px;
+}
+
+
+tr td:nth-child(odd) {
+    width: 10px;
+}
+
+tr td:nth-child(even) {
+    width: 40px;
+}
+
+.wall {
+    background-color: navy;
+}
+
+.wall.linear {
+    background-color: black;
+}
+
+.tile {
+    --tileColor: #b0b0b0;
+    background-color: var(--tileColor);
+}
+
+.inner-tile {
+    background-color: #b4ffd5;
+}
+
+.tile.linear {
+    background-color: #fffdea;
+}
+
+.tile.floating {
+    background-color: #b4ffd5;
+}
+
+.wallspot:hover {
+    background-color: darkgrey;
+}
+
+.tile.checkpoint {
+    background-image: linear-gradient(to top left, #A5A5A5, #BABAC2, #E8E8E8, #A5A5A5, #BABAC2);
+}
+
+.tile.black {
+    background-color: black;
+}
+
+.tile.blue {
+    background-color: blue;
+}
+
+.tile.red {
+    background-color: red;
+}
+
+.tile.swamp {
+    background-color: #CD853F;
+}
+
+.tile-image-container {
+    position: relative;
+    height: 40px;
+    width: 40px;
+}
+
+.tile-image {
+    width: 40px;
+    height: 40px;
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    vertical-align: bottom;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+}
+
+.modal-body td,
+.modal-body th {
+    text-align: center;
+    vertical-align: middle;
+}
+
+.modal-body th.col {
+    text-align: right;
+}
+
+rzslider {
+    width: 200px;
+    /*    width: 80%;*/
+}
+
+.vertical-sliders {
+    margin: 0;
+}
+
+.vertical-sliders>div {
+    height: 250px;
+}
+
+rzslider.rz-vertical {
+    height: 250px;
+}
+
+.confirmation {
+    width: 100%;
+    border: 1px dashed black;
+}
+
+.plusminus {
+    box-sizing: content-box;
+    width: 2em;
+    padding: 0px 15px;
+}
+
+.count {
+    font-size: 2em;
+}
+
+/* Center modal vertically and horizontally */
+.modal-centered .modal-dialog {
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 1rem);
+    margin: 0 auto;
+}
+
+@media (min-width: 576px) {
+    .modal-centered .modal-dialog {
+        min-height: calc(100% - 3.5rem);
+    }
+}

@@ -1,0 +1,54 @@
+<!-- The judge page's sheet of a maze tile, by the Entry rules. Kept in step by hand with
+     the other maze tile sheets (maze_judge_modal_2026*.html, maze_view_modal_2026*.html); change them together, so that
+     they look the same: the judge operates it. Each item is green once scored; each victim
+     shows its side of the tile as the map is turned, its category and whether it was found,
+     then identified. No points. -->
+<div class="rvm rvm-judge rvm-maze">
+  <div class="rvm-header">
+    <h5 class="rvm-title">{{'maze.view.m_score' | translate}}</h5>
+    <button type="button" class="rvm-close" ng-click="ok()" aria-label="Close"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="rvm-body">
+    <!-- The tile's items -->
+    <div class="rvm-toggles" ng-if="cell.tile.checkpoint || cell.tile.speedbump">
+      <button type="button" class="rvm-toggle" ng-if="cell.tile.checkpoint" ng-class="{'is-on': tile.scoredItems.checkpoint}" ng-click="changeCheckPoint()" aria-pressed="{{!!(tile.scoredItems.checkpoint)}}">
+        <img src="/images/checkpoint.png" alt="">
+        <span>{{'maze.judge.m_reach' | translate}}</span>
+        <i class="fas" ng-class="tile.scoredItems.checkpoint ? 'fa-check-circle' : 'fa-circle'"></i>
+      </button>
+      <button type="button" class="rvm-toggle" ng-if="cell.tile.speedbump" ng-class="{'is-on': tile.scoredItems.speedbump}" ng-click="changeSpeedbump()" aria-pressed="{{!!(tile.scoredItems.speedbump)}}">
+        <img src="/images/speedbump.png" alt="">
+        <span>{{'maze.judge.m_bump' | translate}}</span>
+        <i class="fas" ng-class="tile.scoredItems.speedbump ? 'fa-check-circle' : 'fa-circle'"></i>
+      </button>
+    </div>
+
+    <!-- The victims, each on its side of the tile as the map is turned (or the floor) -->
+    <ol class="rvm-victims" ng-if="hasVictims">
+      <li class="rvm-victim" ng-repeat="direction in ['floor', 'top', 'right', 'bottom', 'left']"
+          ng-if="cell.tile.victims[direction] != 'None' && cell.tile.victims[direction] != undefined"
+          ng-class="{'is-on': tile.scoredItems.victims[direction], 'is-half': tile.scoredItems.victims[direction] && !(tile.scoredItems.rescueKits[direction] > 0)}">
+        <span class="rvm-victim-side"><i class="fas" ng-class="direction == 'floor' ? 'fa-dot-circle' : {'top': 'fa-arrow-up', 'right': 'fa-arrow-right', 'bottom': 'fa-arrow-down', 'left': 'fa-arrow-left'}[modalRotate(direction)]"></i></span>
+        <span class="rvm-victim-who">
+          <img class="rvm-victim-image" ng-src="/images/{{['H', 'S', 'U'].indexOf(cell.tile.victims[direction]) >= 0 ? cell.tile.victims[direction] : (cell.tile.victims[direction] | lowercase)}}.png" alt="{{cell.tile.victims[direction]}}">
+          <!-- Its category, by its colour -->
+          <span class="rvm-category" ng-if="getModalVictimStatus(cell, direction)" ng-class="'is-' + (getModalVictimStatus(cell, direction) | lowercase)">
+            <i class="fas" ng-class="{'Harmed': 'fa-heartbeat', 'Stable': 'fa-user-check', 'Unharmed': 'fa-smile', 'Dummy': 'fa-robot'}[getModalVictimStatus(cell, direction)]"></i>
+            {{('maze.view.victimStatus.' + getModalVictimStatus(cell, direction)) | translate}}
+          </span>
+        </span>
+        <button type="button" class="rvm-toggle rvm-found" ng-class="{'is-on': tile.scoredItems.victims[direction]}" ng-click="toggleVictim(direction)" aria-pressed="{{!!(tile.scoredItems.victims[direction])}}">
+          <span>{{'maze.judge.m_found' | translate}}</span>
+          <i class="fas" ng-class="tile.scoredItems.victims[direction] ? 'fa-check-circle' : 'fa-circle'"></i>
+        </button>
+        <button type="button" class="rvm-toggle rvm-found" ng-class="{'is-on': tile.scoredItems.rescueKits[direction] > 0}" ng-click="toggleIdentified(direction)" ng-disabled="!tile.scoredItems.victims[direction]" aria-pressed="{{!!(tile.scoredItems.rescueKits[direction] > 0)}}">
+          <span>{{'line.view.identified' | translate}}</span>
+          <i class="fas" ng-class="tile.scoredItems.rescueKits[direction] > 0 ? 'fa-check-circle' : 'fa-circle'"></i>
+        </button>
+      </li>
+    </ol>
+  </div>
+  <div class="rvm-footer">
+    <button class="rvm-ok" type="button" ng-click="ok()">OK</button>
+  </div>
+</div>

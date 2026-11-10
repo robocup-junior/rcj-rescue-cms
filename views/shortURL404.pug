@@ -5,26 +5,46 @@ block vars
   - var ngAppDef = 'AD'
 
 append scripts
-  script(src='/javascripts/access_denied.js')
+  script(src='/javascripts/access_denied.js?v=' + assetVersion)
 
-block location
-  a.breadcrumb-item(ng-click="go('/home')") Home
-  span.breadcrumb-item.active 404 Not Found
+append css
+  link(href="/stylesheets/fonts.css?v=" + assetVersion rel="stylesheet")
+  link(rel='stylesheet', href='/stylesheets/error_premium.css?v=' + assetVersion)
+
+block bread
 
 block content
-  .row
-    .col-md-1
-    .col-md-10
-      div(style="text-align:center;")
-        i.fas.fa-trash-alt(aria-hidden="true"  style="color:#f1c40f;font-size:200px") &nbsp;404
-        br
-        h1(style="font-size:50px") {{"shortURL404.title" | translate}}
-        br
-        h2 {{"shortURL404.description1" | translate}}
-        p {{"shortURL404.description2" | translate}}
-      br
+  .error-page(ng-cloak)
+    .error-card.denied-card
+      .robot-container.denied-robot.lost-robot(aria-hidden="true")
+        .robot-question ?
+        .robot
+          .robot-head
+            .robot-ear.ear-left
+            .robot-ear.ear-right
+            .eye
+            .eye
+          .robot-body
+            .robot-lock
+              i.fas.fa-link
+            .robot-arm.arm-left
+            .robot-arm.arm-right
+              .stop-sign
+                i.fas.fa-search
+            .robot-leg.leg-left
+            .robot-leg.leg-right
 
-      br
-      button(onclick="location.href=document.referrer" class='btn btn-secondary btn-lg btn-block')
-        i.fas.fa-undo.fa-2x(aria-hidden="true") {{'common.back' | translate}}
-      
+      .error-status 404
+      h1.error-message-title {{"shortURL404.title" | translate}}
+      p.error-message-detail
+        | {{"shortURL404.description1" | translate}}
+        br
+        small {{"shortURL404.description2" | translate}}
+
+      .error-actions
+        button.btn-home.btn-secondary-action(type="button" ng-click="back()")
+          i.fas.fa-undo
+          | {{'common.back' | translate}}
+        a.btn-home(href="/home")
+          i.fas.fa-home
+          | {{"common.backHome" | translate}}

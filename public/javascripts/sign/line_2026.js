@@ -1,0 +1,1260 @@
+// register the directive with your app module
+var app = angular.module('ddApp', ['ngTouch', 'ngAnimate', 'ui.bootstrap', 'pascalprecht.translate', 'ngCookies']);
+var marker = {};
+
+// Tile images of the evacuation zone: ev1.png, ev2.png, ev3.png
+function isEvacImage(image) {
+    return /^ev\d+\.png$/.test(image || '');
+}
+
+var socket;
+var txt_multi;
+var txt_gap;
+var txt_obstacle;
+var txt_ramp;
+var txt_intersection;
+var txt_bump;
+var rotate = 0;
+// function referenced by the drop target
+app.controller('ddController', ['$scope', '$uibModal', '$log', '$timeout', '$http', '$translate', '$cookies', function ($scope, $uibModal, $log, $timeout, $http, $translate, $cookies) {
+
+    var txt_cap_sign, txt_cref_sign, txt_ref_sign, txt_no_sign, txt_complete, txt_confirm;
+    $translate('line.sign.cap_sign').then(function (val) {
+        txt_cap_sign = val;
+    }, function (translationId) {
+        // = translationId;
+    });
+    $translate('line.sign.ref_sign').then(function (val) {
+        txt_ref_sign = val;
+    }, function (translationId) {
+        // = translationId;
+    });
+    $translate('line.sign.cref_sign').then(function (val) {
+        txt_cref_sign = val;
+    }, function (translationId) {
+        // = translationId;
+    });
+    $translate('line.sign.no_sign').then(function (val) {
+        txt_no_sign = val;
+    }, function (translationId) {
+        // = translationId;
+    });
+    $translate('line.sign.complete').then(function (val) {
+        txt_complete = val;
+    }, function (translationId) {
+        // = translationId;
+    });
+    $translate('line.sign.confirm').then(function (val) {
+        txt_confirm = val;
+    }, function (translationId) {
+        // = translationId;
+    });
+
+    $translate('line.judge.js.multi').then(function (val) {
+        txt_multi = val;
+    }, function (translationId) {
+        // = translationId;
+    });
+    $translate('line.judge.js.gap').then(function (val) {
+        txt_gap = val;
+    }, function (translationId) {
+        // = translationId;
+    });
+    $translate('line.judge.js.obstacle').then(function (val) {
+        txt_obstacle = val;
+    }, function (translationId) {
+        // = translationId;
+    });
+    $translate('line.judge.js.ramp').then(function (val) {
+        txt_ramp = val;
+    }, function (translationId) {
+        // = translationId;
+    });
+    $translate('line.judge.js.intersection').then(function (val) {
+        txt_intersection = val;
+    }, function (translationId) {
+        // = translationId;
+    });
+    $translate('line.judge.js.bump').then(function (val) {
+        txt_bump = val;
+    }, function (translationId) {
+        // = translationId;
+    });
+
+
+    //$cookies.remove('sRotate')
+    if ($cookies.get('sRotate')) {
+        $scope.sRotate = Number($cookies.get('sRotate'));
+    }
+    else $scope.sRotate = 0;
+    rotate = $scope.sRotate ;
+
+    $scope.z = 0;
+
+    // Scoring elements of the tiles
+    $scope.stiles = [];
+    // Map (images etc.) for the tiles
+    $scope.mtiles = [];
+
+    $scope.checkPointDistance = [];
+
+    $scope.victim_list = [];
+    $scope.LoPs = [];
+
+    $scope.signData = [null, null, null];
+
+    $scope.sum = function (arr) {
+        if (arr.length == 0) return 0;
+        return arr.reduce(function (prev, current, i, arr) {
+            return prev + current;
+        });
+    };
+
+
+    if (typeof runId !== 'undefined') {
+        $scope.runId = runId;
+        loadNewRun();
+    }
+
+    socket = io(window.location.origin, {
+        transports: ['websocket']
+    });
+    function launchSocketIo() {        
+        if (typeof runId !== 'undefined') {
+            socket.emit('subscribe', 'runs/' + runId);
+
+            socket.on('changed', function () {
+                // Told the run changed: taken again, as this page may see it
+                $http.get("/api/runs/line/" + runId + "?normalized=true").then(function (response) {
+                    const data = response.data;
+                    //console.log(data);
+                    $scope.status = data.status;
+                    $scope.exitBonus = data.exitBonus;
+                    $scope.stiles = data.tiles;
+                    $scope.score = data.score;
+                    $scope.raw_score = data.raw_score;
+                    $scope.normalizedScore = data.normalizedScore;
+                    $scope.multiplier = data.multiplier;
+                    $scope.showedUp = data.showedUp;
+                    $scope.LoPs = data.LoPs;
+                    $scope.LoPs_total = 0;
+                    for (var i = 0; i < $scope.LoPs.length; i++) {
+                        $scope.LoPs_total += $scope.LoPs[i];
+                    }
+                    $scope.minutes = data.time.minutes;
+                    $scope.seconds = data.time.seconds;
+    
+                    $scope.victim_list = data.rescueOrder;
+    
+                    $scope.checkPointDistance = [];
+                    let tmp = {
+                        dis: 1,
+                        status: $scope.showedUp,
+                        point: 5 * $scope.showedUp
+                    }
+                    $scope.checkPointDistance.push(tmp);
+                    let prevCheckPoint = 0;
+                    let j = 0;
+                    for (let i in $scope.stiles) {
+                        if ($scope.isCheckPoint($scope.stiles[i])) {
+                            let tmp = {
+                                dis: i - prevCheckPoint,
+                                status: $scope.stiles[i].scoredItems[findItem("checkpoint", $scope.stiles[i].scoredItems)].scored,
+                                point: (i - prevCheckPoint) * $scope.stiles[i].scoredItems[findItem("checkpoint", $scope.stiles[i].scoredItems)].scored * $scope.LoPsCountPoint($scope.LoPs[j])
+                            }
+                            $scope.checkPointDistance.push(tmp);
+                            prevCheckPoint = i;
+                            j++;
+                        }
+                    }
+                    let finalDis = $scope.stiles.length - 1 - prevCheckPoint;
+                    $scope.checkPointDistance.push({
+                        dis: finalDis,
+                        status: $scope.exitBonus,
+                        point: finalDis * $scope.exitBonus * $scope.LoPsCountPoint($scope.LoPs[j])
+                    });
+                    console.log("Updated view from socket.io");
+                });
+            });
+        }
+
+    }
+
+    launchSocketIo();
+    setInterval(launchSocketIo, 15000);
+
+    // The view and sign pages are covered by a loading screen until the map is complete (line_view.js)
+    function pageLoaded() {
+        if (typeof revealRunPage === 'function') revealRunPage(tile_size);
+    }
+
+    function loadNewRun() {
+        $http.get("/api/runs/line/" + runId +
+            "?normalized=true").then(function (response) {
+                $scope.status = response.data.status;
+                $scope.LoPs = response.data.LoPs;
+                $scope.LoPs_total = 0;
+                for (var i = 0; i < $scope.LoPs.length; i++) {
+                    $scope.LoPs_total += $scope.LoPs[i];
+                }
+                $scope.exitBonus = response.data.exitBonus;
+                $scope.field = response.data.field.name;
+                $scope.score = response.data.score;
+                $scope.raw_score = response.data.raw_score;
+                $scope.normalizedScore = response.data.normalizedScore;
+                $scope.multiplier = response.data.multiplier;
+                $scope.showedUp = response.data.showedUp;
+                $scope.started = response.data.started;
+                $scope.round = response.data.round.name;
+                $scope.team = response.data.team.name;
+                $scope.league = response.data.team.league;
+                $scope.competition = response.data.competition.name;
+                $scope.competition_id = response.data.competition._id;
+                // Verified time by timekeeper
+                $scope.minutes = response.data.time.minutes;
+                $scope.seconds = response.data.time.seconds;
+
+                if (response.data.sign) {
+                    $scope.cap_sig = response.data.sign.captain;
+                    $scope.ref_sig = response.data.sign.referee;
+                    $scope.refas_sig = response.data.sign.referee_as;
+                }
+
+
+                $scope.comment = response.data.comment;
+
+                // Scoring elements of the tiles
+                $scope.stiles = response.data.tiles;
+
+                let checkPointNumber = 1;
+                $scope.checkPointDistance = [];
+                let tmp = {
+                    dis: 1,
+                    status: $scope.showedUp,
+                    point: 5 * $scope.showedUp
+                }
+                $scope.checkPointDistance.push(tmp);
+                let prevCheckPoint = 0;
+                let j = 0;
+                for (let i in $scope.stiles) {
+                    if ($scope.isCheckPoint($scope.stiles[i])) {
+                        marker[i] = checkPointNumber;
+                        checkPointNumber++;
+
+                        let tmp = {
+                            dis: i - prevCheckPoint,
+                            status: $scope.stiles[i].scoredItems[findItem("checkpoint", $scope.stiles[i].scoredItems)].scored,
+                            point: (i - prevCheckPoint) * $scope.stiles[i].scoredItems[findItem("checkpoint", $scope.stiles[i].scoredItems)].scored * $scope.LoPsCountPoint($scope.LoPs[j])
+                        }
+                        $scope.checkPointDistance.push(tmp);
+                        prevCheckPoint = i;
+                        j++;
+                    }
+                }
+                let finalDis = $scope.stiles.length - 1 - prevCheckPoint;
+                $scope.checkPointDistance.push({
+                    dis: finalDis,
+                    status: $scope.exitBonus,
+                    point: finalDis * $scope.exitBonus * $scope.LoPsCountPoint($scope.LoPs[j])
+                });
+
+                $scope.victim_list = response.data.rescueOrder;
+
+                // Get the map
+                $http.get("/api/maps/line/" + response.data.map +
+                    "?populate=true").then(function (response) {
+                        console.log(response.data);
+
+                        $scope.height = response.data.height;
+                        $timeout(tile_size, 0);
+
+                        $scope.width = response.data.width;
+                        $scope.length = response.data.length;
+                        width = response.data.width;
+                        length = response.data.length;
+                        $scope.startTile = response.data.startTile;
+                        $scope.startTile2 = response.data.startTile2;
+                        $scope.numberOfDropTiles = response.data.numberOfDropTiles;;
+                        $scope.mtiles = {};
+
+                        // Get max victim count
+                        $scope.maxLiveVictims = response.data.victims.live;
+                        $scope.maxDeadVictims = response.data.victims.dead;
+
+                        $scope.mapIndexCount = response.data.indexCount;
+
+                        $scope.EvacuationAreaLoPIndex = response.data.EvacuationAreaLoPIndex;
+
+                        for (let i = 0; i < response.data.tiles.length; i++) {
+                            $scope.mtiles[response.data.tiles[i].x + ',' +
+                                response.data.tiles[i].y + ',' +
+                                response.data.tiles[i].z] = response.data.tiles[i];
+                        }
+
+                        $timeout(tile_size, 0);
+                        $timeout(tile_size, 500);
+                        $timeout(tile_size, 1500);
+                        $timeout(tile_size, 3000);
+                        $timeout(pageLoaded, 0);
+
+                    }, function (response) {
+                        console.log("Error: " + response.statusText);
+                        pageLoaded();
+                    });
+            }, function (response) {
+                console.log("Error: " + response.statusText);
+                if (response.status == 401) {
+                    $scope.go(`/home/access_denied?iframe=${iframe}`);
+                }
+            });
+    }
+
+    function findItem(item, tile) {
+        for (let i = 0; i < tile.length; i++) {
+            if (tile[i].item == item) return i;
+        }
+        return null;
+    }
+
+    $scope.isCheckPoint = function (tile) {
+        return findItem("checkpoint", tile.scoredItems) != null;
+    }
+
+    $scope.calc_victim_type_lop_multiplier = function (lop=-1){
+        if(lop == -1) lop = $scope.LoPs[$scope.EvacuationAreaLoPIndex];
+    
+        let multiplier = Math.max(1400 - 50*lop, 1250);
+        return multiplier/1000;
+      };
+    
+      $scope.calc_victim_multipliers = function (index){
+        let victim = $scope.victim_list[index];
+        if (victim == undefined) return 0;
+    
+        // Effective check
+        if(victim.victimType == "LIVE" && victim.zoneType == "RED") return 1.0;
+        if(victim.victimType == "DEAD" && victim.zoneType == "GREEN") return 1.0;
+    
+        // Effective check for dead victim
+        if (victim.victimType == "DEAD") {
+          let liveCount = 0;
+          for (i of $scope.range(index)) {
+            let v = $scope.victim_list[i]
+            if (v.victimType == "LIVE") liveCount ++;
+          }
+          if (liveCount != $scope.maxLiveVictims) return 1.0;
+        }
+        
+        return $scope.calc_victim_type_lop_multiplier($scope.LoPs[$scope.EvacuationAreaLoPIndex]);    
+      };
+
+    $scope.victim_bk_color = function (index, zoneType) {
+        let m = $scope.calc_victim_multipliers(index);
+        if (m == 0 || zoneType != $scope.victim_list[index].zoneType) return '#fff';
+        if (m == 1) return '#ccc';
+        if (zoneType == "RED") return '#ffc1ff';
+        return '#e0ffc1';
+    }
+
+    $scope.LoPsCountPoint = function (n) {
+        if (n == 0) return 5;
+        if (n == 1) return 3;
+        if (n == 2) return 1;
+        return 0;
+    }
+
+    $scope.checkTotal = function () {
+        let ret = 0;
+        for (let i in $scope.checkPointDistance) {
+            ret += $scope.checkPointDistance[i].point;
+        }
+        return ret;
+    };
+
+    $scope.exitBonusPoints = function () {
+        return $scope.exitBonus * Math.max(0, 60 - 5 * $scope.sum($scope.LoPs));
+    };
+
+
+    // Whether the map has an evacuation zone (run view map legend)
+    $scope.hasEvacZone = function () {
+        for (let key in $scope.mtiles) {
+            if ($scope.mtiles[key] && isEvacImage($scope.mtiles[key].tileType && $scope.mtiles[key].tileType.image)) return true;
+        }
+        return false;
+    }
+
+    $scope.range = function (n) {
+        arr = [];
+        for (var i = 0; i < n; i++) {
+            arr.push(i);
+        }
+        return arr;
+    }
+
+    $scope.getOpacity = function (x, y) {
+        var stackedTiles = 0;
+        for (var z = 0; z < $scope.height; z++) {
+            if ($scope.mtiles[x + ',' + y + ',' + z])
+                stackedTiles++;
+        }
+        return 1.0 / stackedTiles;
+    }
+
+    $scope.getParam = function (key) {
+        var str = location.search.split("?");
+        if (str.length < 2) {
+            return "";
+        }
+
+        var params = str[1].split("&");
+        for (var i = 0; i < params.length; i++) {
+            var keyVal = params[i].split("=");
+            if (keyVal[0] == key && keyVal.length == 2) {
+                return decodeURIComponent(keyVal[1]);
+            }
+        }
+        return "";
+    }
+
+    $scope.go = function (path) {
+        playSound(sClick);
+        socket.emit('unsubscribe', 'runs/' + runId);
+        // Only to a page of this site: the path may be the ?return= of a link anyone could have made
+        var url = new URL(path, location.href);
+        if (url.origin !== location.origin) return;
+        window.location = url.pathname + url.search + url.hash;
+    }
+
+    $scope.changeFloor = function (z) {
+        playSound(sClick);
+        $scope.z = z;
+        $timeout(tile_size, 100);
+        $timeout(tile_size, 2000);
+    }
+
+    $scope.tileRot = function (r) {
+        playSound(sClick);
+        $scope.sRotate += r;
+        if ($scope.sRotate >= 360) $scope.sRotate -= 360;
+        else if ($scope.sRotate < 0) $scope.sRotate += 360;
+        rotate = $scope.sRotate;
+        $timeout(tile_size, 0);
+
+        $cookies.put('sRotate', $scope.sRotate, {
+            path: '/'
+        });
+    }
+
+    $scope.totalNumberOf = function (objects) {
+        return objects.gaps + objects.speedbumps + objects.obstacles +
+            objects.intersections;
+    }
+
+    $scope.showElements = function (x, y, z) {
+        var mtile = $scope.mtiles[x + ',' + y + ',' + z];
+        var isCheckPointTile = false;
+        var stile = [];
+        var stileIndex = [];
+
+        // If this is not a created tile
+        if (!mtile || mtile.index.length == 0)
+            return;
+        playSound(sClick);
+        for (var i = 0; i < mtile.index.length; i++) {
+            stile.push($scope.stiles[mtile.index[i]]);
+            stileIndex.push(mtile.index[i])
+            if ($scope.isCheckPoint($scope.stiles[mtile.index[i]])) {
+                isCheckPointTile = true;
+            }
+        }
+
+
+        var total = (mtile.items.obstacles > 0 ||
+            mtile.items.speedbumps > 0 ||
+            mtile.tileType.gaps > 0 ||
+            mtile.tileType.intersections > 0 ||
+            mtile.tileType.seesaw > 0 ||
+            undefined2false(mtile.items.rampPoints)) * mtile.index.length;
+
+        // Add the number of possible passes for drop tiles
+        if (isCheckPointTile) {
+            total = 0;
+            for (let i = 0; i < stile.length; i++) {
+                if (stileIndex[i] < $scope.mapIndexCount) {
+                    total++;
+                }
+            }
+        }
+
+
+        if (total == 0) {
+            return;
+        } else if (total > 1) {
+            // Show modal
+            $scope.open(x, y, z);
+            // Save data from modal when closing it
+        }
+    }
+
+
+    $scope.open = function (x, y, z) {
+        var modalInstance = $uibModal.open({
+            animation: true,
+            // The run view page lists the passes its own way
+            templateUrl: document.body.classList.contains('run-view') ? '/templates/line_view_modal_passes.html' : '/templates/line_view_modal.html',
+            controller: 'ModalInstanceCtrl',
+            size: 'lm',
+            resolve: {
+                mtile: function () {
+                    return $scope.mtiles[x + ',' + y + ',' + z];
+                },
+                mtiles: function () {
+                    return $scope.mtiles;
+                },
+                stiles: function () {
+                    return $scope.stiles;
+                },
+                sRotate: function () {
+                    return $scope.sRotate;
+                },
+                startTile: function () {
+                    return $scope.startTile;
+                },
+                nineTile: function () {
+                    var nine = []
+                    if ($scope.sRotate == 0) {
+                        nine[0] = $scope.mtiles[(x - 1) + ',' + (y - 1) + ',' + z];
+                        nine[1] = $scope.mtiles[(x) + ',' + (y - 1) + ',' + z];
+                        nine[2] = $scope.mtiles[(x + 1) + ',' + (y - 1) + ',' + z];
+                        nine[3] = $scope.mtiles[(x - 1) + ',' + (y) + ',' + z];
+                        nine[4] = $scope.mtiles[(x) + ',' + (y) + ',' + z];
+                        nine[5] = $scope.mtiles[(x + 1) + ',' + (y) + ',' + z];
+                        nine[6] = $scope.mtiles[(x - 1) + ',' + (y + 1) + ',' + z];
+                        nine[7] = $scope.mtiles[(x) + ',' + (y + 1) + ',' + z];
+                        nine[8] = $scope.mtiles[(x + 1) + ',' + (y + 1) + ',' + z];
+                    } else if ($scope.sRotate == 180) {
+                        nine[8] = $scope.mtiles[(x - 1) + ',' + (y - 1) + ',' + z];
+                        nine[7] = $scope.mtiles[(x) + ',' + (y - 1) + ',' + z];
+                        nine[6] = $scope.mtiles[(x + 1) + ',' + (y - 1) + ',' + z];
+                        nine[5] = $scope.mtiles[(x - 1) + ',' + (y) + ',' + z];
+                        nine[4] = $scope.mtiles[(x) + ',' + (y) + ',' + z];
+                        nine[3] = $scope.mtiles[(x + 1) + ',' + (y) + ',' + z];
+                        nine[2] = $scope.mtiles[(x - 1) + ',' + (y + 1) + ',' + z];
+                        nine[1] = $scope.mtiles[(x) + ',' + (y + 1) + ',' + z];
+                        nine[0] = $scope.mtiles[(x + 1) + ',' + (y + 1) + ',' + z];
+                    } else if ($scope.sRotate == 90) {
+                        nine[2] = $scope.mtiles[(x - 1) + ',' + (y - 1) + ',' + z];
+                        nine[5] = $scope.mtiles[(x) + ',' + (y - 1) + ',' + z];
+                        nine[8] = $scope.mtiles[(x + 1) + ',' + (y - 1) + ',' + z];
+                        nine[1] = $scope.mtiles[(x - 1) + ',' + (y) + ',' + z];
+                        nine[4] = $scope.mtiles[(x) + ',' + (y) + ',' + z];
+                        nine[7] = $scope.mtiles[(x + 1) + ',' + (y) + ',' + z];
+                        nine[0] = $scope.mtiles[(x - 1) + ',' + (y + 1) + ',' + z];
+                        nine[3] = $scope.mtiles[(x) + ',' + (y + 1) + ',' + z];
+                        nine[6] = $scope.mtiles[(x + 1) + ',' + (y + 1) + ',' + z];
+                    } else if ($scope.sRotate == 270) {
+                        nine[6] = $scope.mtiles[(x - 1) + ',' + (y - 1) + ',' + z];
+                        nine[3] = $scope.mtiles[(x) + ',' + (y - 1) + ',' + z];
+                        nine[0] = $scope.mtiles[(x + 1) + ',' + (y - 1) + ',' + z];
+                        nine[7] = $scope.mtiles[(x - 1) + ',' + (y) + ',' + z];
+                        nine[4] = $scope.mtiles[(x) + ',' + (y) + ',' + z];
+                        nine[1] = $scope.mtiles[(x + 1) + ',' + (y) + ',' + z];
+                        nine[8] = $scope.mtiles[(x - 1) + ',' + (y + 1) + ',' + z];
+                        nine[5] = $scope.mtiles[(x) + ',' + (y + 1) + ',' + z];
+                        nine[2] = $scope.mtiles[(x + 1) + ',' + (y + 1) + ',' + z];
+                    }
+                    return nine;
+                },
+                startTile2: function () {
+                    return $scope.startTile2;
+                },
+                isCheckPoint: function () {
+                    return $scope.isCheckPoint;
+                }
+            }
+        }).closed.then(function (result) {
+
+        });
+    };
+
+    // Signatures are written on a pad over the whole screen (signature_pad.js); signing again
+    // replaces the signature only once the new one is done
+    $scope.signing = null;
+    $scope.padEmpty = true;
+    var signPad = null;
+
+    $scope.openSign = function (index) {
+        $scope.signing = index;
+        document.documentElement.classList.add('rv-overlay-open');
+        $timeout(function () {
+            if (!signPad) {
+                signPad = new SignaturePad(document.getElementById('rv-pad'), function () {
+                    $scope.$applyAsync(function () {
+                        $scope.padEmpty = signPad.isEmpty();
+                    });
+                });
+            }
+            signPad.resize();
+            signPad.clear();
+        });
+    }
+
+    $scope.closeSign = function (save) {
+        if (save && !signPad.isEmpty()) $scope.signData[$scope.signing] = signPad.toDataURL();
+        $scope.signing = null;
+        document.documentElement.classList.remove('rv-overlay-open');
+    }
+
+    $scope.undoSign = function () {
+        signPad.undo();
+    }
+
+    $scope.eraseSign = function () {
+        signPad.clear();
+    }
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key != 'Escape') return;
+        if ($scope.signing !== null) $scope.$apply(function () { $scope.closeSign(false); });
+        else if ($scope.sendState == 'confirm' || $scope.sendState == 'error') $scope.$apply($scope.cancelSend);
+    });
+
+    $scope.signedCount = function () {
+        return $scope.signData.filter(function (data) {
+            return data;
+        }).length;
+    }
+
+    // Sending the run: the send button first leads to a missing signature, then to a sheet to check
+    // the run once more before it is final; the sheet shows the sending, an error to retry, the end
+    $scope.sendState = null;
+
+    $scope.send_sign = function () {
+        playSound(sClick);
+        var missing = $scope.signData.findIndex(function (data) {
+            return !data;
+        });
+        if (missing >= 0) {
+            var slot = document.querySelectorAll('.rv-sign-slot')[missing];
+            slot.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            slot.classList.remove('is-missing');
+            void slot.offsetWidth;
+            slot.classList.add('is-missing');
+            return;
+        }
+        $scope.sendState = 'confirm';
+        document.documentElement.classList.add('rv-overlay-open');
+    }
+
+    $scope.cancelSend = function () {
+        $scope.sendState = null;
+        document.documentElement.classList.remove('rv-overlay-open');
+    }
+
+    $scope.confirmSend = function () {
+        if ($scope.sendState == 'sending') return;
+        $scope.sendState = 'sending';
+        var run = {
+            comment: $scope.comment,
+            sign: {
+                captain: $scope.signData[0],
+                referee: $scope.signData[1],
+                referee_as: $scope.signData[2]
+            },
+            status: 4
+        };
+        $http.put("/api/runs/line/" + runId, run).then(function () {
+            playSound(sInfo);
+            $scope.sendState = 'done';
+        }, function (response) {
+            playSound(sError);
+            $scope.sendState = 'error';
+            console.log("Error: " + response.statusText);
+        });
+    }
+
+    $scope.leaveSign = function () {
+        if ($scope.getParam('return')) $scope.go($scope.getParam('return'));
+        else $scope.go("/line/" + $scope.competition_id + "/" + $scope.league);
+    }
+
+    function undefined2false(tmp) {
+        if (tmp) return true;
+        return false;
+    }
+
+    // Iframe
+    $scope.victimImgPath = function (victim) {
+        switch (victim.victimType) {
+            case 'LIVE':
+                return 'liveVictim.png';
+            case 'DEAD':
+                return 'deadVictim.png';
+        }
+    }
+
+    $scope.evacZoneColor = function (victim) {
+        switch (victim.zoneType) {
+            case 'GREEN':
+                return "#d6ffd6";
+            case 'RED':
+                return "#ffd6d6";
+        }
+    }
+
+    $scope.navColor = function (stat) {
+        if (stat == 2) return '#e74c3c';
+        if (stat == 3) return '#e67e22';
+        return '#7f8c8d';
+    }
+    // Iframe
+
+    var currentWidth = -1;
+
+
+    $(window).on('load resize', function () {
+        if (currentWidth == window.innerWidth) {
+            return;
+        }
+        currentWidth = window.innerWidth;
+        tile_size();
+
+    });
+
+    if (timeIncrement) {
+        // Increment timer in every second (setInterval)
+        setInterval(function () {
+            if ($scope.minutes < 8 && $scope.status == 2) {
+                if ($scope.seconds < 59) {
+                    $scope.seconds++;
+                } else {
+                    $scope.seconds = 0;
+                    if ($scope.minutes < 59) {
+                        $scope.minutes++;
+                    } else {
+                        $scope.minutes = 0;
+                    }
+                }
+            }
+            $scope.$apply();
+        }, 1000);
+    }
+
+
+}]).directive("tileLoadFinished", ['$timeout', function ($timeout) {
+    return function (scope, element, attrs) {
+        if (scope.$last) {
+            $timeout(function () {
+                tile_size();
+            }, 500);
+            $timeout(function () {
+                tile_size();
+            }, 1000);
+        }
+    }
+}]);
+
+
+app.directive('tile', function () {
+    return {
+        scope: {
+            tile: '='
+        },
+        restrict: 'E',
+        // The run view page shows the tiles its own way (template="view")
+        templateUrl: function (element, attrs) {
+            return attrs.template == 'view' ? '/templates/tile_view.html' : '/templates/tile.html';
+        },
+        link: function ($scope, element, attrs) {
+            // A tile of the evacuation zone, for what the run view shows over it (placeEvacZone)
+            $scope.$watch('tile', function (tile) {
+                element.toggleClass('is-evac', !!(tile && tile.tileType && isEvacImage(tile.tileType.image)));
+            });
+
+            $scope.tilerotate = function (tilerot) {
+                if (!tilerot) return $scope.$parent.sRotate;
+                var ro = tilerot + $scope.$parent.sRotate;
+                if (ro >= 360) ro -= 360;
+                else if (ro < 0) ro += 360;
+                return ro;
+            }
+            $scope.tileNumber = function (tile) {
+                $scope.tileN = 1;
+                var ret_txt = "";
+                if (!tile) return;
+
+                var possible = 0;
+
+                var count = function (list) {
+                    for (var i = 0; i < list.length; i++) {
+                        possible++;
+                    }
+                }
+                count(tile.scoredItems.gaps);
+                count(tile.scoredItems.seesaw);
+                count(tile.scoredItems.speedbumps);
+                count(tile.scoredItems.intersections);
+                count(tile.scoredItems.obstacles);
+                if (possible != 0) return;
+
+                for (var i = 0; i < tile.index.length; i++) {
+                    if (i != 0) ret_txt += ','
+                    ret_txt += tile.index[i] + 1;
+                }
+                return ret_txt;
+            }
+            $scope.checkpointNumber = function (tile) {
+                var ret_txt = "";
+                if (!tile) return;
+                for (var i = 0; i < tile.index.length; i++) {
+                    if (marker[tile.index[i]]) {
+                        if (ret_txt != "") ret_txt += '&'
+                        ret_txt += marker[tile.index[i]];
+                    } else {
+                        return ret_txt;
+                    }
+                }
+                return ret_txt;
+            }
+
+
+            $scope.isCheckPointTile = function (tile) {
+                if (!tile || tile.index.length == 0)
+                    return;
+                return $scope.$parent.isCheckPoint($scope.$parent.stiles[tile.index[0]]);
+            }
+
+            function isStart(tile) {
+                if (!tile)
+                    return;
+                return tile.x == $scope.$parent.startTile.x &&
+                    tile.y == $scope.$parent.startTile.y &&
+                    tile.z == $scope.$parent.startTile.z;
+            }
+
+            $scope.isStart = function (tile) {
+                if (!tile)
+                    return;
+                return tile.x == $scope.$parent.startTile.x &&
+                    tile.y == $scope.$parent.startTile.y &&
+                    tile.z == $scope.$parent.startTile.z;
+            }
+
+            $scope.evacTapeRot = function (tile) {
+                let rot = 0;
+                if (tile.evacEntrance >= 0) {
+                    rot = tile.evacEntrance;
+                } else if (tile.evacExit >= 0) {
+                    rot = tile.evacExit;
+                }
+                rot += $scope.$parent.sRotate;
+                return rot % 360;
+            }
+
+            $scope.tileStatus = function (tile) {
+                // If this is a non-existent tile
+                if ((!tile || tile.index.length == 0) && !isStart(tile))
+                    return;
+
+                // If this tile has no scoring elements we should just return empty string
+                if (tile.items.obstacles == 0 &&
+                    tile.items.speedbumps == 0 &&
+                    !tile.items.rampPoints &&
+                    tile.tileType.gaps == 0 &&
+                    tile.tileType.seesaw == 0 &&
+                    tile.tileType.intersections == 0 &&
+                    !$scope.isCheckPointTile(tile) && !isStart(tile)
+                ) {
+                    return;
+                }
+
+                // Number of successfully passed times
+                var successfully = 0;
+                // Number of times it is possible to pass this tile
+                var possible = 0;
+
+                for (let i = 0; i < tile.index.length; i++) {
+                    for (let j = 0; j < $scope.$parent.stiles[tile.index[i]].scoredItems.length; j++) {
+                        possible++;
+                        if ($scope.$parent.stiles[tile.index[i]].scoredItems[j].scored) {
+                            successfully++;
+                        }
+                    }
+                }
+
+                if ((possible > 0 && successfully == possible) ||
+                    (isStart(tile) && $scope.$parent.showedUp))
+                    return "done";
+                else if (successfully > 0)
+                    return "halfdone";
+                else if (possible > 0 || (isStart(tile) && !$scope.$parent.showedUp))
+                    return "undone";
+                else
+                    return "";
+            }
+
+            // Scoring status of the items on the tile alone, leaving out the checkpoint (run view map)
+            $scope.tileItemStatus = function (tile) {
+                if (!tile || tile.index.length == 0) return;
+                var max = $scope.tileMaxPoint(tile);
+                if (max == 0) return;
+                var points = $scope.tilePoint(tile);
+                return points == max ? 'done' : points > 0 ? 'halfdone' : 'undone';
+            }
+
+            // Points the tile gives when every item on it is scored (counted as in tilePoint)
+            $scope.tileMaxPoint = function (tile) {
+                var points = { gap: 10, intersection: 10, obstacle: 20, speedbump: 10, ramp: 10, seesaw: 20 };
+                var max = 0;
+                for (var i = 0; i < tile.index.length; i++) {
+                    for (let item of $scope.$parent.stiles[tile.index[i]].scoredItems) {
+                        if (!points[item.item]) continue;
+                        max += points[item.item] * (item.item == 'gap' || item.item == 'speedbump' ? 1 : item.count);
+                    }
+                }
+                return max;
+            }
+
+            $scope.tilePoint = function (tile) {
+                // If this is a non-existent tile
+                if ((!tile || tile.index.length == 0) && !isStart(tile))
+                    return -1;
+
+                // If this tile has no scoring elements we should just return empty string
+                if (tile.items.obstacles == 0 &&
+                    tile.items.speedbumps == 0 &&
+                    !tile.items.rampPoints &&
+                    tile.tileType.gaps == 0 &&
+                    tile.tileType.seesaw == 0 &&
+                    tile.tileType.intersections == 0
+                ) {
+                    return -1;
+                }
+
+                // Number of successfully passed times
+                var successfully = 0;
+
+                for (var i = 0; i < tile.index.length; i++) {
+                    for (let j = 0; j < $scope.$parent.stiles[tile.index[i]].scoredItems.length; j++) {
+                        switch ($scope.$parent.stiles[tile.index[i]].scoredItems[j].item) {
+                            case "gap":
+                                successfully += 10 * $scope.$parent.stiles[tile.index[i]].scoredItems[j].scored;
+                                break;
+                            case "intersection":
+                                successfully += 10 * $scope.$parent.stiles[tile.index[i]].scoredItems[j].scored * $scope.$parent.stiles[tile.index[i]].scoredItems[j].count;
+                                break;
+                            case "obstacle":
+                                successfully += 20 * $scope.$parent.stiles[tile.index[i]].scoredItems[j].scored * $scope.$parent.stiles[tile.index[i]].scoredItems[j].count;
+                                break;
+                            case "speedbump":
+                                successfully += 10 * $scope.$parent.stiles[tile.index[i]].scoredItems[j].scored;
+                                break;
+                            case "ramp":
+                                successfully += 10 * $scope.$parent.stiles[tile.index[i]].scoredItems[j].scored * $scope.$parent.stiles[tile.index[i]].scoredItems[j].count;
+                                break;
+                            case "seesaw":
+                                successfully += 20 * $scope.$parent.stiles[tile.index[i]].scoredItems[j].scored * $scope.$parent.stiles[tile.index[i]].scoredItems[j].count;
+                                break;
+                        }
+
+                    }
+                }
+                return successfully;
+            }
+
+            $scope.rotateRamp = function (direction) {
+                var ro;
+                switch (direction) {
+                    case "bottom":
+                        ro = 0;
+                        break;
+                    case "top":
+                        ro = 180;
+                        break;
+                    case "left":
+                        ro = 90;
+                        break;
+                    case "right":
+                        ro = 270;
+                        break;
+                }
+                ro += $scope.$parent.sRotate;
+                if (ro >= 360) ro -= 360;
+                else if (ro < 0) ro += 360;
+                switch (ro) {
+                    case 0:
+                        return;
+                    case 180:
+                        return "fa-rotate-180";
+                    case 90:
+                        return "fa-rotate-90";
+                    case 270:
+                        return "fa-rotate-270";
+                }
+            }
+
+        }
+    };
+});
+
+
+
+app.controller('ModalInstanceCtrl', ['$scope', '$uibModalInstance', 'mtile', 'mtiles', 'stiles', 'nineTile', 'sRotate', 'startTile', 'startTile2', 'isCheckPoint', function ($scope, $uibModalInstance, mtile, mtiles, stiles, nineTile, sRotate, startTile, startTile2, isCheckPoint) {
+    $scope.mtile = mtile;
+    $scope.sRotate = sRotate;
+    $scope.stiles = stiles;
+    $scope.nineTile = nineTile;
+    $scope.isCheckPoint = isCheckPoint;
+    $scope.words = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth"];
+    $scope.evacTapeRot = function (tile) {
+        let rot = 0;
+        if (tile.evacEntrance >= 0) {
+            rot = tile.evacEntrance;
+        } else if (tile.evacExit >= 0) {
+            rot = tile.evacExit;
+        }
+        rot += sRotate;
+        return rot % 360;
+    }
+    function dir2num(dir) {
+        switch (dir) {
+            case "top":
+                return 0;
+            case "right":
+                return 90;
+            case "bottom":
+                return 180;
+            case "left":
+                return 270;
+        }
+    }
+    $scope.next = [];
+    for (let i in mtile.next_dir) {
+        let nd = (dir2num(mtile.next_dir[i]) + sRotate) % 360;
+        switch (nd) {
+            case 0:
+                $scope.next.top = mtile.index[i];
+                break;
+            case 90:
+                $scope.next.right = mtile.index[i];
+                break;
+            case 180:
+                $scope.next.bottom = mtile.index[i];
+                break;
+            case 270:
+                $scope.next.left = mtile.index[i];
+                break;
+        }
+    }
+
+    $scope.dirStatus = function (tile) {
+        if (tile.scoredItems.length == 0) return;
+
+        // Number of successfully passed times
+        var successfully = 0;
+        // Number of times it is possible to pass this tile
+        var possible = 0
+        for (let i = 0; i < tile.scoredItems.length; i++) {
+            possible++;
+            if (tile.scoredItems[i].scored) {
+                successfully++;
+            }
+        }
+
+        if (possible > 0 && successfully == possible)
+            return "done";
+        else if (successfully > 0)
+            return "halfdone";
+        else if (possible > 0)
+            return "undone";
+        else
+            return "";
+    }
+
+    // For the list of passes on the run view page (line_view_modal_passes.html)
+    var ITEM_POINTS = { gap: 10, intersection: 10, obstacle: 20, speedbump: 10, ramp: 10, seesaw: 20 };
+    var ITEM_NAMES = {
+        gap: 'line.judge.js.gap', intersection: 'line.judge.js.intersection', obstacle: 'line.judge.js.obstacle',
+        speedbump: 'line.judge.js.bump', ramp: 'line.judge.js.ramp', seesaw: 'line.view.seesaw'
+    };
+    // Screen direction (0 top, 90 right, ...) the robot left the tile on each pass
+    $scope.passDir = (mtile.next_dir || []).map(function (dir) {
+        return (dir2num(dir) + sRotate) % 360;
+    });
+    // Passes leaving through each neighbour of the 3x3 grid (1 top, 3 left, 5 right, 7 bottom)
+    $scope.passesTo = { 1: [], 3: [], 5: [], 7: [] };
+    $scope.passDir.forEach(function (deg, pass) {
+        $scope.passesTo[{ 0: 1, 90: 5, 180: 7, 270: 3 }[deg]].push(pass);
+    });
+    $scope.itemName = function (item) {
+        return ITEM_NAMES[item.item];
+    }
+    // Points of an item when scored (gaps and speed bumps once, the others per count, as in tilePoint)
+    $scope.itemPoint = function (item) {
+        return ITEM_POINTS[item.item] * (item.item == 'gap' || item.item == 'speedbump' ? 1 : item.count);
+    }
+    $scope.passPoints = function (stile) {
+        return stile.scoredItems.reduce(function (sum, item) {
+            return sum + (ITEM_POINTS[item.item] && item.scored ? $scope.itemPoint(item) : 0);
+        }, 0);
+    }
+
+    $scope.tilerotate = function (tilerot) {
+        if (!tilerot) return $scope.sRotate;
+        var ro = tilerot + $scope.sRotate;
+        if (ro >= 360) ro -= 360;
+        else if (ro < 0) ro += 360;
+        return ro;
+    }
+
+    $scope.isCheckPointTile = function (tile) {
+        if (!tile || tile.index.length == 0)
+            return;
+        return $scope.isCheckPoint($scope.stiles[tile.index[0]]);
+    }
+
+    $scope.isStart = function (tile) {
+        if (!tile)
+            return;
+        return tile.x == startTile.x &&
+            tile.y == startTile.y &&
+            tile.z == startTile.z;
+    }
+
+    $scope.rotateRamp = function (direction) {
+        var ro;
+        switch (direction) {
+            case "bottom":
+                ro = 0;
+                break;
+            case "top":
+                ro = 180;
+                break;
+            case "left":
+                ro = 90;
+                break;
+            case "right":
+                ro = 270;
+                break;
+        }
+        ro += $scope.sRotate;
+        if (ro >= 360) ro -= 360;
+        else if (ro < 0) ro += 360;
+        switch (ro) {
+            case 0:
+                return;
+            case 180:
+                return "fa-rotate-180";
+            case 90:
+                return "fa-rotate-90";
+            case 270:
+                return "fa-rotate-270";
+        }
+    }
+    $scope.ok = function () {
+        playSound(sClick);
+        $uibModalInstance.close();
+    };
+
+}]);
+
+
+
+$(window).on('beforeunload', function () {
+    socket.emit('unsubscribe', 'runs/' + runId);
+});
+
+
+let lastTouch = 0;
+document.addEventListener('touchend', event => {
+    const now = window.performance.now();
+    if (now - lastTouch <= 500) {
+        event.preventDefault();
+    }
+    lastTouch = now;
+}, true);
+
+
+window.AudioContext = window.AudioContext || window.webkitAudioContext;
+var context = new AudioContext();
+
+var getAudioBuffer = function (url, fn) {
+    var req = new XMLHttpRequest();
+    req.responseType = 'arraybuffer';
+
+    req.onreadystatechange = function () {
+        if (req.readyState === 4) {
+            if (req.status === 0 || req.status === 200) {
+                context.decodeAudioData(req.response, function (buffer) {
+                    fn(buffer);
+                });
+            }
+        }
+    };
+
+    req.open('GET', url, true);
+    req.send('');
+};
+
+var playSound = function (buffer) {
+    var source = context.createBufferSource();
+    source.buffer = buffer;
+    source.connect(context.destination);
+    source.start(0);
+};
+
+var sClick, sError, sInfo;
+window.onload = function () {
+    getAudioBuffer('/sounds/click.mp3', function (buffer) {
+        sClick = buffer;
+    });
+    getAudioBuffer('/sounds/error.mp3', function (buffer) {
+        sError = buffer;
+    });
+    getAudioBuffer('/sounds/info.mp3', function (buffer) {
+        sInfo = buffer;
+    });
+};
+
+function tile_size() {
+    try {
+        var b = $('.tilearea');
+        //console.log('コンテンツ本体：' + b.height() + '×' + b.width());
+        //console.log('window：' + window.innerHeight);
+        if (rotate % 180 == 0) {
+            var tilesize_w = ($('.tilearea').width() - 2 * width) / width;
+            var tilesize_h = (window.innerHeight - 140) / length;
+        } else {
+            var tilesize_w = ($('.tilearea').width() - 2 * length) / length;
+            var tilesize_h = (window.innerHeight - 140) / width;
+        }
+
+        //console.log('tilesize_w:' + tilesize_w);
+        //console.log('tilesize_h:' + tilesize_h);
+        if (tilesize_h > tilesize_w) var tilesize = tilesize_w;
+        else var tilesize = tilesize_h;
+        $('tile').css('height', tilesize);
+        $('tile').css('width', tilesize);
+        $('.tile-image').css('height', tilesize);
+        $('.tile-image').css('width', tilesize);
+        $('.tile-font').css('font-size', tilesize - 10);
+        $('.tile-font-1-25').css('font-size', tilesize / 3);
+        $('.slot').css('height', tilesize);
+        $('.slot').css('width', tilesize);
+        $('.chnumtxt').css('font-size', tilesize / 6);
+        $('.tile-point').css('font-size', tilesize / 2 + "px");
+        if (rotate % 180 == 0) {
+            $('#wrapTile').css('width', (tilesize + 3) * width);
+        } else {
+            $('#wrapTile').css('width', (tilesize + 3) * length);
+        }
+
+        $('#card_area').css('height', (window.innerHeight - 130));
+        // The rescues shown over the evacuation zone (run view and sign pages, line_view.js)
+        if (typeof placeEvacZone === 'function') placeEvacZone();
+        if (b.height() == 0) setTimeout("tile_size()", 1000);
+    } catch (e) {
+        setTimeout("tile_size()", 1000);
+    }
+}

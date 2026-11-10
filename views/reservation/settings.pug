@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'ReservationSettings'
@@ -8,16 +8,16 @@ append scripts
   script.
     var competitionId = "#{id}"
     var resvId = "#{resvId}"
-  script(src='/javascripts/reservation/settings.js')
-  script(src='/components/quill/index.js')
-  script(src='/components/ngQuill/src/ng-quill.js')
-  script(src='/components/quill-image-resize-module/image-resize.min.js')
-  script(src='/components/quill-image-drop-and-paste/dist/quill-image-drop-and-paste.min.js')
+  script(src='/javascripts/reservation/settings.js?v=' + assetVersion)
+  script(src='/components/quill-dist/index.js?v=' + assetVersion)
+  script(src='/components/ngQuill/src/ng-quill.js?v=' + assetVersion)
+  script(src='/components/quill-image-resize-module/image-resize.min.js?v=' + assetVersion)
+  script(src='/components/quill-image-drop-and-paste/dist/quill-image-drop-and-paste.min.js?v=' + assetVersion)
 
 append css 
-  link(rel='stylesheet', href='/components/quill.snow/index.css')
+  link(rel='stylesheet', href='/components/quill.snow/index.css?v=' + assetVersion)
   style.
-    .dropdown-menu {
+    .ui-select-bootstrap .dropdown-menu {
       display: initial;
     }
     .btn-default {
@@ -32,103 +32,120 @@ append css
         background-color: initial;
     }
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId + '/reservation')") Reservation
-    span.breadcrumb-item.active Reservation Master
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId + '/reservation')") Reservation
+  span.breadcrumb-item.active Reservation Master
 
+block hero_title
+  | {{competition.name}}
 
-block content
-  .row
-    .col-md-1
-    .col-md-10
-      h1 {{"reservation.master" | translate}}
-      hr
+block hero_subtitle
+  | {{"reservation.master" | translate}}
+
+block hero_actions
+  button.btn-hero-action(type='button' ng-click='save()')
+    i.fas.fa-save
+    | {{"admin.settings.set" | translate}}
+
+block main_content
+  .modern-card.mb-4
+    .modern-card-header
+      i.fas.fa-globe.mr-2
+      | {{"reservation.name" | translate}} / {{"reservation.description" | translate}}
+    .modern-card-body
       ul.nav.nav-tabs.mb-3(role='tablist')
-          i.fas.fa-globe.fa-2x &nbsp;
-          li.nav-item(ng-repeat="i18n in resv.i18n track by $index", style="margin-right:5px;")
-              a.nav-link(ng-class="{active:$first}",ng-attr-id="{{'common_lang'+ $index + '_tab'}}", data-toggle='pill',ng-href="{{'#common_lang'+ $index}}", role='tab', aria-controls="{{'common_lang'+ $index}}", aria-selected='true') {{"language." + i18n.language | translate}}
+        li.nav-item(ng-repeat="i18n in resv.i18n track by $index" style="margin-right:5px;")
+          a.nav-link(ng-class="{active:$first}" ng-attr-id="{{'common_lang'+ $index + '_tab'}}" data-toggle='pill' ng-href="{{'#common_lang'+ $index}}" role='tab' aria-controls="{{'common_lang'+ $index}}" aria-selected='true') {{"language." + i18n.language | translate}}
       .tab-content
-          .tab-pane.fade.show(ng-class="{active:$first}", ng-attr-id="{{'common_lang'+ $index}}", role='tabpanel', aria-labelledby="'common_lang'+ $index + '_tab'", ng-repeat="i18n in resv.i18n track by $index")
-              .input-group(style="margin 0 auto;")
-                  .input-group-prepend
-                      span.input-group-text {{"reservation.name" | translate}}
-                  input.form-control(type='text', ng-model='i18n.name')
-              br
-              span(style="margin-top:10px;") {{"reservation.description" | translate}}
-              ng-quill-editor(ng-model="i18n.description")
-              br
-              .input-group(style="margin 0 auto;")
-                  .input-group-prepend
-                      span.input-group-text {{"reservation.myDescription" | translate}}
-                  input.form-control(type='text', ng-model='i18n.myDescription')
-      hr
-      h5 {{"reservation.deadline" | translate}}
-      input.form-control(type='datetime-local', step=1, ng-model='resv.deadline', ng-style="{backgroundColor: deadlineColour(resv.deadline)}")
-      br
-      h5 {{"reservation.open" | translate}}
-      select.custom-select(ng-model='resv.enable', ng-style="{backgroundColor: resv.enable ? '#bcffbc':'#ffcccc'}")
-        option(ng-value='true') {{"common.enable" | translate}}
-        option(ng-value='false') {{"common.disable" | translate}}  
-      br
-      br
-      h5 {{"reservation.distribution" | translate}}
-      .row(style="background-color:#ecf0f1;padding:20px 0;margin-left:10px;border-radius: 10px;")
-        .col-md-5
-          h6(style="text-align:center;") {{"reservation.league" | translate}}
-          ui-select(multiple='' ng-model='resv.league' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;')
-            ui-select-match(placeholder='Select league...') {{$item.name}}
-            ui-select-choices(repeat='league.id as league in leagues | filter: {id: $select.search}')
-              div(ng-bind-html='league.name')
-        .col-md-1.d-flex.align-items-center.text-center
-          h5 OR
-        .col-md-6
-          h6(style="text-align:center;") {{"reservation.team" | translate}}
-          ui-select(multiple='' ng-model='resv.team' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;')
-            ui-select-match(placeholder='Select team...') {{$item.code}} {{$item.name}}
-            ui-select-choices(repeat='team._id as team in teams | filter: {_id: $select.search}')
-              span {{team.teamCode}} {{team.name}}
-      br
-      h5 {{"document.editor.language" | translate}}
-      .input-group(style="width:100%;margin: 10px auto;", ng-repeat="lang in resv.languages")
-          .input-group-prepend
-              span.input-group-text {{"language." + lang.language | translate}}
-          select.custom-select(ng-model='lang.enable', ng-style="{backgroundColor: lang.enable ? '#bcffbc':'#ffcccc'}")
+        .tab-pane.fade.show(ng-class="{active:$first}" ng-attr-id="{{'common_lang'+ $index}}" role='tabpanel' aria-labelledby="'common_lang'+ $index + '_tab'" ng-repeat="i18n in resv.i18n track by $index")
+          .form-group
+            label.small.text-muted {{"reservation.name" | translate}}
+            input.form-control(type='text' ng-model='i18n.name')
+          .form-group
+            label.small.text-muted {{"reservation.description" | translate}}
+            ng-quill-editor(ng-model="i18n.description")
+          .form-group.mb-0
+            label.small.text-muted {{"reservation.myDescription" | translate}}
+            input.form-control(type='text' ng-model='i18n.myDescription')
+
+  .row
+    .col-lg-6
+      .modern-card.mb-4
+        .modern-card-header
+          i.fas.fa-sliders-h.mr-2
+          | {{"reservation.master" | translate}}
+        .modern-card-body
+          .form-group
+            label.small.text-muted {{"reservation.deadline" | translate}}
+            input.form-control(type='datetime-local' step=1 ng-model='resv.deadline' ng-style="{backgroundColor: deadlineColour(resv.deadline)}")
+          .form-group
+            label.small.text-muted {{"reservation.open" | translate}}
+            select.custom-select(ng-model='resv.enable' ng-style="{backgroundColor: resv.enable ? '#bcffbc':'#ffcccc'}")
               option(ng-value='true') {{"common.enable" | translate}}
               option(ng-value='false') {{"common.disable" | translate}}
-      
-      .text-center(style="margin-top:20px;")
-        button.btn.btn-success.btn-lg(type='button', ng-click='save()')
-          i.fas.fa-save &nbsp;{{"admin.settings.set" | translate}}
-      hr
-      table.custom(style="margin-bottom:20px;")
-        thead
+          label.small.text-muted {{"document.editor.language" | translate}}
+          .input-group.mb-2(ng-repeat="lang in resv.languages")
+            .input-group-prepend
+              span.input-group-text {{"language." + lang.language | translate}}
+            select.custom-select(ng-model='lang.enable' ng-style="{backgroundColor: lang.enable ? '#bcffbc':'#ffcccc'}")
+              option(ng-value='true') {{"common.enable" | translate}}
+              option(ng-value='false') {{"common.disable" | translate}}
+    .col-lg-6
+      .modern-card.mb-4
+        .modern-card-header
+          i.fas.fa-users.mr-2
+          | {{"reservation.distribution" | translate}}
+        .modern-card-body
+          .form-group
+            label.small.text-muted {{"reservation.league" | translate}}
+            ui-select(multiple='' ng-model='resv.league' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;')
+              ui-select-match(placeholder='Select league...') {{$item.name}}
+              ui-select-choices(repeat='league.id as league in leagues | filter: {id: $select.search}')
+                div(ng-bind-html='league.name')
+          .text-center.text-muted.font-weight-bold.my-2 OR
+          .form-group.mb-0
+            label.small.text-muted {{"reservation.team" | translate}}
+            ui-select(multiple='' ng-model='resv.team' theme='bootstrap' sortable='true' close-on-select='false' style='width: 100%;')
+              ui-select-match(placeholder='Select team...') {{$item.code}} {{$item.name}}
+              ui-select-choices(repeat='team._id as team in teams | filter: {_id: $select.search}')
+                span {{team.teamCode}} {{team.name}}
+
+  .modern-card.mb-4
+    .modern-card-header
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-clock.mr-2
+          | {{"reservation.start" | translate}}
+        button.btn.btn-sm.btn-premium-primary(type='button' ng-click='addSlot()')
+          i.fas.fa-plus
+    .modern-card-body.p-0
+      .table-responsive(style="padding: 0 1.5rem 1.5rem;")
+        table.table-modern.table-auto
+          thead
             tr
               th {{"reservation.start" | translate}}
               th {{"reservation.duration" | translate}}
               th {{"reservation.total" | translate}}
-              th {{"reservation.delete" | translate}}
-              
-        tbody
+              th(style="width: 90px;") {{"reservation.delete" | translate}}
+          tbody
             tr(ng-repeat="slot in resv.slot | orderBy: 'start' track by $index")
               td
-                input.form-control(type='datetime-local', step=1, ng-model='slot.start')
-              td 
-                input.form-control(type='number', ng-model='slot.duration')
-              td 
-                input.form-control(type='number', ng-model='slot.max')
-              td 
-                button.btn.btn-danger.btn-sm(type='button', ng-click='removeSlot(slot)')
-                  i.fas.fa-trash-alt
+                input.form-control.form-control-sm(type='datetime-local' step=1 ng-model='slot.start')
+              td
+                input.form-control.form-control-sm(type='number' ng-model='slot.duration')
+              td
+                input.form-control.form-control-sm(type='number' ng-model='slot.max')
+              td
+                .btn-table-group
+                  .btn-table-action.danger(ng-click='removeSlot(slot)' uib-tooltip='{{"common.delete" | translate}}')
+                    i.fas.fa-trash-alt
 
-      .text-center(style="margin-bottom:20px;")
-        button.btn.btn-primary(type='button', ng-click='addSlot()')
-            i.fas.fa-plus
-
-      
-      .text-center
-        button.btn.btn-success.btn-lg(type='button', ng-click='save()')
-          i.fas.fa-save &nbsp;{{"admin.settings.set" | translate}}
-      br
+  .text-center.mb-4
+    button.btn.btn-premium-primary(type='button' ng-click='save()')
+      i.fas.fa-save.mr-2
+      | {{"admin.settings.set" | translate}}

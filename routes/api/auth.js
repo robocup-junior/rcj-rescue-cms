@@ -9,6 +9,8 @@ const validator = require('validator');
 const passport = require('passport');
 const userdb = require('../../models/user');
 const logger = require('../../config/logger').mainLogger;
+const guessLimits = require('../../helper/guessLimits');
+const access = require('../../helper/access');
 
 //= =======================================================================
 //                          auth(mixed) Api endpoints
@@ -29,10 +31,14 @@ const logger = require('../../config/logger').mainLogger;
  *
  * @apiSuccess (400) {String}   msg Bottled message
  */
-router.post('/login', function (req, res) {
+router.post('/login', access.anyone('logging in, the guesses limited'), guessLimits.login, function (req, res) {
   const { username } = req.body;
   const { password } = req.body;
 
+  // (only names and passwords: an object here would be a query of the database)
+  if (typeof username !== 'string' || typeof password !== 'string') {
+    return res.status(400).send({ msg: 'Login failed' });
+  }
   if (!validator.isAscii(password)) {
     return res.status(400).send({ msg: 'Invalid characters' });
   }
@@ -55,20 +61,6 @@ router.post('/login', function (req, res) {
       return res.send({ msg: 'Login successful' });
     });
   })(req, res);
-});
-
-/**
- * @api {get} /auth/logout Request logout
- * @apiName GetLogout
- * @apiGroup Auth
- * @apiVersion 1.0.0
- * @apiDescription This function is used for logging out. This means you are cleared from the server, so even
- * though the cookie is left it doesnt know you.
- *
- */
-router.get('/logout', function (req, res) {
-  req.logout();
-  res.send({ msg: 'Logout successful', status: true });
 });
 
 module.exports = router;

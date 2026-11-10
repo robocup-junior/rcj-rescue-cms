@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'SignEditor'
@@ -7,7 +7,7 @@ block vars
 append scripts
   script.
     var sigId = "#{id}"
-  script(src="/javascripts/signage/editor.js")
+  script(src="/javascripts/signage/editor.js?v=" + assetVersion)
 
 append css
     style.
@@ -28,144 +28,145 @@ append css
             margin-left: .1rem;
             margin-right: .1rem;
         }
-  
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/signage/setting')") Signage setting
-    span.breadcrumb-item.active Signage editor
 
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/signage/setting')") Signage setting
+  span.breadcrumb-item.active Signage editor
 
-block content
-    h1 {{"signage.editor.title" | translate}}
-    div(style='margin-top:50px;')
-      .row
-        .col-md-12
-          .input-group
-              .input-group-prepend
-                span.input-group-text {{"signage.editor.name" | translate}}
-              input.form-control(type='text', ng-model='name')
-              .input-group-append
-                button.btn.btn-outline-success(type='button', ng-click='save()') {{"signage.editor.save" | translate}}
-              .input-group-append
-                  button.btn.btn-outline-warning(type='button', ng-click='saveAs()') {{"signage.editor.saveAs" | translate}}
-      br
-      div(style="text-align : center;")
-        button.btn.btn-warning(type='button', ng-click='refresh()')
-            i.fas.fa-retweet {{"signage.editor.refresh" | translate}}
-      br
-      br
-      .row
-        .col-md-12
-            h3 {{"signage.editor.content" | translate}}
-            div(style="text-align : center;")
-                .btn-group
-                    button.btn.btn-success(type='button',ng-click='addContents(0)')
-                        i.fas.fa-plus &nbsp;{{"signage.editor.add_blank" | translate}}
-                    button.btn.btn-success.dropdown-toggle.dropdown-toggle-split(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')
-                        span.sr-only Toggle Dropdown
-                    .dropdown-menu
-                        .dropdown-divide
-                            h6.dropdown-header {{"signage.editor.score" | translate}}
-                            li(ng-repeat="league in leagues")
-                                a.dropdown-item(href='#',ng-click="addRanking(0,league)") {{league}}
+block hero_title_container
+  .hero-title-container
+    input.hero-title-input(type="text" ng-model="name" placeholder='{{"signage.editor.name" | translate}}')
+    i.fas.fa-pen.title-edit-icon
 
-            div(style="margin: 20px;" ng-repeat="content in contents track by $index")
-                .card.mb-3(style='width: 100%;',ng-style="{backgroundColor: content.disable ? '#ccc':'#fff'}")
-                    .row.no-gutters
-                        .col-md-4
-                            iframe(ng-src="{{iframeUrl(content.url)}}",ng-if="content.type!=''",style="width:100%;height:100%;")
-                        .col-md-8
-                            .card-body
-                                .row
-                                    .col-6
-                                        h5.card-title No. {{$index+1}}
-                                    .col-6(style="text-align:right;")
-                                        h5
-                                            span.badge.badge-primary(ng-if="content.group == 0")  {{"signage.editor.all" | translate}}
-                                            span.badge.badge-secondary(ng-if="content.group == 1")  1
-                                            span.badge.badge-success(ng-if="content.group == 2")  2
-                                            span.badge.badge-danger(ng-if="content.group == 3")  3
-                                            span.badge.badge-warning(ng-if="content.group == 4")  4
-                                            span.badge.badge-info(ng-if="content.group == 5")  5
+block hero_subtitle
+  | {{"signage.editor.title" | translate}}
 
-                                .input-group(style="width:100%;margin: 10px;")
-                                    .input-group-prepend
-                                        span.input-group-text {{"signage.editor.type" | translate}}
-                                    select.custom-select(ng-model='content.type')
-                                        option(value='iframe') {{"signage.editor.iframe" | translate}}
-                                        option(value='img') {{"signage.editor.image" | translate}}
-                                        option(value='movie') {{"signage.editor.movie" | translate}}
-                                    .input-group-append
-                                        span.input-group-text {{"signage.editor.group" | translate}}
-                                    select.custom-select(ng-model='content.group')
-                                        option(value='0') {{"signage.editor.all" | translate}}
-                                        option(value='1') 1
-                                        option(value='2') 2
-                                        option(value='3') 3
-                                        option(value='4') 4
-                                        option(value='5') 5
-                                    .input-group-append
-                                        span.input-group-text {{"signage.editor.use" | translate}}
-                                    select.custom-select(ng-model='content.disable')
-                                        option(ng-value="false") {{"signage.editor.enable" | translate}}
-                                        option(ng-value="true") {{"signage.editor.disable" | translate}}
-                                .input-group(style="width:100%;margin: 10px", ng-show="durationShow(content)")
-                                    .input-group-prepend
-                                        span.input-group-text {{"signage.editor.duration" | translate}}
-                                    input.form-control(type='number', ng-model='content.duration')
-                                    .input-group-append
-                                        span.input-group-text {{"common.sec" | translate}}
-                                
-                                .input-group(style="width:100%;margin: 10px")
-                                    .input-group-prepend
-                                        span.input-group-text Repat
-                                    input.form-control(type='number', ng-model='content.repeat')
-                                    .input-group-append
-                                        span.input-group-text Only once
-                                    select.custom-select(ng-model='content.onlyOnce')
-                                        option(ng-value="false") {{"signage.editor.disable" | translate}}
-                                        option(ng-value="true") {{"signage.editor.enable" | translate}}
-                                    
-                                .input-group(style="width:100%;margin: 10px")
-                                    .input-group-prepend
-                                        span.input-group-text URL
-                                    input.form-control(type='text', ng-model='content.url')
-                                    .input-group-append(ng-show="content.type=='img' || content.type=='movie'")
-                                        button.btn.btn-outline-dark(type='button', ng-click='select($index)') {{"signage.editor.select" | translate}}
-                                div(style="text-align:center;")
-                                    button.btn.btn-danger(type='button', ng-click='removeContents($index)')
-                                        i.fas.fa-times {{"common.delete" | translate}}
+block hero_actions
+  button.btn-action-icon(type='button' ng-click='refresh()' uib-tooltip='{{"signage.editor.refresh" | translate}}' tooltip-placement="bottom")
+    i.fas.fa-retweet
+  button.btn-action-icon(type='button' ng-click='saveAs()' uib-tooltip='{{"signage.editor.saveAs" | translate}}' tooltip-placement="bottom")
+    i.fas.fa-copy
+  button.btn-hero-action(type='button' ng-click='save()')
+    i.fas.fa-save
+    | {{"signage.editor.save" | translate}}
 
+block main_content
+  h5.section-heading
+    i.fas.fa-film
+    | {{"signage.editor.content" | translate}}
+  .text-center.mb-3
+    .btn-group
+      button.btn.btn-sm.btn-success(type='button' ng-click='addContents(0)')
+        i.fas.fa-plus.mr-1
+        | {{"signage.editor.add_blank" | translate}}
+      button.btn.btn-sm.btn-success.dropdown-toggle.dropdown-toggle-split(type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
+        span.sr-only Toggle Dropdown
+      .dropdown-menu
+        h6.dropdown-header {{"signage.editor.score" | translate}}
+        li(ng-repeat="league in leagues")
+          a.dropdown-item(href='#' ng-click="addRanking(0,league)") {{league}}
 
-
-
-                div(style="text-align : center;margin:20px;")
-                    .btn-group
-                        button.btn.btn-success(type='button',ng-click='addContents($index+1)')
-                            i.fas.fa-plus &nbsp;{{"signage.editor.add_blank" | translate}}
-                        button.btn.btn-success.dropdown-toggle.dropdown-toggle-split(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')
-                            span.sr-only Toggle Dropdown
-                        .dropdown-menu
-                            .dropdown-divide
-                            h6.dropdown-header {{"signage.editor.score" | translate}}
-                            li(ng-repeat="league in leagues")
-                                a.dropdown-item(href='#',ng-click="addRanking($parent.$index+1,league)") {{league}}
-            br
-            br
-            br
-            h3 {{"signage.editor.news" | translate}}
-            div(style="text-align : center;")
-                button.btn.btn-success(type='button', ng-click='addNews(0)')
-                    i.fas.fa-plus
-            div(style="margin: 20px;width:calc(100%-50px);" ng-repeat="new in news track by $index")
-                .input-group(style="margin 0 auto;")
-                    .input-group-prepend
-                        span.input-group-text {{$index+1}}
-                    input.form-control(type='text', ng-model='new.txt' style="width:950px;")
+  div(ng-repeat="content in contents track by $index")
+    .modern-card.mb-3(ng-style="content.disable && {'opacity': 0.6}")
+      .modern-card-header
+        .d-flex.justify-content-between.align-items-center.w-100
+          div
+            span.badge.badge-pill.badge-dark.mr-2 No. {{$index+1}}
+            span.badge.badge-primary(ng-if="content.group == 0") {{"signage.editor.all" | translate}}
+            span.badge.badge-secondary(ng-if="content.group == 1") 1
+            span.badge.badge-success(ng-if="content.group == 2") 2
+            span.badge.badge-danger(ng-if="content.group == 3") 3
+            span.badge.badge-warning(ng-if="content.group == 4") 4
+            span.badge.badge-info(ng-if="content.group == 5") 5
+          .btn-table-group
+            .btn-table-action.danger(ng-click='removeContents($index)' uib-tooltip='{{"common.delete" | translate}}')
+              i.fas.fa-trash-alt
+      .modern-card-body
+        .row
+          .col-md-4.mb-3
+            iframe(ng-src="{{iframeUrl(content.url)}}" ng-if="content.type!=''" style="width:100%; height:100%; min-height: 180px; border: 1px solid #e2e8f0; border-radius: 8px;")
+          .col-md-8
+            .row
+              .col-md-4
+                .form-group
+                  label.small.text-muted {{"signage.editor.type" | translate}}
+                  select.custom-select(ng-model='content.type')
+                    option(value='iframe') {{"signage.editor.iframe" | translate}}
+                    option(value='img') {{"signage.editor.image" | translate}}
+                    option(value='movie') {{"signage.editor.movie" | translate}}
+              .col-md-4
+                .form-group
+                  label.small.text-muted {{"signage.editor.group" | translate}}
+                  select.custom-select(ng-model='content.group')
+                    option(value='0') {{"signage.editor.all" | translate}}
+                    option(value='1') 1
+                    option(value='2') 2
+                    option(value='3') 3
+                    option(value='4') 4
+                    option(value='5') 5
+              .col-md-4
+                .form-group
+                  label.small.text-muted {{"signage.editor.use" | translate}}
+                  select.custom-select(ng-model='content.disable')
+                    option(ng-value="false") {{"signage.editor.enable" | translate}}
+                    option(ng-value="true") {{"signage.editor.disable" | translate}}
+            .row
+              .col-md-4(ng-show="durationShow(content)")
+                .form-group
+                  label.small.text-muted {{"signage.editor.duration" | translate}}
+                  .input-group
+                    input.form-control(type='number' ng-model='content.duration')
                     .input-group-append
-                        button.btn.btn-danger(type='button', ng-click='removeNews($index)')
-                            i.fas.fa-times
-                div(style="text-align : center;margin:20px;")
-                    button.btn.btn-success(type='button', ng-click='addNews($index+1)')
-                        i.fas.fa-plus
+                      span.input-group-text {{"common.sec" | translate}}
+              .col-md-4
+                .form-group
+                  label.small.text-muted Repeat
+                  input.form-control(type='number' ng-model='content.repeat')
+              .col-md-4
+                .form-group
+                  label.small.text-muted Only once
+                  select.custom-select(ng-model='content.onlyOnce')
+                    option(ng-value="false") {{"signage.editor.disable" | translate}}
+                    option(ng-value="true") {{"signage.editor.enable" | translate}}
+            .form-group.mb-0
+              label.small.text-muted URL
+              .input-group
+                input.form-control(type='text' ng-model='content.url')
+                .input-group-append(ng-show="content.type=='img' || content.type=='movie'")
+                  button.btn.btn-outline-dark(type='button' ng-click='select($index)') {{"signage.editor.select" | translate}}
+
+    .text-center.mb-3
+      .btn-group
+        button.btn.btn-sm.btn-success(type='button' ng-click='addContents($index+1)')
+          i.fas.fa-plus.mr-1
+          | {{"signage.editor.add_blank" | translate}}
+        button.btn.btn-sm.btn-success.dropdown-toggle.dropdown-toggle-split(type='button' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false')
+          span.sr-only Toggle Dropdown
+        .dropdown-menu
+          h6.dropdown-header {{"signage.editor.score" | translate}}
+          li(ng-repeat="league in leagues")
+            a.dropdown-item(href='#' ng-click="addRanking($parent.$index+1,league)") {{league}}
+
+  h5.section-heading.mt-4
+    i.fas.fa-newspaper
+    | {{"signage.editor.news" | translate}}
+  .modern-card.mb-4
+    .modern-card-body
+      .text-center.mb-3
+        button.btn.btn-sm.btn-outline-success(type='button' ng-click='addNews(0)')
+          i.fas.fa-plus
+      div(ng-repeat="new in news track by $index")
+        .input-group
+          .input-group-prepend
+            span.input-group-text {{$index+1}}
+          input.form-control(type='text' ng-model='new.txt')
+          .input-group-append
+            button.btn.btn-outline-danger(type='button' ng-click='removeNews($index)')
+              i.fas.fa-trash-alt
+        .text-center.my-2
+          button.btn.btn-sm.btn-outline-success(type='button' ng-click='addNews($index+1)')
+            i.fas.fa-plus

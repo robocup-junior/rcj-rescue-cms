@@ -17,6 +17,7 @@ const surveyDb = require('../models/survey');
 const userdb = require('../models/user');
 const base_tmp_path = `${__dirname}/../tmp/`;
 const { ACCESSLEVELS } = require('../models/user');
+const auth = require('../helper/authLevels');
 const logger = require('../config/logger').mainLogger;
 const glob = require('glob');
 const path = require('path')
@@ -28,6 +29,8 @@ const b_keep = process.env.BACKUP_KEEP_VERSION;
 
 const backupQueue = new Queue('backup', {
   redis: {port: process.env.REDIS_PORT, host: process.env.REDIS_HOST},
+  // The queues of another app on the same Redis (the e2e tests') kept apart
+  prefix: process.env.QUEUE_PREFIX || 'bull',
   limiter: {
     max: 1,
     duration: 10000
@@ -246,7 +249,7 @@ function cleanup(job){
         }   
       });
     }
-  }else if(job.name = 'restore'){
+  }else if(job.name == 'restore'){
     rimraf(`./tmp/uploads/${job.data.folder}`, function (err) {
     });
     fs.unlink(`./tmp/uploads/${job.data.folder}.zip`, function (err) {
@@ -256,6 +259,11 @@ function cleanup(job){
 
 backupQueue.on('completed', function(job, result) {
   cleanup(job);
+});
+
+// A restore refused leaves nothing of what was given behind either
+backupQueue.on('failed', function(job) {
+  if (job.name == 'restore') cleanup(job);
 });
 
 backupQueue.on('failed', function(job, err) {
@@ -278,7 +286,7 @@ backupQueue.process('restore', function(job, done){
     done(new Error(error));
   });
 
-  extract.on('end', () => {
+  extract.on('end', async () => {
     job.progress(50);
     let jobProgress = 50;
 
@@ -302,6 +310,15 @@ backupQueue.process('restore', function(job, done){
           'utf8'
         )
       );
+      // A competition of the backup's own, which the user may restore: a new one, or one the user
+      // administers (its id goes into the folders' paths as well)
+      const competitionId = String(competition[0] && competition[0]._id);
+      if (!/^[0-9a-f]{24}$/.test(competitionId)) {
+        return done(new Error('The backup has no competition'));
+      }
+      if (await competitiondb.competition.exists({ _id: competitionId }) && !auth.authCompetition(user, competitionId, ACCESSLEVELS.ADMIN)) {
+        return done(new Error('The competition of the backup is one you do not administer'));
+      }
       job.update({
         folder,
         user,
@@ -337,6 +354,19 @@ backupQueue.process('restore', function(job, done){
           );
           const bulkOps = await json.reduce(async (accumulator, currentValue) => {
             accumulator = await accumulator;
+            if (fileName != "users") {
+              // Only the competition's own, and nothing of another competition taken over
+              if (String(currentValue.competition) !== competitionId) return accumulator;
+              const stored = await Model.findById(currentValue._id).select('competition').lean().exec();
+              if (stored && String(stored.competition) !== competitionId) return accumulator;
+            } else {
+              // The users of the competition, with their rights in it only, and none made a super admin
+              currentValue.competitions = (currentValue.competitions || []).filter((c) => String(c.id) === competitionId);
+              currentValue.superDuperAdmin = false;
+              // Not over an account of another name that has its id
+              const sameId = await userdb.user.findById(currentValue._id).select('username').lean().exec();
+              if (sameId && sameId.username !== currentValue.username) return accumulator;
+            }
             if (fileName == "users") {
               let exist = await userdb.user.findOne({username: currentValue.username}).exec();
               if (exist && exist._id.toString() == currentValue._id) {
@@ -357,7 +387,7 @@ backupQueue.process('restore', function(job, done){
                   }
                 } else {
                   console.log(`Added new competition access level.`);
-                  exist.competitions.push(currentValue.competitions[0]);
+                  if (currentValue.competitions[0]) exist.competitions.push(currentValue.competitions[0]);
                 }
                 accumulator.push(
                   {
@@ -388,6 +418,8 @@ backupQueue.process('restore', function(job, done){
             return accumulator;
           }, []);
 
+          // (all of it left out, there is nothing to write)
+          if (bulkOps.length == 0) bulkOps.push({ deleteOne: { filter: { _id: null } } });
           Model.bulkWrite(bulkOps,
             function (err) {
               if (err) {

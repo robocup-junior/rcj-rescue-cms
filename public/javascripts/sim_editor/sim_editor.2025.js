@@ -32,11 +32,6 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
 
     $scope.competitionId = competitionId;
     $scope.mapId = mapId;
-    $translate('admin.simMapEditor.import').then(function (val) {
-        $("#select").fileinput({'showUpload':false, 'showPreview':false, 'showRemove':false, 'showCancel':false  ,'msgPlaceholder': val,allowedFileExtensions: ['json'] , msgValidationError: "ERROR"});
-    }, function (translationId) {
-        // = translationId;
-    });
 
     let trans = [];
     function loadTranslation(tag){
@@ -69,6 +64,16 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
     $scope.roomColors = ["red", "green", "blue"]
     $scope.area4Room = 0
     $scope.room4VicTypes = [];
+    // Wall token types a custom room 4 stamp can carry; idx is the scoring type of createArea4Victims
+    $scope.room4StampTypes = [
+        { idx: 0, kind: 'victim', symbol: 'H', color: '#1e293b', name: 'admin.simMapEditor.room4Creator.types.harmed' },
+        { idx: 1, kind: 'victim', symbol: 'S', color: '#1e293b', name: 'admin.simMapEditor.room4Creator.types.stable' },
+        { idx: 2, kind: 'victim', symbol: 'U', color: '#1e293b', name: 'admin.simMapEditor.room4Creator.types.unharmed' },
+        { idx: 5, kind: 'hazmat', symbol: 'F', color: '#d32f2f', name: 'admin.simMapEditor.ctF' },
+        { idx: 3, kind: 'hazmat', symbol: 'P', color: '#6a1b9a', name: 'admin.simMapEditor.ctP' },
+        { idx: 6, kind: 'hazmat', symbol: 'C', color: '#1565c0', name: 'admin.simMapEditor.ctC' },
+        { idx: 4, kind: 'hazmat', symbol: 'O', color: '#e65100', name: 'admin.simMapEditor.ctO' }
+    ];
     $scope.area4 = [
         {value: "None", type: 0},
         {value: "Custom Room", type: 1},
@@ -147,7 +152,6 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
     ]
 
     // Custom room 4 setup
-    let useCustomRoom4 = document.getElementById("showRoom4Canvas");
     $scope.room4Img = new Image;
     /*let imgElement = document.getElementById("inputImg");
     let inputElement = document.getElementById("selectImg");
@@ -1022,6 +1026,7 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
             area4Room      : $scope.area4Room,
             room4CanvasSave: $scope.room4CanvasSave,
             room4VicTypes  : $scope.room4VicTypes,
+            connCheckOff   : !!$scope.connCheckOff,
         };
          var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(map))
          var downloadLink = document.createElement('a')
@@ -1038,6 +1043,28 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
                 type: 'error',
                 title: 'Oops...',
                 text: trans['startTileError'],
+            });
+            return;
+        }
+        const area4Problems = presetProblems();
+        if (area4Problems.length) {
+            Swal.fire({
+                type: 'error',
+                title: $translate.instant('admin.simMapEditor.area4Check.exportTitle'),
+                html: '<ul style="text-align:left">' + area4Problems.map(function (key) {
+                    return '<li>' + $translate.instant('admin.simMapEditor.area4Check.' + key) + '</li>';
+                }).join('') + '</ul>'
+            });
+            return;
+        }
+        const roomProblems = $scope.connCheckOff ? [] : connectionProblems();
+        if (roomProblems.length) {
+            Swal.fire({
+                type: 'error',
+                title: $translate.instant('admin.simMapEditor.connCheck.exportTitle'),
+                html: '<ul style="text-align:left">' + roomProblems.map(function (text) {
+                    return '<li>' + text + '</li>';
+                }).join('') + '</ul>'
             });
             return;
         }
@@ -2337,8 +2364,12 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
 
                 $scope.roomTiles       = data.roomTiles;
                 $scope.area4Room       = data.area4Room;
-                $scope.room4CanvasSave = data.room4CanvasSave;
-                $scope.room4Img.src = $scope.room4CanvasSave;
+                $scope.connCheckOff    = !!data.connCheckOff;
+                $scope.room4CanvasSave = data.room4CanvasSave || null;
+                // A map without a custom room 4 picture leaves the image empty: assigning undefined
+                // to src would request "<page>/undefined" from the server
+                if ($scope.room4CanvasSave) $scope.room4Img.src = $scope.room4CanvasSave;
+                else $scope.room4Img = new Image();
                 if (data.room4VicTypes != undefined)
                     $scope.room4VicTypes = data.room4VicTypes;
 
@@ -2354,6 +2385,146 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
             reader.readAsText(fileData);
         }, false);
     }
+
+    // ---- Inserting and removing rows / columns (as in the Maze editor) ----------------------
+    // Grid indices: tiles are odd, the walls between them even. Everything keyed by position
+    // moves with the grid: cells, the room tiles, the start tile and the custom room 4 picture.
+    function gridKeyShift(key, axis, from, amount) {
+        const p = key.split(',').map(Number);
+        const i = axis === 'x' ? 0 : 1;
+        if (p[i] < from) return key;
+        p[i] += amount;
+        return p.join(',');
+    }
+
+    function room4Box() {
+        const tiles = (($scope.roomTiles && $scope.roomTiles[2]) || []).map(function (k) { return k.split(',').map(Number); })
+            .filter(function (p) { return p[2] === 0; });
+        if (!tiles.length) return null;
+        const xs = tiles.map(function (p) { return (p[0] - 1) / 2; }), ys = tiles.map(function (p) { return (p[1] - 1) / 2; });
+        return { minX: Math.min.apply(null, xs), maxX: Math.max.apply(null, xs), minY: Math.min.apply(null, ys), maxY: Math.max.apply(null, ys) };
+    }
+
+    // The custom room 4 picture covers the room 4 box; a tile column / row added inside the box
+    // adds a blank strip to it, one removed inside it cuts its strip out
+    function adjustRoom4Picture(axis, tileIndex, insert, box) {
+        if (!$scope.room4CanvasSave || !box) return;
+        const lo = axis === 'x' ? box.minX : box.minY, hi = axis === 'x' ? box.maxX : box.maxY;
+        if (insert ? !(tileIndex > lo && tileIndex <= hi) : !(tileIndex >= lo && tileIndex <= hi)) return;
+        const tiles = hi - lo + 1;
+        const img = new Image();
+        img.onload = function () {
+            const along = axis === 'x' ? img.width : img.height;
+            const cut = function (t) { return Math.round(t * along / tiles); };
+            const at = cut(tileIndex - lo), strip = cut(1);
+            const c = document.createElement('canvas');
+            c.width = axis === 'x' ? img.width + (insert ? strip : -(cut(tileIndex - lo + 1) - at)) : img.width;
+            c.height = axis === 'y' ? img.height + (insert ? strip : -(cut(tileIndex - lo + 1) - at)) : img.height;
+            const x = c.getContext('2d');
+            x.imageSmoothingEnabled = false;
+            x.fillStyle = '#FFFFFF';
+            x.fillRect(0, 0, c.width, c.height);
+            const end = insert ? at : cut(tileIndex - lo + 1);
+            if (axis === 'x') {
+                x.drawImage(img, 0, 0, at, img.height, 0, 0, at, img.height);
+                x.drawImage(img, end, 0, img.width - end, img.height, insert ? at + strip : at, 0, img.width - end, img.height);
+            } else {
+                x.drawImage(img, 0, 0, img.width, at, 0, 0, img.width, at);
+                x.drawImage(img, 0, end, img.width, img.height - end, 0, insert ? at + strip : at, img.width, img.height - end);
+            }
+            $scope.$applyAsync(function () {
+                $scope.room4CanvasSave = c.toDataURL('image/png');
+                $scope.room4Img.src = $scope.room4CanvasSave;
+            });
+        };
+        img.src = $scope.room4CanvasSave;
+    }
+
+    function insertLine(axis, gridIndex) {
+        const size = axis === 'x' ? $scope.width : $scope.length;
+        const atEnd = gridIndex >= 2 * size;
+        // at the far end the border walls move out with the new edge
+        const from = atEnd ? gridIndex : gridIndex + 1;
+        const box = room4Box();
+        adjustRoom4Picture(axis, gridIndex / 2, true, box);
+
+        const cells = {};
+        Object.keys($scope.cells).forEach(function (key) {
+            cells[gridKeyShift(key, axis, from, 2)] = $scope.cells[key];
+        });
+        const fresh = gridIndex + 1;           // the new tile line
+        const other = axis === 'x' ? $scope.length : $scope.width;
+        const keyAt = function (a, b) { return axis === 'x' ? a + ',' + b + ',0' : b + ',' + a + ',0'; };
+        // walls that run across the new line (the outer walls among them) are carried over it
+        for (let b = 0; b <= 2 * other; b += 2) {
+            const before = cells[keyAt(fresh - 2, b)], after = cells[keyAt(fresh + 2, b)];
+            const wallBefore = gridIndex > 0 && before && before.isWall;
+            const wallAfter = !atEnd && after && after.isWall;
+            if ((wallBefore && wallAfter) || (gridIndex === 0 && wallAfter) || (atEnd && wallBefore)) {
+                cells[keyAt(fresh, b)] = { isWall: true, halfWall: 0 };
+            }
+        }
+        $scope.cells = cells;
+
+        // rooms: shift, and a new tile between two tiles of the same room joins it
+        const rooms = ($scope.roomTiles || []).map(function (list) {
+            return (list || []).map(function (key) { return gridKeyShift(key, axis, from, 2); });
+        });
+        if (gridIndex > 0 && !atEnd) {
+            for (let b = 1; b < 2 * other; b += 2) {
+                rooms.forEach(function (list) {
+                    if (list.indexOf(keyAt(fresh - 2, b)) > -1 && list.indexOf(keyAt(fresh + 2, b)) > -1) list.push(keyAt(fresh, b));
+                });
+            }
+        }
+        $scope.roomTiles = rooms;
+
+        const st = $scope.startTile;
+        if (st && (axis === 'x' ? st.x : st.y) >= from) {
+            if (axis === 'x') st.x += 2; else st.y += 2;
+        }
+        if (axis === 'x') $scope.width++; else $scope.length++;
+        $scope.recalculateLinear();
+    }
+
+    function removeLine(axis, gridIndex) {
+        const size = axis === 'x' ? $scope.width : $scope.length;
+        if (size <= 1) return;
+        const atEnd = gridIndex >= 2 * size - 1;
+        // the tile line goes with the wall line after it; at the far end with the one before it,
+        // so the border walls stay
+        const gone = atEnd ? [gridIndex - 1, gridIndex] : [gridIndex, gridIndex + 1];
+        const box = room4Box();
+        adjustRoom4Picture(axis, (gridIndex - 1) / 2, false, box);
+
+        const i = axis === 'x' ? 0 : 1;
+        const cells = {};
+        Object.keys($scope.cells).forEach(function (key) {
+            const p = key.split(',').map(Number);
+            if (gone.indexOf(p[i]) > -1) return;
+            cells[gridKeyShift(key, axis, gone[1] + 1, -2)] = $scope.cells[key];
+        });
+        $scope.cells = cells;
+        $scope.roomTiles = ($scope.roomTiles || []).map(function (list) {
+            return (list || []).filter(function (key) { return Number(key.split(',')[i]) !== gridIndex; })
+                .map(function (key) { return gridKeyShift(key, axis, gone[1] + 1, -2); });
+        });
+        const st = $scope.startTile;
+        if (st) {
+            const v = axis === 'x' ? st.x : st.y;
+            if (v >= gridIndex) {
+                const nv = Math.max(1, v - 2);
+                if (axis === 'x') st.x = nv; else st.y = nv;
+            }
+        }
+        if (axis === 'x') $scope.width--; else $scope.length--;
+        $scope.recalculateLinear();
+    }
+
+    $scope.addColumn = function (gridX) { insertLine('x', gridX); };
+    $scope.removeColumn = function (gridX) { removeLine('x', gridX); };
+    $scope.addRow = function (gridY) { insertLine('y', gridY); };
+    $scope.removeRow = function (gridY) { removeLine('y', gridY); };
 
     $scope.selectRoom2 = function() {
         if ($scope.selectRoom != 0) {
@@ -2382,15 +2553,538 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
         }
     }
 
-    $scope.updateRoom4Pick = function() {
-        if ($scope.area4Room.value == "Custom Room") {
-            //inputElement.style.display = "inline";
-            useCustomRoom4.style.display = "inline";
+    // The "Create Custom Room 4" button is shown by the page (ng-show) when the custom room is picked
+    $scope.updateRoom4Pick = function() {};
+
+    // Starts as "None" (this used to be done by ng-init on the old select)
+    if (!$scope.area4Room) $scope.area4Room = $scope.area4[0];
+
+    $scope.pickArea4Room = function(room) {
+        if (!$scope.presetAvailable(room)) return;
+        $scope.area4Room = room;
+    };
+
+    $scope.isArea4Room = function(room) {
+        return !!$scope.area4Room && $scope.area4Room.value === room.value;
+    };
+
+    // ---- Room 4 presets: where they can go -------------------------------------------------
+    // A preset (Erebus Area4_1 / Area4_2) has a fixed size in tiles. The world export anchors it on
+    // the 1<->4 passage (green) and turns it so the 3<->4 passage (red) lands on the preset's own
+    // entrance (room1Tile / room3Tile). The checks below use the same geometry as the export, so
+    // the editor only offers a preset that the export will really place on the room 4 area.
+    const PASSAGE_14 = '#08D508';
+    const PASSAGE_34 = '#e71a1a';
+
+    function rotateTiles(v, dir) {   // same as vectorRotate in the world export
+        switch (dir) {
+            case 0: return [v[0], v[1]];
+            case 1: return [-v[1], v[0]];
+            case 2: return [-v[0], -v[1]];
+            case 3: return [v[1], -v[0]];
         }
-        else {
-            //inputElement.style.display = "none";
-            useCustomRoom4.style.display = "none";
+    }
+
+    // Tiles covered by a preset whose tile 0 is at `origin`, turned by `dir`. Erebus places tiles and
+    // the Area4 protos by tile centre and turns Area4 about the centre of its tile 0, so tile indices
+    // rotate like points (as in the export).
+    function presetBounds(preset, origin, dir) {
+        const corners = [[0, 0], [preset.width - 1, 0], [0, preset.height - 1], [preset.width - 1, preset.height - 1]]
+            .map(function (c) { return rotateTiles(c, dir); });
+        const xs = corners.map(function (c) { return c[0]; });
+        const ys = corners.map(function (c) { return c[1]; });
+        return {
+            minX: origin[0] + Math.min.apply(null, xs), maxX: origin[0] + Math.max.apply(null, xs),
+            minY: origin[1] + Math.min.apply(null, ys), maxY: origin[1] + Math.max.apply(null, ys)
+        };
+    }
+
+    function room4Region() {
+        const tiles = ($scope.roomTiles && $scope.roomTiles[2]) || [];
+        if (!tiles.length) return null;
+        const pts = tiles.map(function (key) {
+            const p = key.split(',').map(Number);
+            return [(p[0] - 1) / 2, (p[1] - 1) / 2];
+        });
+        const xs = pts.map(function (p) { return p[0]; });
+        const ys = pts.map(function (p) { return p[1]; });
+        const r = { minX: Math.min.apply(null, xs), maxX: Math.max.apply(null, xs), minY: Math.min.apply(null, ys), maxY: Math.max.apply(null, ys) };
+        r.w = r.maxX - r.minX + 1;
+        r.h = r.maxY - r.minY + 1;
+        r.isRect = new Set(pts.map(function (p) { return p[0] + ',' + p[1]; })).size === r.w * r.h;
+        return r;
+    }
+
+    function passageTiles(color) {
+        const found = [];
+        Object.keys($scope.cells).forEach(function (key) {
+            const cell = $scope.cells[key];
+            if (!cell.isTile || !cell.tile || cell.tile.color !== color) return;
+            const p = key.split(',').map(Number);
+            found.push([(p[0] - 1) / 2, (p[1] - 1) / 2]);
+        });
+        return found;
+    }
+
+    function samePoint(a, b) {
+        return a[0] === b[0] && a[1] === b[1];
+    }
+
+    function inMap(p) {
+        return p[0] >= 0 && p[1] >= 0 && p[0] < $scope.width && p[1] < $scope.length;
+    }
+
+    // Everything the page needs about one preset: can it be chosen, does it fit, where it goes
+    function presetStatus(preset, region, greens, reds) {
+        const status = { size: preset.width + ' × ' + preset.height, sizeOk: false, ok: false, issues: [], candidates: [], placement: null };
+        if (!region) { status.issues.push('noRegion'); return status; }
+        status.region = region.w + ' × ' + region.h;
+        if (!region.isRect) { status.issues.push('notRect'); return status; }
+        status.sizeOk = (region.w === preset.width && region.h === preset.height) || (region.w === preset.height && region.h === preset.width);
+        if (!status.sizeOk) { status.issues.push('wrongSize'); return status; }
+
+        // Orientations whose footprint is exactly the room 4 area, and the passage tiles they need
+        for (let dir = 0; dir < 4; dir++) {
+            const b = presetBounds(preset, [0, 0], dir);
+            if (b.maxX - b.minX + 1 !== region.w || b.maxY - b.minY + 1 !== region.h) continue;
+            const origin = [region.minX - b.minX, region.minY - b.minY];
+            const green = [origin[0] + rotateTiles(preset.room1Tile, dir)[0], origin[1] + rotateTiles(preset.room1Tile, dir)[1]];
+            const red = [origin[0] + rotateTiles(preset.room3Tile, dir)[0], origin[1] + rotateTiles(preset.room3Tile, dir)[1]];
+            if (!inMap(green) || !inMap(red)) continue;
+            status.candidates.push({ dir: dir, origin: origin, green: green, red: red });
         }
+        if (!status.candidates.length) { status.issues.push('noRoomForPassages'); return status; }
+
+        if (greens.length !== 1) status.issues.push(greens.length ? 'manyGreen' : 'noGreen');
+        if (reds.length !== 1) status.issues.push(reds.length ? 'manyRed' : 'noRed');
+        if (greens.length === 1 && reds.length === 1) {
+            const match = status.candidates.find(function (c) { return samePoint(c.green, greens[0]) && samePoint(c.red, reds[0]); });
+            if (match) status.placement = match;
+            else status.issues.push('passageMismatch');
+        }
+        status.ok = !!status.placement;
+        return status;
+    }
+
+    // Recomputed when the room 4 area, the passages or the chosen room change
+    $scope.area4Status = {};
+    $scope.area4Overlay = {};
+    $scope.$watch(function () {
+        const region = (($scope.roomTiles && $scope.roomTiles[2]) || []).join(';');
+        const passages = passageTiles(PASSAGE_14).join(';') + '|' + passageTiles(PASSAGE_34).join(';');
+        return [region, passages, $scope.area4Room && $scope.area4Room.type, $scope.width, $scope.length].join('#');
+    }, function () {
+        const region = room4Region();
+        const greens = passageTiles(PASSAGE_14);
+        const reds = passageTiles(PASSAGE_34);
+        const statuses = {};
+        $scope.area4.forEach(function (room) {
+            if (room.type >= 2) statuses[room.type] = presetStatus(room, region, greens, reds);
+        });
+        $scope.area4Status = statuses;
+
+        // Map preview for the chosen preset: its footprint, and where the passages have to be
+        const overlay = {};
+        const chosen = $scope.area4Room && statuses[$scope.area4Room.type];
+        if (chosen) {
+            const cellKey = function (p) { return (2 * p[0] + 1) + ',' + (2 * p[1] + 1); };
+            if (chosen.placement) {
+                const b = presetBounds($scope.area4Room, chosen.placement.origin, chosen.placement.dir);
+                for (let x = b.minX; x <= b.maxX; x++) for (let y = b.minY; y <= b.maxY; y++) overlay[cellKey([x, y])] = { cls: 'fit' };
+            } else if (region && chosen.sizeOk) {
+                for (let x = region.minX; x <= region.maxX; x++) for (let y = region.minY; y <= region.maxY; y++) overlay[cellKey([x, y])] = { cls: 'pending' };
+                const many = chosen.candidates.length > 1;
+                chosen.candidates.forEach(function (c, i) {
+                    const mark = many ? String.fromCharCode(65 + i) : '';
+                    overlay[cellKey(c.green)] = { cls: 'need-green', label: mark };
+                    overlay[cellKey(c.red)] = { cls: 'need-red', label: mark };
+                });
+            }
+        }
+        $scope.area4Overlay = overlay;
+    });
+
+    $scope.area4OverlayAt = function (c, r) {
+        return $scope.area4Overlay[c + ',' + r];
+    };
+
+    $scope.presetAvailable = function (room) {
+        if (room.type < 2) return true;
+        const st = $scope.area4Status[room.type];
+        return !!st && st.sizeOk;
+    };
+
+    $scope.presetStatusOf = function (room) {
+        return $scope.area4Status[room.type];
+    };
+
+    // ---- Passages between rooms -----------------------------------------------------------
+    // Areas are joined by one-tile passages with a coloured floor (rules 3.3.2 / 3.3.4 / 3.4). Where
+    // two different rooms meet, every gap a robot might get through has to be such a passage tile
+    // (or be closed by a wall). A passage tile belongs to one of its two rooms and opens onto both,
+    // and a room counts as connected once passages link it, directly or through other rooms, to room 1.
+    const ROOM_PASSAGES = [
+        { color: '#1a1ae6', from: 1, to: 2, name: 'admin.simMapEditor.passageBlue' },
+        { color: '#e7e71a', from: 1, to: 3, name: 'admin.simMapEditor.passageYellow' },
+        { color: '#08D508', from: 1, to: 4, name: 'admin.simMapEditor.passageGreen' },
+        { color: '#4d1a99', from: 2, to: 3, name: 'admin.simMapEditor.passagePurple' },
+        { color: '#e7991a', from: 2, to: 4, name: 'admin.simMapEditor.passageOrange' },
+        { color: '#e71a1a', from: 3, to: 4, name: 'admin.simMapEditor.passageRed' }
+    ];
+
+    // Room number of every tile on the first floor, keyed by tile index "x,y"
+    function tileRooms() {
+        const rooms = {};
+        for (let x = 0; x < $scope.width; x++) for (let y = 0; y < $scope.length; y++) rooms[x + ',' + y] = 1;
+        ($scope.roomTiles || []).forEach(function (list, i) {
+            (list || []).forEach(function (key) {
+                const p = key.split(',').map(Number);
+                const k = (p[0] - 1) / 2 + ',' + (p[1] - 1) / 2;
+                if (p[2] === 0 && k in rooms) rooms[k] = i + 2;
+            });
+        });
+        return rooms;
+    }
+
+    function tileNeighbours(k, rooms) {
+        const p = k.split(',').map(Number);
+        return [[1, 0], [-1, 0], [0, 1], [0, -1]]
+            .map(function (d) { return (p[0] + d[0]) + ',' + (p[1] + d[1]); })
+            .filter(function (n) { return n in rooms; });
+    }
+
+    function tileAt(k) {
+        const p = k.split(',').map(Number);
+        const cell = $scope.cells[(2 * p[0] + 1) + ',' + (2 * p[1] + 1) + ',0'];
+        return cell && cell.tile;
+    }
+
+    // ---- Where the robot fits ---------------------------------------------------------------
+    // Sizes in cm as built by Erebus: 12 cm tiles, 1 cm walls, and a robot body that is a cylinder
+    // of radius 3.7 cm (E-puck-custom-default-FLU.proto). So a half-tile gap (5 cm between the
+    // walls) is too narrow, while a whole tile or a half wall next to an open edge is not.
+    const TILE_CM = 12, WALL_HALF_CM = 0.5, ROBOT_RADIUS_CM = 3.7;
+
+    // Wall centre lines on the first floor: tile edges, half walls, inner half walls and the
+    // quarter-circle walls (radius 6 cm, centred on a corner of their quarter tile)
+    function wallShapes() {
+        const shapes = [];
+        const seg = function (x1, y1, x2, y2) { shapes.push({ type: 'seg', x1: x1, y1: y1, x2: x2, y2: y2 }); };
+        Object.keys($scope.cells).forEach(function (key) {
+            const p = key.split(',').map(Number);
+            if (p[2] !== 0) return;
+            const cell = $scope.cells[key];
+            const ex = p[0], ey = p[1];
+            if (ex % 2 === 0 && ey % 2 === 1) {          // vertical edge; half wall 1 = lower half
+                if (cell.isWall) seg(6 * ex, 6 * (ey - 1), 6 * ex, 6 * (ey + 1));
+                else if (cell.halfWall == 1) seg(6 * ex, 6 * ey, 6 * ex, 6 * (ey + 1));
+                else if (cell.halfWall == 2) seg(6 * ex, 6 * (ey - 1), 6 * ex, 6 * ey);
+            } else if (ex % 2 === 1 && ey % 2 === 0) {   // horizontal edge; half wall 1 = left half
+                if (cell.isWall) seg(6 * (ex - 1), 6 * ey, 6 * (ex + 1), 6 * ey);
+                else if (cell.halfWall == 1) seg(6 * (ex - 1), 6 * ey, 6 * ex, 6 * ey);
+                else if (cell.halfWall == 2) seg(6 * ex, 6 * ey, 6 * (ex + 1), 6 * ey);
+            } else if (ex % 2 === 1 && ey % 2 === 1 && cell.tile) {
+                const cx = 6 * ex, cy = 6 * ey;          // tile centre
+                const inner = cell.tile.halfWallIn || [];
+                if (inner[0]) seg(cx, cy - 6, cx, cy);    // up, right, down, left from the centre
+                if (inner[1]) seg(cx, cy, cx + 6, cy);
+                if (inner[2]) seg(cx, cy, cx, cy + 6);
+                if (inner[3]) seg(cx - 6, cy, cx, cy);
+                (cell.tile.curve || []).forEach(function (v, q) {
+                    if (!v) return;
+                    // quarter tiles NW, NE, SW, SE; the curve value names where the arc bulges, so
+                    // its centre is the opposite corner: 1 (NE) -> SW, 2 (SE) -> NW, 3 (SW) -> NE, 4 (NW) -> SE
+                    const ox = cx - 6 + (q % 2) * 6, oy = cy - 6 + Math.floor(q / 2) * 6;
+                    const c = [[0, 6], [0, 0], [6, 0], [6, 6]][v - 1];
+                    if (!c) return;
+                    shapes.push({ type: 'arc', cx: ox + c[0], cy: oy + c[1], r: 6, dx: c[0] === 0 ? 1 : -1, dy: c[1] === 0 ? 1 : -1 });
+                });
+            }
+        });
+        return shapes;
+    }
+
+    function shapeDistance(s, x, y) {
+        if (s.type === 'seg') {
+            const vx = s.x2 - s.x1, vy = s.y2 - s.y1;
+            const t = Math.max(0, Math.min(1, ((x - s.x1) * vx + (y - s.y1) * vy) / (vx * vx + vy * vy)));
+            return Math.hypot(x - s.x1 - t * vx, y - s.y1 - t * vy);
+        }
+        // the arc runs from (cx + dx r, cy) to (cx, cy + dy r)
+        const px = x - s.cx, py = y - s.cy;
+        if (px * s.dx >= 0 && py * s.dy >= 0) return Math.abs(Math.hypot(px, py) - s.r);
+        return Math.min(Math.hypot(px - s.dx * s.r, py), Math.hypot(px, py - s.dy * s.r));
+    }
+
+    // fits(x, y): whether the robot body fits with its centre at (x, y) cm
+    function robotFits() {
+        const reach = ROBOT_RADIUS_CM + WALL_HALF_CM;
+        const buckets = {};
+        wallShapes().forEach(function (s) {
+            const box = s.type === 'seg'
+                ? [Math.min(s.x1, s.x2), Math.min(s.y1, s.y2), Math.max(s.x1, s.x2), Math.max(s.y1, s.y2)]
+                : [s.cx - s.r, s.cy - s.r, s.cx + s.r, s.cy + s.r];
+            for (let i = Math.floor((box[0] - reach) / TILE_CM); i <= Math.floor((box[2] + reach) / TILE_CM); i++)
+                for (let j = Math.floor((box[1] - reach) / TILE_CM); j <= Math.floor((box[3] + reach) / TILE_CM); j++)
+                    (buckets[i + ',' + j] = buckets[i + ',' + j] || []).push(s);
+        });
+        return function (x, y) {
+            const list = buckets[Math.floor(x / TILE_CM) + ',' + Math.floor(y / TILE_CM)] || [];
+            return list.every(function (s) { return shapeDistance(s, x, y) >= reach; });
+        };
+    }
+
+    // Whether the robot can cross the edge between the neighbouring tiles a and b: somewhere on
+    // that edge its centre fits between the walls, and neither side is a hole
+    function edgePassable(a, b, fits) {
+        const ta = tileAt(a), tb = tileAt(b);
+        if ((ta && ta.black) || (tb && tb.black)) return false;
+        const p = a.split(',').map(Number), q = b.split(',').map(Number);
+        for (let d = 0.125; d < TILE_CM; d += 0.25) {
+            const x = p[0] === q[0] ? TILE_CM * p[0] + d : TILE_CM * Math.max(p[0], q[0]);
+            const y = p[1] === q[1] ? TILE_CM * p[1] + d : TILE_CM * Math.max(p[1], q[1]);
+            if (fits(x, y)) return true;
+        }
+        return false;
+    }
+
+    function passageBetween(r1, r2) {
+        return ROOM_PASSAGES.find(function (pass) {
+            return (pass.from === r1 && pass.to === r2) || (pass.from === r2 && pass.to === r1);
+        });
+    }
+
+    function connectionStatus() {
+        const rooms = tileRooms();
+        const keys = Object.keys(rooms);
+        const present = { 1: true };
+        keys.forEach(function (k) { present[rooms[k]] = true; });
+        const status = { show: false, ok: true, rooms: [], issues: [], marks: {} };
+        const fits = robotFits();
+        // A room 4 preset brings its own walls, open only at its entrances (checked by the preset
+        // placement check), so the room 4 border is left to that check
+        const presetRoom4 = $scope.area4Room && $scope.area4Room.type >= 2;
+
+        // The passage tiles that are placed, and whether each really opens onto its two rooms
+        const links = [];
+        ROOM_PASSAGES.forEach(function (pass) {
+            let missing = 0, misplaced = false;
+            keys.forEach(function (k) {
+                const tile = tileAt(k);
+                if (!tile || tile.color !== pass.color) return;
+                status.show = true;
+                if (!present[pass.from] || !present[pass.to]) {
+                    missing = present[pass.from] ? pass.to : pass.from;
+                    status.marks[k] = { cls: 'bad' };
+                    return;
+                }
+                const own = rooms[k];
+                const other = own === pass.from ? pass.to : pass.from;
+                const opens = function (room) {
+                    return tileNeighbours(k, rooms).some(function (n) { return rooms[n] === room && edgePassable(k, n, fits); });
+                };
+                if ((own === pass.from || own === pass.to) && opens(own) && opens(other)) links.push(pass);
+                else { misplaced = true; status.marks[k] = { cls: 'bad' }; }
+            });
+            if (missing) status.issues.push({ key: 'passageNoRoom', pass: pass, room: missing });
+            if (misplaced) status.issues.push({ key: 'passageMisplaced', pass: pass });
+        });
+
+        // Gaps the robot fits through between two different rooms that are not a passage tile of their colour
+        const gaps = {};
+        const gapRooms = {};
+        keys.forEach(function (k) {
+            tileNeighbours(k, rooms).forEach(function (n) {
+                if (k > n) return;   // each edge once
+                const ra = rooms[k], rb = rooms[n];
+                if (ra === rb || (presetRoom4 && (ra === 4 || rb === 4)) || !edgePassable(k, n, fits)) return;
+                const pass = passageBetween(ra, rb);
+                const tk = tileAt(k), tn = tileAt(n);
+                if ((tk && tk.color === pass.color) || (tn && tn.color === pass.color)) return;
+                if (!gaps[pass.color]) gaps[pass.color] = { key: 'unmarkedGap', pass: pass, count: 0 };
+                gaps[pass.color].count++;
+                gapRooms[ra] = gapRooms[rb] = true;
+                // marked on the side of the higher-numbered room, the room being joined
+                const t = ra > rb ? k : n;
+                if (!status.marks[t] || status.marks[t].cls === 'hint') status.marks[t] = { cls: 'gap', style: { 'border-color': pass.color } };
+            });
+        });
+        ROOM_PASSAGES.forEach(function (pass) {
+            if (gaps[pass.color]) status.issues.push(gaps[pass.color]);
+        });
+
+        // Rooms reached from room 1 through the passages
+        const reached = { 1: true };
+        let grew = true;
+        while (grew) {
+            grew = false;
+            links.forEach(function (l) {
+                if (reached[l.from] !== reached[l.to]) { reached[l.from] = reached[l.to] = true; grew = true; }
+            });
+        }
+
+        [2, 3, 4].forEach(function (room) {
+            if (!present[room]) return;
+            status.show = true;
+            const own = keys.filter(function (k) { return rooms[k] === room; });
+            const linked = ROOM_PASSAGES.filter(function (pass) {
+                return (pass.from === room || pass.to === room) && links.indexOf(pass) > -1;
+            });
+            // Passages that could join this room: the rooms it borders, and the tiles on the border
+            const options = [];
+            ROOM_PASSAGES.forEach(function (pass) {
+                if (pass.from !== room && pass.to !== room) return;
+                const other = pass.from === room ? pass.to : pass.from;
+                if (!present[other]) return;
+                const border = own.filter(function (k) {
+                    return tileNeighbours(k, rooms).some(function (n) { return rooms[n] === other; });
+                });
+                if (border.length) options.push({ pass: pass, border: border });
+            });
+            const entry = { room: room, linked: linked, reached: !!reached[room], gap: !!gapRooms[room], options: options };
+            status.rooms.push(entry);
+            if (entry.reached) return;
+            status.ok = false;
+            // Where to put a passage, unless the preset frames or the gap marks already show it
+            if ((room === 4 && presetRoom4) || gapRooms[room]) return;
+            options.forEach(function (o) {
+                o.border.forEach(function (k) {
+                    if (!status.marks[k]) status.marks[k] = { cls: 'hint', style: { 'border-color': o.pass.color } };
+                });
+            });
+        });
+        if (status.issues.length) status.ok = false;
+        return status;
+    }
+
+    // The check can be switched off for a map (saved with it): then nothing is checked, marked,
+    // restricted or blocked
+    $scope.connCheckOff = false;
+    $scope.toggleConnCheck = function () {
+        $scope.connCheckOff = !$scope.connCheckOff;
+    };
+    $scope.connStatus = { show: false, ok: true, rooms: [], issues: [], marks: {} };
+    $scope.$watch(function () {
+        if ($scope.connCheckOff) return 'off';
+        const parts = [];
+        Object.keys($scope.cells).forEach(function (key) {
+            const cell = $scope.cells[key];
+            if (cell.isWall || cell.halfWall > 0) parts.push(key + (cell.isWall ? 'w' : 'h' + cell.halfWall));
+            if (cell.isTile && cell.tile) {
+                const t = cell.tile;
+                const inner = (t.halfWallIn || []).join('') + (t.curve || []).join('');
+                if (t.color || t.black || /[1-9]/.test(inner)) parts.push(key + '=' + (t.color || '') + (t.black ? 'b' : '') + inner);
+            }
+        });
+        return [($scope.roomTiles || []).map(function (l) { return (l || []).join(';'); }).join('|'),
+            parts.join(';'), $scope.area4Room && $scope.area4Room.type, $scope.width, $scope.length].join('#');
+    }, function () {
+        $scope.connStatus = $scope.connCheckOff ? { show: false, ok: true, rooms: [], issues: [], marks: {} } : connectionStatus();
+    });
+
+    $scope.connMarkAt = function (c, r) {
+        return $scope.connStatus.marks[(c - 1) / 2 + ',' + (r - 1) / 2];
+    };
+
+    // For the custom room 4 creator: the map's walls (cm, as for the connection check), its holes
+    // and the start, to draw the walls around room 4 and work out where the robot can get to
+    $scope.room4MapGeometry = function () {
+        const holes = [];
+        Object.keys($scope.cells).forEach(function (key) {
+            const p = key.split(',').map(Number);
+            const cell = $scope.cells[key];
+            if (p[2] === 0 && cell.isTile && cell.tile && cell.tile.black) holes.push([(p[0] - 1) / 2, (p[1] - 1) / 2]);
+        });
+        const st = $scope.startTile;
+        const hasStart = st && st.z == 0 && st.x > 0 && st.y > 0;
+        // Openings of room 4 (no whole wall towards a floor tile outside it, with the passage colour of
+        // that tile) and its checkpoint tiles; rule 3.5.3 wants a checkpoint right behind each passage
+        const room4 = {};
+        (($scope.roomTiles && $scope.roomTiles[2]) || []).forEach(function (key) {
+            const p = key.split(',').map(Number);
+            if (p[2] === 0) room4[(p[0] - 1) / 2 + ',' + (p[1] - 1) / 2] = true;
+        });
+        const entrances = [], checkpoints = [];
+        Object.keys(room4).forEach(function (k) {
+            const t = k.split(',').map(Number);
+            const cell = $scope.cells[(2 * t[0] + 1) + ',' + (2 * t[1] + 1) + ',0'];
+            if (cell && cell.tile && cell.tile.checkpoint) checkpoints.push(t);
+            [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(function (d) {
+                const nx = t[0] + d[0], ny = t[1] + d[1];
+                if (nx < 0 || ny < 0 || nx >= $scope.width || ny >= $scope.length || room4[nx + ',' + ny]) return;
+                const edge = $scope.cells[(2 * t[0] + 1 + d[0]) + ',' + (2 * t[1] + 1 + d[1]) + ',0'];
+                if (edge && edge.isWall) return;
+                const next = $scope.cells[(2 * nx + 1) + ',' + (2 * ny + 1) + ',0'];
+                if (next && next.tile && next.tile.black) return;
+                // the colour of the passage to the room on the other side (1-4 green, 2-4 orange,
+                // 3-4 red), or of the passage tile itself when there is one
+                const tileColor = (next && next.tile && next.tile.color) || '';
+                const other = checkRoomNumberKey((2 * nx + 1) + ',' + (2 * ny + 1) + ',0');
+                const pass = ROOM_PASSAGES.find(function (p) { return p.from === other && p.to === 4; });
+                entrances.push({ tile: t, dir: d, color: tileColor || (pass ? pass.color : ''), passage: !!tileColor,
+                    room: other, half: !!(edge && edge.halfWall > 0) });
+            });
+        });
+        return {
+            entrances: entrances,
+            checkpoints: checkpoints,
+            shapes: wallShapes(),
+            holes: holes,
+            width: $scope.width,
+            length: $scope.length,
+            start: hasStart ? { x: 6 * st.x, y: 6 * st.y } : null,
+            tileCm: TILE_CM,
+            wallHalfCm: WALL_HALF_CM,
+            robotRadiusCm: ROBOT_RADIUS_CM
+        };
+    };
+
+    // For the tile dialog: the room of the tile at cell (x, y, z), the other rooms the robot can
+    // get to from it, and whether it opens onto its own room. A passage colour can be chosen only
+    // where the check would accept it: the tile is in one of the two rooms and the robot can pass
+    // from it into both (walls, half walls, curved walls and holes taken into account).
+    // Null / always allowed when the check is off or off the first floor.
+    $scope.tileRoomInfo = function (x, y, z) {
+        if ($scope.connCheckOff || z != 0) return null;
+        const rooms = tileRooms();
+        const k = (x - 1) / 2 + ',' + (y - 1) / 2;
+        if (!(k in rooms)) return null;
+        const fits = robotFits();
+        const borders = [];
+        let ownOpen = false;
+        tileNeighbours(k, rooms).forEach(function (n) {
+            if (!edgePassable(k, n, fits)) return;
+            if (rooms[n] === rooms[k]) ownOpen = true;
+            else if (borders.indexOf(rooms[n]) < 0) borders.push(rooms[n]);
+        });
+        return { room: rooms[k], borders: borders.sort(), ownOpen: ownOpen };
+    };
+
+    $scope.passageAllowed = function (info, pass) {
+        if (!info) return true;
+        if (!info.ownOpen || (info.room !== pass.from && info.room !== pass.to)) return false;
+        return info.borders.indexOf(info.room === pass.from ? pass.to : pass.from) > -1;
+    };
+
+    // Connection problems as messages (for the world export)
+    function connectionProblems() {
+        const st = connectionStatus();
+        const t = function (key, params) { return $translate.instant('admin.simMapEditor.connCheck.' + key, params); };
+        const problems = st.rooms.filter(function (entry) { return !entry.reached; }).map(function (entry) {
+            return t('notConnected', { room: entry.room });
+        });
+        st.issues.forEach(function (issue) {
+            problems.push(t(issue.key, { name: $translate.instant(issue.pass.name), from: issue.pass.from, to: issue.pass.to, room: issue.room, count: issue.count }));
+        });
+        return problems;
+    }
+
+    // Problems that stop the chosen preset from being placed (for the world export)
+    function presetProblems() {
+        if (!$scope.area4Room || $scope.area4Room.type < 2) return [];
+        const st = $scope.area4Status[$scope.area4Room.type];
+        if (!st) return ['noRegion'];
+        return st.ok ? [] : st.issues;
     }
     
     // tag custom room 4
@@ -2584,7 +3278,51 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
         }
         outputStr += '\n]\n}\n';
 
+        // Victims of the picture can also stand on the map's own walls around room 4 (the creator
+        // lets them attach there), so those walls join the outlines the victims look for
+        fullContPoints = fullContPoints.concat(mapWallRings(x * 12, y * 12, imgWidth / (room4Width * 100), imgWidth, imgHeight));
+
         return outputStr;
+    }
+
+    // Outlines (as [row, col] picture pixels) of the map walls that reach into the room 4 picture: each
+    // wall as the loop around its two faces, 1 cm apart, like the outline of a wall drawn in the picture
+    function mapWallRings(x0cm, y0cm, pxPerCm, imgW, imgH) {
+        const rings = [];
+        const half = WALL_HALF_CM;
+        const toPx = function (p) { return [(p[1] - y0cm) * pxPerCm, (p[0] - x0cm) * pxPerCm]; };
+        const inside = function (pts) {
+            return pts.some(function (q) { return q[0] >= -2 && q[1] >= -2 && q[0] <= imgH + 2 && q[1] <= imgW + 2; });
+        };
+        const step = Math.max(0.25, 2 / pxPerCm);   // about every 2 px
+        wallShapes().forEach(function (sh) {
+            const loop = [];
+            if (sh.type === 'seg') {
+                const len = Math.hypot(sh.x2 - sh.x1, sh.y2 - sh.y1);
+                if (!len) return;
+                const nx = -(sh.y2 - sh.y1) / len * half, ny = (sh.x2 - sh.x1) / len * half;
+                const n = Math.max(1, Math.ceil(len / step));
+                for (let i = 0; i <= n; i++) loop.push([sh.x1 + (sh.x2 - sh.x1) * i / n + nx, sh.y1 + (sh.y2 - sh.y1) * i / n + ny]);
+                for (let i = n; i >= 0; i--) loop.push([sh.x1 + (sh.x2 - sh.x1) * i / n - nx, sh.y1 + (sh.y2 - sh.y1) * i / n - ny]);
+            } else {
+                const a1 = sh.dx > 0 ? 0 : Math.PI, a2 = sh.dy > 0 ? Math.PI / 2 : -Math.PI / 2;
+                let diff = a2 - a1;
+                while (diff <= -Math.PI) diff += 2 * Math.PI;
+                while (diff > Math.PI) diff -= 2 * Math.PI;
+                const n = Math.max(4, Math.ceil(Math.abs(diff) * (sh.r + half) / step));
+                for (let i = 0; i <= n; i++) {
+                    const ang = a1 + diff * i / n;
+                    loop.push([sh.cx + Math.cos(ang) * (sh.r + half), sh.cy + Math.sin(ang) * (sh.r + half)]);
+                }
+                for (let i = n; i >= 0; i--) {
+                    const ang = a1 + diff * i / n;
+                    loop.push([sh.cx + Math.cos(ang) * (sh.r - half), sh.cy + Math.sin(ang) * (sh.r - half)]);
+                }
+            }
+            const px = loop.map(toPx);
+            if (inside(px)) rings.push(px);
+        });
+        return rings;
     }
 
     function dist(point1, point2) {
@@ -2619,7 +3357,9 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
         );
 
         $scope.area4VicScore = 0;
-        if ($scope.room4VicTypes.length != vicContours.size())
+        // A stamp carries its type (SimRoom4); other tokens keep the random type they got before
+        const keepTypes = $scope.room4VicTypes.length === vicContours.size();
+        if (!keepTypes)
             $scope.room4VicTypes = []
         for (let x = 0; x < vicContours.size(); x++) {
             let M = cv.moments(vicContours.get(x), false);
@@ -2651,7 +3391,10 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
             let npInd = [closeIndex[0], closeIndex[1]];
             let ppInd = [closeIndex[0], closeIndex[1]];
             vicWidth = vicWidth * imgWidth / room4Width;
-            while (dist(fullContPoints[npInd[0]][npInd[1]], fullContPoints[ppInd[0]][ppInd[1]]) < vicWidth) {
+            // walk both ways along the outline until the two ends are a victim width apart (at most once
+            // round, so a short outline cannot keep it going)
+            let walk = fullContPoints[closeIndex[0]].length;
+            while (walk-- > 0 && dist(fullContPoints[npInd[0]][npInd[1]], fullContPoints[ppInd[0]][ppInd[1]]) < vicWidth) {
                 if (ppInd[1] == 0) {
                     ppInd[1] = fullContPoints[ppInd[0]].length - 1;
                     npInd[1] += 1;
@@ -2697,15 +3440,17 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
             let vicX = parseFloat(((closePoint[1] / imgWidth) * room4Width).toFixed(roundDigits)) + room4xOffset;
             let vicY = parseFloat(((closePoint[0] / imgHeight) * room4Height).toFixed(roundDigits)) + room4zOffset;
 
-            let rand = 0;
-            if ($scope.room4VicTypes.length != vicContours.size()) {
-                rand = parseInt(Math.random() * scoringElem.length);
-                if (DISABLE_RANDOMNESS) 
-                    rand = parseInt(0.5 * scoringElem.length);
-                $scope.room4VicTypes.push(rand);
-            } else {
-                rand = $scope.room4VicTypes[x];
+            let rand = SimRoom4.contourType(src, vicContours.get(x));
+            if (!scoringElem[rand]) {
+                if (keepTypes && scoringElem[$scope.room4VicTypes[x]]) {
+                    rand = $scope.room4VicTypes[x];
+                } else {
+                    rand = parseInt(Math.random() * scoringElem.length);
+                    if (DISABLE_RANDOMNESS)
+                        rand = parseInt(0.5 * scoringElem.length);
+                }
             }
+            $scope.room4VicTypes[x] = rand;
             if (rand <= 2) { // victim
                 outputStrVic += `
                     Victim {
@@ -2832,6 +3577,7 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
                     if ($scope.selectRoom == 0) {
                         $(".tile").get(i).style.setProperty("--tileColor", "#359ef4");
                         get_cell(x, y, z).tile.halfTile = 1;
+                        get_cell(x, y, z).tile.curve = [0, 0, 0, 0];   // room 2 has no curved walls
                         console.log('a')
                     }
                     else if ($scope.selectRoom == 1) {
@@ -2917,7 +3663,8 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
             createArea4Solid();
             createArea4Victims(0, 0);
             for (let i = 0; i < $scope.room4VicTypes.length; i++) {
-                if ($scope.room4VicTypes[i] <= 3)
+                // 0-2 letter victims, 3-6 hazmat signs (P / O / F / C)
+                if ($scope.room4VicTypes[i] <= 2)
                     victimScore += (15 + 10) * areaMultiplier[4];
                 else
                     victimScore += (30 + 20) * areaMultiplier[4];
@@ -2933,30 +3680,33 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
 
         if(victimScore > 0) exitBonus += (victimScore + checkpointScore) * 0.1
 
+        const t = function (key) { return $translate.instant('admin.simMapEditor.maxScore.' + key); };
+        const fmt = function (value) { return Number(value).toFixed(2).replace(/\.00$/, ''); };
+        const rows = [
+            { icon: 'fa-user-injured', label: t('tokens'), value: victimScore },
+            { icon: 'fa-flag-checkered', label: t('checkpoints'), value: checkpointScore },
+            { icon: 'fa-door-open', label: t('exitBonus'), value: exitBonus },
+            { icon: 'fa-map', label: t('mapBonus'), value: (victimScore + checkpointScore + exitBonus) }
+        ];
         let html = `
-            <div class='text-center'>
-                <i class='fas fa-calculator fa-3x'></i>
-            </div><hr>
-            <table class='custom'>
-                <thead>
-                    <th>Victim / Hazard map score</th>
-                    <th>Checkpoint score</th>
-                    <th>Exit bonus</th>
-                    <th>Map bonus</th>
-                    <th>Total score</th>
-                </thead>
-                <tbody>
-                    <td>${victimScore}</td>
-                    <td>${checkpointScore}</td>
-                    <td>${exitBonus}</td>
-                    <td>${(victimScore + checkpointScore + exitBonus)}</td>
-                    <td>${2*(victimScore + checkpointScore + exitBonus)}</td>
-                </tbody>
-            </table>
+            <div class='sim-score'>
+                <div class='sim-score-total'>
+                    <span class='sim-score-total-label'><i class='fas fa-calculator'></i>${t('total')}</span>
+                    <span class='sim-score-total-value'>${fmt(2*(victimScore + checkpointScore + exitBonus))}</span>
+                </div>
+                <div class='sim-score-rows'>
+                    ${rows.map(function (row) {
+                        return `<div class='sim-score-row'><span><i class='fas ${row.icon}'></i>${row.label}</span><strong>${fmt(row.value)}</strong></div>`;
+                    }).join('')}
+                </div>
+                <div class='sim-score-note'>${t('note')}</div>
+            </div>
         `;
         Swal.fire({
             html: html,
-            showCloseButton: true, 
+            showCloseButton: true,
+            customClass: 'sim-score-popup',
+            confirmButtonText: 'OK'
         })
 
     }
@@ -2987,14 +3737,17 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
             let y = (minY - 1) / 2;
             room4Width = (maxX - minX) / 2 + 1;
             room4Height = (maxY - minY) / 2 + 1;
-            $scope.canvasWidth = 600;
-            $scope.canvasHeight = $scope.canvasWidth / room4Width * room4Height;
+            // Picture resolution: 1600 px on the longer side, so it stays sharp drawn screen-wide
+            const room4Block = Math.floor(1600 / Math.max(room4Width, room4Height));
+            $scope.canvasWidth = room4Block * room4Width;
+            $scope.canvasHeight = room4Block * room4Height;
 
             var modalInstance = $uibModal.open({
                 animation: true,
-                templateUrl: '/templates/sim_editor/custom_room_4_modal.html',
+                templateUrl: '/templates/sim_editor/custom_room_4_modal.2025.html',
                 controller: 'CustomRoom4ModalCtrl',
-                size: 'lg',
+                size: 'xl',
+                windowClass: 'sim-r4-window',
                 scope: $scope,
                 resolve: {
                     x: function() {
@@ -3010,7 +3763,58 @@ app.controller('SimEditorController', ['$scope', '$uibModal', '$log', '$http','$
 // Please note that $uibModalInstance represents a modal window (instance) dependency.
 // It is not the same as the $uibModal service used above.
 
-app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', 'x', 'y', 'z', function ($scope, $uibModalInstance, x, y, z) {
+app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', '$uibModal', 'x', 'y', 'z', function ($scope, $uibModalInstance, $uibModal, x, y, z) {
+    // Floor colours of the one-tile passages between areas (rules 3.3.4 / 3.4). The values are what
+    // the world export looks for, so they must not change.
+    $scope.passageColors = [
+        { color: '#1a1ae6', from: 1, to: 2, name: 'admin.simMapEditor.passageBlue' },
+        { color: '#e7e71a', from: 1, to: 3, name: 'admin.simMapEditor.passageYellow' },
+        { color: '#08D508', from: 1, to: 4, name: 'admin.simMapEditor.passageGreen' },
+        { color: '#4d1a99', from: 2, to: 3, name: 'admin.simMapEditor.passagePurple' },
+        { color: '#e7991a', from: 2, to: 4, name: 'admin.simMapEditor.passageOrange' },
+        { color: '#e71a1a', from: 3, to: 4, name: 'admin.simMapEditor.passageRed' }
+    ];
+    // Only the colours of the rooms this tile lies between can be chosen (unless the room
+    // connection check is off)
+    $scope.passageInfo = $scope.$parent.tileRoomInfo ? $scope.$parent.tileRoomInfo(x, y, z) : null;
+    $scope.passageOk = function (p) {
+        return !$scope.$parent.passageAllowed || $scope.$parent.passageAllowed($scope.passageInfo, p);
+    };
+    $scope.passageAvailable = function () {
+        return $scope.passageColors.some($scope.passageOk);
+    };
+
+    // Wall tokens go on walls only (rules 3.7.2), so a place without a wall cannot take one. A token
+    // already there stays selectable so it can be seen and removed.
+    function edgeCell(dx, dy) {
+        return $scope.$parent.cells[(Number(x) + dx) + ',' + (Number(y) + dy) + ',' + z];
+    }
+    const WALL_SIDES = { top: [0, -1], right: [1, 0], bottom: [0, 1], left: [-1, 0] };
+    $scope.wallAt = function (dir) {
+        const c = edgeCell(WALL_SIDES[dir][0], WALL_SIDES[dir][1]);
+        return !!(c && c.isWall);
+    };
+    // Half-wall slot i = quarter tile (NW, NE, SW, SE) * 4 + side (top, right, bottom, left). A slot
+    // sits on the tile edge (whole wall, or the half wall covering that half: 1 = left / lower half),
+    // on an inner half wall, or - when its quarter tile has a curved wall - on that curve.
+    $scope.halfWallSlotHasWall = function (i) {
+        const q = Math.floor(i / 4), side = i % 4, qx = q % 2, qy = Math.floor(q / 2);
+        const t = $scope.cell && $scope.cell.tile;
+        if (!t) return false;
+        if (t.curve && t.curve[q]) return true;
+        const inner = t.halfWallIn || [];
+        const outer = function (dx, dy, half) {
+            const c = edgeCell(dx, dy);
+            return !!c && (c.isWall || c.halfWall == half);
+        };
+        switch (side) {
+            case 0: return qy === 0 ? outer(0, -1, qx + 1) : !!inner[qx ? 1 : 3];
+            case 1: return qx === 1 ? outer(1, 0, qy ? 1 : 2) : !!inner[qy ? 2 : 0];
+            case 2: return qy === 1 ? outer(0, 1, qx + 1) : !!inner[qx ? 1 : 3];
+            case 3: return qx === 0 ? outer(-1, 0, qy ? 1 : 2) : !!inner[qy ? 2 : 0];
+        }
+        return false;
+    };
     console.log($scope.cell)
     $scope.cell = $scope.$parent.cells[x + ',' + y + ',' + z];
     $scope.isStart = $scope.$parent.startTile.x == x &&
@@ -3032,37 +3836,78 @@ app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', 'x', 'y', 'z'
        $scope.$parent.recalculateLinear();
     }
 
-     $scope.isHalfWall = function(r, c) {
-        var ind = -1, tmp = r * 10 + c;
-        if (tmp == 12) ind = 0;
-        else if (tmp == 23) ind = 1;
-        else if (tmp == 32) ind = 2;
-        else if (tmp == 21) ind = 3;
-        if (((r % 2 == 1) ^ (c % 2 == 1)) && (r != 0 && c != 0 && r != 4 && c != 4) && 
-            $scope.cell && $scope.cell.tile && $scope.cell.tile.curve != undefined && $scope.cell.tile.halfWallIn[ind])
-            return 1;
-        return 0;
-     }
-     
-     $scope.innerTileClick = function(r, c) {
-         console.log(r)
-         console.log(c)
-        var ind = -1, tmp = r * 10 + c;
-        if (tmp == 12) ind = 0;
-        else if (tmp == 23) ind = 1;
-        else if (tmp == 32) ind = 2;
-        else if (tmp == 21) ind = 3;
-        if ($scope.cell && $scope.cell.tile) {
-            if (r % 2 == 1 && c % 2 == 1) { //curved
-                quad = parseInt(r / 2) * 2 + parseInt(c / 2);
-                $scope.cell.tile.curve[quad] = ($scope.cell.tile.curve[quad] + 1) % 5;
-            }
-            else if (((r % 2 == 1) ^ (c % 2 == 1)) && (r != 0 && c != 0 && r != 4 && c != 4)){//half wall
-                $scope.cell.tile.halfWallIn[ind] = !$scope.cell.tile.halfWallIn[ind];
-            } 
-                
+    // Inner walls of a room 2 / room 3 tile, drawn as a 240 x 240 diagram (quarter tiles 120).
+    // Half walls run from the centre to the middle of a side (0 up, 1 right, 2 down, 3 left).
+    // Curves are quarter circles in a quarter tile (NW, NE, SW, SE); the value names where the
+    // arc bulges (1 NE, 2 SE, 3 SW, 4 NW). Room 2 takes half walls only, so it gets no curves.
+    $scope.isRoom2 = (($scope.$parent.roomTiles && $scope.$parent.roomTiles[0]) || []).indexOf(x + ',' + y + ',' + z) > -1;
+    $scope.inner = { hoverQ: -1, hoverSlot: -1, hoverArm: -1 };
+    $scope.innerArms = [
+        { i: 0, x1: 120, y1: 0, x2: 120, y2: 120, icon: 'fa-arrow-up', name: 'top' },
+        { i: 1, x1: 120, y1: 120, x2: 240, y2: 120, icon: 'fa-arrow-right', name: 'right' },
+        { i: 2, x1: 120, y1: 120, x2: 120, y2: 240, icon: 'fa-arrow-down', name: 'bottom' },
+        { i: 3, x1: 0, y1: 120, x2: 120, y2: 120, icon: 'fa-arrow-left', name: 'left' }
+    ];
+    $scope.innerQuarters = ['nw', 'ne', 'sw', 'se'].map(function (name, q) {
+        return { q: q, name: name, x: (q % 2) * 120, y: Math.floor(q / 2) * 120 };
+    });
+    $scope.innerSlots = [];
+    $scope.innerQuarters.forEach(function (Q) {
+        [[60, 20], [100, 60], [60, 100], [20, 60]].forEach(function (p, side) {
+            $scope.innerSlots.push({ i: Q.q * 4 + side, x: Q.x + p[0], y: Q.y + p[1] });
+        });
+    });
+    // walls on the tile's sides (edited on the map), whole or half (1 = left / lower half)
+    $scope.innerOuter = [];
+    [[0, -1, 0, 0, 240, 0], [1, 0, 240, 0, 240, 240], [0, 1, 0, 240, 240, 240], [-1, 0, 0, 0, 0, 240]].forEach(function (s) {
+        const c = edgeCell(s[0], s[1]);
+        if (!c) return;
+        let a = [s[2], s[3]], b = [s[4], s[5]];
+        if (!c.isWall) {
+            if (c.halfWall != 1 && c.halfWall != 2) return;
+            const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+            const lowerOrLeft = c.halfWall == 1;
+            if (s[1] !== 0) { if (lowerOrLeft) b = m; else a = m; }   // top / bottom: 1 = left half
+            else { if (lowerOrLeft) a = m; else b = m; }              // left / right: 1 = lower half
         }
-     }
+        $scope.innerOuter.push({ x1: a[0], y1: a[1], x2: b[0], y2: b[1] });
+    });
+    $scope.curvePath = function (q, v, size) {
+        const s = size || 120, ox = size ? 0 : (q % 2) * 120, oy = size ? 0 : Math.floor(q / 2) * 120;
+        const c = [[0, 1], [0, 0], [1, 0], [1, 1]][v - 1];
+        if (!c) return '';
+        const cx = ox + c[0] * s, cy = oy + c[1] * s, dx = c[0] === 0 ? 1 : -1, dy = c[1] === 0 ? 1 : -1;
+        return 'M' + (cx + dx * s) + ' ' + cy + ' A' + s + ' ' + s + ' 0 0 ' + (dx * dy > 0 ? 1 : 0) + ' ' + cx + ' ' + (cy + dy * s);
+    };
+    $scope.toggleArm = function (i) {
+        const t = $scope.cell && $scope.cell.tile;
+        if (!t) return;
+        if (!t.halfWallIn) t.halfWallIn = [0, 0, 0, 0];
+        t.halfWallIn[i] = !t.halfWallIn[i];
+    };
+    $scope.setCurve = function (q, v) {
+        const t = $scope.cell && $scope.cell.tile;
+        if (!t || (v && $scope.isRoom2)) return;
+        if (!t.curve) t.curve = [0, 0, 0, 0];
+        t.curve[q] = v;
+    };
+    // clicking a quarter tile in the diagram steps through no curve and the four curves
+    $scope.cycleCurve = function (q) {
+        const t = $scope.cell && $scope.cell.tile;
+        if (!t || $scope.isRoom2) return;
+        $scope.setCurve(q, ((Number(t.curve && t.curve[q]) || 0) + 1) % 5);
+    };
+    $scope.hasCurve = function () {
+        const t = $scope.cell && $scope.cell.tile;
+        return !!(t && t.curve && t.curve.some(function (v) { return v; }));
+    };
+    $scope.clearCurves = function () {
+        for (let q = 0; q < 4; q++) $scope.setCurve(q, 0);
+    };
+    $scope.slotUsed = function (i) {
+        const t = $scope.cell && $scope.cell.tile;
+        return !!(t && ((t.halfWallVic && t.halfWallVic[i] && t.halfWallVic[i] != 0) || (t.halfWallCognitives && t.halfWallCognitives[i])));
+    };
 
     $scope.range = function (n) {
         arr = [];
@@ -3071,6 +3916,65 @@ app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', 'x', 'y', 'z'
         }
         return arr;
     }
+    // Token rotation: symbol shown in the dial preview (2025 tokens: H/S/U victims and F/P/C/O hazmats)
+    const _wallSymbols = { H: 'H', S: 'S', U: 'U', F: 'F', P: 'P', C: 'C', O: 'O' };
+    const _halfWallSymbols = { 1: 'H', 2: 'U', 3: 'S', 5: 'F', 6: 'P', 7: 'C', 8: 'O' };
+
+    $scope.wallVictimSymbol = function () {
+        const victims = $scope.cell.tile.victims || {};
+        for (const dir of ['top', 'right', 'bottom', 'left']) {
+            if (_wallSymbols[victims[dir]]) return _wallSymbols[victims[dir]];
+        }
+        return '';
+    };
+
+    $scope.wallVictimDir = function () {
+        const victims = $scope.cell.tile.victims || {};
+        return ['top', 'right', 'bottom', 'left'].find(function (dir) { return _wallSymbols[victims[dir]]; }) || '';
+    };
+
+    $scope.halfWallSymbol = function (idx) {
+        return (($scope.cell.tile.halfWallVic && _halfWallSymbols[Number($scope.cell.tile.halfWallVic[idx])]) || '');
+    };
+
+    // Hazmat placards are shown as their real images in the rotation preview
+    const _placardImages = {
+        F: '/images/placard-2-flammable-gas.png',
+        P: '/images/placard-6-poison.png',
+        C: '/images/placard-8-corrosive.png',
+        O: '/images/placard-5.2-organic-peroxide.png'
+    };
+
+    $scope.wallVictimImage = function () {
+        return _placardImages[$scope.wallVictimSymbol()] || '';
+    };
+
+    $scope.halfWallImage = function (idx) {
+        return _placardImages[$scope.halfWallSymbol(idx)] || '';
+    };
+
+    $scope.halfWallRotation = function (idx) {
+        return Number(($scope.cell.tile.halfWallVicRots && $scope.cell.tile.halfWallVicRots[idx]) || 0);
+    };
+
+    $scope.editHalfWallRotation = function (idx) {
+        $uibModal.open({
+            animation: true,
+            templateUrl: '/templates/sim_editor/rotation_modal.html',
+            controller: 'SimRotationModalCtrl',
+            windowClass: 'sim-rot-modal',
+            resolve: {
+                angle: function () { return $scope.halfWallRotation(idx); },
+                symbol: function () { return $scope.halfWallSymbol(idx); },
+                image: function () { return $scope.halfWallImage(idx); },
+                label: function () { return '#' + (idx + 1); }
+            }
+        }).result.then(function (angle) {
+            if (!$scope.cell.tile.halfWallVicRots) $scope.cell.tile.halfWallVicRots = {};
+            $scope.cell.tile.halfWallVicRots[idx] = angle;
+        }, angular.noop);
+    };
+
     $scope.ok = function () {
         $scope.$parent.recalculateLinear();
         $uibModalInstance.close();
@@ -3078,267 +3982,109 @@ app.controller('ModalInstanceCtrl',['$scope', '$uibModalInstance', 'x', 'y', 'z'
 
 }]);
 
-app.controller('CustomRoom4ModalCtrl',['$scope', '$uibModalInstance', function ($scope, $uibModalInstance){
-
-    let canvas;
-    $scope.importImg = null;
-
-    $scope.downloadCanvas = function downloadCanvas() {
-        if (!canvas)
-            canvas = document.getElementById('room4Canvas');
-
-        let imgData = canvas.toDataURL();
-        var link = document.createElement("a");
-        link.download = 'custom_room_4_pic.png';
-        link.href = imgData;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        delete link;
-    }
-
-    $scope.clearCanvas = function() {
-        if (!canvas)
-            canvas = document.getElementById('room4Canvas');
-        let context = canvas.getContext('2d');
-        
-        context.fillStyle = "white";
-        context.fillRect(0, 0, canvas.width, canvas.height);
-        //$scope.$parent.room4CanvasSave = canvas.toDataURL("image/png");
-        $scope.$parent.room4CanvasSave = null;
-        $scope.$parent.room4Img.src = $scope.$parent.room4CanvasSave;
-        $scope.$parent.drawBlueBox();
-    }
-
-    $scope.click = function() {
-        let canvas = document.getElementById('room4Canvas');
-        let imgElem = document.getElementById('img');
-        let context = canvas.getContext('2d');
-        context.drawImage(imgElem, 0, 0);
-
-        var select = document.getElementById('select');
-
-        select.addEventListener('change', function (e) {
-            var fileData = e.target.files[0];
-            imgElem.src = URL.createObjectURL(fileData);
-            $scope.click();
-        });
-    }
-
-    $scope.closeRoom4 = function() {
-        $uibModalInstance.close();
-    }
+app.controller('SimRotationModalCtrl', ['$scope', '$uibModalInstance', 'angle', 'symbol', 'image', 'label', function ($scope, $uibModalInstance, angle, symbol, image, label) {
+    $scope.value = { angle: angle };
+    $scope.symbol = symbol;
+    $scope.image = image;
+    $scope.label = label;
+    $scope.ok = function () {
+        $uibModalInstance.close($scope.value.angle);
+    };
+    $scope.cancel = function () {
+        $uibModalInstance.dismiss('cancel');
+    };
 }]);
 
-// tag draw custom room 4
-app.directive("drawing", function(){
+// Rotation of a victim symbol on its wall, in degrees (0-359). Seen from the robot, a positive
+// angle turns the symbol clockwise, the same way the preview is drawn.
+app.directive('simRotationDial', function () {
+    function normalize(value) {
+        const n = Math.round(Number(value) || 0);
+        return ((n % 360) + 360) % 360;
+    }
+
     return {
-        restrict: "A",
-        link: function($scope, element){
-        var ctx = element[0].getContext('2d');
-        
-        // variable that decides if something should be drawn on mousemove
-        var drawing = false;
-        
-        // the last coordinates before the current move
-        var lastX;
-        var lastY;
-        
-        // modal initialization
-        let room4Canvas = element[0];
-        let context = ctx;
-        if ($scope.$parent.room4CanvasSave != null) {
-            canvasImg = new Image;
-            canvasImg.onload = function() {
-                context.drawImage(canvasImg, 0, 0);
+        restrict: 'E',
+        require: 'ngModel',
+        scope: {
+            symbol: '<',
+            image: '<?',
+            isDisabled: '<?ngDisabled'
+        },
+        templateUrl: '/templates/sim_editor/rotation_dial.html',
+        link: function (scope, element, attrs, ngModel) {
+            scope.angle = 0;
+            scope.angleInput = 0;
+
+            ngModel.$render = function () {
+                scope.angle = normalize(ngModel.$viewValue);
+                scope.angleInput = scope.angle;
             };
-            canvasImg.src = $scope.$parent.room4CanvasSave;
-        }
-        room4Canvas.width = $scope.$parent.canvasWidth;
-        room4Canvas.height = $scope.$parent.canvasHeight;
-        context.fillStyle = "white";
-        context.fillRect(0, 0, room4Canvas.width, room4Canvas.height);
 
-        let black = '#000000';
-        let red = '#FF0000';
-        let white = '#FFFFFF';
-        let blue = '#0000FF';
-        let canvasColor = black;
-        let wallCheckbox = document.getElementById("drawWall");
-        let vicCheckbox = document.getElementById("drawVic");
-        let eraseCheckbox = document.getElementById("erase");
-        wallCheckbox.checked = 1;
-        vicCheckbox.checked = 0;
-        eraseCheckbox.checked = 0;
-        wallCheckbox.addEventListener('change', function (e) {
-            let checked = !e.target.checked;
-            if (!checked) {
-                vicCheckbox.checked = false;
-                eraseCheckbox.checked = false;
-                canvasColor = black;
+            function set(value) {
+                if (scope.isDisabled) return;
+                scope.angle = normalize(value);
+                scope.angleInput = scope.angle;
+                ngModel.$setViewValue(scope.angle);
             }
-            else
-                e.target.checked = true;
-        });
-        vicCheckbox.addEventListener('change', function (e) {
-            let checked = !e.target.checked;
-            if (!checked) {
-                wallCheckbox.checked = false;
-                eraseCheckbox.checked = false;
-                canvasColor = red;
+
+            scope.set = set;
+            scope.step = function (delta) {
+                set(scope.angle + delta);
+            };
+            scope.random = function () {
+                set(Math.floor(Math.random() * 360));
+            };
+            scope.typed = function () {
+                if (scope.angleInput === null || scope.angleInput === undefined || scope.angleInput === '') return;
+                set(scope.angleInput);
+            };
+
+            // Dragging on the dial: 0° at the top, clockwise. Snaps to 5°, or 1° with Shift.
+            function angleFromEvent(dial, event) {
+                const rect = dial.getBoundingClientRect();
+                const dx = event.clientX - (rect.left + rect.width / 2);
+                const dy = event.clientY - (rect.top + rect.height / 2);
+                let deg = Math.atan2(dx, -dy) * 180 / Math.PI;
+                const snap = event.shiftKey ? 1 : 5;
+                return Math.round(deg / snap) * snap;
             }
-            else
-                e.target.checked = true;
-        });
-        eraseCheckbox.addEventListener('change', function (e) {
-            let checked = !e.target.checked;
-            if (!checked) {
-                wallCheckbox.checked = false;
-                vicCheckbox.checked = false;
-                canvasColor = white;
-            }
-            else
-                e.target.checked = true;
-        });
 
-        let inputFile = document.getElementById("importCanvas");
-        let img = new Image;
-        img.onload = function() {
-            context.drawImage(img, 0, 0, room4Canvas.width, room4Canvas.height);
-            $scope.$parent.drawBlueBox();
-            $scope.$parent.room4CanvasSave = room4Canvas.toDataURL("image/png");
-            $scope.$parent.room4Img.src = $scope.$parent.room4CanvasSave;
-        }
-        inputFile.addEventListener('change', function (e) {
-            img.src = URL.createObjectURL(e.target.files[0]);
-        });
+            const root = element[0];
+            root.addEventListener('pointerdown', function (event) {
+                const dial = event.target.closest('.sim-rot-dial');
+                if (!dial || scope.isDisabled) return;
+                event.preventDefault();
+                dial.focus();
+                dial.setPointerCapture(event.pointerId);
+                scope.$apply(function () { set(angleFromEvent(dial, event)); });
 
-        // cover tiles in canvas that are not actually room 4
-        let minX = -1;
-        let maxX = 0;
-        let minY = -1;
-        let maxY = 0;
-        for (let i = 0; i < $scope.$parent.roomTiles[2].length; i++) {
-            let tileStr = $scope.$parent.roomTiles[2][i];
-            let x = tileStr.slice(0, tileStr.indexOf(","));
-            let y = tileStr.slice(tileStr.indexOf(",")+1, tileStr.lastIndexOf(","));
-            x = parseInt(x);
-            y = parseInt(y);
-            if (x < minX || minX == -1)
-                minX = x;
-            if (x > maxX)
-                maxX = x;
-            if (y < minY || minY == -1)
-                minY = y;
-            if (y > maxY)
-                maxY = y;
-        }
-        room4Width = (maxX - minX) / 2 + 1;
-        room4Height = (maxY - minY) / 2 + 1;
-
-        let blockWidth = room4Canvas.width / room4Width;
-        
-        $scope.$parent.drawBlueBox = function () {
-            for (let x = minX; x <= maxX; x = parseInt(x) + 2) {
-                for (let y = minY; y <= maxY; y = parseInt(y) + 2) {
-                    let found = false;
-                    for (let i = 0; i < $scope.$parent.roomTiles[2].length; i++) {
-                        if ($scope.$parent.roomTiles[2][i] == x+','+y+',0') {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        let startX = (x - minX) / 2 * blockWidth;
-                        let startY = (y - minY) / 2 * blockWidth;
-                        context.fillStyle = blue;
-                        context.fillRect(startX, startY, blockWidth, blockWidth);
-                        context.fillStyle = white;
-                    }
+                function move(e) {
+                    scope.$apply(function () { set(angleFromEvent(dial, e)); });
                 }
-            }
-        }
-
-        $scope.$parent.drawBlueBox();
-
-        element.bind('mousedown', function(event){
-            if(event.offsetX!==undefined){
-            lastX = event.offsetX;
-            lastY = event.offsetY;
-            } else {
-            /*lastX = event.layerX - event.currentTarget.offsetLeft;
-            lastY = event.layerY - event.currentTarget.offsetTop;*/
-            }
-            
-            // begins new line
-            ctx.beginPath();
-            
-            drawing = true;
-        });
-        element.bind('mousemove', function(event){
-            if(drawing){
-            // get current mouse position
-            if(event.offsetX!==undefined){
-                currentX = event.offsetX;
-                currentY = event.offsetY;
-            } else {
-                /*currentX = event.layerX - event.currentTarget.offsetLeft;
-                currentY = event.layerY - event.currentTarget.offsetTop;*/
-            }
-            
-            draw(lastX, lastY, currentX, currentY);
-            
-            // set current coordinates to last one
-            lastX = currentX;
-            lastY = currentY;
-            }
-            
-        });
-        element.bind('mouseup', function(event){
-            // stop drawing
-            drawing = false;
-            $scope.$parent.room4CanvasSave = room4Canvas.toDataURL("image/png");
-            $scope.$parent.room4Img.src = $scope.$parent.room4CanvasSave;
-        });
-            
-        // canvas reset
-        function reset(){
-        element[0].width = element[0].width; 
-        }
-        
-        function draw(lX, lY, cX, cY){
-            // make sure drawing in a room4 tile
-            let gridX1 = (parseInt(cX / blockWidth) * 2) + parseInt(minX);
-            let gridY1 = (parseInt(cY / blockWidth) * 2) + parseInt(minY);
-            let gridX2 = (parseInt(lX / blockWidth) * 2) + parseInt(minX);
-            let gridY2 = (parseInt(lY / blockWidth) * 2) + parseInt(minY);
-            let found = false;
-            for (let i = 0; i < $scope.$parent.roomTiles[2].length; i++) {
-                if ($scope.$parent.roomTiles[2][i] == gridX1+','+gridY1+',0' ||
-                    $scope.$parent.roomTiles[2][i] == gridX2+','+gridY2+',0') {
-                    found = true;
-                    break;
+                function up() {
+                    dial.removeEventListener('pointermove', move);
+                    dial.removeEventListener('pointerup', up);
+                    dial.removeEventListener('pointercancel', up);
                 }
-            }
-            if (found) {
-                // line from
-                ctx.moveTo(lX,lY);
-                // to
-                ctx.lineTo(cX,cY);
-                // color
-                ctx.strokeStyle = canvasColor;
-                // width
-                if (canvasColor == white)
-                    ctx.lineWidth = 20;
-                else
-                    ctx.lineWidth = 2;
-                // draw it
-                ctx.stroke();
+                dial.addEventListener('pointermove', move);
+                dial.addEventListener('pointerup', up);
+                dial.addEventListener('pointercancel', up);
+            });
 
-                $scope.$parent.drawBlueBox();
-            }
-        }
+            // Arrow keys: 1° (15° with Shift)
+            root.addEventListener('keydown', function (event) {
+                if (!event.target.closest('.sim-rot-dial') || scope.isDisabled) return;
+                const amount = event.shiftKey ? 15 : 1;
+                let delta = 0;
+                if (event.key === 'ArrowRight' || event.key === 'ArrowUp') delta = amount;
+                if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') delta = -amount;
+                if (!delta) return;
+                event.preventDefault();
+                scope.$apply(function () { scope.step(delta); });
+            });
         }
     };
 });
 
+// The custom room 4 creator (CustomRoom4ModalCtrl) is in room4_creator.js, shared by both years.

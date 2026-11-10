@@ -32,8 +32,11 @@ app.controller("ClockController", ['$scope', '$http', '$translate', '$timeout', 
         transports: ['websocket']
     });
     if (typeof competitionId !== 'undefined') {
-        socket.emit('subscribe', 'runs/line/' + competitionId + '/status');
-        socket.emit('subscribe', 'runs/maze/' + competitionId + '/status');
+        // (again on reconnecting: the server forgets the rooms of a lost connection)
+        socket.on('connect', function () {
+            socket.emit('subscribe', 'runs/line/' + competitionId + '/status');
+            socket.emit('subscribe', 'runs/maze/' + competitionId + '/status');
+        });
 
         socket.on('LChanged', function (data) {
             update_line_list();

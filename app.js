@@ -17,8 +17,6 @@ var favicon = require('serve-favicon')
 var logger = require('./config/logger').mainLogger
 var cookieParser = require('cookie-parser')
 var bodyParser = require('body-parser')
-const mongo_express = require('mongo-express/lib/middleware')
-const mongo_express_config = require('./mongo_express_config')
 
 // db
 var db = require('./config/db')
@@ -26,6 +24,7 @@ var mongoose = require('mongoose')
 
 // auth
 var pass = require('./config/pass')
+const access = require('./helper/access')
 var passport = require('passport')
 // session
 var session = require('express-session')
@@ -52,7 +51,10 @@ const { addQueue, removeQueue, setQueues, replaceQueues } = createBullBoard({
 })
 
 var app = express();
-app.set('trust proxy', true);
+// The addresses of the clients are taken from X-Forwarded-For only as the proxies before the app
+// give it: those of the machine and of private networks (as nginx beside the app in Docker), or
+// those TRUST_PROXY says. Anyone else could give any address there.
+app.set('trust proxy', process.env.TRUST_PROXY || 'loopback, linklocal, uniquelocal');
 async function bootstrap(){
     //========================================================================
     //                          Routes require
@@ -68,7 +70,6 @@ async function bootstrap(){
     var simulationRoute = require('./routes/simulation')
     var loginRoute = require('./routes/login')
     var adminRoute = require('./routes/admin')
-    var localesRoute = require('./routes/locales')
     var signageRoute = require('./routes/signage')
     var shortRoute = require('./routes/shortURL')
     var serviceRoute = require('./routes/service')
@@ -113,6 +114,9 @@ async function bootstrap(){
     
 
     app.use(compression())
+    app.disable('x-powered-by')
+    // (helper/securityHeaders.js)
+    app.use(require('./helper/securityHeaders'))
 
     app.use(function (req, res, next) {
         res.header("Access-Control-Allow-Origin", "*");
@@ -122,6 +126,8 @@ async function bootstrap(){
     /** Setting up the correct view engine - we are using pug */
     app.set('views', path.join(__dirname, 'views'))
     app.set('view engine', 'pug')
+    // Appended to JS/CSS URLs in views so browsers fetch fresh copies after every update/restart
+    app.locals.assetVersion = `${require('./package.json').version}-${Date.now().toString(36)}`
 
     app.use(bodyParser.json({limit: '50mb'}));
     app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
@@ -146,6 +152,10 @@ async function bootstrap(){
         extended: false
     }))
     app.use(cookieParser())
+    // No operators of the database in what requests give (helper/stripOperators.js)
+    app.use(require('./helper/stripOperators'))
+    // The signage contents are put in by admins: not run as pages either (helper/servedFiles.js)
+    app.use('/signage_content', require('./helper/servedFiles'))
     app.use(express.static(path.join(__dirname, 'public')))
 
     /*
@@ -154,11 +164,15 @@ async function bootstrap(){
     // init passport and session
     app.use(session({
         store: MongoStore.create({ mongoUrl: process.env.DB_CONNECT_STR, mongoOptions:{useUnifiedTopology: true}}),
-        secret: process.env.SESSION_SECRET || 'rcjscoring',
+        secret: await require('./helper/sessionSecret')(),
         resave: false,
         saveUninitialized: false,
         cookie: {
-        maxAge: 10 * 60 * 60 * 1000
+        maxAge: 10 * 60 * 60 * 1000,
+        // Not sent with requests other sites make (forms posted to the API from them)
+        sameSite: 'lax',
+        // Over https only, when the request came so (through a proxy the app trusts)
+        secure: 'auto'
         }
     }))
     app.use(passport.initialize())
@@ -176,28 +190,31 @@ async function bootstrap(){
     //                          API Calls
     //========================================================================
 
-    app.use('/api/auth', apiAuthRoute)
-    app.use('/api/maps/line', [apiLineMapsRoute.public, pass.ensureLoginApi, apiLineMapsRoute.private, pass.ensureAdminApi, apiLineMapsRoute.admin])
-    app.use('/api/maps/maze', [apiMazeMapsRoute.public, pass.ensureLoginApi, apiMazeMapsRoute.private, pass.ensureAdminApi, apiMazeMapsRoute.admin])
-    app.use('/api/teams', [apiTeamsRoute.public, pass.ensureLoginApi, apiTeamsRoute.private, pass.ensureAdminApi, apiTeamsRoute.admin])
-    app.use('/api/rounds', [apiRoundsRoute.public, pass.ensureLoginApi, apiRoundsRoute.private, pass.ensureAdminApi, apiRoundsRoute.admin])
-    app.use('/api/fields', [apiFieldsRoute.public, pass.ensureLoginApi, apiFieldsRoute.private, pass.ensureAdminApi, apiFieldsRoute.admin])
-    app.use('/api/runs/line', [apiLineRunsRoute.public, pass.ensureLoginApi, apiLineRunsRoute.private, pass.ensureAdminApi, apiLineRunsRoute.admin])
-    app.use('/api/runs/maze', [apiMazeRunsRoute.public, pass.ensureLoginApi, apiMazeRunsRoute.private, pass.ensureAdminApi, apiMazeRunsRoute.admin])
-    app.use('/api/runs/simulation', [apiSimulationRunsRoute.public, pass.ensureLoginApi, apiSimulationRunsRoute.private, pass.ensureAdminApi, apiSimulationRunsRoute.admin])
-    app.use('/api/competitions', [apiCompetitionsRoute.public, pass.ensureLoginApi, apiCompetitionsRoute.private, pass.ensureAdminApi, apiCompetitionsRoute.admin])
-    app.use('/api/users', [pass.ensureLoginApi, apiUserRoute.admin, pass.ensureSuperApi , apiUserRoute.super])
-    app.use('/api/signage', [pass.ensureLoginApi, apiSignageRoute.private, pass.ensureAdminApi, apiSignageRoute.admin])
-    app.use('/api/backup', [pass.ensureAdminApi, apiBackupRoute.admin])
-    app.use('/api/short', [pass.ensureSuperApi , apiShortURL.super])
-    app.use('/api/document', [apiDocumentRoute.public, pass.ensureLoginApi, apiDocumentRoute.private, pass.ensureAdminApi, apiDocumentRoute.admin])
-    app.use('/api/mail', [apiMailRoute.public, pass.ensureLoginApi, apiMailRoute.private, pass.ensureAdminApi, apiMailRoute.admin])
-    app.use('/api/registration', [apiRegistrationRoute.public, pass.ensureLoginApi, apiRegistrationRoute.private, pass.ensureAdminApi, apiRegistrationRoute.admin])
-    app.use('/api/reservation', [apiReservationRoute.public, pass.ensureLoginApi, apiReservationRoute.private, pass.ensureAdminApi, apiReservationRoute.admin])
-    app.use('/api/cabinet', [apiCabinetRoute.public, pass.ensureLoginApi, apiCabinetRoute.private, pass.ensureAdminApi, apiCabinetRoute.admin])
-    app.use('/api/survey', [apiSurveyRoute.public, pass.ensureLoginApi, apiSurveyRoute.private, pass.ensureAdminApi, apiSurveyRoute.admin])
-    app.use('/api/ranking', [apiRankingRoute.public, pass.ensureLoginApi, apiRankingRoute.private, pass.ensureAdminApi, apiRankingRoute.admin])
-    app.use('/api/technicalChallenge', [pass.ensureLoginApi, apiTechnicalChallengeRoute.private, pass.ensureAdminApi, apiTechnicalChallengeRoute.admin])
+    // Files people put in are never run as pages from here (helper/servedFiles.js)
+    app.use('/api', require('./helper/servedFiles'))
+    // Each with the guards of its routers, every route declaring who may call it (helper/access.js)
+    access.mount(app, '/api/auth', apiAuthRoute)
+    access.mount(app, '/api/maps/line', apiLineMapsRoute)
+    access.mount(app, '/api/maps/maze', apiMazeMapsRoute)
+    access.mount(app, '/api/teams', apiTeamsRoute)
+    access.mount(app, '/api/rounds', apiRoundsRoute)
+    access.mount(app, '/api/fields', apiFieldsRoute)
+    access.mount(app, '/api/runs/line', apiLineRunsRoute)
+    access.mount(app, '/api/runs/maze', apiMazeRunsRoute)
+    access.mount(app, '/api/runs/simulation', apiSimulationRunsRoute)
+    access.mount(app, '/api/competitions', apiCompetitionsRoute)
+    access.mount(app, '/api/users', apiUserRoute)
+    access.mount(app, '/api/signage', apiSignageRoute)
+    access.mount(app, '/api/backup', apiBackupRoute)
+    access.mount(app, '/api/short', apiShortURL)
+    access.mount(app, '/api/document', apiDocumentRoute)
+    access.mount(app, '/api/mail', apiMailRoute)
+    access.mount(app, '/api/registration', apiRegistrationRoute)
+    access.mount(app, '/api/reservation', apiReservationRoute)
+    access.mount(app, '/api/cabinet', apiCabinetRoute)
+    access.mount(app, '/api/survey', apiSurveyRoute)
+    access.mount(app, '/api/ranking', apiRankingRoute)
+    access.mount(app, '/api/technicalChallenge', apiTechnicalChallengeRoute)
     app.get('/api/ip', (request, response) => response.send(request.ip))
 
 
@@ -213,7 +230,6 @@ async function bootstrap(){
         });
     })
     app.use('/home', [homeRoute.public, pass.ensureAuthenticated, homeRoute.private, pass.ensureAdmin, homeRoute.admin])
-    app.use('/locales', localesRoute)
     app.use('/s', shortRoute.public)
     app.use('/service', serviceRoute)
 
@@ -224,7 +240,12 @@ async function bootstrap(){
     app.use('/admin', pass.ensureAdmin, adminRoute)
     bullAdapter.setBasePath('/admin/queues')
     app.use('/admin/queues', pass.ensureSuper, bullAdapter.getRouter())
-    app.use('/admin/mongo', pass.ensureSuper, await mongo_express(mongo_express_config))
+    // The database's own editor, for the super admins: only when it is asked for (MONGO_EXPRESS),
+    // as it is a way into all of the database, of packages with vulnerabilities of their own
+    if (process.env.MONGO_EXPRESS === 'true') {
+        const mongo_express = require('mongo-express/lib/middleware')
+        app.use('/admin/mongo', pass.ensureSuper, await mongo_express(require('./mongo_express_config')))
+    }
     app.use('/document', [documentRoute.public, pass.ensureAuthenticated, documentRoute.private, pass.ensureAdmin, documentRoute.admin])
     app.use('/registration', [registrationRoute.public, pass.ensureAuthenticated, registrationRoute.private, pass.ensureAdmin, registrationRoute.admin])
     app.use('/mypage', [myPageRoute.public, pass.ensureAuthenticated, myPageRoute.private, pass.ensureAdmin, myPageRoute.admin])

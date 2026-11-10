@@ -118,7 +118,7 @@ privateRouter.get('/sign/:runid', async function (req, res) {
     return next();
   }
   const rule = await ruleDetector.getRuleFromMazeRunId(id);
-  res.render(`sign/${rule.type}_${rule.rule}`, { id });
+  res.render(`sign/${rule.type}_${rule.rule}`, { id, rule: rule.rule });
 });
 
 publicRouter.all('*', function (req, res, next) {

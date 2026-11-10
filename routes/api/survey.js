@@ -15,12 +15,15 @@ const logger = require('../../config/logger').mainLogger;
 const surveyDb = require('../../models/survey');
 const competitiondb = require('../../models/competition');
 let fs = require('fs-extra');
+const sanitize = require('sanitize-filename');
 const gracefulFs = require('graceful-fs');
 fs = gracefulFs.gracefulify(fs);
 const multer = require('multer');
 const path = require('path');
 const mkdirp = require('mkdirp');
 var crypto = require("crypto");
+const access = require('../../helper/access');
+const safePath = require('../../helper/safePath');
 
 const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const N = 32;
@@ -82,7 +85,7 @@ module.exports.connectSocketIo = function (io) {
 };
 
 
-adminRouter.post('/edit/:competitionId', function (req, res, next) {
+adminRouter.post('/edit/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const competitionId = req.params.competitionId;
   let sdata = req.body;
 
@@ -113,7 +116,7 @@ adminRouter.post('/edit/:competitionId', function (req, res, next) {
   });
 });
 
-adminRouter.get('/list/:competitionId', function (req, res, next) {
+adminRouter.get('/list/:competitionId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), function (req, res, next) {
   const competitionId = req.params.competitionId;
 
   if (!ObjectId.isValid(competitionId)) {
@@ -142,7 +145,7 @@ adminRouter.get('/list/:competitionId', function (req, res, next) {
     });
 });
 
-adminRouter.get('/edit/:competitionId/:surveyId', function (req, res, next) {
+adminRouter.get('/edit/:competitionId/:surveyId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), access.of(surveyDb.survey, 'params.surveyId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const surveyId = req.params.surveyId;
 
@@ -176,7 +179,7 @@ adminRouter.get('/edit/:competitionId/:surveyId', function (req, res, next) {
     });
 });
 
-adminRouter.delete('/delete/:competitionId/:surveyId', function (req, res, next) {
+adminRouter.delete('/delete/:competitionId/:surveyId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), access.of(surveyDb.survey, 'params.surveyId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const surveyId = req.params.surveyId;
 
@@ -219,7 +222,7 @@ adminRouter.delete('/delete/:competitionId/:surveyId', function (req, res, next)
             err: err.message,
           });
         }
-        fs.rmdir(`${__dirname}/../../survey/${competitionId}/${surveyId}`, { recursive: true }, (err) => {
+        fs.rmdir(safePath('survey', competitionId, surveyId), { recursive: true }, (err) => {
           if (err) {
             logger.error(err.message);
           }
@@ -231,7 +234,7 @@ adminRouter.delete('/delete/:competitionId/:surveyId', function (req, res, next)
     });
 });
 
-adminRouter.put('/edit/:competitionId/:surveyId', function (req, res, next) {
+adminRouter.put('/edit/:competitionId/:surveyId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), access.of(surveyDb.survey, 'params.surveyId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const surveyId = req.params.surveyId;
   let sData = req.body;
@@ -288,7 +291,7 @@ adminRouter.put('/edit/:competitionId/:surveyId', function (req, res, next) {
     });
 });
 
-publicRouter.get('/list/:competitionId/:leagueId/:teamId', function (req, res, next) {
+publicRouter.get('/list/:competitionId/:leagueId/:teamId', access.team({ tokenAt: 'query.token', inCompetition: 'params.competitionId' }), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const leagueId = req.params.leagueId;
   const teamId = req.params.teamId;
@@ -355,7 +358,7 @@ publicRouter.get('/list/:competitionId/:leagueId/:teamId', function (req, res, n
     });
 });
 
-publicRouter.get('/question/:teamId/:token/:survId', function (req, res, next) {
+publicRouter.get('/question/:teamId/:token/:survId', access.team(), function (req, res, next) {
   const teamId = req.params.teamId;
   const token = req.params.token;
   const survId = req.params.survId;
@@ -406,7 +409,7 @@ publicRouter.get('/question/:teamId/:token/:survId', function (req, res, next) {
   });
 });
 
-publicRouter.get('/answer/:teamId/:token/:survId', function (req, res, next) {
+publicRouter.get('/answer/:teamId/:token/:survId', access.team(), function (req, res, next) {
   const teamId = req.params.teamId;
   const token = req.params.token;
   const survId = req.params.survId;
@@ -453,7 +456,7 @@ publicRouter.get('/answer/:teamId/:token/:survId', function (req, res, next) {
   });
 });
 
-publicRouter.put('/answer/:teamId/:token/:survId', function (req, res, next) {
+publicRouter.put('/answer/:teamId/:token/:survId', access.team(), function (req, res, next) {
   const teamId = req.params.teamId;
   const token = req.params.token;
   const survId = req.params.survId;
@@ -557,7 +560,7 @@ publicRouter.put('/answer/:teamId/:token/:survId', function (req, res, next) {
   });
 });
 
-publicRouter.get('/teamList/:teamId/:token', function (req, res, next) {
+publicRouter.get('/teamList/:teamId/:token', access.team(), function (req, res, next) {
   const teamId = req.params.teamId;
   const token = req.params.token;
 
@@ -599,7 +602,7 @@ publicRouter.get('/teamList/:teamId/:token', function (req, res, next) {
   });
 });
 
-adminRouter.delete('/answer/:competitionId/:answerId', function (req, res, next) {
+adminRouter.delete('/answer/:competitionId/:answerId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), access.of(surveyDb.surveyAnswer, 'params.answerId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const answerId = req.params.answerId;
 
@@ -636,7 +639,7 @@ adminRouter.delete('/answer/:competitionId/:answerId', function (req, res, next)
   });
 });
 
-adminRouter.get('/answer/:competitionId/:survId', function (req, res, next) {
+adminRouter.get('/answer/:competitionId/:survId', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionId'), access.of(surveyDb.survey, 'params.survId', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const competitionId = req.params.competitionId;
   const survId = req.params.survId;
 
@@ -694,7 +697,7 @@ adminRouter.get('/answer/:competitionId/:survId', function (req, res, next) {
           dbAnswer.map(team => {
             team.answer.map(ans => {
               if (questionTypes[ans.questionId] == 'file') {
-                let path = `${__dirname}/../../survey/${team.competition}/${dbSurvey._id}/${team.team._id}/${ans.questionId}`;
+                let path = safePath('survey', team.competition, dbSurvey._id, team.team._id, ans.questionId);
                 let hash = md5(path);
                 if (hash == '') ans.answer = "";
                 else ans.hash = hash;
@@ -722,7 +725,7 @@ function md5(filePath) {
   }
 }
 
-publicRouter.post('/answer/:teamId/:token/:survId/file/:questionId', function (req, res, next) {
+publicRouter.post('/answer/:teamId/:token/:survId/file/:questionId', access.team(), function (req, res, next) {
   const { teamId, token, survId, questionId } = req.params;
 
   if (!ObjectId.isValid(teamId)) {
@@ -798,7 +801,7 @@ publicRouter.post('/answer/:teamId/:token/:survId/file/:questionId', function (r
                 });
               }
 
-              const destination = `${__dirname}/../../survey/${team.competition}/${survey._id}/${team._id}`;
+              const destination = safePath('survey', team.competition, survey._id, team._id);
               if (!fs.existsSync(destination)) {
                 mkdirp.sync(destination);
               }
@@ -869,7 +872,7 @@ const normalizeString = (str) => {
   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]/g, '');
 }
 
-publicRouter.get('/answer/:teamId/:token/:survId/file/:questionId', function (req, res, next) {
+publicRouter.get('/answer/:teamId/:token/:survId/file/:questionId', access.team(), function (req, res, next) {
   const { teamId, token, survId, questionId } = req.params;
 
   if (!ObjectId.isValid(teamId)) {
@@ -910,7 +913,7 @@ publicRouter.get('/answer/:teamId/:token/:survId/file/:questionId', function (re
             let questionAnswer = dbAnswer.answer.find(a => a.questionId == questionId);
             if (questionAnswer) {
               let originalFileName = questionAnswer.answer;
-              let path = `${__dirname}/../../survey/${dbTeam.competition}/${survId}/${dbTeam._id}/${questionId}`;
+              let path = safePath('survey', dbTeam.competition, survId, dbTeam._id, sanitize(questionId));
               fs.stat(path, (err, stat) => {
                 // Handle file not found
                 if (err !== null) {

@@ -1,0 +1,206 @@
+POST /api/auth/login (public): anyone
+GET /api/maps/line/image/:mapid (public): VIEW in the competition of the LineMap at params.mapid, or it is the map of a run anyone may see
+POST /api/maps/line/map-image-pdf (public): anyone
+POST /api/maps/line/map-image-png (public): anyone
+POST /api/maps/line/scoresheet (public): anyone
+GET /api/maps/line/:map (public): VIEW in the competition of the LineMap at params.map, or it is the map of a run anyone may see
+GET /api/maps/line/tiletypes (public): any admin
+GET /api/maps/line/tiletypes/:tiletype (public): any admin
+GET /api/maps/line/tilesets (public): anyone
+GET /api/maps/line/tilesets/:tileset (public): anyone
+GET /api/maps/line/ (private): VIEW in the competition at query.competition
+GET /api/maps/line/name/:competitionid/:name (private): ADMIN in the competition at params.competitionid
+GET /api/maps/line/export (admin): ADMIN in the competition at query.competition and the competitions of the LineMaps at query.ids
+POST /api/maps/line/ (admin): ADMIN in the competition at body.competition
+GET /api/maps/line/:map/maxScore (admin): ADMIN in the competition of the LineMap at params.map
+PUT /api/maps/line/:map (admin): ADMIN in the competition of the LineMap at params.map
+DELETE /api/maps/line/:map (admin): ADMIN in the competition of the LineMap at params.map
+GET /api/maps/line/tileCount/:expectMapId/:tileSetId/:tileId (admin): any admin
+GET /api/maps/line/tileCount/:expectMapId/:tileSetId (admin): any admin
+POST /api/maps/line/tilesets (admin): any admin
+PUT /api/maps/line/tilesets/:tileset (admin): any admin
+DELETE /api/maps/line/tilesets/:tileset (admin): any admin
+GET /api/maps/maze/ (public): VIEW in the competition at query.competition
+GET /api/maps/maze/image/:mapid (public): VIEW in the competition of the MazeMap at params.mapid, or it is the map of a run anyone may see
+POST /api/maps/maze/scoresheet (public): anyone
+POST /api/maps/maze/competition-targets-pdf (public): anyone
+POST /api/maps/maze/map-image-pdf (public): anyone
+POST /api/maps/maze/map-image-png (public): anyone
+GET /api/maps/maze/:map (public): VIEW in the competition of the MazeMap at params.map, or it is the map of a run anyone may see
+GET /api/maps/maze/export (admin): ADMIN in the competition at query.competition and the competitions of the MazeMaps at query.ids
+POST /api/maps/maze/ (admin): ADMIN in the competition at body.competition
+GET /api/maps/maze/:map/maxScore (admin): ADMIN in the competition of the MazeMap at params.map
+PUT /api/maps/maze/:map (admin): ADMIN in the competition of the MazeMap at params.map
+DELETE /api/maps/maze/:map (admin): ADMIN in the competition of the MazeMap at params.map
+GET /api/maps/maze/name/:competitionid/:name (admin): ADMIN in the competition at params.competitionid
+GET /api/teams/leagues (public): anyone
+GET /api/teams/leagues/:league/:competitionId (public): anyone
+GET /api/teams/:teamid (public): anyone
+GET /api/teams/code/:teamId/:code (private): logged in
+PUT /api/teams/:competitionid/:teamid (private): JUDGE in the competition at params.competitionid + JUDGE in the competition of the Team at params.teamid
+DELETE /api/teams/:teamid (admin): ADMIN in the competition of the Team at params.teamid
+POST /api/teams/ (admin): ADMIN in the competition at body.competition
+POST /api/teams/bulk (admin): ADMIN in the competition at body[].competition
+GET /api/rounds/ (public): super admin
+GET /api/rounds/:roundid (public): VIEW in the competition of the Round at params.roundid
+DELETE /api/rounds/:roundid (admin): ADMIN in the competition of the Round at params.roundid
+POST /api/rounds/ (admin): ADMIN in the competition at body.competition
+GET /api/fields/ (public): super admin
+GET /api/fields/:fieldid (public): logged in
+DELETE /api/fields/:fieldid (admin): ADMIN in the competition of the Field at params.fieldid
+POST /api/fields/ (admin): ADMIN in the competition at body.competition
+GET /api/runs/line/competition/:competitionId (public): anyone
+GET /api/runs/line/find/:competitionid/:field/:status (public): logged in
+GET /api/runs/line/:runid (public): anyone
+GET /api/runs/line/find/team_status/:competitionid/:teamid/:status (private): JUDGE in the competition at params.competitionid
+PUT /api/runs/line/:runid (private): JUDGE in the competition of the LineRun at params.runid
+POST /api/runs/line/pre_recorded (private): JUDGE in the competition of the Team at body.team
+PUT /api/runs/line/bulk (admin): ADMIN in the competition of the LineRun at body[]._id
+GET /api/runs/line/scoresheet2 (admin): ADMIN in the competition at query.competition and the competitions of the LineRuns at query.run
+DELETE /api/runs/line/:runids (admin): ADMIN in the competition of the LineRun at params.runids
+POST /api/runs/line/ (admin): ADMIN in the competition at body.competition + ADMIN in the competition of the Team at body.team + ADMIN in the competition of the Round at body.round + ADMIN in the competition of the Field at body.field + ADMIN in the competition of the LineMap at body.map
+GET /api/runs/maze/competition/:competitionId (public): anyone
+GET /api/runs/maze/find/:competitionid/:field/:status (public): logged in
+GET /api/runs/maze/:runid (public): anyone
+GET /api/runs/maze/find/team_status/:competitionid/:teamid/:status (private): JUDGE in the competition at params.competitionid
+PUT /api/runs/maze/:runid (private): JUDGE in the competition of the MazeRun at params.runid
+PUT /api/runs/maze/map/:runid (private): JUDGE in the competition of the MazeRun at params.runid
+POST /api/runs/maze/pre_recorded (private): JUDGE in the competition of the Team at body.team
+PUT /api/runs/maze/bulk (admin): ADMIN in the competition of the MazeRun at body[]._id
+GET /api/runs/maze/scoresheet2 (admin): ADMIN in the competition at query.competition and the competitions of the MazeRuns at query.run
+DELETE /api/runs/maze/:runids (admin): ADMIN in the competition of the MazeRun at params.runids
+POST /api/runs/maze/ (admin): ADMIN in the competition at body.competition + ADMIN in the competition of the Team at body.team + ADMIN in the competition of the Round at body.round + ADMIN in the competition of the Field at body.field + ADMIN in the competition of the MazeMap at body.map
+GET /api/runs/simulation/competition/:competitionId (public): anyone
+GET /api/runs/simulation/:runid (public): anyone
+PUT /api/runs/simulation/:runid (private): JUDGE in the competition of the SimRun at params.runid
+PUT /api/runs/simulation/bulk (admin): ADMIN in the competition of the SimRun at body[]._id
+DELETE /api/runs/simulation/:runids (admin): ADMIN in the competition of the SimRun at params.runids
+POST /api/runs/simulation/ (admin): ADMIN in the competition at body.competition + ADMIN in the competition of the Team at body.team + ADMIN in the competition of the Round at body.round + ADMIN in the competition of the Field at body.field
+GET /api/competitions/ (public): anyone
+GET /api/competitions/leagues (public): anyone
+GET /api/competitions/leagues/:league (public): anyone
+GET /api/competitions/:competition (public): anyone
+GET /api/competitions/:competition/documents/:leagueId (public): anyone
+GET /api/competitions/:competition/teams/:teamid (public): VIEW in the competition at params.competition
+GET /api/competitions/:competition/fields (public): anyone
+GET /api/competitions/:competitionid/fields/:name (public): VIEW in the competition at params.competitionid
+GET /api/competitions/:competition/rounds (public): anyone
+GET /api/competitions/:competitionid/rounds/:name (public): VIEW in the competition at params.competitionid
+GET /api/competitions/:competition/documents/:leagueId/review (private): VIEW or INTERVIEW in the competition at params.competition
+GET /api/competitions/:competition/teams (private): logged in
+GET /api/competitions/:competition/:league/teams (private): logged in
+GET /api/competitions/:competition/:league/maps (private): VIEW in the competition at params.competition
+PUT /api/competitions/:competitionid (admin): ADMIN in the competition at params.competitionid
+GET /api/competitions/:competition/teams/documents (admin): ADMIN in the competition at params.competition
+PUT /api/competitions/:competition/teams/documents (admin): ADMIN in the competition at params.competition + ADMIN in the competition at body.competition + ADMIN in the competition of the Team at body._id
+GET /api/competitions/:competition/registration (admin): ADMIN in the competition at params.competition
+PUT /api/competitions/:competition/registration (admin): ADMIN in the competition at params.competition
+GET /api/competitions/:competition/adminTeams (admin): ADMIN in the competition at params.competition
+POST /api/competitions/ (admin): any admin
+DELETE /api/competitions/:competitionid (admin): ADMIN in the competition at params.competitionid
+POST /api/users/me/password (private): logged in
+GET /api/users/ (admin): any admin
+PUT /api/users/:userid/:competitionid/role (admin): ADMIN in the competition at params.competitionid
+PUT /api/users/:userid/:competitionid/:aLevel (admin): ADMIN in the competition at params.competitionid
+DELETE /api/users/:userid (super): super admin
+POST /api/users/ (super): super admin
+PUT /api/users/:userid (super): super admin
+GET /api/signage/ (private): logged in
+GET /api/signage/:id (private): logged in
+POST /api/signage/:id/refresh (private): logged in
+GET /api/signage/:id/:cont (private): logged in
+GET /api/signage/contentList (admin): any admin
+GET /api/signage/contentList/img (admin): any admin
+GET /api/signage/contentList/mov (admin): any admin
+POST /api/signage/contentList/upload (admin): any admin
+DELETE /api/signage/contentList/:file (admin): any admin
+POST /api/signage/ (admin): any admin
+PUT /api/signage/:id (admin): any admin
+DELETE /api/signage/:id (admin): any admin
+POST /api/backup/restore (admin): any admin
+POST /api/backup/:competition (admin): ADMIN in the competition at params.competition
+GET /api/backup/list/:competitionId (admin): ADMIN in the competition at params.competitionId
+GET /api/backup/archive/:competitionId/:fileName (admin): ADMIN in the competition at params.competitionId
+DELETE /api/backup/archive/:competitionId/:fileName (admin): ADMIN in the competition at params.competitionId
+GET /api/backup/job/:jobId (admin): any admin
+GET /api/short/ (super): super admin
+DELETE /api/short/:shortId (super): super admin
+POST /api/short/ (super): super admin
+GET /api/document/answer/:teamId/:token (public): the team by its token or its public documents
+PUT /api/document/answer/:teamId/:token (public): the team by its token
+POST /api/document/files/:teamId/:token/:fileName (public): the team by its token
+GET /api/document/files/:teamId/:token (public): the team by its token or its public documents
+GET /api/document/files/:teamId/:token/:fileName (public): the team by its token or its public documents or its competition's public token
+POST /api/document/files/usercontent/:teamId/:token (public): the team by its token
+GET /api/document/files/usercontent/:teamId/:token/:fileName (public): the team by its token or its public documents
+GET /api/document/review/:teamId (private): VIEW or INTERVIEW in the competition of the Team at params.teamId
+GET /api/document/review/:teamId/myComments (private): VIEW or INTERVIEW in the competition of the Team at params.teamId
+PUT /api/document/review/:teamId (private): SUPERADMIN or INTERVIEW in the competition of the Team at params.teamId
+POST /api/document/review/files/:teamId/:fileName (private): SUPERADMIN or INTERVIEW in the competition of the Team at params.teamId
+GET /api/document/review/files/:teamId (private): VIEW or INTERVIEW in the competition of the Team at params.teamId
+GET /api/document/review/files/:teamId/:userName/:fileName (private): VIEW or INTERVIEW in the competition of the Team at params.teamId
+POST /api/document/review/files/usercontent/:teamId (private): SUPERADMIN or INTERVIEW in the competition of the Team at params.teamId
+GET /api/document/review/files/usercontent/:teamId/:userName/:fileName (private): VIEW or INTERVIEW in the competition of the Team at params.teamId
+POST /api/document/inspection/files/:teamId/:fileName (private): JUDGE in the competition of the Team at params.teamId
+GET /api/document/inspection/files/:teamId/:fileName (private): JUDGE in the competition of the Team at params.teamId
+GET /api/document/map/:fileName (private): logged in
+GET /api/document/:competitionId/assigned (private): SUPERADMIN or INTERVIEW in the competition at params.competitionId
+DELETE /api/document/review/:reviewId/:questionId (admin): ADMIN in the competition of the review at params.reviewId
+DELETE /api/document/review/:reviewId (admin): ADMIN in the competition of the review at params.reviewId
+GET /api/document/reviews/:competition (admin): ADMIN in the competition at params.competition
+GET /api/document/templates/documentForm (admin): any admin
+GET /api/document/templates/documentForm/:fileName (admin): any admin
+GET /api/document/templates/reviewForm (admin): any admin
+GET /api/document/templates/reviewForm/:fileName (admin): any admin
+GET /api/document/:competitionId/reviewStatus (admin): ADMIN in the competition at params.competitionId
+GET /api/mail/click/:mailId/:token (public): anyone
+GET /api/mail/open/:mailId (public): anyone
+GET /api/mail/my/:teamId/:token (public): the team by its token
+GET /api/mail/get/:teamId/:token/:mailId (public): the team by its token
+GET /api/mail/templates (admin): any admin
+GET /api/mail/templates/:fileName (admin): any admin
+POST /api/mail/templates/:fileName (admin): any admin
+DELETE /api/mail/templates/:fileName (admin): any admin
+POST /api/mail/send (admin): ADMIN in the competition of the Team at body.data[]._id
+GET /api/mail/staff/:competitionId (admin): ADMIN in the competition at params.competitionId
+POST /api/mail/staff/:competitionId (admin): ADMIN in the competition at params.competitionId
+POST /api/mail/test/:competitionId (admin): ADMIN in the competition at params.competitionId
+GET /api/mail/sent/:competitionId (admin): ADMIN in the competition at params.competitionId
+GET /api/mail/sent/:competitionId/:mailId (admin): ADMIN in the competition at params.competitionId
+GET /api/mail/event/:competitionId/:mailId (admin): ADMIN in the competition at params.competitionId
+GET /api/mail/mailAuth (admin): super admin
+POST /api/registration/auth/:competitionId/:leagueId/:lang (public): anyone
+POST /api/registration/reg/:authId/:token/:lang (public): anyone
+GET /api/reservation/book/:teamId/:token/:resvId (public): the team by its token
+POST /api/reservation/book/:teamId/:token/:resvId (public): the team by its token
+POST /api/reservation/cancel/:teamId/:token/:resvId (public): the team by its token
+POST /api/reservation/list/:competitionId (public): the team at body.team by its token at body.token, of the competition at params.competitionId
+POST /api/reservation/config/:competitionId (admin): ADMIN in the competition at params.competitionId
+GET /api/reservation/config/:competitionId (admin): ADMIN in the competition at params.competitionId
+GET /api/reservation/config/:competitionId/:resvId (admin): ADMIN in the competition at params.competitionId + ADMIN in the competition of the reservation at params.resvId
+DELETE /api/reservation/config/:competitionId/:resvId (admin): ADMIN in the competition at params.competitionId + ADMIN in the competition of the reservation at params.resvId
+PUT /api/reservation/config/:competitionId/:resvId (admin): ADMIN in the competition at params.competitionId + ADMIN in the competition of the reservation at params.resvId
+PUT /api/reservation/admin/:competitionId/:resvId (admin): ADMIN in the competition at params.competitionId + ADMIN in the competition of the reservation at params.resvId
+GET /api/cabinet/:competitionId/files/:teamId/:token/:folder (public): the team by its token or ADMIN in its competition, of the competition at params.competitionId
+GET /api/cabinet/:competitionId/file/:teamId/:token/:folder/:file (public): the team by its token or ADMIN in its competition, of the competition at params.competitionId
+POST /api/cabinet/:competitionId/upload/:folder (admin): ADMIN in the competition at params.competitionId
+DELETE /api/cabinet/:competitionId/file/:folder/:file (admin): ADMIN in the competition at params.competitionId
+GET /api/survey/list/:competitionId/:leagueId/:teamId (public): the team by its token at query.token, of the competition at params.competitionId
+GET /api/survey/question/:teamId/:token/:survId (public): the team by its token
+GET /api/survey/answer/:teamId/:token/:survId (public): the team by its token
+PUT /api/survey/answer/:teamId/:token/:survId (public): the team by its token
+GET /api/survey/teamList/:teamId/:token (public): the team by its token
+POST /api/survey/answer/:teamId/:token/:survId/file/:questionId (public): the team by its token
+GET /api/survey/answer/:teamId/:token/:survId/file/:questionId (public): the team by its token
+POST /api/survey/edit/:competitionId (admin): ADMIN in the competition at params.competitionId
+GET /api/survey/list/:competitionId (admin): ADMIN in the competition at params.competitionId
+GET /api/survey/edit/:competitionId/:surveyId (admin): ADMIN in the competition at params.competitionId + ADMIN in the competition of the survey at params.surveyId
+DELETE /api/survey/delete/:competitionId/:surveyId (admin): ADMIN in the competition at params.competitionId + ADMIN in the competition of the survey at params.surveyId
+PUT /api/survey/edit/:competitionId/:surveyId (admin): ADMIN in the competition at params.competitionId + ADMIN in the competition of the survey at params.surveyId
+DELETE /api/survey/answer/:competitionId/:answerId (admin): ADMIN in the competition at params.competitionId + ADMIN in the competition of the surveyAnswer at params.answerId
+GET /api/survey/answer/:competitionId/:survId (admin): ADMIN in the competition at params.competitionId + ADMIN in the competition of the survey at params.survId
+GET /api/ranking/:competitionId/:leagueId (public): anyone
+GET /api/ranking/:competitionId/:leagueId/document (admin): ADMIN in the competition at params.competitionId
+PUT /api/technicalChallenge/:id (private): JUDGE in the competition of the TechnicalChallenge at params.id
+GET /api/technicalChallenge/:competitionId/:leagueId (private): VIEW in the competition at params.competitionId
+POST /api/technicalChallenge/recovery/:competitionId (admin): ADMIN in the competition at params.competitionId

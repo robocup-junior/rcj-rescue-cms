@@ -13,6 +13,8 @@ const { ACCESSLEVELS } = require('../../models/user');
 const competitiondb = require('../../models/competition');
 const { VICTIMS } = require('../../models/mazeMap');
 const Decimal = require('decimal.js');
+const access = require('../../helper/access');
+const { mazeMap } = require('../../models/mazeMap');
 
 let socketIo;
 
@@ -42,7 +44,7 @@ module.exports.connectSocketIo = function (io) {
  *
  * @apiError (400) {String} msg The error message
  */
-publicRouter.get('/competition/:competitionId', function (req, res, next) {
+publicRouter.get('/competition/:competitionId', access.anyone('shown as their status and the ranking settings let them be, by the handler'), function (req, res, next) {
   const competition = req.params.competitionId;
   const normalized = req.query.normalized;
 
@@ -126,7 +128,7 @@ publicRouter.get('/competition/:competitionId', function (req, res, next) {
 
         // Apply score adjustment
         if (run.adjustment != null) {
-          run.score = new Decimal(run.score).times((run.adjustment + 100) / 100);
+          run.score = new Decimal(run.score).times((run.adjustment + 100) / 100).toNumber();
         }
 
         if (run.foundVictims) run.foundVictims = run.foundVictims.sort((a,b) => VICTIMS.indexOf(a.type) - VICTIMS.indexOf(b.type));
@@ -168,7 +170,7 @@ function getMaxScoreWithCache(runs, league, normalizationGroup, cache) {
 
 privateRouter.get(
   '/find/team_status/:competitionid/:teamid/:status',
-  function (req, res, next) {
+  access.competition(ACCESSLEVELS.JUDGE, 'params.competitionid'), function (req, res, next) {
     const id = req.params.competitionid;
     const teamId = req.params.teamid;
     const { status } = req.params;
@@ -223,7 +225,7 @@ privateRouter.get(
 
 publicRouter.get(
   '/find/:competitionid/:field/:status',
-  function (req, res, next) {
+  access.loggedIn('the runs of a field, for the signage displays'), function (req, res, next) {
     const id = req.params.competitionid;
     const field_id = req.params.field;
     const { status } = req.params;
@@ -294,7 +296,7 @@ publicRouter.get(
  * @apiError (400) {String} err The error message
  * @apiError (400) {String} msg The error message
  */
-publicRouter.get('/:runid', function (req, res, next) {
+publicRouter.get('/:runid', access.anyone('shown as their status and the ranking settings let them be, by the handler'), function (req, res, next) {
   const id = req.params.runid;
   const normalized = req.query.normalized
 
@@ -315,7 +317,11 @@ publicRouter.get('/:runid', function (req, res, next) {
         err: err.message,
       });
     }
-    // Hide map and field from public
+    if (!dbRun) {
+      return res.status(404).send({
+        msg: 'Run not found',
+      });
+    }
     // Hide map and field from public
     const authResult = auth.authViewRun(req.user, dbRun, ACCESSLEVELS.VIEW, dbRun.competition.preparation);
     if (authResult == 0) {
@@ -355,7 +361,7 @@ publicRouter.get('/:runid', function (req, res, next) {
   });
 });
 
-adminRouter.put('/bulk', function (req, res) {
+adminRouter.put('/bulk', access.of(mazeRun, 'body[]._id', ACCESSLEVELS.ADMIN), function (req, res) {
   const updates = req.body;
   const totalCount = updates.length;
   let processed = 0;
@@ -444,7 +450,7 @@ adminRouter.put('/bulk', function (req, res) {
  * @apiError (400) {String} err The error message
  * @apiError (400) {String} msg The error message
  */
-privateRouter.put('/:runid', function (req, res, next) {
+privateRouter.put('/:runid', access.of(mazeRun, 'params.runid', ACCESSLEVELS.JUDGE), function (req, res, next) {
   const id = req.params.runid;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -463,146 +469,114 @@ privateRouter.put('/:runid', function (req, res, next) {
   delete run.field;
   delete run.score;
 
-  // logger.debug(run)
-
-  mazeRun
-    .findById(id)
-    .populate(['map', 'competition', 'team'])
-    .exec(function (err, dbRun) {
-      if (err) {
-        logger.error(err);
-        res.status(400).send({
-          msg: 'Could not get run',
-          err: err.message,
-        });
-      } else {
-        if (!dbRun)
-          return res.status(400).send({
-            msg: 'Could not get run',
-          });
-        if (
-          !auth.authCompetition(
-            req.user,
-            dbRun.competition._id,
-            ACCESSLEVELS.JUDGE
-          )
-        ) {
-          return res.status(401).send({
-            msg: 'You have no authority to access this api!!',
-          });
-        }
-
-        // Recursively updates properties in "dbObj" from "obj"
-        const copyProperties = function (obj, dbObj) {
-          for (const prop in obj) {
-            if (
-              obj.hasOwnProperty(prop) &&
-              (dbObj.hasOwnProperty(prop) || dbObj.get(prop) !== undefined)
-            ) {
-              // Mongoose objects don't have hasOwnProperty
-              if (typeof obj[prop] === 'object' && dbObj[prop] != null) {
-                // Catches object and array
-                copyProperties(obj[prop], dbObj[prop]);
-
-                if (dbObj.markModified !== undefined) {
-                  dbObj.markModified(prop);
-                }
-              } else if (obj[prop] !== undefined) {
-                // logger.debug("copy " + prop)
-                dbObj[prop] = obj[prop];
-              }
-            } else {
-              return new Error(`Illegal key: ${prop}`);
-            }
-          }
-        };
-
-        for (const i in run.tiles) {
-          if (run.tiles.hasOwnProperty(i)) {
-            const tile = run.tiles[i];
-            delete tile.processing;
-
-            if (isNaN(i)) {
-              const coords = i.split(',');
-              tile.x = Number(coords[0]);
-              tile.y = Number(coords[1]);
-              tile.z = Number(coords[2]);
-            }
-
-            let existing = false;
-            for (let j = 0; j < dbRun.tiles.length; j++) {
-              const dbTile = dbRun.tiles[j];
-              // logger.debug(tile)
-              // logger.debug(dbTile)
-              if (
-                tile.x == dbTile.x &&
-                tile.y == dbTile.y &&
-                tile.z == dbTile.z
-              ) {
-                existing = true;
-                err = copyProperties(tile, dbTile);
-                dbRun.markModified('tiles');
-                if (err) {
-                  logger.error(err);
-                  return res.status(400).send({
-                    err: err.message,
-                    msg: 'Could not save run',
-                  });
-                }
-                break;
-              }
-            }
-            if (!existing) {
-              dbRun.tiles.push(tile);
-              dbRun.markModified('tiles');
-            }
-          }
-        }
-
-        delete run.tiles;
-
-        if (run.status) {
-          if (dbRun.status > run.status) delete run.status;
-        }
-
-        const prevStatus = dbRun.status;
-
-        err = copyProperties(run, dbRun);
+  // Read, change and save the run, again if another request saved it in between. Each time from
+  // the request as it came, since applying it takes parts of it away
+  const body = JSON.stringify(run);
+  const update = function (retries) {
+    const run = JSON.parse(body);
+    mazeRun
+      .findById(id)
+      .populate(['map', 'competition', 'team'])
+      .exec(function (err, dbRun) {
         if (err) {
           logger.error(err);
-          return res.status(400).send({
+          res.status(400).send({
+            msg: 'Could not get run',
             err: err.message,
-            msg: 'Could not save run',
           });
-        }
-
-        if (prevStatus != dbRun.status) statusUpdate = 1;
-
-        let retScoreCals = scoreCalculator.calculateScore(dbRun);
-
-        if (!retScoreCals) {
-          logger.error('Value Error');
-          return res.status(202).send({
-            msg: 'Try again later',
-          });
-        }
-
-        dbRun.score = retScoreCals.score;
-        dbRun.foundVictims = retScoreCals.victims;
-        if (retScoreCals.kits) dbRun.distKits = retScoreCals.kits;
-
-        if (
-          dbRun.score > 0 ||
-          dbRun.time.minutes != 0 ||
-          dbRun.time.seconds != 0 ||
-          dbRun.status >= 2
-        ) {
-          dbRun.started = true;
         } else {
-          dbRun.started = false;
-        }
+          if (!dbRun)
+            return res.status(400).send({
+              msg: 'Could not get run',
+            });
+          if (
+            !auth.authCompetition(
+              req.user,
+              dbRun.competition._id,
+              ACCESSLEVELS.JUDGE
+            )
+          ) {
+            return res.status(401).send({
+              msg: 'You have no authority to access this api!!',
+            });
+          }
 
-        dbRun.save(function (err) {
+          // Recursively updates properties in "dbObj" from "obj"
+          const copyProperties = function (obj, dbObj) {
+            for (const prop in obj) {
+              if (
+                obj.hasOwnProperty(prop) &&
+                (dbObj.hasOwnProperty(prop) || dbObj.get(prop) !== undefined)
+              ) {
+                // Mongoose objects don't have hasOwnProperty
+                if (typeof obj[prop] === 'object' && dbObj[prop] != null) {
+                  // Catches object and array
+                  copyProperties(obj[prop], dbObj[prop]);
+
+                  if (dbObj.markModified !== undefined) {
+                    dbObj.markModified(prop);
+                  }
+                } else if (obj[prop] !== undefined) {
+                  // logger.debug("copy " + prop)
+                  dbObj[prop] = obj[prop];
+                }
+              } else {
+                return new Error(`Illegal key: ${prop}`);
+              }
+            }
+          };
+
+          for (const i in run.tiles) {
+            if (run.tiles.hasOwnProperty(i)) {
+              const tile = run.tiles[i];
+              delete tile.processing;
+
+              if (isNaN(i)) {
+                const coords = i.split(',');
+                tile.x = Number(coords[0]);
+                tile.y = Number(coords[1]);
+                tile.z = Number(coords[2]);
+              }
+
+              let existing = false;
+              for (let j = 0; j < dbRun.tiles.length; j++) {
+                const dbTile = dbRun.tiles[j];
+                // logger.debug(tile)
+                // logger.debug(dbTile)
+                if (
+                  tile.x == dbTile.x &&
+                  tile.y == dbTile.y &&
+                  tile.z == dbTile.z
+                ) {
+                  existing = true;
+                  err = copyProperties(tile, dbTile);
+                  dbRun.markModified('tiles');
+                  if (err) {
+                    logger.error(err);
+                    return res.status(400).send({
+                      err: err.message,
+                      msg: 'Could not save run',
+                    });
+                  }
+                  break;
+                }
+              }
+              if (!existing) {
+                dbRun.tiles.push(tile);
+                dbRun.markModified('tiles');
+              }
+            }
+          }
+
+          delete run.tiles;
+
+          if (run.status) {
+            if (dbRun.status > run.status) delete run.status;
+          }
+
+          const prevStatus = dbRun.status;
+
+          err = copyProperties(run, dbRun);
           if (err) {
             logger.error(err);
             return res.status(400).send({
@@ -610,28 +584,76 @@ privateRouter.put('/:runid', function (req, res, next) {
               msg: 'Could not save run',
             });
           }
-          if (socketIo !== undefined) {
-            delete dbRun.sign;
-            socketIo.sockets
-              .in(`runs/maze/${dbRun.competition._id}`)
-              .emit('changed');
-            socketIo.sockets.in(`runs/${dbRun._id}`).emit('data', dbRun);
-            if (statusUpdate) {
-              socketIo.sockets
-                .in(`runs/maze/${dbRun.competition._id}/status`)
-                .emit('MChanged');
-            }
+
+          if (prevStatus != dbRun.status) statusUpdate = 1;
+
+          let retScoreCals = scoreCalculator.calculateScore(dbRun);
+
+          if (!retScoreCals) {
+            logger.error('Value Error');
+            return res.status(202).send({
+              msg: 'Try again later',
+            });
           }
-          return res.status(200).send({
-            msg: 'Saved run',
-            score: dbRun.score,
+
+          dbRun.score = retScoreCals.score;
+          dbRun.foundVictims = retScoreCals.victims;
+          if (retScoreCals.kits) dbRun.distKits = retScoreCals.kits;
+
+          if (
+            dbRun.score > 0 ||
+            dbRun.time.minutes != 0 ||
+            dbRun.time.seconds != 0 ||
+            dbRun.status >= 2
+          ) {
+            dbRun.started = true;
+          } else {
+            dbRun.started = false;
+          }
+
+          // Only if no other request saved it since it was read. Mongoose checks the version for
+          // most changes, but not for a tile only added to the run: saves made together would add
+          // the same tile once each
+          dbRun.increment();
+          dbRun.save(function (err) {
+            // Saved by another request since it was read (the judge page sends one at a time, but
+            // two devices may not): read it again and apply this one over that
+            if (err && err.name == 'VersionError' && retries > 0) {
+              // After a moment, which varies so that requests that clashed do not clash again
+              return setTimeout(update, 5 + Math.random() * 20, retries - 1);
+            }
+            if (err) {
+              logger.error(err);
+              return res.status(400).send({
+                err: err.message,
+                msg: 'Could not save run',
+              });
+            }
+            if (socketIo !== undefined) {
+              delete dbRun.sign;
+              socketIo.sockets
+                .in(`runs/maze/${dbRun.competition._id}`)
+                .emit('changed');
+              // Only that it changed: anyone may be in the room, the run is had as they may see it (GET)
+              socketIo.sockets.in(`runs/${dbRun._id}`).emit('changed');
+              if (statusUpdate) {
+                socketIo.sockets
+                  .in(`runs/maze/${dbRun.competition._id}/status`)
+                  .emit('MChanged');
+              }
+            }
+            return res.status(200).send({
+              msg: 'Saved run',
+              score: dbRun.score,
+            });
           });
-        });
-      }
-    });
+        }
+      });
+  };
+  update(10);
 });
 
-adminRouter.get('/scoresheet2', function (req, res, next) {
+adminRouter.get('/scoresheet2', access.competition(ACCESSLEVELS.ADMIN, ['query.competition', access.competitionsOf(mazeRun, 'query.run')]), function (req, res, next) {
   const run = req.query.run || req.params.run;
   const competition = req.query.competition || req.params.competition;
   const field = req.query.field || req.params.field;
@@ -699,7 +721,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
     },
   ]);
 
-  query.lean().exec(function (err, dbRuns) {
+  query.lean().exec(async function (err, dbRuns) {
     if (err) {
       logger.error(err);
       res.status(400).send({
@@ -718,7 +740,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
           dbRuns[i].diceNumber = randomMapIndex + 1;
         }
       }
-      scoreSheetPDF2.generateScoreSheet(res, dbRuns);
+      await scoreSheetPDF2.generateScoreSheet(res, dbRuns);
       for (let i = 0; i < dbRuns.length; i++) {
         mazeRun.findById(dbRuns[i]._id, (err, run) => {
           if (err) {
@@ -746,7 +768,7 @@ adminRouter.get('/scoresheet2', function (req, res, next) {
   });
 });
 
-privateRouter.put('/map/:runid', function (req, res, next) {
+privateRouter.put('/map/:runid', access.of(mazeRun, 'params.runid', ACCESSLEVELS.JUDGE), function (req, res, next) {
   const id = req.params.runid;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -826,7 +848,7 @@ privateRouter.put('/map/:runid', function (req, res, next) {
  *
  * @apiError (400) {String} err The error message
  */
-adminRouter.delete('/:runids', function (req, res) {
+adminRouter.delete('/:runids', access.of(mazeRun, 'params.runids', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const ids = req.params.runids.split(',');
   if (!ObjectId.isValid(ids[0])) {
     return next();
@@ -837,7 +859,7 @@ adminRouter.delete('/:runids', function (req, res) {
     .exec(function (err, dbRun) {
       if (err) {
         logger.error(err);
-        res.status(400).send({
+        return res.status(400).send({
           msg: 'Could not get run',
           err: err.message,
         });
@@ -849,6 +871,10 @@ adminRouter.delete('/:runids', function (req, res) {
             msg: 'You have no authority to access this api',
           });
         }
+      } else {
+        return res.status(404).send({
+          msg: 'Run not found',
+        });
       }
       mazeRun.deleteMany(
         {
@@ -889,7 +915,7 @@ adminRouter.delete('/:runids', function (req, res) {
  *
  * @apiError (400) {String} err The error message
  */
-adminRouter.post('/', function (req, res) {
+adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition'), access.of(competitiondb.team, 'body.team', ACCESSLEVELS.ADMIN), access.of(competitiondb.round, 'body.round', ACCESSLEVELS.ADMIN), access.of(competitiondb.field, 'body.field', ACCESSLEVELS.ADMIN), access.of(mazeMap, 'body.map', ACCESSLEVELS.ADMIN), function (req, res) {
   const run = req.body;
 
   if (!auth.authCompetition(req.user, run.competition, ACCESSLEVELS.ADMIN)) {
@@ -934,7 +960,7 @@ adminRouter.post('/', function (req, res) {
   });
 });
 
-privateRouter.post('/pre_recorded', function (req, res) {
+privateRouter.post('/pre_recorded', access.of(competitiondb.team, 'body.team', ACCESSLEVELS.JUDGE), function (req, res) {
   const data = req.body;
   competitiondb.team
   .findById(data.team)

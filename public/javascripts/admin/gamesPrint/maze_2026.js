@@ -1,0 +1,182 @@
+var socket;
+var app = angular.module("RunAdmin", ['ngTouch','ngAnimate', 'ui.bootstrap', 'ui.bootstrap.datetimepicker', 'pascalprecht.translate', 'ngCookies', 'ngFileUpload']);
+app.controller('RunAdminController', ['$scope', '$http', '$log', '$location', '$translate', 'Upload', function ($scope, $http, $log, $location, $translate, Upload) {
+        $scope.competitionId = competitionId
+        $scope.showTeam = true;
+
+        var runListTimer = null;
+        var runListChanged = false;
+
+        function timerUpdateRunList() {
+            if (runListChanged) {
+                updateRunList();
+                runListChanged = false;
+                runListTimer = setTimeout(timerUpdateRunList, 1000 * 15);
+            } else {
+                runListTimer = null
+            }
+        }
+
+        function launchSocketIo() {
+            // launch socket.io
+            socket = io({
+                transports: ['websocket']
+            }).connect(window.location.origin)
+            socket.on('connect', function () {
+                socket.emit('subscribe', 'runs/maze/' + competitionId)
+            })
+            socket.on('changed', function () {
+                runListChanged = true;
+                if (runListTimer == null) {
+                    updateRunList();
+                    runListChanged = false;
+                    runListTimer = setTimeout(timerUpdateRunList, 1000 * 15)
+                }
+            })
+        }
+
+        $http.get(`/api/competitions/${competitionId}`).then(function (response) {
+            $scope.competition = response.data;
+            $scope.league = response.data.leagues.find((l) => l.league == leagueId);
+            launchSocketIo();
+            updateRunList();
+            const setTitle = (runList) => { $scope.list = { comment: `${$scope.league.name} - ${runList}` }; };
+            $translate('admin.print.runList').then(setTitle, setTitle);
+        })
+
+        var showAllRounds = true
+        var showAllFields = true
+        var showAllTeams = true
+        $scope.teamName = ""
+
+        $scope.$watch('Rrounds', function (newValue, oldValue) {
+            showAllRounds = true
+            for (let round in newValue) {
+                if (newValue.hasOwnProperty(round)) {
+                    if (newValue[round]) {
+                        showAllRounds = false
+                        return
+                    }
+                }
+            }
+        }, true)
+        $scope.$watch('Rfields', function (newValue, oldValue) {
+            showAllFields = true
+            for (let field in newValue) {
+                if (newValue.hasOwnProperty(field)) {
+                    if (newValue[field]) {
+                        showAllFields = false
+                        return
+                    }
+                }
+            }
+        }, true)
+        $scope.$watch('teamName', function (newValue, oldValue) {
+            if (newValue == '') showAllTeams = true
+            else showAllTeams = false
+            return
+        }, true)
+
+        $scope.list_filter = function (value, index, array) {
+            return (showAllRounds || $scope.Rrounds[value.round.name]) &&
+                (showAllFields || $scope.Rfields[value.field.name]) && (showAllTeams || ~value.team.name.indexOf($scope.teamName))
+        }
+
+
+        function objectSort(object) {
+            var sorted = {};
+            var arr = [];
+            for (key in object) {
+                if (object.hasOwnProperty(key)) {
+                    arr.push(key);
+                }
+            }
+            arr.sort();
+
+            for (var i = 0; i < arr.length; i++) {
+                sorted[arr[i]] = object[arr[i]];
+            }
+            return sorted;
+        }
+
+        // "All" chip of the round/field filters: nothing selected means everything is shown
+        $scope.noneSelected = function (selection) {
+            return !Object.values(selection || {}).some(Boolean);
+        };
+
+        $scope.clearSelection = function (selection) {
+            for (const key in selection) selection[key] = false;
+        };
+
+        // Plain-text victims for the Excel export
+        $scope.victimText = function (run) {
+            return (run.foundVictims || []).map((v) => `${v.type} ×${v.count}`).join(', ');
+        };
+
+        function updateRunList() {
+            $http.get(`/api/runs/${$scope.league.type}/competition/${competitionId}?normalized=true`).then(function (response) {
+                var runs = response.data.filter(r => r.team.league == leagueId);
+                for (let run of runs) {
+                    if (!run.team) {
+                        run.team = {
+                            'name': ""
+                        };
+                    }
+                }
+                $scope.runs = runs;
+                if (!$scope.Rrounds && !$scope.Rfields) {
+                    var rounds = {}
+                    var fields = {}
+                    for (var i = 0; i < $scope.runs.length; i++) {
+                        try {
+                            var round = $scope.runs[i].round.name
+                            if (!rounds.hasOwnProperty(round)) {
+                                rounds[round] = false
+                            }
+                        } catch (e) {
+
+                        }
+
+                        try {
+                            var field = $scope.runs[i].field.name
+
+                            if (!fields.hasOwnProperty(field)) {
+                                fields[field] = false
+                            }
+                        } catch (e) {
+
+                        }
+                    }
+
+                    $scope.Rrounds = objectSort(rounds)
+                    $scope.Rfields = objectSort(fields)
+                }
+                $('.loader').remove();
+            })
+        }
+
+        $scope.go = function (path) {
+            window.location = path + '?return=' + window.location.pathname;
+        }
+
+        $scope.victimOrder = function (victim) {
+            const order = {
+                'PHI': 1,
+                'PSI': 2,
+                'OMEGA': 3,
+                'H': 1,
+                'S': 2,
+                'U': 3,
+                'Cognitive:H': 4,
+                'Cognitive:S': 5,
+                'Cognitive:U': 6,
+                'Cognitive': 7
+            };
+            return order[victim.type] || 99;
+        };
+}])
+
+
+$(window).on('beforeunload', function () {
+    socket.emit('unsubscribe', 'competition/' + competitionId);
+});

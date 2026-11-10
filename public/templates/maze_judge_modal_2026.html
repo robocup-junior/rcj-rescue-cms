@@ -1,0 +1,84 @@
+<!-- The judge page's sheet of a maze tile, by the rules. Kept in step by hand with
+     the other maze tile sheets (maze_judge_modal_2026*.html, maze_view_modal_2026*.html); change them together, so that
+     they look the same: the judge operates it. Each item is green once scored; each victim
+     shows its side of the tile as the map is turned, its category and whether it was found,
+     with its rescue kits against those it needs. No points. -->
+<div class="rvm rvm-judge rvm-maze">
+  <div class="rvm-header">
+    <h5 class="rvm-title">{{'maze.view.m_score' | translate}}</h5>
+    <button type="button" class="rvm-close" ng-click="ok()" aria-label="Close"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="rvm-body">
+    <!-- The tile's items, then the blue tile's visits -->
+    <div class="rvm-toggles" ng-if="cell.tile.checkpoint || cell.tile.speedbump || cell.tile.steps || cell.tile.ramp">
+      <button type="button" class="rvm-toggle" ng-if="cell.tile.checkpoint" ng-class="{'is-on': tile.scoredItems.checkpoint}" ng-click="changeCheckPoint()" aria-pressed="{{!!(tile.scoredItems.checkpoint)}}">
+        <img src="/images/checkpoint.png" alt="">
+        <span>{{'maze.judge.m_reach' | translate}}</span>
+        <i class="fas" ng-class="tile.scoredItems.checkpoint ? 'fa-check-circle' : 'fa-circle'"></i>
+      </button>
+      <button type="button" class="rvm-toggle" ng-if="cell.tile.speedbump" ng-class="{'is-on': tile.scoredItems.speedbump}" ng-click="changeSpeedbump()" aria-pressed="{{!!(tile.scoredItems.speedbump)}}">
+        <img src="/images/speedbump.png" alt="">
+        <span>{{'maze.judge.m_bump' | translate}}</span>
+        <i class="fas" ng-class="tile.scoredItems.speedbump ? 'fa-check-circle' : 'fa-circle'"></i>
+      </button>
+      <button type="button" class="rvm-toggle" ng-if="cell.tile.steps" ng-class="{'is-on': tile.scoredItems.steps}" ng-click="changeSteps()" aria-pressed="{{!!(tile.scoredItems.steps)}}">
+        <img src="/images/steps.png" alt="">
+        <span>{{'maze.judge.m_steps' | translate}}</span>
+        <i class="fas" ng-class="tile.scoredItems.steps ? 'fa-check-circle' : 'fa-circle'"></i>
+      </button>
+      <button type="button" class="rvm-toggle" ng-if="cell.tile.ramp" ng-class="{'is-on': tile.scoredItems.ramp}" ng-click="changeRamp()" aria-pressed="{{!!(tile.scoredItems.ramp)}}">
+        <img src="/images/ramp.png" alt="">
+        <span>{{'maze.judge.m_ramp' | translate}}</span>
+        <i class="fas" ng-class="tile.scoredItems.ramp ? 'fa-check-circle' : 'fa-circle'"></i>
+      </button>
+    </div>
+
+    <div class="rvm-counter" ng-if="cell.tile.blue" ng-class="{'is-on': tile.scoredItems.blue > 0}">
+      <img src="/images/blue_tile.png" alt="">
+      <span class="rvm-counter-name">{{'maze.judge.blue' | translate}}</span>
+      <div class="rv-stepper">
+        <button type="button" class="rv-step is-minus" ng-click="decrementBlue()" ng-disabled="!tile.scoredItems.blue" title="−1"><i class="fas fa-minus"></i></button>
+        <span class="rv-step-count" ng-class="{'is-zero': !tile.scoredItems.blue}">{{tile.scoredItems.blue || 0}}</span>
+        <button type="button" class="rv-step is-plus" ng-click="incrementBlue()" title="+1"><i class="fas fa-plus"></i></button>
+      </div>
+    </div>
+
+    <!-- The victims, each on its side of the tile as the map is turned -->
+    <ol class="rvm-victims" ng-if="hasVictims">
+      <li class="rvm-victim" ng-repeat="direction in ['top', 'right', 'bottom', 'left']"
+          ng-if="cell.tile.victims[direction] != 'None' && cell.tile.victims[direction] != undefined && (!hasRealVictims() || !isModalDummy(cell, direction))"
+          ng-class="{'is-on': tile.scoredItems.victims[direction], 'is-half': tile.scoredItems.victims[direction] && leagueType == 'standard' && tile.scoredItems.rescueKits[direction] < getModalMaxKitNum(cell, direction)}">
+        <span class="rvm-victim-side"><i class="fas" ng-class="{'top': 'fa-arrow-up', 'right': 'fa-arrow-right', 'bottom': 'fa-arrow-down', 'left': 'fa-arrow-left'}[modalRotate(direction)]"></i></span>
+        <span class="rvm-victim-who">
+          <img class="rvm-victim-image" ng-if="cell.tile.victims[direction] != 'Cognitive'" ng-src="/images/{{['H', 'S', 'U'].indexOf(cell.tile.victims[direction]) >= 0 ? cell.tile.victims[direction] : (cell.tile.victims[direction] | lowercase)}}.png" alt="{{cell.tile.victims[direction]}}">
+          <span class="rvm-victim-image" ng-if="cell.tile.victims[direction] == 'Cognitive' && cell.tile.cognitiveTargets[direction]" ng-style="getModalCognitiveStyle(cell, direction)" role="img" aria-label="Cognitive"></span>
+          <!-- Its category, which says the kits it needs -->
+          <span class="rvm-category" ng-if="getModalVictimStatus(cell, direction)" ng-class="'is-' + (getModalVictimStatus(cell, direction) | lowercase)">
+            <i class="fas" ng-class="{'Harmed': 'fa-heartbeat', 'Stable': 'fa-user-check', 'Unharmed': 'fa-smile', 'Dummy': 'fa-robot'}[getModalVictimStatus(cell, direction)]"></i>
+            {{('maze.view.victimStatus.' + getModalVictimStatus(cell, direction)) | translate}}
+          </span>
+        </span>
+        <button type="button" class="rvm-toggle rvm-found" ng-class="{'is-on': tile.scoredItems.victims[direction]}" ng-click="tile.scoredItems.victims[direction] = !tile.scoredItems.victims[direction]; clickSound()" aria-pressed="{{!!(tile.scoredItems.victims[direction])}}">
+          <span>{{'maze.judge.m_found' | translate}}</span>
+          <i class="fas" ng-class="tile.scoredItems.victims[direction] ? 'fa-check-circle' : 'fa-circle'"></i>
+        </button>
+        <!-- Maps of the entry level: identified or not instead of the kits -->
+        <button type="button" class="rvm-toggle rvm-found" ng-if="leagueType == 'entry'" ng-class="{'is-on': tile.scoredItems.rescueKits[direction]}" ng-click="tile.scoredItems.rescueKits[direction] = tile.scoredItems.rescueKits[direction] ? 0 : 1; clickSound()" aria-pressed="{{!!(tile.scoredItems.rescueKits[direction])}}">
+          <span>{{'line.view.identified' | translate}}</span>
+          <i class="fas" ng-class="tile.scoredItems.rescueKits[direction] ? 'fa-check-circle' : 'fa-circle'"></i>
+        </button>
+        <!-- Rescue kits: those placed of those the victim needs (none for some) -->
+        <div class="rvm-kits" ng-if="leagueType == 'standard' && getModalMaxKitNum(cell, direction) > 0" ng-class="{'is-enough': tile.scoredItems.rescueKits[direction] >= getModalMaxKitNum(cell, direction)}">
+          <span class="rvm-kits-name"><i class="fas fa-medkit"></i> {{tile.scoredItems.rescueKits[direction] || 0}}<small>/{{getModalMaxKitNum(cell, direction)}}</small></span>
+          <div class="rv-stepper">
+            <button type="button" class="rv-step is-minus" ng-click="decKits(direction)" ng-disabled="!tile.scoredItems.rescueKits[direction]" title="−1"><i class="fas fa-minus"></i></button>
+            <button type="button" class="rv-step is-plus" ng-click="incKits(direction)" title="+1"><i class="fas fa-plus"></i></button>
+          </div>
+        </div>
+      </li>
+    </ol>
+  </div>
+  <div class="rvm-footer">
+    <button class="rvm-ok" type="button" ng-click="ok()">OK</button>
+  </div>
+</div>

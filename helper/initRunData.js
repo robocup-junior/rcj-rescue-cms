@@ -45,8 +45,8 @@ module.exports.initLine = async function (run, rule, scored = false) {
           })
         }
 
-        // Intersection
-        if (m.tileType.intersections > 0) {
+        // Intersection (not a scoring element in the Entry rules)
+        if (m.tileType.intersections > 0 && rule != '2026E') {
           run.tiles[i].scoredItems.push({
             item: "intersection",
             scored: scored,
@@ -80,22 +80,6 @@ module.exports.initLine = async function (run, rule, scored = false) {
             count: 1
           })
           checkPointCount++;
-        }
-      }
-    }
-
-    if (rule == '2024' || rule == '2024E' || rule == '2025E') {
-      // Consider continued ramp tiles as a ramp
-      let rampContinueFlag = false;
-      for (let index = run.tiles.length - 1; index >= 0; index--) {
-        if (run.tiles[index].scoredItems.some(item => item.item == "ramp")) {
-          if (rampContinueFlag) {
-            run.tiles[index].scoredItems.splice(run.tiles[index].scoredItems.findIndex(item => item.item === 'ramp'), 1);
-          } else {
-            rampContinueFlag = true;
-          }
-        } else {
-          rampContinueFlag = false;
         }
       }
     }

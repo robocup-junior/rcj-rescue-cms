@@ -11,15 +11,18 @@ const query = require('../../helper/query-helper');
 const { ObjectId } = require('mongoose').Types;
 const logger = require('../../config/logger').mainLogger;
 const competitiondb = require('../../models/competition');
+const auth = require('../../helper/authLevels');
+const { ACCESSLEVELS } = require('../../models/user');
+const access = require('../../helper/access');
 //= =======================================================================
 //                          /maps Api endpoints
 //= =======================================================================
 
-publicRouter.get('/', function (req, res) {
+publicRouter.get('/', access.superAdmin('the fields of every competition'), function (req, res) {
   query.doFindResultSortQuery(req, res, null, null, competitiondb.field);
 });
 
-publicRouter.get('/:fieldid', function (req, res, next) {
+publicRouter.get('/:fieldid', access.loggedIn('a field, for the signage displays'), function (req, res, next) {
   const id = req.params.fieldid;
 
   if (!ObjectId.isValid(id)) {
@@ -29,24 +32,7 @@ publicRouter.get('/:fieldid', function (req, res, next) {
   query.doIdQuery(req, res, id, '', competitiondb.field);
 });
 
-publicRouter.get('/:fieldid/runs', function (req, res, next) {
-  const id = req.params.fieldid;
-
-  if (!ObjectId.isValid(id)) {
-    return next();
-  }
-
-  competitiondb.run.find({ field: id }, function (err, data) {
-    if (err) {
-      logger.error(err);
-      res.status(400).send({ msg: 'Could not get runs', err: err.message });
-    } else {
-      res.status(200).send(data);
-    }
-  });
-});
-
-adminRouter.delete('/:fieldid', function (req, res, next) {
+adminRouter.delete('/:fieldid', access.of(competitiondb.field, 'params.fieldid', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const id = req.params.fieldid;
 
   if (!ObjectId.isValid(id)) {
@@ -63,8 +49,9 @@ adminRouter.delete('/:fieldid', function (req, res, next) {
   });
 });
 
-adminRouter.post('/', function (req, res) {
+adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition'), function (req, res) {
   const field = req.body;
+  if (!auth.authCompetition(req.user, field.competition, ACCESSLEVELS.ADMIN)) return res.status(401).send(auth.NO_AUTHORITY);
 
   const newField = new competitiondb.field({
     name: field.name,

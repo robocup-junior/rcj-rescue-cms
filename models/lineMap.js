@@ -1235,7 +1235,7 @@ for (var i in tileTypes) {
       }
     }
     else {
-      logger.log("saved tiletype")
+      logger.debug("saved tiletype")
     }
   })
 

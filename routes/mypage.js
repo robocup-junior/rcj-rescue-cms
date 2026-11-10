@@ -225,6 +225,10 @@ publicRouter.get('/:teamId/:token/survey/:survId', function (req, res, next) {
 publicRouter.all('*', function (req, res, next) {
   next();
 });
+privateRouter.get('/', function (req, res) {
+  res.render('mypage/profile', { user: req.user });
+});
+
 privateRouter.all('*', function (req, res, next) {
   next();
 });

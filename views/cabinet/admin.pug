@@ -1,5 +1,5 @@
 //- -*- tab-width: 2 -*-
-extends ../includes/layout
+extends ../includes/modern_layout
 
 block vars
   - var ngAppDef = 'CabinetAdmin'
@@ -7,68 +7,78 @@ block vars
 append scripts
   script.
     var competitionId = "#{id}"
-  script(src='/javascripts/cabinet/admin.js')
+  script(src='/javascripts/cabinet/admin.js?v=' + assetVersion)
   
 
-block location
-    a.breadcrumb-item(ng-click="go('/home')") Home
-    a.breadcrumb-item(ng-click="go('/admin')") Admin
-    a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
-    span.breadcrumb-item.active Cabinet
+block hero_breadcrumb
+  a.breadcrumb-item(ng-click="go('/home')")
+    i.fas.fa-home.mr-1
+    | Home
+  a.breadcrumb-item(ng-click="go('/admin')") Admin
+  a.breadcrumb-item(ng-click="go('/admin/' + competitionId)") {{competition.name}}
+  span.breadcrumb-item.active Cabinet
 
+block hero_title
+  | {{competition.name}}
 
-block content
+block hero_subtitle
+  | {{'cabinet.title' | translate}}
+
+block main_content
+  p.text-muted {{'cabinet.description' | translate}}
+
+  h5.section-heading
+    i.fas.fa-trophy
+    | {{'cabinet.toLeague' | translate}}
   .row
-    .col-md-1
-    .col-md-10
-      h4 {{competition.name}}
-      h1 {{'cabinet.title' | translate}}
-      p {{'cabinet.description' | translate}}
-      hr
-      h3 {{'cabinet.toLeague' | translate}}
-      .row 
-        .col-md-3(ng-repeat='league in leagues', style="margin-bottom:30px;")
-          button(ng-click="go('/admin/' + competitionId + '/cabinet/' + league.id)" class='btn btn-dark btn-lg btn-block' style="height:100%;")
-            i.fas.fa-folder.fa-2x
-            br
-            span {{league.name}}
-      hr
+    .col-md-3.mb-3(ng-repeat='league in leagues')
+      .action-card-character.flex-row.hover-lift.h-100(ng-click="go('/admin/' + competitionId + '/cabinet/' + league.id)")
+        .icon-box-premium(style="background: #f0fdfa; color: #14b8a6; width: 42px; height: 42px; border-radius: 10px; font-size: 1.1rem;")
+          i.fas.fa-folder
+        h6.text-heading-premium.mb-0(style="font-size: 0.95rem;") {{league.name}}
 
-      h3 {{'cabinet.toTeam' | translate}}
-      .refine
-        .card.border-dark.mb-3(style='width:100%;')
-          .card-header.bg-transparent.border-dark.fa-2x
-            i.fas.fa-search(aria-hidden='true') &nbsp;
-            | {{'common.refine' | translate}}
-          .card-body.text-dark
-            h6.card-title {{"common.teamCode" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-list-ol(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.teamCode" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineCode')
-            hr
-            h6.card-title {{"common.team" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-users(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.team" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineName')
-            hr
-            h6.card-title {{"common.region" | translate}}
-            .input-group
-              .input-group-prepend
-                span.input-group-text
-                  i.fas.fa-globe-asia(aria-hidden='true')
-              input.form-control(type='text', placeholder='{{"common.region" | translate}}', aria-label='Username', aria-describedby='basic-addon1' ng-model='refineRegion')
-            hr
-            h6.card-title {{"common.league" | translate}}
-            span(ng-repeat='(key, value) in Rleagues track by key')
-              input(type='checkbox' ng-model='Rleagues[key]' id="checkL_{{key}}")
-              label.checkbox(for="checkL_{{key}}") {{key}}
-      .row 
-        .col-md-3(ng-repeat='team in teams | filter:list_filter | orderBy:"[teamCode,name]"', style="margin-bottom:30px;")
-          button(ng-click="go('/admin/' + competitionId + '/cabinet/' + team._id)" class='btn btn-dark btn-lg btn-block' style="height:100%;")
-            i.fas.fa-folder.fa-2x
-            br
-            span {{team.teamCode}} {{team.name}}
+  .modern-card.mt-4
+    .modern-card-header
+      .d-flex.justify-content-between.align-items-center.w-100
+        div
+          i.fas.fa-users.mr-2
+          | {{'cabinet.toTeam' | translate}}
+        .btn-table-group
+          .btn-table-action.primary(ng-click="showFilter = !showFilter" ng-class="showFilter ? 'active-blue' : ''" uib-tooltip="{{'common.refine' | translate}}")
+            i.fas.fa-filter
+    .filter-collapse(ng-show="showFilter" style="background: #f8fafc; border-bottom: 1px solid #f1f5f9; padding: 1.5rem;")
+      .row
+        .col-md-3.mb-2
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"common.teamCode" | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-hashtag
+            input.form-control.form-control-sm(type='text' placeholder='{{"common.teamCode" | translate}}' ng-model='refineCode')
+        .col-md-3.mb-2
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"common.team" | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-users
+            input.form-control.form-control-sm(type='text' placeholder='{{"common.team" | translate}}' ng-model='refineName')
+        .col-md-3.mb-2
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"common.region" | translate}}
+          .input-group
+            .input-group-prepend
+              span.input-group-text
+                i.fas.fa-globe-asia
+            input.form-control.form-control-sm(type='text' placeholder='{{"common.region" | translate}}' ng-model='refineRegion')
+        .col-md-3.mb-2
+          h6.font-weight-bold.text-muted.small.text-uppercase.mb-2 {{"common.league" | translate}}
+          .filter-container
+            span.filter-badge(ng-repeat='(key, value) in Rleagues track by key' ng-class="{'active': Rleagues[key]}" ng-click="Rleagues[key] = !Rleagues[key]") {{key}}
+    .modern-card-body
+      .row
+        .col-md-3.mb-3(ng-repeat='team in teams | filter:list_filter | orderBy:"[teamCode,name]"')
+          .action-card-character.flex-row.hover-lift.h-100(ng-click="go('/admin/' + competitionId + '/cabinet/' + team._id)")
+            .icon-box-premium(style="background: #f8fafc; color: #64748b; width: 42px; height: 42px; border-radius: 10px; font-size: 1.1rem;")
+              i.fas.fa-folder
+            div
+              .small.text-muted {{team.teamCode}}
+              h6.text-heading-premium.mb-0(style="font-size: 0.95rem;") {{team.name}}

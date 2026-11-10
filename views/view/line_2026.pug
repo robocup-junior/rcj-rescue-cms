@@ -1,0 +1,85 @@
+html(ng-app="ddApp")
+  head
+    title Rescue Line View
+    script.
+      var runId = "#{id}"
+      var timeIncrement = false
+      var iframe = "#{iframe}"
+
+    include ../includes/common_component
+    script(src="/javascripts/sign/line_2026.js?v=" + assetVersion)
+    script(src="/javascripts/translate_config.js?v=" + assetVersion)
+    link(href="/stylesheets/fredrik.css?v=" + assetVersion rel="stylesheet")
+    link(href="/stylesheets/line_view.css?v=" + assetVersion rel="stylesheet")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0")
+
+  body.run-view.rv-is-loading(ng-controller="ddController")
+    include ../includes/line_loading
+    //- Sticky bar: team, live score and time
+    header.rv-topbar
+      button.rv-back(type='button' title="{{'common.back' | translate}}" ng-click="getParam('return')? go(getParam('return')):go('/line/' + competition_id + '/' + league)")
+        i.fas.fa-arrow-left
+      .rv-team
+        span.rv-live(title='Live')
+        span.rv-team-name {{team}}
+      .rv-topbar-stats
+        .rv-stat
+          i.fas.fa-calculator
+          span.rv-stat-value {{score}}
+          span.rv-stat-unit {{'common.point' | translate}}
+        .rv-stat
+          i.fas.fa-stopwatch
+          span.rv-stat-value {{minutes*60*1000+seconds*1000 | date:'m:ss'}}
+
+    main.rv-page
+      include common/line_2026_summary
+      include common/line_2026
+
+      //- Comment and signatures (staff only)
+      if user
+        section.rv-card
+          .rv-card-header
+            i.fas.fa-comment
+            | {{'line.view.comment' | translate}}
+          .rv-card-body
+            p.rv-note {{'line.view.comment_e' | translate}}
+            textarea.form-control(ng-model='comment', rows='3', disabled='')
+        section.rv-card
+          .rv-card-header
+            i.fas.fa-pencil-alt
+            | {{'line.view.sign' | translate}}
+          .rv-card-body
+            p.rv-note.rv-note-warning(translate='line.view.sign_e')
+            .rv-sign-grid
+              .rv-sign
+                .rv-sign-title(translate='line.view.cap_sign')
+                img(ng-src='{{cap_sig}}', alt='')
+              .rv-sign
+                .rv-sign-title(translate='line.view.ref_sign')
+                img(ng-src='{{ref_sig}}', alt='')
+              .rv-sign
+                .rv-sign-title(translate='line.view.cref_sign')
+                img(ng-src='{{refas_sig}}', alt='')
+    include ../includes/footer
+    script(src="/javascripts/line_view.js?v=" + assetVersion)
+    script.
+      // View page only: start with the map turned the way it is drawn largest (0° or 90°).
+      // The rotation is set directly, because tileRot() would also save it in the cookie
+      // that the judge and sign pages read.
+      angular.element(document).ready(function () {
+        var scope = angular.element(document.body).scope();
+        var stop = scope.$watchGroup(['width', 'length'], function (size) {
+          if (!size[0] || !size[1]) return;
+          stop();
+          var area = document.querySelector('.tilearea');
+          var areaWidth = area.clientWidth - parseFloat(getComputedStyle(area).paddingLeft) * 2;
+          // Same space as tile_size() in sign/line_2026.js
+          var areaHeight = window.innerHeight - 140;
+          function tileSize(cols, rows) {
+            return Math.min((areaWidth - 2 * cols) / cols, areaHeight / rows);
+          }
+          scope.sRotate = tileSize(scope.length, scope.width) > tileSize(scope.width, scope.length) ? 90 : 0;
+          rotate = scope.sRotate;
+          setTimeout(tile_size, 0);
+        });
+      });

@@ -1,0 +1,394 @@
+.error-page {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  font-family: 'Outfit', sans-serif;
+  background: #f8fafc;
+}
+
+.error-card {
+  background: white;
+  padding: 4rem 3rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+  border: 1px solid #f1f5f9;
+  position: relative;
+  overflow: hidden;
+}
+
+/* CSS Cuter Robot Container */
+.robot-container {
+  width: 200px;
+  height: 220px;
+  margin: 0 auto 3rem;
+  position: relative;
+}
+
+.robot {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  animation: robotTotalFlow 6s infinite;
+}
+
+/* Cuter Robot Parts */
+.robot-head {
+  width: 60px;
+  height: 50px;
+  background: #f1f5f9;
+  border-radius: 20px 20px 15px 15px;
+  position: relative;
+  margin: 0 auto 5px;
+  border: 3px solid #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  z-index: 2;
+}
+
+/* Ears/Antenna */
+.robot-ear {
+  width: 12px;
+  height: 20px;
+  background: #64748b;
+  position: absolute;
+  top: -12px;
+  border-radius: 6px 6px 0 0;
+}
+.ear-left { left: 10px; transform: rotate(-15deg); }
+.ear-right { right: 10px; transform: rotate(15deg); }
+
+.eye {
+  width: 10px;
+  height: 10px;
+  background: #475569;
+  border-radius: 50%;
+  animation: eyeChange 6s infinite;
+  position: relative;
+}
+
+.robot-body {
+  width: 80px;
+  height: 70px;
+  background: linear-gradient(135deg, #ff4757 0%, #2e86de 100%); /* Taegeuk Colors */
+  border-radius: 30px; /* Rounder body */
+  margin: -10px auto 0;
+  position: relative;
+  border: 3px solid #1e293b;
+  z-index: 1;
+}
+
+.robot-arm {
+  width: 12px;
+  height: 35px;
+  background: #94a3b8;
+  position: absolute;
+  top: 15px;
+  border-radius: 10px;
+}
+
+.arm-left { left: -12px; transform-origin: top center; animation: armSwingLeft 1.5s infinite; }
+.arm-right { right: -12px; transform-origin: top center; animation: armSwingRight 1.5s infinite; }
+
+.robot-leg {
+  width: 15px;
+  height: 25px;
+  background: #475569;
+  position: absolute;
+  bottom: -20px;
+  border-radius: 10px;
+}
+
+.leg-left { left: 20px; transform-origin: top center; animation: legSwingLeft 1.5s infinite; }
+.leg-right { right: 20px; transform-origin: top center; animation: legSwingRight 1.5s infinite; }
+
+/* TRIP OBJECT */
+.stone {
+  width: 25px;
+  height: 12px;
+  background: #cbd5e1;
+  border-radius: 50% 50% 0 0;
+  position: absolute;
+  bottom: 20px;
+  right: 10px;
+  animation: stoneMove 6s infinite linear;
+}
+
+/* Animations */
+@keyframes robotTotalFlow {
+  0% { transform: translateX(-150%) rotate(0deg); opacity: 1; }
+  30% { transform: translateX(-20px) rotate(0deg); }
+  35% { transform: translateX(0) rotate(-15deg) translateY(-15px); }
+  40% { transform: translateX(60px) rotate(100deg) translateY(60px); } /* Fallen */
+  85% { transform: translateX(60px) rotate(100deg) translateY(60px); opacity: 1; }
+  95% { transform: translateX(60px) rotate(100deg) translateY(60px); opacity: 0; }
+  100% { transform: translateX(-150%) rotate(0deg); opacity: 0; }
+}
+
+@keyframes armSwingLeft {
+  0%, 100% { transform: rotate(25deg); }
+  50% { transform: rotate(-25deg); }
+}
+@keyframes armSwingRight {
+  0%, 100% { transform: rotate(-25deg); }
+  50% { transform: rotate(25deg); }
+}
+
+@keyframes legSwingLeft {
+  0%, 100% { transform: rotate(35deg); }
+  50% { transform: rotate(-35deg); }
+}
+@keyframes legSwingRight {
+  0%, 100% { transform: rotate(-35deg); }
+  50% { transform: rotate(35deg); }
+}
+
+@keyframes stoneMove {
+  0% { transform: translateX(200px); }
+  30% { transform: translateX(0); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes eyeChange {
+  0%, 15% { height: 10px; border: none; background: #475569; }
+  16%, 18% { height: 2px; } /* Blink */
+  19%, 34% { height: 10px; border: none; background: #475569; }
+  35%, 85% { background: transparent; border-radius: 0; transform: scale(1.2); border-left: 2px solid #ef4444; border-right: 2px solid #ef4444; height: 10px; width: 10px; }
+  86%, 100% { background: #475569; border-radius: 50%; }
+}
+
+.error-status {
+  font-size: 5rem;
+  font-weight: 900;
+  color: #f1f5f9;
+  line-height: 1;
+  margin-bottom: -2.5rem;
+  position: relative;
+  z-index: 0;
+  letter-spacing: -0.05em;
+}
+
+.error-message-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.error-message-detail {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin-bottom: 3rem;
+  line-height: 1.6;
+}
+
+.btn-home {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: white !important;
+  padding: 1rem 2.5rem;
+  border-radius: 0.75rem;
+  font-weight: 700;
+  text-decoration: none !important;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.btn-home:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+  background: #000;
+}
+
+/* ---------- Access denied (403) ---------- */
+/* The same card; the robot stands guard instead of tripping over. */
+.error-page-iframe {
+  min-height: 0;
+  padding: 1rem 0;
+}
+
+.denied-robot {
+  height: 170px;
+  margin-bottom: 2rem;
+}
+
+.denied-robot .robot {
+  animation: none;
+  bottom: 30px;
+}
+
+.denied-robot .robot-head {
+  animation: deniedHeadShake 3s ease-in-out infinite;
+}
+
+.denied-robot .eye {
+  animation: deniedEyes 3s infinite;
+}
+
+.denied-robot .robot-body {
+  background: linear-gradient(135deg, #64748b 0%, #334155 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.robot-lock {
+  color: #fbbf24;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.denied-robot .arm-left {
+  animation: none;
+  transform: rotate(20deg);
+}
+
+/* The right arm raised, holding the sign up. */
+.denied-robot .arm-right {
+  animation: deniedArmRaise 3s ease-in-out infinite;
+  transform-origin: top center;
+}
+
+.stop-sign {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: white;
+  color: #e74c3c;
+  font-size: 44px;
+  line-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 14px rgba(231, 76, 60, 0.25);
+}
+
+.denied-robot .robot-leg {
+  animation: none;
+}
+
+.denied-card .error-message-detail small {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+.error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.error-actions .btn-home {
+  border: none;
+  cursor: pointer;
+}
+
+.btn-home.btn-secondary-action {
+  background: white;
+  color: #0f172a !important;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.05);
+}
+
+.btn-home.btn-secondary-action:hover {
+  background: #f8fafc;
+}
+
+@keyframes deniedHeadShake {
+  0%, 55%, 100% { transform: rotate(0deg); }
+  62% { transform: rotate(-10deg); }
+  70% { transform: rotate(10deg); }
+  78% { transform: rotate(-10deg); }
+  86% { transform: rotate(0deg); }
+}
+
+@keyframes deniedArmRaise {
+  0%, 100% { transform: rotate(-160deg); }
+  50% { transform: rotate(-150deg); }
+}
+
+@keyframes deniedEyes {
+  0%, 40% { height: 10px; }
+  42%, 44% { height: 2px; }
+  46%, 100% { height: 10px; }
+}
+
+@media (max-width: 576px) {
+  .error-card { padding: 3rem 1.5rem; }
+  .error-actions .btn-home { width: 100%; justify-content: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .denied-robot .robot-head,
+  .denied-robot .eye,
+  .denied-robot .arm-right { animation: none; }
+  .denied-robot .arm-right { transform: rotate(-155deg); }
+}
+
+/* ---------- Short link not found (404) ---------- */
+/* The guard robot again, searching with a magnifier for the page that is not there. */
+.lost-robot .robot-head {
+  animation: lostLookAround 4s ease-in-out infinite;
+}
+
+.lost-robot .robot-body {
+  background: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%);
+}
+
+.lost-robot .robot-lock {
+  color: white;
+  font-size: 1.4rem;
+}
+
+.lost-robot .stop-sign {
+  background: transparent;
+  color: #334155;
+  font-size: 34px;
+  box-shadow: none;
+}
+
+.robot-question {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  margin-left: -50px;
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #f1c40f;
+  animation: lostQuestion 4s ease-in-out infinite;
+}
+
+@keyframes lostLookAround {
+  0%, 100% { transform: translateX(0) rotate(0deg); }
+  25% { transform: translateX(-4px) rotate(-8deg); }
+  50% { transform: translateX(0) rotate(0deg); }
+  75% { transform: translateX(4px) rotate(8deg); }
+}
+
+@keyframes lostQuestion {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  50% { transform: translateY(-6px); opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lost-robot .robot-head,
+  .robot-question { animation: none; }
+}

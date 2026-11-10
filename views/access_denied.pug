@@ -5,34 +5,54 @@ block vars
   - var ngAppDef = 'AD'
 
 append scripts
-  script(src='/javascripts/access_denied.js')
+  script(src='/javascripts/access_denied.js?v=' + assetVersion)
+
+append css
+  link(href="/stylesheets/fonts.css?v=" + assetVersion rel="stylesheet")
+  link(rel='stylesheet', href='/stylesheets/error_premium.css?v=' + assetVersion)
 
 block bread
-  if !iframe
-    .row
-        .col-md-1
-        .col-md-10
-            nav.breadcrumb
-              a.breadcrumb-item(ng-click="go('/home')") Home
-              span.breadcrumb-item.active Access denied
-    br
 
 block content
-  .row
-    .col-md-1
-    .col-md-10
-      i.fas.fa-ban.fa-5x(aria-hidden="true" style="color:#e74c3c;") &nbsp;{{"accessDenied.title" | translate}}
-      br
-      br
-      
-      br
-      h2 {{"accessDenied.description1" | translate}}
-      p {{"accessDenied.description2" | translate}}
+  .error-page(ng-cloak class=(iframe ? 'error-page-iframe' : ''))
+    .error-card.denied-card
+      .robot-container.denied-robot(aria-hidden="true")
+        .robot
+          .robot-head
+            .robot-ear.ear-left
+            .robot-ear.ear-right
+            .eye
+            .eye
+          .robot-body
+            .robot-lock
+              i.fas.fa-lock
+            .robot-arm.arm-left
+            .robot-arm.arm-right
+              .stop-sign
+                i.fas.fa-ban
+            .robot-leg.leg-left
+            .robot-leg.leg-right
+
+      .error-status 403
+      h1.error-message-title {{"accessDenied.title" | translate}}
+      p.error-message-detail
+        | {{"accessDenied.description1" | translate}}
+        br
+        small {{"accessDenied.description2" | translate}}
+
       if !iframe
-        br
-        br
-        button(onclick="location.href=document.referrer" class='btn btn-secondary btn-lg btn-block')
-          i.fas.fa-undo.fa-2x(aria-hidden="true") {{'common.back' | translate}}
+        .error-actions
+          button.btn-home.btn-secondary-action(type="button" ng-click="back()")
+            i.fas.fa-undo
+            | {{'common.back' | translate}}
+          if !user
+            a.btn-home(href='#' data-toggle='modal' data-target='#loginModal')
+              i.fas.fa-sign-in-alt
+              | {{"home.login" | translate}}
+          else
+            a.btn-home(href="/home")
+              i.fas.fa-home
+              | {{"common.backHome" | translate}}
 
 block navbar
   if !iframe

@@ -111,15 +111,8 @@ app.controller('TeamHomeController', ['$scope', '$uibModal', '$log', '$http', '$
         '#b2bec3'
     ]
     $scope.leagueColor = function(league){
+        if (!$scope.leagues) return '';
         let lIndex = $scope.leagues.indexOf(league) % lColor.length;
         return lColor[lIndex];
     }
-
-    $scope.isSmartPhone = function() {
-        if (window.matchMedia && window.matchMedia('(max-device-width: 640px)').matches) {
-          return true;
-        } else {
-          return false;
-        }
-      }
 }]);

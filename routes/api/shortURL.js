@@ -8,8 +8,9 @@ const superRouter = express.Router();
 const urlDb = require('../../models/shortURL');
 const { ObjectId } = require('mongoose').Types;
 const logger = require('../../config/logger').mainLogger;
+const access = require('../../helper/access');
 
-superRouter.get('/', function (req, res) {
+superRouter.get('/', access.superAdmin(), function (req, res) {
   urlDb.shortURL
     .find({})
     .lean()
@@ -26,7 +27,7 @@ superRouter.get('/', function (req, res) {
     });
 });
 
-superRouter.delete('/:shortId', function (req, res, next) {
+superRouter.delete('/:shortId', access.superAdmin(), function (req, res, next) {
   const id = req.params.shortId;
 
   if (!ObjectId.isValid(id)) {
@@ -53,7 +54,7 @@ superRouter.delete('/:shortId', function (req, res, next) {
   );
 });
 
-superRouter.post('/', function (req, res) {
+superRouter.post('/', access.superAdmin(), function (req, res) {
   const set = req.body;
 
   const newSetting = new urlDb.shortURL({

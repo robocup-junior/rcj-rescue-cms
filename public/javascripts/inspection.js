@@ -25,27 +25,40 @@ app.controller("InspectionController", ['$scope', '$http', 'Upload', '$timeout',
 
     $http.get("/api/competitions/" + competitionId + "/teams/" + teamId).then(function (response) {
         $scope.team = response.data;
-        if($scope.team.inspected){
-            $("#slider-cancel").slideToUnlock({ useData: true, unlockfn: function() {
-                $http.put("/api/teams/" + competitionId + "/" + teamId, {
-                    inspected: false
-                }).then(function (response) {
-                    $scope.go('/home/' + competitionId + '/teams');
-                })
-            }});
-        }else{
-            $("#slider-inspected").slideToUnlock({ useData: true, unlockfn: function() {
-                $http.put("/api/teams/" + competitionId + "/" + teamId, {
-                    inspected: true
-                }).then(function (response) {
-                    $scope.go('/home/' + competitionId + '/teams');
-                })
-            }});
-        }
+        const keys = ['document.inspection.swipeToInspect', 'document.inspection.swipeToCancel',
+            'document.inspection.completed', 'document.inspection.canceled'];
+        // Start the slider once its texts are translated (a missing key falls back to the key itself)
+        $translate(keys).then(initSlider, initSlider);
     })
 
+    function initSlider(text) {
+        const setInspected = (inspected) => function () {
+            $http.put("/api/teams/" + competitionId + "/" + teamId, {
+                inspected: inspected
+            }).then(function (response) {
+                $scope.go('/home/' + competitionId + '/teams');
+            })
+        };
+        if ($scope.team.inspected) {
+            $("#slider-cancel").slideToUnlock({
+                lockText: text['document.inspection.swipeToCancel'],
+                unlockText: text['document.inspection.canceled'],
+                unlockfn: setInspected(false)
+            });
+        } else {
+            $("#slider-inspected").slideToUnlock({
+                lockText: text['document.inspection.swipeToInspect'],
+                unlockText: text['document.inspection.completed'],
+                unlockfn: setInspected(true)
+            });
+        }
+    }
+
     $scope.go = function (path) {
-        window.location = path
+        // Only to a page of this site: the path may be the ?return= of a link anyone could have made
+        var url = new URL(path, location.href);
+        if (url.origin !== location.origin) return;
+        window.location = url.pathname + url.search + url.hash;
     }
 
     $scope.getParam = function (key) {
@@ -73,6 +86,13 @@ app.controller("InspectionController", ['$scope', '$http', 'Upload', '$timeout',
 
     $scope.teamPhoto = {fileName: "teamPhoto"};
     $scope.robotPhoto = {fileName: "robotPhoto"};
+
+    // Called from the photo <img> onload/onerror to switch between the photo and the placeholder
+    $scope.photoLoaded = function (name, loaded) {
+        $scope.$applyAsync(function () {
+            $scope[name].loaded = loaded;
+        });
+    };
 
     $scope.uploadFiles = function(question, file, errFiles) {
         question.f = file;

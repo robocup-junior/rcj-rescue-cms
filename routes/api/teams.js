@@ -10,27 +10,28 @@ const adminRouter = express.Router();
 const { ObjectId } = require('mongoose').Types;
 const mkdirp = require('mkdirp');
 const fs = require('fs');
-const crypto = require('crypto');
+const { randomToken } = require('../../helper/crypto');
 const { ACCESSLEVELS } = require('../../models/user');
 const logger = require('../../config/logger').mainLogger;
 const competitiondb = require('../../models/competition');
 const auth = require('../../helper/authLevels');
 const { type } = require('os');
+const access = require('../../helper/access');
+const safePath = require('../../helper/safePath');
 
 const { LEAGUES_JSON } = competitiondb;
 
-const S = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const N = 32;
 
 // publicRouter.get('/', function (req, res) {
 //    query.doFindResultSortQuery(req, res, null, null, competitiondb.team)
 // })
 
-publicRouter.get('/leagues', function (req, res) {
+publicRouter.get('/leagues', access.anyone('of no competition'), function (req, res) {
   res.send(competitiondb.team.schema.path('league').enumValues);
 });
 
-publicRouter.get('/leagues/:league/:competitionId', async function (req, res) {
+publicRouter.get('/leagues/:league/:competitionId', access.anyone('the teams of a league, as the public pages list them'), async function (req, res) {
   const id = req.params.competitionId;
   const { league } = req.params;
 
@@ -64,7 +65,7 @@ publicRouter.get('/leagues/:league/:competitionId', async function (req, res) {
   res.send(ret);
 });
 
-privateRouter.get('/code/:teamId/:code', function (req, res, next) {
+privateRouter.get('/code/:teamId/:code', access.loggedIn('the team of the code given'), function (req, res, next) {
   const id = req.params.teamId;
   const { code } = req.params;
 
@@ -92,41 +93,7 @@ privateRouter.get('/code/:teamId/:code', function (req, res, next) {
     });
 });
 
-adminRouter.get('/set/:teamId/:teamCode', function (req, res, next) {
-  const team = req.params.teamId;
-  const code = req.params.teamCode;
-
-  if (!ObjectId.isValid(team)) {
-    return next();
-  }
-
-  competitiondb.team.findById(team).exec(function (err, dbTeam) {
-    if (err) {
-      logger.error(err);
-      res.status(400).send({
-        msg: 'Could not get user',
-        err: err.message,
-      });
-    } else if (dbTeam) {
-      dbTeam.teamCode = code;
-
-      dbTeam.save(function (err) {
-        if (err) {
-          logger.error(err);
-          return res.status(400).send({
-            err: err.message,
-            msg: 'Could not save changes',
-          });
-        }
-        res.status(200).send({
-          msg: 'Saved changes',
-        });
-      });
-    }
-  });
-});
-
-publicRouter.get('/:teamid', function (req, res, next) {
+publicRouter.get('/:teamid', access.anyone('a team, as the public pages show it'), function (req, res, next) {
   const id = req.params.teamid;
 
   if (!ObjectId.isValid(id)) {
@@ -152,7 +119,7 @@ publicRouter.get('/:teamid', function (req, res, next) {
     });
 });
 
-privateRouter.put('/:competitionid/:teamid', function (req, res, next) {
+privateRouter.put('/:competitionid/:teamid', access.competition(ACCESSLEVELS.JUDGE, 'params.competitionid'), access.of(competitiondb.team, 'params.teamid', ACCESSLEVELS.JUDGE), function (req, res, next) {
   const id = req.params.teamid;
   const { competitionid } = req.params;
   if (!ObjectId.isValid(id)) {
@@ -163,7 +130,7 @@ privateRouter.put('/:competitionid/:teamid', function (req, res, next) {
     res.status(401).send({
       msg: 'You have no authority to access this api',
     });
-    return next();
+    return;
   }
 
   const team = req.body;
@@ -212,31 +179,7 @@ privateRouter.put('/:competitionid/:teamid', function (req, res, next) {
     });
 });
 
-publicRouter.get('/:teamid/runs', function (req, res, next) {
-  const id = req.params.teamid;
-
-  if (!ObjectId.isValid(id)) {
-    return next();
-  }
-
-  competitiondb.run.find(
-    {
-      team: id,
-    },
-    function (err, data) {
-      if (err) {
-        logger.error(err);
-        return res.status(400).send({
-          msg: 'Could not get runs',
-          err: err.message,
-        });
-      }
-      return res.status(200).send(data);
-    }
-  );
-});
-
-adminRouter.delete('/:teamid', function (req, res, next) {
+adminRouter.delete('/:teamid', access.of(competitiondb.team, 'params.teamid', ACCESSLEVELS.ADMIN), function (req, res, next) {
   const ids = req.params.teamid.split(',');
   if (!ObjectId.isValid(ids[0])) {
     return next();
@@ -283,11 +226,11 @@ adminRouter.delete('/:teamid', function (req, res, next) {
               msg: 'Team has been removed!',
             });
             for (const id of ids) {
-              let path = `${__dirname}/../../documents/${dbTeam.competition}/${id}`;
+              let path = safePath('documents', dbTeam.competition, id);
               fs.rmdir(path, { recursive: true }, (err) => {
                 if (err) throw err;
               });
-              path = `${__dirname}/../../cabinet/${dbTeam.competition}/${id}`;
+              path = safePath('cabinet', dbTeam.competition, id);
               fs.rmdir(path, { recursive: true }, (err) => {
                 if (err) throw err;
               });
@@ -298,8 +241,11 @@ adminRouter.delete('/:teamid', function (req, res, next) {
     });
 });
 
-adminRouter.post('/', function (req, res) {
+adminRouter.post('/', access.competition(ACCESSLEVELS.ADMIN, 'body.competition'), function (req, res) {
   const team = req.body;
+  if (!auth.authCompetition(req.user, team.competition, ACCESSLEVELS.ADMIN)) {
+    return res.status(401).send({ msg: 'You have no authority to access this api' });
+  }
 
   competitiondb.competition
     .findOne({
@@ -316,9 +262,7 @@ adminRouter.post('/', function (req, res) {
           teamCode: team.teamCode,
           country: team.country,
           document: {
-            token: Array.from(crypto.randomFillSync(new Uint8Array(N)))
-              .map((n) => S[n % S.length])
-              .join(''),
+            token: randomToken(N),
             answers: [],
           },
           email: team.email,
@@ -351,9 +295,9 @@ adminRouter.post('/', function (req, res) {
                   msg: 'New team has been saved',
                   id: createdTeam._id,
                 });
-                let path = `${__dirname}/../../documents/${dbComp._id}/${createdTeam._id}`;
+                let path = safePath('documents', dbComp._id, createdTeam._id);
                 mkdirp.sync(path);
-                path = `${__dirname}/../../cabinet/${dbComp._id}/${createdTeam._id}`;
+                path = safePath('cabinet', dbComp._id, createdTeam._id);
                 mkdirp.sync(path);
               }
             });
@@ -363,11 +307,15 @@ adminRouter.post('/', function (req, res) {
     });
 });
 
-adminRouter.post('/bulk', function (req, res) {
+adminRouter.post('/bulk', access.competition(ACCESSLEVELS.ADMIN, 'body[].competition'), function (req, res) {
   const teams = req.body;
   if (typeof(teams) != "object") {
     res.status(400).send("Bad request");
     return;
+  }
+  // Every team is of a competition the user administers
+  if (!teams.every((team) => auth.authCompetition(req.user, team.competition, ACCESSLEVELS.ADMIN))) {
+    return res.status(401).send({ msg: 'You have no authority to access this api' });
   }
 
   competitiondb.competition
@@ -388,9 +336,7 @@ adminRouter.post('/bulk', function (req, res) {
             teamCode: team.teamCode,
             country: team.country,
             document: {
-              token: Array.from(crypto.randomFillSync(new Uint8Array(N)))
-                .map((n) => S[n % S.length])
-                .join(''),
+              token: randomToken(N),
               answers: [],
             },
             email: team.email,
@@ -418,9 +364,9 @@ adminRouter.post('/bulk', function (req, res) {
                 if (err) {
                   logger.error(err);
                 } else {
-                  path = `${__dirname}/../../cabinet/${dbComp._id}/${createdTeam._id}`;
+                  path = safePath('cabinet', dbComp._id, createdTeam._id);
                   mkdirp.sync(path);
-                  path = `${__dirname}/../../documents/${dbComp._id}/${createdTeam._id}`;
+                  path = safePath('documents', dbComp._id, createdTeam._id);
                   mkdirp.sync(path);
                   count--;
                   if (count <= 0) {

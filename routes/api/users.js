@@ -11,12 +11,14 @@ const { ObjectId } = require('mongoose').Types;
 const logger = require('../../config/logger').mainLogger;
 const auth = require('../../helper/authLevels');
 const { ACCESSLEVELS } = require('../../models/user');
-const {sendMail} = require('../../helper/mailSender');
+const {sendMail, STAFF} = require('../../helper/mailSender');
+const access = require('../../helper/access');
 
-adminRouter.get('/', function (req, res) {
+adminRouter.get('/', access.anyAdmin('the users, to give them rights in a competition; their addresses for the super admins only'), function (req, res) {
   userdb.user
     .find({})
-    .select("_id username email admin superDuperAdmin competitions")
+    // The addresses are for the super admins (who manage the users) only
+    .select(`_id username ${req.user.superDuperAdmin ? 'email ' : ''}admin superDuperAdmin competitions`)
     .lean()
     .exec(function (err, data) {
       if (err) {
@@ -31,7 +33,7 @@ adminRouter.get('/', function (req, res) {
     });
 });
 
-superRouter.delete('/:userid', function (req, res, next) {
+superRouter.delete('/:userid', access.superAdmin(), function (req, res, next) {
   const id = req.params.userid;
 
   if (!ObjectId.isValid(id)) {
@@ -58,7 +60,7 @@ superRouter.delete('/:userid', function (req, res, next) {
   );
 });
 
-superRouter.post('/', function (req, res) {
+superRouter.post('/', access.superAdmin(), function (req, res) {
   const user = req.body;
 
   const newUser = new userdb.user({
@@ -125,11 +127,11 @@ superRouter.post('/', function (req, res) {
     };
     const subject = "Welcome to RCJ CMS – Your Account Information";
     const templateName = "_Welcome to RCJ CMS – Your Account Information";
-    sendMail(subject, templateName, "", variables, user.email);
+    sendMail(subject, templateName, "", variables, user.email, STAFF);
   }
 });
 
-adminRouter.put('/:userid/:competitionid/role', function (req, res, next) {
+adminRouter.put('/:userid/:competitionid/role', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionid'), function (req, res, next) {
   const { userid } = req.params;
   const { competitionid } = req.params;
   const role = Array.from(new Set(req.body));
@@ -139,7 +141,7 @@ adminRouter.put('/:userid/:competitionid/role', function (req, res, next) {
     res.status(401).send({
       msg: 'You have no authority to access this api',
     });
-    return next();
+    return;
   }
 
   userdb.user.findById(userid).exec(function (err, dbUser) {
@@ -181,7 +183,7 @@ adminRouter.put('/:userid/:competitionid/role', function (req, res, next) {
   });
 });
 
-adminRouter.put('/:userid/:competitionid/:aLevel', function (req, res, next) {
+adminRouter.put('/:userid/:competitionid/:aLevel', access.competition(ACCESSLEVELS.ADMIN, 'params.competitionid'), function (req, res, next) {
   const { userid } = req.params;
   const { competitionid } = req.params;
   const { aLevel } = req.params;
@@ -190,7 +192,7 @@ adminRouter.put('/:userid/:competitionid/:aLevel', function (req, res, next) {
     res.status(401).send({
       msg: 'You have no authority to access this api',
     });
-    return next();
+    return;
   }
 
   userdb.user.findById(userid).exec(function (err, dbUser) {
@@ -233,7 +235,7 @@ adminRouter.put('/:userid/:competitionid/:aLevel', function (req, res, next) {
 });
 
 // not good at security
-superRouter.put('/:userid', function (req, res, next) {
+superRouter.put('/:userid', access.superAdmin(), function (req, res, next) {
   const id = req.params.userid;
   if (!ObjectId.isValid(id)) {
     return next();
@@ -312,5 +314,47 @@ superRouter.put('/:userid', function (req, res, next) {
   });
 });
 
+const privateRouter = express.Router();
+
+privateRouter.post('/me/password', access.loggedIn("the user's own password"), function (req, res) {
+  const { current, new: newPass, confirm } = req.body;
+
+  if (newPass !== confirm) {
+    return res.status(400).send({ msg: 'Passwords do not match' });
+  }
+
+  // Password validation: 8+ chars, 2+ types
+  let types = 0;
+  if (/[a-z]/.test(newPass)) types++;
+  if (/[A-Z]/.test(newPass)) types++;
+  if (/[0-9]/.test(newPass)) types++;
+  if (/[^A-Za-z0-9]/.test(newPass)) types++;
+
+  if (newPass.length < 8 || types < 2) {
+    return res.status(400).send({ msg: 'Password does not meet the requirements' });
+  }
+
+  userdb.user.findById(req.user._id).select('+password +salt').exec(function (err, dbUser) {
+    if (err || !dbUser) {
+      return res.status(500).send({ msg: 'User not found' });
+    }
+
+    dbUser.comparePassword(current, function (isMatch) {
+      if (!isMatch) {
+        return res.status(400).send({ msg: 'Current password is incorrect' });
+      }
+
+      dbUser.updatePassword(newPass, function (err) {
+        if (err) {
+          logger.error(err);
+          return res.status(500).send({ msg: 'Failed to update password' });
+        }
+        return res.status(200).send({ msg: 'Password updated successfully' });
+      });
+    });
+  });
+});
+
 module.exports.admin = adminRouter;
 module.exports.super = superRouter;
+module.exports.private = privateRouter;
